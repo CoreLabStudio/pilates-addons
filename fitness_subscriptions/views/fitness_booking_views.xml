@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend booking FORM: show floating-credit flag in Payment Source group -->
+    <record id="view_fitness_booking_form_subscription" model="ir.ui.view">
+        <field name="name">fitness.booking.form.subscription</field>
+        <field name="model">fitness.booking</field>
+        <field name="inherit_id" ref="fitness_bookings.view_fitness_booking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='subscription_id']" position="after">
+                <!-- True when this booking consumed a floating credit rather than a
+                     weekly-allowance slot. Immutable after creation. Shown only when
+                     a subscription is the payment source. -->
+                <field name="fitness_used_floating_credit"
+                       readonly="1"
+                       invisible="not subscription_id"
+                       string="Paid with Floating Credit"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend booking LIST: add floating-credit column (optional, shown by default) -->
+    <record id="view_fitness_booking_list_subscription" model="ir.ui.view">
+        <field name="name">fitness.booking.list.subscription</field>
+        <field name="model">fitness.booking</field>
+        <field name="inherit_id" ref="fitness_bookings.view_fitness_booking_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='credit_returned']" position="before">
+                <field name="fitness_used_floating_credit"
+                       optional="show"
+                       string="Floating Credit"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

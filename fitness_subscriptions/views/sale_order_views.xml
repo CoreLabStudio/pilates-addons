@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add subscription usage info to sale.order form -->
+    <record id="view_sale_order_form_fitness_subscription" model="ir.ui.view">
+        <field name="name">sale.order.form.fitness.subscription</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fitness Subscription" name="fitness_subscription_usage"
+                      invisible="not fitness_subscription_product_id">
+                    <group>
+                        <group string="Plan">
+                            <field name="fitness_subscription_product_id" readonly="1"/>
+                            <field name="fitness_class_type" readonly="1"/>
+                            <field name="fitness_session_type" readonly="1"/>
+                            <field name="fitness_is_unlimited" readonly="1"/>
+                            <!-- ENFORCEMENT cap (1/2/3 per week) -->
+                            <field name="fitness_weekly_class_allowance" readonly="1"
+                                   invisible="fitness_is_unlimited"/>
+                            <!-- Legacy monthly values (4/8/12): reporting only -->
+                            <field name="fitness_monthly_class_allowance" readonly="1"
+                                   invisible="fitness_is_unlimited"
+                                   string="Monthly Allowance (legacy)"/>
+                        </group>
+                        <group string="Current Period">
+                            <field name="fitness_period_start_date" readonly="1"/>
+                            <!-- Reporting counter: all bookings this cycle, never decremented -->
+                            <field name="fitness_subscription_used_classes" readonly="1"
+                                   string="Classes This Period (reporting)"/>
+                            <!-- Floating-credit pool for this cycle -->
+                            <field name="fitness_floating_credits" readonly="1"/>
+                            <!-- Live weekly-state: effective cap and slots used this ISO week -->
+                            <field name="fitness_effective_weekly_allowance_display" readonly="1"
+                                   invisible="fitness_is_unlimited"/>
+                            <field name="fitness_weekly_used_this_week" readonly="1"
+                                   invisible="fitness_is_unlimited"/>
+                        </group>
+                        <group string="Clase Fija Slots" invisible="not fitness_is_clase_fija" colspan="2">
+                            <!-- One row per reserved weekly class slot. Active slot count
+                                 must not exceed the effective weekly allowance (B1 guard).
+                                 Auto-placement creates bookings for every occurrence of
+                                 each active slot's class within each billing period. -->
+                            <!-- UI-7: manager-only manual placement trigger.
+                                 Groups= hides it in the UI; action_place_clase_fija()
+                                 re-checks has_group() server-side. Only visible when
+                                 the subscription is actively running ('3_progress'). -->
+                            <button name="action_place_clase_fija"
+                                    string="Place Classes for Current Period"
+                                    type="object"
+                                    class="btn-primary"
+                                    groups="fitness_core.group_fitness_manager"
+                                    invisible="subscription_state != '3_progress'"
+                                    confirm="This will book all active Clase Fija slots for the current billing period. Already-booked occurrences are skipped. Proceed?"
+                                    colspan="2"/>
+                            <field name="fitness_clase_fija_ids" nolabel="1" colspan="2">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="calendar_event_id"
+                                           widget="many2one"
+                                           domain="[('is_fitness_class','=',True)] if parent.fitness_class_type == 'any' else [('is_fitness_class','=',True),('class_type_id.classroom_type','=',parent.fitness_class_type)]"
+                                           string="Anchor Class Event"/>
+                                    <field name="name" readonly="1"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </group>
+                        <group string="Member Override">
+                            <!-- 0 = use plan default; >0 overrides the weekly cap for this member -->
+                            <field name="fitness_weekly_allowance_override"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Subscriptions list (sale.order filtered to fitness subscription plans) -->
+    <record id="action_fitness_subscriptions" model="ir.actions.act_window">
+        <field name="name">Subscriptions</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('fitness_subscription_product_id', '!=', False)]</field>
+        <field name="context">{'default_is_subscription': True}</field>
+    </record>
+
+</odoo>

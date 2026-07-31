@@ -1,0 +1,7 @@
+# Normalize line endings: store LF in git, checkout as LF on all platforms
+* text=auto eol=lf
+*.py text eol=lf
+*.xml text eol=lf
+*.csv text eol=lf
+*.po text eol=lf
+*.md text eol=lf

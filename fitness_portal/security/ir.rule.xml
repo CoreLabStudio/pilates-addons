@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Fitness students may read any calendar.event that is a fitness class.
+        This rule is scoped to group_fitness_student and ORs with the existing
+        "Own events" portal rule, so students can browse the schedule without
+        needing to be attendees of every event.
+    -->
+    <record id="rule_fitness_student_calendar_event" model="ir.rule">
+        <field name="name">Fitness Students: read fitness class events</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
+        <field name="domain_force">[('is_fitness_class', '=', True)]</field>
+        <field name="groups" eval="[(4, ref('fitness_core.group_fitness_student'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!--
+        Fitness students may read and write only their OWN fitness.booking records.
+        Read: scoped so students cannot browse other students' bookings by ID.
+        Write: combined with the model-level write ACL added in fitness_bookings,
+        allows action_cancel() to run as the portal student (no blanket sudo).
+        Create is intentionally excluded — the controller always forces student_id
+        server-side; the model-level portal ACL grants create.
+    -->
+    <!--
+        Write-only restriction: students may only cancel (write) their OWN bookings.
+        perm_read is intentionally False — leaving reads unrestricted so the engine's
+        capacity search_count and weekly-cap count see ALL students' bookings, not
+        just the current user's. The controller enforces read isolation at the
+        application level (explicit partner_id filter + ownership check on cancel).
+    -->
+    <record id="rule_fitness_student_own_bookings" model="ir.rule">
+        <field name="name">Fitness Students: write own bookings only</field>
+        <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+        <field name="domain_force">[('student_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('fitness_core.group_fitness_student'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

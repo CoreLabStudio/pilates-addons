@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BOOKING REPORT — fitness.booking
+         Scope: manager-only; opened exclusively from Informes menu.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- LIST ─────────────────────────────────────────────────── -->
+    <record id="view_fitness_booking_report_list" model="ir.ui.view">
+        <field name="name">fitness.booking.report.list</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" default_order="class_start desc"
+                  decoration-success="state == 'attended'"
+                  decoration-danger="state == 'no_show'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="class_start" string="Fecha clase"/>
+                <field name="student_id"  string="Alumno"/>
+                <field name="class_type_id" string="Tipo"/>
+                <field name="classroom_id"  string="Sala"/>
+                <field name="teacher_user_id" string="Instructor"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'attended'"
+                       decoration-warning="state == 'no_show'"
+                       decoration-danger="state == 'cancelled'"
+                       decoration-info="state == 'booked'"/>
+                <field name="booking_date" string="Reservado el" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- PIVOT ────────────────────────────────────────────────── -->
+    <record id="view_fitness_booking_report_pivot" model="ir.ui.view">
+        <field name="name">fitness.booking.report.pivot</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <pivot string="Reservas">
+                <field name="class_start"   type="row" interval="month"/>
+                <field name="class_type_id" type="row"/>
+                <field name="state"         type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH ────────────────────────────────────────────────── -->
+    <record id="view_fitness_booking_report_graph" model="ir.ui.view">
+        <field name="name">fitness.booking.report.graph</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <graph string="Reservas por mes" type="bar">
+                <field name="class_start" type="row" interval="month"/>
+                <field name="state"       type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH ───────────────────────────────────────────────── -->
+    <record id="view_fitness_booking_report_search" model="ir.ui.view">
+        <field name="name">fitness.booking.report.search</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <search string="Buscar reservas">
+                <field name="student_id"/>
+                <field name="class_type_id"/>
+                <field name="teacher_user_id"/>
+                <field name="classroom_id"/>
+                <separator/>
+                <!-- B5: date range chips -->
+                <filter name="filter_this_month"
+                        string="Este mes"
+                        domain="[('class_start','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('class_start','&lt;',  (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_last_month"
+                        string="Mes anterior"
+                        domain="[('class_start','&gt;=', (context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')),
+                                 ('class_start','&lt;',  (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="filter_attended"  string="Asistido"
+                        domain="[('state','=','attended')]"/>
+                <filter name="filter_booked"    string="Reservado"
+                        domain="[('state','=','booked')]"/>
+                <filter name="filter_no_show"   string="No presentado"
+                        domain="[('state','=','no_show')]"/>
+                <filter name="filter_cancelled" string="Cancelado"
+                        domain="[('state','=','cancelled')]"/>
+                <separator/>
+                <group>
+                    <filter name="group_month"
+                            string="Mes"
+                            context="{'group_by':'class_start:month'}"/>
+                    <filter name="group_state"
+                            string="Estado"
+                            context="{'group_by':'state'}"/>
+                    <filter name="group_class_type"
+                            string="Tipo de clase"
+                            context="{'group_by':'class_type_id'}"/>
+                    <filter name="group_teacher"
+                            string="Instructor"
+                            context="{'group_by':'teacher_user_id'}"/>
+                    <filter name="group_student"
+                            string="Alumno"
+                            context="{'group_by':'student_id'}"/>
+                    <filter name="group_classroom"
+                            string="Sala"
+                            context="{'group_by':'classroom_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION ───────────────────────────────────────────────── -->
+    <record id="action_fitness_booking_report" model="ir.actions.act_window">
+        <field name="name">Bookings</field>
+        <field name="res_model">fitness.booking</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_booking_report_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_booking_report_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_booking_report_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_booking_report_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay reservas que mostrar.
+            </p>
+        </field>
+    </record>
+
+</odoo>

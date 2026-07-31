@@ -1,0 +1,1225 @@
+# Catalan translations for fitness_portal
+# Copyright (C) Yoleyva Studio — CoreLab
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-31 00:00+0000\n"
+"PO-Revision-Date: 2026-07-31 00:00+0000\n"
+"Language-Team: Catalan\n"
+"Language: ca_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Code translations (Python controllers) ───────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Welcome back, %s"
+msgstr "Hola de nou, %s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Welcome back"
+msgstr "Hola de nou"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Nothing booked yet"
+msgstr "Encara no has reservat res"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d class booked"
+msgstr "%d classe reservada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d classes booked"
+msgstr "%d classes reservades"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d class available"
+msgstr "%d classe disponible"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d classes available"
+msgstr "%d classes disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Ready to book a class?"
+msgstr "A punt per reservar una classe?"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "No classes available in the next %d days for your plan. Check back soon!"
+msgstr "No hi ha classes disponibles en els propers %d dies per al teu pla. Torna a mirar aviat!"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You don't have an active membership or class pack. Please contact the studio to get started."
+msgstr "No tens cap subscripció activa ni cap bo de classes. Contacta amb l'estudi per començar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Next %d days"
+msgstr "Propers %d dies"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "No upcoming classes in the next %d days."
+msgstr "No tens classes en els propers %d dies."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Today"
+msgstr "Avui"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Tomorrow"
+msgstr "Demà"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "barre credits"
+msgstr "crèdits barre"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "reformer credits"
+msgstr "crèdits reformer"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "class credits"
+msgstr "crèdits"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class not found."
+msgstr "Classe no trobada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Booking not found or does not belong to your account."
+msgstr "Reserva no trobada o que no pertany al teu compte."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "This class starts in less than 2 hours and can no longer be cancelled online. Please contact the studio."
+msgstr "Aquesta classe comença en menys de 2 hores i ja no es pot cancel·lar en línia. Contacta amb l'estudi."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%dd ago"
+msgstr "fa %dd"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%dh ago"
+msgstr "fa %dh"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%dm ago"
+msgstr "fa %dm"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Just now"
+msgstr "Ara mateix"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d spot left"
+msgstr "queda %d plaça"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d spots left"
+msgstr "queden %d places"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class is full"
+msgstr "Classe completa"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Only %d spot left"
+msgstr "Només queda %d plaça"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Only %d spots left"
+msgstr "Només queden %d places"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d spots available"
+msgstr "%d places disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d %s available"
+msgstr "%d %s disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d class"
+msgstr "%d classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d classes"
+msgstr "%d classes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d day"
+msgstr "%d dia"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d days"
+msgstr "%d dies"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Unlimited classes"
+msgstr "Classes il·limitades"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d class per week"
+msgstr "%d classe per setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d classes per week"
+msgstr "%d classes per setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Monthly plan"
+msgstr "Pla mensual"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All"
+msgstr "Tots"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Barre"
+msgstr "Barre"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reformer"
+msgstr "Reformer"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All disciplines"
+msgstr "Totes les disciplines"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No packages available right now."
+msgstr "No hi ha bons disponibles ara mateix."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No subscriptions available right now."
+msgstr "No hi ha subscripcions disponibles ara mateix."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%(remaining)s / %(total)s credits"
+msgstr "%(remaining)s / %(total)s crèdits"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d credits"
+msgstr "%d crèdits"
+
+# ── Credit history ledger ────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No credit activity yet. Buy a package to get started."
+msgstr "Encara no hi ha moviments de crèdits. Compra un bo per començar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class pack"
+msgstr "Bo de classes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Package purchased · %s"
+msgstr "Bo comprat · %s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Credits expired"
+msgstr "Crèdits caducats"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Subscription"
+msgstr "Subscripció"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Subscription started · bonus credits"
+msgstr "Subscripció iniciada · crèdits de regal"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Subscription started · %s"
+msgstr "Subscripció iniciada · %s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class"
+msgstr "Classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Booking cancelled · credit returned"
+msgstr "Reserva cancel·lada · crèdit retornat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Booking cancelled · no credit returned"
+msgstr "Reserva cancel·lada · sense devolució de crèdit"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class booked"
+msgstr "Classe reservada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No-show · credit not returned"
+msgstr "Absència · crèdit no retornat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class booked · covered by subscription"
+msgstr "Classe reservada · coberta per la subscripció"
+
+# ── Checkout flow ────────────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Bizum"
+msgstr "Bizum"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Bank Transfer"
+msgstr "Transferència bancària"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Not selected"
+msgstr "Sense seleccionar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Please choose a payment method."
+msgstr "Tria un mètode de pagament."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Please accept the Terms and Conditions to continue."
+msgstr "Accepta els termes i condicions per continuar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%(product)s · %(price)s · paid by %(method)s"
+msgstr "%(product)s · %(price)s · pagament mitjançant %(method)s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Please sign in the box before completing your purchase."
+msgstr "Signa dins del requadre abans de completar la compra."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "The signature could not be read. Please try again."
+msgstr "No s'ha pogut llegir la signatura. Torna-ho a provar."
+
+# ── Active orders ────────────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Awaiting signature"
+msgstr "Pendent de signatura"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Awaiting invoice"
+msgstr "Pendent de factura"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have no active orders. Everything is settled."
+msgstr "No tens comandes actives. Tot està al dia."
+
+# ── Sale order fields (models/sale_order.py) ─────────────────────────────────
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order__fitness_payment_method
+msgid "Portal Payment Method"
+msgstr "Mètode de pagament del portal"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order__fitness_terms_accepted_on
+msgid "Terms Accepted On"
+msgstr "Termes acceptats el"
+
+# ══ VIEW TERMS ═══════════════════════════════════════════════════════════════
+# ── Page header — mv_page_header ─────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Notifications"
+msgstr "Notificacions"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Everything the studio has sent you"
+msgstr "Tot el que l'estudi t'ha enviat"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Mark all read"
+msgstr "Marcar-ho tot com a llegit"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+msgid "View all notifications"
+msgstr "Veure totes les notificacions"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No notifications yet."
+msgstr "Encara no tens notificacions."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "New purchase: %(product)s"
+msgstr "Nova compra: %(product)s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%(customer)s bought %(product)s for %(amount)s. Payment method: %(method)s. Order %(order)s needs invoicing."
+msgstr "%(customer)s ha comprat %(product)s per %(amount)s. Mètode de pagament: %(method)s. La comanda %(order)s necessita facturació."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+msgid "Loading…"
+msgstr "Carregant…"
+
+# ── Bottom navigation — mv_bottom_nav / mv_teacher_bottom_nav ────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
+msgid "Main navigation"
+msgstr "Navegació principal"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Home"
+msgstr "Inici"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Studio"
+msgstr "Estudi"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Packages"
+msgstr "Bons"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
+msgid "Profile"
+msgstr "Perfil"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "My Classes"
+msgstr "Les meves classes"
+
+# ── Checkout step indicator — mv_step_indicator ──────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_step_indicator
+msgid "Package"
+msgstr "Bo"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_step_indicator
+msgid "Payment"
+msgstr "Pagament"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_step_indicator
+msgid "Sign"
+msgstr "Signatura"
+
+# ── Home tab — portal_student_home ───────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Ready for your next class?"
+msgstr "A punt per a la teva propera classe?"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Book a Class"
+msgstr "Reservar una classe"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Schedule"
+msgstr "Horari"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Credits"
+msgstr "Crèdits"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "No active pack"
+msgstr "Sense bo actiu"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Next up"
+msgstr "El següent"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Booked"
+msgstr "Reservada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "View all"
+msgstr "Veure-ho tot"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "You have no upcoming classes."
+msgstr "No tens classes properes."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Find a class"
+msgstr "Cercar una classe"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Packages &amp; Subscriptions"
+msgstr "Bons i subscripcions"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Top up your credits or start a plan"
+msgstr "Recarrega els teus crèdits o comença un pla"
+
+# ── Studio tab — portal_student_studio ───────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Available"
+msgstr "Disponibles"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "My Schedule"
+msgstr "El meu horari"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "<strong>Booked!</strong> Your spot is confirmed. See you in class."
+msgstr "<strong>Reservada!</strong> La teva plaça està confirmada. Ens veiem a classe."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "<strong>Booking cancelled.</strong> A credit has been returned to your pack."
+msgstr "<strong>Reserva cancel·lada.</strong> S'ha retornat un crèdit al teu bo."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "<strong>Booking cancelled.</strong>"
+msgstr "<strong>Reserva cancel·lada.</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "<strong>Oops:</strong>"
+msgstr "<strong>Error:</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Full"
+msgstr "Completa"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Book"
+msgstr "Reservar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Browse &amp; book classes"
+msgstr "Explorar i reservar classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Cancel"
+msgstr "Cancel·lar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Browse &amp; book more classes"
+msgstr "Explorar i reservar més classes"
+
+# ── Class detail — portal_student_class_detail ───────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Back to Studio"
+msgstr "Tornar a l'estudi"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Instructor"
+msgstr "Instructora"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "You’re booked for this class ✓"
+msgstr "Ja tens reserva per a aquesta classe ✓"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Reserve My Spot"
+msgstr "Reservar la meva plaça"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "This class is full"
+msgstr "Aquesta classe està completa"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Booking not available — contact the studio."
+msgstr "Reserva no disponible — contacta amb l'estudi."
+
+# ── History page — portal_student_history ────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "My History"
+msgstr "El meu historial"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Past classes and purchases"
+msgstr "Classes passades i compres"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Past classes"
+msgstr "Classes passades"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "No past classes recorded yet."
+msgstr "Encara no hi ha classes passades registrades."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Attended"
+msgstr "Assistida"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Cancelled"
+msgstr "Cancel·lada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Credit returned"
+msgstr "Crèdit retornat"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "No-show"
+msgstr "Absència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Unmarked"
+msgstr "Sense marcar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Show more"
+msgstr "Veure'n més"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Memberships"
+msgstr "Subscripcions"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Active"
+msgstr "Activa"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Ended"
+msgstr "Finalitzada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Enrolled</strong>"
+msgstr "<strong>Alta</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Next billing</strong>"
+msgstr "<strong>Proper cobrament</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Bonus credits</strong>"
+msgstr "<strong>Crèdits de regal</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Class packs"
+msgstr "Bons de classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Expired"
+msgstr "Caducat"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Purchased</strong>"
+msgstr "<strong>Comprat</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Remaining</strong>"
+msgstr "<strong>Restants</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "<strong>Valid until</strong>"
+msgstr "<strong>Vàlid fins</strong>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Nothing on record yet."
+msgstr "Encara no hi ha res registrat."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Book your first class"
+msgstr "Reserva la teva primera classe"
+
+# ── Credit history — portal_credit_history ───────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Credit History"
+msgstr "Historial de crèdits"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Every change to your credit balance"
+msgstr "Tots els canvis al teu saldo de crèdits"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Back to CoreLab"
+msgstr "Tornar a CoreLab"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Balance"
+msgstr "Saldo"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Browse packages"
+msgstr "Veure bons"
+
+# ── Packages tab — portal_packages ───────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Search"
+msgstr "Cercar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Search by name"
+msgstr "Cercar per nom"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Subscriptions"
+msgstr "Subscripcions"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Your order is confirmed. Thank you!"
+msgstr "La teva comanda està confirmada. Gràcies!"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Buy"
+msgstr "Comprar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Nothing matches your search."
+msgstr "No hi ha resultats per a la teva cerca."
+
+# ── Package detail — portal_package_detail ───────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Price"
+msgstr "Preu"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Buy now"
+msgstr "Comprar ara"
+
+# ── Checkout payment step — portal_checkout_payment ──────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_subpage_back
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Back"
+msgstr "Enrere"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Order summary"
+msgstr "Resum de la comanda"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Choose payment method"
+msgstr "Tria un mètode de pagament"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Send your payment to"
+msgstr "Envia el teu pagament a"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Account holder"
+msgstr "Titular del compte"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "I agree to the"
+msgstr "Accepto els"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Terms and Conditions"
+msgstr "Termes i condicions"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Next"
+msgstr "Següent"
+
+# ── Checkout signature step — portal_checkout_sign ───────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "You are confirming"
+msgstr "Estàs confirmant"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "Your full name"
+msgstr "El teu nom complet"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "Draw your signature"
+msgstr "Dibuixa la teva signatura"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "Sign here"
+msgstr "Signa aquí"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "Clear"
+msgstr "Esborrar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+msgid "Complete Purchase"
+msgstr "Completar la compra"
+
+# ── Terms page — portal_terms ────────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Terms and conditions content to be provided by the studio."
+msgstr "L'estudi facilitarà el contingut dels termes i condicions."
+
+# ── Active orders — portal_active_orders ─────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
+msgid "All orders"
+msgstr "Totes les comandes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Active Orders"
+msgstr "Comandes actives"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Orders that are not settled yet"
+msgstr "Comandes que encara no estan liquidades"
+
+# ── Language picker — portal_language_picker ─────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Language"
+msgstr "Idioma"
+
+# ── Profile Hub — mv_portal_my_home_hub ──────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Change photo"
+msgstr "Canviar foto"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Profile photo updated."
+msgstr "Foto de perfil actualitzada."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Photo upload failed — please try a smaller image."
+msgstr "No s'ha pogut pujar la foto — prova amb una imatge més petita."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "View rosters and manage upcoming classes"
+msgstr "Veure llistes i gestionar classes properes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Classes History"
+msgstr "Historial de classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Past classes you have taught"
+msgstr "Classes passades que has impartit"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Settings"
+msgstr "Configuració"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Connection &amp; Security"
+msgstr "Connexió i seguretat"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Log out"
+msgstr "Tancar sessió"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "My CoreLab Studio"
+msgstr "El meu estudi CoreLab"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Available Classes"
+msgstr "Classes disponibles"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Upcoming available classes"
+msgstr "Classes disponibles properes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Upcoming booked classes"
+msgstr "Classes reservades properes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Past classes and attendance"
+msgstr "Classes passades i assistència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Account"
+msgstr "Compte"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Orders"
+msgstr "Comandes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Invoices"
+msgstr "Factures"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Addresses"
+msgstr "Adreces"
+
+# ── Password hint — mv_portal_my_security_pw_hint ────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_security_pw_hint
+msgid "<strong>Requirements:</strong> at least 8 characters, at least one letter, at least one number. Must differ from your current password."
+msgstr "<strong>Requisits:</strong> com a mínim 8 caràcters, com a mínim una lletra i com a mínim un número. Ha de ser diferent de la teva contrasenya actual."
+
+# ── Subscription status page (/my/subscription) ──────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "My Subscription"
+msgstr "La meva subscripció"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Your active plan &amp; weekly status"
+msgstr "El teu pla actiu i l'estat setmanal"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "No active subscription."
+msgstr "Sense subscripció activa."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Browse plans →"
+msgstr "Veure plans →"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Classes"
+msgstr "Classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Unlimited"
+msgstr "Il·limitat"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "This week"
+msgstr "Aquesta setmana"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Bonus credits"
+msgstr "Crèdits de regal"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Next renewal"
+msgstr "Propera renovació"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+msgid "Fixed weekly schedule"
+msgstr "Horari fix setmanal"
+
+# ── Active orders — new strings ───────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
+msgid "All your orders"
+msgstr "Totes les teves comandes"
+
+# ── Profile Hub — updated Orders row ─────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub_override
+msgid "All orders &amp; active status"
+msgstr "Totes les comandes i estat actiu"

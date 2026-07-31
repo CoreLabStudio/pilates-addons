@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Package Balances list (sale.order.line filtered to packages) -->
+    <record id="view_fitness_package_line_list" model="ir.ui.view">
+        <field name="name">fitness.package.line.list</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="fitness_is_expired"
+                  decoration-muted="fitness_remaining_classes == 0">
+                <field name="order_id" string="Sale Order"/>
+                <field name="order_partner_id" string="Student"/>
+                <field name="product_id" string="Package"/>
+                <field name="fitness_class_type" string="Studio"/>
+                <field name="fitness_session_type" string="Session"/>
+                <field name="fitness_original_class_count" string="Purchased"/>
+                <field name="fitness_classes_used" string="Used"/>
+                <field name="fitness_remaining_classes" string="Remaining"/>
+                <field name="fitness_validity_end_date" string="Valid Until"/>
+                <field name="fitness_is_expired" string="Expired" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fitness_package_balances" model="ir.actions.act_window">
+        <field name="name">Package Balances</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_fitness_package_line_list"/>
+        <field name="domain">[('product_id.fitness_is_package', '=', True)]</field>
+        <field name="context">{'search_default_order_partner_id': 1}</field>
+    </record>
+
+    <!-- Package sales (sale.order filtered to fitness packages).
+         Renamed from "Packages" and moved under Bookings: Catalog > Packages
+         now opens the package PRODUCTS, which is what an admin expects to
+         find in a catalog and what carries the image upload. -->
+    <record id="action_fitness_packages" model="ir.actions.act_window">
+        <field name="name">Package Sales</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('fitness_is_package', '=', True)]</field>
+        <field name="context">{'default_fitness_is_package': True}</field>
+    </record>
+
+    <!-- Add credit info to sale.order form (package tab) -->
+    <record id="view_sale_order_form_fitness" model="ir.ui.view">
+        <field name="name">sale.order.form.fitness</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Package Credits" name="fitness_credits"
+                      invisible="not fitness_is_package">
+                    <field name="order_line" readonly="1"
+                           domain="[('product_id.fitness_is_package', '=', True)]">
+                        <list>
+                            <field name="product_id" string="Package"/>
+                            <field name="fitness_original_class_count" string="Purchased"/>
+                            <field name="fitness_remaining_classes" string="Remaining"/>
+                            <field name="fitness_validity_end_date" string="Valid Until"/>
+                            <field name="fitness_is_expired" string="Expired" widget="boolean"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

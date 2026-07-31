@@ -1,0 +1,69 @@
+# Catalan translations for fitness_packages
+# Copyright (C) Yoleyva Studio — CoreLab
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-31 00:00+0000\n"
+"PO-Revision-Date: 2026-07-31 00:00+0000\n"
+"Language-Team: Catalan\n"
+"Language: ca_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: fitness_packages
+#: model:ir.actions.act_window,name:fitness_packages.action_fitness_package_products
+#: model:ir.ui.menu,name:fitness_packages.menu_fitness_packages
+msgid "Packages"
+msgstr "Bons"
+
+#. module: fitness_packages
+#: model:ir.actions.act_window,name:fitness_packages.action_fitness_packages
+#: model:ir.ui.menu,name:fitness_packages.menu_fitness_package_sales
+msgid "Package Sales"
+msgstr "Vendes de bons"
+
+#. module: fitness_packages
+#: model:ir.actions.act_window,name:fitness_packages.action_fitness_package_balances
+#: model:ir.ui.menu,name:fitness_packages.menu_fitness_package_balances
+msgid "Package Balances"
+msgstr "Saldo de bons"
+
+# ── Packages product list — view_product_template_packages_list ──────────────
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Package Name"
+msgstr "Nom del bo"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Studio"
+msgstr "Estudi"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Session"
+msgstr "Sessió"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Classes"
+msgstr "Classes"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Validity (days)"
+msgstr "Validesa (dies)"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Price"
+msgstr "Preu"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Can be Sold"
+msgstr "Es pot vendre"

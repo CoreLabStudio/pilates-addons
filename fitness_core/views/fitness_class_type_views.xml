@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_class_type_list" model="ir.ui.view">
+        <field name="name">fitness.class.type.list</field>
+        <field name="model">fitness.class.type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="classroom_type" widget="badge"
+                       decoration-info="classroom_type == 'barre'"
+                       decoration-success="classroom_type == 'reformer'"/>
+                <field name="session_type"/>
+                <field name="level"/>
+                <field name="intensity"/>
+                <field name="duration" string="Min"/>
+                <field name="max_capacity" string="Max Pax"/>
+                <field name="equipment" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_class_type_form" model="ir.ui.view">
+        <field name="name">fitness.class.type.form</field>
+        <field name="model">fitness.class.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_512'}"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Reformer Power"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Class Details">
+                            <field name="classroom_type"/>
+                            <field name="classroom_id"/>
+                            <field name="session_type"/>
+                            <field name="duration"/>
+                            <field name="max_capacity" readonly="1"/>
+                        </group>
+                        <group string="Level &amp; Intensity">
+                            <field name="level"/>
+                            <field name="intensity"/>
+                            <field name="equipment"
+                                   placeholder="e.g. Dumbbells, fit ball, fit circle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"
+                                   placeholder="Describe this class for students..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fitness_class_type_kanban" model="ir.ui.view">
+        <field name="name">fitness.class.type.kanban</field>
+        <field name="model">fitness.class.type</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="classroom_type"/>
+                <field name="level"/>
+                <field name="intensity"/>
+                <field name="duration"/>
+                <field name="session_type"/>
+                <field name="max_capacity"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside>
+                            <field name="color" widget="color_picker" readonly="1"/>
+                        </aside>
+                        <main>
+                            <field name="name" class="fw-bold fs-5"/>
+                            <div class="mt-1">
+                                <span class="badge rounded-pill text-bg-info me-1">
+                                    <field name="classroom_type"/>
+                                </span>
+                                <span class="badge rounded-pill text-bg-secondary">
+                                    <field name="level"/>
+                                </span>
+                            </div>
+                            <div class="text-muted mt-1">
+                                <t t-out="record.duration.value"/> min ·
+                                Max <t t-out="record.max_capacity.value"/> pax ·
+                                <field name="intensity"/>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_fitness_class_type" model="ir.actions.act_window">
+        <field name="name">Class Types</field>
+        <field name="res_model">fitness.class.type</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+</odoo>

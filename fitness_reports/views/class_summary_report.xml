@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CLASS SUMMARY REPORT — fitness.report.class (SQL view)
+         One row per fitness calendar event.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- LIST ─────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_class_list" model="ir.ui.view">
+        <field name="name">fitness.report.class.list</field>
+        <field name="model">fitness.report.class</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" default_order="class_date desc">
+                <field name="class_date"          string="Fecha"/>
+                <field name="event_id"            string="Clase"/>
+                <field name="class_type_id"       string="Tipo"/>
+                <field name="teacher_user_id"     string="Instructor"/>
+                <field name="capacity"            string="Aforo" sum="Total aforo"/>
+                <field name="booked_count"        string="Reservas" sum="Total"/>
+                <field name="attended_count"      string="Asistidos" sum="Total"/>
+                <field name="no_show_count"       string="No presentados" sum="Total"/>
+                <field name="cancelled_count"     string="Cancelados" sum="Total"/>
+                <field name="occupancy_pct"       string="Ocupación %"/>
+                <field name="attributed_revenue"
+                       string="Ingresos atribuidos (aprox., puede solapar)"
+                       sum="Total (aprox.)"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- PIVOT ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_class_pivot" model="ir.ui.view">
+        <field name="name">fitness.report.class.pivot</field>
+        <field name="model">fitness.report.class</field>
+        <field name="arch" type="xml">
+            <pivot string="Resumen de clases">
+                <field name="class_date"         type="row" interval="month"/>
+                <field name="teacher_user_id"    type="row"/>
+                <field name="class_type_id"      type="col"/>
+                <field name="booked_count"       type="measure"/>
+                <field name="attended_count"     type="measure"/>
+                <field name="occupancy_pct"      type="measure"/>
+                <field name="attributed_revenue" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_class_graph" model="ir.ui.view">
+        <field name="name">fitness.report.class.graph</field>
+        <field name="model">fitness.report.class</field>
+        <field name="arch" type="xml">
+            <graph string="Ocupación por instructor" type="bar">
+                <field name="teacher_user_id" type="row"/>
+                <field name="class_type_id"   type="col"/>
+                <field name="booked_count"    type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH ───────────────────────────────────────────────── -->
+    <record id="view_fitness_report_class_search" model="ir.ui.view">
+        <field name="name">fitness.report.class.search</field>
+        <field name="model">fitness.report.class</field>
+        <field name="arch" type="xml">
+            <search string="Buscar clases">
+                <field name="event_id"        string="Clase"/>
+                <field name="teacher_user_id" string="Instructor"/>
+                <field name="class_type_id"   string="Tipo de clase"/>
+                <separator/>
+                <group>
+                    <filter name="group_instructor"
+                            string="Instructor"
+                            context="{'group_by':'teacher_user_id'}"/>
+                    <filter name="group_class_type"
+                            string="Tipo de clase"
+                            context="{'group_by':'class_type_id'}"/>
+                    <filter name="group_month"
+                            string="Mes"
+                            context="{'group_by':'class_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION ───────────────────────────────────────────────── -->
+    <record id="action_fitness_class_summary_report" model="ir.actions.act_window">
+        <field name="name">Class Summary</field>
+        <field name="res_model">fitness.report.class</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_report_class_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_class_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_class_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_class_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay clases de fitness registradas.
+            </p>
+        </field>
+    </record>
+
+</odoo>

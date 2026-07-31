@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="mail_template_teacher_swap" model="mail.template">
+            <field name="name">Fitness: Teacher Change Notification</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Your class instructor has changed' if object.student_id.lang == 'en_US' else ('El/La professor/a de la teva classe ha canviat' if object.student_id.lang == 'ca_ES' else 'El/La instructor/a de tu clase ha cambiado') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>We wanted to let you know that the instructor for your upcoming class has been updated:</p>
+    <ul>
+      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>New instructor: <strong t-out="object.calendar_event_id.user_id.name or 'TBA'"/></li>
+    </ul>
+    <p>Everything else remains the same. See you in class!</p>
+    <p>The m&#333;va team</p>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Et volem informar que el/la professor/a de la teva classe propera ha canviat:</p>
+    <ul>
+      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Nou/nova professor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Per confirmar'"/></li>
+    </ul>
+    <p>La resta es mant&#233; igual. Ens veiem a classe!</p>
+    <p>L'equip de m&#333;va</p>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Te queremos informar que el/la instructor/a de tu pr&#243;xima clase ha cambiado:</p>
+    <ul>
+      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Nuevo/a instructor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Por confirmar'"/></li>
+    </ul>
+    <p>Todo lo dem&#225;s sigue igual. &#161;Nos vemos en clase!</p>
+    <p>El equipo de m&#333;va</p>
+  </t>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

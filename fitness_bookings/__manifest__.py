@@ -1,0 +1,24 @@
+{
+    'name': 'Fitness Bookings – Yoleyva Studio',
+    'version': '19.0.1.0.0',
+    'category': 'Services',
+    'summary': 'Class booking with capacity control, cancellation rules, attendance tracking',
+    'author': 'Yoleyva Studio',
+    'license': 'LGPL-3',
+    'depends': [
+        'calendar',
+        'sale',
+        'sale_subscription',
+        'fitness_core',
+    ],
+    'data': [
+        'security/ir.model.access.csv',
+        'security/ir_rule.xml',
+        'views/fitness_booking_views.xml',
+        'views/fitness_booking_cancel_wizard_views.xml',
+        'views/menu.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}

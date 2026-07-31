@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Master on/off per notification type. Change via Settings > Technical >
+             System Parameters, or simply write to ir.config_parameter. -->
+        <record id="config_param_send_confirmation" model="ir.config_parameter">
+            <field name="key">fitness_notifications.send_confirmation</field>
+            <field name="value">True</field>
+        </record>
+
+        <record id="config_param_send_cancellation" model="ir.config_parameter">
+            <field name="key">fitness_notifications.send_cancellation</field>
+            <field name="value">True</field>
+        </record>
+
+        <record id="config_param_send_reminder" model="ir.config_parameter">
+            <field name="key">fitness_notifications.send_reminder</field>
+            <field name="value">True</field>
+        </record>
+
+        <!-- How many hours before class start the reminder cron should fire. -->
+        <record id="config_param_reminder_lead_hours" model="ir.config_parameter">
+            <field name="key">fitness_notifications.reminder_lead_hours</field>
+            <field name="value">24</field>
+        </record>
+
+        <record id="config_param_send_credit_expiry" model="ir.config_parameter">
+            <field name="key">fitness_notifications.send_credit_expiry</field>
+            <field name="value">True</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Packages — under Catalog dropdown.
+         Points at the package PRODUCTS (product.template), matching the
+         Subscription Plans menu. This is the form that carries the image
+         upload; previously this menu opened sale orders instead. -->
+    <menuitem
+        id="menu_fitness_packages"
+        name="Packages"
+        parent="fitness_core.menu_group_catalog"
+        action="action_fitness_package_products"
+        sequence="10"
+    />
+
+    <!-- Package Sales — under Bookings dropdown (the sale.order view that
+         used to sit under Catalog). -->
+    <menuitem
+        id="menu_fitness_package_sales"
+        name="Package Sales"
+        parent="fitness_core.menu_group_bookings"
+        action="action_fitness_packages"
+        sequence="15"
+    />
+
+    <!-- Package Balances — under Bookings dropdown (operational view of credits) -->
+    <menuitem
+        id="menu_fitness_package_balances"
+        name="Package Balances"
+        parent="fitness_core.menu_group_bookings"
+        action="action_fitness_package_balances"
+        sequence="20"
+    />
+
+</odoo>

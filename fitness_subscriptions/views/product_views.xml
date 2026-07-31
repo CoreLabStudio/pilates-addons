@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Standalone list for Subscription Plans menu (filtered product.template) -->
+    <record id="view_product_template_subscription_plans_list" model="ir.ui.view">
+        <field name="name">product.template.subscription.plans.list</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" string="Plan Name"/>
+                <field name="fitness_class_type" string="Studio"
+                       widget="badge"
+                       decoration-info="fitness_class_type == 'barre'"
+                       decoration-success="fitness_class_type == 'reformer'"/>
+                <field name="fitness_session_type" string="Session"/>
+                <field name="is_unlimited" string="Unlimited" widget="boolean"/>
+                <field name="weekly_class_allowance" string="Weekly Cap"
+                       optional="show"/>
+                <field name="fitness_is_clase_fija" string="Clase Fija"
+                       widget="boolean" optional="show"/>
+                <field name="fitness_promo_first_cycle_bonus" string="Promo Bonus"
+                       optional="hide"/>
+                <field name="list_price" string="Price" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action: Subscription Plans (filtered product.template) -->
+    <record id="action_fitness_subscription_plans" model="ir.actions.act_window">
+        <field name="name">Subscription Plans</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_product_template_subscription_plans_list"/>
+        <field name="domain">[('fitness_is_subscription_plan', '=', True)]</field>
+        <field name="context">{'default_fitness_is_subscription_plan': True, 'active_test': False}</field>
+    </record>
+
+    <!-- Add Fitness Subscription tab to product form -->
+    <record id="view_product_template_form_fitness_subscription" model="ir.ui.view">
+        <field name="name">product.template.form.fitness.subscription</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fitness Subscription" name="fitness_subscription">
+                    <group>
+                        <group string="Plan Settings">
+                            <field name="fitness_is_subscription_plan"/>
+                            <field name="fitness_is_clase_fija"
+                                   invisible="not fitness_is_subscription_plan"/>
+                            <field name="is_unlimited"
+                                   invisible="not fitness_is_subscription_plan"/>
+                            <!-- ENFORCEMENT: weekly cap — this is what validation reads -->
+                            <field name="weekly_class_allowance"
+                                   invisible="not fitness_is_subscription_plan or is_unlimited"/>
+                            <!-- Promo bonus: 1 for "+1 Promo" plans, 0 for all others -->
+                            <field name="fitness_promo_first_cycle_bonus"
+                                   invisible="not fitness_is_subscription_plan or is_unlimited"/>
+                            <!-- LEGACY / REPORTING ONLY — values 4/8/12 have no enforcement effect -->
+                            <field name="monthly_class_allowance"
+                                   invisible="not fitness_is_subscription_plan or is_unlimited"
+                                   readonly="1"
+                                   string="Monthly Allowance (legacy — reporting only)"/>
+                        </group>
+                        <group string="Restrictions" invisible="not fitness_is_subscription_plan">
+                            <field name="fitness_class_type"/>
+                            <field name="fitness_session_type"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

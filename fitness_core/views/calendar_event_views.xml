@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend calendar.event form to add Fitness Class tab -->
+    <record id="view_calendar_event_form_fitness" model="ir.ui.view">
+        <field name="name">calendar.event.form.fitness</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fitness Class" name="fitness_class_page">
+                    <group>
+                        <group string="Class Setup">
+                            <field name="is_fitness_class"/>
+                            <field name="class_type_id"
+                                   invisible="not is_fitness_class"/>
+                            <field name="classroom_id"
+                                   invisible="not is_fitness_class"/>
+                            <field name="session_type"
+                                   invisible="not is_fitness_class"/>
+                        </group>
+                        <group string="Capacity" invisible="not is_fitness_class">
+                            <field name="capacity"/>
+                            <field name="booked_seats"/>
+                            <field name="available_seats"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend calendar list view to show classroom for fitness classes -->
+    <record id="view_calendar_event_list_fitness" model="ir.ui.view">
+        <field name="name">calendar.event.list.fitness</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="classroom_id" optional="show"/>
+                <field name="class_type_id" optional="show"/>
+                <field name="available_seats" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Standalone list for the Schedule menu (fitness classes only) -->
+    <record id="view_fitness_schedule_list" model="ir.ui.view">
+        <field name="name">calendar.event.fitness.schedule.list</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <list default_order="start asc"
+                  decoration-muted="available_seats == 0">
+                <field name="name" string="Class"/>
+                <field name="start" string="Date / Time"/>
+                <field name="stop" string="End" optional="hide"/>
+                <field name="classroom_id" string="Studio"/>
+                <field name="class_type_id" string="Class Type"/>
+                <field name="session_type" string="Session"/>
+                <field name="capacity" string="Capacity"/>
+                <field name="booked_seats" string="Booked"/>
+                <field name="available_seats" string="Available"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action: Schedule (fitness classes only) -->
+    <record id="action_fitness_schedule" model="ir.actions.act_window">
+        <field name="name">Schedule</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="domain">[('is_fitness_class', '=', True)]</field>
+        <field name="context">{'default_is_fitness_class': True}</field>
+    </record>
+
+</odoo>

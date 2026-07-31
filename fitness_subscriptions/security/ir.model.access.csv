@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fitness_clase_fija_system,fitness.clase.fija system,model_fitness_clase_fija,base.group_system,1,1,1,1
+access_fitness_clase_fija_manager,fitness.clase.fija manager,model_fitness_clase_fija,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_clase_fija_user,fitness.clase.fija user,model_fitness_clase_fija,base.group_user,1,1,1,0

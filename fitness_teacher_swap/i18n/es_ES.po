@@ -1,0 +1,163 @@
+﻿# Spanish (Spain) translations for fitness_teacher_swap
+# Copyright (C) Yoleyva Pilates
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-29 00:00+0000\n"
+"PO-Revision-Date: 2026-07-29 00:00+0000\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Code translations (Python controllers) ───────────────────────────────────
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+#, python-format
+msgid "Last %d"
+msgstr "Últimos %d"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+#, python-format
+msgid "next %d days"
+msgstr "próximos %d días"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Class not found or not assigned to you."
+msgstr "Clase no encontrada o no asignada a ti."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Invalid request."
+msgstr "Solicitud no válida."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "This class hasn't started yet — attendance can be marked once it begins."
+msgstr "Esta clase aún no ha empezado — la asistencia se puede marcar una vez que comience."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "This booking has already been marked."
+msgstr "Esta reserva ya ha sido marcada."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Booking not found."
+msgstr "Reserva no encontrada."
+
+# ── Teacher class list — portal_my_classes ───────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_home_teacher_link
+msgid "My Classes"
+msgstr "Mis clases"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_home_teacher_link
+msgid "View rosters and reassign your upcoming classes"
+msgstr "Ver listados y reasignar tus clases próximas"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "No classes in this window."
+msgstr "No hay clases en este período."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+#, python-format
+msgid "students"
+msgstr "alumnas"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Reassign to…"
+msgstr "Reasignar a…"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Reassign"
+msgstr "Reasignar"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Roster →"
+msgstr "Lista →"
+
+# ── Teacher roster — portal_teacher_roster ───────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Classes"
+msgstr "Clases"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "Profile"
+msgstr "Perfil"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Attendance opens at class start"
+msgstr "La asistencia se abre al inicio de la clase"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "No students booked into this class."
+msgstr "No hay alumnas inscritas en esta clase."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Attended"
+msgstr "Asistió"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "No-show"
+msgstr "No se presentó"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Not yet started"
+msgstr "Todavía no ha empezado"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Attendance marked."
+msgstr "Asistencia marcada."
+
+# ── Teacher history — portal_teacher_history ─────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "Classes History"
+msgstr "Historial de clases"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "Past classes you have taught"
+msgstr "Clases pasadas que has impartido"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "No past classes recorded yet."
+msgstr "Todavía no hay clases pasadas registradas."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "Show more"
+msgstr "Mostrar más"

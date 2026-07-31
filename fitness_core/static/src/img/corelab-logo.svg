@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 48" width="232" height="48"
+     role="img" aria-label="CoreLab">
+  <title>CoreLab</title>
+  <!-- Mark: an open ring (the "core") with an orbiting accent dot.
+       Stroke weights match the 1.6–1.8 line-icon style used across the app. -->
+  <g fill="none" stroke="#50423D" stroke-width="2.2" stroke-linecap="round">
+    <path d="M35.2 12.6a14 14 0 1 0 0 22.8"/>
+  </g>
+  <circle cx="24" cy="24" r="5.4" fill="#9ABACD"/>
+  <circle cx="38.6" cy="24" r="2.6" fill="#50423D"/>
+
+  <!-- Wordmark. Georgia/serif is used rather than Fraunces because webfonts do
+       not load when this file is referenced as an <img> or favicon. -->
+  <text x="56" y="33"
+        font-family="Fraunces, Georgia, 'Times New Roman', serif"
+        font-size="28" font-weight="400" letter-spacing="-0.6"
+        fill="#50423D">CoreLab</text>
+</svg>

@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Inject CoreLab header + bottom nav into every standard Odoo portal page
+         (pages using portal.portal_layout) for student users.
+         Our custom pages (/my/home, /my/studio, /my/packages, …) call
+         portal.frontend_layout directly and are NOT affected here. -->
+    <template id="mv_portal_layout_shell" name="CoreLab Portal Layout Shell"
+              inherit_id="portal.portal_layout">
+        <xpath expr="//div[@id='wrap']" position="before">
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_student')">
+                <t t-call="fitness_portal.mv_page_header"/>
+            </t>
+            <t t-elif="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <t t-call="fitness_portal.mv_teacher_page_header"/>
+            </t>
+        </xpath>
+        <xpath expr="//div[@id='wrap']" position="after">
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_student')">
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </t>
+            <t t-elif="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Profile Hub — injected before the standard Odoo home grid on /my.
+         CSS in section 18 of corelab.css hides the standard grid when this hub
+         is present, giving students a custom navigation-focused home page. -->
+    <template id="mv_portal_my_home_hub" name="CoreLab Profile Hub"
+              inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='oe_structure_portal_my_home_1']" position="before">
+            <!-- Teacher Profile Hub -->
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <t t-set="_tp_partner" t-value="partner or request.env.user.partner_id"/>
+                <t t-set="_tp_name" t-value="_tp_partner.name or ''"/>
+                <t t-set="_tp_initial" t-value="(_tp_name[:1] if _tp_name else 'T').upper()"/>
+                <t t-set="_tp_email" t-value="request.env.user.email or _tp_partner.email or ''"/>
+
+                <div class="mv-profile-hub">
+                    <div class="mv-profile-hero">
+                        <t t-if="_tp_partner.image_1920">
+                            <div class="mv-avatar-lg mv-avatar-lg--photo" t-att-title="_tp_name or 'Profile'">
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _tp_partner.id"
+                                     t-att-alt="_tp_name or ''"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="mv-avatar-lg" t-att-title="_tp_name or 'Profile'">
+                                <t t-out="_tp_initial"/>
+                            </div>
+                        </t>
+                        <form action="/my/profile/upload-photo" method="post"
+                              enctype="multipart/form-data" style="margin:6px 0 4px;">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <label class="mv-photo-upload-btn"><div>Change photo</div>
+                                <input type="file" name="photo" accept="image/*"
+                                       style="display:none;" onchange="this.form.submit()"/>
+                            </label>
+                        </form>
+                        <h1 class="mv-profile-name" t-out="_tp_name or 'My Profile'"/>
+                        <p class="mv-profile-email" t-out="_tp_email"/>
+                    </div>
+
+                    <t t-if="request.httprequest.args.get('photo_ok')">
+                        <div class="mv-flash mv-flash-ok" style="margin:0 16px 12px;">Profile photo updated.</div>
+                    </t>
+                    <t t-if="request.httprequest.args.get('photo_err')">
+                        <div class="mv-flash mv-flash-err" style="margin:0 16px 12px;">Photo upload failed — please try a smaller image.</div>
+                    </t>
+
+                    <div class="mv-menu-list">
+                        <!-- Teacher hub: scoped-down equivalent of the student
+                             structure. Deliberately no Orders / Invoices /
+                             Packages / Addresses — those are student-only. -->
+                        <div class="mv-menu-section-label">My CoreLab Studio</div>
+                        <a href="/my/teacher/classes" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">My Classes</div>
+                                <div class="mv-menu-desc">View rosters and manage upcoming classes</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <a href="/my/teacher/history" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Classes History</div>
+                                <div class="mv-menu-desc">Past classes you have taught</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <div class="mv-menu-divider"/>
+
+                        <!-- Same Account position as the student hub, scoped to
+                             the one row a teacher needs. -->
+                        <div class="mv-menu-section-label">Account</div>
+                        <a href="/my/notifications" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Notifications</div>
+                                <div class="mv-menu-desc">Everything the studio has sent you</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <div class="mv-menu-divider"/>
+
+                        <div class="mv-menu-section-label">Settings</div>
+                        <a href="/my/security" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Connection &amp; Security</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <t t-set="_mv_cur_lang" t-value="request.httprequest.cookies.get('mv_lang', request.env.lang or 'en_US')"/>
+                        <t t-set="_mv_lang_names" t-value="{'en_US': 'English', 'es_ES': 'Español', 'ca_ES': 'Català'}"/>
+                        <a href="/my/language" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Language</div>
+                            </div>
+                            <span class="mv-menu-hint" t-out="_mv_lang_names.get(_mv_cur_lang, 'English')"/>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/web/session/logout?redirect=/web/login"
+                           class="mv-menu-row mv-menu-row--danger">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Log out</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Student Profile Hub -->
+            <t t-elif="request.env.user.has_group('fitness_core.group_fitness_student')">
+                <t t-set="_ph_partner" t-value="partner or request.env.user.partner_id"/>
+                <t t-set="_ph_name" t-value="_ph_partner.name or ''"/>
+                <t t-set="_ph_initial" t-value="(_ph_name[:1] if _ph_name else 'Y').upper()"/>
+                <t t-set="_ph_email" t-value="request.env.user.email or _ph_partner.email or ''"/>
+                <t t-set="_ph_line" t-value="request.env['sale.order.line'].sudo().search([
+                    ('order_partner_id', '=', _ph_partner.id),
+                    ('product_id.fitness_is_package', '=', True),
+                    ('fitness_remaining_classes', '>', 0),
+                ], order='fitness_validity_end_date asc nulls last', limit=1)"/>
+                <t t-set="_ph_credits" t-value="_ph_line.fitness_remaining_classes if _ph_line else False"/>
+                <t t-set="_ph_total" t-value="_ph_line.fitness_original_class_count if _ph_line else False"/>
+
+                <div class="mv-profile-hub">
+
+                    <!-- Hero: avatar + name + email + credit badge -->
+                    <div class="mv-profile-hero">
+                        <t t-if="_ph_partner.image_1920">
+                            <div class="mv-avatar-lg mv-avatar-lg--photo" t-att-title="_ph_name or 'Profile'">
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _ph_partner.id"
+                                     t-att-alt="_ph_name or ''"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="mv-avatar-lg" t-att-title="_ph_name or 'Profile'">
+                                <t t-out="_ph_initial"/>
+                            </div>
+                        </t>
+                        <form action="/my/profile/upload-photo" method="post"
+                              enctype="multipart/form-data" style="margin:6px 0 4px;">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <label class="mv-photo-upload-btn"><div>Change photo</div>
+                                <input type="file" name="photo" accept="image/*"
+                                       style="display:none;" onchange="this.form.submit()"/>
+                            </label>
+                        </form>
+                        <h1 class="mv-profile-name" t-out="_ph_name or 'My Profile'"/>
+                        <p class="mv-profile-email" t-out="_ph_email"/>
+                        <t t-if="_ph_credits">
+                            <t t-set="_ph_display"
+                               t-value="('%s / %s' % (_ph_credits, int(_ph_total))) if _ph_total else str(_ph_credits)"/>
+                            <a href="/my/credits" class="mv-credit-badge" style="text-decoration:none;">
+                                <span class="mv-credit-count" t-out="_ph_display"/>
+                            </a>
+                        </t>
+                    </div>
+
+                    <t t-if="request.httprequest.args.get('photo_ok')">
+                        <div class="mv-flash mv-flash-ok" style="margin:0 16px 12px;">Profile photo updated.</div>
+                    </t>
+                    <t t-if="request.httprequest.args.get('photo_err')">
+                        <div class="mv-flash mv-flash-err" style="margin:0 16px 12px;">Photo upload failed — please try a smaller image.</div>
+                    </t>
+
+                    <!-- Menu rows -->
+                    <div class="mv-menu-list">
+
+                        <!-- SECTION 1 — the two Studio tab views. These link into
+                             the existing toggle, they are not separate pages. -->
+                        <div class="mv-menu-section-label">My CoreLab Studio</div>
+                        <a href="/my/studio" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="4.5" width="18" height="16.5" rx="2"/>
+                                <line x1="3" y1="9.5" x2="21" y2="9.5"/>
+                                <line x1="7.5" y1="3" x2="7.5" y2="6"/>
+                                <line x1="16.5" y1="3" x2="16.5" y2="6"/>
+                                <line x1="9" y1="14" x2="9" y2="14.01"/>
+                                <line x1="13" y1="14" x2="13" y2="14.01"/>
+                                <line x1="17" y1="14" x2="17" y2="14.01"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Available Classes</div>
+                                <div class="mv-menu-desc">Upcoming available classes</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/studio?view=schedule" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">My Schedule</div>
+                                <div class="mv-menu-desc">Upcoming booked classes</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <div class="mv-menu-divider"/>
+
+                        <!-- SECTION 2 — Account. Notifications sits first: it is
+                             the only place a notification can be reviewed after
+                             the bell dropdown marks it read. -->
+                        <div class="mv-menu-section-label">Account</div>
+                        <a href="/my/notifications" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Notifications</div>
+                                <div class="mv-menu-desc">Everything the studio has sent you</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/credits" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 6h13a2 2 0 0 1 2 2v1"/>
+                                <path d="M3 6v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2H5a2 2 0 0 1 0-4"/>
+                                <circle cx="16.5" cy="14" r="1.2"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Credit History</div>
+                                <div class="mv-menu-desc">Every change to your credit balance</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/history" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">My History</div>
+                                <div class="mv-menu-desc">Past classes and attendance</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/subscription" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Subscriptions</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/orders/active?show=all" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <path d="M16 10a4 4 0 0 1-8 0"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Orders</div>
+                                <div class="mv-menu-desc">All orders &amp; active status</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/my/invoices" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Invoices</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <!-- Addresses belongs to Account, not Settings. -->
+                        <a href="/my/addresses" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Addresses</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <div class="mv-menu-divider"/>
+
+                        <!-- SECTION 3 — Settings -->
+                        <div class="mv-menu-section-label">Settings</div>
+                        <a href="/my/security" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Connection &amp; Security</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <t t-set="_mv_cur_lang" t-value="request.httprequest.cookies.get('mv_lang', request.env.lang or 'en_US')"/>
+                        <t t-set="_mv_lang_names" t-value="{'en_US': 'English', 'es_ES': 'Español', 'ca_ES': 'Català'}"/>
+                        <a href="/my/language" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Language</div>
+                            </div>
+                            <span class="mv-menu-hint" t-out="_mv_lang_names.get(_mv_cur_lang, 'English')"/>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                        <a href="/web/session/logout?redirect=/web/login"
+                           class="mv-menu-row mv-menu-row--danger">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Log out</div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+
+    <!-- Password requirements hint on the stock portal security page.
+         Shown permanently before typing, not only on error.
+         Client-side validation runs from fitness_portal/static/src/js/password_validation.js. -->
+    <template id="mv_portal_my_security_pw_hint" name="CoreLab Password Requirements Hint"
+              inherit_id="portal.portal_my_security">
+        <xpath expr="//div[hasclass('mb-3')][.//label[@for='new2']]" position="before">
+            <p class="small text-muted mb-2" style="line-height:1.5;"><strong>Requirements:</strong> at least 8 characters, at least one letter, at least one number. Must differ from your current password.</p>
+        </xpath>
+    </template>
+
+</odoo>

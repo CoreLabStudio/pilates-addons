@@ -1,0 +1,137 @@
+# Spanish (Spain) translations for fitness_core
+# Copyright (C) Yoleyva Pilates
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-09 00:00+0000\n"
+"PO-Revision-Date: 2026-07-09 00:00+0000\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_schedule
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_schedule
+msgid "Schedule"
+msgstr "Horario"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_bookings
+msgid "Bookings"
+msgstr "Reservas"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_catalog
+msgid "Catalog"
+msgstr "Catálogo"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_configuration
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_classrooms
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_classroom
+msgid "Classrooms"
+msgstr "Salas"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_class_types
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_class_type
+msgid "Class Types"
+msgstr "Tipos de clase"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_session_types
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_session_type
+msgid "Session Types"
+msgstr "Tipos de sesión"
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_barre_classic_flow
+msgid ""
+"Barre Harmony is a dynamic class designed to help you tone, sweat, and enjoy movement to a classic, feel-good playlist. "
+"This low-impact workout is based on isometric exercises that target and strengthen deep muscle groups, improving both stability and endurance. "
+"The class emphasizes precise technique and controlled movement, helping you build body awareness and alignment. "
+"It incorporates elements of functional Pilates, while primarily drawing inspiration from ballet-inspired movements. "
+"Barre Harmony is accessible and welcoming, making it an excellent choice for beginners as well as anyone looking for a mindful yet effective workout."
+msgstr ""
+"Barre Harmony es una clase dinámica diseñada para ayudarte a tonificar, sudar y disfrutar del movimiento con una selección musical clásica y motivadora. "
+"Este entrenamiento de bajo impacto se basa en ejercicios isométricos que trabajan y fortalecen los músculos profundos, mejorando tanto la estabilidad como la resistencia. "
+"La clase pone énfasis en la técnica precisa y el control del movimiento, ayudándote a desarrollar conciencia corporal y una mejor alineación. "
+"Incorpora elementos del Pilates funcional, aunque se inspira principalmente en movimientos de ballet. "
+"Barre Harmony es accesible y acogedora, lo que la convierte en una excelente opción tanto para principiantes como para cualquier persona que busque un entrenamiento consciente y efectivo."
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_barre_blast
+msgid ""
+"Better known as Barre Blast, this is not your typical adult ballet class—it's faster, stronger, and way more fun. "
+"Get ready for 30 minutes of high-energy barre work, combining technical ballet exercises with weights and props to fire up your muscles and boost strength and precision. "
+"Then, take it to the floor for an intense 15-minute barre burn that challenges your core, endurance, and control. "
+"All set to a powerful, feel-good playlist that keeps you moving, motivated, and pushing your limits. "
+"Barre Blast is where technique meets sweat—a dynamic, full-body workout that leaves you feeling strong, energized, and unstoppable."
+msgstr ""
+"Más conocida como Barre Blast, esta no es la típica clase de ballet para adultos: es más rápida, más intensa y mucho más divertida. "
+"Prepárate para 30 minutos de trabajo en barra de alta energía, combinando ejercicios técnicos de ballet con pesas y accesorios para activar tus músculos y potenciar la fuerza y la precisión. "
+"Después, pasamos al suelo con 15 minutos intensos de floor barre que pondrán a prueba tu core, tu resistencia y tu control. "
+"Todo acompañado de una playlist potente y motivadora que te mantendrá en movimiento, concentrada y superando tus límites. "
+"Barre Blast es donde la técnica se encuentra con el esfuerzo: un entrenamiento dinámico de cuerpo completo que te hará sentir fuerte, llena de energía e imparable."
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_burn_barre
+msgid ""
+"Burn It Baby is your ultimate lower-body burner—designed to sculpt, lift, and set your glutes on fire. "
+"This high-intensity class zeroes in on the glute muscles while firing up your core, combining resistance, mobility, and control for serious, full-body results. "
+"Get ready for deep isometric holds, relentless slow pulses, and sliding exercises that push your muscles to the limit. "
+"Your core stays constantly engaged, building strength, stability, and control with every move. "
+"It's all about that shake, that burn, and that unstoppable energy. Feel it. Fight it. Love it."
+msgstr ""
+"Burn It Baby es tu entrenamiento definitivo de tren inferior, diseñado para esculpir, elevar y hacer arder tus glúteos. "
+"Esta clase de alta intensidad se centra en los músculos glúteos mientras activa constantemente el core, combinando resistencia, movilidad y control para conseguir resultados potentes en todo el cuerpo. "
+"Prepárate para isometrías profundas, pulsos lentos e intensos y ejercicios de deslizamiento que llevan tus músculos al límite. "
+"Tu core trabaja en todo momento, desarrollando fuerza, estabilidad y control en cada movimiento. "
+"Aquí se trata de ese temblor, ese burn y esa energía imparable. Siéntelo. Supéralo. Disfrútalo."
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_reformer_alignment
+msgid ""
+"This routine is designed at a slower, more controlled pace, focusing on movements that incorporate open rotations and twisting patterns. "
+"The emphasis is on depth, precision, and fluidity—allowing you to move with intention and control. "
+"Longer in duration and stronger in impact, this style of training builds mobility, strength, and body awareness while helping you connect more deeply with each movement."
+msgstr ""
+"Esta rutina está diseñada a un ritmo más lento y controlado, centrada en movimientos que incorporan rotaciones abiertas y patrones de torsión. "
+"El énfasis está en la profundidad, la precisión y la fluidez, permitiéndote moverte con intención y control. "
+"Más larga en duración y más intensa en su impacto, este estilo de entrenamiento desarrolla la movilidad, la fuerza y la conciencia corporal, ayudándote a conectar de forma más profunda con cada movimiento."
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_reformer_tone
+msgid ""
+"This is core training turned all the way up. Designed to build unstoppable stamina, these routines keep your core under constant fire from start to finish. "
+"With fewer exercises and lightning-fast transitions, your heart rate stays high while your abs, obliques, and deep core muscles work non-stop to stabilize, power, and control every move. "
+"No breaks, no escape—just pure core activation. "
+"Each session finishes with an intense burnout that pushes your endurance to the edge and leaves your core shaking. "
+"Strong core. High intensity. No limits."
+msgstr ""
+"Esto es entrenamiento de core llevado al máximo. Diseñado para construir una resistencia imparable, estas rutinas mantienen tu core en constante activación de principio a fin. "
+"Con menos ejercicios y transiciones rápidas, tu frecuencia cardíaca se mantiene alta mientras tus abdominales, oblicuos y musculatura profunda trabajan sin descanso para estabilizar, impulsar y controlar cada movimiento. "
+"Sin pausas, sin escapatoria: pura activación. "
+"Cada sesión termina con un burnout intenso que lleva tu resistencia al límite y deja tu core temblando. "
+"Core fuerte. Alta intensidad. Sin límites."
+
+#. module: fitness_core
+#: model:fitness.class.type,description:fitness_core.class_type_pump_it_reformer
+msgid ""
+"BURN!!! Is a full-on, high-intensity blast powered by an electrifying playlist that keeps your energy at maximum from the very first beat. "
+"This class is designed to spike your heart rate and keep it there, combining fast, dynamic movements with weights, a fit ball, and a fit circle for a seriously effective burn. "
+"Expect non-stop action, full-body engagement, and an addictive rhythm that pushes you harder every second. "
+"It's sweaty, it's powerful, and it hits different every time. You won't just feel it—you'll be blown away."
+msgstr ""
+"BURN!!! Es una explosión de alta intensidad impulsada por una playlist electrizante que mantiene tu energía al máximo desde el primer beat. "
+"Esta clase está diseñada para disparar tu frecuencia cardíaca y mantenerla arriba, combinando movimientos rápidos y dinámicos con pesas, fit ball y fit circle para un burn brutal. "
+"Prepárate para acción sin pausa, activación total del cuerpo y un ritmo adictivo que te empuja a dar más en cada segundo. "
+"Es sudor, es potencia y es una experiencia que se siente diferente cada vez. No solo lo vas a sentir... te va a sorprender."

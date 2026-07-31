@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root app menu (Yoleyva home screen icon) -->
+    <menuitem
+        id="menu_fitness_root"
+        name="Yoleyva"
+        sequence="100"
+    />
+
+    <!-- ── Top-level items under Yoleyva root ──────────────────────────────── -->
+
+    <!-- 1. Schedule — direct action, most-used, stays at top level -->
+    <menuitem
+        id="menu_fitness_schedule"
+        name="Schedule"
+        parent="menu_fitness_root"
+        action="fitness_core.action_fitness_schedule"
+        sequence="10"
+    />
+
+    <!-- 2. Bookings group — dropdown; children added by fitness_bookings + fitness_packages -->
+    <menuitem
+        id="menu_group_bookings"
+        name="Bookings"
+        parent="menu_fitness_root"
+        sequence="20"
+    />
+
+    <!-- 3. Catalog group — dropdown; children added by fitness_packages + fitness_subscriptions -->
+    <menuitem
+        id="menu_group_catalog"
+        name="Catalog"
+        parent="menu_fitness_root"
+        sequence="30"
+    />
+
+    <!-- 4. Configuration group — dropdown; children below -->
+    <menuitem
+        id="menu_group_configuration"
+        name="Configuration"
+        parent="menu_fitness_root"
+        sequence="40"
+    />
+
+    <!-- ── Configuration children ──────────────────────────────────────────── -->
+
+    <menuitem
+        id="menu_fitness_classrooms"
+        name="Classrooms"
+        parent="menu_group_configuration"
+        action="action_fitness_classroom"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_fitness_class_types"
+        name="Class Types"
+        parent="menu_group_configuration"
+        action="action_fitness_class_type"
+        sequence="20"
+    />
+
+    <menuitem
+        id="menu_fitness_session_types"
+        name="Session Types"
+        parent="menu_group_configuration"
+        action="action_fitness_session_type"
+        sequence="30"
+    />
+
+</odoo>

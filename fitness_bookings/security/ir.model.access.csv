@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fitness_booking_system,fitness.booking system admin,model_fitness_booking,base.group_system,1,1,1,1
+access_fitness_booking_manager,fitness.booking manager,model_fitness_booking,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_booking_teacher,fitness.booking teacher,model_fitness_booking,fitness_core.group_fitness_teacher,1,1,0,0
+access_fitness_booking_portal,fitness.booking portal,model_fitness_booking,base.group_portal,1,0,1,0
+access_fitness_booking_user,fitness.booking user,model_fitness_booking,base.group_user,1,0,0,0
+access_fitness_booking_student_write,fitness.booking student write,model_fitness_booking,fitness_core.group_fitness_student,0,1,0,0
+access_product_product_fitness_student,product.product fitness student,product.model_product_product,fitness_core.group_fitness_student,1,0,0,0
+access_product_template_fitness_student,product.template fitness student,product.model_product_template,fitness_core.group_fitness_student,1,0,0,0
+access_fitness_booking_cancel_wizard_system,fitness.booking.cancel.wizard system,model_fitness_booking_cancel_wizard,base.group_system,1,1,1,1
+access_fitness_booking_cancel_wizard_manager,fitness.booking.cancel.wizard manager,model_fitness_booking_cancel_wizard,fitness_core.group_fitness_manager,1,1,1,1

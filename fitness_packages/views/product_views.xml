@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Standalone list for the Packages menu (filtered product.template).
+         Mirrors fitness_subscriptions' Subscription Plans list.
+
+         Why this exists: Catalog > Packages previously opened
+         action_fitness_packages, whose res_model is sale.order — it listed
+         package SALES, not the package PRODUCTS. That left no way anywhere in
+         the backend to open a package product, which is why it had no image
+         upload while Subscription Plans did. The product form already carries
+         image_1920 from the stock view; it simply was not reachable. -->
+    <record id="view_product_template_packages_list" model="ir.ui.view">
+        <field name="name">product.template.packages.list</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="image_128" widget="image" width="48px" options="{'size': [48, 48]}"/>
+                <field name="name" string="Package Name"/>
+                <field name="fitness_class_type" string="Studio"
+                       widget="badge"
+                       decoration-info="fitness_class_type == 'barre'"
+                       decoration-success="fitness_class_type == 'reformer'"/>
+                <field name="fitness_session_type" string="Session"/>
+                <field name="fitness_class_count" string="Classes"/>
+                <field name="fitness_validity_days" string="Validity (days)"/>
+                <field name="list_price" string="Price" optional="show"/>
+                <field name="sale_ok" string="Can be Sold" widget="boolean" optional="hide"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action: Packages (product.template). view_mode list,form so the form
+         falls through to the stock product form, which already provides the
+         image_1920 upload widget. -->
+    <record id="action_fitness_package_products" model="ir.actions.act_window">
+        <field name="name">Packages</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_product_template_packages_list"/>
+        <field name="domain">[('fitness_is_package', '=', True)]</field>
+        <field name="context">{'default_fitness_is_package': True, 'active_test': False}</field>
+    </record>
+
+    <!-- Add Fitness Package tab to product form -->
+    <record id="view_product_template_form_fitness" model="ir.ui.view">
+        <field name="name">product.template.form.fitness</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fitness Package" name="fitness_package">
+                    <group>
+                        <group string="Package Settings">
+                            <field name="fitness_is_package"/>
+                            <field name="fitness_class_count"
+                                   invisible="not fitness_is_package"/>
+                            <field name="fitness_validity_days"
+                                   invisible="not fitness_is_package"/>
+                        </group>
+                        <group string="Restrictions" invisible="not fitness_is_package">
+                            <field name="fitness_class_type"/>
+                            <field name="fitness_session_type"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

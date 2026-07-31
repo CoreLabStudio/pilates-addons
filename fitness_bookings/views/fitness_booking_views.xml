@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="view_fitness_booking_list" model="ir.ui.view">
+        <field name="name">fitness.booking.list</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'attended'"
+                  decoration-danger="state == 'no_show'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="student_id"/>
+                <field name="calendar_event_id"/>
+                <field name="classroom_id"/>
+                <field name="class_start" string="Class Date"/>
+                <field name="booking_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'attended'"
+                       decoration-warning="state == 'no_show'"
+                       decoration-danger="state == 'cancelled'"
+                       decoration-info="state == 'booked'"/>
+                <field name="credit_returned" optional="show"/>
+                <field name="marked_by_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_fitness_booking_form" model="ir.ui.view">
+        <field name="name">fitness.booking.form</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_mark_attended"
+                            string="Mark Attended"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'booked'"/>
+                    <button name="action_mark_no_show"
+                            string="Mark No-Show"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'booked'"/>
+                    <button name="action_cancel"
+                            string="Cancel Booking"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'booked'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="booked,attended,no_show,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Booking">
+                            <field name="student_id"/>
+                            <field name="calendar_event_id"/>
+                            <field name="classroom_id" readonly="1"/>
+                            <field name="class_type_id" readonly="1"/>
+                            <field name="teacher_user_id" readonly="1"/>
+                            <field name="booking_date"/>
+                        </group>
+                        <group string="Payment Source">
+                            <field name="package_order_line_id"/>
+                            <field name="subscription_id"/>
+                        </group>
+                    </group>
+                    <group string="Cancellation" invisible="state != 'cancelled'">
+                        <field name="cancellation_date"/>
+                        <field name="credit_returned"/>
+                    </group>
+                    <group string="Attendance"
+                           invisible="state not in ('attended', 'no_show')">
+                        <field name="marked_by_id"/>
+                        <field name="marked_date"/>
+                    </group>
+                    <!-- Manager-only: bypass the 24h booking lead-time window.
+                         Hidden from non-managers at the view layer and
+                         ignored server-side if set by a non-manager. -->
+                    <group string="Manager Options"
+                           groups="fitness_core.group_fitness_manager">
+                        <field name="manager_override_timewindow"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_fitness_booking_search" model="ir.ui.view">
+        <field name="name">fitness.booking.search</field>
+        <field name="model">fitness.booking</field>
+        <field name="arch" type="xml">
+            <search string="Search Bookings">
+                <field name="student_id"/>
+                <field name="calendar_event_id"/>
+                <field name="classroom_id"/>
+                <filter name="filter_booked"    string="Booked"
+                        domain="[('state', '=', 'booked')]"/>
+                <filter name="filter_attended"  string="Attended"
+                        domain="[('state', '=', 'attended')]"/>
+                <filter name="filter_no_show"   string="No-Show"
+                        domain="[('state', '=', 'no_show')]"/>
+                <filter name="filter_cancelled" string="Cancelled"
+                        domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="filter_credit_returned" string="Credit Returned"
+                        domain="[('credit_returned', '=', True)]"/>
+                <group>
+                    <filter name="group_classroom" string="Classroom"
+                            context="{'group_by': 'classroom_id'}"/>
+                    <filter name="group_state"     string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_student"   string="Student"
+                            context="{'group_by': 'student_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_fitness_booking" model="ir.actions.act_window">
+        <field name="name">Bookings</field>
+        <field name="res_model">fitness.booking</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_fitness_booking_search"/>
+        <field name="context">{'search_default_filter_booked': 1}</field>
+    </record>
+
+</odoo>

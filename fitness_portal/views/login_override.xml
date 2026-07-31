@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Replace the company logo block with the CoreLab lockup.
+        Page background, card radius/shadow, inputs, and button are
+        all styled via corelab.css using body.bg-100 selectors.
+    -->
+    <template id="mv_login_logo" name="CoreLab Login Logo"
+              inherit_id="web.login_layout">
+        <xpath expr="//div[hasclass('border-bottom') and hasclass('pb-3')]" position="replace">
+            <div class="mv-login-logo">
+                <img src="/corelab/logo" alt="CoreLab"/>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

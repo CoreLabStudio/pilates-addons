@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  BARRE PACKAGES                                                  -->
+        <!--  5-pack / 10-pack: 60 days (2 months, client-confirmed)          -->
+        <!--  Single / Trial / Privada: 90 days (single-use grace period)     -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="product_barre_trial" model="product.template">
+            <field name="name">Barre Trial Class</field>
+            <field name="type">service</field>
+            <field name="list_price">10.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_barre_single" model="product.template">
+            <field name="name">Barre Single Class</field>
+            <field name="type">service</field>
+            <field name="list_price">19.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_barre_5pack" model="product.template">
+            <field name="name">Barre 5-pack</field>
+            <field name="type">service</field>
+            <field name="list_price">90.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">5</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_barre_10pack" model="product.template">
+            <field name="name">Barre 10-pack</field>
+            <field name="type">service</field>
+            <field name="list_price">150.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">10</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <!-- Privadas: private 1-on-1 Barre class -->
+        <record id="product_barre_privada_single" model="product.template">
+            <field name="name">Barre Privada Single Class</field>
+            <field name="type">service</field>
+            <field name="list_price">35.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">private</field>
+        </record>
+
+        <!-- Discontinued Barre packs (replaced by 5-pack / 10-pack above) -->
+        <record id="product_barre_6pack" model="product.template">
+            <field name="name">Barre – 6-Class Pack (discontinued)</field>
+            <field name="type">service</field>
+            <field name="list_price">89.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">6</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+            <field name="active">0</field>
+        </record>
+
+        <record id="product_barre_16pack" model="product.template">
+            <field name="name">Barre – 16-Class Pack (discontinued)</field>
+            <field name="type">service</field>
+            <field name="list_price">178.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">16</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+            <field name="active">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  REFORMER GROUP PACKAGES                                        -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="product_reformer_trial" model="product.template">
+            <field name="name">Reformer Trial (Clase de prueba)</field>
+            <field name="type">service</field>
+            <field name="list_price">15.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">15</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_reformer_single" model="product.template">
+            <field name="name">Reformer Single (Una Clase)</field>
+            <field name="type">service</field>
+            <field name="list_price">25.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">15</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_reformer_intro3" model="product.template">
+            <field name="name">Reformer Intro Bono (3 Clases)</field>
+            <field name="type">service</field>
+            <field name="list_price">60.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">3</field>
+            <field name="fitness_validity_days">15</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_reformer_5pack" model="product.template">
+            <field name="name">Reformer Pack 5</field>
+            <field name="type">service</field>
+            <field name="list_price">120.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">5</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_reformer_10pack" model="product.template">
+            <field name="name">Reformer Pack 10</field>
+            <field name="type">service</field>
+            <field name="list_price">230.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">10</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <record id="product_reformer_15pack" model="product.template">
+            <field name="name">Reformer Pack 15</field>
+            <field name="type">service</field>
+            <field name="list_price">330.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">15</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+        </record>
+
+        <!-- Discontinued: removed entirely from the new catalog -->
+        <record id="product_reformer_20pack" model="product.template">
+            <field name="name">Reformer – Pack 20 Sessions (discontinued)</field>
+            <field name="type">service</field>
+            <field name="list_price">450.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">20</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+            <field name="active">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  REFORMER PRIVATE SESSIONS                                      -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="product_private_single" model="product.template">
+            <field name="name">Reformer Privado Single</field>
+            <field name="type">service</field>
+            <field name="list_price">50.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">14</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">private</field>
+        </record>
+
+        <record id="product_private_5pack" model="product.template">
+            <field name="name">Reformer Privado Pack 5</field>
+            <field name="type">service</field>
+            <field name="list_price">250.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">5</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">private</field>
+        </record>
+
+        <record id="product_private_10pack" model="product.template">
+            <field name="name">Reformer Privado Pack 10</field>
+            <field name="type">service</field>
+            <field name="list_price">450.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">10</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">private</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  REFORMER DUO SESSIONS                                          -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="product_duo_single" model="product.template">
+            <field name="name">Reformer Duo Single</field>
+            <field name="type">service</field>
+            <field name="list_price">80.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">1</field>
+            <field name="fitness_validity_days">15</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">duo</field>
+        </record>
+
+        <record id="product_duo_5pack" model="product.template">
+            <field name="name">Reformer Duo Pack 5</field>
+            <field name="type">service</field>
+            <field name="list_price">350.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">5</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">duo</field>
+        </record>
+
+        <record id="product_duo_10pack" model="product.template">
+            <field name="name">Reformer Duo Pack 10</field>
+            <field name="type">service</field>
+            <field name="list_price">600.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">10</field>
+            <field name="fitness_validity_days">60</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">duo</field>
+        </record>
+
+    </data>
+</odoo>

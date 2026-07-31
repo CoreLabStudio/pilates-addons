@@ -1,0 +1,29 @@
+{
+    'name': 'Fitness Core – Yoleyva Studio',
+    'version': '19.0.1.0.1',
+    'category': 'Services',
+    'summary': 'Core models for Yoleyva Pilates & Barre Studio',
+    'author': 'Yoleyva Studio',
+    'license': 'LGPL-3',
+    'depends': ['base', 'calendar'],
+    'data': [
+        'security/groups.xml',
+        'security/ir.model.access.csv',
+        'views/fitness_classroom_views.xml',
+        'views/fitness_class_type_views.xml',
+        'views/fitness_session_type_views.xml',
+        'views/calendar_event_views.xml',
+        'views/menu_views.xml',
+        'data/demo_classrooms.xml',
+        'data/demo_session_types.xml',
+    ],
+    'assets': {
+        'web.assets_frontend': [
+            'fitness_core/static/src/css/corelab.css',
+            'fitness_core/static/src/js/corelab.js',
+        ],
+    },
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+}

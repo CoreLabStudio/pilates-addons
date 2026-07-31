@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  BOOKING CONFIRMATION                                           -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="mail_template_booking_confirmation" model="mail.template">
+            <field name="name">Fitness: Booking Confirmation</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Booking Confirmed' if object.student_id.lang == 'en_US' else ('Reserva Confirmada' if object.student_id.lang == 'ca_ES' else 'Reserva Confirmada') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Your booking is confirmed:</p>
+    <ul>
+      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Teacher: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
+    </ul>
+    <t t-if="object.package_order_line_id">
+      <p>Credits remaining on your package: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+    </t>
+    <t t-elif="object.subscription_id">
+      <t t-if="object.subscription_id.fitness_is_unlimited">
+        <p>Your subscription is unlimited.</p>
+      </t>
+      <t t-else="">
+        <p>Classes used this period: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+      </t>
+    </t>
+    <p>See you soon!</p>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>La teva reserva està confirmada:</p>
+    <ul>
+      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Professor/a: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
+    </ul>
+    <t t-if="object.package_order_line_id">
+      <p>Crèdits restants del teu paquet: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+    </t>
+    <t t-elif="object.subscription_id">
+      <t t-if="object.subscription_id.fitness_is_unlimited">
+        <p>La teva subscripció és il·limitada.</p>
+      </t>
+      <t t-else="">
+        <p>Classes utilitzades aquest període: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+      </t>
+    </t>
+    <p>Ens veiem aviat!</p>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Tu reserva está confirmada:</p>
+    <ul>
+      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Profesor/a: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
+    </ul>
+    <t t-if="object.package_order_line_id">
+      <p>Créditos restantes en tu paquete: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+    </t>
+    <t t-elif="object.subscription_id">
+      <t t-if="object.subscription_id.fitness_is_unlimited">
+        <p>Tu suscripción es ilimitada.</p>
+      </t>
+      <t t-else="">
+        <p>Clases usadas este periodo: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+      </t>
+    </t>
+    <p>¡Nos vemos pronto!</p>
+  </t>
+</div>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  CANCELLATION                                                   -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="mail_template_booking_cancellation" model="mail.template">
+            <field name="name">Fitness: Booking Cancellation</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Booking Cancelled' if object.student_id.lang == 'en_US' else ('Reserva Cancel·lada' if object.student_id.lang == 'ca_ES' else 'Reserva Cancelada') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Your booking has been cancelled:</p>
+    <ul>
+      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <t t-if="object.credit_returned">
+      <p>Your credit has been returned (cancelled more than 2 hours before the class).</p>
+    </t>
+    <t t-else="">
+      <p>No credit was returned (cancelled less than 2 hours before the class).</p>
+    </t>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>La teva reserva ha estat cancel·lada:</p>
+    <ul>
+      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <t t-if="object.credit_returned">
+      <p>El teu crèdit s'ha retornat (cancel·lat amb més de 2 hores d'antelació).</p>
+    </t>
+    <t t-else="">
+      <p>No s'ha retornat el crèdit (cancel·lat amb menys de 2 hores d'antelació).</p>
+    </t>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Tu reserva ha sido cancelada:</p>
+    <ul>
+      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <t t-if="object.credit_returned">
+      <p>Tu crédito ha sido devuelto (cancelado con más de 2 horas de antelación).</p>
+    </t>
+    <t t-else="">
+      <p>No se ha devuelto el crédito (cancelado con menos de 2 horas de antelación).</p>
+    </t>
+  </t>
+</div>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  CLASS REMINDER                                                 -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="mail_template_class_reminder" model="mail.template">
+            <field name="name">Fitness: Class Reminder</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Class Reminder' if object.student_id.lang == 'en_US' else ('Recordatori de Classe' if object.student_id.lang == 'ca_ES' else 'Recordatorio de Clase') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Reminder — you have an upcoming class:</p>
+    <ul>
+      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <p>See you there!</p>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Recordatori — tens una classe properament:</p>
+    <ul>
+      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <p>Ens veiem allà!</p>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Recordatorio — tienes una clase próximamente:</p>
+    <ul>
+      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+    </ul>
+    <p>¡Nos vemos allí!</p>
+  </t>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,18 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fitness_classroom_system,fitness.classroom system,model_fitness_classroom,base.group_system,1,1,1,1
+access_fitness_classroom_manager,fitness.classroom manager,model_fitness_classroom,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_classroom_teacher,fitness.classroom teacher,model_fitness_classroom,fitness_core.group_fitness_teacher,1,0,0,0
+access_fitness_classroom_user,fitness.classroom user,model_fitness_classroom,base.group_user,1,0,0,0
+access_fitness_classroom_portal,fitness.classroom portal,model_fitness_classroom,base.group_portal,1,0,0,0
+access_fitness_classroom_public,fitness.classroom public,model_fitness_classroom,base.group_public,1,0,0,0
+access_fitness_class_type_system,fitness.class.type system,model_fitness_class_type,base.group_system,1,1,1,1
+access_fitness_class_type_manager,fitness.class.type manager,model_fitness_class_type,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_class_type_teacher,fitness.class.type teacher,model_fitness_class_type,fitness_core.group_fitness_teacher,1,0,0,0
+access_fitness_class_type_user,fitness.class.type user,model_fitness_class_type,base.group_user,1,0,0,0
+access_fitness_class_type_portal,fitness.class.type portal,model_fitness_class_type,base.group_portal,1,0,0,0
+access_fitness_class_type_public,fitness.class.type public,model_fitness_class_type,base.group_public,1,0,0,0
+access_fitness_session_type_system,fitness.session.type system,model_fitness_session_type,base.group_system,1,1,1,1
+access_fitness_session_type_manager,fitness.session.type manager,model_fitness_session_type,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_session_type_user,fitness.session.type user,model_fitness_session_type,base.group_user,1,0,0,0
+access_fitness_session_type_portal,fitness.session.type portal,model_fitness_session_type,base.group_portal,1,0,0,0
+access_fitness_session_type_public,fitness.session.type public,model_fitness_session_type,base.group_public,1,0,0,0

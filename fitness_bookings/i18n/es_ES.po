@@ -1,0 +1,20 @@
+# Spanish (Spain) translations for fitness_bookings
+# Copyright (C) Yoleyva Pilates
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-09 00:00+0000\n"
+"PO-Revision-Date: 2026-07-09 00:00+0000\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: fitness_bookings
+#: model:ir.ui.menu,name:fitness_bookings.menu_fitness_bookings
+#: model:ir.actions.act_window,name:fitness_bookings.action_fitness_booking
+msgid "Bookings"
+msgstr "Reservas"

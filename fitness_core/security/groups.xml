@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Fitness Studio Manager: full back-office access -->
+        <record id="group_fitness_manager" model="res.groups">
+            <field name="name">Fitness Studio Manager</field>
+        </record>
+
+        <!-- Fitness Teacher: portal-level with attendance access -->
+        <record id="group_fitness_teacher" model="res.groups">
+            <field name="name">Fitness Studio Teacher</field>
+        </record>
+
+        <!-- Fitness Student: portal users who can browse and book classes -->
+        <record id="group_fitness_student" model="res.groups">
+            <field name="name">Fitness Studio Student</field>
+        </record>
+
+    </data>
+</odoo>

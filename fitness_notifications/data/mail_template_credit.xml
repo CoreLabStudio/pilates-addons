@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="mail_template_credit_expiring" model="mail.template">
+            <field name="name">Fitness: Credits Expiring Soon</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Your credits are expiring soon' if object.student_id.lang == 'en_US' else ('Els teus crèdits caduquen aviat' if object.student_id.lang == 'ca_ES' else 'Tus créditos caducan pronto') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>A reminder that you have credits on your pack that are expiring soon. Log in to book your remaining classes before they expire.</p>
+    <p>The m&#333;va team</p>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Et recordem que tens cr&#232;dits al teu paquet que caduca aviat. Inicia sessi&#243; per reservar les teves classes restants abans que vencin.</p>
+    <p>L'equip de m&#333;va</p>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Te recordamos que tienes cr&#233;ditos en tu paquete que caducan pronto. Inicia sesi&#243;n para reservar tus clases restantes antes de que venzan.</p>
+    <p>El equipo de m&#333;va</p>
+  </t>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

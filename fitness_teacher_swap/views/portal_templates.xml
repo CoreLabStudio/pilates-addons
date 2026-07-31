@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Teacher class list ────────────────────────────────────────────── -->
+    <template id="portal_my_classes" name="My Classes (Teacher)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_teacher_page_header"/>
+
+                <!-- Greeting -->
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">My Classes</p>
+                        <p class="mv-greeting-sub" t-out="window_subtitle"/>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <t t-if="error or success">
+                    <div class="mv-flashes">
+                        <t t-if="error">
+                            <div class="mv-flash mv-flash-err" t-out="error"/>
+                        </t>
+                        <t t-if="success">
+                            <div class="mv-flash mv-flash-ok" t-out="success"/>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Class list -->
+                <t t-if="not events_ctx">
+                    <div class="mv-empty">No classes in this window.</div>
+                </t>
+                <t t-else="">
+                    <div class="mv-class-list">
+                        <t t-foreach="events_ctx" t-as="ctx">
+                            <t t-set="event" t-value="ctx['event']"/>
+                            <div class="mv-class-row">
+                                <div style="flex:1;min-width:0;">
+                                    <p class="mv-class-row-name" t-out="event.name"/>
+                                    <p class="mv-class-row-sub">
+                                        <t t-out="ctx['local_start']"/>
+                                        <t t-if="event.classroom_id">
+                                            · <t t-out="event.classroom_id.name"/>
+                                        </t>
+                                    </p>
+                                    <p class="mv-class-row-sub">
+                                        <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                                    </p>
+                                    <!-- Reassign form (secondary action) -->
+                                    <t t-if="other_teachers">
+                                        <form t-attf-action="/my/teacher/classes/#{event.id}/reassign"
+                                              method="post"
+                                              class="mv-reassign-form"
+                                              style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+                                            <input type="hidden" name="csrf_token"
+                                                   t-att-value="request.csrf_token()"/>
+                                            <select name="new_teacher_id"
+                                                    style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
+                                                    required="required">
+                                                <option value="">Reassign to…</option>
+                                                <t t-foreach="other_teachers" t-as="teacher">
+                                                    <option t-att-value="teacher.id"
+                                                            t-out="teacher.name"/>
+                                                </t>
+                                            </select>
+                                            <button type="submit"
+                                                    style="font-size:0.72rem;padding:5px 12px;border:1px solid var(--mv-border);border-radius:999px;background:var(--mv-bg);color:var(--mv-muted);cursor:pointer;white-space:nowrap;">Reassign</button>
+                                        </form>
+                                    </t>
+                                </div>
+                                <div class="mv-class-row-right">
+                                    <a t-attf-href="/my/teacher/classes/#{event.id}"
+                                       class="mv-roster-link">Roster →</a>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Class roster ───────────────────────────────────────────────────── -->
+    <template id="portal_teacher_roster" name="Class Roster (Teacher)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_teacher_page_header"/>
+
+                <t t-set="_back_url" t-value="'/my/teacher/classes'"/>
+                <t t-set="_back_label">Classes</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <!-- Alerts -->
+                <t t-if="error or success or marked">
+                    <div class="mv-flashes">
+                        <t t-if="error">
+                            <div class="mv-flash mv-flash-err" t-out="error"/>
+                        </t>
+                        <t t-if="marked or success">
+                            <div class="mv-flash mv-flash-ok">
+                                <t t-if="marked">Attendance marked.</t>
+                                <t t-elif="success" t-out="success"/>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <div class="mv-roster-wrap">
+                    <!-- Class info card -->
+                    <div class="mv-roster-header">
+                        <p class="mv-roster-title" t-out="event.name"/>
+                        <p class="mv-roster-sub">
+                            <t t-out="local_start"/>
+                            <t t-if="event.classroom_id">
+                                · <t t-out="event.classroom_id.name"/>
+                            </t>
+                            <t t-if="event.class_type_id">
+                                · <t t-out="event.class_type_id.name"/>
+                            </t>
+                        </p>
+                        <span class="mv-roster-pill">
+                            <t t-out="len(bookings)"/> /
+                            <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                        </span>
+                        <t t-if="not class_started">
+                            <div class="mv-roster-pill" style="margin-left:6px;">Attendance opens at class start</div>
+                        </t>
+                    </div>
+
+                    <!-- Student list -->
+                    <t t-if="not bookings">
+                        <div class="mv-empty">No students booked into this class.</div>
+                    </t>
+                    <t t-else="">
+                        <div class="mv-student-list">
+                            <t t-foreach="bookings" t-as="booking">
+                                <div class="mv-student-card">
+                                    <p class="mv-student-name" t-out="booking.student_id.name"/>
+                                    <div class="mv-student-status-wrap">
+                                        <t t-if="booking.state == 'booked'">
+                                            <t t-if="class_started">
+                                                <form t-attf-action="/my/teacher/classes/#{event.id}/mark"
+                                                      method="post" style="display:contents;">
+                                                    <input type="hidden" name="csrf_token"
+                                                           t-att-value="request.csrf_token()"/>
+                                                    <input type="hidden" name="booking_id"
+                                                           t-att-value="booking.id"/>
+                                                    <input type="hidden" name="action" value="attended"/>
+                                                    <button type="submit" class="mv-btn-attend">Attended</button>
+                                                </form>
+                                                <form t-attf-action="/my/teacher/classes/#{event.id}/mark"
+                                                      method="post" style="display:contents;">
+                                                    <input type="hidden" name="csrf_token"
+                                                           t-att-value="request.csrf_token()"/>
+                                                    <input type="hidden" name="booking_id"
+                                                           t-att-value="booking.id"/>
+                                                    <input type="hidden" name="action" value="no_show"/>
+                                                    <button type="submit" class="mv-btn-noshow">No-show</button>
+                                                </form>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="mv-not-started">Not yet started</div>
+                                            </t>
+                                        </t>
+                                        <t t-elif="booking.state == 'attended'">
+                                            <div class="mv-badge mv-badge-attended">Attended</div>
+                                        </t>
+                                        <t t-elif="booking.state == 'no_show'">
+                                            <div class="mv-badge mv-badge-noshow">No-show</div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Portal home card: visible only to teachers ────────────────────── -->
+    <template id="portal_my_home_teacher_link" name="My Classes link on portal home"
+              inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="title">My Classes</t>
+                    <t t-set="text">View rosters and reassign your upcoming classes</t>
+                    <t t-set="url" t-value="'/my/teacher/classes'"/>
+                    <t t-set="config_card" t-value="True"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ── Teacher classes history ──────────────────────────────────────────── -->
+    <template id="portal_teacher_history" name="Classes History (Teacher)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_teacher_page_header"/>
+
+                <!-- Sub-page of Profile: always offer a way back -->
+                <t t-set="_back_url" t-value="'/my'"/>
+                <t t-set="_back_label">Profile</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <!-- Greeting -->
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Classes History</p>
+                        <p class="mv-greeting-sub">Past classes you have taught</p>
+                    </div>
+                </div>
+
+                <!-- Class list -->
+                <t t-if="not month_groups">
+                    <div class="mv-empty">No past classes recorded yet.</div>
+                </t>
+                <t t-else="">
+                    <div class="mv-history-months">
+                        <t t-foreach="month_groups" t-as="mgroup">
+                            <details class="mv-month-group"
+                                     t-att-open="'open' if mgroup_index == 0 else False">
+                                <summary>
+                                    <span class="mv-month-label" t-out="mgroup['label']"/>
+                                    <span class="mv-month-count" t-out="len(mgroup['entries'])"/>
+                                    <svg class="mv-month-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                                        <polyline points="9 18 15 12 9 6" stroke-width="2"
+                                                  stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </summary>
+                                <div class="mv-month-entries">
+                                    <t t-foreach="mgroup['entries']" t-as="ctx">
+                                        <t t-set="ev" t-value="ctx['event']"/>
+                                        <div t-att-class="'mv-history-card' + (' mv-hist-hidden' if ctx_index >= 10 else '')">
+                                            <div class="mv-history-info">
+                                                <p class="mv-history-name" t-out="ev.name"/>
+                                                <p class="mv-history-meta">
+                                                    <t t-out="ctx['local_start']"/>
+                                                    <t t-if="ev.classroom_id">
+                                                        · <t t-out="ev.classroom_id.name"/>
+                                                    </t>
+                                                </p>
+                                            </div>
+                                            <div style="text-align:right;flex-shrink:0;">
+                                                <span class="mv-badge mv-badge-attended"
+                                                      t-out="'%d / %d' % (ctx['attended'], ctx['total'])"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                    <t t-if="len(mgroup['entries']) > 10">
+                                        <button class="mv-load-more-btn" type="button">Show more</button>
+                                    </t>
+                                </div>
+                            </details>
+                        </t>
+                    </div>
+                    <script>
+                    document.querySelectorAll('.mv-load-more-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            this.closest('.mv-month-entries').querySelectorAll('.mv-hist-hidden').forEach(function(c) { c.classList.remove('mv-hist-hidden'); });
+                            this.remove();
+                        });
+                    });
+                    </script>
+                </t>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+</odoo>

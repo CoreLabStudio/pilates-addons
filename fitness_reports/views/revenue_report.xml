@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         REVENUE REPORT — sale.order (confirmed only)
+         Revenue = amount_untaxed (base imponible, ex-IVA).
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- LIST ─────────────────────────────────────────────────── -->
+    <record id="view_sale_order_revenue_list" model="ir.ui.view">
+        <field name="name">sale.order.revenue.report.list</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" default_order="date_order desc">
+                <field name="name"             string="Pedido"/>
+                <field name="partner_id"       string="Student"/>
+                <field name="date_order"       string="Fecha"/>
+                <field name="revenue_type"     string="Tipo"/>
+                <field name="is_subscription"  string="Suscripcion" optional="hide"/>
+                <field name="fitness_is_package" string="Pack"      optional="hide"/>
+                <field name="currency_id"      groups="base.group_multi_currency" optional="show"/>
+                <field name="amount_untaxed"   string="Base imponible" sum="Total base"/>
+                <field name="amount_total"     string="Total (IVA incl.)" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- PIVOT ────────────────────────────────────────────────── -->
+    <record id="view_sale_order_revenue_pivot" model="ir.ui.view">
+        <field name="name">sale.order.revenue.report.pivot</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Ingresos">
+                <field name="date_order"      type="row" interval="month"/>
+                <field name="partner_id"      type="row"/>
+                <field name="revenue_type"    type="col"/>
+                <field name="amount_untaxed"  type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH ────────────────────────────────────────────────── -->
+    <record id="view_sale_order_revenue_graph" model="ir.ui.view">
+        <field name="name">sale.order.revenue.report.graph</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <graph string="Ingresos por mes" type="bar">
+                <field name="date_order"      type="row" interval="month"/>
+                <field name="revenue_type"    type="col"/>
+                <field name="amount_untaxed"  type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH ───────────────────────────────────────────────── -->
+    <record id="view_sale_order_revenue_search" model="ir.ui.view">
+        <field name="name">sale.order.revenue.report.search</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <search string="Buscar ingresos">
+                <field name="partner_id"/>
+                <field name="name"/>
+                <separator/>
+                <!-- B5: date range chips -->
+                <filter name="filter_this_month"
+                        string="Este mes"
+                        domain="[('date_order','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('date_order','&lt;',  (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_last_month"
+                        string="Mes anterior"
+                        domain="[('date_order','&gt;=', (context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')),
+                                 ('date_order','&lt;',  (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_year"
+                        string="Este año"
+                        domain="[('date_order','&gt;=', context_today().strftime('%Y-01-01')),
+                                 ('date_order','&lt;',  (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="filter_subscriptions"
+                        string="Suscripciones"
+                        domain="[('is_subscription','=',True)]"/>
+                <filter name="filter_packages"
+                        string="Packs de clases"
+                        domain="[('fitness_is_package','=',True)]"/>
+                <separator/>
+                <group>
+                    <filter name="group_partner"
+                            string="Student"
+                            context="{'group_by':'partner_id'}"/>
+                    <filter name="group_month"
+                            string="Mes"
+                            context="{'group_by':'date_order:month'}"/>
+                    <filter name="group_revenue_type"
+                            string="Tipo (suscripcion / pack / clase)"
+                            context="{'group_by':'revenue_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION ───────────────────────────────────────────────── -->
+    <record id="action_sale_order_report" model="ir.actions.act_window">
+        <field name="name">Revenue</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('state','=','sale')]</field>
+        <field name="search_view_id" ref="view_sale_order_revenue_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_sale_order_revenue_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_sale_order_revenue_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_sale_order_revenue_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay pedidos confirmados.
+            </p>
+        </field>
+    </record>
+
+</odoo>

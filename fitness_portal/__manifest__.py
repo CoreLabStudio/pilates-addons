@@ -1,0 +1,27 @@
+{
+    'name': 'CoreLab Student Portal – Yoleyva Studio',
+    'version': '19.0.1.1.0',
+    'category': 'Services',
+    'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
+    'author': 'Yoleyva Studio',
+    'license': 'LGPL-3',
+    'depends': [
+        'web',
+        'portal',
+        'sale',
+        'fitness_core',
+        'fitness_bookings',
+        'fitness_packages',
+        'fitness_subscriptions',
+        'fitness_notifications',
+    ],
+    'data': [
+        'security/ir.rule.xml',
+        'views/portal_templates.xml',
+        'views/portal_shell_override.xml',
+        'views/login_override.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}

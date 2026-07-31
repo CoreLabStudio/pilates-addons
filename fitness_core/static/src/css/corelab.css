@@ -1,0 +1,2152 @@
+/* =============================================================
+   CoreLab Design System
+   Background: Feather White #FAF9F6
+   Accent:     Heather      #9ABACD
+   Ink:        Paco         #50423D
+   Sage:       #8FA394 (success / completed states)
+   Fonts: Fraunces (serif) · Inter (sans)  — loaded via template
+
+   NOTE: the `mv-` class prefix is kept deliberately. It is an internal
+   namespace token, not a user-facing brand string; renaming ~200 call
+   sites across three XML files and the JS would be churn with no
+   visible benefit. All user-visible brand strings say "CoreLab".
+   ============================================================= */
+
+/* ── 1. Tokens ─────────────────────────────────────────────── */
+:root {
+  --mv-bg:          #FAF9F6;
+  --mv-accent:      #9ABACD;
+  --mv-ink:         #50423D;
+  --mv-muted:       #7D6E68;
+  --mv-muted2:      #A09088;
+  --mv-ok-bg:       #E6EDEA;
+  --mv-ok-ink:      #5E8C7A;
+  --mv-sage:        #8FA394;
+  --mv-warn-bg:     #F5EDE9;
+  --mv-warn-ink:    #9B5A50;
+  --mv-card-bg:     #FFFFFF;
+  --mv-border:      #EAE4DC;
+  --mv-barre-card:  #D0C6C2;
+  --mv-reform-card: #C2CCCA;
+  --mv-fall-card:   #C8C2BA;
+  --mv-app-max:     860px;
+  --mv-r:           14px;
+  --mv-r-sm:        8px;
+  --mv-t-fast:      100ms ease;
+  --mv-t-mid:       200ms ease;
+}
+
+/* ── 2. CSS View Transitions (Chrome 126 +, Safari 18 +) ───── */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) {
+  animation: mv-vt-out 180ms ease forwards;
+}
+::view-transition-new(root) {
+  animation: mv-vt-in 230ms ease forwards;
+}
+@keyframes mv-vt-out {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes mv-vt-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+/* ── 3. CoreLab page shell — hides Odoo header/footer ─────────── */
+body:has(.mv-app) {
+  background: var(--mv-bg) !important;
+}
+body:has(.mv-app) #wrapwrap > header#top,
+body:has(.mv-app) #wrapwrap > footer#bottom {
+  display: none !important;
+}
+body:has(.mv-app) #wrapwrap > main {
+  padding: 0 !important;
+}
+
+.mv-app {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--mv-ink);
+  background: var(--mv-bg);
+  min-height: 100svh;
+  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  -webkit-tap-highlight-color: transparent;
+  /* This is a phone-first layout. Without a cap it stretches edge-to-edge on
+     a laptop or an external monitor and stops reading as an app. */
+  max-width: var(--mv-app-max);
+  margin-inline: auto;
+}
+
+/* Nothing inside the app may push the page sideways. */
+.mv-app img,
+.mv-app svg,
+.mv-app canvas { max-width: 100%; }
+
+/* ── 4. CoreLab header ────────────────────────────────────────── */
+.mv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 8px;
+}
+
+/* CoreLab lockup in the app header. The <img> is served by /corelab/logo,
+   which prefers corelab-logo.png when the studio supplies one and falls
+   back to the bundled SVG. */
+.mv-wordmark {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-wordmark img {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
+.mv-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--mv-accent);
+  color: var(--mv-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+/* "Change photo" control on the Profile Hub */
+.mv-photo-upload-btn {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mv-muted);
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
+}
+.mv-photo-upload-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+
+/* ── 5. Curved-line divider (SVG inline) ────────────────────── */
+.mv-curve {
+  display: block;
+  margin: 2px 20px 14px;
+  overflow: visible;
+}
+
+/* ── 6. Greeting + credits row ──────────────────────────────── */
+.mv-greeting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 20px 20px;
+  gap: 12px;
+}
+
+.mv-greeting-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+  line-height: 1.1;
+}
+.mv-greeting-sub {
+  font-size: 0.76rem;
+  color: var(--mv-muted);
+  margin: 3px 0 0;
+}
+
+/* ── 6. Credit badge ─────────────────────────────────────────── */
+.mv-credit-badge { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; text-align: center; }
+/* Rendered from a single value built in Python (e.g. "7 / 10") so the markup
+   holds no translatable fragments. */
+.mv-credit-count { font-family: 'Fraunces', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink); line-height: 1; }
+.mv-credit-label { font-size: 0.68rem; color: var(--mv-muted2); letter-spacing: 0.01em; margin-top: 2px; }
+
+/* ── 7. Section / day labels ────────────────────────────────── */
+.mv-section-label {
+  display: block;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  padding: 0 20px;
+  margin: 0 0 10px;
+}
+.mv-day-group { margin-bottom: 22px; }
+
+/* ── 8. Card grid ───────────────────────────────────────────── */
+.mv-cards {
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 600px)  { .mv-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px)  { .mv-cards { grid-template-columns: repeat(3, 1fr); } }
+
+/* ── 8a. Class card ─────────────────────────────────────────── */
+.mv-class-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  cursor: pointer;
+  transition: transform var(--mv-t-fast), box-shadow var(--mv-t-fast);
+  will-change: transform;
+  animation: mv-card-rise 320ms ease both;
+}
+.mv-class-card:nth-child(1) { animation-delay:   0ms; }
+.mv-class-card:nth-child(2) { animation-delay:  45ms; }
+.mv-class-card:nth-child(3) { animation-delay:  90ms; }
+.mv-class-card:nth-child(4) { animation-delay: 135ms; }
+.mv-class-card:nth-child(5) { animation-delay: 180ms; }
+.mv-class-card:nth-child(6) { animation-delay: 225ms; }
+.mv-class-card:nth-child(7) { animation-delay: 270ms; }
+.mv-class-card:nth-child(8) { animation-delay: 315ms; }
+
+@keyframes mv-card-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mv-class-card:active {
+  transform: scale(0.968);
+  box-shadow: 0 0 2px rgba(80,66,61,0.07);
+}
+
+/* ── 8b. Card image area ────────────────────────────────────── */
+.mv-card-img {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+}
+.mv-card-photo {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.mv-card-fallback {
+  width: 100%; height: 100%;
+  background: var(--mv-fall-card);
+}
+.mv-card-fallback::after {
+  content: '';
+  display: block;
+  width: 100%; height: 100%;
+  background-image: repeating-linear-gradient(
+    45deg, transparent, transparent 5px,
+    rgba(255,255,255,0.16) 5px, rgba(255,255,255,0.16) 6px
+  );
+}
+.mv-card-fallback.mv-barre   { background: var(--mv-barre-card); }
+.mv-card-fallback.mv-reform  { background: var(--mv-reform-card); }
+
+/* Overlaid pills (tag + time) */
+.mv-card-tag, .mv-card-time {
+  position: absolute;
+  top: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(250,249,246,0.84);
+  color: var(--mv-ink);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.mv-card-tag  { left: 10px; }
+.mv-card-time { right: 10px; }
+
+/* ── 8c. Card body ──────────────────────────────────────────── */
+.mv-card-body {
+  padding: 12px 14px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mv-class-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+  text-decoration: none !important;
+  display: block;
+  text-transform: capitalize;
+}
+.mv-class-meta {
+  font-size: 0.77rem;
+  color: var(--mv-muted);
+  margin: 0;
+}
+.mv-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 8px;
+}
+.mv-card-full { font-size: 0.75rem; color: var(--mv-muted2); }
+
+/* Book button (pill, on card) */
+.mv-btn-book {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mv-ink);
+  background: var(--mv-accent);
+  border: none;
+  border-radius: 999px;
+  padding: 7px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  line-height: 1;
+}
+.mv-btn-book:active  { transform: scale(0.94); opacity: 0.84; }
+.mv-btn-book:hover   { opacity: 0.9; }
+
+/* ── 9. Upcoming bookings ───────────────────────────────────── */
+.mv-upcoming-list {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mv-upcoming-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  border-left: 3px solid var(--mv-ok-ink);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  animation: mv-card-rise 280ms ease both;
+}
+.mv-upcoming-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0 0 2px;
+}
+.mv-upcoming-meta {
+  font-size: 0.75rem;
+  color: var(--mv-muted);
+  margin: 0;
+}
+.mv-badge-confirmed {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mv-ok-ink);
+  background: var(--mv-ok-bg);
+  border-radius: 999px;
+  padding: 4px 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Cancel link in upcoming */
+.mv-cancel-btn {
+  font-size: 0.72rem;
+  color: var(--mv-muted2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color var(--mv-t-fast);
+}
+.mv-cancel-btn:active { color: var(--mv-warn-ink); }
+
+/* ── 10. Flash banners ──────────────────────────────────────── */
+.mv-flashes {
+  padding: 0 16px;
+  margin-bottom: 4px;
+}
+.mv-flash {
+  padding: 12px 16px;
+  border-radius: var(--mv-r-sm);
+  font-size: 0.84rem;
+  margin-bottom: 8px;
+  animation: mv-flash-pop 360ms cubic-bezier(0.175,0.885,0.32,1.275) both;
+}
+@keyframes mv-flash-pop {
+  from { opacity:0; transform:scale(0.93) translateY(-6px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.mv-flash-ok   { background:var(--mv-ok-bg);   color:var(--mv-ok-ink); }
+.mv-flash-err  { background:var(--mv-warn-bg); color:var(--mv-warn-ink); }
+.mv-flash-info { background:#EEF4F8; color:#3E6A82; }
+.mv-flash strong { font-weight:700; }
+
+/* No-subscription callout */
+.mv-callout {
+  margin: 0 16px;
+  padding: 16px;
+  border-radius: var(--mv-r-sm);
+  background: #EEF4F8;
+  color: #3E6A82;
+  font-size: 0.84rem;
+}
+
+/* ── 11. Class detail page ──────────────────────────────────── */
+.mv-detail-img {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: var(--mv-fall-card);
+}
+.mv-detail-img .mv-card-photo { height: 200px; }
+.mv-detail-img .mv-card-fallback { height: 200px; }
+.mv-detail-back {
+  position: absolute;
+  top: 16px; left: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(250,249,246,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--mv-ink);
+  font-size: 1rem;
+  transition: transform var(--mv-t-fast);
+  border: none;
+  cursor: pointer;
+}
+.mv-detail-back:active { transform: scale(0.9); }
+
+.mv-detail-body {
+  padding: 20px 20px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mv-detail-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+  line-height: 1.15;
+}
+.mv-detail-meta {
+  font-size: 0.8rem;
+  color: var(--mv-muted);
+  margin: 0;
+}
+.mv-detail-desc {
+  font-size: 0.91rem;
+  line-height: 1.72;
+  color: var(--mv-ink);
+  margin: 0;
+  white-space: pre-line;
+}
+.mv-teacher-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--mv-border);
+}
+.mv-teacher-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--mv-accent);
+  color: var(--mv-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.mv-teacher-name {
+  font-size: 0.9rem;
+  color: var(--mv-ink);
+  font-weight: 500;
+  margin: 0 0 1px;
+}
+.mv-teacher-seats { font-size:0.75rem; color:var(--mv-muted); margin:0; }
+
+/* Book / already-booked (full-width) */
+.mv-btn-book-lg {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--mv-ink);
+  background: var(--mv-accent);
+  border: none;
+  border-radius: var(--mv-r);
+  padding: 15px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  margin-top: 8px;
+  letter-spacing: 0.01em;
+}
+.mv-btn-book-lg:active { transform:scale(0.97); opacity:0.86; }
+
+.mv-already-booked {
+  display: block;
+  width: 100%;
+  border-radius: var(--mv-r);
+  padding: 15px;
+  text-align: center;
+  background: var(--mv-ok-bg);
+  color: var(--mv-ok-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.mv-class-full {
+  display:block; width:100%; border-radius:var(--mv-r);
+  padding:15px; text-align:center;
+  background:#F0ECE8; color:var(--mv-muted);
+  font-size:0.9rem; margin-top:8px;
+}
+
+/* ── 12. History page ───────────────────────────────────────── */
+.mv-history-list {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mv-history-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  animation: mv-card-rise 280ms ease both;
+}
+.mv-history-card:nth-child(1) { animation-delay:  0ms; }
+.mv-history-card:nth-child(2) { animation-delay: 30ms; }
+.mv-history-card:nth-child(3) { animation-delay: 60ms; }
+.mv-history-card:nth-child(4) { animation-delay: 90ms; }
+.mv-history-card:nth-child(5) { animation-delay:120ms; }
+.mv-history-card:nth-child(6) { animation-delay:150ms; }
+.mv-history-card:nth-child(7) { animation-delay:180ms; }
+.mv-history-card:nth-child(8) { animation-delay:210ms; }
+
+.mv-history-info { flex:1; min-width:0; }
+.mv-history-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size:0.93rem; font-weight:400;
+  color:var(--mv-ink); margin:0 0 2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.mv-history-meta { font-size:0.74rem; color:var(--mv-muted); margin:0; }
+
+/* State badges */
+.mv-badge {
+  font-size:0.63rem; font-weight:700;
+  letter-spacing:0.04em; text-transform:uppercase;
+  border-radius:999px; padding:3px 10px;
+  white-space:nowrap; flex-shrink:0;
+}
+.mv-badge-attended  { background:var(--mv-ok-bg);  color:var(--mv-ok-ink); }
+.mv-badge-cancelled { background:#EEE9E3; color:var(--mv-muted); }
+.mv-badge-noshow    { background:#F5EAE8; color:#9B5A52; }
+.mv-badge-unmarked  { background:#EEE9E3; color:var(--mv-muted2); }
+.mv-badge-credit    { font-size:0.63rem; color:var(--mv-ok-ink); display:block; margin-top:2px; }
+
+/* Subscriptions / packs section */
+.mv-pack-section { padding:0 16px; }
+.mv-pack-card {
+  background:var(--mv-card-bg); border-radius:var(--mv-r-sm);
+  padding:14px 16px; margin-bottom:10px;
+  box-shadow:0 1px 3px rgba(80,66,61,0.05);
+}
+.mv-pack-name {
+  font-family:'Fraunces',Georgia,serif; font-size:0.95rem;
+  color:var(--mv-ink); margin:0 0 8px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.mv-pack-meta {
+  font-size:0.75rem; color:var(--mv-muted);
+  display:flex; flex-wrap:wrap; gap:12px;
+}
+.mv-pack-meta span strong { color:var(--mv-ink); font-weight:600; display:block; }
+
+/* ── 13. Bottom navigation ──────────────────────────────────── */
+.mv-bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  /* Stays centred under the capped app shell on wide screens. */
+  max-width: var(--mv-app-max);
+  margin-inline: auto;
+  height: 68px;
+  background: var(--mv-card-bg);
+  border-top: 1px solid var(--mv-border);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.mv-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none !important;
+  color: var(--mv-muted2);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: color var(--mv-t-fast);
+  border: none; background: none; cursor: pointer; padding: 0;
+}
+.mv-nav-tab svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; stroke-width: 1.6;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+  transition: stroke var(--mv-t-fast);
+}
+.mv-nav-tab.mv-active { color: var(--mv-accent); }
+.mv-nav-tab:active    { opacity: 0.65; }
+
+/* ── 14. Teacher roster ─────────────────────────────────────── */
+.mv-roster-wrap { padding: 0 16px 32px; }
+
+.mv-roster-header {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(80,66,61,0.07);
+}
+.mv-roster-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.2rem; font-weight: 400;
+  color: var(--mv-ink); margin: 0 0 4px;
+}
+.mv-roster-sub  { font-size:0.8rem; color:var(--mv-muted); margin:0; }
+.mv-roster-pill {
+  display:inline-block; margin-top:10px;
+  font-size:0.68rem; font-weight:700;
+  letter-spacing:0.05em; text-transform:uppercase;
+  color:var(--mv-muted); background:var(--mv-bg);
+  border-radius:999px; padding:3px 11px;
+}
+
+.mv-student-list { display:flex; flex-direction:column; gap:10px; }
+.mv-student-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  animation: mv-card-rise 250ms ease both;
+}
+.mv-student-card:nth-child(1) { animation-delay:  0ms; }
+.mv-student-card:nth-child(2) { animation-delay: 35ms; }
+.mv-student-card:nth-child(3) { animation-delay: 70ms; }
+.mv-student-card:nth-child(4) { animation-delay:105ms; }
+.mv-student-card:nth-child(5) { animation-delay:140ms; }
+
+.mv-student-name { flex:1; font-size:0.92rem; color:var(--mv-ink); font-weight:500; margin:0; }
+.mv-student-status-wrap {
+  display:flex; align-items:center; gap:10px;
+}
+
+.mv-btn-attend, .mv-btn-noshow {
+  font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700;
+  border:none; border-radius:999px; padding:6px 15px; cursor:pointer;
+  transition:transform var(--mv-t-fast), opacity var(--mv-t-fast);
+}
+.mv-btn-attend { background:var(--mv-ok-bg);   color:var(--mv-ok-ink); }
+.mv-btn-noshow { background:var(--mv-warn-bg); color:var(--mv-warn-ink); }
+.mv-btn-attend:active, .mv-btn-noshow:active { transform:scale(0.93); opacity:0.8; }
+
+.mv-not-started { font-size:0.75rem; color:var(--mv-muted2); }
+
+/* Teacher class list */
+.mv-class-list { padding: 0 16px; display:flex; flex-direction:column; gap:10px; }
+.mv-class-row {
+  background:var(--mv-card-bg); border-radius:var(--mv-r-sm);
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  box-shadow:0 1px 3px rgba(80,66,61,0.05);
+  animation: mv-card-rise 280ms ease both;
+}
+.mv-class-row:nth-child(1){animation-delay:0ms}
+.mv-class-row:nth-child(2){animation-delay:40ms}
+.mv-class-row:nth-child(3){animation-delay:80ms}
+.mv-class-row:nth-child(4){animation-delay:120ms}
+
+.mv-class-row-name {
+  font-family:'Fraunces',Georgia,serif; font-size:0.97rem;
+  color:var(--mv-ink); margin:0 0 3px;
+}
+.mv-class-row-sub { font-size:0.75rem; color:var(--mv-muted); margin:0; }
+.mv-class-row-right { text-align:right; flex-shrink:0; }
+
+.mv-roster-link {
+  display:inline-block; font-size:0.78rem; font-weight:600;
+  color:var(--mv-ink); background:var(--mv-accent);
+  border-radius:999px; padding:6px 16px; text-decoration:none;
+  transition:transform var(--mv-t-fast), opacity var(--mv-t-fast);
+}
+.mv-roster-link:active { transform:scale(0.94); opacity:0.84; }
+
+/* ── 15. Login page ─────────────────────────────────────────── */
+/* body.bg-100 = Odoo's login/reset page body class (always applied) */
+body.bg-100 {
+  background: var(--mv-bg) !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+body.bg-100 #wrapwrap,
+body.bg-100 .bg-100 { background: var(--mv-bg) !important; }
+
+/* Card: widen beyond Odoo's 300px default, apply CoreLab radius + shadow */
+body.bg-100 .card {
+  max-width: 400px !important;
+  border-radius: 16px !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 32px rgba(80,66,61,0.10) !important;
+  background: var(--mv-card-bg) !important;
+}
+/* Hide the default company logo; CoreLab lockup is injected via template */
+body.bg-100 .card-body > img { display: none !important; }
+
+/* Also triggered when template override succeeds and mv-login-body is set */
+.mv-login-body {
+  background: var(--mv-bg) !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.mv-login-body #wrapwrap { background: var(--mv-bg) !important; }
+.mv-login-body .bg-100 { background: var(--mv-bg) !important; }
+
+.mv-login-card {
+  background: var(--mv-card-bg) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(80,66,61,0.10) !important;
+  max-width: 400px !important;
+  border: none !important;
+}
+.mv-login-logo {
+  text-align: center;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--mv-border);
+}
+.mv-login-logo img {
+  height: 38px;
+  width: auto;
+  display: inline-block;
+}
+.mv-login-body label.form-label,
+.mv-login-body .oe_login_form label {
+  font-size: 0.78rem; font-weight: 600; color: var(--mv-muted);
+}
+.mv-login-body .form-control {
+  border: 1.5px solid var(--mv-border) !important;
+  border-radius: var(--mv-r-sm) !important;
+  color: var(--mv-ink) !important;
+  background: var(--mv-bg) !important;
+  font-size: 0.9rem;
+}
+.mv-login-body .form-control:focus {
+  border-color: var(--mv-accent) !important;
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.22) !important;
+  background: #fff !important;
+}
+.mv-login-body .oe_login_buttons .btn-primary,
+.mv-login-body .btn-primary {
+  background: var(--mv-accent) !important;
+  border-color: var(--mv-accent) !important;
+  color: var(--mv-ink) !important;
+  border-radius: var(--mv-r) !important;
+  font-weight: 600; font-size: 0.9rem; padding: 12px;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+}
+.mv-login-body .oe_login_buttons .btn-primary:active { transform:scale(0.97); opacity:0.86; }
+.mv-login-body a { color: var(--mv-accent); }
+
+/* ── 17. Standard Odoo portal pages with CoreLab shell ─────────────
+   Scoped to body:has(.mv-bottom-nav) — any student page where the
+   bottom nav was injected via portal.portal_layout inheritance.
+   Our custom pages (.mv-app) are handled separately in section 3. */
+
+body:has(.mv-bottom-nav) #wrapwrap > header,
+body:has(.mv-bottom-nav) #wrapwrap > footer {
+  display: none !important;
+}
+
+body:has(.mv-bottom-nav) #wrapwrap,
+body:has(.mv-bottom-nav) #wrap {
+  background: var(--mv-bg) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  color: var(--mv-ink) !important;
+}
+
+body:has(.mv-bottom-nav) #wrapwrap > main {
+  padding-top: 0 !important;
+}
+
+body:has(.mv-bottom-nav) #wrap {
+  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Hide Odoo breadcrumbs — students navigate via bottom nav */
+body:has(.mv-bottom-nav) #wrapwrap > main > .o_portal.container {
+  display: none !important;
+}
+
+/* Typography */
+body:has(.mv-bottom-nav) h1,
+body:has(.mv-bottom-nav) h2,
+body:has(.mv-bottom-nav) h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  color: var(--mv-ink);
+}
+body:has(.mv-bottom-nav) .o_portal_wrap h1 { font-size: 1.4rem; }
+
+/* Tables */
+body:has(.mv-bottom-nav) table.table {
+  font-size: 0.85rem;
+  color: var(--mv-ink);
+}
+body:has(.mv-bottom-nav) table.table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  border-color: var(--mv-border);
+  background: transparent;
+}
+body:has(.mv-bottom-nav) table.table td,
+body:has(.mv-bottom-nav) table.table th {
+  border-color: var(--mv-border);
+  vertical-align: middle;
+}
+
+/* Buttons */
+body:has(.mv-bottom-nav) .btn-primary {
+  background: var(--mv-accent) !important;
+  border-color: var(--mv-accent) !important;
+  color: var(--mv-ink) !important;
+  border-radius: var(--mv-r) !important;
+}
+
+/* Pagination */
+body:has(.mv-bottom-nav) .o_portal_pager .page-link {
+  color: var(--mv-ink);
+  border-color: var(--mv-border);
+  background: transparent;
+}
+body:has(.mv-bottom-nav) .o_portal_pager .active .page-link {
+  background: var(--mv-accent);
+  border-color: var(--mv-accent);
+  color: var(--mv-ink);
+}
+
+/* ── 18. Profile Hub — hide standard Odoo home grid ─────────────
+   Only applies when .mv-profile-hub is present (students only). */
+
+body:has(.mv-profile-hub) .o_portal_my_home .o_portal_docs,
+body:has(.mv-profile-hub) #oe_structure_portal_my_home_1 {
+  display: none !important;
+}
+
+/* Hide "My account" heading and side panel controls */
+body:has(.mv-profile-hub) .o_portal_wrap .wrapper.col-12 {
+  display: none !important;
+}
+body:has(.mv-profile-hub) .d-none.d-lg-flex,
+body:has(.mv-profile-hub) .offcanvas,
+body:has(.mv-profile-hub) [data-bs-target="#accountOffCanvas"] {
+  display: none !important;
+}
+
+/* Make the content column full-width */
+body:has(.mv-profile-hub) .o_portal_content {
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+  padding: 0 !important;
+}
+
+/* Remove container padding so profile hub spans full width */
+body:has(.mv-profile-hub) #wrap > .container {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: 100% !important;
+}
+body:has(.mv-profile-hub) #wrap .row.justify-content-between {
+  margin: 0 !important;
+}
+
+/* ── 19. Profile Hub component ──────────────────────────────────── */
+.mv-profile-hub {
+  padding: 0 0 32px;
+}
+
+.mv-profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 28px;
+  text-align: center;
+}
+
+.mv-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--mv-accent);
+  color: var(--mv-ink);
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.mv-avatar-lg--photo { overflow: hidden; }
+.mv-avatar-lg--photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mv-profile-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0 0 4px;
+  line-height: 1.1;
+}
+
+.mv-profile-email {
+  font-size: 0.82rem;
+  color: var(--mv-muted);
+  margin: 0 0 16px;
+}
+
+.mv-menu-list {
+  padding: 0 16px;
+}
+
+.mv-menu-section-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  padding: 14px 4px 8px;
+}
+
+.mv-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--mv-ink);
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-menu-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-menu-row:active { transform: scale(0.98); opacity: 0.82; }
+
+.mv-menu-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--mv-accent);
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.mv-menu-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mv-menu-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--mv-ink);
+}
+.mv-menu-desc {
+  font-size: 0.75rem;
+  color: var(--mv-muted2);
+}
+
+.mv-menu-arrow {
+  width: 16px;
+  height: 16px;
+  stroke: var(--mv-muted2);
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.mv-menu-divider {
+  height: 1px;
+  background: var(--mv-border);
+  margin: 10px 4px 4px;
+}
+
+.mv-menu-row--danger .mv-menu-title { color: var(--mv-warn-ink); }
+.mv-menu-row--danger .mv-menu-icon  { stroke: var(--mv-warn-ink); }
+
+/* ── 16. Spacing helpers ────────────────────────────────────── */
+.mv-spacer-8  { height: 8px; }
+.mv-spacer-16 { height: 16px; }
+.mv-spacer-24 { height: 24px; }
+.mv-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--mv-muted);
+  font-size: 0.88rem;
+}
+.mv-empty a {
+  color: var(--mv-accent);
+  text-decoration: underline;
+}
+
+/* ── 20. Header right group + bell icon ─────────────────────── */
+.mv-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mv-bell-wrap {
+  position: relative;
+}
+
+.mv-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--mv-ink);
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--mv-t-fast);
+}
+.mv-bell-btn:active { background: var(--mv-border); }
+.mv-bell-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--mv-ink);
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mv-bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--mv-warn-ink);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+.mv-notif-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  /* A fixed 300px overflowed the viewport on a 320px phone. */
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r);
+  box-shadow: 0 8px 24px rgba(80,66,61,0.14);
+  z-index: 1000;
+  padding: 12px 0;
+}
+
+.mv-notif-empty {
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--mv-muted);
+  text-align: center;
+}
+
+.mv-notif-list {
+  display: block;
+}
+.mv-notif-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--mv-border);
+  cursor: default;
+}
+.mv-notif-item:last-child { border-bottom: none; }
+.mv-notif-item--unread { background: rgba(154,186,205,0.08); }
+.mv-notif-title {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--mv-ink);
+}
+.mv-notif-body {
+  font-size: 0.76rem;
+  color: var(--mv-muted);
+  white-space: pre-wrap;
+}
+.mv-notif-time {
+  font-size: 0.7rem;
+  color: var(--mv-muted2);
+  margin-top: 2px;
+}
+
+/* ── 20b. Day-jump picker (classes page) ────────────────────── */
+.mv-day-picker {
+  padding: 0 16px 10px;
+}
+.mv-day-picker-summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mv-ink);
+  background: var(--mv-card-bg);
+  border-radius: 999px;
+  padding: 7px 14px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.08);
+  cursor: pointer;
+  user-select: none;
+}
+.mv-day-picker-summary::-webkit-details-marker { display: none; }
+.mv-day-picker-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+.mv-day-jump-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--mv-muted);
+  background: var(--mv-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
+}
+.mv-day-jump-btn:hover { color: var(--mv-ink); border-color: var(--mv-muted); }
+
+/* ── 21. Packages grid ──────────────────────────────────────── */
+.mv-pkg-grid {
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 600px) { .mv-pkg-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .mv-pkg-grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* Filter pills above grid */
+.mv-pkg-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+  flex-wrap: wrap;
+}
+.mv-pkg-pill-btn {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: color var(--mv-t-fast), border-color var(--mv-t-fast), background var(--mv-t-fast);
+}
+.mv-pkg-pill-btn.mv-active {
+  background: var(--mv-ink);
+  border-color: var(--mv-ink);
+  color: var(--mv-bg);
+}
+
+.mv-pkg-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  display: flex;
+  flex-direction: column;
+  animation: mv-card-rise 320ms ease both;
+}
+
+/* Price in card footer */
+.mv-pkg-price-inline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--mv-ink);
+}
+
+.mv-pkg-discipline {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--mv-border);
+  color: var(--mv-muted);
+  align-self: flex-start;
+}
+.mv-pkg-discipline--barre  { background: rgba(154,186,205,0.25); color: #4a7d92; }
+.mv-pkg-discipline--reformer { background: rgba(155,90,80,0.12); color: #9B5A50; }
+
+.mv-pkg-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.mv-pkg-price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--mv-ink);
+  margin: 0;
+  line-height: 1;
+}
+.mv-pkg-currency {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--mv-muted);
+  margin-left: 1px;
+}
+
+.mv-pkg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mv-pkg-pill {
+  font-size: 0.68rem;
+  color: var(--mv-muted);
+  background: var(--mv-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.mv-pkg-buy-form { margin-top: auto; }
+.mv-pkg-buy-btn {
+  width: 100%;
+  padding: 10px 0;
+  background: var(--mv-accent);
+  color: var(--mv-ink);
+  border: none;
+  border-radius: var(--mv-r-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-pkg-buy-btn:active { transform: scale(0.97); opacity: 0.85; }
+.mv-pkg-card { position: relative; }
+.mv-pkg-card-link { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.mv-pkg-card .mv-card-footer { position: relative; z-index: 2; }
+
+/* ── 22. Language menu row hint + picker page ───────────────────── */
+.mv-menu-hint {
+  font-size: 0.78rem;
+  color: var(--mv-muted);
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.mv-lang-picker-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+.mv-lang-picker-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.mv-lang-picker-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.84rem;
+  color: var(--mv-accent-ink, var(--mv-ink));
+  text-decoration: none;
+  padding: 6px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-lang-picker-back svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.mv-lang-picker-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+}
+
+.mv-lang-row--active .mv-menu-title {
+  color: var(--mv-accent-ink, var(--mv-ink));
+  font-weight: 600;
+}
+
+.mv-lang-check {
+  width: 20px;
+  height: 20px;
+  stroke: var(--mv-accent-ink, var(--mv-ink));
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── 23. History month groups ──────────────────────────────────── */
+.mv-history-months { display: flex; flex-direction: column; }
+.mv-month-group { border-bottom: 1px solid var(--mv-border); }
+.mv-month-group:last-child { border-bottom: none; }
+.mv-month-group > summary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 16px 9px; cursor: pointer; list-style: none;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.mv-month-group > summary::-webkit-details-marker { display: none; }
+.mv-month-label { font-family: 'Fraunces', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink); flex: 1; }
+.mv-month-count { font-size: 0.7rem; color: var(--mv-muted); background: var(--mv-border); border-radius: 999px; padding: 2px 8px; }
+.mv-month-chevron { flex-shrink: 0; stroke: var(--mv-muted); fill: none; width: 15px; height: 15px; transition: transform 0.2s ease; }
+details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
+.mv-month-entries { padding: 0 0 8px; }
+.mv-hist-hidden { display: none; }
+.mv-load-more-btn {
+  display: block; width: calc(100% - 32px); margin: 4px 16px 0;
+  background: none; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm);
+  color: var(--mv-muted); font-size: 0.8rem; padding: 9px 0;
+  cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent;
+}
+.mv-load-more-btn:active { opacity: 0.7; }
+
+/* ── 24. Sub-page back header ───────────────────────────────────
+   Every non-tab page carries this row so there is always a visible
+   way back. Tab pages rely on the fixed bottom nav instead. */
+.mv-subpage-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px 2px;
+}
+.mv-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--mv-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--mv-t-fast);
+}
+.mv-back-link svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; stroke-width: 2.4;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.mv-back-link:hover,
+.mv-back-link:active { color: var(--mv-ink); text-decoration: none; }
+/* The generic wording is a translation carrier for corelab.js; keep it out of
+   the layout even if a framework reset re-declares display on spans. */
+.mv-back-link [hidden] { display: none !important; }
+
+/* ── 25. Segmented toggle (Studio: Available | My Schedule,
+        Packages: Packages | Subscriptions) ─────────────────────── */
+.mv-segmented {
+  display: flex;
+  gap: 4px;
+  margin: 0 16px 16px;
+  padding: 4px;
+  background: var(--mv-border);
+  border-radius: 999px;
+}
+.mv-segment {
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mv-muted);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--mv-t-fast), color var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-segment:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-segment.mv-active {
+  background: var(--mv-card-bg);
+  color: var(--mv-ink);
+  box-shadow: 0 1px 3px rgba(80,66,61,0.10);
+}
+
+/* ── 26. Home page ──────────────────────────────────────────────── */
+.mv-home-hero { padding: 4px 20px 18px; }
+.mv-home-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0;
+  line-height: 1.15;
+}
+.mv-home-sub {
+  font-size: 0.84rem;
+  color: var(--mv-muted);
+  margin: 5px 0 0;
+}
+.mv-home-cta {
+  display: block;
+  margin: 16px 20px 0;
+  padding: 15px;
+  border-radius: var(--mv-r);
+  background: var(--mv-accent);
+  color: var(--mv-ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-home-cta:hover { color: var(--mv-ink); text-decoration: none; opacity: 0.92; }
+.mv-home-cta:active { transform: scale(0.97); opacity: 0.86; }
+
+.mv-stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 16px 4px;
+}
+.mv-stat-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  padding: 14px 16px;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-stat-card:hover { text-decoration: none; }
+.mv-stat-card:active { transform: scale(0.97); opacity: 0.86; }
+.mv-stat-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+}
+.mv-stat-value {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  line-height: 1.1;
+}
+.mv-stat-value small {
+  font-size: 0.62em;
+  font-weight: 300;
+  color: var(--mv-muted2);
+}
+.mv-stat-hint { font-size: 0.7rem; color: var(--mv-muted2); }
+
+.mv-link-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 16px 0;
+  padding: 14px 16px;
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  text-decoration: none;
+  color: var(--mv-ink);
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-link-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-link-row:active { transform: scale(0.98); opacity: 0.82; }
+
+/* ── 27. Packages tab — title row + collapsing search ───────────── */
+.mv-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px 14px;
+}
+.mv-credit-line {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--mv-muted);
+  text-decoration: none;
+  margin: 5px 0 0;
+  border-bottom: 1px solid transparent;
+}
+.mv-credit-line:hover { color: var(--mv-ink); border-bottom-color: var(--mv-border); text-decoration: none; }
+
+.mv-search-btn {
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--mv-t-fast), transform var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-search-btn svg {
+  width: 17px; height: 17px;
+  stroke: var(--mv-ink); stroke-width: 2;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+.mv-search-btn:active { transform: scale(0.92); }
+.mv-search-btn.mv-active { background: var(--mv-accent); }
+
+.mv-search-wrap {
+  padding: 0 16px 14px;
+  display: none;
+}
+.mv-search-wrap.mv-open { display: block; }
+.mv-search-input {
+  width: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: var(--mv-ink);
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  outline: none;
+}
+.mv-search-input:focus {
+  border-color: var(--mv-accent);
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.22);
+}
+.mv-no-results {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--mv-muted);
+  font-size: 0.86rem;
+}
+
+/* ── 28. Credit ledger ──────────────────────────────────────────── */
+.mv-ledger { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.mv-ledger-row {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+}
+.mv-ledger-delta {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 44px;
+  text-align: center;
+  border-radius: 999px;
+  padding: 5px 4px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.mv-ledger-delta--plus    { background: var(--mv-ok-bg);  color: var(--mv-ok-ink); }
+.mv-ledger-delta--minus   { background: #EEF4F8;          color: #3E6A82; }
+.mv-ledger-delta--neutral { background: #EEE9E3;          color: var(--mv-muted2); }
+.mv-ledger-info { flex: 1; min-width: 0; }
+.mv-ledger-title {
+  font-size: 0.88rem;
+  color: var(--mv-ink);
+  font-weight: 500;
+  margin: 0 0 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mv-ledger-meta { font-size: 0.73rem; color: var(--mv-muted); margin: 0; }
+.mv-ledger-balance {
+  text-align: right;
+  flex-shrink: 0;
+}
+.mv-ledger-balance-num {
+  display: block;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--mv-ink);
+  line-height: 1.1;
+}
+.mv-ledger-balance-lbl {
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mv-muted2);
+}
+
+/* ── 29. Checkout step indicator ────────────────────────────────── */
+.mv-steps {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 24px 20px;
+}
+.mv-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  /* Not a fixed width — Catalan "Signatura" and Spanish "Transferencia"
+     need room the old 74px did not give them. */
+  min-width: 58px;
+  max-width: 96px;
+}
+.mv-step-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--mv-border);
+  border: 2px solid var(--mv-border);
+  box-sizing: border-box;
+}
+.mv-step-label {
+  font-size: 0.7rem;
+  color: var(--mv-muted2);
+  text-align: center;
+  line-height: 1.2;
+}
+.mv-step--done .mv-step-dot     { background: var(--mv-sage); border-color: var(--mv-sage); }
+.mv-step--done .mv-step-label   { color: var(--mv-muted); }
+.mv-step--current .mv-step-dot  { background: var(--mv-accent); border-color: var(--mv-accent); }
+.mv-step--current .mv-step-label{ color: var(--mv-ink); font-weight: 700; }
+.mv-step-line {
+  flex: 1;
+  height: 1px;
+  background: var(--mv-border);
+  margin-top: 7px;
+}
+.mv-step-line--done { background: var(--mv-sage); }
+
+/* ── 30. Checkout: summary, payment methods, terms ─────────────── */
+.mv-checkout { padding: 0 16px 40px; }
+.mv-panel {
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.mv-panel-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  margin: 0 0 10px;
+}
+.mv-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.mv-summary-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--mv-ink);
+  margin: 0;
+}
+.mv-summary-total {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--mv-ink);
+  white-space: nowrap;
+}
+
+.mv-paymethod {
+  border: 1.5px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color var(--mv-t-fast), background var(--mv-t-fast);
+}
+.mv-paymethod:has(input:checked) {
+  border-color: var(--mv-accent);
+  background: rgba(154,186,205,0.07);
+}
+.mv-paymethod-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-paymethod-head input { accent-color: var(--mv-accent); width: 18px; height: 18px; flex-shrink: 0; }
+.mv-paymethod-name { font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); }
+/* Details stay collapsed until that method is the selected one. */
+.mv-paymethod-detail { display: none; padding: 0 14px 14px 44px; }
+.mv-paymethod:has(input:checked) .mv-paymethod-detail { display: block; }
+.mv-paymethod-detail dt {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--mv-muted2); font-weight: 700; margin: 0 0 2px;
+}
+.mv-paymethod-detail dd {
+  font-size: 0.92rem; color: var(--mv-ink); margin: 0 0 8px;
+  font-variant-numeric: tabular-nums; word-break: break-all;
+}
+.mv-paymethod-detail dd:last-child { margin-bottom: 0; }
+
+.mv-terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 2px 18px;
+  font-size: 0.85rem;
+  color: var(--mv-ink);
+  line-height: 1.5;
+}
+.mv-terms-row input {
+  accent-color: var(--mv-accent);
+  width: 18px; height: 18px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.mv-terms-row a { color: var(--mv-ink); text-decoration: underline; }
+
+.mv-btn-primary-lg {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mv-ink);
+  background: var(--mv-accent);
+  border: none;
+  border-radius: var(--mv-r);
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+}
+.mv-btn-primary-lg:active:not(:disabled) { transform: scale(0.97); opacity: 0.86; }
+.mv-btn-primary-lg:disabled {
+  background: var(--mv-border);
+  color: var(--mv-muted2);
+  cursor: not-allowed;
+}
+
+/* ── 31. Signature pad ─────────────────────────────────────────── */
+.mv-sign-pad-wrap {
+  position: relative;
+  border: 1.5px dashed var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-card-bg);
+  overflow: hidden;
+}
+.mv-sign-pad { display: block; width: 100%; height: 170px; touch-action: none; cursor: crosshair; }
+.mv-sign-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  color: var(--mv-muted2);
+  pointer-events: none;
+}
+.mv-sign-tools {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+.mv-sign-clear {
+  background: none;
+  border: none;
+  color: var(--mv-muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.mv-field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mv-muted);
+  margin: 0 0 6px;
+}
+.mv-input {
+  width: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  color: var(--mv-ink);
+  background: var(--mv-bg);
+  border: 1.5px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  padding: 11px 14px;
+  outline: none;
+}
+.mv-input:focus {
+  border-color: var(--mv-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.22);
+}
+
+/* ── 32. Terms & Conditions page ───────────────────────────────── */
+.mv-prose {
+  padding: 4px 20px 40px;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--mv-ink);
+}
+.mv-prose p { margin: 0 0 14px; }
+
+/* ── 33. Active orders list ────────────────────────────────────── */
+.mv-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  padding: 13px 15px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-order-row:hover { text-decoration: none; }
+.mv-order-row:active { transform: scale(0.98); opacity: 0.85; }
+.mv-order-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 0.95rem;
+  color: var(--mv-ink);
+  margin: 0 0 2px;
+}
+.mv-order-meta { font-size: 0.74rem; color: var(--mv-muted); margin: 0; }
+.mv-order-amount {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1rem;
+  color: var(--mv-ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mv-badge-pending { background: var(--mv-warn-bg); color: var(--mv-warn-ink); }
+.mv-badge-sage    { background: var(--mv-ok-bg);   color: var(--mv-sage); }
+.mv-badge-success { background: var(--mv-ok-bg);   color: var(--mv-sage); }
+
+/* ── 33c. Active package badge on card image ──────────────────── */
+.mv-card-tag-active {
+  background: var(--mv-sage);
+  color: #fff;
+  top: auto;
+  bottom: 6px;
+  right: 6px;
+  left: auto;
+}
+
+/* ── 34. Subscription status page ────────────────────────────── */
+.mv-sub-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  box-shadow: 0 1px 3px rgba(80,66,61,0.06);
+  padding: 18px 16px;
+  margin: 0 16px 14px;
+}
+.mv-sub-plan-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--mv-ink);
+  margin: 0 0 14px;
+}
+.mv-sub-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--mv-divider);
+  gap: 8px;
+}
+.mv-sub-stat-row:last-child { border-bottom: none; }
+.mv-sub-stat-label {
+  font-size: 0.78rem;
+  color: var(--mv-muted);
+}
+.mv-sub-stat-value {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 0.92rem;
+  color: var(--mv-ink);
+  text-align: right;
+}
+.mv-sub-progress-wrap {
+  height: 4px;
+  background: var(--mv-divider);
+  border-radius: 2px;
+  margin: 4px 0 10px;
+  overflow: hidden;
+}
+.mv-sub-progress-bar {
+  height: 100%;
+  background: var(--mv-sage);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  max-width: 100%;
+}
+.mv-sub-slots-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mv-muted);
+  margin: 14px 0 6px;
+}
+.mv-sub-slot {
+  font-size: 0.84rem;
+  color: var(--mv-ink);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--mv-divider);
+}
+.mv-sub-slot:last-child { border-bottom: none; }
+
+/* ── 33b. Label elements are <div>, not <span>, on purpose ───────
+   Odoo's TRANSLATED_ELEMENTS contains 'span', so a <span> is folded into
+   its parent's translation term *including its tags* — msgids came out as
+   '<span class="mv-menu-title">My Classes</span>…' and never matched the
+   catalogues. 'div' is not in that set, so each label becomes its own
+   clean plain-text msgid. These were inline spans, so restore that
+   rendering explicitly. Do not convert them back to <span>. */
+.mv-badge,
+.mv-badge-confirmed,
+.mv-badge-credit,
+.mv-card-full,
+.mv-not-started,
+.mv-stat-label,
+.mv-stat-hint,
+.mv-credit-label,
+.mv-inline-label { display: inline-block; }
+
+.mv-menu-title, .mv-menu-desc,
+.mv-back-text, .mv-back-generic,
+.mv-step-label { display: block; }
+
+/* Bottom-nav labels were <span>; keep them centred under the icon. */
+.mv-nav-tab > div { line-height: 1; text-align: center; }
+
+/* ── 33c. Notifications archive page ────────────────────────────── */
+.mv-notif-page-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.mv-notif-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r-sm);
+  padding: 13px 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+}
+.mv-notif-card--unread { background: rgba(154,186,205,0.10); }
+.mv-notif-card-main { flex: 1; min-width: 0; }
+.mv-notif-card-title {
+  font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); margin: 0 0 3px;
+}
+.mv-notif-card-body {
+  font-size: 0.8rem; color: var(--mv-muted); margin: 0 0 4px;
+  line-height: 1.5; white-space: pre-wrap;
+}
+.mv-notif-card-time { font-size: 0.7rem; color: var(--mv-muted2); margin: 0; }
+.mv-notif-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--mv-accent); flex-shrink: 0; margin-top: 5px;
+}
+.mv-mark-read-btn {
+  background: none; border: 1px solid var(--mv-border);
+  border-radius: 999px; padding: 6px 14px;
+  font-size: 0.75rem; font-weight: 600; color: var(--mv-muted);
+  cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-mark-read-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-notif-viewall {
+  display: block; text-align: center;
+  padding: 10px 16px 2px; margin-top: 4px;
+  border-top: 1px solid var(--mv-border);
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--mv-ink); text-decoration: none;
+}
+.mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink); }
+
+/* ── 34. Responsive ─────────────────────────────────────────────
+   The layout is phone-first; these rules cover the two ends —
+   small phones (≤360px) and tablet/laptop (≥600px). */
+
+/* Nothing anywhere may scroll the page sideways. */
+html, body { overflow-x: hidden; }
+
+/* Small phones — 320–360px. Trim the type and the gutters so long
+   Spanish/Catalan labels stop wrapping awkwardly. */
+@media (max-width: 360px) {
+  .mv-greeting-name,
+  .mv-home-title { font-size: 1.28rem; }
+  .mv-greeting-row,
+  .mv-title-row,
+  .mv-home-hero { padding-left: 16px; padding-right: 16px; }
+  .mv-cards, .mv-pkg-grid, .mv-upcoming-list,
+  .mv-ledger, .mv-pack-section, .mv-checkout { padding-left: 12px; padding-right: 12px; }
+  .mv-home-cta { margin-left: 16px; margin-right: 16px; }
+  .mv-stat-row { gap: 10px; padding-left: 12px; padding-right: 12px; }
+  .mv-stat-value { font-size: 1.3rem; }
+  .mv-steps { padding-left: 12px; padding-right: 12px; }
+  .mv-step { min-width: 50px; }
+  .mv-step-label { font-size: 0.64rem; }
+  .mv-segment { font-size: 0.74rem; padding: 8px 6px; }
+  .mv-nav-tab { font-size: 0.55rem; }
+  /* Ledger: give the description room by shrinking the fixed columns. */
+  .mv-ledger-delta { min-width: 38px; font-size: 0.9rem; }
+  .mv-ledger-row { gap: 9px; padding: 11px 12px; }
+}
+
+/* Very long words (IBANs, class names) must wrap rather than overflow. */
+.mv-class-name, .mv-order-name, .mv-ledger-title,
+.mv-summary-name, .mv-pkg-name { overflow-wrap: anywhere; }
+
+/* Tablet and up — the card grids already widen at 600/900px; give the
+   detail hero a taller image so it does not look letterboxed. */
+@media (min-width: 600px) {
+  .mv-detail-img,
+  .mv-detail-img .mv-card-photo,
+  .mv-detail-img .mv-card-fallback { height: 260px; }
+  .mv-card-img { height: 150px; }
+}
+
+/* Landscape phones: the fixed bottom nav eats most of a short viewport. */
+@media (max-height: 460px) and (orientation: landscape) {
+  .mv-bottom-nav { height: 54px; }
+  .mv-nav-tab svg { width: 18px; height: 18px; }
+  .mv-app { padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* Stock Odoo portal pages (orders, invoices, subscriptions, security)
+   render wide tables that overflow a phone. Let them scroll inside
+   their own box instead of pushing the page. */
+body:has(.mv-bottom-nav) .table-responsive,
+body:has(.mv-bottom-nav) .o_portal_table_wrapper { overflow-x: auto; }
+body:has(.mv-bottom-nav) #wrap > .container,
+body:has(.mv-bottom-nav) #wrap > .container-fluid {
+  max-width: var(--mv-app-max);
+  margin-inline: auto;
+}
+body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
+
+/* Respect a reduced-motion preference — the card entrance animations and
+   page transitions are decorative. */
+@media (prefers-reduced-motion: reduce) {
+  .mv-class-card, .mv-pkg-card, .mv-upcoming-card,
+  .mv-history-card, .mv-student-card, .mv-class-row, .mv-flash {
+    animation: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
+}

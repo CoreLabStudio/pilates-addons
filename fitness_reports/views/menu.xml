@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Reports dropdown — manager-only, sits at root level seq=50.
+         Source strings are English; es_ES loaded from i18n/es_ES.po.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <menuitem
+        id="menu_fitness_reports_root"
+        name="Reports"
+        parent="fitness_core.menu_fitness_root"
+        sequence="50"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_bookings"
+        name="Bookings"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_booking_report"
+        sequence="10"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_revenue"
+        name="Revenue"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_sale_order_report"
+        sequence="20"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_classes"
+        name="Classes"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_class_report"
+        sequence="30"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_clients"
+        name="Clients"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_client_report"
+        sequence="40"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_team"
+        name="Team"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_team_report"
+        sequence="50"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+</odoo>

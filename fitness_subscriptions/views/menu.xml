@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Subscriptions — active member agreements, under Catalog dropdown -->
+    <menuitem
+        id="menu_fitness_subscriptions"
+        name="Subscriptions"
+        parent="fitness_core.menu_group_catalog"
+        action="action_fitness_subscriptions"
+        sequence="20"
+    />
+
+    <!-- Subscription Plans — product templates, under Catalog dropdown -->
+    <menuitem
+        id="menu_fitness_subscription_plans"
+        name="Subscription Plans"
+        parent="fitness_core.menu_group_catalog"
+        action="action_fitness_subscription_plans"
+        sequence="30"
+    />
+
+</odoo>

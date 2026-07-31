@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_classroom_list" model="ir.ui.view">
+        <field name="name">fitness.classroom.list</field>
+        <field name="model">fitness.classroom</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="classroom_type" widget="badge"
+                       decoration-info="classroom_type == 'barre'"
+                       decoration-success="classroom_type == 'reformer'"/>
+                <field name="capacity"/>
+                <field name="fixed_capacity"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_classroom_form" model="ir.ui.view">
+        <field name="name">fitness.classroom.form</field>
+        <field name="model">fitness.classroom</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Studio A – Barre"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Studio Details">
+                            <field name="classroom_type"/>
+                            <field name="capacity"/>
+                            <field name="fixed_capacity"/>
+                        </group>
+                        <group string="Display">
+                            <field name="color" widget="color_picker"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Equipment">
+                            <field name="equipment"
+                                   placeholder="e.g. Barre, mats, mirrors, sound system"/>
+                        </page>
+                        <page string="Description">
+                            <field name="description"
+                                   placeholder="Describe this studio..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_classroom" model="ir.actions.act_window">
+        <field name="name">Classrooms</field>
+        <field name="res_model">fitness.classroom</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+</odoo>
