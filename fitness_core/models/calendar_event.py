@@ -32,6 +32,10 @@ class CalendarEvent(models.Model):
         "Available Seats",
         compute='_compute_available_seats',
     )
+    fitness_note = fields.Text(
+        "Class Note",
+        help="Optional note for this specific class occurrence, visible to the teacher and students.",
+    )
 
     @api.depends(
         'classroom_id', 'classroom_id.capacity',

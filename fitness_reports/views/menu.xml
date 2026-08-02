@@ -16,7 +16,7 @@
 
     <menuitem
         id="menu_fitness_reports_bookings"
-        name="Bookings"
+        name="Booking Analytics"
         parent="menu_fitness_reports_root"
         action="fitness_reports.action_fitness_booking_report"
         sequence="10"
@@ -52,7 +52,7 @@
 
     <menuitem
         id="menu_fitness_reports_team"
-        name="Team"
+        name="Teacher Stats"
         parent="menu_fitness_reports_root"
         action="fitness_reports.action_fitness_team_report"
         sequence="50"

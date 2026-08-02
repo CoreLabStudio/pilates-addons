@@ -171,6 +171,46 @@
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  RECURRING PRIVATE SLOTS — reuse Clase Fija auto-placement      -->
+        <!--  Admin-only: sale_ok=0, not portal-purchasable.                 -->
+        <!--  Admin flow: create subscription with one of these products,    -->
+        <!--  add fitness.clase.fija slot pointing to a recurring private    -->
+        <!--  calendar event, confirm → auto-placement creates bookings.     -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="product_reformer_privado_clase_fija" model="product.template">
+            <field name="name">Reformer Privado Clase Fija</field>
+            <field name="type">service</field>
+            <field name="list_price">0.00</field><!-- set per-client when creating subscription -->
+            <field name="recurring_invoice">1</field>
+            <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_is_clase_fija">1</field>
+            <field name="weekly_class_allowance">1</field>
+            <field name="fitness_promo_first_cycle_bonus">0</field>
+            <field name="monthly_class_allowance">4</field><!-- legacy; reporting-only -->
+            <field name="is_unlimited">0</field>
+            <field name="fitness_class_type">reformer</field>
+            <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
+        </record>
+
+        <record id="product_barre_privada_clase_fija" model="product.template">
+            <field name="name">Barre Privada Clase Fija</field>
+            <field name="type">service</field>
+            <field name="list_price">0.00</field><!-- set per-client when creating subscription -->
+            <field name="recurring_invoice">1</field>
+            <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_is_clase_fija">1</field>
+            <field name="weekly_class_allowance">1</field>
+            <field name="fitness_promo_first_cycle_bonus">0</field>
+            <field name="monthly_class_allowance">4</field><!-- legacy; reporting-only -->
+            <field name="is_unlimited">0</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
         <!--  BARRE ILIMITADO (unlimited — no weekly cap)                    -->
         <!-- ═══════════════════════════════════════════════════════════════ -->
 

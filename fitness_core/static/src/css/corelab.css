@@ -1094,22 +1094,16 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   stroke-linejoin: round;
 }
 
-.mv-bell-badge {
+.mv-bell-dot {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: var(--mv-warn-ink);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  line-height: 1;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mv-accent);
+  border: 2px solid var(--mv-bg);
+  pointer-events: none;
 }
 
 .mv-notif-panel {
@@ -2150,3 +2144,90 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   ::view-transition-old(root),
   ::view-transition-new(root) { animation: none !important; }
 }
+
+/* ── Task 1: Period filter dropdown ─────────────────────────────────────── */
+.mv-period-select {
+  font-size: 0.78rem;
+  padding: 4px 10px 4px 10px;
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  background: var(--mv-bg);
+  color: var(--mv-muted);
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: auto;
+  outline: none;
+}
+.mv-period-select:focus { border-color: var(--mv-accent); }
+
+/* ── Task 2: Reassign details/summary toggle ─────────────────────────────── */
+.mv-reassign-details { display: inline-block; margin-top: 6px; }
+.mv-reassign-details > summary {
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--mv-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-block;
+}
+.mv-reassign-details > summary::-webkit-details-marker { display: none; }
+.mv-reassign-details > summary::marker { display: none; }
+
+/* ── Task 3: Cancellation policy note ────────────────────────────────────── */
+.mv-cancel-policy {
+  font-size: 0.74rem;
+  color: var(--mv-muted2);
+  text-align: center;
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+
+/* ── Task 4: Per-class note box ──────────────────────────────────────────── */
+.mv-class-note {
+  background: var(--mv-ok-bg);
+  border-left: 3px solid var(--mv-sage);
+  border-radius: 0 var(--mv-r-sm) var(--mv-r-sm) 0;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--mv-ink);
+  line-height: 1.5;
+  margin: 12px 0 0;
+  white-space: pre-wrap;
+}
+.mv-class-note-label {
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: var(--mv-ok-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+/* ── Task 5: Message-the-Studio form ─────────────────────────────────────── */
+.mv-msg-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.mv-msg-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r);
+  background: var(--mv-card-bg);
+  color: var(--mv-ink);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.mv-msg-textarea:focus { outline: none; border-color: var(--mv-accent); }
+.mv-msg-send-btn {
+  align-self: flex-end;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 999px;
+  background: var(--mv-accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mv-msg-send-btn:active { opacity: 0.85; }

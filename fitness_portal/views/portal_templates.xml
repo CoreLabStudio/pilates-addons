@@ -30,7 +30,7 @@
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                         </svg>
-                        <span class="mv-bell-badge" id="mv-bell-badge" style="display:none">0</span>
+                        <span class="mv-bell-dot" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
                     </button>
                     <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
                         <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
@@ -65,9 +65,25 @@
             <a href="/my/teacher/classes" class="mv-wordmark" title="CoreLab">
                 <img src="/corelab/logo" alt="CoreLab"/>
             </a>
-            <a href="/my" class="mv-avatar" t-att-title="_mv_tname or 'Profile'">
-                <t t-out="(_mv_tname[:1] if _mv_tname else 'T').upper()"/>
-            </a>
+            <div class="mv-header-right">
+                <div class="mv-bell-wrap">
+                    <button class="mv-bell-btn" id="mv-bell-btn" type="button" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="mv-bell-dot" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
+                    </button>
+                    <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
+                        <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
+                        <ul class="mv-notif-list" id="mv-notif-list" style="display:none;margin:0;padding:0;list-style:none;"/>
+                        <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
+                    </div>
+                </div>
+                <a href="/my" class="mv-avatar" t-att-title="_mv_tname or 'Profile'">
+                    <t t-out="(_mv_tname[:1] if _mv_tname else 'T').upper()"/>
+                </a>
+            </div>
         </header>
         <svg class="mv-curve" xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 320 16" preserveAspectRatio="none" aria-hidden="true">
@@ -88,12 +104,10 @@
          the static _back_url still works. -->
     <template id="mv_subpage_back" name="CoreLab Sub-page Back Link">
         <div class="mv-subpage-head">
-            <a t-att-href="_back_url" class="mv-back-link" data-cl-back="1">
+            <a t-att-href="_back_url" class="mv-back-link" data-cl-back="1" aria-label="Back">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <polyline points="15 18 9 12 15 6"/>
                 </svg>
-                <div class="mv-back-text" t-out="_back_label"/>
-                <div class="mv-back-generic" hidden="hidden">Back</div>
             </a>
         </div>
     </template>
@@ -203,11 +217,17 @@
 
                 <div class="mv-home-hero">
                     <h1 class="mv-home-title" t-out="welcome"/>
-                    <p class="mv-home-sub">Ready for your next class?</p>
+                    <t t-if="has_any_bookings">
+                        <p class="mv-home-sub">Ready for your next class?</p>
+                    </t>
+                    <t t-else="">
+                        <p class="mv-home-sub">Let's book your first class.</p>
+                    </t>
                 </div>
 
                 <a href="/my/studio" class="mv-home-cta">Book a Class</a>
 
+                <t t-if="has_any_bookings">
                 <!-- Two quick stats. Both are tappable. -->
                 <div class="mv-stat-row">
                     <a href="/my/studio?view=schedule" class="mv-stat-card">
@@ -256,6 +276,7 @@
                 </t>
                 <t t-else="">
                     <div class="mv-empty"><div>You have no upcoming classes.</div><a href="/my/studio">Find a class</a></div>
+                </t>
                 </t>
 
                 <!-- Packages &amp; Subscriptions shortcut -->
@@ -548,6 +569,14 @@
                         <p class="mv-detail-desc" t-out="ct.description"/>
                     </t>
 
+                    <!-- Per-class note from studio (Task 4) -->
+                    <t t-if="event.fitness_note">
+                        <div class="mv-class-note">
+                            <div class="mv-class-note-label">Note from studio</div>
+                            <t t-out="event.fitness_note"/>
+                        </div>
+                    </t>
+
                     <!-- Teacher row -->
                     <t t-if="event.user_id">
                         <div class="mv-teacher-row">
@@ -586,6 +615,9 @@
                         <div class="mv-class-full">Booking not available — contact the studio.</div>
                     </t>
 
+                    <!-- Cancellation policy note (Task 3) -->
+                    <p class="mv-cancel-policy">Cancel up to 2 hours before class to keep your credit.</p>
+
                 </div>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
@@ -617,6 +649,20 @@
                             <div class="mv-credit-label" t-out="primary_credit['label']"/>
                         </a>
                     </t>
+                </div>
+
+                <!-- Period filter -->
+                <div style="text-align:right;margin-bottom:8px;">
+                    <select class="mv-period-select"
+                            onchange="location.href=this.value"
+                            aria-label="Filter period">
+                        <option t-att-value="'/my/history'"
+                                t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
+                        <option t-att-value="'/my/history?period=month'"
+                                t-att-selected="'selected' if filter_period == 'month' else None">This month</option>
+                        <option t-att-value="'/my/history?period=week'"
+                                t-att-selected="'selected' if filter_period == 'week' else None">This week</option>
+                    </select>
                 </div>
 
                 <!-- Past classes -->
@@ -776,12 +822,12 @@
 
                 <div class="mv-greeting-row">
                     <div>
-                        <p class="mv-greeting-name">Credit History</p>
-                        <p class="mv-greeting-sub">Every change to your credit balance</p>
+                        <p class="mv-greeting-name" t-out="label_credits_page"/>
+                        <p class="mv-greeting-sub" t-out="label_credits_sub"/>
                     </div>
                     <div class="mv-credit-badge">
-                        <span class="mv-credit-count" t-out="current_total"/>
-                        <div class="mv-credit-label">Balance</div>
+                        <span class="mv-credit-count" t-out="current_total"></span>
+                        <div class="mv-credit-label">Total credits</div>
                     </div>
                 </div>
 
@@ -802,7 +848,7 @@
                                     <span class="mv-ledger-delta mv-ledger-delta--minus"><t t-out="entry['delta']"/></span>
                                 </t>
                                 <t t-else="">
-                                    <span class="mv-ledger-delta mv-ledger-delta--neutral">0</span>
+                                    <span class="mv-ledger-delta mv-ledger-delta--neutral">—</span>
                                 </t>
                                 <div class="mv-ledger-info">
                                     <p class="mv-ledger-title" t-out="entry['title']"/>
@@ -811,10 +857,6 @@
                                               t-options='{"widget": "datetime", "format": "d MMM yyyy · HH:mm"}'/>
                                         · <t t-out="entry['meta']"/>
                                     </p>
-                                </div>
-                                <div class="mv-ledger-balance">
-                                    <span class="mv-ledger-balance-num" t-out="entry['balance']"/>
-                                    <div>Balance</div>
                                 </div>
                             </div>
                         </t>
@@ -1018,18 +1060,54 @@
                            t-out="product.description_sale"/>
                     </t>
 
-                    <!-- Price + buy -->
-                    <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
-                        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                            <span style="font-size:0.8rem;color:var(--mv-muted);">Price</span>
-                            <span style="font-family:'Fraunces',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
-                                <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
-                            </span>
+                    <t t-if="active_info">
+                        <!-- Student already holds this product — show ownership info -->
+                        <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <span style="font-size:0.8rem;color:var(--mv-muted);">Status</span>
+                                <span class="mv-card-tag mv-card-tag-active">Active</span>
+                            </div>
+                            <t t-if="active_info.get('date_str')">
+                                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Purchased</span>
+                                    <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['date_str']"/>
+                                </div>
+                            </t>
+                            <t t-if="active_info.get('credits_remaining') is not None">
+                                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Remaining</span>
+                                    <span style="font-size:0.85rem;color:var(--mv-ink);">
+                                        <t t-out="active_info['credits_remaining']"/>
+                                        <t t-if="active_info.get('credits_total')"> / <t t-out="active_info['credits_total']"/> classes</t>
+                                    </span>
+                                </div>
+                            </t>
+                            <t t-if="active_info.get('validity_end_str')">
+                                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Valid until</span>
+                                    <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['validity_end_str']"/>
+                                </div>
+                            </t>
+                            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                                <span style="font-size:0.8rem;color:var(--mv-muted);">Order</span>
+                                <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['ref']"/>
+                            </div>
                         </div>
-                        <a t-attf-href="/my/packages/#{product.id}/checkout"
-                           class="mv-pkg-buy-btn"
-                           style="display:block;text-align:center;text-decoration:none;line-height:1.4;">Buy now</a>
-                    </div>
+                    </t>
+                    <t t-else="">
+                        <!-- Price + buy -->
+                        <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
+                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+                                <span style="font-size:0.8rem;color:var(--mv-muted);">Price</span>
+                                <span style="font-family:'Fraunces',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
+                                    <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                </span>
+                            </div>
+                            <a t-attf-href="/my/packages/#{product.id}/checkout"
+                               class="mv-pkg-buy-btn"
+                               style="display:block;text-align:center;text-decoration:none;line-height:1.4;">Buy now</a>
+                        </div>
+                    </t>
                 </div>
 
                 <t t-call="fitness_portal.mv_bottom_nav"/>
@@ -1108,8 +1186,7 @@
 
                         <label class="mv-terms-row">
                             <input type="checkbox" name="terms_accepted" value="1" id="mv-terms-check"/>
-                            <span><span>I agree to the</span>
-                                <a t-attf-href="/my/terms?back=/my/packages/#{product.id}/checkout">Terms and Conditions</a></span>
+                            <span><span t-out="terms_label"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}/checkout"><t t-out="terms_link_label"/></a></span>
                         </label>
 
                         <button type="submit" class="mv-btn-primary-lg"
@@ -1155,16 +1232,16 @@
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                         <input type="hidden" name="signature" id="mv-sign-data"/>
 
-                        <label class="mv-field-label" for="mv-sign-name">Your full name</label>
+                        <label class="mv-field-label" for="mv-sign-name" t-out="label_your_full_name"/>
                         <input type="text" class="mv-input" name="signed_by" id="mv-sign-name"
                                t-att-value="sign_default" required="required"/>
 
                         <div class="mv-spacer-16"/>
 
-                        <span class="mv-field-label">Draw your signature</span>
+                        <span class="mv-field-label" t-out="label_draw_signature"/>
                         <div class="mv-sign-pad-wrap">
                             <canvas class="mv-sign-pad" id="mv-sign-pad"/>
-                            <div class="mv-sign-placeholder" id="mv-sign-placeholder">Sign here</div>
+                            <div class="mv-sign-placeholder" id="mv-sign-placeholder" t-out="label_sign_here"/>
                         </div>
                         <div class="mv-sign-tools">
                             <button type="button" class="mv-sign-clear" id="mv-sign-clear">Clear</button>
@@ -1208,11 +1285,10 @@
                 </t>
                 <t t-else="">
                     <div class="mv-subpage-head">
-                        <a t-att-href="back_url" class="mv-back-link">
+                        <a t-att-href="back_url" class="mv-back-link" aria-label="Back">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <polyline points="15 18 9 12 15 6"/>
                             </svg>
-                            <div>Back to CoreLab</div>
                         </a>
                     </div>
                 </t>
@@ -1318,10 +1394,10 @@
                 <div class="mv-segmented" role="tablist">
                     <a href="/my/orders/active"
                        t-att-class="'mv-segment' + ('' if show_all else ' mv-active')"
-                       t-att-aria-selected="'false' if show_all else 'true'">Active</a>
+                       t-att-aria-selected="'false' if show_all else 'true'"><t t-out="tab_active"/></a>
                     <a href="/my/orders/active?show=all"
                        t-att-class="'mv-segment' + (' mv-active' if show_all else '')"
-                       t-att-aria-selected="'true' if show_all else 'false'">All</a>
+                       t-att-aria-selected="'true' if show_all else 'false'"><t t-out="tab_all"/></a>
                 </div>
 
                 <t t-if="not rows">
@@ -1330,13 +1406,13 @@
                 <t t-else="">
                     <div class="mv-pack-section">
                         <t t-foreach="rows" t-as="row">
-                            <a t-attf-href="/my/orders/#{row['order'].id}" class="mv-order-row">
+                            <a t-attf-href="/my/orders/#{row['order'].id}/view" class="mv-order-row">
                                 <div style="min-width:0;">
-                                    <p class="mv-order-name" t-out="row['order'].name"/>
+                                    <p class="mv-order-name" t-out="row['plan_name']"/>
                                     <p class="mv-order-meta">
                                         <span t-field="row['order'].date_order"
                                               t-options='{"widget":"date"}'/>
-                                        · <t t-out="row['status']"/>
+                                        · <span class="mv-order-ref" t-out="row['order'].name"/>
                                     </p>
                                 </div>
                                 <div style="text-align:right;flex-shrink:0;">
@@ -1502,6 +1578,140 @@
                         </t>
                     </a>
                 </div>
+
+                <div class="mv-spacer-16"/>
+                <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                    <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_bottom_nav"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Order detail — mobile PWA override of sale portal ───────────────── -->
+    <!-- Replaces the standard Odoo desktop sale order portal with the mobile design -->
+    <template id="portal_order_detail" name="Order Detail (Student — Mobile)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="'/my/orders/active'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Order</p>
+                        <p class="mv-greeting-sub" t-out="sale_order.name"/>
+                    </div>
+                </div>
+
+                <!-- Order info card -->
+                <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+                        <span style="font-size:0.8rem;color:var(--mv-muted);">Date</span>
+                        <span style="font-size:0.85rem;color:var(--mv-ink);"
+                              t-field="sale_order.date_order"
+                              t-options='{"widget":"date"}'/>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.8rem;color:var(--mv-muted);">Status</span>
+                        <span style="font-size:0.8rem;" t-field="sale_order.state"></span>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="mv-section-label">Items</div>
+                <div class="mv-pack-section">
+                    <t t-foreach="sale_order._get_order_lines_to_report()" t-as="line">
+                        <t t-if="not line.display_type">
+                            <div class="mv-order-row" style="cursor:default;">
+                                <div style="min-width:0;flex:1;">
+                                    <p class="mv-order-name" t-out="line.product_id.name or line.name"/>
+                                    <p class="mv-order-meta">
+                                        ×<t t-out="int(line.product_uom_qty)"/>
+                                    </p>
+                                </div>
+                                <div style="text-align:right;flex-shrink:0;">
+                                    <span class="mv-order-amount"
+                                          t-field="line.price_subtotal"
+                                          t-options="{'widget':'monetary','display_currency':sale_order.currency_id}"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+
+                <!-- Total -->
+                <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:14px 16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:600;font-size:0.9rem;">Order total</span>
+                    <span class="mv-order-amount" style="font-size:1.05rem;"
+                          t-field="sale_order.amount_total"
+                          t-options="{'widget':'monetary','display_currency':sale_order.currency_id}"/>
+                </div>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Message the Studio (/my/message-studio) — Task 5 ────────────────── -->
+    <template id="portal_message_studio" name="Message the Studio">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                    <t t-call="fitness_portal.mv_teacher_page_header"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_page_header"/>
+                </t>
+
+                <t t-set="_back_url" t-value="'/my'"/>
+                <t t-set="_back_label">Profile</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Message the Studio</p>
+                        <p class="mv-greeting-sub">Send a message to the team</p>
+                    </div>
+                </div>
+
+                <t t-if="sent">
+                    <div class="mv-flash mv-flash-ok">
+                        <strong>Sent!</strong> The studio will get back to you soon.
+                    </div>
+                </t>
+                <t t-if="error == 'empty'">
+                    <div class="mv-flash mv-flash-err">Please write a message before sending.</div>
+                </t>
+                <t t-if="error == 'toolong'">
+                    <div class="mv-flash mv-flash-err">Message is too long (max 2 000 characters).</div>
+                </t>
+
+                <t t-if="not sent">
+                    <form action="/my/message-studio/send" method="post" class="mv-msg-form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <textarea class="mv-msg-textarea"
+                                  name="body"
+                                  maxlength="2000"
+                                  placeholder="Write your message here…"
+                                  required="required"/>
+                        <button type="submit" class="mv-msg-send-btn">Send</button>
+                    </form>
+                </t>
+                <t t-else="">
+                    <div style="text-align:center;margin-top:24px;">
+                        <a href="/my" class="mv-link-row" style="display:inline-block;text-decoration:underline;color:var(--mv-muted);">Back to Profile</a>
+                    </div>
+                </t>
 
                 <div class="mv-spacer-16"/>
                 <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">

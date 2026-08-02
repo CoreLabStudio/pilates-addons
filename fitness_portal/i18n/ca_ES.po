@@ -1223,3 +1223,185 @@ msgstr "Totes les teves comandes"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub_override
 msgid "All orders &amp; active status"
 msgstr "Totes les comandes i estat actiu"
+
+# ── Task 4 — new translatable strings ────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Active"
+msgstr "Actiu"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All"
+msgstr "Tot"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "I agree to the"
+msgstr "Accepto els"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Terms and Conditions"
+msgstr "Termes i Condicions"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Draw your signature"
+msgstr "Dibuixa la teva signatura"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your full name"
+msgstr "El teu nom complet"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Sign here"
+msgstr "Signa aquí"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Welcome, %s"
+msgstr "Benvingut/da, %s"
+
+# ── Credit history ────────────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Credit History"
+msgstr "Historial de crèdits"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All changes to your credits"
+msgstr "Tots els canvis als teus crèdits"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Total credits"
+msgstr "Crèdits totals"
+
+# ── Order detail ──────────────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Invoiced"
+msgstr "Facturat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Order"
+msgstr "Comanda"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Date"
+msgstr "Data"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Status"
+msgstr "Estat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Items"
+msgstr "Articles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Order total"
+msgstr "Total de la comanda"
+
+# ── Task 1: Period filter ─────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "All time"
+msgstr "Sempre"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "This month"
+msgstr "Aquest mes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "This week"
+msgstr "Aquesta setmana"
+
+# ── Task 3: Cancellation policy ───────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Cancel up to 2 hours before class to keep your credit."
+msgstr "Pots cancel·lar fins a 2 hores abans de la classe per conservar el teu crèdit."
+
+# ── Task 4: Per-class note ────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Note from studio"
+msgstr "Nota de l'estudi"
+
+# ── Task 5: Message the Studio ────────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Message the Studio"
+msgstr "Missatge a l'estudi"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Send a message to the admin team"
+msgstr "Envia un missatge a l'equip d'administració"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Send a message to the team"
+msgstr "Envia un missatge a l'equip"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Sent! The studio will get back to you soon."
+msgstr "Enviat! L'estudi et contactarà aviat."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Please write a message before sending."
+msgstr "Escriu un missatge abans d'enviar."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Message is too long (max 2 000 characters)."
+msgstr "El missatge és massa llarg (màx. 2 000 caràcters)."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Write your message here…"
+msgstr "Escriu el teu missatge aquí…"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Send"
+msgstr "Envia"

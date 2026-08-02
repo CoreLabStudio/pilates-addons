@@ -161,3 +161,44 @@ msgstr "Todavía no hay clases pasadas registradas."
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
 msgid "Show more"
 msgstr "Mostrar más"
+
+# ── Task 1: Period filter ─────────────────────────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "All time"
+msgstr "Siempre"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "This month"
+msgstr "Este mes"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "This week"
+msgstr "Esta semana"
+
+# ── Task 2: Reassign toggle ───────────────────────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Reassign"
+msgstr "Reasignar"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Select teacher…"
+msgstr "Seleccionar instructor…"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Confirm"
+msgstr "Confirmar"
+
+# ── Task 4: Per-class note ────────────────────────────────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Note from studio"
+msgstr "Nota del estudio"

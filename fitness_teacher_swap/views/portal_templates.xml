@@ -50,26 +50,28 @@
                                     <p class="mv-class-row-sub">
                                         <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
                                     </p>
-                                    <!-- Reassign form (secondary action) -->
+                                    <!-- Reassign: show link only; form reveals on click -->
                                     <t t-if="other_teachers">
-                                        <form t-attf-action="/my/teacher/classes/#{event.id}/reassign"
-                                              method="post"
-                                              class="mv-reassign-form"
-                                              style="display:flex;gap:6px;align-items:center;margin-top:8px;">
-                                            <input type="hidden" name="csrf_token"
-                                                   t-att-value="request.csrf_token()"/>
-                                            <select name="new_teacher_id"
-                                                    style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
-                                                    required="required">
-                                                <option value="">Reassign to…</option>
-                                                <t t-foreach="other_teachers" t-as="teacher">
-                                                    <option t-att-value="teacher.id"
-                                                            t-out="teacher.name"/>
-                                                </t>
-                                            </select>
-                                            <button type="submit"
-                                                    style="font-size:0.72rem;padding:5px 12px;border:1px solid var(--mv-border);border-radius:999px;background:var(--mv-bg);color:var(--mv-muted);cursor:pointer;white-space:nowrap;">Reassign</button>
-                                        </form>
+                                        <details class="mv-reassign-details">
+                                            <summary>Reassign</summary>
+                                            <form t-attf-action="/my/teacher/classes/#{event.id}/reassign"
+                                                  method="post"
+                                                  style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+                                                <input type="hidden" name="csrf_token"
+                                                       t-att-value="request.csrf_token()"/>
+                                                <select name="new_teacher_id"
+                                                        style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
+                                                        required="required">
+                                                    <option value="">Select teacher…</option>
+                                                    <t t-foreach="other_teachers" t-as="teacher">
+                                                        <option t-att-value="teacher.id"
+                                                                t-out="teacher.name"/>
+                                                    </t>
+                                                </select>
+                                                <button type="submit"
+                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-accent);color:#fff;cursor:pointer;white-space:nowrap;">Confirm</button>
+                                            </form>
+                                        </details>
                                     </t>
                                 </div>
                                 <div class="mv-class-row-right">
@@ -134,6 +136,12 @@
                         </span>
                         <t t-if="not class_started">
                             <div class="mv-roster-pill" style="margin-left:6px;">Attendance opens at class start</div>
+                        </t>
+                        <t t-if="event.fitness_note">
+                            <div class="mv-class-note">
+                                <div class="mv-class-note-label">Note from studio</div>
+                                <t t-out="event.fitness_note"/>
+                            </div>
                         </t>
                     </div>
 
@@ -220,12 +228,22 @@
                 <t t-set="_back_label">Profile</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
-                <!-- Greeting -->
+                <!-- Greeting + period filter -->
                 <div class="mv-greeting-row">
                     <div>
                         <p class="mv-greeting-name">Classes History</p>
                         <p class="mv-greeting-sub">Past classes you have taught</p>
                     </div>
+                    <select class="mv-period-select"
+                            onchange="location.href=this.value"
+                            aria-label="Filter period">
+                        <option t-att-value="'/my/teacher/history'"
+                                t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
+                        <option t-att-value="'/my/teacher/history?period=month'"
+                                t-att-selected="'selected' if filter_period == 'month' else None">This month</option>
+                        <option t-att-value="'/my/teacher/history?period=week'"
+                                t-att-selected="'selected' if filter_period == 'week' else None">This week</option>
+                    </select>
                 </div>
 
                 <!-- Class list -->

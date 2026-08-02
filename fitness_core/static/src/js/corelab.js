@@ -173,8 +173,7 @@
       .then(data => {
         const n = data.count || 0;
         if (n > 0 && badge) {
-          badge.textContent = n > 9 ? '9+' : String(n);
-          badge.style.display = 'flex';
+          badge.style.display = 'block';
         }
       }).catch(() => {});
 
@@ -228,10 +227,14 @@
      track /my/* navigation in sessionStorage so that 8b can use the
      real previous page even without a referrer.                    */
   function trackNavHistory() {
+    // Settings/utility pages are excluded from the nav stack so they never
+    // appear as back-navigation targets from content pages.
+    const UTILITY = ['/my/language', '/my/security', '/my/set_lang', '/my/addresses'];
     const key = 'cl_nav_stack';
     try {
       const cur = window.location.pathname + window.location.search;
       if (!/^\/my(\/|$)/.test(cur)) return;
+      if (UTILITY.some(function(u) { return cur === u || cur.startsWith(u + '?'); })) return;
       const stack = JSON.parse(sessionStorage.getItem(key) || '[]');
       if (stack[stack.length - 1] === cur) return; // no duplicate on reload
       stack.push(cur);
@@ -244,12 +247,17 @@
      A sub-page such as Credit History is reachable from Home, Studio,
      Packages and Profile, so a fixed href always sent someone to the
      wrong place. When the previous page was inside /my we point the
-     back link at it and switch the wording to the generic "Back".
+     back link at it. Utility/settings pages are excluded as back targets.
      Falls back to sessionStorage nav stack (PWA mode), then to the
-     server-rendered href when nothing better is available.         */
+     server-rendered href when nothing better is available.             */
   function setupBackLinks() {
     const links = $$('[data-cl-back]');
     if (!links.length) return;
+
+    const UTILITY = ['/my/language', '/my/security', '/my/set_lang', '/my/addresses'];
+    function isUtility(p) {
+      return UTILITY.some(function(u) { return p === u || p.startsWith(u + '?') || p.startsWith(u + '/'); });
+    }
 
     const cur = window.location.pathname + window.location.search;
     let target = null;
@@ -262,21 +270,22 @@
         if (
           url.origin === window.location.origin &&
           /^\/my(\/|$)/.test(url.pathname) &&
-          url.pathname !== window.location.pathname
+          url.pathname !== window.location.pathname &&
+          !isUtility(url.pathname)
         ) {
           target = url.pathname + url.search;
         }
       } catch (_) {}
     }
 
-    // 2. PWA fallback: walk sessionStorage nav stack backwards
+    // 2. PWA fallback: walk sessionStorage nav stack backwards, skipping utility pages
     if (!target) {
       try {
         const key = 'cl_nav_stack';
         const stack = JSON.parse(sessionStorage.getItem(key) || '[]');
         for (let i = stack.length - 1; i >= 0; i--) {
           const entry = stack[i];
-          if (entry !== cur && /^\/my(\/|$)/.test(entry)) {
+          if (entry !== cur && /^\/my(\/|$)/.test(entry) && !isUtility(entry)) {
             target = entry;
             break;
           }
@@ -286,11 +295,8 @@
 
     if (!target) return; // nothing better than the static server href
 
-    links.forEach((link) => {
+    links.forEach(function(link) {
       link.setAttribute('href', target);
-      const text = $('.mv-back-text', link);
-      const generic = $('.mv-back-generic', link);
-      if (text && generic) text.textContent = generic.textContent;
     });
   }
 

@@ -28,7 +28,7 @@
 
     <!-- Action: Subscription Plans (filtered product.template) -->
     <record id="action_fitness_subscription_plans" model="ir.actions.act_window">
-        <field name="name">Subscription Plans</field>
+        <field name="name">Membership Plans</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_product_template_subscription_plans_list"/>

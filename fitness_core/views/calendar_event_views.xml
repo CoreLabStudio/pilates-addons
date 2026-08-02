@@ -7,6 +7,10 @@
         <field name="model">calendar.event</field>
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="fitness_note" placeholder="Optional note for this specific class…"
+                       widget="text" invisible="not is_fitness_class"/>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Fitness Class" name="fitness_class_page">
                     <group>
@@ -61,6 +65,21 @@
                 <field name="booked_seats" string="Booked"/>
                 <field name="available_seats" string="Available"/>
             </list>
+        </field>
+    </record>
+
+    <!-- Relabel "Meeting Subject" → "Class Name" in the form header -->
+    <record id="view_calendar_event_form_fitness_name" model="ir.ui.view">
+        <field name="name">calendar.event.form.fitness.name</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//label[@for='name']" position="attributes">
+                <attribute name="string">Class Name</attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="placeholder">e.g. Barre Beginner</attribute>
+            </xpath>
         </field>
     </record>
 

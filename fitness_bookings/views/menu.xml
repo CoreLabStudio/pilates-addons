@@ -4,7 +4,7 @@
     <!-- Bookings list — first child under the Bookings dropdown group -->
     <menuitem
         id="menu_fitness_bookings"
-        name="Bookings"
+        name="Student Bookings"
         parent="fitness_core.menu_group_bookings"
         action="action_fitness_booking"
         sequence="10"

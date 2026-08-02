@@ -52,7 +52,7 @@
             <field name="fitness_session_type">group</field>
         </record>
 
-        <!-- Privadas: private 1-on-1 Barre class -->
+        <!-- Privadas: private 1-on-1 Barre class — sold directly by admin, not portal-purchasable -->
         <record id="product_barre_privada_single" model="product.template">
             <field name="name">Barre Privada Single Class</field>
             <field name="type">service</field>
@@ -62,6 +62,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <!-- Discontinued Barre packs (replaced by 5-pack / 10-pack above) -->
@@ -173,7 +174,7 @@
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <!--  REFORMER PRIVATE SESSIONS                                      -->
+        <!--  REFORMER PRIVATE SESSIONS — sold directly by admin only        -->
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="product_private_single" model="product.template">
@@ -185,6 +186,7 @@
             <field name="fitness_validity_days">14</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <record id="product_private_5pack" model="product.template">
@@ -196,6 +198,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <record id="product_private_10pack" model="product.template">
@@ -207,10 +210,11 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <!--  REFORMER DUO SESSIONS                                          -->
+        <!--  REFORMER DUO SESSIONS — sold directly by admin only            -->
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="product_duo_single" model="product.template">
@@ -222,6 +226,7 @@
             <field name="fitness_validity_days">15</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <record id="product_duo_5pack" model="product.template">
@@ -233,6 +238,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
+            <field name="sale_ok">0</field>
         </record>
 
         <record id="product_duo_10pack" model="product.template">
@@ -244,6 +250,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
+            <field name="sale_ok">0</field>
         </record>
 
     </data>

@@ -28,7 +28,7 @@
         <field name="view_mode">list</field>
         <field name="view_id" ref="view_fitness_package_line_list"/>
         <field name="domain">[('product_id.fitness_is_package', '=', True)]</field>
-        <field name="context">{'search_default_order_partner_id': 1}</field>
+        <field name="context">{}</field>
     </record>
 
     <!-- Package sales (sale.order filtered to fitness packages).

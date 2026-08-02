@@ -16,6 +16,7 @@
         'security/ir_rule.xml',
         'views/fitness_booking_views.xml',
         'views/fitness_booking_cancel_wizard_views.xml',
+        'views/calendar_event_views.xml',
         'views/menu.xml',
     ],
     'installable': True,

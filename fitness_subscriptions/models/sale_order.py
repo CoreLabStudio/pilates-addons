@@ -47,17 +47,18 @@ class SaleOrder(models.Model):
              "own next_invoice_date / start_date (no parallel calendar).",
     )
 
-    # ── FLOATING CREDITS — per-subscription, per-cycle pool ──────────────────
+    # ── FLOATING CREDITS — per-subscription, accumulating pool ───────────────
     # Each credit permits one booking exempt from the weekly cap. Fed by:
     #   (a) promo first-cycle bonus (product.fitness_promo_first_cycle_bonus)
     #   (b) in-time (>2h) cancellation of an allowance-paid booking
-    # Reset to 0 at renewal. Decremented when a floating-credit booking is made.
+    # Carry forward across renewals; decremented when a floating-credit booking is made.
     fitness_floating_credits = fields.Integer(
         "Floating Credits",
         default=0,
-        help="Cap-exempt booking credits available this cycle. Seeded from promo "
-             "bonus on first confirmation; earned via >2h cancellation of allowance "
-             "bookings. Never carry over to next cycle.",
+        help="Cap-exempt booking credits accumulated across all billing cycles. "
+             "Seeded from promo bonus on first confirmation; earned via >2h "
+             "cancellation of allowance bookings. Carry forward at renewal — "
+             "only decremented when actually consumed by a booking.",
     )
 
     # ── PER-MEMBER OVERRIDE — 0 means 'use plan default' ─────────────────────
@@ -276,7 +277,7 @@ class SaleOrder(models.Model):
 
             sub._auto_place_clase_fija()
 
-    # ─── Renewal: reset counters; floating credits NEVER carry over ──────────────
+    # ─── Renewal: reset usage counter; floating credits carry forward ────────────
 
     def _update_next_invoice_date(self):
         # Snapshot BEFORE super() advances next_invoice_date. The old value is the
@@ -287,13 +288,16 @@ class SaleOrder(models.Model):
             if not sub.fitness_subscription_product_id:
                 continue
             sub.fitness_subscription_used_classes = 0
-            sub.fitness_floating_credits = 0
+            # fitness_floating_credits is NOT reset — credits carry forward
+            # across billing periods until consumed by an actual booking.
             # fitness_period_start_date = start of the NEW period (old next_invoice_date)
             sub.fitness_period_start_date = old_invoice_dates.get(sub.id)
             _logger.info(
-                "[SUBSCRIPTION] %s renewed: reporting_counter=0 floating=0 "
+                "[SUBSCRIPTION] %s renewed: reporting_counter=0 "
+                "floating_credits=%d (carried forward) "
                 "period_start=%s period_end=%s",
-                sub.name, sub.fitness_period_start_date, sub.next_invoice_date,
+                sub.name, sub.fitness_floating_credits,
+                sub.fitness_period_start_date, sub.next_invoice_date,
             )
             sub._auto_place_clase_fija()
 

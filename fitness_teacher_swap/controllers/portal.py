@@ -185,22 +185,37 @@ class FitnessTeacherSwapPortal(http.Controller):
         return request.redirect('/my/teacher/classes')
 
     @http.route('/my/teacher/history', type='http', auth='user', website=True, sitemap=False)
-    def my_class_history(self, **kw):
+    def my_class_history(self, period=None, **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
         now = fields.Datetime.now()
+
+        # Determine cutoff for period filter
+        if period == 'week':
+            cutoff = now - timedelta(days=7)
+        elif period == 'month':
+            cutoff = now - timedelta(days=30)
+        elif period == 'year':
+            cutoff = now - timedelta(days=365)
+        else:
+            period = 'all'
+            cutoff = None
 
         try:
             user_tz = pytz.timezone(request.env.user.tz or 'UTC')
         except pytz.UnknownTimeZoneError:
             user_tz = pytz.UTC
 
-        past_events = request.env['calendar.event'].search([
+        domain = [
             ('user_id', '=', request.env.user.id),
             ('is_fitness_class', '=', True),
             ('start', '<', now),
-        ], order='start desc', limit=200)
+        ]
+        if cutoff:
+            domain.append(('start', '>=', cutoff))
+
+        past_events = request.env['calendar.event'].search(domain, order='start desc', limit=200)
 
         events_ctx = []
         for ev in past_events:
@@ -234,5 +249,6 @@ class FitnessTeacherSwapPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_teacher_swap.portal_teacher_history', {
-            'month_groups': month_groups,
+            'month_groups':  month_groups,
+            'filter_period': period,
         })

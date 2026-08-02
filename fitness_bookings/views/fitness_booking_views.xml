@@ -32,18 +32,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_mark_attended"
-                            string="Mark Attended"
-                            type="object"
-                            class="btn-success"
-                            invisible="state != 'booked'"/>
-                    <button name="action_mark_no_show"
-                            string="Mark No-Show"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'booked'"/>
                     <button name="action_cancel"
-                            string="Cancel Booking"
+                            string="Cancel (Manager Override)"
                             type="object"
                             class="btn-danger"
                             invisible="state != 'booked'"/>

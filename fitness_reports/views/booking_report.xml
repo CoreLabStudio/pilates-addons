@@ -111,7 +111,7 @@
 
     <!-- ACTION ───────────────────────────────────────────────── -->
     <record id="action_fitness_booking_report" model="ir.actions.act_window">
-        <field name="name">Bookings</field>
+        <field name="name">Booking Analytics</field>
         <field name="res_model">fitness.booking</field>
         <field name="view_mode">pivot,graph,list</field>
         <field name="search_view_id" ref="view_fitness_booking_report_search"/>

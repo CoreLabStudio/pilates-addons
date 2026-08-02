@@ -6,20 +6,79 @@ _logger = logging.getLogger(__name__)
 
 
 class CalendarEvent(models.Model):
-    """Adds one-class-at-a-time teacher reassignment for the teacher portal page.
-
-    All checks run against self.env.user (the actual caller, NEVER sudo) before
-    any write happens. Only the final write — after every check has passed —
-    is escalated via sudo(), since portal/teacher accounts are not given broad
-    ORM write access to calendar.event via ir.model.access (see manifest: no
-    new access rows are added by this module).
-    """
+    """Adds one-class-at-a-time teacher reassignment for the teacher portal page,
+    and sends in-app notifications whenever a fitness class teacher is changed
+    via the backend form (admin assignment)."""
     _inherit = 'calendar.event'
 
     # Minimal override: turn on chatter tracking for the organizer field so
     # every teacher change (swap or otherwise) is logged automatically.
-    # string/comodel/default/etc. are untouched and inherit from base calendar.
     user_id = fields.Many2one(tracking=True)
+
+    def write(self, vals):
+        # Skip notification logic when skip_fitness_notification is set
+        # (used by fitness_reassign_teacher which handles notifications itself)
+        # or when user_id isn't changing.
+        if 'user_id' not in vals or self.env.context.get('skip_fitness_notification'):
+            return super().write(vals)
+
+        # Snapshot old teacher ids for fitness classes before the write
+        old_teacher_ids = {
+            e.id: e.user_id.id
+            for e in self.filtered('is_fitness_class')
+        }
+
+        result = super().write(vals)
+
+        if not old_teacher_ids:
+            return result
+
+        new_teacher_id = vals['user_id']
+        if not new_teacher_id:
+            return result
+
+        new_teacher = self.env['res.users'].browse(new_teacher_id)
+        if not new_teacher.exists():
+            return result
+
+        Notif = self.env['fitness.notification'].sudo()
+
+        for event in self.filtered('is_fitness_class'):
+            old_id = old_teacher_ids.get(event.id)
+            if old_id == new_teacher_id:
+                continue
+
+            # Notify students with active bookings
+            bookings = self.env['fitness.booking'].sudo().search([
+                ('calendar_event_id', '=', event.id),
+                ('state', '=', 'booked'),
+            ])
+            notified = 0
+            for booking in bookings:
+                student_user = booking.student_id.user_ids[:1]
+                if student_user:
+                    Notif._create_for_user(
+                        student_user.id,
+                        'teacher_swap',
+                        f'Teacher updated: {event.name}',
+                        f'Your class will now be taught by {new_teacher.name}.',
+                    )
+                    notified += 1
+
+            # Notify the newly assigned teacher
+            Notif._create_for_user(
+                new_teacher.id,
+                'teacher_swap',
+                f'Class assigned to you: {event.name}',
+                f'You have been assigned as teacher for this class.',
+            )
+
+            _logger.info(
+                "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
+                event.name, new_teacher.name, notified,
+            )
+
+        return result
 
     def fitness_reassign_teacher(self, new_teacher_id):
         self.ensure_one()
@@ -58,9 +117,8 @@ class CalendarEvent(models.Model):
             )
 
         old_teacher_name = self.user_id.name
-        # Suppress fitness_notifications (it doesn't hook calendar.event today,
-        # but this guarantees silence even if that ever changes) while still
-        # persisting the change so students see the new teacher immediately.
+        # skip_fitness_notification prevents our write() hook from firing;
+        # this method sends its own notifications below.
         self.sudo().with_context(skip_fitness_notification=True).write({'user_id': new_teacher.id})
         _logger.info(
             "[TEACHER-SWAP] %s reassigned class %s (id=%d) from %s to %s",

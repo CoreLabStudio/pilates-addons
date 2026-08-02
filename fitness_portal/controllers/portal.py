@@ -60,10 +60,17 @@ class FitnessStudentPortal(http.Controller):
             ('class_start', '>', now),
         ], order='class_start asc')
 
+        has_any_bookings = bool(request.env['fitness.booking'].search_count([
+            ('student_id', '=', partner.id),
+        ]))
+
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
 
-        welcome = (_('Welcome back, %s') % student_name) if student_name else _('Welcome back')
+        if has_any_bookings:
+            welcome = (_('Welcome back, %s') % student_name) if student_name else _('Welcome back')
+        else:
+            welcome = (_('Welcome, %s') % student_name) if student_name else _('Welcome')
 
         n = len(upcoming)
         if n == 0:
@@ -74,12 +81,13 @@ class FitnessStudentPortal(http.Controller):
             schedule_hint = _('%d classes booked') % n
 
         return request.render('fitness_portal.portal_student_home', {
-            'welcome':        welcome,
-            'student_name':   student_name,
-            'upcoming_count': n,
-            'next_booking':   upcoming[:1],
-            'schedule_hint':  schedule_hint,
-            'primary_credit': self._primary_credit(partner.id),
+            'welcome':          welcome,
+            'student_name':     student_name,
+            'upcoming_count':   n,
+            'next_booking':     upcoming[:1],
+            'schedule_hint':    schedule_hint,
+            'primary_credit':   self._primary_credit(partner.id),
+            'has_any_bookings': has_any_bookings,
         })
 
     # ══════════════════════════════════════════════════════════
@@ -394,7 +402,7 @@ class FitnessStudentPortal(http.Controller):
     # ══════════════════════════════════════════════════════════
 
     @http.route('/my/history', type='http', auth='user', website=True, sitemap=False)
-    def my_history(self, **kw):
+    def my_history(self, period=None, **kw):
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -402,12 +410,25 @@ class FitnessStudentPortal(http.Controller):
         now = fields.Datetime.now()
         today = fields.Date.today()
 
-        past_bookings = request.env['fitness.booking'].search([
+        if period == 'week':
+            cutoff = now - timedelta(days=7)
+        elif period == 'month':
+            cutoff = now - timedelta(days=30)
+        else:
+            period = 'all'
+            cutoff = None
+
+        booking_domain = [
             ('student_id', '=', partner.id),
             '|',
             ('class_start', '<', now),
             ('state', 'in', ['no_show', 'cancelled']),
-        ], order='class_start desc', limit=200)
+        ]
+        if cutoff:
+            booking_domain.append(('class_start', '>=', cutoff))
+
+        past_bookings = request.env['fitness.booking'].search(
+            booking_domain, order='class_start desc', limit=200)
 
         orders = request.env['sale.order'].search([
             ('partner_id', '=', partner.id),
@@ -459,6 +480,7 @@ class FitnessStudentPortal(http.Controller):
             'packs':          packs,
             'primary_credit': self._primary_credit(partner.id),
             'student_name':   student_name,
+            'filter_period':  period,
         })
 
     # ══════════════════════════════════════════════════════════
@@ -478,11 +500,13 @@ class FitnessStudentPortal(http.Controller):
         student_name = full_name.split()[0] if full_name else full_name
 
         return request.render('fitness_portal.portal_credit_history', {
-            'entries':        entries,
-            'current_total':  entries[0]['balance'] if entries else self._credit_total(partner),
-            'primary_credit': self._primary_credit(partner.id),
-            'student_name':   student_name,
-            'ledger_empty':   _('No credit activity yet. Buy a package to get started.'),
+            'entries':           entries,
+            'current_total':     entries[0]['balance'] if entries else self._credit_total(partner),
+            'primary_credit':    self._primary_credit(partner.id),
+            'student_name':      student_name,
+            'ledger_empty':      _('No credit activity yet. Buy a package to get started.'),
+            'label_credits_page': _('Credit History'),
+            'label_credits_sub':  _('All changes to your credits'),
         })
 
     def _credit_total(self, partner):
@@ -802,15 +826,62 @@ class FitnessStudentPortal(http.Controller):
                              else (_('%d days') % product.fitness_validity_days))
         meta = ' · '.join(parts)
 
+        # Check if student holds an active instance of this product
+        active_info = None
+        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+
+        def _fmt_date(d):
+            if not d:
+                return ''
+            if isinstance(d, _dt_cls):
+                d = d.date()
+            if _BABEL_OK:
+                try:
+                    return _babel_format_date(d, format='d MMM yyyy', locale=lang_code)
+                except Exception:
+                    pass
+            return d.strftime('%d/%m/%Y')
+
+        if is_sub:
+            active_sub = request.env['sale.order'].sudo().search([
+                ('partner_id', '=', partner.id),
+                ('is_subscription', '=', True),
+                ('subscription_state', '=', '3_progress'),
+                ('order_line.product_id.product_tmpl_id', '=', product.id),
+            ], limit=1)
+            if active_sub:
+                raw_date = active_sub.start_date or active_sub.date_order
+                active_info = {
+                    'order':    active_sub,
+                    'date_str': _fmt_date(raw_date),
+                    'ref':      active_sub.name,
+                }
+        else:
+            active_line = request.env['sale.order.line'].sudo().search([
+                ('order_partner_id', '=', partner.id),
+                ('product_id.product_tmpl_id', '=', product.id),
+                ('fitness_remaining_classes', '>', 0),
+            ], order='fitness_validity_end_date asc nulls last', limit=1)
+            if active_line:
+                active_info = {
+                    'order':             active_line.order_id,
+                    'date_str':          _fmt_date(active_line.order_id.date_order),
+                    'ref':               active_line.order_id.name,
+                    'credits_remaining': active_line.fitness_remaining_classes,
+                    'credits_total':     active_line.fitness_original_class_count,
+                    'validity_end_str':  _fmt_date(active_line.fitness_validity_end_date),
+                }
+
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_package_detail', {
-            'product':        product,
-            'meta':           meta,
+            'product':         product,
+            'meta':            meta,
             'is_subscription': is_sub,
-            'back_url':       '/my/packages?tab=subscriptions' if is_sub else '/my/packages',
-            'ct':             product.fitness_class_type or 'any',
-            'student_name':   full_name.split()[0] if full_name else '',
-            'primary_credit': self._primary_credit(partner.id),
+            'back_url':        '/my/packages?tab=subscriptions' if is_sub else '/my/packages',
+            'ct':              product.fitness_class_type or 'any',
+            'student_name':    full_name.split()[0] if full_name else '',
+            'primary_credit':  self._primary_credit(partner.id),
+            'active_info':     active_info,
         })
 
     # Legacy POST target — the Buy button is now a link to the payment step.
@@ -855,14 +926,16 @@ class FitnessStudentPortal(http.Controller):
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
-            'product':        product,
-            'is_subscription': bool(product.fitness_is_subscription_plan),
-            'step':           'payment',
-            'selected_method': method if method in PAYMENT_METHODS else None,
-            'payment_details': self._payment_details(),
-            'error_msg':      error_msg,
-            'back_url':       f'/my/packages/{product.id}',
-            'student_name':   full_name.split()[0] if full_name else '',
+            'product':          product,
+            'is_subscription':  bool(product.fitness_is_subscription_plan),
+            'step':             'payment',
+            'selected_method':  method if method in PAYMENT_METHODS else None,
+            'payment_details':  self._payment_details(),
+            'error_msg':        error_msg,
+            'back_url':         f'/my/packages/{product.id}',
+            'student_name':     full_name.split()[0] if full_name else '',
+            'terms_label':      _('I agree to the'),
+            'terms_link_label': _('Terms and Conditions'),
         })
 
     @http.route('/my/checkout/<int:order_id>/sign', type='http', auth='user',
@@ -891,15 +964,18 @@ class FitnessStudentPortal(http.Controller):
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_sign', {
-            'order':          order,
-            'product':        product,
-            'step':           'sign',
-            'method_label':   method_label,
-            'summary':        summary,
-            'sign_default':   partner.name or '',
-            'back_url':       f'/my/packages/{product.id}/checkout' if product else '/my/packages',
-            'error_msg':      kw.get('error') or None,
-            'student_name':   full_name.split()[0] if full_name else '',
+            'order':                order,
+            'product':              product,
+            'step':                 'sign',
+            'method_label':         method_label,
+            'summary':              summary,
+            'sign_default':         partner.name or '',
+            'back_url':             f'/my/packages/{product.id}/checkout' if product else '/my/packages',
+            'error_msg':            kw.get('error') or None,
+            'student_name':         full_name.split()[0] if full_name else '',
+            'label_draw_signature': _('Draw your signature'),
+            'label_your_full_name': _('Your full name'),
+            'label_sign_here':      _('Sign here'),
         })
 
     @http.route('/my/checkout/<int:order_id>/complete', type='http', auth='user',
@@ -1029,11 +1105,14 @@ class FitnessStudentPortal(http.Controller):
             else:
                 status = _('Awaiting invoice')
                 badge = 'sage'
+            first_line = order.order_line.filtered(lambda l: l.product_id)[:1]
+            plan_name = first_line.product_id.name if first_line else order.name
             rows.append({
-                'order':  order,
-                'status': status,
-                'badge':  badge,
-                'amount': self._format_price(order.amount_total, order.currency_id),
+                'order':     order,
+                'status':    status,
+                'badge':     badge,
+                'amount':    self._format_price(order.amount_total, order.currency_id),
+                'plan_name': plan_name,
             })
 
         full_name = partner.name or ''
@@ -1043,6 +1122,32 @@ class FitnessStudentPortal(http.Controller):
             'rows':         rows,
             'show_all':     show_all,
             'empty_msg':    empty_msg,
+            'student_name': full_name.split()[0] if full_name else '',
+            'tab_active':   _('Active'),
+            'tab_all':      _('All'),
+        })
+
+    # ══════════════════════════════════════════════════════════
+    #  ORDER DETAIL  (/my/orders/<id>/view)  — mobile override
+    # NOTE: Route activates on next service restart after module upgrade.
+    #       Until restart, /my/orders/<id> shows the standard Odoo order page.
+    # ══════════════════════════════════════════════════════════
+
+    @http.route('/my/orders/<int:order_id>/view', type='http', auth='user',
+                website=True, sitemap=False)
+    def order_detail(self, order_id, **kw):
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        partner = request.env.user.partner_id
+        order = request.env['sale.order'].sudo().browse(order_id)
+
+        if not order.exists() or order.partner_id.id != partner.id:
+            return request.redirect('/my/orders/active')
+
+        full_name = partner.name or ''
+        return request.render('fitness_portal.portal_order_detail', {
+            'sale_order':   order,
             'student_name': full_name.split()[0] if full_name else '',
         })
 
@@ -1398,6 +1503,63 @@ class FitnessStudentPortal(http.Controller):
         if not event.class_type_id:
             return False
         return event.class_type_id.classroom_type in eligible_types
+
+    # ══════════════════════════════════════════════════════════
+    #  Message the Studio
+    # ══════════════════════════════════════════════════════════
+
+    @http.route('/my/message-studio', type='http', auth='user', website=True, sitemap=False)
+    def message_studio_page(self, **kw):
+        if not (request.env.user.has_group(STUDENT_GROUP) or
+                request.env.user.has_group('fitness_core.group_fitness_teacher')):
+            return request.redirect('/my')
+        return request.render('fitness_portal.portal_message_studio', {
+            'sent':  bool(kw.get('sent')),
+            'error': kw.get('error'),
+        })
+
+    @http.route('/my/message-studio/send', type='http', auth='user',
+                methods=['POST'], website=True, sitemap=False)
+    def message_studio_send(self, body=None, **kw):
+        import html as _html
+        if not (request.env.user.has_group(STUDENT_GROUP) or
+                request.env.user.has_group('fitness_core.group_fitness_teacher')):
+            return request.redirect('/my')
+
+        body = (body or '').strip()
+        if not body:
+            return request.redirect('/my/message-studio?error=empty')
+        if len(body) > 2000:
+            return request.redirect('/my/message-studio?error=toolong')
+
+        Channel = request.env['discuss.channel'].sudo()
+        channel = Channel.search([('name', '=', 'Studio Messages')], limit=1)
+        if not channel:
+            channel = Channel.create({
+                'name': 'Studio Messages',
+                'channel_type': 'channel',
+                'description': 'Messages from students and teachers to the studio.',
+            })
+            try:
+                admin_partner = request.env.ref('base.user_admin').sudo().partner_id
+                channel.add_members([admin_partner.id])
+            except Exception:
+                pass
+
+        user = request.env.user
+        sender = user.partner_id.name or user.name or 'Portal User'
+        role = 'Teacher' if user.has_group('fitness_core.group_fitness_teacher') else 'Student'
+        msg_html = (
+            f'<strong>[{role}] {_html.escape(sender)}</strong><br/>'
+            f'{_html.escape(body).replace(chr(10), "<br/>")}'
+        )
+        channel.message_post(
+            body=msg_html,
+            author_id=user.partner_id.id,
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )
+        return request.redirect('/my/message-studio?sent=1')
 
     # ══════════════════════════════════════════════════════════
     #  Language

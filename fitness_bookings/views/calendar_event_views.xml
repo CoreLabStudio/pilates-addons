@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Adds "Cancel Entire Class" to the calendar event form header.
+         Only visible to managers when the event is a fitness class. -->
+    <record id="view_calendar_event_form_cancel_class" model="ir.ui.view">
+        <field name="name">calendar.event.form.cancel_class</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_cancel_class"
+                        string="Cancel Entire Class"
+                        type="object"
+                        class="btn-danger"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="not is_fitness_class"
+                        confirm="This will cancel ALL active bookings and return credits to students. Continue?"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
