@@ -35,7 +35,23 @@
         sequence="30"
     />
 
-    <!-- 4. Configuration group — dropdown; children below -->
+    <!-- 4. Content group — News & Promotions posts -->
+    <menuitem
+        id="menu_group_content"
+        name="Content"
+        parent="menu_fitness_root"
+        sequence="35"
+    />
+
+    <menuitem
+        id="menu_fitness_news_posts"
+        name="News &amp; Promotions"
+        parent="menu_group_content"
+        action="action_fitness_news_post"
+        sequence="10"
+    />
+
+    <!-- 5. Configuration group — dropdown; children below -->
     <menuitem
         id="menu_group_configuration"
         name="Configuration"

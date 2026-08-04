@@ -1,36 +1,40 @@
 import logging
+import os
 
 from odoo import http
 from odoo.http import request
-from odoo.tools.misc import file_open
+from odoo.modules import get_module_path
 
 _logger = logging.getLogger(__name__)
 
 APP_NAME = 'CoreLab'
-BRAND_BG = '#FAF9F6'
-BRAND_THEME = '#9ABACD'
+BRAND_BG = '#F8F3E8'
+BRAND_THEME = '#18110C'
 
-# The studio can drop a real PNG next to the bundled SVG at any time and it is
-# picked up automatically — no code or template change needed.
 LOGO_CANDIDATES = [
     ('fitness_core/static/src/img/corelab-logo.png', 'image/png'),
-    ('fitness_core/static/src/img/corelab-logo.svg', 'image/svg+xml'),
 ]
 ICON_CANDIDATES = [
     ('fitness_core/static/src/img/corelab-icon.png', 'image/png'),
     ('fitness_core/static/src/img/corelab-icon.svg', 'image/svg+xml'),
     ('fitness_core/static/src/img/corelab-logo.png', 'image/png'),
-    ('fitness_core/static/src/img/corelab-logo.svg', 'image/svg+xml'),
 ]
 
 
 def _read_first(candidates):
     for path, mimetype in candidates:
-        try:
-            with file_open(path, 'rb') as handle:
-                return handle.read(), mimetype
-        except (FileNotFoundError, OSError, ValueError):
+        parts = path.split('/')
+        module_name = parts[0]
+        module_root = get_module_path(module_name, display_warning=False)
+        if not module_root:
             continue
+        full_path = os.path.join(module_root, *parts[1:])
+        if os.path.isfile(full_path):
+            try:
+                with open(full_path, 'rb') as fh:
+                    return fh.read(), mimetype
+            except OSError:
+                continue
     return None, None
 
 

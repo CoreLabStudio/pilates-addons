@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Notifications – Yoleyva Studio',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.3.0',
     'category': 'Services',
     'summary': 'Email and in-app notifications for booking lifecycle, credit status, and teacher changes',
     'author': 'Yoleyva Studio',

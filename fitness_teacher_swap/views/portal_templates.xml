@@ -69,7 +69,7 @@
                                                     </t>
                                                 </select>
                                                 <button type="submit"
-                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-accent);color:#fff;cursor:pointer;white-space:nowrap;">Confirm</button>
+                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-accent);color:var(--mv-accent-fg);cursor:pointer;white-space:nowrap;">Confirm</button>
                                             </form>
                                         </details>
                                     </t>
@@ -239,10 +239,11 @@
                             aria-label="Filter period">
                         <option t-att-value="'/my/teacher/history'"
                                 t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
-                        <option t-att-value="'/my/teacher/history?period=month'"
-                                t-att-selected="'selected' if filter_period == 'month' else None">This month</option>
-                        <option t-att-value="'/my/teacher/history?period=week'"
-                                t-att-selected="'selected' if filter_period == 'week' else None">This week</option>
+                        <t t-foreach="available_months" t-as="m">
+                            <option t-att-value="'/my/teacher/history?period=' + m['key']"
+                                    t-att-selected="'selected' if filter_period == m['key'] else None"
+                                    t-out="m['label']"/>
+                        </t>
                     </select>
                 </div>
 

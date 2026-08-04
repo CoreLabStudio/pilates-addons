@@ -26,3 +26,72 @@ msgstr "Has recibido la factura %(number)s de %(studio)s"
 #, python-format
 msgid "Amount due: %(amount)s"
 msgstr "Importe a pagar: %(amount)s"
+
+# ── In-app notification content (fitness_booking.py) ─────────────────────────
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "1 credit used for %s"
+msgstr "1 crédito usado en %s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "%d credit(s) remaining in this pack."
+msgstr "%d crédito(s) restante(s) en este bono."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "No credits remaining"
+msgstr "Sin créditos restantes"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "You have used your last credit. Visit Packages to purchase more."
+msgstr "Has usado tu último crédito. Visita Bonos para comprar más."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Only %d credit(s) left"
+msgstr "Solo quedan %d crédito(s)"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "Running low on credits. Browse packages to top up."
+msgstr "Créditos bajos. Explora los bonos para recargar."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "%d credit(s) expiring in %d day(s)"
+msgstr "%d crédito(s) caducan en %d día(s)"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your pack expires on %s. Use your remaining credits before they expire."
+msgstr "Tu bono caduca el %s. Usa tus créditos restantes antes de que caduquen."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Subscription renews in %d days"
+msgstr "La suscripción se renueva en %d días"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your %s plan renews on %s. No action needed."
+msgstr "Tu plan %s se renueva el %s. No necesitas hacer nada."

@@ -18,14 +18,19 @@ class FitnessNotification(models.Model):
         ('booking_cancelled', 'Booking Cancelled'),
         ('credit_low', 'Credits Running Low'),
         ('credit_expiring', 'Credits Expiring'),
+        ('credit_used', 'Credit Used'),
+        ('credit_zero', 'No Credits Left'),
         ('teacher_swap', 'Teacher Changed'),
         ('invoice_issued', 'Invoice Issued'),
         ('purchase_completed', 'Purchase Completed'),
+        ('message_reply', 'New Message Reply'),
+        ('billing_reminder', 'Subscription Renewal Reminder'),
     ], required=True, default='booking_confirmed')
     read = fields.Boolean(default=False, index=True)
+    action_url = fields.Char("Action URL")
 
     @api.model
-    def _create_for_user(self, user_id, notif_type, title, body=None):
+    def _create_for_user(self, user_id, notif_type, title, body=None, action_url=None):
         """Create a single in-app notification; silently skips if user_id is falsy."""
         if not user_id:
             return
@@ -35,6 +40,7 @@ class FitnessNotification(models.Model):
                 'notification_type': notif_type,
                 'title': title,
                 'body': body,
+                'action_url': action_url,
             })
         except Exception:
             _logger.exception(

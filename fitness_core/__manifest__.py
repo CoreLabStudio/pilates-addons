@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – Yoleyva Studio',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.4.0',
     'category': 'Services',
     'summary': 'Core models for Yoleyva Pilates & Barre Studio',
     'author': 'Yoleyva Studio',
@@ -13,6 +13,7 @@
         'views/fitness_class_type_views.xml',
         'views/fitness_session_type_views.xml',
         'views/calendar_event_views.xml',
+        'views/fitness_news_views.xml',
         'views/menu_views.xml',
         'data/demo_classrooms.xml',
         'data/demo_session_types.xml',

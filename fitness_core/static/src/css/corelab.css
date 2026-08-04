@@ -1,10 +1,11 @@
 /* =============================================================
-   CoreLab Design System
-   Background: Feather White #FAF9F6
-   Accent:     Heather      #9ABACD
-   Ink:        Paco         #50423D
-   Sage:       #8FA394 (success / completed states)
-   Fonts: Fraunces (serif) · Inter (sans)  — loaded via template
+   CoreLab Design System  —  palette matches movement-sparkle-site-main
+   Background: Cream       #F8F3E8
+   Accent:     Ink         #18110C  (near-black; button fill)
+   Clay:       Terracotta  #C76846  (primary button background, active nav)
+   Ink:                    #18110C
+   Sage:       #8FA394 (success / completed states — unchanged)
+   Fonts: Cormorant Garamond (serif) · Inter (sans)  — loaded via template
 
    NOTE: the `mv-` class prefix is kept deliberately. It is an internal
    namespace token, not a user-facing brand string; renaming ~200 call
@@ -14,21 +15,28 @@
 
 /* ── 1. Tokens ─────────────────────────────────────────────── */
 :root {
-  --mv-bg:          #FAF9F6;
-  --mv-accent:      #9ABACD;
-  --mv-ink:         #50423D;
-  --mv-muted:       #7D6E68;
-  --mv-muted2:      #A09088;
+  --mv-bg:          #F8F3E8;   /* cream warm off-white */
+  --mv-accent:      #18110C;   /* near-black ink — focus rings, dots, indicators */
+  --mv-accent-fg:   #F8F3E8;   /* cream — kept for avatars that use near-black bg */
+  --mv-sand:        #EFE3D3;   /* sand/tan — toggle/segmented active bg; not used for buttons */
+  --mv-btn-bg:      var(--mv-clay); /* primary button fill — terracotta */
+  --mv-btn-fg:      var(--mv-bg);   /* cream text on terracotta */
+  --mv-clay:        #C76846;   /* terracotta — primary button background, active nav, links */
+  --mv-clay-dark:   #A85535;   /* dark terracotta — button hover/pressed state */
+  --mv-ink:         #18110C;   /* near-black warm ink */
+  --mv-muted:       #5E534A;   /* muted text */
+  --mv-muted2:      #7A6D65;   /* lighter muted */
   --mv-ok-bg:       #E6EDEA;
   --mv-ok-ink:      #5E8C7A;
-  --mv-sage:        #8FA394;
-  --mv-warn-bg:     #F5EDE9;
-  --mv-warn-ink:    #9B5A50;
-  --mv-card-bg:     #FFFFFF;
-  --mv-border:      #EAE4DC;
-  --mv-barre-card:  #D0C6C2;
-  --mv-reform-card: #C2CCCA;
-  --mv-fall-card:   #C8C2BA;
+  --mv-sage:        #8FA394;   /* success / completed — unchanged */
+  --mv-warn-bg:     #FDE8EA;   /* light red error bg */
+  --mv-warn-ink:    #D40924;   /* deep red error ink */
+  --mv-card-bg:     #FBF8F3;   /* slightly lighter than cream */
+  --mv-border:      #DACFC3;   /* warm sand borders */
+  --mv-info-bg:     #EDE6DC;   /* warm sand — info / callout / neutral states */
+  --mv-barre-card:  #D8C9BC;   /* warm sand fallback image */
+  --mv-reform-card: #C9BBAF;   /* muted tan fallback */
+  --mv-fall-card:   #D4C5B5;   /* warm bone fallback */
   --mv-app-max:     860px;
   --mv-r:           14px;
   --mv-r-sm:        8px;
@@ -39,17 +47,16 @@
 /* ── 2. CSS View Transitions (Chrome 126 +, Safari 18 +) ───── */
 @view-transition { navigation: auto; }
 
+/* Keep old page fully visible while new one loads — fading the old page
+   out to opacity 0 creates a blank flash between the two states. */
 ::view-transition-old(root) {
-  animation: mv-vt-out 180ms ease forwards;
+  animation: none;
 }
 ::view-transition-new(root) {
-  animation: mv-vt-in 230ms ease forwards;
-}
-@keyframes mv-vt-out {
-  to { opacity: 0; transform: translateY(-6px); }
+  animation: mv-vt-in 220ms ease forwards;
 }
 @keyframes mv-vt-in {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
 }
 
 /* ── 3. CoreLab page shell — hides Odoo header/footer ─────────── */
@@ -99,10 +106,11 @@ body:has(.mv-app) #wrapwrap > main {
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
-.mv-wordmark img {
-  height: 26px;
+.mv-header .mv-wordmark img {
+  height: 48px;
   width: auto;
   display: block;
+  flex-shrink: 0;
 }
 
 .mv-avatar {
@@ -110,7 +118,7 @@ body:has(.mv-app) #wrapwrap > main {
   height: 34px;
   border-radius: 50%;
   background: var(--mv-accent);
-  color: var(--mv-ink);
+  color: var(--mv-accent-fg);
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;
@@ -142,7 +150,7 @@ body:has(.mv-app) #wrapwrap > main {
 /* ── 5. Curved-line divider (SVG inline) ────────────────────── */
 .mv-curve {
   display: block;
-  margin: 2px 20px 14px;
+  margin: 8px 20px 14px;
   overflow: visible;
 }
 
@@ -156,7 +164,7 @@ body:has(.mv-app) #wrapwrap > main {
 }
 
 .mv-greeting-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -173,7 +181,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-credit-badge { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; text-align: center; }
 /* Rendered from a single value built in Python (e.g. "7 / 10") so the markup
    holds no translatable fragments. */
-.mv-credit-count { font-family: 'Fraunces', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink); line-height: 1; }
+.mv-credit-count { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink); line-height: 1; }
 .mv-credit-label { font-size: 0.68rem; color: var(--mv-muted2); letter-spacing: 0.01em; margin-top: 2px; }
 
 /* ── 7. Section / day labels ────────────────────────────────── */
@@ -267,7 +275,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: rgba(250,249,246,0.84);
+  background: rgba(248,243,232,0.84);
   color: var(--mv-ink);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -283,7 +291,7 @@ body:has(.mv-app) #wrapwrap > main {
   gap: 4px;
 }
 .mv-class-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -311,18 +319,18 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--mv-ink);
-  background: var(--mv-accent);
+  color: var(--mv-btn-fg);
+  background: var(--mv-btn-bg);
   border: none;
   border-radius: 999px;
   padding: 7px 20px;
   cursor: pointer;
   white-space: nowrap;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
   line-height: 1;
 }
 .mv-btn-book:active  { transform: scale(0.94); opacity: 0.84; }
-.mv-btn-book:hover   { opacity: 0.9; }
+.mv-btn-book:hover   { background: var(--mv-clay-dark); }
 
 /* ── 9. Upcoming bookings ───────────────────────────────────── */
 .mv-upcoming-list {
@@ -344,7 +352,7 @@ body:has(.mv-app) #wrapwrap > main {
   animation: mv-card-rise 280ms ease both;
 }
 .mv-upcoming-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -399,7 +407,7 @@ body:has(.mv-app) #wrapwrap > main {
 }
 .mv-flash-ok   { background:var(--mv-ok-bg);   color:var(--mv-ok-ink); }
 .mv-flash-err  { background:var(--mv-warn-bg); color:var(--mv-warn-ink); }
-.mv-flash-info { background:#EEF4F8; color:#3E6A82; }
+.mv-flash-info { background:var(--mv-info-bg); color:var(--mv-muted); }
 .mv-flash strong { font-weight:700; }
 
 /* No-subscription callout */
@@ -407,8 +415,8 @@ body:has(.mv-app) #wrapwrap > main {
   margin: 0 16px;
   padding: 16px;
   border-radius: var(--mv-r-sm);
-  background: #EEF4F8;
-  color: #3E6A82;
+  background: var(--mv-info-bg);
+  color: var(--mv-muted);
   font-size: 0.84rem;
 }
 
@@ -426,7 +434,7 @@ body:has(.mv-app) #wrapwrap > main {
   top: 16px; left: 16px;
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(250,249,246,0.88);
+  background: rgba(248,243,232,0.88);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
@@ -448,7 +456,7 @@ body:has(.mv-app) #wrapwrap > main {
   gap: 14px;
 }
 .mv-detail-title {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.65rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -478,7 +486,7 @@ body:has(.mv-app) #wrapwrap > main {
   width: 40px; height: 40px;
   border-radius: 50%;
   background: var(--mv-accent);
-  color: var(--mv-ink);
+  color: var(--mv-accent-fg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -502,18 +510,19 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Inter', sans-serif;
   font-size: 0.93rem;
   font-weight: 600;
-  color: var(--mv-ink);
-  background: var(--mv-accent);
+  color: var(--mv-btn-fg);
+  background: var(--mv-btn-bg);
   border: none;
   border-radius: var(--mv-r);
   padding: 15px;
   cursor: pointer;
   text-align: center;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
   margin-top: 8px;
   letter-spacing: 0.01em;
 }
 .mv-btn-book-lg:active { transform:scale(0.97); opacity:0.86; }
+.mv-btn-book-lg:hover  { background: var(--mv-clay-dark); }
 
 .mv-already-booked {
   display: block;
@@ -530,7 +539,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-class-full {
   display:block; width:100%; border-radius:var(--mv-r);
   padding:15px; text-align:center;
-  background:#F0ECE8; color:var(--mv-muted);
+  background:var(--mv-info-bg); color:var(--mv-muted);
   font-size:0.9rem; margin-top:8px;
 }
 
@@ -563,7 +572,7 @@ body:has(.mv-app) #wrapwrap > main {
 
 .mv-history-info { flex:1; min-width:0; }
 .mv-history-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size:0.93rem; font-weight:400;
   color:var(--mv-ink); margin:0 0 2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -578,9 +587,9 @@ body:has(.mv-app) #wrapwrap > main {
   white-space:nowrap; flex-shrink:0;
 }
 .mv-badge-attended  { background:var(--mv-ok-bg);  color:var(--mv-ok-ink); }
-.mv-badge-cancelled { background:#EEE9E3; color:var(--mv-muted); }
-.mv-badge-noshow    { background:#F5EAE8; color:#9B5A52; }
-.mv-badge-unmarked  { background:#EEE9E3; color:var(--mv-muted2); }
+.mv-badge-cancelled { background:var(--mv-info-bg);  color:var(--mv-muted); }
+.mv-badge-noshow    { background:var(--mv-warn-bg);  color:var(--mv-warn-ink); }
+.mv-badge-unmarked  { background:var(--mv-info-bg);  color:var(--mv-muted2); }
 .mv-badge-credit    { font-size:0.63rem; color:var(--mv-ok-ink); display:block; margin-top:2px; }
 
 /* Subscriptions / packs section */
@@ -591,7 +600,7 @@ body:has(.mv-app) #wrapwrap > main {
   box-shadow:0 1px 3px rgba(80,66,61,0.05);
 }
 .mv-pack-name {
-  font-family:'Fraunces',Georgia,serif; font-size:0.95rem;
+  font-family:'Cormorant Garamond',Georgia,serif; font-size:0.95rem;
   color:var(--mv-ink); margin:0 0 8px;
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
@@ -639,7 +648,7 @@ body:has(.mv-app) #wrapwrap > main {
   fill: none; stroke-linecap: round; stroke-linejoin: round;
   transition: stroke var(--mv-t-fast);
 }
-.mv-nav-tab.mv-active { color: var(--mv-accent); }
+.mv-nav-tab.mv-active { color: var(--mv-clay); }
 .mv-nav-tab:active    { opacity: 0.65; }
 
 /* ── 14. Teacher roster ─────────────────────────────────────── */
@@ -653,7 +662,7 @@ body:has(.mv-app) #wrapwrap > main {
   box-shadow: 0 1px 4px rgba(80,66,61,0.07);
 }
 .mv-roster-title {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.2rem; font-weight: 400;
   color: var(--mv-ink); margin: 0 0 4px;
 }
@@ -715,7 +724,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-class-row:nth-child(4){animation-delay:120ms}
 
 .mv-class-row-name {
-  font-family:'Fraunces',Georgia,serif; font-size:0.97rem;
+  font-family:'Cormorant Garamond',Georgia,serif; font-size:0.97rem;
   color:var(--mv-ink); margin:0 0 3px;
 }
 .mv-class-row-sub { font-size:0.75rem; color:var(--mv-muted); margin:0; }
@@ -723,11 +732,12 @@ body:has(.mv-app) #wrapwrap > main {
 
 .mv-roster-link {
   display:inline-block; font-size:0.78rem; font-weight:600;
-  color:var(--mv-ink); background:var(--mv-accent);
+  color:var(--mv-btn-fg); background:var(--mv-btn-bg);
   border-radius:999px; padding:6px 16px; text-decoration:none;
-  transition:transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition:transform var(--mv-t-fast), background var(--mv-t-fast);
 }
 .mv-roster-link:active { transform:scale(0.94); opacity:0.84; }
+.mv-roster-link:hover  { background:var(--mv-clay-dark); }
 
 /* ── 15. Login page ─────────────────────────────────────────── */
 /* body.bg-100 = Odoo's login/reset page body class (always applied) */
@@ -788,20 +798,21 @@ body.bg-100 .card-body > img { display: none !important; }
 }
 .mv-login-body .form-control:focus {
   border-color: var(--mv-accent) !important;
-  box-shadow: 0 0 0 3px rgba(154,186,205,0.22) !important;
-  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(199,104,70,0.22) !important;
+  background: var(--mv-card-bg) !important;
 }
 .mv-login-body .oe_login_buttons .btn-primary,
 .mv-login-body .btn-primary {
-  background: var(--mv-accent) !important;
-  border-color: var(--mv-accent) !important;
-  color: var(--mv-ink) !important;
+  background: var(--mv-btn-bg) !important;
+  border-color: var(--mv-btn-bg) !important;
+  color: var(--mv-btn-fg) !important;
   border-radius: var(--mv-r) !important;
   font-weight: 600; font-size: 0.9rem; padding: 12px;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
 }
+.mv-login-body .oe_login_buttons .btn-primary:hover { background: var(--mv-clay-dark) !important; border-color: var(--mv-clay-dark) !important; }
 .mv-login-body .oe_login_buttons .btn-primary:active { transform:scale(0.97); opacity:0.86; }
-.mv-login-body a { color: var(--mv-accent); }
+.mv-login-body a { color: var(--mv-clay); }
 
 /* ── 17. Standard Odoo portal pages with CoreLab shell ─────────────
    Scoped to body:has(.mv-bottom-nav) — any student page where the
@@ -837,7 +848,7 @@ body:has(.mv-bottom-nav) #wrapwrap > main > .o_portal.container {
 body:has(.mv-bottom-nav) h1,
 body:has(.mv-bottom-nav) h2,
 body:has(.mv-bottom-nav) h3 {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 400;
   color: var(--mv-ink);
 }
@@ -865,10 +876,14 @@ body:has(.mv-bottom-nav) table.table th {
 
 /* Buttons */
 body:has(.mv-bottom-nav) .btn-primary {
-  background: var(--mv-accent) !important;
-  border-color: var(--mv-accent) !important;
-  color: var(--mv-ink) !important;
+  background: var(--mv-btn-bg) !important;
+  border-color: var(--mv-btn-bg) !important;
+  color: var(--mv-btn-fg) !important;
   border-radius: var(--mv-r) !important;
+}
+body:has(.mv-bottom-nav) .btn-primary:hover {
+  background: var(--mv-clay-dark) !important;
+  border-color: var(--mv-clay-dark) !important;
 }
 
 /* Pagination */
@@ -950,7 +965,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-avatar-lg--photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .mv-profile-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -1142,8 +1157,18 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   border-bottom: 1px solid var(--mv-border);
   cursor: default;
 }
+.mv-notif-item--linked { cursor: pointer; }
+.mv-notif-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.mv-notif-link:hover { opacity: 0.82; }
 .mv-notif-item:last-child { border-bottom: none; }
-.mv-notif-item--unread { background: rgba(154,186,205,0.08); }
+.mv-notif-item--unread { background: rgba(199,104,70,0.07); }
 .mv-notif-title {
   font-size: 0.84rem;
   font-weight: 500;
@@ -1247,7 +1272,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 
 /* Price in card footer */
 .mv-pkg-price-inline {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 300;
   color: var(--mv-ink);
@@ -1264,11 +1289,11 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   color: var(--mv-muted);
   align-self: flex-start;
 }
-.mv-pkg-discipline--barre  { background: rgba(154,186,205,0.25); color: #4a7d92; }
-.mv-pkg-discipline--reformer { background: rgba(155,90,80,0.12); color: #9B5A50; }
+.mv-pkg-discipline--barre    { background: rgba(143,163,148,0.25); color: var(--mv-ok-ink); }
+.mv-pkg-discipline--reformer { background: rgba(199,104,70,0.15);  color: var(--mv-clay); }
 
 .mv-pkg-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -1308,8 +1333,8 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-pkg-buy-btn {
   width: 100%;
   padding: 10px 0;
-  background: var(--mv-accent);
-  color: var(--mv-ink);
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
   border: none;
   border-radius: var(--mv-r-sm);
   font-size: 0.85rem;
@@ -1318,6 +1343,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
+.mv-pkg-buy-btn:hover  { background: var(--mv-clay-dark); }
 .mv-pkg-buy-btn:active { transform: scale(0.97); opacity: 0.85; }
 .mv-pkg-card { position: relative; }
 .mv-pkg-card-link { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
@@ -1360,7 +1386,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 }
 
 .mv-lang-picker-title {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -1393,18 +1419,30 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   -webkit-tap-highlight-color: transparent; user-select: none;
 }
 .mv-month-group > summary::-webkit-details-marker { display: none; }
-.mv-month-label { font-family: 'Fraunces', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink); flex: 1; }
+.mv-month-label { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink); flex: 1; }
 .mv-month-count { font-size: 0.7rem; color: var(--mv-muted); background: var(--mv-border); border-radius: 999px; padding: 2px 8px; }
 .mv-month-chevron { flex-shrink: 0; stroke: var(--mv-muted); fill: none; width: 15px; height: 15px; transition: transform 0.2s ease; }
 details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-month-entries { padding: 0 0 8px; }
 .mv-hist-hidden { display: none; }
 .mv-load-more-btn {
-  display: block; width: calc(100% - 32px); margin: 4px 16px 0;
-  background: none; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm);
-  color: var(--mv-muted); font-size: 0.8rem; padding: 9px 0;
-  cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent;
+  display: block;
+  width: calc(100% - 32px);
+  margin: 10px 16px 4px;
+  padding: 9px 0;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  color: var(--mv-clay);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--mv-t-fast), color var(--mv-t-fast);
 }
+.mv-load-more-btn:hover { border-color: var(--mv-clay); }
 .mv-load-more-btn:active { opacity: 0.7; }
 
 /* ── 24. Sub-page back header ───────────────────────────────────
@@ -1475,7 +1513,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 /* ── 26. Home page ──────────────────────────────────────────────── */
 .mv-home-hero { padding: 4px 20px 18px; }
 .mv-home-title {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.6rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -1492,16 +1530,16 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 16px 20px 0;
   padding: 15px;
   border-radius: var(--mv-r);
-  background: var(--mv-accent);
-  color: var(--mv-ink);
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
   font-size: 0.95rem;
   font-weight: 600;
   text-align: center;
   text-decoration: none;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-home-cta:hover { color: var(--mv-ink); text-decoration: none; opacity: 0.92; }
+.mv-home-cta:hover { background: var(--mv-clay-dark); color: var(--mv-card-bg); text-decoration: none; }
 .mv-home-cta:active { transform: scale(0.97); opacity: 0.86; }
 
 .mv-stat-row {
@@ -1532,7 +1570,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted);
 }
 .mv-stat-value {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--mv-ink);
@@ -1620,7 +1658,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-search-input:focus {
   border-color: var(--mv-accent);
-  box-shadow: 0 0 0 3px rgba(154,186,205,0.22);
+  box-shadow: 0 0 0 3px rgba(199,104,70,0.22);
 }
 .mv-no-results {
   padding: 32px 20px;
@@ -1641,7 +1679,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   box-shadow: 0 1px 3px rgba(80,66,61,0.05);
 }
 .mv-ledger-delta {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 500;
   min-width: 44px;
@@ -1651,9 +1689,9 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   flex-shrink: 0;
   line-height: 1;
 }
-.mv-ledger-delta--plus    { background: var(--mv-ok-bg);  color: var(--mv-ok-ink); }
-.mv-ledger-delta--minus   { background: #EEF4F8;          color: #3E6A82; }
-.mv-ledger-delta--neutral { background: #EEE9E3;          color: var(--mv-muted2); }
+.mv-ledger-delta--plus    { background: var(--mv-ok-bg);   color: var(--mv-ok-ink); }
+.mv-ledger-delta--minus   { background: var(--mv-warn-bg); color: var(--mv-warn-ink); }
+.mv-ledger-delta--neutral { background: var(--mv-info-bg); color: var(--mv-muted2); }
 .mv-ledger-info { flex: 1; min-width: 0; }
 .mv-ledger-title {
   font-size: 0.88rem;
@@ -1669,7 +1707,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-ledger-balance-num {
   display: block;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 500;
   color: var(--mv-ink);
@@ -1748,13 +1786,13 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 12px;
 }
 .mv-summary-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   color: var(--mv-ink);
   margin: 0;
 }
 .mv-summary-total {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.35rem;
   color: var(--mv-ink);
   white-space: nowrap;
@@ -1769,7 +1807,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-paymethod:has(input:checked) {
   border-color: var(--mv-accent);
-  background: rgba(154,186,205,0.07);
+  background: rgba(199,104,70,0.08);
 }
 .mv-paymethod-head {
   display: flex;
@@ -1817,15 +1855,16 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--mv-ink);
-  background: var(--mv-accent);
+  color: var(--mv-btn-fg);
+  background: var(--mv-btn-bg);
   border: none;
   border-radius: var(--mv-r);
   padding: 15px;
   text-align: center;
   cursor: pointer;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
 }
+.mv-btn-primary-lg:hover:not(:disabled) { background: var(--mv-clay-dark); }
 .mv-btn-primary-lg:active:not(:disabled) { transform: scale(0.97); opacity: 0.86; }
 .mv-btn-primary-lg:disabled {
   background: var(--mv-border);
@@ -1886,8 +1925,8 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-input:focus {
   border-color: var(--mv-accent);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(154,186,205,0.22);
+  background: var(--mv-card-bg);
+  box-shadow: 0 0 0 3px rgba(199,104,70,0.22);
 }
 
 /* ── 32. Terms & Conditions page ───────────────────────────────── */
@@ -1917,14 +1956,14 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-order-row:hover { text-decoration: none; }
 .mv-order-row:active { transform: scale(0.98); opacity: 0.85; }
 .mv-order-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
   color: var(--mv-ink);
   margin: 0 0 2px;
 }
 .mv-order-meta { font-size: 0.74rem; color: var(--mv-muted); margin: 0; }
 .mv-order-amount {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   color: var(--mv-ink);
   white-space: nowrap;
@@ -1944,6 +1983,22 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   left: auto;
 }
 
+/* ── 33d. Private / contact-only card ─────────────────────────── */
+.mv-card-tag-private {
+  background: #9A8478;
+  color: #fff;
+}
+.mv-pkg-card--contact {
+  opacity: 0.92;
+}
+.mv-btn-contact {
+  background: transparent;
+  color: var(--mv-clay);
+  border: 1px solid var(--mv-clay);
+  padding: 6px 14px;
+}
+.mv-btn-contact:hover { background: rgba(199,104,70,0.08); }
+
 /* ── 34. Subscription status page ────────────────────────────── */
 .mv-sub-card {
   background: var(--mv-card-bg);
@@ -1953,7 +2008,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 0 16px 14px;
 }
 .mv-sub-plan-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
   color: var(--mv-ink);
   margin: 0 0 14px;
@@ -1972,7 +2027,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted);
 }
 .mv-sub-stat-value {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.92rem;
   color: var(--mv-ink);
   text-align: right;
@@ -2041,7 +2096,10 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 12px;
   box-shadow: 0 1px 3px rgba(80,66,61,0.05);
 }
-.mv-notif-card--unread { background: rgba(154,186,205,0.10); }
+.mv-notif-card--unread { background: rgba(199,104,70,0.07); }
+a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit; }
+.mv-notif-card--linked { cursor: pointer; }
+.mv-notif-card--linked:hover { box-shadow: 0 2px 8px rgba(80,66,61,0.14); opacity: 0.93; }
 .mv-notif-card-main { flex: 1; min-width: 0; }
 .mv-notif-card-title {
   font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); margin: 0 0 3px;
@@ -2071,6 +2129,98 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-ink); text-decoration: none;
 }
 .mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink); }
+
+/* ── 35. Message thread (/my/messages) ──────────────────────── */
+.mv-msg-history {
+  padding: 0 16px;
+}
+.mv-msg-card {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  padding: 14px 15px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(80,66,61,0.06);
+  border-left: 3px solid transparent;
+}
+/* Admin replies get a sage accent to visually distinguish them */
+.mv-msg-card--admin {
+  border-left-color: var(--mv-sage);
+  background: var(--mv-info-bg);
+}
+.mv-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  color: var(--mv-muted);
+  margin-bottom: 6px;
+}
+.mv-msg-author {
+  font-weight: 600;
+  color: var(--mv-ink);
+}
+.mv-msg-body {
+  font-size: 0.88rem;
+  color: var(--mv-ink);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mv-msg-reply {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--mv-info-bg);
+  border-radius: var(--mv-r-sm);
+  border-left: 3px solid var(--mv-sage);
+}
+.mv-msg-reply-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--mv-sage);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.mv-msg-reply-text {
+  font-size: 0.86rem;
+  color: var(--mv-ink);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mv-msg-reply-date {
+  font-size: 0.72rem;
+  color: var(--mv-muted);
+  margin-top: 4px;
+}
+
+/* prose headings for T&C page */
+.mv-prose h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: var(--mv-ink);
+  margin: 24px 0 6px;
+}
+.mv-prose h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--mv-ink);
+  margin: 16px 0 4px;
+}
+.mv-prose ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+.mv-prose li { margin-bottom: 4px; }
+.mv-prose .mv-draft-banner {
+  background: var(--mv-warn-bg);
+  color: var(--mv-warn-ink);
+  border-radius: var(--mv-r-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
 
 /* ── 34. Responsive ─────────────────────────────────────────────
    The layout is phone-first; these rules cover the two ends —
@@ -2224,10 +2374,154 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   padding: 10px 28px;
   border: none;
   border-radius: 999px;
-  background: var(--mv-accent);
-  color: #fff;
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--mv-t-fast);
 }
+.mv-msg-send-btn:hover { background: var(--mv-clay-dark); }
 .mv-msg-send-btn:active { opacity: 0.85; }
+
+/* ── News &amp; Promotions section (Home page + list page) ─────────────── */
+.mv-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  margin-bottom: 10px;
+}
+/* Section label inside a section-header inherits the header's padding — remove double-indent */
+.mv-section-header .mv-section-label { padding: 0; }
+.mv-seeall-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mv-clay);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+}
+.mv-seeall-link:hover { text-decoration: underline; }
+
+/* News card list container */
+.mv-news-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px;
+}
+.mv-news-cards--page { padding: 0 16px 24px; }
+
+/* White card — client-approved design */
+.mv-news-card {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  border: 0.5px solid #E5DFD6;
+  border-radius: 12px;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  animation: mv-card-rise 320ms ease both;
+}
+
+/* Thumbnail — fixed aspect-ratio, object-fit:cover for any source size */
+.mv-news-card-thumb {
+  position: relative;
+  padding-top: 52%;
+  overflow: hidden;
+}
+.mv-news-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* Info area below image or noimg row */
+.mv-news-card-info {
+  padding: 10px 14px 14px;
+}
+.mv-news-card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #50423D;
+  margin: 0 0 3px;
+  line-height: 1.3;
+}
+.mv-news-card-date {
+  font-size: 0.68rem;
+  color: #8A7A72;
+  margin: 0;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* No-image variant: muted icon circle + date on one row */
+.mv-news-card-noimg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 6px;
+}
+.mv-news-card-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  background: #F5F1E8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mv-news-card-icon svg {
+  width: 15px;
+  height: 15px;
+  stroke: #8A7A72;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mv-news-card-excerpt {
+  font-size: 0.78rem;
+  color: #8A7A72;
+  margin: 3px 0 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* News detail page */
+.mv-news-body {
+  font-size: 0.875rem;
+  color: var(--mv-muted);
+  line-height: 1.55;
+}
+.mv-news-body p { margin: 0 0 6px; }
+.mv-news-body p:last-child { margin-bottom: 0; }
+.mv-news-detail { padding: 0 0 20px; }
+.mv-news-detail-img { height: 220px; }
+.mv-news-detail-body { padding: 14px 20px 0; }
+.mv-news-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--mv-ink);
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+.mv-news-title-lg { font-size: 1.35rem; margin: 0 0 6px; }
+.mv-news-date {
+  font-size: 0.7rem;
+  color: var(--mv-muted2);
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
+.mv-news-card-img { position: relative; height: 160px; overflow: hidden; }
+.mv-news-card-photo { width: 100%; height: 100%; object-fit: cover; display: block; }

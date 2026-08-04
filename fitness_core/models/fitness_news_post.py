@@ -1,0 +1,33 @@
+from odoo import models, fields, api
+import re
+
+
+class FitnessNewsPost(models.Model):
+    _name = 'fitness.news.post'
+    _description = 'News Post / Promotion'
+    _order = 'sequence asc, publish_date desc, id desc'
+
+    title = fields.Char("Title", required=True, translate=True)
+    body = fields.Html("Body", sanitize=True, translate=True)
+    image = fields.Image("Image", max_width=800, max_height=600)
+    active = fields.Boolean(default=True)
+    publish_date = fields.Date(
+        "Publish Date",
+        required=True,
+        default=fields.Date.today,
+    )
+    sequence = fields.Integer("Sequence", default=10)
+    body_excerpt = fields.Char(compute='_compute_body_excerpt')
+
+    @api.depends('body')
+    def _compute_body_excerpt(self):
+        _tag = re.compile(r'<[^>]+>')
+        _ent = re.compile(r'&[a-z#0-9]+;')
+        for post in self:
+            raw = post.body or ''
+            text = _tag.sub('', raw)
+            text = _ent.sub(' ', text)
+            text = ' '.join(text.split())
+            if len(text) > 120:
+                text = text[:120].rsplit(' ', 1)[0] + '…'
+            post.body_excerpt = text

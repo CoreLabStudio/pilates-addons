@@ -202,3 +202,32 @@ msgstr "Confirmar"
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
 msgid "Note from studio"
 msgstr "Nota del estudio"
+
+# ── Teacher assignment notifications (calendar_event.py) ─────────────────────
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+#, python-format
+msgid "Teacher updated: %s"
+msgstr "Instructora actualizada: %s"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+#, python-format
+msgid "Your class will now be taught by %s."
+msgstr "Tu clase será impartida por %s."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+#, python-format
+msgid "Class assigned to you: %s"
+msgstr "Clase asignada a ti: %s"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "You have been assigned as teacher for this class."
+msgstr "Has sido asignado/a como instructor/a de esta clase."

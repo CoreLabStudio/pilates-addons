@@ -80,6 +80,10 @@ class FitnessStudentPortal(http.Controller):
         else:
             schedule_hint = _('%d classes booked') % n
 
+        news_posts = request.env['fitness.news.post'].search(
+            [], order='sequence asc, publish_date desc, id desc', limit=3
+        )
+
         return request.render('fitness_portal.portal_student_home', {
             'welcome':          welcome,
             'student_name':     student_name,
@@ -88,6 +92,7 @@ class FitnessStudentPortal(http.Controller):
             'schedule_hint':    schedule_hint,
             'primary_credit':   self._primary_credit(partner.id),
             'has_any_bookings': has_any_bookings,
+            'news_posts':       news_posts,
         })
 
     # ══════════════════════════════════════════════════════════
@@ -403,20 +408,25 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/history', type='http', auth='user', website=True, sitemap=False)
     def my_history(self, period=None, **kw):
+        import re as _re
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
         today = fields.Date.today()
+        lang_code = (request.lang.code if request.lang else None) or 'en_US'
 
-        if period == 'week':
-            cutoff = now - timedelta(days=7)
-        elif period == 'month':
-            cutoff = now - timedelta(days=30)
+        cutoff_start = cutoff_end = None
+        if period and _re.match(r'^\d{4}-\d{2}$', period):
+            try:
+                yr, mo = int(period[:4]), int(period[5:7])
+                cutoff_start = _dt_cls(yr, mo, 1)
+                cutoff_end = _dt_cls(yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1, 1)
+            except ValueError:
+                period = 'all'
         else:
             period = 'all'
-            cutoff = None
 
         booking_domain = [
             ('student_id', '=', partner.id),
@@ -424,8 +434,28 @@ class FitnessStudentPortal(http.Controller):
             ('class_start', '<', now),
             ('state', 'in', ['no_show', 'cancelled']),
         ]
-        if cutoff:
-            booking_domain.append(('class_start', '>=', cutoff))
+        if cutoff_start:
+            booking_domain.append(('class_start', '>=', cutoff_start))
+        if cutoff_end:
+            booking_domain.append(('class_start', '<', cutoff_end))
+
+        # Build available months from all bookings (no cutoff) for the picker
+        all_month_keys = sorted({
+            b.class_start.strftime('%Y-%m')
+            for b in request.env['fitness.booking'].search([
+                ('student_id', '=', partner.id),
+                ('class_start', '!=', False),
+            ], order='class_start desc', limit=500)
+            if b.class_start
+        }, reverse=True)
+        available_months = []
+        for mk in all_month_keys:
+            try:
+                dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
+                lbl = _babel_format_date(dt, format='MMMM yyyy', locale=lang_code) if _BABEL_OK else mk
+            except Exception:
+                lbl = mk
+            available_months.append({'key': mk, 'label': lbl})
 
         past_bookings = request.env['fitness.booking'].search(
             booking_domain, order='class_start desc', limit=200)
@@ -451,6 +481,8 @@ class FitnessStudentPortal(http.Controller):
                     (validity_end and validity_end < today)
                     or pack_line.fitness_remaining_classes <= 0
                 )
+                if is_expired:
+                    continue
                 packs.append({
                     'order':      order,
                     'line':       pack_line,
@@ -460,7 +492,6 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
 
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
         month_groups = []
         for month_key, items in _groupby(
             past_bookings,
@@ -475,12 +506,13 @@ class FitnessStudentPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_portal.portal_student_history', {
-            'month_groups':   month_groups,
-            'subscriptions':  subscriptions,
-            'packs':          packs,
-            'primary_credit': self._primary_credit(partner.id),
-            'student_name':   student_name,
-            'filter_period':  period,
+            'month_groups':    month_groups,
+            'subscriptions':   subscriptions,
+            'packs':           packs,
+            'primary_credit':  self._primary_credit(partner.id),
+            'student_name':    student_name,
+            'filter_period':   period,
+            'available_months': available_months,
         })
 
     # ══════════════════════════════════════════════════════════
@@ -488,24 +520,70 @@ class FitnessStudentPortal(http.Controller):
     # ══════════════════════════════════════════════════════════
 
     @http.route('/my/credits', type='http', auth='user', website=True, sitemap=False)
-    def credit_history(self, **kw):
+    def credit_history(self, period=None, **kw):
+        import re as _re
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
         _ = request.env._
         partner = request.env.user.partner_id
-        entries = self._credit_ledger(partner)
+        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+        all_entries = self._credit_ledger(partner)
+
+        # Validate and apply period filter
+        if period and _re.match(r'^\d{4}-\d{2}$', period):
+            filtered = [e for e in all_entries
+                        if e.get('when') and hasattr(e['when'], 'strftime')
+                        and e['when'].strftime('%Y-%m') == period]
+        else:
+            period = 'all'
+            filtered = all_entries
+
+        # Build month picker from full (unfiltered) history
+        months_seen = {}
+        for e in all_entries:
+            when = e.get('when')
+            if when and hasattr(when, 'strftime'):
+                mk = when.strftime('%Y-%m')
+                if mk not in months_seen:
+                    try:
+                        dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
+                        lbl = _babel_format_date(dt, format='MMMM yyyy', locale=lang_code) if _BABEL_OK else mk
+                    except Exception:
+                        lbl = mk
+                    months_seen[mk] = lbl
+        available_months = [{'key': k, 'label': v}
+                            for k, v in sorted(months_seen.items(), reverse=True)]
+
+        # Group filtered entries by month for display
+        mg_dict = {}
+        for e in filtered:
+            when = e.get('when')
+            if when and hasattr(when, 'strftime'):
+                mk = when.strftime('%Y-%m')
+                if mk not in mg_dict:
+                    try:
+                        dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
+                        lbl = _babel_format_date(dt, format='MMMM yyyy', locale=lang_code) if _BABEL_OK else mk
+                    except Exception:
+                        lbl = mk
+                    mg_dict[mk] = {'label': lbl, 'key': mk, 'entries': []}
+                mg_dict[mk]['entries'].append(e)
+        month_groups = [v for _, v in sorted(mg_dict.items(), reverse=True)]
 
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
 
         return request.render('fitness_portal.portal_credit_history', {
-            'entries':           entries,
-            'current_total':     entries[0]['balance'] if entries else self._credit_total(partner),
-            'primary_credit':    self._primary_credit(partner.id),
-            'student_name':      student_name,
-            'ledger_empty':      _('No credit activity yet. Buy a package to get started.'),
-            'label_credits_page': _('Credit History'),
+            'entries':            filtered,
+            'month_groups':       month_groups,
+            'available_months':   available_months,
+            'filter_period':      period,
+            'current_total':      all_entries[0]['balance'] if all_entries else self._credit_total(partner),
+            'primary_credit':     self._primary_credit(partner.id),
+            'student_name':       student_name,
+            'ledger_empty':       _('No credit activity yet. Buy a package to get started.'),
+            'label_credits_page': _('Balance'),
             'label_credits_sub':  _('All changes to your credits'),
         })
 
@@ -694,25 +772,37 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        active_tab = 'subscriptions' if tab == 'subscriptions' else 'packages'
+        active_tab = ('subscriptions' if tab == 'subscriptions'
+                      else 'classes' if tab == 'classes'
+                      else 'packages')
 
         if active_tab == 'subscriptions':
             domain = [('fitness_is_subscription_plan', '=', True)]
+        elif active_tab == 'classes':
+            domain = [('fitness_is_package', '=', True), ('fitness_class_count', '<=', 1)]
         else:
-            domain = [('fitness_is_package', '=', True)]
+            domain = [('fitness_is_package', '=', True), ('fitness_class_count', '>', 1)]
 
-        products = request.env['product.template'].sudo().search(
-            domain + [('active', '=', True), ('sale_ok', '=', True)],
-            order='fitness_class_type, list_price',
-        )
+        if active_tab == 'classes':
+            # Include sale_ok=False (Privadas/Duo) — they show as contact-only
+            products = request.env['product.template'].sudo().search(
+                domain + [('active', '=', True)],
+                order='fitness_class_type, list_price',
+            )
+        else:
+            products = request.env['product.template'].sudo().search(
+                domain + [('active', '=', True), ('sale_ok', '=', True)],
+                order='fitness_class_type, list_price',
+            )
         products = products.filtered(
             lambda p: 'discontinued' not in (p.name or '').lower()
         )
+        contact_only_ids = frozenset(p.id for p in products if not p.sale_ok)
 
         pkg_meta = {}
         for p in products:
             parts = []
-            if active_tab == 'packages':
+            if active_tab in ('packages', 'classes'):
                 if p.fitness_class_count:
                     parts.append((_('%d class') % p.fitness_class_count) if p.fitness_class_count == 1
                                  else (_('%d classes') % p.fitness_class_count))
@@ -787,11 +877,13 @@ class FitnessStudentPortal(http.Controller):
             'products':                 products,
             'pkg_meta':                 pkg_meta,
             'active_product_tmpl_ids':  active_product_tmpl_ids,
+            'contact_only_ids':         contact_only_ids,
             'primary_credit':           credit,
             'credit_line':              credit_line,
             'student_name':             student_name,
             'bought':                   bool(kw.get('bought')),
             'empty_msg':                (_('No subscriptions available right now.') if active_tab == 'subscriptions'
+                                         else _('No classes available right now.') if active_tab == 'classes'
                                          else _('No packages available right now.')),
         })
 
@@ -877,7 +969,10 @@ class FitnessStudentPortal(http.Controller):
             'product':         product,
             'meta':            meta,
             'is_subscription': is_sub,
-            'back_url':        '/my/packages?tab=subscriptions' if is_sub else '/my/packages',
+            'back_url':        ('/my/packages?tab=subscriptions' if is_sub
+                               else '/my/packages?tab=classes' if (
+                                   product.fitness_is_package and product.fitness_class_count and product.fitness_class_count <= 1
+                               ) else '/my/packages'),
             'ct':              product.fitness_class_type or 'any',
             'student_name':    full_name.split()[0] if full_name else '',
             'primary_credit':  self._primary_credit(partner.id),
@@ -1056,6 +1151,30 @@ class FitnessStudentPortal(http.Controller):
                 'order': order.name,
             }
             Notif._create_for_user(manager.id, 'purchase_completed', title, body)
+
+    # ══════════════════════════════════════════════════════════
+    #  NEWS DETAIL
+    # ══════════════════════════════════════════════════════════
+
+    @http.route('/my/news', type='http', auth='user', website=True, sitemap=False)
+    def news_list(self, **kw):
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+        posts = request.env['fitness.news.post'].sudo().search(
+            [('active', '=', True)],
+            order='sequence asc, publish_date desc, id desc',
+        )
+        return request.render('fitness_portal.portal_news_list', {'posts': posts})
+
+    @http.route('/my/news/<int:post_id>', type='http', auth='user',
+                website=True, sitemap=False)
+    def news_detail(self, post_id, **kw):
+        post = request.env['fitness.news.post'].sudo().search([
+            ('id', '=', post_id), ('active', '=', True),
+        ], limit=1)
+        if not post:
+            return request.not_found()
+        return request.render('fitness_portal.portal_news_detail', {'post': post})
 
     # ══════════════════════════════════════════════════════════
     #  TERMS AND CONDITIONS
@@ -1276,7 +1395,7 @@ class FitnessStudentPortal(http.Controller):
         _ = request.env._
         notif_model = request.env['fitness.notification'].sudo()
         notifs = notif_model.search(
-            [('user_id', '=', request.env.user.id)], limit=20
+            [('user_id', '=', request.env.user.id), ('read', '=', False)], limit=20
         )
         now = fields.Datetime.now()
         result = []
@@ -1286,13 +1405,31 @@ class FitnessStudentPortal(http.Controller):
                 'id': n.id,
                 'title': n.title,
                 'body': n.body or '',
-                'read': n.read,
+                'read': False,
                 'time_ago': time_ago,
                 'type': n.notification_type,
+                'action_url': n.action_url or '',
             })
-        notifs.filtered(lambda n: not n.read).write({'read': True})
         return request.make_response(
             json.dumps({'notifications': result}),
+            headers=[('Content-Type', 'application/json')],
+        )
+
+    @http.route('/my/notifications/mark_read', type='http', auth='user',
+                website=True, sitemap=False, methods=['POST'], csrf=False)
+    def notification_mark_read(self, notif_id=None, **kw):
+        if notif_id:
+            try:
+                nid = int(notif_id)
+                notif = request.env['fitness.notification'].sudo().search([
+                    ('id', '=', nid), ('user_id', '=', request.env.user.id)
+                ], limit=1)
+                if notif:
+                    notif.write({'read': True})
+            except Exception:
+                pass
+        return request.make_response(
+            json.dumps({'ok': True}),
             headers=[('Content-Type', 'application/json')],
         )
 
@@ -1508,58 +1645,66 @@ class FitnessStudentPortal(http.Controller):
     #  Message the Studio
     # ══════════════════════════════════════════════════════════
 
-    @http.route('/my/message-studio', type='http', auth='user', website=True, sitemap=False)
-    def message_studio_page(self, **kw):
-        if not (request.env.user.has_group(STUDENT_GROUP) or
-                request.env.user.has_group('fitness_core.group_fitness_teacher')):
+    @http.route('/my/messages', type='http', auth='user', website=True, sitemap=False)
+    def messages_page(self, sent=None, error=None, prefill=None, **kw):
+        user = request.env.user
+        is_student = user.has_group(STUDENT_GROUP)
+        is_teacher = user.has_group('fitness_core.group_fitness_teacher')
+        if not (is_student or is_teacher):
             return request.redirect('/my')
-        return request.render('fitness_portal.portal_message_studio', {
-            'sent':  bool(kw.get('sent')),
-            'error': kw.get('error'),
+
+        conversation = request.env['fitness.studio.conversation'].sudo().search([
+            ('user_id', '=', user.id),
+        ], order='write_date desc', limit=1)
+
+        messages = conversation.message_ids.sorted('create_date') if conversation else []
+
+        return request.render('fitness_portal.portal_messages', {
+            'conversation': conversation,
+            'messages':     messages,
+            'sent':         bool(sent),
+            'error':        error,
+            'is_teacher':   is_teacher,
+            'prefill':      (prefill or '').strip()[:300],
         })
 
-    @http.route('/my/message-studio/send', type='http', auth='user',
+    @http.route('/my/messages/send', type='http', auth='user',
                 methods=['POST'], website=True, sitemap=False)
-    def message_studio_send(self, body=None, **kw):
-        import html as _html
-        if not (request.env.user.has_group(STUDENT_GROUP) or
-                request.env.user.has_group('fitness_core.group_fitness_teacher')):
+    def messages_send(self, body=None, **kw):
+        user = request.env.user
+        is_student = user.has_group(STUDENT_GROUP)
+        is_teacher = user.has_group('fitness_core.group_fitness_teacher')
+        if not (is_student or is_teacher):
             return request.redirect('/my')
 
         body = (body or '').strip()
         if not body:
-            return request.redirect('/my/message-studio?error=empty')
+            return request.redirect('/my/messages?error=empty')
         if len(body) > 2000:
-            return request.redirect('/my/message-studio?error=toolong')
+            return request.redirect('/my/messages?error=toolong')
 
-        Channel = request.env['discuss.channel'].sudo()
-        channel = Channel.search([('name', '=', 'Studio Messages')], limit=1)
-        if not channel:
-            channel = Channel.create({
-                'name': 'Studio Messages',
-                'channel_type': 'channel',
-                'description': 'Messages from students and teachers to the studio.',
+        role = 'Teacher' if is_teacher else 'Student'
+
+        Conv = request.env['fitness.studio.conversation'].sudo()
+        conversation = Conv.search([('user_id', '=', user.id)], order='write_date desc', limit=1)
+        if not conversation:
+            conversation = Conv.create({
+                'user_id':    user.id,
+                'partner_id': user.partner_id.id,
+                'role':       role,
             })
-            try:
-                admin_partner = request.env.ref('base.user_admin').sudo().partner_id
-                channel.add_members([admin_partner.id])
-            except Exception:
-                pass
 
-        user = request.env.user
-        sender = user.partner_id.name or user.name or 'Portal User'
-        role = 'Teacher' if user.has_group('fitness_core.group_fitness_teacher') else 'Student'
-        msg_html = (
-            f'<strong>[{role}] {_html.escape(sender)}</strong><br/>'
-            f'{_html.escape(body).replace(chr(10), "<br/>")}'
-        )
-        channel.message_post(
-            body=msg_html,
-            author_id=user.partner_id.id,
-            message_type='comment',
-            subtype_xmlid='mail.mt_comment',
-        )
-        return request.redirect('/my/message-studio?sent=1')
+        request.env['fitness.studio.message'].sudo().create({
+            'conversation_id': conversation.id,
+            'author_id':       user.id,
+            'is_admin':        False,
+            'body':            body,
+        })
+        return request.redirect('/my/messages?sent=1')
+
+    @http.route('/my/message-studio', type='http', auth='user', website=True, sitemap=False)
+    def message_studio_page(self, **kw):
+        return request.redirect('/my/messages')
 
     # ══════════════════════════════════════════════════════════
     #  Language

@@ -56,8 +56,61 @@ class FitnessBookingNotifications(models.Model):
         if self._notif_enabled('send_confirmation'):
             bookings._send_notification('fitness_notifications.mail_template_booking_confirmation')
         for booking in bookings:
+            self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
+            self._maybe_notify_credit_zero(booking)
         return bookings
+
+    def _maybe_notify_credit_used(self, booking):
+        """Notify student when a credit pack credit is used for a booking.
+        Skipped for subscription bookings (no pack credits involved).
+        """
+        if not booking.package_order_line_id:
+            return
+        partner = booking.student_id
+        user = partner.user_ids[:1]
+        if not user:
+            return
+        line = booking.package_order_line_id
+        remaining = line.fitness_remaining_classes or 0
+        class_name = booking.calendar_event_id.name or 'class'
+        lang_env = self.with_context(lang=user.lang or 'en_US')
+        self.env['fitness.notification'].sudo()._create_for_user(
+            user.id,
+            'credit_used',
+            lang_env.env._('1 credit used for %s', class_name),
+            lang_env.env._('%d credit(s) remaining in this pack.', remaining),
+            action_url='/my/packages',
+        )
+
+    def _maybe_notify_credit_zero(self, booking):
+        """Notify student when their total credit balance across all packs hits zero."""
+        partner = booking.student_id
+        user = partner.user_ids[:1]
+        if not user:
+            return
+        all_lines = self.env['sale.order.line'].sudo().search([
+            ('order_partner_id', '=', partner.id),
+            ('product_id.fitness_is_package', '=', True),
+            ('fitness_remaining_classes', '>', 0),
+        ])
+        if all_lines:
+            return
+        recent = self.env['fitness.notification'].sudo().search([
+            ('user_id', '=', user.id),
+            ('notification_type', '=', 'credit_zero'),
+            ('create_date', '>=', fields.Datetime.now() - timedelta(hours=24)),
+        ], limit=1)
+        if recent:
+            return
+        lang_env = self.with_context(lang=user.lang or 'en_US')
+        self.env['fitness.notification'].sudo()._create_for_user(
+            user.id,
+            'credit_zero',
+            lang_env.env._('No credits remaining'),
+            lang_env.env._('You have used your last credit. Visit Packages to purchase more.'),
+            action_url='/my/packages',
+        )
 
     def _maybe_notify_credit_low(self, booking):
         """Create an in-app notification when a student's remaining credits drop to 1."""
@@ -82,11 +135,12 @@ class FitnessBookingNotifications(models.Model):
         if recent:
             return
         remaining = line.fitness_remaining_classes
+        lang_env = self.with_context(lang=user.lang or 'en_US')
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_low',
-            f'Only {remaining} credit(s) left',
-            'Running low on credits. Browse packages to top up.',
+            lang_env.env._('Only %d credit(s) left', remaining),
+            lang_env.env._('Running low on credits. Browse packages to top up.'),
         )
 
     # ─── Booking cancelled ───────────────────────────────────────────────────────
@@ -153,12 +207,53 @@ class FitnessBookingNotifications(models.Model):
                 continue
             days_left = (line.fitness_validity_end_date - today).days
             remaining = line.fitness_remaining_classes
+            expire_date_str = line.fitness_validity_end_date.strftime("%d %b %Y")
+            lang_env = self.with_context(lang=user.lang or 'en_US')
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'credit_expiring',
-                f'{remaining} credit(s) expiring in {days_left} day(s)',
-                f'Your pack expires on {line.fitness_validity_end_date.strftime("%d %b %Y")}. '
-                'Use your remaining credits before they expire.',
+                lang_env.env._('%d credit(s) expiring in %d day(s)', remaining, days_left),
+                lang_env.env._('Your pack expires on %s. Use your remaining credits before they expire.', expire_date_str),
             )
             notified += 1
         _logger.info("[NOTIFICATIONS] Credit expiry: notified %d student(s).", notified)
+
+    # ─── Subscription billing reminder (cron, 3 days lead) ──────────────────────
+
+    @api.model
+    def _cron_send_billing_reminders(self):
+        """Notify subscribers 3 days before their next renewal/billing date."""
+        LEAD_DAYS = 3
+        today = fields.Date.today()
+        target_date = today + timedelta(days=LEAD_DAYS)
+
+        due_subs = self.env['sale.order'].sudo().search([
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', '3_progress'),
+            ('next_invoice_date', '=', target_date),
+        ])
+        notified = 0
+        for sub in due_subs:
+            partner = sub.partner_id
+            user = partner.user_ids[:1]
+            if not user:
+                continue
+            recent = self.env['fitness.notification'].sudo().search([
+                ('user_id', '=', user.id),
+                ('notification_type', '=', 'billing_reminder'),
+                ('create_date', '>=', fields.Datetime.now() - timedelta(hours=48)),
+            ], limit=1)
+            if recent:
+                continue
+            plan_name = sub.fitness_subscription_product_id.name if sub.fitness_subscription_product_id else sub.name
+            renew_date_str = target_date.strftime("%d %b %Y")
+            lang_env = self.with_context(lang=user.lang or 'en_US')
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id,
+                'billing_reminder',
+                lang_env.env._('Subscription renews in %d days', LEAD_DAYS),
+                lang_env.env._('Your %s plan renews on %s. No action needed.', plan_name, renew_date_str),
+                action_url='/my/packages',
+            )
+            notified += 1
+        _logger.info("[NOTIFICATIONS] Billing reminders: notified %d subscriber(s).", notified)

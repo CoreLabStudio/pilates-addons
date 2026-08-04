@@ -16,3 +16,9 @@ access_fitness_session_type_manager,fitness.session.type manager,model_fitness_s
 access_fitness_session_type_user,fitness.session.type user,model_fitness_session_type,base.group_user,1,0,0,0
 access_fitness_session_type_portal,fitness.session.type portal,model_fitness_session_type,base.group_portal,1,0,0,0
 access_fitness_session_type_public,fitness.session.type public,model_fitness_session_type,base.group_public,1,0,0,0
+access_fitness_news_post_system,fitness.news.post system,model_fitness_news_post,base.group_system,1,1,1,1
+access_fitness_news_post_manager,fitness.news.post manager,model_fitness_news_post,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_news_post_teacher,fitness.news.post teacher,model_fitness_news_post,fitness_core.group_fitness_teacher,1,0,0,0
+access_fitness_news_post_user,fitness.news.post user,model_fitness_news_post,base.group_user,1,0,0,0
+access_fitness_news_post_portal,fitness.news.post portal,model_fitness_news_post,base.group_portal,1,0,0,0
+access_fitness_news_post_public,fitness.news.post public,model_fitness_news_post,base.group_public,1,0,0,0

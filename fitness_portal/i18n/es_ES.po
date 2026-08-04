@@ -557,8 +557,8 @@ msgstr "Inicio"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
-msgid "Studio"
-msgstr "Estudio"
+msgid "Classes"
+msgstr "Clases"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
@@ -653,10 +653,11 @@ msgid "Find a class"
 msgstr "Buscar una clase"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Packages &amp; Subscriptions"
-msgstr "Bonos y suscripciones"
+msgid "Packages &amp; Memberships"
+msgstr "Bonos y membresías"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
@@ -664,11 +665,6 @@ msgid "Top up your credits or start a plan"
 msgstr "Recarga tus créditos o empieza un plan"
 
 # ── Studio tab — portal_student_studio ───────────────────────────────────────
-
-#. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
-msgid "Available"
-msgstr "Disponibles"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
@@ -727,8 +723,8 @@ msgstr "Explorar y reservar más clases"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
-msgid "Back to Studio"
-msgstr "Volver al estudio"
+msgid "Back to Classes"
+msgstr "Volver a las clases"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
@@ -760,8 +756,8 @@ msgstr "Reserva no disponible — contacta con el estudio."
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-msgid "My History"
-msgstr "Mi historial"
+msgid "Reservations"
+msgstr "Reservas"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
@@ -878,8 +874,8 @@ msgstr "Reserva tu primera clase"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
-msgid "Credit History"
-msgstr "Historial de créditos"
+msgid "Balance"
+msgstr "Saldo"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
@@ -917,8 +913,8 @@ msgstr "Buscar por nombre"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-msgid "Subscriptions"
-msgstr "Suscripciones"
+msgid "Memberships"
+msgstr "Membresías"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
@@ -1029,8 +1025,188 @@ msgstr "Completar compra"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Terms and conditions content to be provided by the studio."
-msgstr "El estudio facilitará el contenido de los términos y condiciones."
+msgid "1. Introduction"
+msgstr "1. Introducción"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "These Terms and Conditions (\"Terms\") govern your use of the CoreLab Pilates studio services, including class bookings, memberships, credit packages, and the online portal provided by Yoleyva Studio (\"we\", \"us\", \"the Studio\"). By booking a class or activating a package you agree to these Terms in full."
+msgstr "Estos Términos y Condiciones (\"Términos\") regulan el uso de los servicios del estudio CoreLab Pilates, incluidas las reservas de clases, membresías, bonos de créditos y el portal en línea proporcionado por Yoleyva Studio (\"nosotros\", \"nos\", \"el Estudio\"). Al reservar una clase o activar un bono, aceptas estos Términos en su totalidad."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "2. Membership &amp; Account"
+msgstr "2. Membresía y cuenta"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "You must be 16 years of age or older to register independently. Under-16s require written parental or guardian consent."
+msgstr "Debes tener 16 años o más para registrarte de forma independiente. Los menores de 16 años necesitan el consentimiento escrito de sus padres o tutores."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "You are responsible for maintaining the confidentiality of your login credentials. Notify us immediately if you suspect unauthorised access to your account."
+msgstr "Eres responsable de mantener la confidencialidad de tus credenciales de acceso. Notifícanos de inmediato si sospechas de un acceso no autorizado a tu cuenta."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Accounts are personal and non-transferable. Sharing login details to allow a third party to attend classes is not permitted."
+msgstr "Las cuentas son personales e intransferibles. No está permitido compartir las credenciales de acceso para que un tercero asista a las clases."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "3. Class Booking"
+msgstr "3. Reserva de clases"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Classes can be booked through the portal subject to availability."
+msgstr "Las clases pueden reservarse a través del portal según disponibilidad."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "A booking is confirmed only when a class credit or valid subscription has been applied."
+msgstr "Una reserva se confirma únicamente cuando se aplica un crédito de clase o una suscripción válida."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio reserves the right to cancel or reschedule a class with reasonable notice. In such cases, any used credit will be returned."
+msgstr "El Estudio se reserva el derecho de cancelar o reprogramar una clase con aviso razonable. En estos casos, se devolverá cualquier crédito utilizado."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Maximum occupancy per class is set by the Studio; once full, a waiting-list may be offered at the Studio's discretion."
+msgstr "La ocupación máxima por clase la establece el Estudio; una vez completa, puede ofrecerse una lista de espera a criterio del Estudio."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "4. Cancellation Policy"
+msgstr "4. Política de cancelación"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "<strong>You must cancel at least 2 hours before the scheduled class start time</strong> to have your credit returned."
+msgstr "<strong>Debes cancelar al menos 2 horas antes de la hora de inicio programada de la clase</strong> para que se devuelva tu crédito."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Cancellations made within 2 hours of the class, or no-shows, will result in the full credit deduction with no refund."
+msgstr "Las cancelaciones realizadas dentro de las 2 horas previas a la clase, o las ausencias, conllevarán la deducción del crédito completo sin reembolso."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "To cancel, use the \"Upcoming Classes\" section in your portal before the cut-off time."
+msgstr "Para cancelar, utiliza la sección \"Próximas clases\" de tu portal antes del plazo límite."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio may waive the policy in exceptional circumstances (medical emergency, etc.) at its sole discretion. Contact us as soon as possible if this applies."
+msgstr "El Estudio puede hacer una excepción a esta política en circunstancias extraordinarias (emergencia médica, etc.) a su entera discreción. Contáctanos lo antes posible si es tu caso."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "5. Credit Policy"
+msgstr "5. Política de créditos"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Credits are valid for the duration stated at the time of purchase. Expired credits are non-refundable."
+msgstr "Los créditos son válidos durante el período indicado en el momento de la compra. Los créditos caducados no son reembolsables."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Credits are personal and may not be transferred to another account."
+msgstr "Los créditos son personales y no pueden transferirse a otra cuenta."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Credit balances are viewable in your portal under \"Balance\"."
+msgstr "El saldo de créditos se puede consultar en el portal, en la sección \"Saldo\"."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio reserves the right to correct any credit balance errors (over- or under-credited) with prior notice to the account holder."
+msgstr "El Estudio se reserva el derecho de corregir cualquier error en el saldo de créditos (exceso o defecto) con previo aviso al titular de la cuenta."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "6. Payments &amp; Refunds"
+msgstr "6. Pagos y reembolsos"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "All prices are stated in the currency displayed on the Studio's portal and are inclusive of applicable taxes unless stated otherwise."
+msgstr "Todos los precios se expresan en la moneda mostrada en el portal del Estudio e incluyen los impuestos aplicables, salvo que se indique lo contrario."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Credit packages are non-refundable once purchased, except where required by applicable consumer-protection law."
+msgstr "Los bonos de créditos no son reembolsables una vez comprados, excepto cuando lo exija la legislación de protección al consumidor aplicable."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Subscription fees are charged on a recurring basis as described at the time of sign-up. You may cancel your subscription at any time; the cancellation takes effect at the end of the current billing cycle."
+msgstr "Las cuotas de suscripción se cobran de forma periódica según lo indicado en el momento del alta. Puedes cancelar tu suscripción en cualquier momento; la cancelación surtirá efecto al final del ciclo de facturación en curso."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio does not store full payment card details; all payments are processed via a PCI-DSS-compliant payment provider."
+msgstr "El Estudio no almacena datos completos de tarjetas de pago; todos los pagos son procesados por un proveedor de pagos con certificación PCI-DSS."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "7. Health &amp; Liability"
+msgstr "7. Salud y responsabilidad"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Participation in Pilates and fitness classes carries inherent risk. You confirm that you are in adequate physical condition to participate and that you have sought medical advice where necessary."
+msgstr "La participación en clases de Pilates y fitness conlleva riesgos inherentes. Confirmas que te encuentras en condiciones físicas adecuadas para participar y que has consultado a un médico si es necesario."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "You agree to inform the Studio of any injuries, medical conditions, or pregnancy before joining a class."
+msgstr "Aceptas informar al Estudio de cualquier lesión, afección médica o embarazo antes de unirte a una clase."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio shall not be liable for any injury, loss, or damage arising from participation in classes, except where caused by the Studio's own negligence."
+msgstr "El Estudio no será responsable de ninguna lesión, pérdida o daño derivado de la participación en las clases, salvo que sea causado por negligencia del propio Estudio."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "The Studio's equipment and premises are maintained to a reasonable standard. Report any hazards to staff immediately."
+msgstr "Las instalaciones y el equipamiento del Estudio se mantienen en condiciones razonables. Comunica inmediatamente al personal cualquier peligro detectado."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "8. Privacy"
+msgstr "8. Privacidad"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "We collect and process personal data as described in our Privacy Policy, available on request."
+msgstr "Recogemos y procesamos datos personales según lo descrito en nuestra Política de Privacidad, disponible a petición."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Your data is used solely to manage your account, process bookings, and communicate with you about the Studio's services."
+msgstr "Tus datos se utilizan exclusivamente para gestionar tu cuenta, procesar reservas y comunicarnos contigo sobre los servicios del Estudio."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "We do not sell or share your personal data with third parties for marketing purposes."
+msgstr "No vendemos ni compartimos tus datos personales con terceros con fines de marketing."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "You may request access to, correction of, or deletion of your personal data by contacting us at the Studio."
+msgstr "Puedes solicitar el acceso, la rectificación o la eliminación de tus datos personales poniéndote en contacto con nosotros en el Estudio."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Last updated: August 2026 — DRAFT, pending legal review."
+msgstr "Última actualización: agosto de 2026 — BORRADOR, pendiente de revisión legal."
 
 # ── Active orders — portal_active_orders ─────────────────────────────────────
 
@@ -1048,8 +1224,8 @@ msgstr "Pedidos activos"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-msgid "Orders that are not settled yet"
-msgstr "Pedidos que aún no están liquidados"
+msgid "Purchases not yet settled"
+msgstr "Compras no liquidadas"
 
 # ── Language picker — portal_language_picker ─────────────────────────────────
 
@@ -1113,8 +1289,8 @@ msgstr "Mi estudio CoreLab"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-msgid "Available Classes"
-msgstr "Clases disponibles"
+msgid "CoreLab Classes"
+msgstr "Clases CoreLab"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
@@ -1138,8 +1314,9 @@ msgstr "Cuenta"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-msgid "Orders"
-msgstr "Pedidos"
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
+msgid "Shopping"
+msgstr "Compras"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
@@ -1214,15 +1391,15 @@ msgstr "Horario fijo semanal"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
-msgid "All your orders"
-msgstr "Todos tus pedidos"
+msgid "All your purchases"
+msgstr "Todas tus compras"
 
 # ── Profile Hub — updated Orders row ─────────────────────────────────────────
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub_override
-msgid "All orders &amp; active status"
-msgstr "Todos los pedidos y estado activo"
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "All purchases &amp; active status"
+msgstr "Todas las compras y estado activo"
 
 # ── Task 4 — new translatable strings ────────────────────────────────────────
 
@@ -1279,8 +1456,8 @@ msgstr "Bienvenid@, %s"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Credit History"
-msgstr "Historial de créditos"
+msgid "Balance"
+msgstr "Saldo"
 
 #. module: fitness_portal
 #. odoo-python
@@ -1403,5 +1580,72 @@ msgstr "Escribe tu mensaje aquí…"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "Send"
 msgstr "Enviar"
+
+# ── Admin reply notification (studio_message.py) ─────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/studio_message.py:0
+#, python-format
+msgid "Reply from %s"
+msgstr "Respuesta de %s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/studio_message.py:0
+msgid "the studio"
+msgstr "el estudio"
+
+# ── Messages history — portal_messages ───────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "Inbox"
+msgstr "Buzón"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Your messages and conversation history"
+msgstr "Tus mensajes e historial de conversación"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "Have a question? Send us a message."
+msgstr "¿Tienes alguna pregunta? Envíanos un mensaje."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "New message"
+msgstr "Nuevo mensaje"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "Write your message here…"
+msgstr "Escribe tu mensaje aquí…"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "Conversation history"
+msgstr "Historial de conversación"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "No messages yet. Write the first one above."
+msgstr "Aún no hay mensajes. Escribe el primero arriba."
+
+# ── Home — News & Promotions section ─────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Latest News &amp; Promotions"
+msgstr "Últimas noticias y promociones"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Read more"
+msgstr "Leer más"

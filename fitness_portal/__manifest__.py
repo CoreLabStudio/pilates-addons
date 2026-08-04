@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.9.0',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Yoleyva Studio',
@@ -16,7 +16,9 @@
         'fitness_notifications',
     ],
     'data': [
+        'security/ir.model.access.csv',
         'security/ir.rule.xml',
+        'views/studio_message_views.xml',
         'views/portal_templates.xml',
         'views/portal_shell_override.xml',
         'views/login_override.xml',

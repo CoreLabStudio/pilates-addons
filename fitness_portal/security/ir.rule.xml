@@ -44,4 +44,29 @@
         <field name="perm_unlink" eval="False"/>
     </record>
 
+
+    <!-- Conversations: portal users read only their own conversation. -->
+    <record id="rule_fitness_studio_conversation_own" model="ir.rule">
+        <field name="name">Studio Conversation: portal users see own only</field>
+        <field name="model_id" ref="fitness_portal.model_fitness_studio_conversation"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Messages: portal users read only messages in their own conversation. -->
+    <record id="rule_fitness_studio_message_own" model="ir.rule">
+        <field name="name">Studio Message: portal users see own conversation messages</field>
+        <field name="model_id" ref="fitness_portal.model_fitness_studio_message"/>
+        <field name="domain_force">[('conversation_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
 </odoo>

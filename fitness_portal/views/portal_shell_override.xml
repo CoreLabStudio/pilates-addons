@@ -105,13 +105,13 @@
                             </svg>
                         </a>
 
-                        <a href="/my/message-studio" class="mv-menu-row">
+                        <a href="/my/messages" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Message the Studio</div>
-                                <div class="mv-menu-desc">Send a message to the admin team</div>
+                                <div class="mv-menu-title">Inbox</div>
+                                <div class="mv-menu-desc">Your messages and conversation history</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
                                 <polyline points="9 18 15 12 9 6"/>
@@ -255,7 +255,7 @@
                                 <line x1="17" y1="14" x2="17" y2="14.01"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Available Classes</div>
+                                <div class="mv-menu-title">CoreLab Classes</div>
                                 <div class="mv-menu-desc">Upcoming available classes</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
@@ -289,7 +289,7 @@
                                 <polyline points="12 6 12 12 16 14"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">My History</div>
+                                <div class="mv-menu-title">Reservations</div>
                                 <div class="mv-menu-desc">Past classes and attendance</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
@@ -303,7 +303,7 @@
                                 <circle cx="16.5" cy="14" r="1.2"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Credit History</div>
+                                <div class="mv-menu-title">Balance</div>
                                 <div class="mv-menu-desc">Every change to your credit balance</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
@@ -330,8 +330,8 @@
                                 <path d="M16 10a4 4 0 0 1-8 0"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Orders</div>
-                                <div class="mv-menu-desc">All orders &amp; active status</div>
+                                <div class="mv-menu-title">Shopping</div>
+                                <div class="mv-menu-desc">All purchases &amp; active status</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
                                 <polyline points="9 18 15 12 9 6"/>
@@ -344,7 +344,7 @@
                                 <path d="M2 12l10 5 10-5"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Subscriptions</div>
+                                <div class="mv-menu-title">Memberships</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
                                 <polyline points="9 18 15 12 9 6"/>
@@ -377,13 +377,13 @@
                                 <polyline points="9 18 15 12 9 6"/>
                             </svg>
                         </a>
-                        <a href="/my/message-studio" class="mv-menu-row">
+                        <a href="/my/messages" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Message the Studio</div>
-                                <div class="mv-menu-desc">Send a message to the admin team</div>
+                                <div class="mv-menu-title">Inbox</div>
+                                <div class="mv-menu-desc">Your messages and conversation history</div>
                             </div>
                             <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
                                 <polyline points="9 18 15 12 9 6"/>

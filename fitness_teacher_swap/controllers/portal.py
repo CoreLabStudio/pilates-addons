@@ -186,21 +186,23 @@ class FitnessTeacherSwapPortal(http.Controller):
 
     @http.route('/my/teacher/history', type='http', auth='user', website=True, sitemap=False)
     def my_class_history(self, period=None, **kw):
+        import re as _re
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
         now = fields.Datetime.now()
+        lang_code = (request.lang.code if request.lang else None) or 'en_US'
 
-        # Determine cutoff for period filter
-        if period == 'week':
-            cutoff = now - timedelta(days=7)
-        elif period == 'month':
-            cutoff = now - timedelta(days=30)
-        elif period == 'year':
-            cutoff = now - timedelta(days=365)
+        cutoff_start = cutoff_end = None
+        if period and _re.match(r'^\d{4}-\d{2}$', period):
+            try:
+                yr, mo = int(period[:4]), int(period[5:7])
+                cutoff_start = _dt_cls(yr, mo, 1)
+                cutoff_end = _dt_cls(yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1, 1)
+            except ValueError:
+                period = 'all'
         else:
             period = 'all'
-            cutoff = None
 
         try:
             user_tz = pytz.timezone(request.env.user.tz or 'UTC')
@@ -212,8 +214,29 @@ class FitnessTeacherSwapPortal(http.Controller):
             ('is_fitness_class', '=', True),
             ('start', '<', now),
         ]
-        if cutoff:
-            domain.append(('start', '>=', cutoff))
+        if cutoff_start:
+            domain.append(('start', '>=', cutoff_start))
+        if cutoff_end:
+            domain.append(('start', '<', cutoff_end))
+
+        # Build available months from all past events (no cutoff)
+        all_events_for_months = request.env['calendar.event'].search([
+            ('user_id', '=', request.env.user.id),
+            ('is_fitness_class', '=', True),
+            ('start', '<', now),
+            ('start', '!=', False),
+        ], order='start desc', limit=500)
+        all_month_keys = sorted({
+            e.start.strftime('%Y-%m') for e in all_events_for_months if e.start
+        }, reverse=True)
+        available_months = []
+        for mk in all_month_keys:
+            try:
+                dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
+                lbl = _babel_format_date(dt, format='MMMM yyyy', locale=lang_code) if _BABEL_OK else mk
+            except Exception:
+                lbl = mk
+            available_months.append({'key': mk, 'label': lbl})
 
         past_events = request.env['calendar.event'].search(domain, order='start desc', limit=200)
 
@@ -234,7 +257,6 @@ class FitnessTeacherSwapPortal(http.Controller):
                 'total':       total,
             })
 
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
         month_groups = []
         for month_key, items in _groupby(
             events_ctx,
@@ -249,6 +271,7 @@ class FitnessTeacherSwapPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_teacher_swap.portal_teacher_history', {
-            'month_groups':  month_groups,
-            'filter_period': period,
+            'month_groups':    month_groups,
+            'filter_period':   period,
+            'available_months': available_months,
         })

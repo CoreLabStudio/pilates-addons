@@ -57,20 +57,24 @@ class CalendarEvent(models.Model):
             for booking in bookings:
                 student_user = booking.student_id.user_ids[:1]
                 if student_user:
+                    student_env = self.with_context(lang=student_user.lang or 'en_US')
                     Notif._create_for_user(
                         student_user.id,
                         'teacher_swap',
-                        f'Teacher updated: {event.name}',
-                        f'Your class will now be taught by {new_teacher.name}.',
+                        student_env.env._('Teacher updated: %s', event.name),
+                        student_env.env._('Your class will now be taught by %s.', new_teacher.name),
+                        action_url=f'/my/classes/{event.id}',
                     )
                     notified += 1
 
             # Notify the newly assigned teacher
+            teacher_env = self.with_context(lang=new_teacher.lang or 'en_US')
             Notif._create_for_user(
                 new_teacher.id,
                 'teacher_swap',
-                f'Class assigned to you: {event.name}',
-                f'You have been assigned as teacher for this class.',
+                teacher_env.env._('Class assigned to you: %s', event.name),
+                teacher_env.env._('You have been assigned as teacher for this class.'),
+                action_url='/my/teacher/classes',
             )
 
             _logger.info(
@@ -139,11 +143,13 @@ class CalendarEvent(models.Model):
             for booking in affected_bookings:
                 student_user = booking.student_id.user_ids[:1]
                 if student_user:
+                    student_env = self.with_context(lang=student_user.lang or 'en_US')
                     notif_model._create_for_user(
                         student_user.id,
                         'teacher_swap',
-                        f'Teacher updated: {self.name}',
-                        f'Your class will now be taught by {new_teacher.name}.',
+                        student_env.env._('Teacher updated: %s', self.name),
+                        student_env.env._('Your class will now be taught by %s.', new_teacher.name),
+                        action_url=f'/my/classes/{self.id}',
                     )
                 if template:
                     try:

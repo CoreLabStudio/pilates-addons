@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ── Google Fonts — Fraunces + Inter ───────────────────────────────── -->
+    <!-- ── Google Fonts — Cormorant Garamond + Inter ────────────────────── -->
     <template id="mv_google_fonts" name="CoreLab Google Fonts" inherit_id="portal.frontend_layout">
         <xpath expr="//head/meta[@charset]" position="after">
             <link rel="preconnect" href="https://fonts.googleapis.com"/>
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&amp;family=Inter:wght@400;500;600;700&amp;display=swap"/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Inter:wght@400;500;600;700&amp;display=swap"/>
         </xpath>
     </template>
 
@@ -21,7 +21,9 @@
         <t t-set="_mv_sname" t-value="student_name if student_name else (request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else '')"/>
         <header class="mv-header">
             <a href="/my/home" class="mv-wordmark" title="CoreLab">
-                <img src="/corelab/logo" alt="CoreLab"/>
+                <img src="/fitness_core/static/src/img/corelab-logo-header.png"
+                     alt="CoreLab"
+                     style="height:48px;width:auto;display:block;flex-shrink:0;"/>
             </a>
             <div class="mv-header-right">
                 <div class="mv-bell-wrap">
@@ -54,7 +56,7 @@
         <svg class="mv-curve" xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 320 16" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 8 Q80 1 160 8 Q240 15 320 8"
-                  fill="none" stroke="#EAE4DC" stroke-width="1.4"/>
+                  fill="none" style="stroke:var(--mv-border)" stroke-width="1.4"/>
         </svg>
     </template>
 
@@ -63,7 +65,9 @@
         <t t-set="_mv_tname" t-value="request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else ''"/>
         <header class="mv-header">
             <a href="/my/teacher/classes" class="mv-wordmark" title="CoreLab">
-                <img src="/corelab/logo" alt="CoreLab"/>
+                <img src="/fitness_core/static/src/img/corelab-logo-header.png"
+                     alt="CoreLab"
+                     style="height:48px;width:auto;display:block;flex-shrink:0;"/>
             </a>
             <div class="mv-header-right">
                 <div class="mv-bell-wrap">
@@ -88,7 +92,7 @@
         <svg class="mv-curve" xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 320 16" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 8 Q80 1 160 8 Q240 15 320 8"
-                  fill="none" stroke="#EAE4DC" stroke-width="1.4"/>
+                  fill="none" style="stroke:var(--mv-border)" stroke-width="1.4"/>
         </svg>
     </template>
 
@@ -147,7 +151,7 @@
                 </svg>
                 <div>Home</div>
             </a>
-            <!-- Studio — calendar grid -->
+            <!-- Classes — calendar grid -->
             <a href="/my/studio" class="mv-nav-tab">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3" y="4.5" width="18" height="16.5" rx="2"/>
@@ -161,9 +165,9 @@
                     <line x1="11" y1="17" x2="11" y2="17.01"/>
                     <line x1="15" y1="17" x2="15" y2="17.01"/>
                 </svg>
-                <div>Studio</div>
+                <div>Classes</div>
             </a>
-            <!-- Packages — ticket / ledger -->
+            <!-- Packages & Subscriptions — ticket / ledger -->
             <a href="/my/packages" class="mv-nav-tab">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2a2.3 2.3 0 0 0 0 4.6v1.2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.2a2.3 2.3 0 0 0 0-4.6z"/>
@@ -171,7 +175,7 @@
                     <line x1="14" y1="11.5" x2="14" y2="14"/>
                     <line x1="14" y1="16.5" x2="14" y2="19"/>
                 </svg>
-                <div>Packages</div>
+                <div>Packages &amp; Memberships</div>
             </a>
             <!-- Profile — person -->
             <a href="/my" class="mv-nav-tab">
@@ -279,7 +283,7 @@
                 </t>
                 </t>
 
-                <!-- Packages &amp; Subscriptions shortcut -->
+                <!-- Packages &amp; Memberships shortcut -->
                 <div class="mv-spacer-16"/>
                 <a href="/my/packages" class="mv-link-row">
                     <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -289,13 +293,62 @@
                         <line x1="14" y1="16.5" x2="14" y2="19"/>
                     </svg>
                     <div class="mv-menu-text">
-                        <div class="mv-menu-title">Packages &amp; Subscriptions</div>
+                        <div class="mv-menu-title">Packages &amp; Memberships</div>
                         <div class="mv-menu-desc">Top up your credits or start a plan</div>
                     </div>
                     <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </a>
+
+                <!-- Latest News &amp; Promotions — hidden entirely when no active posts -->
+                <t t-if="news_posts">
+                    <div class="mv-spacer-24"/>
+                    <div class="mv-section-header">
+                        <div class="mv-section-label">Latest News &amp; Promotions</div>
+                        <a href="/my/news" class="mv-seeall-link">See all</a>
+                    </div>
+                    <div class="mv-news-cards">
+                        <t t-foreach="news_posts" t-as="post">
+                            <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
+                                <t t-if="post.image">
+                                    <div class="mv-news-card-thumb">
+                                        <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
+                                             t-att-alt="post.title"
+                                             class="mv-news-thumb-img"
+                                             loading="lazy"/>
+                                    </div>
+                                    <div class="mv-news-card-info">
+                                        <p class="mv-news-card-title" t-field="post.title"/>
+                                        <p class="mv-news-card-date">
+                                            <span t-field="post.publish_date"
+                                                  t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
+                                        </p>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="mv-news-card-noimg">
+                                        <div class="mv-news-card-icon">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
+                                                <polyline points="14 2 14 8 20 8"/>
+                                                <path d="M2 15h10M9 19H2M7 11H2"/>
+                                            </svg>
+                                        </div>
+                                        <p class="mv-news-card-date">
+                                            <span t-field="post.publish_date"
+                                                  t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
+                                        </p>
+                                    </div>
+                                    <div class="mv-news-card-info">
+                                        <p class="mv-news-card-title" t-field="post.title"/>
+                                        <p class="mv-news-card-excerpt" t-out="post.body_excerpt"/>
+                                    </div>
+                                </t>
+                            </a>
+                        </t>
+                    </div>
+                </t>
 
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
@@ -315,7 +368,7 @@
                 <!-- Title + credit readout -->
                 <div class="mv-greeting-row">
                     <div>
-                        <p class="mv-greeting-name">Studio</p>
+                        <p class="mv-greeting-name">Classes</p>
                         <p class="mv-greeting-sub" t-out="subtitle"/>
                     </div>
                     <t t-if="primary_credit">
@@ -330,7 +383,7 @@
                 <div class="mv-segmented" role="tablist">
                     <a href="/my/studio"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'available' else '')"
-                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">Available</a>
+                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">CoreLab Classes</a>
                     <a href="/my/studio?view=schedule"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'schedule' else '')"
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
@@ -531,7 +584,7 @@
                         <div t-att-class="'mv-card-fallback mv-detail-img' + (' mv-barre' if ct and ct.classroom_type == 'barre' else (' mv-reform' if ct and ct.classroom_type == 'reformer' else ''))"/>
                     </t>
                     <a href="/my/studio" class="mv-detail-back" data-cl-back="1"
-                       title="Back to Studio">←</a>
+                       title="Back to Classes">←</a>
                     <t t-if="ct and ct.classroom_type">
                         <span class="mv-card-tag" t-out="ct.classroom_type.capitalize()"/>
                     </t>
@@ -640,7 +693,7 @@
                 <!-- Greeting -->
                 <div class="mv-greeting-row">
                     <div>
-                        <p class="mv-greeting-name">My History</p>
+                        <p class="mv-greeting-name">Reservations</p>
                         <p class="mv-greeting-sub">Past classes and purchases</p>
                     </div>
                     <t t-if="primary_credit">
@@ -651,17 +704,18 @@
                     </t>
                 </div>
 
-                <!-- Period filter -->
+                <!-- Period filter — dynamic month picker -->
                 <div style="text-align:right;margin-bottom:8px;">
                     <select class="mv-period-select"
                             onchange="location.href=this.value"
                             aria-label="Filter period">
                         <option t-att-value="'/my/history'"
                                 t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
-                        <option t-att-value="'/my/history?period=month'"
-                                t-att-selected="'selected' if filter_period == 'month' else None">This month</option>
-                        <option t-att-value="'/my/history?period=week'"
-                                t-att-selected="'selected' if filter_period == 'week' else None">This week</option>
+                        <t t-foreach="available_months" t-as="m">
+                            <option t-att-value="'/my/history?period=' + m['key']"
+                                    t-att-selected="'selected' if filter_period == m['key'] else None"
+                                    t-out="m['label']"/>
+                        </t>
                     </select>
                 </div>
 
@@ -831,36 +885,84 @@
                     </div>
                 </div>
 
-                <t t-if="not entries">
+                <t t-if="not month_groups">
                     <div class="mv-empty">
-                        <t t-out="ledger_empty"/>
-                        <br/><a href="/my/packages">Browse packages</a>
+                        <t t-if="filter_period != 'all'">
+                            No credit activity in the selected month.
+                            <br/><a t-att-href="'/my/credits'">View all</a>
+                        </t>
+                        <t t-else="">
+                            <t t-out="ledger_empty"/>
+                            <br/><a href="/my/packages">Browse packages</a>
+                        </t>
                     </div>
                 </t>
                 <t t-else="">
-                    <div class="mv-ledger">
-                        <t t-foreach="entries" t-as="entry">
-                            <div class="mv-ledger-row">
-                                <t t-if="entry['delta'] &gt; 0">
-                                    <span class="mv-ledger-delta mv-ledger-delta--plus">+<t t-out="entry['delta']"/></span>
-                                </t>
-                                <t t-elif="entry['delta'] &lt; 0">
-                                    <span class="mv-ledger-delta mv-ledger-delta--minus"><t t-out="entry['delta']"/></span>
-                                </t>
-                                <t t-else="">
-                                    <span class="mv-ledger-delta mv-ledger-delta--neutral">—</span>
-                                </t>
-                                <div class="mv-ledger-info">
-                                    <p class="mv-ledger-title" t-out="entry['title']"/>
-                                    <p class="mv-ledger-meta">
-                                        <span t-out="entry['when']"
-                                              t-options='{"widget": "datetime", "format": "d MMM yyyy · HH:mm"}'/>
-                                        · <t t-out="entry['meta']"/>
-                                    </p>
+                    <div style="text-align:right;margin:0 16px 12px;">
+                        <select class="mv-period-select"
+                                onchange="location.href=this.value"
+                                aria-label="Filter period">
+                            <option t-att-value="'/my/credits'"
+                                    t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
+                            <t t-foreach="available_months" t-as="m">
+                                <option t-att-value="'/my/credits?period=' + m['key']"
+                                        t-att-selected="'selected' if filter_period == m['key'] else None"
+                                        t-out="m['label']"/>
+                            </t>
+                        </select>
+                    </div>
+
+                    <div class="mv-history-months">
+                        <t t-foreach="month_groups" t-as="mg">
+                            <details class="mv-month-group"
+                                     t-att-open="'open' if mg_index == 0 else False">
+                                <summary>
+                                    <span class="mv-month-label" t-out="mg['label']"/>
+                                    <span class="mv-month-count" t-out="len(mg['entries'])"/>
+                                    <svg class="mv-month-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                                        <polyline points="9 18 15 12 9 6" stroke-width="2"
+                                                  stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </summary>
+                                <div class="mv-month-entries">
+                                    <div class="mv-ledger" style="padding:0 16px">
+                                        <t t-foreach="mg['entries']" t-as="entry">
+                                            <div t-att-class="'mv-ledger-row' + (' mv-hist-hidden' if entry_index >= 10 else '')">
+                                                <t t-if="entry['delta'] &gt; 0">
+                                                    <span class="mv-ledger-delta mv-ledger-delta--plus">+<t t-out="entry['delta']"/></span>
+                                                </t>
+                                                <t t-elif="entry['delta'] &lt; 0">
+                                                    <span class="mv-ledger-delta mv-ledger-delta--minus"><t t-out="entry['delta']"/></span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="mv-ledger-delta mv-ledger-delta--neutral">—</span>
+                                                </t>
+                                                <div class="mv-ledger-info">
+                                                    <p class="mv-ledger-title" t-out="entry['title']"/>
+                                                    <p class="mv-ledger-meta">
+                                                        <span t-out="entry['when']"
+                                                              t-options='{"widget": "datetime", "format": "d MMM yyyy · HH:mm"}'/>
+                                                        · <t t-out="entry['meta']"/>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <t t-if="len(mg['entries']) > 10">
+                                        <button class="mv-load-more-btn" type="button">Show more</button>
+                                    </t>
                                 </div>
-                            </div>
+                            </details>
                         </t>
                     </div>
+                    <script>
+                    document.querySelectorAll('.mv-history-months .mv-load-more-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            this.closest('.mv-month-entries').querySelectorAll('.mv-hist-hidden').forEach(function(c) { c.classList.remove('mv-hist-hidden'); });
+                            this.remove();
+                        });
+                    });
+                    </script>
                 </t>
 
                 <div class="mv-spacer-16"/>
@@ -873,19 +975,27 @@
     <template id="portal_pwa_head" name="Portal PWA Head Meta" inherit_id="portal.frontend_layout">
         <xpath expr="//head/meta[@charset]" position="after">
             <link rel="manifest" href="/my/manifest.webmanifest" crossorigin="use-credentials"/>
-            <link rel="icon" href="/corelab/icon"/>
+            <link rel="icon" type="image/png" href="/corelab/icon"/>
             <link rel="apple-touch-icon" href="/corelab/icon"/>
-            <meta name="theme-color" content="#9ABACD"/>
+            <meta name="theme-color" content="#18110C"/>
             <meta name="apple-mobile-web-app-capable" content="yes"/>
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
             <t t-set="pwa_name"
                t-value="request.env['ir.config_parameter'].sudo().get_param('web.web_app_name') or 'CoreLab'"/>
             <meta name="apple-mobile-web-app-title" t-att-content="pwa_name"/>
         </xpath>
+        <!-- Override Odoo's default shortcut icon (favicon.ico) with the CoreLab icon -->
+        <xpath expr="//link[@rel='shortcut icon']" position="replace">
+            <link type="image/png" rel="shortcut icon" href="/corelab/icon"/>
+        </xpath>
+        <!-- Override default "Odoo" browser tab title -->
+        <xpath expr="//title" position="replace">
+            <title>CoreLab</title>
+        </xpath>
     </template>
 
     <!-- ── PACKAGES tab (/my/packages) ───────────────────────────────────── -->
-    <template id="portal_packages" name="Packages &amp; Subscriptions">
+    <template id="portal_packages" name="Packages &amp; Memberships">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
@@ -896,7 +1006,7 @@
                 <!-- Title + quiet credit line + circular search toggle -->
                 <div class="mv-title-row">
                     <div>
-                        <p class="mv-greeting-name">Packages &amp; Subscriptions</p>
+                        <p class="mv-greeting-name">Packages &amp; Memberships</p>
                         <t t-if="credit_line">
                             <a href="/my/credits" class="mv-credit-line" t-out="credit_line"/>
                         </t>
@@ -922,7 +1032,10 @@
                        t-att-aria-selected="'true' if active_tab == 'packages' else 'false'">Packages</a>
                     <a href="/my/packages?tab=subscriptions"
                        t-att-class="'mv-segment' + (' mv-active' if active_tab == 'subscriptions' else '')"
-                       t-att-aria-selected="'true' if active_tab == 'subscriptions' else 'false'">Subscriptions</a>
+                       t-att-aria-selected="'true' if active_tab == 'subscriptions' else 'false'">Memberships</a>
+                    <a href="/my/packages?tab=classes"
+                       t-att-class="'mv-segment' + (' mv-active' if active_tab == 'classes' else '')"
+                       t-att-aria-selected="'true' if active_tab == 'classes' else 'false'">Classes</a>
                 </div>
 
                 <t t-if="bought">
@@ -954,10 +1067,14 @@
                                 <div class="mv-pkg-grid">
                                     <t t-foreach="group['products']" t-as="product">
                                         <t t-set="_ct" t-value="product.fitness_class_type or 'any'"/>
-                                        <div class="mv-pkg-card" t-att-data-ct="_ct"
+                                        <t t-set="_contact_only" t-value="product.id in (contact_only_ids or set())"/>
+                                        <div t-att-class="'mv-pkg-card' + (' mv-pkg-card--contact' if _contact_only else '')"
+                                             t-att-data-ct="_ct"
                                              t-att-data-name="product.name or ''">
-                                            <a t-attf-href="/my/packages/#{product.id}"
-                                               class="mv-pkg-card-link" t-att-aria-label="product.name or ''"/>
+                                            <t t-if="not _contact_only">
+                                                <a t-attf-href="/my/packages/#{product.id}"
+                                                   class="mv-pkg-card-link" t-att-aria-label="product.name or ''"/>
+                                            </t>
                                             <t t-set="_is_active" t-value="product.id in active_product_tmpl_ids"/>
                                             <!-- Image / fallback top -->
                                             <div class="mv-card-img">
@@ -970,7 +1087,10 @@
                                                 <t t-else="">
                                                     <div t-att-class="'mv-card-fallback' + (' mv-barre' if _ct == 'barre' else (' mv-reform' if _ct == 'reformer' else ''))"/>
                                                 </t>
-                                                <t t-if="_ct != 'any'">
+                                                <t t-if="_contact_only">
+                                                    <span class="mv-card-tag mv-card-tag-private">Private</span>
+                                                </t>
+                                                <t t-elif="_ct != 'any'">
                                                     <span class="mv-card-tag" t-out="_ct.capitalize()"/>
                                                 </t>
                                                 <t t-if="_is_active">
@@ -987,15 +1107,22 @@
                                                     <p style="font-size:0.76rem;color:var(--mv-muted);line-height:1.4;margin:3px 0 0;" t-out="product.description_sale"/>
                                                 </t>
                                                 <div class="mv-card-footer">
-                                                    <span class="mv-pkg-price-inline">
-                                                        <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
-                                                    </span>
-                                                    <t t-if="_is_active">
-                                                        <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
+                                                    <t t-if="_contact_only">
+                                                        <span class="mv-pkg-price-inline" style="color:var(--mv-muted);font-style:italic;font-size:0.78rem;">Price on request</span>
+                                                        <a t-att-href="'/my/messages?prefill=Re%3A+' + (product.name or '').replace(' ', '+')"
+                                                           class="mv-btn-book mv-btn-contact" style="text-decoration:none;">Contact</a>
                                                     </t>
                                                     <t t-else="">
-                                                        <a t-attf-href="/my/packages/#{product.id}/checkout"
-                                                           class="mv-btn-book" style="text-decoration:none;">Buy</a>
+                                                        <span class="mv-pkg-price-inline">
+                                                            <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                                        </span>
+                                                        <t t-if="_is_active">
+                                                            <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <a t-attf-href="/my/packages/#{product.id}/checkout"
+                                                               class="mv-btn-book" style="text-decoration:none;">Buy</a>
+                                                        </t>
                                                     </t>
                                                 </div>
                                             </div>
@@ -1042,7 +1169,7 @@
 
                     <!-- Name + type tag -->
                     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
-                        <h1 style="font-family:'Fraunces',Georgia,serif;font-size:1.4rem;font-weight:400;color:var(--mv-ink);margin:0;line-height:1.2;flex:1;"
+                        <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:400;color:var(--mv-ink);margin:0;line-height:1.2;flex:1;"
                             t-out="product.name"/>
                         <t t-if="ct != 'any'">
                             <span class="mv-card-tag" style="position:static;margin:2px 0 0;" t-out="ct.capitalize()"/>
@@ -1099,7 +1226,7 @@
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
                                 <span style="font-size:0.8rem;color:var(--mv-muted);">Price</span>
-                                <span style="font-family:'Fraunces',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
+                                <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
                                 </span>
                             </div>
@@ -1313,18 +1440,35 @@
                     <div class="mv-notif-page-list">
                         <t t-foreach="entries" t-as="entry">
                             <t t-set="n" t-value="entry['record']"/>
-                            <div t-att-class="'mv-notif-card' + (' mv-notif-card--unread' if entry.get('is_new') else '')">
-                                <div class="mv-notif-card-main">
-                                    <p class="mv-notif-card-title" t-out="n.title"/>
-                                    <t t-if="n.body">
-                                        <p class="mv-notif-card-body" t-out="n.body"/>
+                            <t t-set="_ncls" t-value="'mv-notif-card' + (' mv-notif-card--unread' if entry.get('is_new') else '')"/>
+                            <t t-if="n.action_url">
+                                <a t-att-href="n.action_url" t-att-class="_ncls + ' mv-notif-card--linked'">
+                                    <div class="mv-notif-card-main">
+                                        <p class="mv-notif-card-title" t-out="n.title"/>
+                                        <t t-if="n.body">
+                                            <p class="mv-notif-card-body" t-out="n.body"/>
+                                        </t>
+                                        <p class="mv-notif-card-time" t-out="entry['time_ago']"/>
+                                    </div>
+                                    <t t-if="entry.get('is_new')">
+                                        <div class="mv-notif-dot" aria-hidden="true"/>
                                     </t>
-                                    <p class="mv-notif-card-time" t-out="entry['time_ago']"/>
+                                </a>
+                            </t>
+                            <t t-else="">
+                                <div t-att-class="_ncls">
+                                    <div class="mv-notif-card-main">
+                                        <p class="mv-notif-card-title" t-out="n.title"/>
+                                        <t t-if="n.body">
+                                            <p class="mv-notif-card-body" t-out="n.body"/>
+                                        </t>
+                                        <p class="mv-notif-card-time" t-out="entry['time_ago']"/>
+                                    </div>
+                                    <t t-if="entry.get('is_new')">
+                                        <div class="mv-notif-dot" aria-hidden="true"/>
+                                    </t>
                                 </div>
-                                <t t-if="entry.get('is_new')">
-                                    <div class="mv-notif-dot" aria-hidden="true"/>
-                                </t>
-                            </div>
+                            </t>
                         </t>
                     </div>
                 </t>
@@ -1360,7 +1504,69 @@
                 </div>
 
                 <div class="mv-prose">
-                    <p>Terms and conditions content to be provided by the studio.</p>
+
+                    <h2>1. Introduction</h2>
+                    <p>These Terms and Conditions ("Terms") govern your use of the CoreLab Pilates studio services, including class bookings, memberships, credit packages, and the online portal provided by Yoleyva Studio ("we", "us", "the Studio"). By booking a class or activating a package you agree to these Terms in full.</p>
+
+                    <h2>2. Membership &amp; Account</h2>
+                    <ul>
+                        <li>You must be 16 years of age or older to register independently. Under-16s require written parental or guardian consent.</li>
+                        <li>You are responsible for maintaining the confidentiality of your login credentials. Notify us immediately if you suspect unauthorised access to your account.</li>
+                        <li>Accounts are personal and non-transferable. Sharing login details to allow a third party to attend classes is not permitted.</li>
+                    </ul>
+
+                    <h2>3. Class Booking</h2>
+                    <ul>
+                        <li>Classes can be booked through the portal subject to availability.</li>
+                        <li>A booking is confirmed only when a class credit or valid subscription has been applied.</li>
+                        <li>The Studio reserves the right to cancel or reschedule a class with reasonable notice. In such cases, any used credit will be returned.</li>
+                        <li>Maximum occupancy per class is set by the Studio; once full, a waiting-list may be offered at the Studio's discretion.</li>
+                    </ul>
+
+                    <h2>4. Cancellation Policy</h2>
+                    <ul>
+                        <li><strong>You must cancel at least 2 hours before the scheduled class start time</strong> to have your credit returned.</li>
+                        <li>Cancellations made within 2 hours of the class, or no-shows, will result in the full credit deduction with no refund.</li>
+                        <li>To cancel, use the "Upcoming Classes" section in your portal before the cut-off time.</li>
+                        <li>The Studio may waive the policy in exceptional circumstances (medical emergency, etc.) at its sole discretion. Contact us as soon as possible if this applies.</li>
+                    </ul>
+
+                    <h2>5. Credit Policy</h2>
+                    <ul>
+                        <li>Credits are valid for the duration stated at the time of purchase. Expired credits are non-refundable.</li>
+                        <li>Credits are personal and may not be transferred to another account.</li>
+                        <li>Credit balances are viewable in your portal under "Balance".</li>
+                        <li>The Studio reserves the right to correct any credit balance errors (over- or under-credited) with prior notice to the account holder.</li>
+                    </ul>
+
+                    <h2>6. Payments &amp; Refunds</h2>
+                    <ul>
+                        <li>All prices are stated in the currency displayed on the Studio's portal and are inclusive of applicable taxes unless stated otherwise.</li>
+                        <li>Credit packages are non-refundable once purchased, except where required by applicable consumer-protection law.</li>
+                        <li>Subscription fees are charged on a recurring basis as described at the time of sign-up. You may cancel your subscription at any time; the cancellation takes effect at the end of the current billing cycle.</li>
+                        <li>The Studio does not store full payment card details; all payments are processed via a PCI-DSS-compliant payment provider.</li>
+                    </ul>
+
+                    <h2>7. Health &amp; Liability</h2>
+                    <ul>
+                        <li>Participation in Pilates and fitness classes carries inherent risk. You confirm that you are in adequate physical condition to participate and that you have sought medical advice where necessary.</li>
+                        <li>You agree to inform the Studio of any injuries, medical conditions, or pregnancy before joining a class.</li>
+                        <li>The Studio shall not be liable for any injury, loss, or damage arising from participation in classes, except where caused by the Studio's own negligence.</li>
+                        <li>The Studio's equipment and premises are maintained to a reasonable standard. Report any hazards to staff immediately.</li>
+                    </ul>
+
+                    <h2>8. Privacy</h2>
+                    <ul>
+                        <li>We collect and process personal data as described in our Privacy Policy, available on request.</li>
+                        <li>Your data is used solely to manage your account, process bookings, and communicate with you about the Studio's services.</li>
+                        <li>We do not sell or share your personal data with third parties for marketing purposes.</li>
+                        <li>You may request access to, correction of, or deletion of your personal data by contacting us at the Studio.</li>
+                    </ul>
+
+                    <p style="margin-top:24px;font-size:0.85rem;color:var(--mv-muted);">
+                        Last updated: August 2026
+                    </p>
+
                 </div>
 
                 <div class="mv-spacer-16"/>
@@ -1384,9 +1590,9 @@
 
                 <div class="mv-greeting-row">
                     <div>
-                        <p class="mv-greeting-name">Orders</p>
-                        <p class="mv-greeting-sub" t-if="show_all">All your orders</p>
-                        <p class="mv-greeting-sub" t-else="">Orders that are not settled yet</p>
+                        <p class="mv-greeting-name">Shopping</p>
+                        <p class="mv-greeting-sub" t-if="show_all">All your purchases</p>
+                        <p class="mv-greeting-sub" t-else="">Purchases not yet settled</p>
                     </div>
                 </div>
 
@@ -1659,6 +1865,87 @@
         </t>
     </template>
 
+    <!-- ── Messages history + compose (/my/messages) ──────────────────────── -->
+    <template id="portal_messages" name="Studio Messages">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-if="is_teacher">
+                    <t t-call="fitness_portal.mv_teacher_page_header"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_page_header"/>
+                </t>
+
+                <t t-set="_back_url" t-value="'/my'"/>
+                <t t-set="_back_label">Profile</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Inbox</p>
+                        <p class="mv-greeting-sub">Have a question? Send us a message.</p>
+                    </div>
+                </div>
+
+                <t t-if="sent">
+                    <div class="mv-flash mv-flash-ok" style="margin:0 16px 12px;">
+                        <strong>Sent!</strong> The studio will get back to you soon.
+                    </div>
+                </t>
+                <t t-if="error == 'empty'">
+                    <div class="mv-flash mv-flash-err" style="margin:0 16px 12px;">Please write a message before sending.</div>
+                </t>
+                <t t-if="error == 'toolong'">
+                    <div class="mv-flash mv-flash-err" style="margin:0 16px 12px;">Message too long (max 2,000 characters).</div>
+                </t>
+
+                <!-- Compose -->
+                <div class="mv-section-label">New message</div>
+                <form action="/my/messages/send" method="post" class="mv-msg-form" style="padding:0 16px 4px;">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <textarea class="mv-msg-textarea"
+                              name="body"
+                              maxlength="2000"
+                              placeholder="Write your message here…"
+                              required="required"><t t-if="prefill" t-out="prefill"/></textarea>
+                    <button type="submit" class="mv-msg-send-btn">Send</button>
+                </form>
+
+                <!-- Thread -->
+                <div class="mv-section-label" style="margin-top:20px;">Conversation history</div>
+                <t t-if="not messages">
+                    <div class="mv-empty">No messages yet. Write the first one above.</div>
+                </t>
+                <t t-else="">
+                    <div class="mv-msg-history">
+                        <t t-foreach="messages" t-as="msg">
+                            <div t-att-class="'mv-msg-card' + (' mv-msg-card--admin' if msg.is_admin else '')">
+                                <div class="mv-msg-meta">
+                                    <span class="mv-msg-author"
+                                          t-out="msg.author_name or 'You'"/>
+                                    <span t-out="msg.create_date"
+                                          t-options='{"widget": "datetime", "format": "d MMM · HH:mm"}'/>
+                                </div>
+                                <div class="mv-msg-body" t-out="msg.body"/>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <div class="mv-spacer-16"/>
+                <t t-if="is_teacher">
+                    <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_bottom_nav"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
     <!-- ── Message the Studio (/my/message-studio) — Task 5 ────────────────── -->
     <template id="portal_message_studio" name="Message the Studio">
         <t t-call="portal.frontend_layout">
@@ -1724,13 +2011,99 @@
         </t>
     </template>
 
+    <!-- ── News Post Detail (/my/news/<id>) ─────────────────────────────── -->
+    <template id="portal_news_detail" name="News Post Detail">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+                <div class="mv-news-detail">
+                    <t t-if="post.image">
+                        <div class="mv-news-card-img mv-news-detail-img">
+                            <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
+                                 t-att-alt="post.title"
+                                 class="mv-news-card-photo"
+                                 loading="lazy"/>
+                        </div>
+                    </t>
+                    <div class="mv-news-detail-body">
+                        <p class="mv-news-title mv-news-title-lg" t-field="post.title"/>
+                        <p class="mv-news-date">
+                            <span t-field="post.publish_date"
+                                  t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
+                        </p>
+                        <div class="mv-news-body" t-field="post.body"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── News list page ───────────────────────────────────────────────────── -->
+    <template id="portal_news_list" name="News List (Student)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+                <div class="mv-news-cards mv-news-cards--page">
+                    <t t-foreach="posts" t-as="post">
+                        <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
+                            <t t-if="post.image">
+                                <div class="mv-news-card-thumb">
+                                    <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
+                                         t-att-alt="post.title"
+                                         class="mv-news-thumb-img" loading="lazy"/>
+                                </div>
+                                <div class="mv-news-card-info">
+                                    <p class="mv-news-card-title" t-field="post.title"/>
+                                    <p class="mv-news-card-date">
+                                        <span t-field="post.publish_date"
+                                              t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
+                                    </p>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="mv-news-card-noimg">
+                                    <div class="mv-news-card-icon">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
+                                            <polyline points="14 2 14 8 20 8"/>
+                                            <path d="M2 15h10M9 19H2M7 11H2"/>
+                                        </svg>
+                                    </div>
+                                    <p class="mv-news-card-date">
+                                        <span t-field="post.publish_date"
+                                              t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
+                                    </p>
+                                </div>
+                                <div class="mv-news-card-info">
+                                    <p class="mv-news-card-title" t-field="post.title"/>
+                                    <p class="mv-news-card-excerpt" t-out="post.body_excerpt"/>
+                                </div>
+                            </t>
+                        </a>
+                    </t>
+                    <t t-if="not posts">
+                        <p class="mv-empty">No news yet.</p>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
     <!-- ── Package description on sale order portal page ───────────────────── -->
     <template id="mv_portal_order_pkg_desc" name="CoreLab Package Description in Order"
               inherit_id="sale.sale_order_portal_content">
         <xpath expr="//div[@name='sol_table']" position="after">
             <t t-foreach="sale_order.order_line" t-as="oline">
                 <t t-if="oline.product_id.description_sale">
-                    <div style="padding:12px 0 4px;border-top:1px solid #EAE4DC;margin-top:12px;font-size:0.88rem;line-height:1.55;color:#4a4035;white-space:pre-line;">
+                    <div style="padding:12px 0 4px;border-top:1px solid var(--mv-border);margin-top:12px;font-size:0.88rem;line-height:1.55;color:var(--mv-ink);white-space:pre-line;">
                         <t t-out="oline.product_id.description_sale"/>
                     </div>
                 </t>

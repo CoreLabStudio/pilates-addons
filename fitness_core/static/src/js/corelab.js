@@ -8,61 +8,24 @@
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
 
-  /* ── 1. Detect @view-transition { navigation: auto } support ─
-     Chrome 126+, Safari 18+.  If unsupported we add a JS fade. */
-  const supportsNavVT = (() => {
-    try {
-      const sheet = new CSSStyleSheet();
-      sheet.insertRule('@view-transition { navigation: auto; }');
-      return CSS.supports('view-transition-name', 'none'); // proxy for VT support
-    } catch (_) { return false; }
-  })();
-
-  /* ── 2. JS fade fallback for browsers without nav VT ────────
-     Intercept same-site /my/* and /web/login links, fade out,
-     navigate, fade in on arrival. */
-  function setupJSTransitions() {
-    if (supportsNavVT) return;
-
-    // Fade-in on load
-    document.documentElement.style.opacity = '0';
-    const fadeIn = () => {
-      document.documentElement.style.transition = 'opacity 200ms ease';
-      document.documentElement.style.opacity = '1';
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fadeIn);
-    } else {
-      requestAnimationFrame(fadeIn);
-    }
-
-    // Fade-out on navigation
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href]');
-      if (!link) return;
-      const href = link.getAttribute('href') || '';
-      if (!href || href.startsWith('#') || href.startsWith('javascript') ||
-          link.target || e.metaKey || e.ctrlKey || e.shiftKey) return;
-      if (!/^\/(my|web\/login)/.test(href)) return;
-      e.preventDefault();
-      document.documentElement.style.transition = 'opacity 150ms ease';
-      document.documentElement.style.opacity = '0';
-      setTimeout(() => { window.location.href = href; }, 158);
-    }, true);
-  }
-
   /* ── 3. Bottom nav — highlight active tab ──────────────────
      Four student tabs: Home / Studio / Packages / Profile.
      /my/classes/<id> (class detail) and /my/schedule belong to Studio. */
   const STUDIO_PATHS = ['/my/studio', '/my/classes', '/my/schedule'];
-  const PACKAGE_PATHS = ['/my/packages', '/my/credits', '/my/terms'];
+  const PACKAGE_PATHS = ['/my/packages', '/my/credits', '/my/terms', '/my/checkout'];
+  const PROFILE_PATHS = ['/my/messages', '/my/notifications', '/my/orders',
+                         '/my/security', '/my/language', '/my/addresses'];
 
   function startsWithAny(path, prefixes) {
     return prefixes.some((p) => path === p || path.startsWith(p + '/') || path.startsWith(p + '?'));
   }
 
   function activateBottomNav() {
-    const path = window.location.pathname;
+    // Strip Odoo language prefix (/en/, /es/, /ca_ES/, etc.) before comparing
+    let path = window.location.pathname;
+    const langMatch = path.match(/^\/((?:[a-z]{2})(?:_[A-Za-z]{2,4})?)(\/.*)/);
+    if (langMatch) path = langMatch[2];
+
     $$('.mv-nav-tab').forEach((tab) => {
       const href = (tab.getAttribute('href') || '').split('?')[0];
       if (!href) return;
@@ -76,11 +39,8 @@
       } else if (href === '/my/teacher/classes') {
         active = path === '/my/teacher/classes' || path.startsWith('/my/teacher/classes/');
       } else if (href === '/my') {
-        // Profile tab — active when not on any other CoreLab tab route
-        active = path !== '/my/home' &&
-                 !startsWithAny(path, STUDIO_PATHS) &&
-                 !startsWithAny(path, PACKAGE_PATHS) &&
-                 !path.startsWith('/my/teacher/classes');
+        // Profile tab — explicit positive match only
+        active = path === '/my' || startsWithAny(path, PROFILE_PATHS);
       } else {
         active = false;
       }
@@ -198,19 +158,43 @@
         .then(data => {
           const notifs = data.notifications || [];
           if (!notifs.length) {
-            if (empty) empty.textContent = 'No notifications';
+            if (empty) empty.textContent = 'No new notifications';
             return;
           }
           if (empty) empty.style.display = 'none';
           if (list) {
-            list.innerHTML = notifs.map(n =>
-              '<li class="mv-notif-item' + (n.read ? '' : ' mv-notif-item--unread') + '">' +
-              '<span class="mv-notif-title">' + _escHtml(n.title) + '</span>' +
-              (n.body ? '<span class="mv-notif-body">' + _escHtml(n.body) + '</span>' : '') +
-              '<span class="mv-notif-time">' + _escHtml(n.time_ago) + '</span>' +
-              '</li>'
-            ).join('');
+            list.innerHTML = notifs.map(function(n) {
+              var cls = 'mv-notif-item mv-notif-item--unread';
+              var dId = ' data-id="' + n.id + '"';
+              var inner = '<span class="mv-notif-title">' + _escHtml(n.title) + '</span>' +
+                (n.body ? '<span class="mv-notif-body">' + _escHtml(n.body) + '</span>' : '') +
+                '<span class="mv-notif-time">' + _escHtml(n.time_ago) + '</span>';
+              if (n.action_url) {
+                return '<li class="' + cls + ' mv-notif-item--linked"' + dId + '>' +
+                  '<a href="' + _escHtml(n.action_url) + '" class="mv-notif-link">' + inner + '</a></li>';
+              }
+              return '<li class="' + cls + '"' + dId + '>' + inner + '</li>';
+            }).join('');
             list.style.display = 'block';
+
+            // Mark-read on click: fire async, remove from list immediately
+            list.addEventListener('click', function(e) {
+              var li = e.target.closest('li[data-id]');
+              if (!li) return;
+              var nid = li.getAttribute('data-id');
+              fetch('/my/notifications/mark_read', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'notif_id=' + encodeURIComponent(nid),
+                keepalive: true,
+              }).catch(function() {});
+              li.remove();
+              if (!list.querySelector('li')) {
+                list.style.display = 'none';
+                if (empty) { empty.textContent = 'No new notifications'; empty.style.display = ''; }
+              }
+            });
           }
         }).catch(() => { if (empty) empty.textContent = 'Could not load notifications'; });
     });
@@ -253,6 +237,9 @@
   function setupBackLinks() {
     const links = $$('[data-cl-back]');
     if (!links.length) return;
+
+    // Checkout step pages have server-provided back URLs — skip JS override
+    if (/\/my\/(packages\/\d+\/checkout|checkout\/\d+\/sign)/.test(window.location.pathname)) return;
 
     const UTILITY = ['/my/language', '/my/security', '/my/set_lang', '/my/addresses'];
     function isUtility(p) {
@@ -474,7 +461,6 @@
   /* ── Init ────────────────────────────────────────────────── */
   function init() {
     trackNavHistory();      // must run before setupBackLinks reads the stack
-    setupJSTransitions();
     activateBottomNav();
     setupCardTaps();
     animateBookingSuccess();
