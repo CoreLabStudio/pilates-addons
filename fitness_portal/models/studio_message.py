@@ -11,14 +11,14 @@ class FitnessStudioConversation(models.Model):
     _rec_name = 'display_name_computed'
 
     user_id = fields.Many2one(
-        'res.users', 'User', required=True, readonly=True,
+        'res.users', 'User', required=True,
         ondelete='cascade', index=True,
     )
     partner_id = fields.Many2one(
-        'res.partner', 'Partner', required=True, readonly=True,
+        'res.partner', 'Partner', required=True,
         ondelete='cascade',
     )
-    role = fields.Char('Role', readonly=True)
+    role = fields.Char('Role')
 
     message_ids = fields.One2many(
         'fitness.studio.message', 'conversation_id', 'Messages',
@@ -68,6 +68,58 @@ class FitnessStudioConversation(models.Model):
 
     def name_get(self):
         return [(r.id, r.display_name_computed or f"Conv #{r.id}") for r in self]
+
+    @api.onchange('user_id')
+    def _onchange_user_id(self):
+        if self.user_id:
+            self.partner_id = self.user_id.partner_id
+        else:
+            self.partner_id = False
+
+    def _get_role_for_user(self, uid):
+        teacher_g = self.env.ref('fitness_core.group_fitness_teacher', raise_if_not_found=False)
+        if not teacher_g:
+            return 'Student'
+        self.env.cr.execute(
+            "SELECT 1 FROM res_groups_users_rel WHERE gid = %s AND uid = %s LIMIT 1",
+            (teacher_g.id, uid),
+        )
+        return 'Teacher' if self.env.cr.fetchone() else 'Student'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            uid = vals.get('user_id')
+            if uid:
+                user = self.env['res.users'].browse(uid)
+                if not vals.get('partner_id'):
+                    vals['partner_id'] = user.partner_id.id
+                if not vals.get('role'):
+                    vals['role'] = self._get_role_for_user(uid)
+        records = super().create(vals_list)
+        for rec in records:
+            body = (rec.reply_body or '').strip()
+            if body:
+                self.env['fitness.studio.message'].create({
+                    'conversation_id': rec.id,
+                    'author_id': self.env.uid,
+                    'author_name': self.env.user.name,
+                    'is_admin': True,
+                    'body': body,
+                })
+                rec.reply_body = False
+        return records
+
+    def action_create_and_open(self):
+        """Called from the create-mode form to save and stay on this conversation."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'fitness.studio.conversation',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     def action_send_reply(self):
         for conv in self:
@@ -123,7 +175,7 @@ class FitnessStudioMessage(models.Model):
                             'message_reply',
                             lang_env.env._('Reply from %s', sender),
                             msg.body[:200] if msg.body else None,
-                            action_url='/my/messages',
+                            action_url=f'/my/messages/{conv.id}',
                         )
                     except Exception:
                         _logger.exception(

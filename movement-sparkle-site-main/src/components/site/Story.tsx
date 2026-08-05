@@ -47,7 +47,7 @@ export function Story() {
           <div className="img-cover-zoom overflow-hidden rounded-[2rem] aspect-[7/5] bg-muted">
             <img
               src={lounge}
-              alt="The mōva studio lounge with folded towels and coffee"
+              alt="The CoreLab studio lounge"
               loading="lazy"
               width={1400}
               height={1000}

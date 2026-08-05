@@ -441,6 +441,18 @@
     </template>
 
 
+    <!-- Browser tab: replace Odoo defaults with CoreLab branding. -->
+    <template id="mv_portal_tab_title" name="CoreLab Tab Title"
+              inherit_id="portal.frontend_layout">
+        <xpath expr="//head/title" position="replace">
+            <title t-esc="title or 'CoreLab'"/>
+        </xpath>
+        <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
+            <link rel="shortcut icon" type="image/png"
+                  href="/fitness_core/static/src/img/corelab-logo.png"/>
+        </xpath>
+    </template>
+
     <!-- Password requirements hint on the stock portal security page.
          Shown permanently before typing, not only on error.
          Client-side validation runs from fitness_portal/static/src/js/password_validation.js. -->

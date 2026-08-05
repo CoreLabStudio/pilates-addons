@@ -2,27 +2,47 @@ import { Reveal } from "./Reveal";
 
 const plans = [
   {
-    name: "Drop-in",
-    price: "€24",
-    unit: "per class",
-    desc: "One mat, no commitment. Perfect for a first taste of the reformer.",
-    perks: ["Any group class", "Mat, socks & towel included", "Valid 30 days"],
+    name: "Barre",
+    price: "€10",
+    unit: "trial class",
+    desc: "Start with a single session, build the habit with a pack.",
+    perks: [
+      "Trial class: €10",
+      "Single class: €19",
+      "5-class pack: €90 · valid 60 days",
+      "10-class pack: €150 · valid 60 days",
+      "Monthly from €75",
+    ],
     featured: false,
   },
   {
-    name: "Ten pack",
-    price: "€210",
-    unit: "10 classes",
-    desc: "Our most-loved option. Come twice a week, keep the rhythm.",
-    perks: ["€21 per class", "Shareable with one guest", "Valid 4 months", "Priority waitlist"],
+    name: "Reformer",
+    price: "€15",
+    unit: "trial class",
+    desc: "Your first session at a special rate — then build with packs or a fixed weekly rhythm.",
+    perks: [
+      "Trial class: €15",
+      "Single class: €25",
+      "Intro 3-class bono: €60 · valid 15 days",
+      "5-class pack: €120 · valid 90 days",
+      "10-class pack: €230 · valid 90 days",
+      "15-class pack: €330 · valid 90 days",
+    ],
     featured: true,
   },
   {
-    name: "Unlimited",
-    price: "€180",
-    unit: "per month",
-    desc: "For the practice that has become part of the week.",
-    perks: ["Unlimited group classes", "1 private per month", "10% off workshops", "Pause anytime"],
+    name: "Monthly",
+    price: "€75",
+    unit: "/ month",
+    desc: "Fix a slot each week. Build the habit with a reserved place in every class.",
+    perks: [
+      "Barre Clase Fija 1×: €75 / mo",
+      "Barre Clase Fija 2×: €140 / mo",
+      "Barre Ilimitado: €200 / mo",
+      "Reformer 1×/week: €80 / mo",
+      "Reformer 2×/week: €150 / mo",
+      "Reformer 3×/week: €210 / mo",
+    ],
     featured: false,
   },
 ];
@@ -41,7 +61,7 @@ export function Pricing() {
             Simple ways to <span className="italic text-accent font-light">stay.</span>
           </Reveal>
           <Reveal delay={2} className="max-w-sm text-foreground/70">
-            No contracts, no joining fee. First reformer class is always €12 so you can meet the springs first.
+            No contracts, no joining fee. First Reformer class €15, first Barre class €10 — try the machine before committing.
           </Reveal>
         </div>
 
@@ -80,7 +100,7 @@ export function Pricing() {
                   href="#contact"
                   className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm transition-colors ${
                     p.featured
-                      ? "bg-foreground text-background hover:bg-accent"
+                      ? "bg-accent text-accent-foreground hover:opacity-90"
                       : "border border-foreground hover:bg-foreground hover:text-background"
                   }`}
                 >

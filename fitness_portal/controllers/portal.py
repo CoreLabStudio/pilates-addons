@@ -21,6 +21,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
+TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
 SCHEDULE_LOOK_AHEAD_DAYS = 28
 
@@ -47,6 +48,8 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/home', type='http', auth='user', website=True, sitemap=False)
     def portal_home(self, **kw):
+        if request.env.user.has_group(TEACHER_GROUP):
+            return request.redirect('/my/teacher/classes')
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -663,11 +666,11 @@ class FitnessStudentPortal(http.Controller):
             bonus = product.fitness_promo_first_cycle_bonus or 0
             sub_date = sub.date_order.date() if sub.date_order else None
             is_cf = bool(getattr(product, 'fitness_is_clase_fija', False))
-            cf_promo = (
-                is_cf and sub_date is not None
-                and _PROMO_WINDOW_START <= sub_date <= _PROMO_WINDOW_END
-            )
-            effective_bonus = 1 if cf_promo else bonus
+            is_rm = bool(getattr(product, 'fitness_is_reformer_mensual', False))
+            in_promo = sub_date is not None and _PROMO_WINDOW_START <= sub_date <= _PROMO_WINDOW_END
+            cf_promo = is_cf and in_promo
+            rm_promo = is_rm and in_promo
+            effective_bonus = 1 if (cf_promo or rm_promo) else bonus
 
             # Subscription started (always neutral, no delta)
             events.append({

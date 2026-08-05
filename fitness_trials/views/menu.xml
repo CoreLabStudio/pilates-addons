@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem
+    id="menu_fitness_trial_requests"
+    name="Trial Requests"
+    parent="fitness_core.menu_group_bookings"
+    action="fitness_trials.action_fitness_trial_request"
+    sequence="20"
+    groups="fitness_core.group_fitness_manager"
+  />
+
+</odoo>

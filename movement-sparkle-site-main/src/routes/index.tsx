@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BookingDialogProvider } from "@/components/site/BookingDialog";
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/site/Hero";
 import { Marquee } from "@/components/site/Marquee";
@@ -22,17 +23,17 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "mōva — Reformer Pilates Studio in Lisbon" },
+      { title: "CoreLab — Reformer & Barre Pilates Studio" },
       {
         name: "description",
         content:
-          "Boutique reformer pilates in Príncipe Real, Lisbon. Six mats per class, slow deliberate teaching, memberships from €21 a class.",
+          "Boutique reformer and barre pilates studio. Small groups, considered teaching, real results.",
       },
-      { property: "og:title", content: "mōva — Reformer Pilates Studio in Lisbon" },
+      { property: "og:title", content: "CoreLab — Reformer & Barre Pilates Studio" },
       {
         property: "og:description",
         content:
-          "Small-group reformer and mat pilates in Príncipe Real. Classes, teachers, timetable and memberships.",
+          "Reformer and barre pilates. Classes, memberships, private sessions and workshops.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
+    <BookingDialogProvider>
     <main className="grain min-h-screen bg-background text-foreground">
       <Nav />
       <Hero />
@@ -62,5 +64,6 @@ function Index() {
       <Contact />
 
     </main>
+    </BookingDialogProvider>
   );
 }

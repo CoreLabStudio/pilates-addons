@@ -18,7 +18,7 @@ export function Studio() {
         >
           <motion.img
             src={warm}
-            alt="Golden hour inside the mōva studio"
+            alt="Golden hour inside the CoreLab studio"
             loading="lazy"
             width={1600}
             height={1200}

@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import corelabLogo from "@/assets/corelab-logo-header.png";
+import { useBookingDialog } from "@/components/site/BookingDialog";
 
 const links = [
   { label: "Method", href: "#method" },
@@ -15,6 +16,7 @@ const links = [
 
 
 export function Nav() {
+  const { openDialog } = useBookingDialog();
   return (
     <motion.header
       initial={{ y: -40, opacity: 0 }}
@@ -35,13 +37,13 @@ export function Nav() {
           ))}
         </nav>
 
-        <a
-          href="#schedule"
-          className="group inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm transition-colors hover:bg-accent"
+        <button
+          onClick={openDialog}
+          className="group inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm hover:opacity-90 transition-opacity"
         >
           Book a class
           <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
-        </a>
+        </button>
       </div>
     </motion.header>
   );

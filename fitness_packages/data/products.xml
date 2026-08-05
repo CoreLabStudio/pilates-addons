@@ -198,7 +198,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
-            <field name="sale_ok">0</field>
+            <field name="sale_ok">1</field>
         </record>
 
         <record id="product_private_10pack" model="product.template">
@@ -210,7 +210,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
-            <field name="sale_ok">0</field>
+            <field name="sale_ok">1</field>
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -226,7 +226,7 @@
             <field name="fitness_validity_days">15</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
-            <field name="sale_ok">0</field>
+            <field name="sale_ok">1</field>
         </record>
 
         <record id="product_duo_5pack" model="product.template">
@@ -238,7 +238,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
-            <field name="sale_ok">0</field>
+            <field name="sale_ok">1</field>
         </record>
 
         <record id="product_duo_10pack" model="product.template">
@@ -250,7 +250,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
-            <field name="sale_ok">0</field>
+            <field name="sale_ok">1</field>
         </record>
 
     </data>

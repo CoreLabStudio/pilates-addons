@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- ── New Conversation Wizard ── -->
+
+    <record id="action_new_conversation_wizard" model="ir.actions.act_window">
+        <field name="name">New Message</field>
+        <field name="res_model">fitness.studio.new_conversation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_new_conversation_wizard_form" model="ir.ui.view">
+        <field name="name">fitness.studio.new_conversation.wizard.form</field>
+        <field name="model">fitness.studio.new_conversation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="New Message">
+                <sheet>
+                    <group>
+                        <field name="user_id"/>
+                        <field name="body" placeholder="Write your message here…"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_send" type="object"
+                            string="Send" class="btn btn-primary"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <!-- ── fitness.studio.conversation — list + form ── -->
 
     <record id="view_fitness_studio_conversation_list" model="ir.ui.view">
@@ -8,7 +37,7 @@
         <field name="model">fitness.studio.conversation</field>
         <field name="arch" type="xml">
             <list string="Studio Conversations" default_order="write_date desc"
-                  decoration-info="has_unread" create="0">
+                  decoration-info="has_unread">
                 <field name="partner_id" string="From"/>
                 <field name="role" string="Role"/>
                 <field name="message_count" string="Messages"/>
@@ -22,9 +51,26 @@
         <field name="name">fitness.studio.conversation.form</field>
         <field name="model">fitness.studio.conversation</field>
         <field name="arch" type="xml">
-            <form string="Conversation" create="0">
+            <form string="Conversation">
                 <sheet>
-                    <group string="Sender">
+                    <!-- Create mode: recipient + opening message -->
+                    <group string="New Conversation" invisible="id">
+                        <field name="user_id"/>
+                    </group>
+                    <group string="Opening Message" invisible="id">
+                        <field name="reply_body" nolabel="1"
+                               placeholder="Type your opening message to this member…"
+                               required="not id"/>
+                    </group>
+                    <div invisible="id" class="mt8">
+                        <button name="action_create_and_open"
+                                type="object"
+                                string="Send Message"
+                                class="btn btn-primary"/>
+                    </div>
+
+                    <!-- View/edit mode: sender info -->
+                    <group string="Sender" invisible="not id">
                         <field name="partner_id" readonly="1"/>
                         <field name="user_id" readonly="1"/>
                         <field name="role" readonly="1"/>
@@ -32,9 +78,9 @@
                         <field name="last_activity" readonly="1"/>
                     </group>
 
-                    <notebook>
+                    <!-- Thread: only for existing conversations -->
+                    <notebook invisible="not id">
                         <page string="Thread">
-                            <!-- Read-only message history -->
                             <field name="message_ids" nolabel="1">
                                 <list string="Messages"
                                       default_order="create_date asc"
@@ -63,6 +109,22 @@
         </field>
     </record>
 
+    <!-- Server action — always visible in the Action dropdown (⚙ gear) of the conversation list -->
+    <record id="server_action_new_conversation" model="ir.actions.server">
+        <field name="name">New Message</field>
+        <field name="model_id" ref="fitness_portal.model_fitness_studio_conversation"/>
+        <field name="binding_model_id" ref="fitness_portal.model_fitness_studio_conversation"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = {
+    'type': 'ir.actions.act_window',
+    'name': 'New Message',
+    'res_model': 'fitness.studio.new_conversation.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+}</field>
+    </record>
+
     <record id="action_fitness_studio_messages" model="ir.actions.act_window">
         <field name="name">Messages</field>
         <field name="res_model">fitness.studio.conversation</field>
@@ -77,5 +139,6 @@
         action="action_fitness_studio_messages"
         sequence="50"
         groups="fitness_core.group_fitness_manager"/>
+
 
 </odoo>

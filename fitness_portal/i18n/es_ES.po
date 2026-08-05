@@ -1649,3 +1649,119 @@ msgstr "Últimas noticias y promociones"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Read more"
 msgstr "Leer más"
+
+# ── Email verification flow ───────────────────────────────────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/signup_override.py:0
+msgid "Email verified — please sign in."
+msgstr "Correo verificado — por favor, inicia sesión."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/signup_override.py:0
+msgid "Another user is already registered using this email address."
+msgstr "Ya hay un usuario registrado con esta dirección de correo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/signup_override.py:0
+msgid "Could not create a new account."
+msgstr "No se ha podido crear una cuenta nueva."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "Check your email"
+msgstr "Revisa tu correo"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "We sent a verification link to"
+msgstr "Hemos enviado un enlace de verificación a"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "Click the link in the email to activate your account and access the studio portal. The link is valid for 6 days."
+msgstr "Haz clic en el enlace del correo para activar tu cuenta y acceder al portal del estudio. El enlace es válido 6 días."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "Already verified?"
+msgstr "¿Ya verificado?"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "Didn't receive it? Check your spam folder, or"
+msgstr "¿No lo has recibido? Revisa el spam o"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "sign up again"
+msgstr "regístrate de nuevo"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
+msgid "with the same email to resend."
+msgstr "con el mismo correo para reenviarlo."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
+msgid "Link expired or invalid"
+msgstr "Enlace caducado o no válido"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
+msgid "This verification link is no longer valid. Links expire after 6 days, or become invalid once used."
+msgstr "Este enlace de verificación ya no es válido. Los enlaces caducan a los 6 días o se invalidan una vez utilizados."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
+msgid "Create a new account"
+msgstr "Crear una cuenta nueva"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
+msgid "Back to sign in"
+msgstr "Volver al inicio de sesión"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "One more step"
+msgstr "Un paso más"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Verify your email to access the CoreLab studio portal."
+msgstr "Verifica tu correo para acceder al portal del estudio CoreLab."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Verification email resent to"
+msgstr "Correo de verificación reenviado a"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Check your inbox (and spam folder)."
+msgstr "Revisa tu bandeja de entrada (y la carpeta de spam)."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Click it to activate your account."
+msgstr "Haz clic en él para activar tu cuenta."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Resend verification email"
+msgstr "Reenviar correo de verificación"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
+msgid "Sign out"
+msgstr "Cerrar sesión"

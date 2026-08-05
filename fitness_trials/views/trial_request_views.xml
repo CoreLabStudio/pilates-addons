@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_fitness_trial_request_list" model="ir.ui.view">
+    <field name="name">fitness.trial.request.list</field>
+    <field name="model">fitness.trial.request</field>
+    <field name="arch" type="xml">
+      <list string="Trial Requests" default_order="create_date desc"
+            decoration-info="status == 'pending'"
+            decoration-warning="status == 'contacted'"
+            decoration-success="status == 'scheduled'"
+            decoration-danger="status == 'declined'">
+        <field name="create_date" string="Received" optional="show"/>
+        <field name="name" string="Name"/>
+        <field name="email"/>
+        <field name="phone" optional="show"/>
+        <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
+        <field name="status" widget="badge"/>
+        <field name="scheduled_datetime" string="Scheduled" optional="show"/>
+        <field name="lang" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_fitness_trial_request_form" model="ir.ui.view">
+    <field name="name">fitness.trial.request.form</field>
+    <field name="model">fitness.trial.request</field>
+    <field name="arch" type="xml">
+      <form string="Trial Class Request">
+        <header>
+          <field name="status" widget="statusbar"
+                 statusbar_visible="pending,contacted,scheduled,declined"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <label for="name"/>
+            <h1><field name="name" placeholder="Requester name"/></h1>
+          </div>
+          <group>
+            <group string="Contact">
+              <field name="email"/>
+              <field name="phone"/>
+              <field name="lang" string="Language"/>
+            </group>
+            <group string="Scheduling">
+              <field name="status" string="Status"/>
+              <field name="scheduled_datetime" string="Scheduled Date/Time"/>
+              <field name="create_date" string="Request Received" readonly="1"/>
+            </group>
+          </group>
+          <group string="Preferred Day / Time (from requester)">
+            <field name="preferred_time_notes" nolabel="1"
+                   placeholder="Free-text note left by the requester about when they'd prefer to come."/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_fitness_trial_request_search" model="ir.ui.view">
+    <field name="name">fitness.trial.request.search</field>
+    <field name="model">fitness.trial.request</field>
+    <field name="arch" type="xml">
+      <search string="Trial Requests">
+        <field name="name"/>
+        <field name="email"/>
+        <filter string="Pending" name="pending" domain="[('status','=','pending')]"/>
+        <filter string="Contacted" name="contacted" domain="[('status','=','contacted')]"/>
+        <filter string="Scheduled" name="scheduled" domain="[('status','=','scheduled')]"/>
+        <filter string="Declined" name="declined" domain="[('status','=','declined')]"/>
+        <group>
+          <filter string="Status" name="group_status" context="{'group_by':'status'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_fitness_trial_request" model="ir.actions.act_window">
+    <field name="name">Trial Requests</field>
+    <field name="res_model">fitness.trial.request</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_fitness_trial_request_search"/>
+    <field name="context">{'search_default_pending': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No trial requests yet</p>
+      <p>Trial class requests submitted through the website will appear here.</p>
+    </field>
+  </record>
+
+</odoo>

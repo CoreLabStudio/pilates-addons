@@ -1,9 +1,11 @@
 import { motion } from "motion/react";
 import heroImg from "@/assets/studio-hero.jpg";
+import { useBookingDialog } from "@/components/site/BookingDialog";
 
 const words = ["Move", "with", "intention."];
 
 export function Hero() {
+  const { openDialog } = useBookingDialog();
   return (
     <section id="top" className="relative pt-32 md:pt-40 pb-20 md:pb-28 px-6 md:px-10 overflow-hidden">
       <div className="mx-auto max-w-[1400px]">
@@ -55,13 +57,13 @@ export function Hero() {
               transition={{ duration: 0.9, delay: 1.05 }}
               className="mt-10 flex flex-wrap items-center gap-4"
             >
-              <a
-                href="#schedule"
-                className="inline-flex items-center gap-3 rounded-full bg-foreground text-background px-7 py-4 text-sm tracking-wide hover:bg-accent transition-colors"
+              <button
+                onClick={openDialog}
+                className="inline-flex items-center gap-3 rounded-full bg-accent text-accent-foreground px-7 py-4 text-sm tracking-wide hover:opacity-90 transition-opacity"
               >
                 Reserve your mat
                 <span aria-hidden>→</span>
-              </a>
+              </button>
               <a
                 href="#method"
                 className="inline-flex items-center gap-2 px-2 py-4 text-sm story-link"

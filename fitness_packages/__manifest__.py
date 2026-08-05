@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Packages – Yoleyva Studio',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Services',
     'summary': 'Class-pack products, credit balance tracking and validity management',
     'author': 'Yoleyva Studio',

@@ -84,8 +84,16 @@
                         <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
                     </div>
                 </div>
+                <t t-set="_mv_tphoto" t-value="request.env.user.partner_id.image_128"/>
                 <a href="/my" class="mv-avatar" t-att-title="_mv_tname or 'Profile'">
-                    <t t-out="(_mv_tname[:1] if _mv_tname else 'T').upper()"/>
+                    <t t-if="_mv_tphoto">
+                        <img t-att-src="'/web/image/res.partner/%d/image_128' % request.env.user.partner_id.id"
+                             t-att-alt="_mv_tname or ''"
+                             style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/>
+                    </t>
+                    <t t-else="">
+                        <t t-out="(_mv_tname[:1] if _mv_tname else 'T').upper()"/>
+                    </t>
                 </a>
             </div>
         </header>
@@ -364,6 +372,9 @@
 
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
 
                 <!-- Title + credit readout -->
                 <div class="mv-greeting-row">
@@ -1078,9 +1089,9 @@
                                             <t t-set="_is_active" t-value="product.id in active_product_tmpl_ids"/>
                                             <!-- Image / fallback top -->
                                             <div class="mv-card-img">
-                                                <t t-if="product.image_128">
+                                                <t t-if="product.image_512">
                                                     <img class="mv-card-photo"
-                                                         t-att-src="'/web/image/product.template/' + str(product.id) + '/image_128'"
+                                                         t-att-src="'/web/image/product.template/' + str(product.id) + '/image_512'"
                                                          t-att-alt="product.name or ''"
                                                          loading="lazy"/>
                                                 </t>
@@ -1114,7 +1125,7 @@
                                                     </t>
                                                     <t t-else="">
                                                         <span class="mv-pkg-price-inline">
-                                                            <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                                            <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/><span style="font-size:0.65rem;color:var(--mv-muted);font-weight:400;margin-left:3px;">+ IVA</span>
                                                         </span>
                                                         <t t-if="_is_active">
                                                             <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
@@ -1159,7 +1170,7 @@
                     <t t-if="product.image_512">
                         <img t-att-src="'/web/image/product.template/' + str(product.id) + '/image_512'"
                              t-att-alt="product.name or ''"
-                             style="width:100%;height:200px;object-fit:cover;border-radius:var(--mv-r);display:block;margin-bottom:16px;"
+                             style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--mv-r);display:block;margin-bottom:16px;"
                              loading="lazy"/>
                     </t>
                     <t t-else="">
@@ -1225,7 +1236,7 @@
                         <!-- Price + buy -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);">Price</span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);">Price <span style="font-size:0.72rem;">+ IVA</span></span>
                                 <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
                                 </span>
@@ -1271,6 +1282,18 @@
                             <p class="mv-summary-name" t-out="product.name"/>
                             <span class="mv-summary-total">
                                 <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                            </span>
+                        </div>
+                        <div class="mv-summary-row" style="padding-top:4px;border-top:1px solid var(--mv-border);margin-top:8px;">
+                            <p class="mv-summary-name" style="color:var(--mv-muted);font-size:0.8rem;">IVA (21%)</p>
+                            <span class="mv-summary-total" style="color:var(--mv-muted);font-size:0.8rem;">
+                                <t t-out="'%.2f' % (product.list_price * 0.21)"/> <t t-out="product.currency_id.symbol or '€'"/>
+                            </span>
+                        </div>
+                        <div class="mv-summary-row" style="padding-top:6px;font-weight:600;">
+                            <p class="mv-summary-name">Total</p>
+                            <span class="mv-summary-total">
+                                <t t-out="'%.2f' % (product.list_price * 1.21)"/> <t t-out="product.currency_id.symbol or '€'"/>
                             </span>
                         </div>
                     </div>

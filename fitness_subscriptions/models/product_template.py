@@ -17,6 +17,13 @@ class ProductTemplate(models.Model):
              "creates bookings for every occurrence of the member's fixed class "
              "slot within the billing period (auto-placement).",
     )
+    fitness_is_reformer_mensual = fields.Boolean(
+        "Is Reformer Mensual Plan",
+        default=False,
+        help="When enabled, confirming a subscription within the studio-wide promo "
+             "window (Sept–Nov) grants +1 floating credit automatically — identical "
+             "mechanism to Barre Clase Fija opening promo.",
+    )
 
     # ── ENFORCEMENT fields — read by validate_subscription_for_booking() and
     #    _select_payment_source(). These are the authoritative cap values. ────────

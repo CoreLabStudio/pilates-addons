@@ -74,7 +74,7 @@ class CalendarEvent(models.Model):
                 'teacher_swap',
                 teacher_env.env._('Class assigned to you: %s', event.name),
                 teacher_env.env._('You have been assigned as teacher for this class.'),
-                action_url='/my/teacher/classes',
+                action_url=f'/my/teacher/classes/{event.id}',
             )
 
             _logger.info(

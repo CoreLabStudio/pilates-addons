@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.9.0',
+    'version': '19.0.1.9.9',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Yoleyva Studio',
@@ -22,6 +22,7 @@
         'views/portal_templates.xml',
         'views/portal_shell_override.xml',
         'views/login_override.xml',
+        'views/signup_templates.xml',
     ],
     'installable': True,
     'application': False,

@@ -2,7 +2,7 @@ import { Reveal } from "./Reveal";
 
 const quotes = [
   {
-    q: "I came for a stronger back and left with a slower mind. mōva changed my whole week.",
+    q: "I came for a stronger back and left with a slower mind. It changed my whole week.",
     n: "Inês C.",
     r: "Member since 2022",
   },

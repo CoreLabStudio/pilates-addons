@@ -6,12 +6,17 @@
         <!--  REFORMER MENSUAL (metered monthly bucket)                      -->
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
+        <!-- fitness_is_reformer_mensual=1: auto-grants +1 floating credit when
+             confirmed within the studio promo window (Sept–Nov 2026), same as
+             Barre Clase Fija. fitness_promo_first_cycle_bonus stays 0 so the
+             action_confirm() date gate does not block year-round sales. -->
         <record id="product_reformer_mensual_1" model="product.template">
             <field name="name">Reformer Mensual 1</field>
             <field name="type">service</field>
             <field name="list_price">80.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
             <field name="monthly_class_allowance">4</field><!-- legacy value; reporting-only -->
@@ -26,6 +31,7 @@
             <field name="list_price">150.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">2</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
             <field name="monthly_class_allowance">8</field><!-- legacy value; reporting-only -->
@@ -40,6 +46,7 @@
             <field name="list_price">210.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">3</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
             <field name="monthly_class_allowance">12</field><!-- legacy value; reporting-only -->
@@ -53,8 +60,12 @@
         <!--  Promo availability is gated by date in Stage 8.                -->
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
+        <!-- Deprecated: bonus is now auto-granted on Reformer Mensual 1/2/3
+             during the promo window. These SKUs are archived and not sellable. -->
         <record id="product_reformer_mensual_1_promo" model="product.template">
             <field name="name">Reformer Mensual 1 +1 Promo</field>
+            <field name="active">0</field>
+            <field name="sale_ok">0</field>
             <field name="type">service</field>
             <field name="list_price">80.00</field>
             <field name="recurring_invoice">1</field>
@@ -69,6 +80,8 @@
 
         <record id="product_reformer_mensual_2_promo" model="product.template">
             <field name="name">Reformer Mensual 2 +1 Promo</field>
+            <field name="active">0</field>
+            <field name="sale_ok">0</field>
             <field name="type">service</field>
             <field name="list_price">150.00</field>
             <field name="recurring_invoice">1</field>
@@ -83,6 +96,8 @@
 
         <record id="product_reformer_mensual_3_promo" model="product.template">
             <field name="name">Reformer Mensual 3 +1 Promo</field>
+            <field name="active">0</field>
+            <field name="sale_ok">0</field>
             <field name="type">service</field>
             <field name="list_price">210.00</field>
             <field name="recurring_invoice">1</field>

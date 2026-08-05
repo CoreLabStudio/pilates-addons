@@ -9,7 +9,7 @@ class FitnessNewsPost(models.Model):
 
     title = fields.Char("Title", required=True, translate=True)
     body = fields.Html("Body", sanitize=True, translate=True)
-    image = fields.Image("Image", max_width=800, max_height=600)
+    image = fields.Image("Image", max_width=1600, max_height=900)
     active = fields.Boolean(default=True)
     publish_date = fields.Date(
         "Publish Date",

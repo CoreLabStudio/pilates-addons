@@ -10,6 +10,7 @@ import {
 import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import iconUrl from "../assets/corelab-favicon.png?url";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -74,13 +75,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CoreLab — Reformer & Barre Pilates Studio" },
+      { title: "CoreLab" },
       {
         name: "description",
         content:
           "A boutique reformer pilates studio in Príncipe Real, Lisbon. Small groups, considered teaching, a space that feels like a deep breath.",
       },
-      { property: "og:title", content: "CoreLab — Reformer & Barre Pilates Studio" },
+      { property: "og:title", content: "CoreLab" },
       {
         property: "og:description",
         content:
@@ -88,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "CoreLab — Reformer & Barre Pilates Studio" },
+      { name: "twitter:title", content: "CoreLab" },
       {
         name: "description",
         content:
@@ -116,6 +117,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: iconUrl },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

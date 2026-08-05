@@ -98,6 +98,10 @@ class SaleOrder(models.Model):
         related='fitness_subscription_product_id.fitness_is_clase_fija',
         store=False, string="Is Clase Fija",
     )
+    fitness_is_reformer_mensual = fields.Boolean(
+        related='fitness_subscription_product_id.fitness_is_reformer_mensual',
+        store=False, string="Is Reformer Mensual",
+    )
 
     # ── CLASE FIJA: fixed weekly class slots (one per reserved class time) ──────
     # Each active slot holds an anchor event. Auto-placement creates bookings for
@@ -246,20 +250,21 @@ class SaleOrder(models.Model):
 
             product_bonus = product.fitness_promo_first_cycle_bonus or 0
 
-            # Clase Fija plans: +1 floating credit if confirmed within promo window.
-            # The product itself keeps fitness_promo_first_cycle_bonus=0 so the
-            # action_confirm() gate does not block year-round sales.
-            cf_promo = (
-                product.fitness_is_clase_fija
-                and PROMO_WINDOW_START <= gate_date <= PROMO_WINDOW_END
-            )
+            # Clase Fija and Reformer Mensual plans: +1 floating credit if confirmed
+            # within the studio-wide promo window (Sept–Nov 2026).
+            # Both keep fitness_promo_first_cycle_bonus=0 so the action_confirm()
+            # date gate does not block year-round sales.
+            in_promo_window = PROMO_WINDOW_START <= gate_date <= PROMO_WINDOW_END
+            cf_promo = product.fitness_is_clase_fija and in_promo_window
+            rm_promo = product.fitness_is_reformer_mensual and in_promo_window
 
-            if cf_promo:
+            if cf_promo or rm_promo:
                 sub.fitness_floating_credits = 1
+                plan_kind = 'CF' if cf_promo else 'RM'
                 _logger.info(
-                    "[SUBSCRIPTION] %s confirmed (CF opening promo): plan=%s "
+                    "[SUBSCRIPTION] %s confirmed (%s opening promo): plan=%s "
                     "period_start=%s → 1 floating credit seeded",
-                    sub.name, product.name, sub.start_date,
+                    sub.name, plan_kind, product.name, sub.start_date,
                 )
             elif product_bonus:
                 sub.fitness_floating_credits = product_bonus

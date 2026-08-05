@@ -3,3 +3,4 @@ access_fitness_studio_conversation_portal,fitness.studio.conversation portal,mod
 access_fitness_studio_conversation_user,fitness.studio.conversation user,model_fitness_studio_conversation,base.group_user,1,1,1,1
 access_fitness_studio_message_portal,fitness.studio.message portal,model_fitness_studio_message,base.group_portal,1,0,0,0
 access_fitness_studio_message_user,fitness.studio.message user,model_fitness_studio_message,base.group_user,1,1,1,1
+access_fitness_studio_new_conv_wizard_user,fitness.studio.new_conversation.wizard user,model_fitness_studio_new_conversation_wizard,base.group_user,1,1,1,1

@@ -1,9 +1,9 @@
 import { Reveal } from "./Reveal";
 import { WEEKLY_SCHEDULE as days } from "@/lib/schedule-template";
-
-const PORTAL_URL = import.meta.env.VITE_PORTAL_URL as string;
+import { useBookingDialog } from "@/components/site/BookingDialog";
 
 export function Schedule() {
+  const { openDialog } = useBookingDialog();
   return (
     <section id="schedule" className="px-6 md:px-10 py-28 md:py-36">
       <div className="mx-auto max-w-[1400px]">
@@ -49,12 +49,12 @@ export function Schedule() {
                   >
                     <span className="font-mono text-sm text-accent">{t}</span>
                     <span className="text-sm text-foreground/80">{c}</span>
-                    <a
-                      href={PORTAL_URL}
-                      className="text-xs uppercase tracking-[0.2em] story-link"
+                    <button
+                      onClick={openDialog}
+                      className="text-xs uppercase tracking-[0.2em] story-link cursor-pointer"
                     >
                       Book
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
