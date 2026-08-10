@@ -1,7 +1,42 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Odoo runtime / local config
+odoo.conf
+*.conf
+filestore/
+.odoo/
+
+# Environment / secrets — NEVER commit credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+credentials.json
+secrets.json
+
+# Node / frontend (marketing site — not part of Odoo deployment)
+movement-sparkle-site-main/
+node_modules/
+.wrangler/
+.tanstack/
+dist/
+build/
+.next/
+bun.lockb
+
+# Editor / OS
 .DS_Store
 *.swp
 *.swo
+.idea/
+.vscode/
+Thumbs.db
+
+# Dev utilities
+start-tunnel.bat
+DEMO.md

@@ -70,6 +70,14 @@
     />
 
     <menuitem
+        id="menu_fitness_class_categories"
+        name="Class Categories"
+        parent="menu_group_configuration"
+        action="action_fitness_class_category"
+        sequence="15"
+    />
+
+    <menuitem
         id="menu_fitness_class_types"
         name="Class Types"
         parent="menu_group_configuration"

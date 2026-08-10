@@ -14,8 +14,21 @@
                 <div class="mv-greeting-row">
                     <div>
                         <p class="mv-greeting-name">My Classes</p>
-                        <p class="mv-greeting-sub" t-out="window_subtitle"/>
                     </div>
+                </div>
+
+                <!-- Filter pills: same pill style as student day-jump buttons -->
+                <t t-set="_af" t-value="request.params.get('filter') or 'all'"/>
+                <div style="display:flex;gap:8px;padding:0 16px 16px;flex-wrap:wrap;">
+                    <a href="/my/teacher/classes?filter=today"
+                       class="mv-day-jump-btn"
+                       t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'today' else None">Today</a>
+                    <a href="/my/teacher/classes?filter=week"
+                       class="mv-day-jump-btn"
+                       t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'week' else None">This week</a>
+                    <a href="/my/teacher/classes"
+                       class="mv-day-jump-btn"
+                       t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'all' else None">Upcoming</a>
                 </div>
 
                 <!-- Alerts -->
@@ -32,7 +45,12 @@
 
                 <!-- Class list -->
                 <t t-if="not events_ctx">
-                    <div class="mv-empty">No classes in this window.</div>
+                    <div class="mv-empty">
+                        <t t-if="_af == 'today'">No classes today.</t>
+                        <t t-elif="_af == 'week'">No classes this week.</t>
+                        <t t-else="">No upcoming classes.</t>
+                        <a href="/my/teacher/history">View class history →</a>
+                    </div>
                 </t>
                 <t t-else="">
                     <div class="mv-class-list">
@@ -223,9 +241,8 @@
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_teacher_page_header"/>
 
-                <!-- Sub-page of Profile: always offer a way back -->
-                <t t-set="_back_url" t-value="'/my'"/>
-                <t t-set="_back_label">Profile</t>
+                <t t-set="_back_url" t-value="'/my/teacher/classes'"/>
+                <t t-set="_back_label">My Classes</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
                 <!-- Greeting + period filter -->

@@ -8,7 +8,7 @@ from odoo.modules import get_module_path
 _logger = logging.getLogger(__name__)
 
 APP_NAME = 'CoreLab'
-BRAND_BG = '#F8F3E8'
+BRAND_BG = '#FAF9F6'
 BRAND_THEME = '#18110C'
 
 LOGO_CANDIDATES = [

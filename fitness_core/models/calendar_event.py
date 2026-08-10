@@ -36,6 +36,16 @@ class CalendarEvent(models.Model):
         "Class Note",
         help="Optional note for this specific class occurrence, visible to the teacher and students.",
     )
+    image_1920 = fields.Image(
+        "Class Photo",
+        max_width=1920, max_height=1920,
+        help="Optional photo for this specific class occurrence. Overrides the class type's default photo.",
+    )
+    image_512  = fields.Image(
+        "Class Photo (512)",
+        related='image_1920', max_width=512, max_height=512,
+        store=True, readonly=True,
+    )
 
     @api.depends(
         'classroom_id', 'classroom_id.capacity',

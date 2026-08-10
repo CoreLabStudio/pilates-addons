@@ -16,16 +16,6 @@ from odoo.http import request
 
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 
-_DEFAULT_DAYS_BACK    = 7
-_DEFAULT_DAYS_FORWARD = 28
-
-
-def _get_window_days():
-    ICP = request.env['ir.config_parameter'].sudo()
-    days_back    = int(ICP.get_param('fitness_teacher.roster_days_back',    _DEFAULT_DAYS_BACK))
-    days_forward = int(ICP.get_param('fitness_teacher.roster_days_forward', _DEFAULT_DAYS_FORWARD))
-    return days_back, days_forward
-
 
 def _format_local(dt, user_tz):
     if not dt:
@@ -36,32 +26,48 @@ def _format_local(dt, user_tz):
 class FitnessTeacherSwapPortal(http.Controller):
 
     @http.route('/my/teacher/classes', type='http', auth='user', website=True, sitemap=False)
-    def my_classes(self, **kw):
+    def my_classes(self, filter='all', **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
-        _ = request.env._
         now = fields.Datetime.now()
-        days_back, days_forward = _get_window_days()
-        window_start = now - timedelta(days=days_back)
-        window_end   = now + timedelta(days=days_forward)
-
-        events = request.env['calendar.event'].search([
-            ('user_id', '=', request.env.user.id),
-            ('is_fitness_class', '=', True),
-            ('start', '>=', window_start),
-            ('start', '<',  window_end),
-        ], order='start asc')
-
-        other_teachers = request.env['res.users'].sudo().search([
-            ('id', '!=', request.env.user.id),
-            ('group_ids', 'in', [request.env.ref(TEACHER_GROUP).id]),
-        ])
 
         try:
             user_tz = pytz.timezone(request.env.user.tz or 'UTC')
         except pytz.UnknownTimeZoneError:
             user_tz = pytz.UTC
+
+        # Timezone-aware day boundaries for today/week filters
+        now_local = pytz.UTC.localize(now).astimezone(user_tz)
+        today_start_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start_utc = today_start_local.astimezone(pytz.UTC).replace(tzinfo=None)
+
+        if filter not in ('today', 'week', 'all'):
+            filter = 'all'
+
+        domain = [
+            ('user_id', '=', request.env.user.id),
+            ('is_fitness_class', '=', True),
+        ]
+        if filter == 'today':
+            domain += [
+                ('start', '>=', today_start_utc),
+                ('start', '<',  today_start_utc + timedelta(days=1)),
+            ]
+        elif filter == 'week':
+            domain += [
+                ('start', '>=', today_start_utc),
+                ('start', '<',  today_start_utc + timedelta(days=7)),
+            ]
+        else:
+            domain += [('start', '>=', now)]
+
+        events = request.env['calendar.event'].search(domain, order='start asc')
+
+        other_teachers = request.env['res.users'].sudo().search([
+            ('id', '!=', request.env.user.id),
+            ('group_ids', 'in', [request.env.ref(TEACHER_GROUP).id]),
+        ])
 
         events_ctx = []
         for ev in events:
@@ -75,16 +81,12 @@ class FitnessTeacherSwapPortal(http.Controller):
                 'booked':      booked_count,
             })
 
-        window_subtitle = (_('Last %d') % days_back) + ' · ' + (_('next %d days') % days_forward)
-
         return request.render('fitness_teacher_swap.portal_my_classes', {
-            'events_ctx':      events_ctx,
-            'other_teachers':  other_teachers,
-            'days_back':       days_back,
-            'days_forward':    days_forward,
-            'window_subtitle': window_subtitle,
-            'error':           kw.get('error'),
-            'success':         kw.get('success'),
+            'events_ctx':     events_ctx,
+            'other_teachers': other_teachers,
+            'active_filter':  filter,
+            'error':          kw.get('error'),
+            'success':        kw.get('success'),
         })
 
     @http.route('/my/teacher/classes/<int:event_id>', type='http', auth='user',

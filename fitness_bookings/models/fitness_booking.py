@@ -147,7 +147,7 @@ class FitnessBooking(models.Model):
                 f"({class_start.strftime('%Y-%m-%d %H:%M')} UTC)."
             )
 
-        # ── 2. Cannot book more than 24 h in advance ──────────────────────────
+        # ── 2. Cannot book more than 7 days in advance ───────────────────────
         # Exception: a manager may tick manager_override_timewindow to bypass
         # this specific check.  The group membership is re-verified here
         # server-side so a non-manager who force-sends the field is still blocked.
@@ -158,9 +158,9 @@ class FitnessBooking(models.Model):
                 or self.env.user.has_group('base.group_system')
             )
         )
-        if not _tw_override and time_until.total_seconds() > 86400:
+        if not _tw_override and time_until.total_seconds() > 604800:
             raise ValidationError(
-                f"Booking opens 24 hours before the class. "
+                f"Booking opens 7 days before the class. "
                 f"This class starts in {time_until.days}d "
                 f"{int(time_until.seconds / 3600)}h – come back later."
             )

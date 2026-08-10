@@ -12,8 +12,8 @@ class IrHttp(models.AbstractModel):
         super()._frontend_pre_dispatch()
         # mv_lang is set by /my/set_lang. Apply AFTER super() so our choice
         # overrides any lang the base machinery derived from session/URL/cookie.
-        mv_lang = request.cookies.get('mv_lang')
-        if mv_lang and mv_lang in _PORTAL_LANGS:
+        mv_lang = request.cookies.get('mv_lang') or 'es_ES'
+        if mv_lang in _PORTAL_LANGS:
             lang_data = request.env['res.lang']._get_data(code=mv_lang)
             if lang_data:
                 request.lang = lang_data

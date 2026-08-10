@@ -45,6 +45,12 @@ class FitnessClassType(models.Model):
     )
     equipment = fields.Char("Equipment / Props")
     description = fields.Text("Description", translate=True)
+    category_id = fields.Many2one(
+        'fitness.class.category',
+        'Category',
+        help="Discipline category (e.g. Barre, Reformer Pilates). "
+             "Used as fallback image when the class type has no photo.",
+    )
     image_1920 = fields.Image("Photo", max_width=1920, max_height=1920)
     image_512  = fields.Image("Photo (512)", related='image_1920', max_width=512, max_height=512, store=True, readonly=True)
     active = fields.Boolean(default=True)

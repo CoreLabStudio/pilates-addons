@@ -1,9 +1,8 @@
 /* =============================================================
    CoreLab Design System  —  palette matches movement-sparkle-site-main
-   Background: Cream       #F8F3E8
-   Accent:     Ink         #18110C  (near-black; button fill)
-   Clay:       Terracotta  #C76846  (primary button background, active nav)
-   Ink:                    #18110C
+   Background: Feather White  #FAF9F6
+   Clay:       Heather blue   #9ABACD  (primary button background, active nav)
+   Ink:        Hemp brown     #92786C  (body text)
    Sage:       #8FA394 (success / completed states — unchanged)
    Fonts: Cormorant Garamond (serif) · Inter (sans)  — loaded via template
 
@@ -15,15 +14,17 @@
 
 /* ── 1. Tokens ─────────────────────────────────────────────── */
 :root {
-  --mv-bg:          #F8F3E8;   /* cream warm off-white */
-  --mv-accent:      #18110C;   /* near-black ink — focus rings, dots, indicators */
-  --mv-accent-fg:   #F8F3E8;   /* cream — kept for avatars that use near-black bg */
+  --mv-bg:          #FAF9F6;   /* Feather White */
+  --mv-accent:      #18110C;   /* near-black — avatars, pagination, focus indicators (unchanged) */
+  --mv-accent-fg:   #FAF9F6;   /* Feather White — text on dark avatar background */
   --mv-sand:        #EFE3D3;   /* sand/tan — toggle/segmented active bg; not used for buttons */
-  --mv-btn-bg:      var(--mv-clay); /* primary button fill — terracotta */
-  --mv-btn-fg:      var(--mv-bg);   /* cream text on terracotta */
-  --mv-clay:        #C76846;   /* terracotta — primary button background, active nav, links */
-  --mv-clay-dark:   #A85535;   /* dark terracotta — button hover/pressed state */
-  --mv-ink:         #18110C;   /* near-black warm ink */
+  --mv-btn-bg:      var(--mv-clay); /* primary button fill — heather blue */
+  --mv-btn-fg:      #18110C;   /* dark ink — heather blue bg needs dark text (1.88:1 with cream fails) */
+  --mv-clay:        #9ABACD;   /* Heather blue — primary button background, active nav, links */
+  --mv-clay-dark:   #7AA0B8;   /* Heather blue hover/pressed state */
+  --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
+  --mv-ink:         #92786C;   /* Hemp brown */
+  --mv-active-fill: #7A6458;   /* darkened hemp for active pill/segment — 5.26:1 on #FAF9F6 */
   --mv-muted:       #5E534A;   /* muted text */
   --mv-muted2:      #7A6D65;   /* lighter muted */
   --mv-ok-bg:       #E6EDEA;
@@ -31,7 +32,7 @@
   --mv-sage:        #8FA394;   /* success / completed — unchanged */
   --mv-warn-bg:     #FDE8EA;   /* light red error bg */
   --mv-warn-ink:    #D40924;   /* deep red error ink */
-  --mv-card-bg:     #FBF8F3;   /* slightly lighter than cream */
+  --mv-card-bg:     var(--mv-bg);   /* inherits page background — separation via border */
   --mv-border:      #DACFC3;   /* warm sand borders */
   --mv-info-bg:     #EDE6DC;   /* warm sand — info / callout / neutral states */
   --mv-barre-card:  #D8C9BC;   /* warm sand fallback image */
@@ -89,6 +90,21 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-app svg,
 .mv-app canvas { max-width: 100%; }
 
+/* ── 3b. Portal shell — hide Odoo navbar on portal.portal_layout pages ──
+   o_portal is on #wrapwrap (not body) on all standard portal pages.
+   We use :has(.mv-header) so this only fires when our CoreLab header
+   has been injected, protecting admin/non-student sessions. */
+#wrapwrap.o_portal:has(.mv-header) > header#top,
+#wrapwrap.o_portal:has(.mv-header) > footer#bottom {
+  display: none !important;
+}
+#wrapwrap.o_portal:has(.mv-header) {
+  background: var(--mv-bg) !important;
+}
+#wrapwrap.o_portal:has(.mv-header) > main {
+  padding-top: 0 !important;
+}
+
 /* ── 4. CoreLab header ────────────────────────────────────────── */
 .mv-header {
   display: flex;
@@ -107,7 +123,7 @@ body:has(.mv-app) #wrapwrap > main {
   -webkit-tap-highlight-color: transparent;
 }
 .mv-header .mv-wordmark img {
-  height: 48px;
+  height: 68px;
   width: auto;
   display: block;
   flex-shrink: 0;
@@ -275,7 +291,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: rgba(248,243,232,0.84);
+  background: rgba(250,249,246,0.84);
   color: var(--mv-ink);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -434,7 +450,7 @@ body:has(.mv-app) #wrapwrap > main {
   top: 16px; left: 16px;
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(248,243,232,0.88);
+  background: rgba(250,249,246,0.88);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
@@ -648,7 +664,7 @@ body:has(.mv-app) #wrapwrap > main {
   fill: none; stroke-linecap: round; stroke-linejoin: round;
   transition: stroke var(--mv-t-fast);
 }
-.mv-nav-tab.mv-active { color: var(--mv-clay); }
+.mv-nav-tab.mv-active { color: var(--mv-clay-text); }
 .mv-nav-tab:active    { opacity: 0.65; }
 
 /* ── 14. Teacher roster ─────────────────────────────────────── */
@@ -781,9 +797,10 @@ body.bg-100 .card-body > img { display: none !important; }
   border-bottom: 1px solid var(--mv-border);
 }
 .mv-login-logo img {
-  height: 38px;
+  height: 80px;
   width: auto;
   display: inline-block;
+  max-width: 100%;
 }
 .mv-login-body label.form-label,
 .mv-login-body .oe_login_form label {
@@ -798,7 +815,7 @@ body.bg-100 .card-body > img { display: none !important; }
 }
 .mv-login-body .form-control:focus {
   border-color: var(--mv-accent) !important;
-  box-shadow: 0 0 0 3px rgba(199,104,70,0.22) !important;
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.35) !important;
   background: var(--mv-card-bg) !important;
 }
 .mv-login-body .oe_login_buttons .btn-primary,
@@ -812,18 +829,24 @@ body.bg-100 .card-body > img { display: none !important; }
 }
 .mv-login-body .oe_login_buttons .btn-primary:hover { background: var(--mv-clay-dark) !important; border-color: var(--mv-clay-dark) !important; }
 .mv-login-body .oe_login_buttons .btn-primary:active { transform:scale(0.97); opacity:0.86; }
-.mv-login-body a { color: var(--mv-clay); }
+.mv-login-body a { color: var(--mv-clay-text); }
 
 /* ── 17. Standard Odoo portal pages with CoreLab shell ─────────────
-   Scoped to body:has(.mv-bottom-nav) — any student page where the
-   bottom nav was injected via portal.portal_layout inheritance.
-   Our custom pages (.mv-app) are handled separately in section 3. */
+   Primary scope: body.o_portal — Odoo sets this on <body> for every
+   authenticated portal request, so it fires even before any JS or XPath
+   injection runs. body:has(.mv-bottom-nav) is kept as a secondary guard
+   for the few layout tweaks that must only apply once our shell is present. */
 
+/* Hide default Odoo navbar/footer — CoreLab provides its own header */
+body.o_portal #wrapwrap > header,
+body.o_portal #wrapwrap > footer,
 body:has(.mv-bottom-nav) #wrapwrap > header,
 body:has(.mv-bottom-nav) #wrapwrap > footer {
   display: none !important;
 }
 
+body.o_portal #wrapwrap,
+body.o_portal #wrap,
 body:has(.mv-bottom-nav) #wrapwrap,
 body:has(.mv-bottom-nav) #wrap {
   background: var(--mv-bg) !important;
@@ -831,6 +854,7 @@ body:has(.mv-bottom-nav) #wrap {
   color: var(--mv-ink) !important;
 }
 
+body.o_portal #wrapwrap > main,
 body:has(.mv-bottom-nav) #wrapwrap > main {
   padding-top: 0 !important;
 }
@@ -840,6 +864,7 @@ body:has(.mv-bottom-nav) #wrap {
 }
 
 /* Hide Odoo breadcrumbs — students navigate via bottom nav */
+body.o_portal #wrapwrap > main > .o_portal.container,
 body:has(.mv-bottom-nav) #wrapwrap > main > .o_portal.container {
   display: none !important;
 }
@@ -1168,7 +1193,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 }
 .mv-notif-link:hover { opacity: 0.82; }
 .mv-notif-item:last-child { border-bottom: none; }
-.mv-notif-item--unread { background: rgba(199,104,70,0.07); }
+.mv-notif-item--unread { background: rgba(154,186,205,0.12); }
 .mv-notif-title {
   font-size: 0.84rem;
   font-weight: 500;
@@ -1255,9 +1280,31 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast), background var(--mv-t-fast);
 }
 .mv-pkg-pill-btn.mv-active {
-  background: var(--mv-ink);
-  border-color: var(--mv-ink);
+  background: var(--mv-active-fill);
+  border-color: var(--mv-active-fill);
   color: var(--mv-bg);
+}
+
+/* Hierarchical filter — timeframe row (step 2) */
+#mv-filter-hierarchy { display: flex; flex-direction: column; }
+#mv-type-filters { padding-bottom: 6px; }
+.mv-timeframe-row {
+  padding-left: 28px;
+  padding-top: 0;
+  padding-bottom: 14px;
+  animation: mv-tf-reveal 160ms ease both;
+}
+.mv-timeframe-row .mv-pkg-pill-btn {
+  font-size: 0.65rem;
+  padding: 4px 12px;
+  border-style: dashed;
+}
+.mv-timeframe-row .mv-pkg-pill-btn.mv-active {
+  border-style: solid;
+}
+@keyframes mv-tf-reveal {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .mv-pkg-card {
@@ -1290,7 +1337,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   align-self: flex-start;
 }
 .mv-pkg-discipline--barre    { background: rgba(143,163,148,0.25); color: var(--mv-ok-ink); }
-.mv-pkg-discipline--reformer { background: rgba(199,104,70,0.15);  color: var(--mv-clay); }
+.mv-pkg-discipline--reformer { background: rgba(154,186,205,0.20);  color: var(--mv-clay-text); }
 
 .mv-pkg-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
@@ -1433,7 +1480,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   background: var(--mv-card-bg);
   border: 1px solid var(--mv-border);
   border-radius: 999px;
-  color: var(--mv-clay);
+  color: var(--mv-clay-text);
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -1442,7 +1489,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   -webkit-tap-highlight-color: transparent;
   transition: border-color var(--mv-t-fast), color var(--mv-t-fast);
 }
-.mv-load-more-btn:hover { border-color: var(--mv-clay); }
+.mv-load-more-btn:hover { border-color: var(--mv-clay-text); }
 .mv-load-more-btn:active { opacity: 0.7; }
 
 /* ── 24. Sub-page back header ───────────────────────────────────
@@ -1506,7 +1553,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-segment:hover { text-decoration: none; color: var(--mv-ink); }
 .mv-segment.mv-active {
   background: var(--mv-card-bg);
-  color: var(--mv-ink);
+  color: var(--mv-active-fill);
   box-shadow: 0 1px 3px rgba(80,66,61,0.10);
 }
 
@@ -1539,7 +1586,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   transition: transform var(--mv-t-fast), background var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-home-cta:hover { background: var(--mv-clay-dark); color: var(--mv-card-bg); text-decoration: none; }
+.mv-home-cta:hover { background: var(--mv-clay-dark); text-decoration: none; }
 .mv-home-cta:active { transform: scale(0.97); opacity: 0.86; }
 
 .mv-stat-row {
@@ -1582,6 +1629,64 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted2);
 }
 .mv-stat-hint { font-size: 0.7rem; color: var(--mv-muted2); }
+
+/* Credit pager — multi-pool variant of the Credits stat card */
+.mv-credit-pager {
+  background: var(--mv-card-bg);
+  border-radius: var(--mv-r);
+  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+}
+.mv-credit-pager:active { transform: scale(0.97); opacity: 0.86; }
+.mv-credit-slide {
+  position: relative;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  /* Fixed height matches .mv-stat-card so the grid cell never shifts */
+  min-height: 82px;
+  box-sizing: border-box;
+}
+.mv-pager-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px 5px;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--mv-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mv-pager-prev { left: 2px; }
+.mv-pager-next { right: 2px; }
+/* Nudge label/value/hint inward so text doesn't overlap chevrons */
+.mv-credit-slide .mv-stat-label,
+.mv-credit-slide .mv-stat-value,
+.mv-credit-slide .mv-stat-hint { padding-left: 14px; padding-right: 14px; }
+.mv-pager-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 0 7px;
+}
+.mv-pager-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mv-border);
+  transition: background 0.2s;
+  display: inline-block;
+}
+.mv-dot-active { background: var(--mv-accent); }
 
 .mv-link-row {
   display: flex;
@@ -1658,7 +1763,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-search-input:focus {
   border-color: var(--mv-accent);
-  box-shadow: 0 0 0 3px rgba(199,104,70,0.22);
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.35);
 }
 .mv-no-results {
   padding: 32px 20px;
@@ -1807,7 +1912,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-paymethod:has(input:checked) {
   border-color: var(--mv-accent);
-  background: rgba(199,104,70,0.08);
+  background: rgba(154,186,205,0.12);
 }
 .mv-paymethod-head {
   display: flex;
@@ -1926,7 +2031,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-input:focus {
   border-color: var(--mv-accent);
   background: var(--mv-card-bg);
-  box-shadow: 0 0 0 3px rgba(199,104,70,0.22);
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.35);
 }
 
 /* ── 32. Terms & Conditions page ───────────────────────────────── */
@@ -1993,11 +2098,11 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-btn-contact {
   background: transparent;
-  color: var(--mv-clay);
-  border: 1px solid var(--mv-clay);
+  color: var(--mv-clay-text);
+  border: 1px solid var(--mv-clay-text);
   padding: 6px 14px;
 }
-.mv-btn-contact:hover { background: rgba(199,104,70,0.08); }
+.mv-btn-contact:hover { background: rgba(154,186,205,0.12); }
 
 /* ── 34. Subscription status page ────────────────────────────── */
 .mv-sub-card {
@@ -2096,7 +2201,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 12px;
   box-shadow: 0 1px 3px rgba(80,66,61,0.05);
 }
-.mv-notif-card--unread { background: rgba(199,104,70,0.07); }
+.mv-notif-card--unread { background: rgba(154,186,205,0.12); }
 a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit; }
 .mv-notif-card--linked { cursor: pointer; }
 .mv-notif-card--linked:hover { box-shadow: 0 2px 8px rgba(80,66,61,0.14); opacity: 0.93; }
@@ -2397,7 +2502,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 .mv-seeall-link {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--mv-clay);
+  color: var(--mv-clay-text);
   text-decoration: none;
   letter-spacing: 0.03em;
 }
@@ -2448,7 +2553,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
   font-weight: 500;
-  color: #50423D;
+  color: #92786C;
   margin: 0 0 3px;
   line-height: 1.3;
 }
@@ -2471,7 +2576,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   flex-shrink: 0;
   width: 34px;
   height: 34px;
-  background: #F5F1E8;
+  background: var(--mv-info-bg);
   border-radius: 50%;
   display: flex;
   align-items: center;

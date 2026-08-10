@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="category_id" optional="show"/>
                 <field name="classroom_type" widget="badge"
                        decoration-info="classroom_type == 'barre'"
                        decoration-success="classroom_type == 'reformer'"/>
@@ -36,6 +37,7 @@
                     </div>
                     <group>
                         <group string="Class Details">
+                            <field name="category_id"/>
                             <field name="classroom_type"/>
                             <field name="classroom_id"/>
                             <field name="session_type"/>

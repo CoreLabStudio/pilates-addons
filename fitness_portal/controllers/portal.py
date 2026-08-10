@@ -3,6 +3,7 @@ import binascii
 import json
 import logging
 from datetime import timedelta, datetime as _dt_cls, date as _date_cls
+from dateutil.relativedelta import relativedelta as _relativedelta
 from itertools import groupby as _groupby
 from urllib.parse import urlencode
 
@@ -11,7 +12,10 @@ _logger = logging.getLogger(__name__)
 import pytz
 
 try:
-    from babel.dates import format_date as _babel_format_date
+    from babel.dates import (
+        format_date as _babel_format_date,
+        format_datetime as _babel_format_datetime,
+    )
     _BABEL_OK = True
 except Exception:
     _BABEL_OK = False
@@ -41,6 +45,13 @@ PAYMENT_METHODS = ('bizum', 'transfer')
 
 
 class FitnessStudentPortal(http.Controller):
+
+    # ── /my/account redirect ─────────────────────────────────
+    # Odoo's standard account-details page is unstyled in our custom
+    # portal. Send it to the Profile Hub which handles all account info.
+    @http.route('/my/account', type='http', auth='user', website=True, sitemap=False)
+    def account_redirect(self, **kw):
+        return request.redirect('/my')
 
     # ══════════════════════════════════════════════════════════
     #  HOME  (post-login landing page, bottom-nav tab 1)
@@ -87,15 +98,18 @@ class FitnessStudentPortal(http.Controller):
             [], order='sequence asc, publish_date desc, id desc', limit=3
         )
 
+        credit_pools = self._credit_pools(partner.id)
         return request.render('fitness_portal.portal_student_home', {
             'welcome':          welcome,
             'student_name':     student_name,
             'upcoming_count':   n,
             'next_booking':     upcoming[:1],
             'schedule_hint':    schedule_hint,
-            'primary_credit':   self._primary_credit(partner.id),
+            'primary_credit':   credit_pools[0] if credit_pools else None,
+            'credit_pools':     credit_pools,
             'has_any_bookings': has_any_bookings,
             'news_posts':       news_posts,
+            'lbl_lets_book':    _("Let's book your first class."),
         })
 
     # ══════════════════════════════════════════════════════════
@@ -165,6 +179,21 @@ class FitnessStudentPortal(http.Controller):
         today_local = pytz.UTC.localize(now).astimezone(user_tz).date()
         tomorrow_local = today_local + timedelta(days=1)
 
+        # Pre-load type and category image flags in one batch read to avoid
+        # the QWeb safe_eval restriction that blocks binary field lazy-loads.
+        class_types = events.mapped('class_type_id').sudo()
+        ct_image_map = {}
+        cat_of_ct = {}
+        if class_types:
+            for row in class_types.read(['id', 'image_1920', 'category_id']):
+                ct_image_map[row['id']] = bool(row['image_1920'])
+                cat_of_ct[row['id']] = row['category_id'][0] if row['category_id'] else False
+        categories = class_types.mapped('category_id').sudo()
+        cat_image_map = {}
+        if categories:
+            for row in categories.read(['id', 'image_1920']):
+                cat_image_map[row['id']] = bool(row['image_1920'])
+
         grouped_events = []
         _current_date = None
         _current_items = []
@@ -185,8 +214,17 @@ class FitnessStudentPortal(http.Controller):
                 seats_label = (_('%d spot left') % seats_v) if seats_v == 1 else (_('%d spots left') % seats_v)
             else:
                 seats_label = None
-            _current_items.append({'event': ev, 'local_time': local_dt.strftime('%H:%M'),
-                                   'seats_v': seats_v, 'seats_label': seats_label})
+            ct_id = ev.class_type_id.id if ev.class_type_id else False
+            cat_id = cat_of_ct.get(ct_id, False)
+            _current_items.append({
+                'event':        ev,
+                'local_time':   local_dt.strftime('%H:%M'),
+                'seats_v':      seats_v,
+                'seats_label':  seats_label,
+                'type_has_img': ct_image_map.get(ct_id, False),
+                'cat_id':       cat_id,
+                'cat_has_img':  cat_image_map.get(cat_id, False),
+            })
         if _current_items:
             grouped_events.append((
                 _current_date,
@@ -200,6 +238,16 @@ class FitnessStudentPortal(http.Controller):
         else:
             subtitle = _('Ready to book a class?')
 
+        # Studio discipline filter chips — only shown when >1 type is present
+        ct_types = {(ev.class_type_id.classroom_type or '') for ev in events if ev.class_type_id}
+        if len(ct_types) > 1:
+            stable = [t for t in ('barre', 'reformer', 'any', '') if t in ct_types]
+            studio_chips = [{'key': 'all', 'label': _('All')}] + [
+                {'key': t, 'label': self._discipline_label(t)} for t in stable
+            ]
+        else:
+            studio_chips = []
+
         return {
             'events':          events,
             'grouped_events':  grouped_events,
@@ -209,6 +257,7 @@ class FitnessStudentPortal(http.Controller):
             'subtitle':        subtitle,
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % LOOK_AHEAD_DAYS,
             'no_sources_msg':  _("You don't have an active membership or class pack. Please contact the studio to get started."),
+            'studio_chips':    studio_chips,
         }
 
     def _schedule_values(self, partner):
@@ -249,11 +298,22 @@ class FitnessStudentPortal(http.Controller):
         if current_date is not None:
             grouped.append((current_date, _day_label(current_date, today_local, tomorrow_local, _, lang), current_group))
 
+        # Studio discipline filter chips — only shown when >1 type is present
+        bk_types = {(b.class_type_id.classroom_type or '') for b in bookings if b.class_type_id}
+        if len(bk_types) > 1:
+            stable = [t for t in ('barre', 'reformer', 'any', '') if t in bk_types]
+            sched_studio_chips = [{'key': 'all', 'label': _('All')}] + [
+                {'key': t, 'label': self._discipline_label(t)} for t in stable
+            ]
+        else:
+            sched_studio_chips = []
+
         return {
             'grouped_bookings':  grouped,
             'look_ahead_days':   look_ahead,
             'subtitle':          _('Next %d days') % look_ahead,
             'schedule_empty':    _('No upcoming classes in the next %d days.') % look_ahead,
+            'studio_chips':      sched_studio_chips,
         }
 
     # Legacy routes — kept so old bookmarks, emails and browser history
@@ -333,6 +393,20 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
 
+        # Pre-load image flags for the 4-tier fallback (binary fields not accessible via QWeb safe_eval)
+        ct = event.class_type_id.sudo()
+        type_has_img = False
+        cat_id = False
+        cat_has_img = False
+        if ct:
+            ct_row = ct.read(['id', 'image_1920', 'category_id'])[0]
+            type_has_img = bool(ct_row.get('image_1920'))
+            cat_ref = ct_row.get('category_id')
+            if cat_ref:
+                cat_id = cat_ref[0]
+                cat_row = ct.env['fitness.class.category'].sudo().browse(cat_id).read(['image_1920'])[0]
+                cat_has_img = bool(cat_row.get('image_1920'))
+
         return request.render('fitness_portal.portal_student_class_detail', {
             'event':               event,
             'can_book':            can_book,
@@ -346,6 +420,9 @@ class FitnessStudentPortal(http.Controller):
             'student_name':        student_name,
             'booked':              bool(kw.get('booked')),
             'error_msg':           kw.get('error') or None,
+            'type_has_img':        type_has_img,
+            'cat_id':              cat_id,
+            'cat_has_img':         cat_has_img,
         })
 
     @http.route('/my/classes/<int:event_id>/book', type='http',
@@ -492,6 +569,7 @@ class FitnessStudentPortal(http.Controller):
                     'is_expired': is_expired,
                 })
 
+        _ = request.env._
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
 
@@ -509,13 +587,19 @@ class FitnessStudentPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_portal.portal_student_history', {
-            'month_groups':    month_groups,
-            'subscriptions':   subscriptions,
-            'packs':           packs,
-            'primary_credit':  self._primary_credit(partner.id),
-            'student_name':    student_name,
-            'filter_period':   period,
-            'available_months': available_months,
+            'month_groups':      month_groups,
+            'subscriptions':     subscriptions,
+            'packs':             packs,
+            'primary_credit':    self._primary_credit(partner.id),
+            'student_name':      student_name,
+            'filter_period':     period,
+            'available_months':  available_months,
+            'lbl_enrolled':      _('Enrolled'),
+            'lbl_next_billing':  _('Next billing'),
+            'lbl_bonus_credits': _('Bonus credits'),
+            'lbl_purchased':     _('Purchased'),
+            'lbl_remaining':     _('Remaining'),
+            'lbl_valid_until':   _('Valid until'),
         })
 
     # ══════════════════════════════════════════════════════════
@@ -573,6 +657,30 @@ class FitnessStudentPortal(http.Controller):
                     mg_dict[mk] = {'label': lbl, 'key': mk, 'entries': []}
                 mg_dict[mk]['entries'].append(e)
         month_groups = [v for _, v in sorted(mg_dict.items(), reverse=True)]
+
+        # Localise each entry's timestamp into the user's timezone + locale
+        user_tz = self._user_tz()
+        for e in all_entries:
+            raw = e.get('when')
+            if raw and hasattr(raw, 'tzinfo'):
+                try:
+                    if raw.tzinfo is None:
+                        aware = pytz.utc.localize(raw)
+                    else:
+                        aware = raw
+                    local_dt = aware.astimezone(user_tz)
+                    if _BABEL_OK:
+                        e['when_str'] = _babel_format_datetime(
+                            local_dt,
+                            format='d MMM yyyy · HH:mm',
+                            locale=lang_code,
+                        )
+                    else:
+                        e['when_str'] = local_dt.strftime('%d %b %Y · %H:%M')
+                except Exception:
+                    e['when_str'] = str(raw)
+            else:
+                e['when_str'] = str(raw) if raw else ''
 
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
@@ -980,6 +1088,14 @@ class FitnessStudentPortal(http.Controller):
             'student_name':    full_name.split()[0] if full_name else '',
             'primary_credit':  self._primary_credit(partner.id),
             'active_info':     active_info,
+            'lbl_status':      _('Status'),
+            'lbl_active':      _('Active'),
+            'lbl_purchased':   _('Purchased'),
+            'lbl_remaining':   _('Remaining'),
+            'lbl_classes':     _('classes'),
+            'lbl_valid_until': _('Valid until'),
+            'lbl_order':       _('Order'),
+            'lbl_price':       _('Price'),
         })
 
     # Legacy POST target — the Buy button is now a link to the payment step.
@@ -1267,10 +1383,14 @@ class FitnessStudentPortal(http.Controller):
         if not order.exists() or order.partner_id.id != partner.id:
             return request.redirect('/my/orders/active')
 
+        _ = request.env._
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_order_detail', {
-            'sale_order':   order,
-            'student_name': full_name.split()[0] if full_name else '',
+            'sale_order':      order,
+            'student_name':    full_name.split()[0] if full_name else '',
+            'lbl_date':        _('Date'),
+            'lbl_status':      _('Status'),
+            'lbl_order_total': _('Order total'),
         })
 
     # ══════════════════════════════════════════════════════════
@@ -1310,7 +1430,17 @@ class FitnessStudentPortal(http.Controller):
 
             period_end_str = ''
             if sub.next_invoice_date:
-                period_end_str = sub.next_invoice_date.strftime('%d %b %Y')
+                next_renewal = sub.next_invoice_date
+                today_date = fields.Date.today()
+                # Advance stale dates forward — manual-payment studios don't
+                # trigger the Odoo billing cron so next_invoice_date can lag.
+                if next_renewal < today_date and sub.plan_id:
+                    unit  = sub.plan_id.billing_period_unit   # 'month', 'week', 'year'
+                    value = sub.plan_id.billing_period_value  # e.g. 1
+                    delta = _relativedelta(**{unit + 's': value})
+                    while next_renewal < today_date:
+                        next_renewal = next_renewal + delta
+                period_end_str = next_renewal.strftime('%d %b %Y')
 
             sub_data.append({
                 'plan_name':        product.name,
@@ -1325,9 +1455,14 @@ class FitnessStudentPortal(http.Controller):
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_subscription', {
-            'sub_data':     sub_data,
-            'has_sub':      bool(sub_data),
-            'student_name': full_name.split()[0] if full_name else '',
+            'sub_data':          sub_data,
+            'has_sub':           bool(sub_data),
+            'student_name':      full_name.split()[0] if full_name else '',
+            'lbl_classes':       _('Classes'),
+            'lbl_unlimited':     _('Unlimited'),
+            'lbl_this_week':     _('This week'),
+            'lbl_bonus_credits': _('Bonus credits'),
+            'lbl_next_renewal':  _('Next renewal'),
         })
 
     # ══════════════════════════════════════════════════════════
@@ -1573,10 +1708,44 @@ class FitnessStudentPortal(http.Controller):
             return None
         return order
 
-    def _primary_credit(self, partner_id):
-        """Return the soonest-expiring active pack's credit info, or None."""
+    def _credit_pools(self, partner_id):
+        """Return ALL active credit pools for the pager stat card.
+
+        Returns a list ordered by priority:
+        1. Active subscription weekly slots (most time-sensitive)
+        2. Active credit packs (soonest-expiring first, non-expired)
+
+        Used by portal_home for the paged Credits card (multiple pools)
+        and by _primary_credit (single best pool for other pages).
+        """
         _ = request.env._
         today = fields.Date.today()
+        pools = []
+
+        # Active subscription first
+        active_sub = request.env['sale.order'].sudo().search([
+            ('partner_id', '=', partner_id),
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', '3_progress'),
+            ('fitness_subscription_product_id', '!=', False),
+        ], order='id desc', limit=1)
+
+        if active_sub:
+            weekly_cap = active_sub.fitness_weekly_class_allowance or 0
+            used_this_week = active_sub.fitness_weekly_used_this_week or 0
+            remaining_week = max(0, weekly_cap - used_this_week)
+            ct = active_sub.fitness_class_type or 'reformer'
+            type_label = {'barre': 'barre', 'reformer': 'reformer'}.get(ct, 'class')
+            label = _('%s slots this week') % type_label
+            pools.append({
+                'remaining':              remaining_week,
+                'total':                  weekly_cap,
+                'display':                ('%s / %s' % (remaining_week, weekly_cap)) if weekly_cap else str(remaining_week),
+                'label':                  label,
+                'credits_available_text': _('%d %s slot(s) left this week') % (remaining_week, type_label),
+            })
+
+        # Credit packs with remaining credits and valid expiry
         lines = request.env['sale.order.line'].sudo().search([
             ('order_partner_id', '=', partner_id),
             ('product_id.fitness_is_package', '=', True),
@@ -1593,17 +1762,21 @@ class FitnessStudentPortal(http.Controller):
             }.get(ct, _('class credits'))
             remaining = line.fitness_remaining_classes
             total = line.fitness_original_class_count
-            credits_available_text = (_('%d %s available') % (remaining, label))
-            return {
+            pools.append({
                 'remaining':              remaining,
                 'total':                  total,
-                # Pre-rendered so templates never mix a number, a separator and
-                # a t-directive inside one node — that produces junk msgids.
                 'display':                ('%s / %s' % (remaining, int(total))) if total else str(remaining),
                 'label':                  label,
-                'credits_available_text': credits_available_text,
-            }
-        return None
+                'credits_available_text': _('%d %s available') % (remaining, label),
+            })
+
+        return pools
+
+    def _primary_credit(self, partner_id):
+        """Return the most relevant credit pool, or None. Used by pages that
+        show a single stat (not the paged home card)."""
+        pools = self._credit_pools(partner_id)
+        return pools[0] if pools else None
 
     def _eligible_class_types(self, partner_id):
         eligible = set()
@@ -1715,7 +1888,7 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/language', type='http', auth='user', website=True, sitemap=False)
     def language_picker(self, **kw):
-        mv_lang = request.httprequest.cookies.get('mv_lang') or request.env.lang or 'en_US'
+        mv_lang = request.httprequest.cookies.get('mv_lang') or request.env.lang or 'es_ES'
         partner = request.env.user.partner_id
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_language_picker', {

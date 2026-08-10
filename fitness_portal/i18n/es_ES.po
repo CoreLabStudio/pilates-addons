@@ -556,6 +556,7 @@ msgstr "Inicio"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Classes"
 msgstr "Clases"
@@ -638,6 +639,7 @@ msgid "Booked"
 msgstr "Reservado"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "View all"
 msgstr "Ver todo"
@@ -651,6 +653,11 @@ msgstr "No tienes clases próximas."
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Find a class"
 msgstr "Buscar una clase"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Browse classes"
+msgstr "Explorar clases"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
@@ -718,6 +725,16 @@ msgstr "Cancelar"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Browse &amp; book more classes"
 msgstr "Explorar y reservar más clases"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "This Week"
+msgstr "Esta semana"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "This Month"
+msgstr "Este mes"
 
 # ── Class detail — portal_student_class_detail ───────────────────────────────
 
@@ -800,6 +817,7 @@ msgid "Unmarked"
 msgstr "Sin marcar"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "Show more"
 msgstr "Ver más"
@@ -942,6 +960,57 @@ msgstr "Precio"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
 msgid "Buy now"
 msgstr "Comprar ahora"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Status"
+msgstr "Estado"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Purchased"
+msgstr "Comprado"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Remaining"
+msgstr "Restante"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "classes"
+msgstr "clases"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Valid until"
+msgstr "Válido hasta"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Order"
+msgstr "Pedido"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Private"
+msgstr "Privado"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Price on request"
+msgstr "Precio a consultar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Contact"
+msgstr "Contactar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+msgid "Active"
+msgstr "Activo"
 
 # ── Checkout payment step — portal_checkout_payment ──────────────────────────
 
@@ -1289,6 +1358,7 @@ msgstr "Mi estudio CoreLab"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "CoreLab Classes"
 msgstr "Clases CoreLab"
 
@@ -1471,7 +1541,61 @@ msgstr "Todos los cambios en tus créditos"
 msgid "Total credits"
 msgstr "Créditos totales"
 
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%s slots this week"
+msgstr "%s clases esta semana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "%d %s slot(s) left this week"
+msgstr "%d %s clase(s) esta semana"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "See all"
+msgstr "Ver todo"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "Total credits"
+msgstr "Créditos totales"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+msgid "No credit activity in the selected month."
+msgstr "Sin actividad de crédito en el mes seleccionado."
+
 # ── Order detail ──────────────────────────────────────────────────────────────
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+msgid "Order"
+msgstr "Pedido"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+msgid "Date"
+msgstr "Fecha"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+msgid "Status"
+msgstr "Estado"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+msgid "Items"
+msgstr "Artículos"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+msgid "Order total"
+msgstr "Total del pedido"
 
 #. module: fitness_portal
 #. odoo-python
@@ -1509,9 +1633,52 @@ msgstr "Artículos"
 msgid "Order total"
 msgstr "Total del pedido"
 
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Purchased"
+msgstr "Comprado"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Remaining"
+msgstr "Restante"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "classes"
+msgstr "clases"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Valid until"
+msgstr "Válido hasta"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Price"
+msgstr "Precio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Enrolled"
+msgstr "Inscrito"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Next billing"
+msgstr "Próxima facturación"
+
 # ── Task 1: Period filter ─────────────────────────────────────────────────────
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "All time"
 msgstr "Siempre"
@@ -1765,3 +1932,35 @@ msgstr "Reenviar correo de verificación"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.pending_verification
 msgid "Sign out"
 msgstr "Cerrar sesión"
+
+# ── Home/subscription labels passed via Python controller ────────────────────
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Let's book your first class."
+msgstr "Reserva tu primera clase."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "This week"
+msgstr "Esta semana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Bonus credits"
+msgstr "Créditos de regalo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Next renewal"
+msgstr "Próxima renovación"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Unlimited"
+msgstr "Ilimitado"

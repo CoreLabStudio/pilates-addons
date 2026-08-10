@@ -33,7 +33,7 @@
             <form>
                 <header>
                     <button name="action_cancel"
-                            string="Cancel (Manager Override)"
+                            string="Cancel Student's Booking"
                             type="object"
                             class="btn-danger"
                             invisible="state != 'booked'"/>

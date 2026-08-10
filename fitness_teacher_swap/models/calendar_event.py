@@ -1,3 +1,5 @@
+import pytz as _pytz
+
 from odoo import models, fields
 from odoo.exceptions import UserError
 
@@ -5,82 +7,129 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def _fmt_event_dt(dt_utc, user):
+    """Return dt_utc formatted in the user's local timezone."""
+    if not dt_utc:
+        return ''
+    try:
+        tz = _pytz.timezone(user.tz or 'UTC')
+    except Exception:
+        tz = _pytz.UTC
+    local = _pytz.UTC.localize(dt_utc).astimezone(tz)
+    return local.strftime('%d/%m/%Y %H:%M')
+
+
 class CalendarEvent(models.Model):
     """Adds one-class-at-a-time teacher reassignment for the teacher portal page,
     and sends in-app notifications whenever a fitness class teacher is changed
-    via the backend form (admin assignment)."""
+    or a class is rescheduled via the backend form."""
     _inherit = 'calendar.event'
 
-    # Minimal override: turn on chatter tracking for the organizer field so
-    # every teacher change (swap or otherwise) is logged automatically.
+    # Turn on chatter tracking for the organizer field.
     user_id = fields.Many2one(tracking=True)
 
     def write(self, vals):
-        # Skip notification logic when skip_fitness_notification is set
-        # (used by fitness_reassign_teacher which handles notifications itself)
-        # or when user_id isn't changing.
-        if 'user_id' not in vals or self.env.context.get('skip_fitness_notification'):
+        skip = self.env.context.get('skip_fitness_notification')
+        changing_teacher = 'user_id' in vals and not skip
+        changing_time    = 'start' in vals and not skip
+
+        if not changing_teacher and not changing_time:
             return super().write(vals)
 
-        # Snapshot old teacher ids for fitness classes before the write
-        old_teacher_ids = {
-            e.id: e.user_id.id
-            for e in self.filtered('is_fitness_class')
+        fitness_events = self.filtered('is_fitness_class')
+        # Snapshot before write
+        old_data = {
+            e.id: {'teacher_id': e.user_id.id, 'start': e.start}
+            for e in fitness_events
         }
 
         result = super().write(vals)
 
-        if not old_teacher_ids:
-            return result
-
-        new_teacher_id = vals['user_id']
-        if not new_teacher_id:
-            return result
-
-        new_teacher = self.env['res.users'].browse(new_teacher_id)
-        if not new_teacher.exists():
+        if not old_data:
             return result
 
         Notif = self.env['fitness.notification'].sudo()
+        now   = fields.Datetime.now()
 
-        for event in self.filtered('is_fitness_class'):
-            old_id = old_teacher_ids.get(event.id)
-            if old_id == new_teacher_id:
-                continue
+        for event in fitness_events:
+            snap = old_data.get(event.id, {})
 
-            # Notify students with active bookings
-            bookings = self.env['fitness.booking'].sudo().search([
-                ('calendar_event_id', '=', event.id),
-                ('state', '=', 'booked'),
-            ])
-            notified = 0
-            for booking in bookings:
-                student_user = booking.student_id.user_ids[:1]
-                if student_user:
-                    student_env = self.with_context(lang=student_user.lang or 'en_US')
-                    Notif._create_for_user(
-                        student_user.id,
-                        'teacher_swap',
-                        student_env.env._('Teacher updated: %s', event.name),
-                        student_env.env._('Your class will now be taught by %s.', new_teacher.name),
-                        action_url=f'/my/classes/{event.id}',
+            # ── Teacher swap notifications ──────────────────────────────
+            if changing_teacher:
+                new_teacher_id = vals['user_id']
+                if new_teacher_id and snap.get('teacher_id') != new_teacher_id:
+                    new_teacher = self.env['res.users'].browse(new_teacher_id)
+                    if new_teacher.exists():
+                        bookings = self.env['fitness.booking'].sudo().search([
+                            ('calendar_event_id', '=', event.id),
+                            ('state', '=', 'booked'),
+                        ])
+                        notified = 0
+                        for booking in bookings:
+                            student_user = booking.student_id.user_ids[:1]
+                            if student_user:
+                                senv = self.with_context(lang=student_user.lang or 'en_US')
+                                Notif._create_for_user(
+                                    student_user.id,
+                                    'teacher_swap',
+                                    senv.env._('Teacher updated: %s', event.name),
+                                    senv.env._('Your class will now be taught by %s.', new_teacher.name),
+                                    action_url=f'/my/classes/{event.id}',
+                                )
+                                notified += 1
+                        tenv = self.with_context(lang=new_teacher.lang or 'en_US')
+                        Notif._create_for_user(
+                            new_teacher.id,
+                            'teacher_swap',
+                            tenv.env._('Class assigned to you: %s', event.name),
+                            tenv.env._('You have been assigned as teacher for this class.'),
+                            action_url=f'/my/teacher/classes/{event.id}',
+                        )
+                        _logger.info(
+                            "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
+                            event.name, new_teacher.name, notified,
+                        )
+
+            # ── Reschedule notifications ────────────────────────────────
+            if changing_time:
+                old_start = snap.get('start')
+                new_start = event.start
+                # Guard: only fire if start actually moved by >1 min and class is in the future
+                if (old_start and new_start and new_start > now
+                        and abs((new_start - old_start).total_seconds()) > 60):
+                    teacher = event.user_id
+                    bookings = self.env['fitness.booking'].sudo().search([
+                        ('calendar_event_id', '=', event.id),
+                        ('state', '=', 'booked'),
+                    ])
+                    notified = 0
+                    for booking in bookings:
+                        student_user = booking.student_id.user_ids[:1]
+                        if student_user:
+                            new_dt_str = _fmt_event_dt(new_start, student_user)
+                            senv = self.with_context(lang=student_user.lang or 'en_US')
+                            Notif._create_for_user(
+                                student_user.id,
+                                'class_rescheduled',
+                                senv.env._('Class rescheduled: %s', event.name),
+                                senv.env._('This class has been moved to %s.', new_dt_str),
+                                action_url=f'/my/classes/{event.id}',
+                            )
+                            notified += 1
+                    if teacher and teacher.id:
+                        new_dt_str = _fmt_event_dt(new_start, teacher)
+                        tenv = self.with_context(lang=teacher.lang or 'en_US')
+                        Notif._create_for_user(
+                            teacher.id,
+                            'class_rescheduled',
+                            tenv.env._('Class rescheduled: %s', event.name),
+                            tenv.env._('Your class has been moved to %s.', new_dt_str),
+                            action_url=f'/my/teacher/classes/{event.id}',
+                        )
+                    _logger.info(
+                        "[RESCHEDULE] '%s' (id=%d): %s → %s, %d student(s) + teacher notified",
+                        event.name, event.id, old_start, new_start, notified,
                     )
-                    notified += 1
-
-            # Notify the newly assigned teacher
-            teacher_env = self.with_context(lang=new_teacher.lang or 'en_US')
-            Notif._create_for_user(
-                new_teacher.id,
-                'teacher_swap',
-                teacher_env.env._('Class assigned to you: %s', event.name),
-                teacher_env.env._('You have been assigned as teacher for this class.'),
-                action_url=f'/my/teacher/classes/{event.id}',
-            )
-
-            _logger.info(
-                "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
-                event.name, new_teacher.name, notified,
-            )
 
         return result
 

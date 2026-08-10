@@ -25,6 +25,13 @@ class FitnessBookingNotifications(models.Model):
         help="Set once the class-reminder cron has emailed this booking's student. "
              "Prevents duplicate reminders.",
     )
+    bell_reminder_sent = fields.Boolean(
+        "Bell Reminder Sent",
+        default=False,
+        readonly=True,
+        help="Set once the 6–12h bell-notification cron has fired for this booking. "
+             "Prevents duplicate in-app reminders.",
+    )
 
     @api.model
     def _notif_enabled(self, key):
@@ -41,7 +48,7 @@ class FitnessBookingNotifications(models.Model):
             return
         for booking in self:
             try:
-                template.send_mail(booking.id, force_send=False)
+                template.sudo().send_mail(booking.id, force_send=False)
                 _logger.info("[NOTIFICATIONS] Queued %s for booking %s (student=%s)",
                              template_xmlid, booking.id, booking.student_id.name)
             except Exception:
@@ -257,3 +264,49 @@ class FitnessBookingNotifications(models.Model):
             )
             notified += 1
         _logger.info("[NOTIFICATIONS] Billing reminders: notified %d subscriber(s).", notified)
+
+    # ─── Class bell reminder (cron, 6–12h window) ────────────────────────────────
+
+    @api.model
+    def _cron_send_bell_reminders(self):
+        """Send in-app bell notifications for classes starting in 6–12 hours.
+
+        Fires once per booking (bell_reminder_sent flag). The 6h lower bound
+        prevents overlap with last-minute logistics; 12h gives enough notice
+        to prepare or cancel. Runs every 30 min so no booking falls through the gap.
+        """
+        now = fields.Datetime.now()
+        window_start = now + timedelta(hours=6)
+        window_end = now + timedelta(hours=12)
+
+        due = self.search([
+            ('state', '=', 'booked'),
+            ('bell_reminder_sent', '=', False),
+            ('class_start', '>', window_start),
+            ('class_start', '<=', window_end),
+        ])
+        if not due:
+            _logger.info("[NOTIFICATIONS] No bell reminders due (6–12h window).")
+            return
+
+        notified = 0
+        for booking in due:
+            partner = booking.student_id
+            user = partner.user_ids[:1]
+            if not user:
+                continue
+            event = booking.calendar_event_id
+            class_name = event.name or 'class'
+            hours_until = max(1, int((booking.class_start - now).total_seconds() / 3600))
+            lang_env = self.with_context(lang=user.lang or 'en_US')
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id,
+                'class_reminder',
+                lang_env.env._('Class in ~%d hours', hours_until),
+                lang_env.env._('Reminder: %s is coming up soon. See you there!', class_name),
+                action_url='/my/classes',
+            )
+            notified += 1
+
+        due.write({'bell_reminder_sent': True})
+        _logger.info("[NOTIFICATIONS] Bell reminders: notified %d student(s).", notified)

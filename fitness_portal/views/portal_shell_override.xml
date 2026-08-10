@@ -7,6 +7,17 @@
          portal.frontend_layout directly and are NOT affected here. -->
     <template id="mv_portal_layout_shell" name="CoreLab Portal Layout Shell"
               inherit_id="portal.portal_layout">
+
+        <!-- Suppress the breadcrumb container when page_name='home'.
+             The container (div.o_portal.container.mt-3) normally appears only when
+             my_details=False; with our my_details=False fix on /my it would render an
+             empty div above the CoreLab header, adding unwanted top spacing.
+             Adding page_name != 'home' removes it cleanly without touching other pages. -->
+        <xpath expr="//div[@t-if='not no_breadcrumbs and not my_details and not breadcrumbs_searchbar']"
+               position="attributes">
+            <attribute name="t-if">not no_breadcrumbs and not my_details and not breadcrumbs_searchbar and page_name != 'home'</attribute>
+        </xpath>
+
         <xpath expr="//div[@id='wrap']" position="before">
             <t t-if="request.env.user.has_group('fitness_core.group_fitness_student')">
                 <t t-call="fitness_portal.mv_page_header"/>
@@ -25,12 +36,49 @@
         </xpath>
     </template>
 
-    <!-- Profile Hub — injected before the standard Odoo home grid on /my.
-         CSS in section 18 of corelab.css hides the standard grid when this hub
-         is present, giving students a custom navigation-focused home page. -->
+    <!-- Profile Hub — renders on /my for students and teachers.
+         The hub replaces Odoo's standard "My account" home grid entirely.
+
+         Root-cause note: portal_layout emits the "Mi cuenta" <h3> inside
+         t-if="my_details" which is rendered ABOVE the t-out="0" slot where our
+         hub is injected. A body-level <style> that arrives after the h3 cannot
+         un-paint it — the browser has already laid out those pixels. The correct
+         fix is to set my_details=False so portal_layout takes its t-else branch
+         (full-width t-out="0", no h3, no sidebar) — the h3 is then absent from
+         the DOM entirely and cannot flash at any connection speed.
+         no_breadcrumbs=True prevents an orphan breadcrumb container from
+         appearing above the CoreLab header (the breadcrumb div is emitted before
+         #wrap, which is also where the CoreLab header is injected). -->
     <template id="mv_portal_my_home_hub" name="CoreLab Profile Hub"
               inherit_id="portal.portal_my_home">
+
+        <!-- PRIMARY FIX: prevent the "Mi cuenta" flash.
+             Replaces my_details=True with False for fitness users so the h3 and
+             sidebar are never emitted. Non-fitness portal users keep my_details=True
+             (standard Odoo behaviour unchanged). -->
+        <xpath expr="//t[@t-set='my_details']" position="replace">
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_student') or request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <t t-set="my_details" t-value="False"/>
+                <t t-set="no_breadcrumbs" t-value="True"/>
+            </t>
+            <t t-else="">
+                <t t-set="my_details" t-value="True"/>
+            </t>
+        </xpath>
+
         <xpath expr="//div[@id='oe_structure_portal_my_home_1']" position="before">
+            <!-- Hide remaining Odoo portal home elements that still appear in the
+                 HTML stream after my_details=False: the oe_structure placeholder,
+                 the standard doc-cards grid, and the JS spinner. These come AFTER
+                 this style block in the stream, so the browser applies the rule
+                 before painting them — no flash. -->
+            <t t-if="request.env.user.has_group('fitness_core.group_fitness_student') or request.env.user.has_group('fitness_core.group_fitness_teacher')">
+                <style>
+                    #oe_structure_portal_my_home_1,
+                    .o_portal_my_home .o_portal_docs,
+                    .o_portal_doc_spinner { display: none !important; }
+                </style>
+            </t>
             <!-- Teacher Profile Hub -->
             <t t-if="request.env.user.has_group('fitness_core.group_fitness_teacher')">
                 <t t-set="_tp_partner" t-value="partner or request.env.user.partner_id"/>

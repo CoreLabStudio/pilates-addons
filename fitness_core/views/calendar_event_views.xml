@@ -13,6 +13,13 @@
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Fitness Class" name="fitness_class_page">
+                    <group invisible="not is_fitness_class">
+                        <field name="image_1920" widget="image"
+                               options="{'preview_image': 'image_512'}"
+                               class="oe_avatar"
+                               string="Class Photo (overrides type default)"
+                               colspan="2"/>
+                    </group>
                     <group>
                         <group string="Class Setup">
                             <field name="is_fitness_class"/>

@@ -21,10 +21,12 @@ class FitnessNotification(models.Model):
         ('credit_used', 'Credit Used'),
         ('credit_zero', 'No Credits Left'),
         ('teacher_swap', 'Teacher Changed'),
+        ('class_rescheduled', 'Class Rescheduled'),
         ('invoice_issued', 'Invoice Issued'),
         ('purchase_completed', 'Purchase Completed'),
         ('message_reply', 'New Message Reply'),
         ('billing_reminder', 'Subscription Renewal Reminder'),
+        ('class_reminder', 'Class Reminder'),
     ], required=True, default='booking_confirmed')
     read = fields.Boolean(default=False, index=True)
     action_url = fields.Char("Action URL")

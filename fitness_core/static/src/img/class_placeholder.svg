@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- warm tan background -->
+  <rect width="400" height="300" fill="#EDE0D0"/>
+  <!-- subtle wave silhouette at bottom -->
+  <path d="M0 255 Q100 215 200 245 Q300 275 400 248 L400 300 L0 300Z" fill="#D9CCBC" opacity="0.65"/>
+  <!-- abstract pilates ring / reformer wheel — intentional brand shape -->
+  <circle cx="200" cy="132" r="68" fill="none" stroke="#C8B5A0" stroke-width="2.5"/>
+  <circle cx="200" cy="132" r="46" fill="none" stroke="#C8B5A0" stroke-width="2"/>
+  <circle cx="200" cy="132" r="24" fill="#C8B5A0" opacity="0.22"/>
+</svg>

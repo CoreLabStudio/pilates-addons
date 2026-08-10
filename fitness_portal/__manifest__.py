@@ -9,6 +9,7 @@
         'web',
         'portal',
         'sale',
+        'auth_signup',
         'fitness_core',
         'fitness_bookings',
         'fitness_packages',

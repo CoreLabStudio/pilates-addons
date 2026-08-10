@@ -23,7 +23,7 @@
             <a href="/my/home" class="mv-wordmark" title="CoreLab">
                 <img src="/fitness_core/static/src/img/corelab-logo-header.png"
                      alt="CoreLab"
-                     style="height:48px;width:auto;display:block;flex-shrink:0;"/>
+                     style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>
             <div class="mv-header-right">
                 <div class="mv-bell-wrap">
@@ -67,7 +67,7 @@
             <a href="/my/teacher/classes" class="mv-wordmark" title="CoreLab">
                 <img src="/fitness_core/static/src/img/corelab-logo-header.png"
                      alt="CoreLab"
-                     style="height:48px;width:auto;display:block;flex-shrink:0;"/>
+                     style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>
             <div class="mv-header-right">
                 <div class="mv-bell-wrap">
@@ -233,7 +233,7 @@
                         <p class="mv-home-sub">Ready for your next class?</p>
                     </t>
                     <t t-else="">
-                        <p class="mv-home-sub">Let's book your first class.</p>
+                        <p class="mv-home-sub" t-out="lbl_lets_book"/>
                     </t>
                 </div>
 
@@ -247,17 +247,46 @@
                         <span class="mv-stat-value" t-out="upcoming_count"/>
                         <div class="mv-stat-hint" t-out="schedule_hint"/>
                     </a>
-                    <a href="/my/credits" class="mv-stat-card">
-                        <div class="mv-stat-label">Credits</div>
-                        <t t-if="primary_credit">
-                            <span class="mv-stat-value" t-out="primary_credit['display']"/>
-                            <div class="mv-stat-hint" t-out="primary_credit['label']"/>
-                        </t>
-                        <t t-else="">
+                    <!-- Credits stat card — single static card OR paged carousel -->
+                    <t t-if="credit_pools and len(credit_pools) == 1">
+                        <a href="/my/credits" class="mv-stat-card">
+                            <div class="mv-stat-label">Credits</div>
+                            <span class="mv-stat-value" t-out="credit_pools[0]['display']"/>
+                            <div class="mv-stat-hint"  t-out="credit_pools[0]['label']"/>
+                        </a>
+                    </t>
+                    <t t-elif="credit_pools">
+                        <!-- Multiple pools: paged card with chevrons + dots -->
+                        <div class="mv-credit-pager" id="mv-credit-pager">
+                            <t t-foreach="credit_pools" t-as="pool">
+                                <div class="mv-credit-slide"
+                                     t-att-style="'display:none' if pool_index > 0 else ''"
+                                     data-href="/my/credits">
+                                    <t t-if="not pool_first">
+                                        <button type="button" class="mv-pager-btn mv-pager-prev" aria-label="Previous">&#8249;</button>
+                                    </t>
+                                    <div class="mv-stat-label">Credits</div>
+                                    <span class="mv-stat-value" t-out="pool['display']"/>
+                                    <div class="mv-stat-hint" t-out="pool['label']"/>
+                                    <t t-if="not pool_last">
+                                        <button type="button" class="mv-pager-btn mv-pager-next" aria-label="Next">&#8250;</button>
+                                    </t>
+                                </div>
+                            </t>
+                            <div class="mv-pager-dots">
+                                <t t-foreach="credit_pools" t-as="pool">
+                                    <span t-att-class="'mv-pager-dot mv-dot-active' if pool_first else 'mv-pager-dot'"/>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <a href="/my/credits" class="mv-stat-card">
+                            <div class="mv-stat-label">Credits</div>
                             <span class="mv-stat-value">0</span>
                             <div class="mv-stat-hint">No active pack</div>
-                        </t>
-                    </a>
+                        </a>
+                    </t>
                 </div>
 
                 <!-- Next up -->
@@ -287,7 +316,24 @@
                     </div>
                 </t>
                 <t t-else="">
-                    <div class="mv-empty"><div>You have no upcoming classes.</div><a href="/my/studio">Find a class</a></div>
+                    <div class="mv-empty">
+                        <div>You have no upcoming classes.</div>
+                        <a href="/my/studio" class="mv-empty-cal-link"
+                           style="display:inline-flex;flex-direction:column;align-items:center;gap:6px;margin-top:12px;text-decoration:none;color:inherit;transition:opacity 0.15s;">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="4.5" width="18" height="16.5" rx="2"/>
+                                <line x1="3" y1="9.5" x2="21" y2="9.5"/>
+                                <line x1="7.5" y1="3" x2="7.5" y2="6"/>
+                                <line x1="16.5" y1="3" x2="16.5" y2="6"/>
+                                <line x1="9" y1="14" x2="9" y2="14.01"/>
+                                <line x1="13" y1="14" x2="13" y2="14.01"/>
+                                <line x1="17" y1="14" x2="17" y2="14.01"/>
+                            </svg>
+                            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;">Browse classes</span>
+                        </a>
+                    </div>
                 </t>
                 </t>
 
@@ -360,6 +406,36 @@
 
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
+
+                <!-- Credit pager JS — only runs when multiple pools are rendered -->
+                <script>
+(function(){
+  var pager = document.getElementById('mv-credit-pager');
+  if (!pager) return;
+  var slides = Array.prototype.slice.call(pager.querySelectorAll('.mv-credit-slide'));
+  var dots   = Array.prototype.slice.call(pager.querySelectorAll('.mv-pager-dot'));
+  if (slides.length &lt; 2) return;
+  var current = 0;
+  function show(idx){
+    slides[current].style.display = 'none';
+    dots[current].classList.remove('mv-dot-active');
+    current = idx;
+    slides[current].style.display = '';
+    dots[current].classList.add('mv-dot-active');
+  }
+  pager.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.mv-pager-btn') : null;
+    if (!btn &amp;&amp; e.target.classList.contains('mv-pager-btn')) btn = e.target;
+    if (btn){
+      e.preventDefault(); e.stopPropagation();
+      if (btn.classList.contains('mv-pager-next') &amp;&amp; current &lt; slides.length - 1) show(current + 1);
+      else if (btn.classList.contains('mv-pager-prev') &amp;&amp; current > 0) show(current - 1);
+      return;
+    }
+    window.location.href = '/my/credits';
+  });
+})();
+                </script>
             </div>
         </t>
     </template>
@@ -400,6 +476,29 @@
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
                 </div>
 
+                <!-- Two-step hierarchical filter: Step 1 = class type, Step 2 = timeframe -->
+                <t t-if="studio_chips">
+                    <div id="mv-filter-hierarchy">
+                        <!-- Step 1: type selection (Barre / Reformer — no All) -->
+                        <div class="mv-pkg-filters" id="mv-type-filters">
+                            <t t-foreach="studio_chips" t-as="chip">
+                                <t t-if="chip['key'] != 'all'">
+                                    <button type="button"
+                                            class="mv-pkg-pill-btn mv-type-pill"
+                                            t-att-data-filter="chip['key']"
+                                            t-out="chip['label']"/>
+                                </t>
+                            </t>
+                        </div>
+                        <!-- Step 2: timeframe — revealed only after a type is chosen -->
+                        <div class="mv-pkg-filters mv-timeframe-row" id="mv-timeframe-filters" style="display:none">
+                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill mv-active" data-filter="week">This Week</button>
+                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill" data-filter="today">Today</button>
+                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill" data-filter="month">This Month</button>
+                        </div>
+                    </div>
+                </t>
+
                 <!-- Flash banners -->
                 <t t-if="booked or cancelled or error_msg">
                     <div class="mv-flashes">
@@ -427,22 +526,6 @@
                         <div class="mv-empty" t-out="empty_state"/>
                     </t>
                     <t t-else="">
-                        <!-- Lightweight day-jump control — expands only when tapped -->
-                        <details class="mv-day-picker">
-                            <summary class="mv-day-picker-summary"><div class="mv-inline-label">Today</div>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                                    <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </summary>
-                            <div class="mv-day-picker-panel">
-                                <t t-foreach="grouped_events" t-as="day_group">
-                                    <a t-attf-href="#day-#{day_group[0]}" class="mv-day-jump-btn">
-                                        <t t-out="day_group[1]"/>
-                                    </a>
-                                </t>
-                            </div>
-                        </details>
-
                         <t t-foreach="grouped_events" t-as="day_group">
                             <t t-set="day_date" t-value="day_group[0]"/>
                             <t t-set="day_label_str" t-value="day_group[1]"/>
@@ -455,17 +538,32 @@
                                         <t t-set="ct" t-value="ev.class_type_id"/>
                                         <t t-set="seats_v" t-value="item['seats_v']"/>
                                         <div class="mv-class-card"
-                                             t-att-data-href="'/my/classes/' + str(ev.id)">
-                                            <!-- Image area -->
+                                             t-att-data-href="'/my/classes/' + str(ev.id)"
+                                             t-att-data-ct="ct.classroom_type if ct and ct.classroom_type else ''"
+                                             t-att-data-date="ev.start.strftime('%Y-%m-%d') if ev.start else ''">
+                                            <!-- Image area: 1) occurrence  2) class type  3) category  4) SVG fallback -->
                                             <div class="mv-card-img">
-                                                <t t-if="ct and ct.image_512">
+                                                <t t-if="ev._fields.get('image_512') and ev.image_512">
+                                                    <img class="mv-card-photo"
+                                                         t-att-src="'/web/image/calendar.event/' + str(ev.id) + '/image_512'"
+                                                         t-att-alt="ev.name or ''"
+                                                         loading="lazy"/>
+                                                </t>
+                                                <t t-elif="ct and item['type_has_img']">
                                                     <img class="mv-card-photo"
                                                          t-att-src="'/web/image/fitness.class.type/' + str(ct.id) + '/image_512'"
                                                          t-att-alt="ct.name or ''"
                                                          loading="lazy"/>
                                                 </t>
+                                                <t t-elif="item['cat_id'] and item['cat_has_img']">
+                                                    <img class="mv-card-photo"
+                                                         t-att-src="'/web/image/fitness.class.category/' + str(item['cat_id']) + '/image_512'"
+                                                         alt="" loading="lazy"/>
+                                                </t>
                                                 <t t-else="">
-                                                    <div t-att-class="'mv-card-fallback' + (' mv-barre' if ct and ct.classroom_type == 'barre' else (' mv-reform' if ct and ct.classroom_type == 'reformer' else ''))"/>
+                                                    <img class="mv-card-photo"
+                                                         src="/fitness_core/static/src/img/class_placeholder.svg"
+                                                         alt="" loading="lazy"/>
                                                 </t>
                                                 <t t-if="ct and ct.classroom_type">
                                                     <span class="mv-card-tag"
@@ -529,7 +627,9 @@
                                 <div class="mv-section-label" t-out="day_label_str"/>
                                 <div class="mv-upcoming-list">
                                     <t t-foreach="day_bookings" t-as="booking">
-                                        <div class="mv-upcoming-card">
+                                        <div class="mv-upcoming-card"
+                                             t-att-data-ct="booking.class_type_id.classroom_type if booking.class_type_id and booking.class_type_id.classroom_type else ''"
+                                             t-att-data-date="booking.class_start.strftime('%Y-%m-%d') if booking.class_start else ''">
                                             <div>
                                                 <p class="mv-upcoming-name"
                                                    t-out="booking.calendar_event_id.name"/>
@@ -584,15 +684,27 @@
             <div class="mv-app">
                 <t t-set="ct" t-value="event.class_type_id"/>
 
-                <!-- Hero image with back button -->
+                <!-- Hero image: 1) occurrence  2) class type  3) category  4) SVG fallback -->
                 <div class="mv-detail-img">
-                    <t t-if="ct and ct.image_512">
+                    <t t-if="event._fields.get('image_512') and event.image_512">
+                        <img class="mv-card-photo"
+                             t-att-src="'/web/image/calendar.event/' + str(event.id) + '/image_512'"
+                             t-att-alt="event.name or ''"/>
+                    </t>
+                    <t t-elif="ct and type_has_img">
                         <img class="mv-card-photo"
                              t-att-src="'/web/image/fitness.class.type/' + str(ct.id) + '/image_512'"
                              t-att-alt="ct.name or ''"/>
                     </t>
+                    <t t-elif="cat_id and cat_has_img">
+                        <img class="mv-card-photo"
+                             t-att-src="'/web/image/fitness.class.category/' + str(cat_id) + '/image_512'"
+                             alt=""/>
+                    </t>
                     <t t-else="">
-                        <div t-att-class="'mv-card-fallback mv-detail-img' + (' mv-barre' if ct and ct.classroom_type == 'barre' else (' mv-reform' if ct and ct.classroom_type == 'reformer' else ''))"/>
+                        <img class="mv-card-photo"
+                             src="/fitness_core/static/src/img/class_placeholder.svg"
+                             alt=""/>
                     </t>
                     <a href="/my/studio" class="mv-detail-back" data-cl-back="1"
                        title="Back to Classes">←</a>
@@ -816,13 +928,13 @@
                                     </t>
                                 </div>
                                 <div class="mv-pack-meta">
-                                    <span><strong>Enrolled</strong><span t-field="sub.date_order"
+                                    <span><strong t-out="lbl_enrolled"/><span t-field="sub.date_order"
                                               t-options='{"widget":"date"}'/></span>
                                     <t t-if="sub.subscription_state == '3_progress' and sub.next_invoice_date">
-                                        <span><strong>Next billing</strong><span t-field="sub.next_invoice_date"/></span>
+                                        <span><strong t-out="lbl_next_billing"/><span t-field="sub.next_invoice_date"/></span>
                                     </t>
                                     <t t-if="sub.fitness_floating_credits">
-                                        <span><strong>Bonus credits</strong><t t-out="sub.fitness_floating_credits"/></span>
+                                        <span><strong t-out="lbl_bonus_credits"/><t t-out="sub.fitness_floating_credits"/></span>
                                     </t>
                                 </div>
                             </div>
@@ -850,11 +962,11 @@
                                     </t>
                                 </div>
                                 <div class="mv-pack-meta">
-                                    <span><strong>Purchased</strong><span t-field="pack_order.date_order"
+                                    <span><strong t-out="lbl_purchased"/><span t-field="pack_order.date_order"
                                               t-options='{"widget":"date"}'/></span>
-                                    <span><strong>Remaining</strong><t t-out="pack_line.fitness_remaining_classes"/>/<t t-out="pack_line.fitness_original_class_count"/></span>
+                                    <span><strong t-out="lbl_remaining"/><t t-out="pack_line.fitness_remaining_classes"/>/<t t-out="pack_line.fitness_original_class_count"/></span>
                                     <t t-if="pack_line.fitness_validity_end_date">
-                                        <span><strong>Valid until</strong><span t-field="pack_line.fitness_validity_end_date"/></span>
+                                        <span><strong t-out="lbl_valid_until"/><span t-field="pack_line.fitness_validity_end_date"/></span>
                                     </t>
                                 </div>
                             </div>
@@ -951,8 +1063,7 @@
                                                 <div class="mv-ledger-info">
                                                     <p class="mv-ledger-title" t-out="entry['title']"/>
                                                     <p class="mv-ledger-meta">
-                                                        <span t-out="entry['when']"
-                                                              t-options='{"widget": "datetime", "format": "d MMM yyyy · HH:mm"}'/>
+                                                        <span t-out="entry['when_str']"/>
                                                         · <t t-out="entry['meta']"/>
                                                     </p>
                                                 </div>
@@ -1202,32 +1313,32 @@
                         <!-- Student already holds this product — show ownership info -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);">Status</span>
-                                <span class="mv-card-tag mv-card-tag-active">Active</span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_status"/>
+                                <span class="mv-card-tag mv-card-tag-active" t-out="lbl_active"/>
                             </div>
                             <t t-if="active_info.get('date_str')">
                                 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Purchased</span>
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_purchased"/>
                                     <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['date_str']"/>
                                 </div>
                             </t>
                             <t t-if="active_info.get('credits_remaining') is not None">
                                 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Remaining</span>
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_remaining"/>
                                     <span style="font-size:0.85rem;color:var(--mv-ink);">
                                         <t t-out="active_info['credits_remaining']"/>
-                                        <t t-if="active_info.get('credits_total')"> / <t t-out="active_info['credits_total']"/> classes</t>
+                                        <t t-if="active_info.get('credits_total')"> / <t t-out="active_info['credits_total']"/> <t t-out="lbl_classes"/></t>
                                     </span>
                                 </div>
                             </t>
                             <t t-if="active_info.get('validity_end_str')">
                                 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-                                    <span style="font-size:0.8rem;color:var(--mv-muted);">Valid until</span>
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_valid_until"/>
                                     <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['validity_end_str']"/>
                                 </div>
                             </t>
                             <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);">Order</span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_order"/>
                                 <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['ref']"/>
                             </div>
                         </div>
@@ -1236,7 +1347,7 @@
                         <!-- Price + buy -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);">Price <span style="font-size:0.72rem;">+ IVA</span></span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/> <span style="font-size:0.72rem;">+ IVA</span></span>
                                 <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
                                 </span>
@@ -1694,13 +1805,13 @@
                             <!-- Weekly usage meter -->
                             <t t-if="s['is_unlimited']">
                                 <div class="mv-sub-stat-row">
-                                    <span class="mv-sub-stat-label">Classes</span>
-                                    <span class="mv-sub-stat-value mv-badge mv-badge-success">Unlimited</span>
+                                    <span class="mv-sub-stat-label" t-out="lbl_classes"/>
+                                    <span class="mv-sub-stat-value mv-badge mv-badge-success" t-out="lbl_unlimited"/>
                                 </div>
                             </t>
                             <t t-else="">
                                 <div class="mv-sub-stat-row">
-                                    <span class="mv-sub-stat-label">This week</span>
+                                    <span class="mv-sub-stat-label" t-out="lbl_this_week"/>
                                     <span class="mv-sub-stat-value">
                                         <t t-out="s['weekly_used']"/> / <t t-out="s['weekly_allowance']"/>
                                     </span>
@@ -1715,7 +1826,7 @@
                             <!-- Floating credits -->
                             <t t-if="s['floating_credits']">
                                 <div class="mv-sub-stat-row">
-                                    <span class="mv-sub-stat-label">Bonus credits</span>
+                                    <span class="mv-sub-stat-label" t-out="lbl_bonus_credits"/>
                                     <span class="mv-sub-stat-value" t-out="s['floating_credits']"/>
                                 </div>
                             </t>
@@ -1723,7 +1834,7 @@
                             <!-- Renewal date -->
                             <t t-if="s['period_end']">
                                 <div class="mv-sub-stat-row">
-                                    <span class="mv-sub-stat-label">Next renewal</span>
+                                    <span class="mv-sub-stat-label" t-out="lbl_next_renewal"/>
                                     <span class="mv-sub-stat-value" t-out="s['period_end']"/>
                                 </div>
                             </t>
@@ -1841,13 +1952,13 @@
                 <!-- Order info card -->
                 <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;margin-bottom:16px;">
                     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-                        <span style="font-size:0.8rem;color:var(--mv-muted);">Date</span>
+                        <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_date"/>
                         <span style="font-size:0.85rem;color:var(--mv-ink);"
                               t-field="sale_order.date_order"
                               t-options='{"widget":"date"}'/>
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:0.8rem;color:var(--mv-muted);">Status</span>
+                        <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_status"/>
                         <span style="font-size:0.8rem;" t-field="sale_order.state"></span>
                     </div>
                 </div>
@@ -1876,7 +1987,7 @@
 
                 <!-- Total -->
                 <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:14px 16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-weight:600;font-size:0.9rem;">Order total</span>
+                    <span style="font-weight:600;font-size:0.9rem;" t-out="lbl_order_total"/>
                     <span class="mv-order-amount" style="font-size:1.05rem;"
                           t-field="sale_order.amount_total"
                           t-options="{'widget':'monetary','display_currency':sale_order.currency_id}"/>
