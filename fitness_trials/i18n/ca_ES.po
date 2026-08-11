@@ -14,62 +14,62 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:class_interest
+#: model:ir.model.fields,field_description:fitness.trial.request,class_interest
 msgid "Class Interest"
 msgstr "Tipus de classe"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,selection:class_interest:barre
+#: model:ir.model.fields.selection,name:fitness.trial.request.class_interest,barre
 msgid "Barre"
 msgstr "Barre"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,selection:class_interest:reformer
+#: model:ir.model.fields.selection,name:fitness.trial.request.class_interest,reformer
 msgid "Reformer"
 msgstr "Reformer"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:reformer_is_first_time
+#: model:ir.model.fields,field_description:fitness.trial.request,reformer_is_first_time
 msgid "First time with Reformer Pilates?"
 msgstr "Primera vegada amb Reformer Pilates?"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,selection:reformer_is_first_time:yes
+#: model:ir.model.fields.selection,name:fitness.trial.request.reformer_is_first_time,yes
 msgid "Yes"
 msgstr "Sí"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,selection:reformer_is_first_time:no
+#: model:ir.model.fields.selection,name:fitness.trial.request.reformer_is_first_time,no
 msgid "No"
 msgstr "No"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:reformer_years_experience
+#: model:ir.model.fields,field_description:fitness.trial.request,reformer_years_experience
 msgid "Years of Reformer Experience"
 msgstr "Anys d'experiència amb Reformer"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:preferred_time_notes
+#: model:ir.model.fields,field_description:fitness.trial.request,preferred_time_notes
 msgid "Preferred Day / Time"
 msgstr "Dia / Horari preferit"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:status:pending
+#: model:ir.model.fields.selection,name:fitness.trial.request.status,pending
 msgid "Pending"
 msgstr "Pendent"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:status:contacted
+#: model:ir.model.fields.selection,name:fitness.trial.request.status,contacted
 msgid "Contacted"
 msgstr "Contactat"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:status:scheduled
+#: model:ir.model.fields.selection,name:fitness.trial.request.status,scheduled
 msgid "Scheduled"
 msgstr "Programat"
 
 #. module: fitness_trials
-#: model:fitness.trial.request,fields:status:declined
+#: model:ir.model.fields.selection,name:fitness.trial.request.status,declined
 msgid "Declined"
 msgstr "Rebutjat"
 
