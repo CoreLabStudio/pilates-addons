@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
+from urllib.parse import urlencode as url_encode
+
 from markupsafe import Markup, escape
-from werkzeug.urls import url_encode
 
 from odoo import fields, http, _
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
