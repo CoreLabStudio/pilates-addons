@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.9.10',
+    'version': '19.0.1.9.11',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Yoleyva Studio',
