@@ -4,7 +4,7 @@ import re
 import threading
 import time
 
-from odoo import http
+from odoo import http, _
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -19,6 +19,9 @@ _rate_buckets: dict = {}   # {ip: [timestamp, ...]}
 # Cached DB name — resolved once on first request.
 _TARGET_DB: str | None = None
 _TARGET_DB_LOCK = threading.Lock()
+
+_VALID_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
+_VALID_CLASS_INTERESTS = frozenset({'barre', 'reformer'})
 
 
 def _check_rate_limit(ip: str) -> bool:
@@ -95,6 +98,89 @@ def _json_err(msg: str, status: int = 200):
 
 class TrialRequestController(http.Controller):
 
+    # ──────────────────────────────────────────────────────────────
+    # Portal form  GET /trial  /  POST /trial/submit
+    # ──────────────────────────────────────────────────────────────
+
+    @http.route('/trial', type='http', auth='public', website=True, sitemap=True, multilang=False)
+    def trial_form(self, **kw):
+        """Render the trial class request form."""
+        return request.render('fitness_trials.trial_request_form', {
+            'error': kw.get('error'),
+            'form_values': {},
+        })
+
+    @http.route('/trial/submit', type='http', auth='public', website=True,
+                methods=['POST'], sitemap=False, multilang=False)
+    def trial_submit(self, **kw):
+        """Handle HTML form submission from the portal trial request form."""
+        name            = (kw.get('name')   or '').strip()[:120]
+        email           = (kw.get('email')  or '').strip()[:200]
+        phone           = (kw.get('phone')  or '').strip()[:40]
+        class_interest  = (kw.get('class_interest') or '').strip()
+        notes           = (kw.get('notes')  or '').strip()[:1000]
+        reformer_first  = (kw.get('reformer_is_first_time') or '').strip()
+        reformer_years  = (kw.get('reformer_years_experience') or '').strip()[:40]
+        lang = request.context.get('lang', 'es_ES')
+        if lang not in _VALID_LANGS:
+            lang = 'es_ES'
+
+        # Preserve entered values for form re-display on error
+        form_values = {
+            'name': name, 'email': email, 'phone': phone,
+            'class_interest': class_interest, 'notes': notes,
+            'reformer_is_first_time': reformer_first,
+            'reformer_years_experience': reformer_years,
+        }
+
+        # Validation
+        errors = []
+        if not name:
+            errors.append(_('Please provide your name.'))
+        if not email or not _EMAIL_RE.match(email):
+            errors.append(_('A valid email address is required.'))
+        if class_interest not in _VALID_CLASS_INTERESTS:
+            errors.append(_('Please select a class type (Barre or Reformer).'))
+
+        if errors:
+            return request.render('fitness_trials.trial_request_form', {
+                'error': ' '.join(errors),
+                'form_values': form_values,
+            })
+
+        vals = {
+            'name': name,
+            'email': email,
+            'phone': phone or False,
+            'preferred_time_notes': notes or False,
+            'class_interest': class_interest,
+            'lang': lang,
+        }
+        if class_interest == 'reformer':
+            if reformer_first in ('yes', 'no'):
+                vals['reformer_is_first_time'] = reformer_first
+            if reformer_years:
+                vals['reformer_years_experience'] = reformer_years
+
+        try:
+            request.env['fitness.trial.request'].sudo().create(vals)
+        except Exception:
+            _logger.exception("Portal trial submission error")
+            return request.render('fitness_trials.trial_request_form', {
+                'error': _('Something went wrong. Please try again.'),
+                'form_values': form_values,
+            })
+
+        return request.render('fitness_trials.trial_request_form', {
+            'success': True,
+            'submitted_interest': class_interest,
+            'form_values': {},
+        })
+
+    # ──────────────────────────────────────────────────────────────
+    # External JSON API  POST /trial/request  (marketing site)
+    # ──────────────────────────────────────────────────────────────
+
     @http.route(
         '/trial/request',
         type='http',
@@ -118,18 +204,23 @@ class TrialRequestController(http.Controller):
         except Exception:
             return _json_err('Invalid request body.', status=400)
 
-        name  = (data.get('name')  or '').strip()[:120]
-        email = (data.get('email') or '').strip()[:200]
-        phone = (data.get('phone') or '').strip()[:40]
-        notes = (data.get('notes') or '').strip()[:1000]
-        lang  = (data.get('lang')  or 'en_US').strip()[:10]
+        name             = (data.get('name')             or '').strip()[:120]
+        email            = (data.get('email')            or '').strip()[:200]
+        phone            = (data.get('phone')            or '').strip()[:40]
+        notes            = (data.get('notes')            or '').strip()[:1000]
+        lang             = (data.get('lang')             or 'en_US').strip()[:10]
+        class_interest   = (data.get('class_interest')   or 'barre').strip()
+        reformer_first   = (data.get('reformer_is_first_time')     or '').strip()
+        reformer_years   = (data.get('reformer_years_experience')  or '').strip()[:40]
 
         if not name:
             return _json_err('Name is required.')
         if not email or not _EMAIL_RE.match(email):
             return _json_err('A valid email address is required.')
-        if lang not in ('en_US', 'es_ES', 'ca_ES'):
+        if lang not in _VALID_LANGS:
             lang = 'en_US'
+        if class_interest not in _VALID_CLASS_INTERESTS:
+            class_interest = 'barre'
 
         db_name = _get_target_db()
         if not db_name:
@@ -140,14 +231,21 @@ class TrialRequestController(http.Controller):
             import odoo.api
             with Registry(db_name).cursor() as cr:
                 env = odoo.api.Environment(cr, 1, {})
-                env['fitness.trial.request'].create({
+                vals = {
                     'name': name,
                     'email': email,
                     'phone': phone or False,
                     'preferred_time_notes': notes or False,
                     'lang': lang,
+                    'class_interest': class_interest,
                     'status': 'pending',
-                })
+                }
+                if class_interest == 'reformer':
+                    if reformer_first in ('yes', 'no'):
+                        vals['reformer_is_first_time'] = reformer_first
+                    if reformer_years:
+                        vals['reformer_years_experience'] = reformer_years
+                env['fitness.trial.request'].create(vals)
         except Exception:
             _logger.exception("Error creating trial request from %s", ip)
             return _json_err('Server error. Please try again.', status=500)

@@ -3,7 +3,7 @@ import logging
 from markupsafe import Markup, escape
 from werkzeug.urls import url_encode
 
-from odoo import http, _
+from odoo import fields, http, _
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
 from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.models.res_users import SKIP_CAPTCHA_LOGIN
@@ -50,6 +50,17 @@ class FitnessSignup(AuthSignupHome):
 
     @http.route()
     def web_login(self, redirect=None, **kw):
+        # Already-logged-in students/teachers who land on /web/login (e.g. via
+        # an external link or bookmark) must go straight to the portal home.
+        # Without this, Odoo's base handler detects a non-internal logged-in
+        # user and bounces them through /web/login_successful → / (website root).
+        if request.session.uid:
+            user = request.env['res.users'].sudo().browse(request.session.uid)
+            if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
+                dest = (redirect if redirect and redirect not in _GENERIC_REDIRECTS
+                        else '/my/home')
+                return request.redirect(dest)
+
         response = super().web_login(redirect=redirect, **kw)
 
         # Show "email verified" success message on the login page
@@ -91,6 +102,10 @@ class FitnessSignup(AuthSignupHome):
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             try:
                 if not qcontext.get('token'):
+                    # Block signup if terms consent is missing (server-side guard)
+                    if not request.httprequest.form.get('consent_terms'):
+                        raise UserError(_("Debes aceptar los Términos y Condiciones para continuar."))
+
                     # --- self-signup: create user without logging in ---
                     self.do_signup(qcontext, do_login=False)
 
@@ -102,6 +117,13 @@ class FitnessSignup(AuthSignupHome):
                     )
                     if user_sudo:
                         user_sudo.sudo().write({'lang': 'es_ES'})
+                        # Store GDPR consent timestamps on the partner record
+                        now = fields.Datetime.now()
+                        consent_vals = {'consent_terms_date': now}
+                        if request.httprequest.form.get('consent_marketing'):
+                            consent_vals['consent_marketing'] = True
+                            consent_vals['consent_marketing_date'] = now
+                        user_sudo.partner_id.sudo().write(consent_vals)
                         self._send_fitness_verification_email(user_sudo)
 
                     return request.render('fitness_portal.signup_verify_email', {
@@ -155,6 +177,18 @@ class FitnessSignup(AuthSignupHome):
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
         return response
+
+    # ------------------------------------------------------------------
+    # Public legal pages (linked from signup form, auth=public)
+    # ------------------------------------------------------------------
+
+    @http.route('/corelab/terms', type='http', auth='public', website=True, sitemap=False)
+    def public_terms(self, **kw):
+        return request.render('fitness_portal.public_terms', {})
+
+    @http.route('/corelab/privacy-policy', type='http', auth='public', website=True, sitemap=False)
+    def public_privacy_policy(self, **kw):
+        return request.render('fitness_portal.public_privacy_policy', {})
 
     # ------------------------------------------------------------------
     # Helpers

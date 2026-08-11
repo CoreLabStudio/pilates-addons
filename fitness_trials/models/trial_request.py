@@ -34,6 +34,25 @@ class FitnessTrialRequest(models.Model):
     phone = fields.Char(string='Phone')
     preferred_time_notes = fields.Text(string='Preferred Day / Time')
     lang = fields.Char(string='Language', default='en_US')
+    class_interest = fields.Selection(
+        selection=[
+            ('barre', 'Barre'),
+            ('reformer', 'Reformer'),
+        ],
+        string='Class Interest',
+        required=True,
+        default='barre',
+        index=True,
+    )
+    # Reformer-specific intake questions
+    reformer_is_first_time = fields.Selection(
+        selection=[
+            ('yes', 'Yes'),
+            ('no', 'No'),
+        ],
+        string='First time with Reformer Pilates?',
+    )
+    reformer_years_experience = fields.Char(string='Years of Reformer Experience')
     status = fields.Selection(
         selection=[
             ('pending', 'Pending'),
@@ -75,7 +94,10 @@ class FitnessTrialRequest(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            rec._send_pending_email()
+            # Barre: auto-send "received" email (self-service flow)
+            # Reformer: hold in pending for admin review — no email until admin acts
+            if rec.class_interest != 'reformer':
+                rec._send_pending_email()
         return records
 
     def write(self, vals):

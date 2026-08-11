@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Trial class request form — public, accessible at /trial
+        Uses web.login_layout so the CoreLab wordmark appears.
+        Class interest radio drives conditional section visibility via inline JS.
+
+        IMPORTANT — Barre timetable:
+        The timetable below is a PLACEHOLDER based on existing class types.
+        Replace the day/time rows with the actual Barre schedule from the meeting notes
+        before going live.
+    -->
+    <template id="trial_request_form" name="Trial Class Request Form">
+        <t t-call="web.login_layout">
+
+            <!-- ── Success state ───────────────────────────────────────── -->
+            <t t-if="success">
+                <div class="text-center mb-4 mt-2">
+                    <div style="font-size:2rem;margin-bottom:0.75rem;">✓</div>
+                    <h5 class="fw-semibold mb-2">
+                        <t t-if="submitted_interest == 'reformer'">Solicitud recibida</t>
+                        <t t-else="">¡Solicitud enviada!</t>
+                    </h5>
+                    <t t-if="submitted_interest == 'reformer'">
+                        <p class="text-muted small mb-0">
+                            Hemos recibido tu solicitud de clase de prueba de Reformer.
+                            Nuestro equipo la revisará y se pondrá en contacto contigo pronto.
+                        </p>
+                    </t>
+                    <t t-else="">
+                        <p class="text-muted small mb-0">
+                            Hemos recibido tu solicitud de clase de prueba de Barre.
+                            Nos pondremos en contacto contigo en breve para confirmar día y hora.
+                        </p>
+                    </t>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/trial" class="btn btn-link btn-sm text-muted">Enviar otra solicitud</a>
+                </div>
+            </t>
+
+            <!-- ── Form state ───────────────────────────────────────────── -->
+            <t t-else="">
+                <div class="text-center mb-4 mt-1">
+                    <h5 class="fw-semibold mb-1">Solicitar clase de prueba</h5>
+                    <p class="text-muted small mb-0">Elige el tipo de clase y rellena el formulario.</p>
+                </div>
+
+                <t t-if="error">
+                    <div class="alert alert-danger small mb-3" role="alert">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+
+                <form method="post" action="/trial/submit" class="mv-trial-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <!-- ── Contact fields ──────────────────────────────── -->
+                    <div class="mb-3">
+                        <label for="trial_name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <input type="text" id="trial_name" name="name" class="form-control"
+                               required="required" autocomplete="name"
+                               t-att-value="form_values.get('name', '')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="trial_email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" id="trial_email" name="email" class="form-control"
+                               required="required" autocomplete="email"
+                               t-att-value="form_values.get('email', '')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="trial_phone" class="form-label">Teléfono <span class="text-muted small">(opcional)</span></label>
+                        <input type="tel" id="trial_phone" name="phone" class="form-control"
+                               autocomplete="tel"
+                               t-att-value="form_values.get('phone', '')"/>
+                    </div>
+
+                    <!-- ── Class interest ──────────────────────────────── -->
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de clase <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="class_interest"
+                                       id="ci_barre" value="barre"
+                                       t-att-checked="'checked' if form_values.get('class_interest') == 'barre' else None"/>
+                                <label class="form-check-label" for="ci_barre">
+                                    <strong>Barre</strong>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="class_interest"
+                                       id="ci_reformer" value="reformer"
+                                       t-att-checked="'checked' if form_values.get('class_interest') == 'reformer' else None"/>
+                                <label class="form-check-label" for="ci_reformer">
+                                    <strong>Reformer</strong>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Barre section (shown when Barre is selected) ── -->
+                    <div id="mv-barre-section" class="mv-trial-conditional d-none">
+
+                        <!-- Barre timetable
+                             TODO: Replace with actual Barre schedule from meeting notes.
+                             These are placeholder times based on the studio's Barre class types. -->
+                        <div class="mb-3 p-3 rounded" style="background:#f8f5f0;border:1px solid #e8e0d6;">
+                            <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">Horario semanal de Barre</p>
+                            <table class="table table-sm mb-0" style="font-size:0.85rem;">
+                                <thead>
+                                    <tr style="color:#9e8e7e;">
+                                        <th class="border-0 ps-0" style="font-weight:500;">Día</th>
+                                        <th class="border-0" style="font-weight:500;">Hora</th>
+                                        <th class="border-0" style="font-weight:500;">Clase</th>
+                                        <th class="border-0" style="font-weight:500;">Duración</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="ps-0">Lunes</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Lunes</td><td>18:30</td><td>Barre Blast</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Martes</td><td>13:00</td><td>Quick &amp; Dirty</td><td>45 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Miércoles</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Miércoles</td><td>18:30</td><td>Burn It Baby</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Jueves</td><td>13:00</td><td>Quick &amp; Dirty</td><td>45 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Viernes</td><td>10:00</td><td>Barre Blast</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Sábado</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-0">Sábado</td><td>11:30</td><td>Stronger than Ever</td><td>45 min</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="small text-muted mt-2 mb-0" style="font-size:0.78rem;">Aforo máximo: 10 personas por clase. La reserva definitiva se confirma por email.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- ── Reformer section (shown when Reformer is selected) ── -->
+                    <div id="mv-reformer-section" class="mv-trial-conditional d-none">
+
+                        <div class="mb-3 p-3 rounded" style="background:#f8f5f0;border:1px solid #e8e0d6;">
+                            <p class="small mb-0" style="font-size:0.85rem;color:#4a4a4a;line-height:1.6;">
+                                Las clases de Reformer en CoreLab tienen aforo reducido y requieren una
+                                valoración previa. Por favor responde las preguntas de abajo — te
+                                contactaremos para confirmar disponibilidad.
+                            </p>
+                        </div>
+
+                        <!-- Intake question 1: first time -->
+                        <div class="mb-3">
+                            <label class="form-label">¿Es la primera vez que practicas Reformer Pilates? <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="reformer_is_first_time" id="rft_yes" value="yes"
+                                           t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'yes' else None"/>
+                                    <label class="form-check-label" for="rft_yes">Sí</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="reformer_is_first_time" id="rft_no" value="no"
+                                           t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'no' else None"/>
+                                    <label class="form-check-label" for="rft_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Intake question 2: years of experience -->
+                        <div class="mb-3">
+                            <label for="trial_reformer_years" class="form-label">¿Cuántos años de experiencia tienes con Reformer Pilates?</label>
+                            <input type="text" id="trial_reformer_years" name="reformer_years_experience"
+                                   class="form-control" style="max-width:200px;"
+                                   placeholder="p.ej. 0, 1, 3, 5+"
+                                   t-att-value="form_values.get('reformer_years_experience', '')"/>
+                        </div>
+
+                    </div>
+
+                    <!-- ── Preferred time (always shown) ─────────────── -->
+                    <div id="mv-notes-section" class="d-none">
+                        <div class="mb-3">
+                            <label for="trial_notes" class="form-label">Días / horarios preferidos</label>
+                            <textarea id="trial_notes" name="notes" class="form-control" rows="2"
+                                      placeholder="p.ej. Lunes tarde, sábado por la mañana…"><t t-esc="form_values.get('notes', '')"/></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ── Submit ─────────────────────────────────────── -->
+                    <div class="d-grid mt-2">
+                        <button type="submit" id="mv-trial-submit" class="btn btn-primary" disabled="disabled">
+                            Enviar solicitud
+                        </button>
+                    </div>
+                    <p class="text-center small text-muted mt-3 mb-0">
+                        ¿Ya tienes cuenta?
+                        <a href="/web/login" class="text-decoration-none">Inicia sesión</a>
+                    </p>
+                </form>
+
+                <!-- Inline JS: toggle conditional sections and submit button -->
+                <script>
+                (function () {
+                    var radios = document.querySelectorAll('input[name="class_interest"]');
+                    var barreSection    = document.getElementById('mv-barre-section');
+                    var reformerSection = document.getElementById('mv-reformer-section');
+                    var notesSection    = document.getElementById('mv-notes-section');
+                    var submitBtn       = document.getElementById('mv-trial-submit');
+
+                    function showSection(val) {
+                        var showBarre    = (val === 'barre');
+                        var showReformer = (val === 'reformer');
+                        barreSection.classList.toggle('d-none', !showBarre);
+                        reformerSection.classList.toggle('d-none', !showReformer);
+                        notesSection.classList.remove('d-none');
+                        submitBtn.disabled = false;
+                        submitBtn.removeAttribute('disabled');
+                    }
+
+                    radios.forEach(function (r) {
+                        r.addEventListener('change', function () { showSection(this.value); });
+                    });
+
+                    // Restore selection on back-navigation / server-side re-render with errors
+                    var checked = document.querySelector('input[name="class_interest"]:checked');
+                    if (checked) { showSection(checked.value); }
+                })();
+                </script>
+            </t>
+
+        </t>
+    </template>
+
+</odoo>

@@ -8,13 +8,31 @@ class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
     @classmethod
+    def _get_mv_lang(cls):
+        mv_lang = request.cookies.get('mv_lang') or 'es_ES'
+        if mv_lang not in _PORTAL_LANGS:
+            mv_lang = 'es_ES'
+        return request.env['res.lang']._get_data(code=mv_lang)
+
+    @classmethod
+    def _pre_dispatch(cls, rule, args):
+        super()._pre_dispatch(rule, args)
+        # _frontend_pre_dispatch handles frontend routes already.
+        # For non-frontend auth='none' routes like /web/login, apply mv_lang here.
+        if not getattr(request, 'is_frontend', False):
+            try:
+                lang_data = cls._get_mv_lang()
+                if lang_data:
+                    request.update_context(lang=lang_data.code)
+            except Exception:
+                pass
+
+    @classmethod
     def _frontend_pre_dispatch(cls):
         super()._frontend_pre_dispatch()
-        # mv_lang is set by /my/set_lang. Apply AFTER super() so our choice
-        # overrides any lang the base machinery derived from session/URL/cookie.
-        mv_lang = request.cookies.get('mv_lang') or 'es_ES'
-        if mv_lang in _PORTAL_LANGS:
-            lang_data = request.env['res.lang']._get_data(code=mv_lang)
-            if lang_data:
-                request.lang = lang_data
-                request.update_context(lang=mv_lang)
+        lang_data = cls._get_mv_lang()
+        if lang_data:
+            request.lang = lang_data
+            request.update_context(lang=lang_data.code)
+            # Sync frontend_lang cookie so _match picks the right lang next request.
+            request.future_response.set_cookie('frontend_lang', lang_data.code)

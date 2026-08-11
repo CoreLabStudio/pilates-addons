@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        GDPR consent checkboxes injected into the stock auth_signup form.
+        Targets the button row so checkboxes appear directly above "Sign up".
+        Both start unchecked. consent_terms is required (HTML5 + server-side).
+    -->
+    <template id="signup_consent_gdpr" inherit_id="auth_signup.signup" name="Signup GDPR Consent Checkboxes">
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="before">
+            <div class="mv-signup-consent mb-3 pt-2">
+                <div class="form-check mb-2">
+                    <input type="checkbox" class="form-check-input" id="consent_terms"
+                           name="consent_terms" required="required"/>
+                    <label class="form-check-label" style="font-size:0.85rem;" for="consent_terms">
+                        He leído y acepto los
+                        <a href="/corelab/terms" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
+                        y la
+                        <a href="/corelab/privacy-policy" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>.
+                        <span class="text-danger ms-1" aria-hidden="true">*</span>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="consent_marketing"
+                           name="consent_marketing"/>
+                    <label class="form-check-label" style="font-size:0.85rem;" for="consent_marketing">
+                        Deseo recibir noticias y promociones por email.
+                    </label>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!--
+        Public Terms &amp; Conditions page — auth=public, opens in new tab from the signup form.
+        Uses web.login_layout so the CoreLab wordmark appears (from login_override.xml).
+    -->
+    <template id="public_terms" name="Terms and Conditions (Public)">
+        <t t-call="web.login_layout">
+            <div style="text-align:left;padding-bottom:1.5rem;">
+                <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Términos y Condiciones</h1>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducción</h3>
+                <p style="font-size:0.87rem;line-height:1.65;">Estos Términos y Condiciones ("Términos") rigen el uso de los servicios del estudio de pilates CoreLab, incluidas las reservas de clases, membresías, paquetes de créditos y el portal online proporcionado por Yoleyva Studio ("nosotros", "nos", "el Estudio"). Al reservar una clase o activar un paquete, aceptas estos Términos en su totalidad.</p>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membresía y Cuenta</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Debes tener 16 años o más para registrarte de forma independiente. Los menores de 16 años requieren consentimiento escrito de sus padres o tutores.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Eres responsable de mantener la confidencialidad de tus credenciales de acceso. Notifícanos de inmediato si sospechas de acceso no autorizado a tu cuenta.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuentas son personales e intransferibles. No está permitido compartir credenciales de acceso para que un tercero asista a clases.</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">3. Reserva de Clases</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las clases pueden reservarse a través del portal según disponibilidad.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Una reserva se confirma únicamente cuando se ha aplicado un crédito de clase o una suscripción válida.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio se reserva el derecho de cancelar o reprogramar una clase con aviso razonable. En tal caso, se devolverá cualquier crédito utilizado.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El aforo máximo por clase lo establece el Estudio; una vez completo, puede ofrecerse lista de espera a su discreción.</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">4. Política de Cancelación</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;"><strong>Debes cancelar al menos 2 horas antes del inicio de la clase</strong> para recuperar tu crédito.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cancelaciones con menos de 2 horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Para cancelar, usa la sección "Próximas Clases" del portal antes del tiempo límite.</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">5. Política de Créditos</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos tienen validez durante el período indicado en el momento de la compra. Los créditos caducados no son reembolsables.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos son personales y no pueden transferirse a otra cuenta.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El saldo de créditos es visible en tu portal bajo "Saldo".</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">6. Pagos y Reembolsos</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Todos los precios incluyen los impuestos aplicables salvo que se indique lo contrario.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los paquetes de créditos no son reembolsables una vez adquiridos, excepto cuando lo exija la legislación de protección al consumidor.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuotas de suscripción se cobran de forma recurrente. Puedes cancelar en cualquier momento; la cancelación surte efecto al final del ciclo de facturación en curso.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no almacena datos completos de tarjetas de pago; todos los pagos se procesan a través de un proveedor con certificación PCI-DSS.</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">7. Salud y Responsabilidad</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">La participación en clases de Pilates conlleva riesgos inherentes. Confirmas que estás en condición física adecuada para participar y has buscado asesoramiento médico cuando fue necesario.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Aceptas informar al Estudio de cualquier lesión, condición médica o embarazo antes de unirte a una clase.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no será responsable de ninguna lesión, pérdida o daño derivados de la participación en clases, salvo que sean causados por negligencia propia del Estudio.</li>
+                </ul>
+
+                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">8. Privacidad</h3>
+                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Recopilamos y tratamos datos personales conforme a nuestra Política de Privacidad.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Tus datos se utilizan exclusivamente para gestionar tu cuenta, procesar reservas y comunicarnos contigo sobre los servicios del Estudio.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">No vendemos ni compartimos tus datos personales con terceros con fines comerciales.</li>
+                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Puedes solicitar el acceso, corrección o eliminación de tus datos personales contactándonos en el Estudio.</li>
+                </ul>
+
+                <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: agosto 2026</p>
+                <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
+            </div>
+        </t>
+    </template>
+
+    <!--
+        Public Privacy Policy — placeholder. DO NOT publish until client/lawyer supplies legal text.
+        Route: /corelab/privacy-policy
+    -->
+    <template id="public_privacy_policy" name="Privacy Policy (Public — Placeholder)">
+        <t t-call="web.login_layout">
+            <div style="text-align:left;padding-bottom:1.5rem;">
+                <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Política de Privacidad</h1>
+                <div class="alert alert-warning small mb-4">
+                    <strong>Aviso:</strong> El texto completo de la Política de Privacidad está pendiente de
+                    publicación. Para cualquier consulta sobre el tratamiento de tus datos, contáctanos en
+                    <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
+                </div>
+                <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) trata tus datos personales de conformidad con el Reglamento General de Protección de Datos (RGPD) y la normativa española aplicable. Los datos recogidos durante el registro se utilizan exclusivamente para gestionar tu cuenta y la prestación de nuestros servicios.</p>
+                <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: próximamente</p>
+                <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
+            </div>
+        </t>
+    </template>
+
+</odoo>

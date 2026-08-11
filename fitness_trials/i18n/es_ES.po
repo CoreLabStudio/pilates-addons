@@ -1,0 +1,103 @@
+# Spanish (es_ES) translations for fitness_trials
+# Copyright (C) CoreLab Studio
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-11 00:00+0000\n"
+"PO-Revision-Date: 2026-08-11 00:00+0000\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:class_interest
+msgid "Class Interest"
+msgstr "Tipo de clase"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,selection:class_interest:barre
+msgid "Barre"
+msgstr "Barre"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,selection:class_interest:reformer
+msgid "Reformer"
+msgstr "Reformer"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:reformer_is_first_time
+msgid "First time with Reformer Pilates?"
+msgstr "¿Primera vez con Reformer Pilates?"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,selection:reformer_is_first_time:yes
+msgid "Yes"
+msgstr "Sí"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,selection:reformer_is_first_time:no
+msgid "No"
+msgstr "No"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:reformer_years_experience
+msgid "Years of Reformer Experience"
+msgstr "Años de experiencia con Reformer"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:preferred_time_notes
+msgid "Preferred Day / Time"
+msgstr "Día / Horario preferido"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:status:pending
+msgid "Pending"
+msgstr "Pendiente"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:status:contacted
+msgid "Contacted"
+msgstr "Contactado"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:status:scheduled
+msgid "Scheduled"
+msgstr "Programado"
+
+#. module: fitness_trials
+#: model:fitness.trial.request,fields:status:declined
+msgid "Declined"
+msgstr "Rechazado"
+
+#. module: fitness_trials
+#: model:ir.actions.act_window,name:fitness_trials.action_fitness_trial_request
+msgid "Trial Requests"
+msgstr "Solicitudes de clase de prueba"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please provide your name."
+msgstr "Por favor, indica tu nombre."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "A valid email address is required."
+msgstr "Introduce una dirección de email válida."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please select a class type (Barre or Reformer)."
+msgstr "Selecciona un tipo de clase (Barre o Reformer)."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Something went wrong. Please try again."
+msgstr "Ha ocurrido un error. Por favor, inténtalo de nuevo."

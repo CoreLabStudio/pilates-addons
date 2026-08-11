@@ -14,6 +14,9 @@
         <field name="name" string="Name"/>
         <field name="email"/>
         <field name="phone" optional="show"/>
+        <field name="class_interest" widget="badge"
+               decoration-primary="class_interest == 'reformer'"
+               decoration-info="class_interest == 'barre'"/>
         <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
         <field name="status" widget="badge"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
@@ -42,10 +45,22 @@
               <field name="phone"/>
               <field name="lang" string="Language"/>
             </group>
-            <group string="Scheduling">
+            <group string="Class Interest">
+              <field name="class_interest" widget="radio"/>
+            </group>
+          </group>
+          <group string="Scheduling">
+            <group>
               <field name="status" string="Status"/>
               <field name="scheduled_datetime" string="Scheduled Date/Time"/>
               <field name="create_date" string="Request Received" readonly="1"/>
+            </group>
+          </group>
+          <!-- Reformer intake fields — only relevant when class_interest == 'reformer' -->
+          <group string="Reformer Intake" invisible="class_interest != 'reformer'">
+            <group>
+              <field name="reformer_is_first_time" string="First time with Reformer?"/>
+              <field name="reformer_years_experience" string="Years of Experience"/>
             </group>
           </group>
           <group string="Preferred Day / Time (from requester)">
@@ -64,12 +79,17 @@
       <search string="Trial Requests">
         <field name="name"/>
         <field name="email"/>
-        <filter string="Pending" name="pending" domain="[('status','=','pending')]"/>
+        <separator/>
+        <filter string="Barre"    name="barre"    domain="[('class_interest','=','barre')]"/>
+        <filter string="Reformer" name="reformer" domain="[('class_interest','=','reformer')]"/>
+        <separator/>
+        <filter string="Pending"   name="pending"   domain="[('status','=','pending')]"/>
         <filter string="Contacted" name="contacted" domain="[('status','=','contacted')]"/>
         <filter string="Scheduled" name="scheduled" domain="[('status','=','scheduled')]"/>
-        <filter string="Declined" name="declined" domain="[('status','=','declined')]"/>
+        <filter string="Declined"  name="declined"  domain="[('status','=','declined')]"/>
         <group>
-          <filter string="Status" name="group_status" context="{'group_by':'status'}"/>
+          <filter string="Class Type" name="group_class"  context="{'group_by':'class_interest'}"/>
+          <filter string="Status"     name="group_status" context="{'group_by':'status'}"/>
         </group>
       </search>
     </field>

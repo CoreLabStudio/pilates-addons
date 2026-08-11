@@ -24,6 +24,7 @@
         'views/portal_shell_override.xml',
         'views/login_override.xml',
         'views/signup_templates.xml',
+        'views/signup_consent.xml',
     ],
     'installable': True,
     'application': False,
