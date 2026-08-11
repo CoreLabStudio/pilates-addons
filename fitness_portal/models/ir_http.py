@@ -9,9 +9,12 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_mv_lang(cls):
-        mv_lang = request.cookies.get('mv_lang') or 'es_ES'
-        if mv_lang not in _PORTAL_LANGS:
-            mv_lang = 'es_ES'
+        mv_lang = request.cookies.get('mv_lang')
+        if not mv_lang or mv_lang not in _PORTAL_LANGS:
+            # No explicit user preference — let Odoo's default lang handling apply.
+            # Returning None here prevents forcing es_ES on every request (which breaks
+            # core Odoo test runs where no cookies are set).
+            return None
         return request.env['res.lang']._get_data(code=mv_lang)
 
     @classmethod
