@@ -4,7 +4,7 @@ import pytz
 import re
 import threading
 import time
-from datetime import timedelta
+from datetime import date as _date, timedelta
 
 from odoo import fields as _odoo_fields, http, _
 from odoo.http import request
@@ -118,6 +118,7 @@ def _format_event(ev) -> dict:
         'teacher': ev.user_id.name if ev.user_id else '',
         'available': available,
         'start_utc': ev.start,
+        'start_date': dt_local.date().isoformat(),
     }
 
 
@@ -131,12 +132,51 @@ class TrialRequestController(http.Controller):
             ('start', '>', now),
             ('start', '<', now + timedelta(days=14)),
         ], order='start asc').filtered(
-            lambda e: (
-                e.class_type_id.classroom_type == 'barre'
-                and (not e.capacity or e.booked_seats < e.capacity)
-            )
+            lambda e: e.class_type_id.classroom_type == 'barre'
         )
         return [_format_event(ev) for ev in events]
+
+    def _get_date_filters(self, slots: list) -> list:
+        """Return [{key, label}] for each unique slot date — used by date-filter pills."""
+        try:
+            from babel.dates import format_date as _babel_fmt
+            _babel_ok = True
+        except ImportError:
+            _babel_ok = False
+
+        lang     = request.context.get('lang', 'es_ES')
+        today    = _date.today()
+        tomorrow = today + timedelta(days=1)
+
+        seen    = set()
+        filters = []
+        for slot in slots:
+            d_str = slot.get('start_date', '')
+            if not d_str or d_str in seen:
+                continue
+            seen.add(d_str)
+            try:
+                d = _date.fromisoformat(d_str)
+            except (ValueError, AttributeError):
+                continue
+
+            if d == today:
+                label = _('Today')
+            elif d == tomorrow:
+                label = _('Tomorrow')
+            elif _babel_ok:
+                try:
+                    locale = lang.replace('_', '-')
+                    abbr   = _babel_fmt(d, format='EEE', locale=locale).rstrip('.').strip()
+                    label  = '{} {}'.format(abbr.capitalize(), d.day)
+                except Exception:
+                    label  = '{} {}'.format(d.strftime('%a'), d.day)
+            else:
+                label = '{} {}'.format(d.strftime('%a'), d.day)
+
+            filters.append({'key': d_str, 'label': label})
+
+        return filters
 
     # ──────────────────────────────────────────────────────────────
     # Portal form  GET /trial  /  POST /trial/submit
@@ -145,10 +185,12 @@ class TrialRequestController(http.Controller):
     @http.route('/trial', type='http', auth='public', website=True, sitemap=True, multilang=False)
     def trial_form(self, **kw):
         """Render the trial class request form."""
+        slots = self._get_barre_slots()
         return request.render('fitness_trials.trial_request_form', {
             'error': kw.get('error'),
             'form_values': {},
-            'barre_slots': self._get_barre_slots(),
+            'barre_slots': slots,
+            'date_filters': self._get_date_filters(slots),
         })
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
@@ -196,7 +238,6 @@ class TrialRequestController(http.Controller):
                         occ.exists()
                         and occ.is_fitness_class
                         and occ.class_type_id.classroom_type == 'barre'
-                        and (not occ.capacity or occ.booked_seats < occ.capacity)
                     ):
                         occurrence = occ
                     else:
@@ -205,10 +246,12 @@ class TrialRequestController(http.Controller):
                     errors.append(_('Invalid class slot selected.'))
 
         if errors:
+            slots = self._get_barre_slots()
             return request.render('fitness_trials.trial_request_form', {
                 'error': ' '.join(errors),
                 'form_values': form_values,
-                'barre_slots': self._get_barre_slots(),
+                'barre_slots': slots,
+                'date_filters': self._get_date_filters(slots),
             })
 
         vals = {
@@ -239,10 +282,12 @@ class TrialRequestController(http.Controller):
             request.env['fitness.trial.request'].sudo().create(vals)
         except Exception:
             _logger.exception("Portal trial submission error")
+            slots = self._get_barre_slots()
             return request.render('fitness_trials.trial_request_form', {
                 'error': _('Something went wrong. Please try again.'),
                 'form_values': form_values,
-                'barre_slots': self._get_barre_slots(),
+                'barre_slots': slots,
+                'date_filters': self._get_date_filters(slots),
             })
 
         return request.render('fitness_trials.trial_request_form', {
@@ -251,6 +296,7 @@ class TrialRequestController(http.Controller):
             'submitted_slot': submitted_slot,
             'form_values': {},
             'barre_slots': [],
+            'date_filters': [],
         })
 
     # ──────────────────────────────────────────────────────────────

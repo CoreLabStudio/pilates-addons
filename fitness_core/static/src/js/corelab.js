@@ -327,47 +327,21 @@
 
   function applyCombinedFilter() {
     const typeWrap = $('#mv-type-filters');
-    if (!typeWrap) return;
+    const dateSel  = $('#mv-date-select');
+    if (!typeWrap && !dateSel) return;
 
-    const typeChip = $('.mv-type-pill.mv-active', typeWrap);
+    const typeChip  = typeWrap ? $('.mv-type-pill.mv-active', typeWrap) : null;
     const activeType = typeChip ? (typeChip.dataset.filter || '') : '';
-
-    const tfWrap = $('#mv-timeframe-filters');
-    const tfChip = tfWrap ? $('.mv-timeframe-pill.mv-active', tfWrap) : null;
-    const activeTf = (tfChip && activeType) ? (tfChip.dataset.filter || 'all') : 'all';
-
-    // Build date bounds for timeframe check (local midnight)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const activeDate = dateSel ? (dateSel.value || 'all') : 'all';
 
     $$('.mv-class-card, .mv-upcoming-card').forEach((card) => {
-      const ct = card.dataset.ct || '';
+      const ct      = card.dataset.ct   || '';
       const dateStr = card.dataset.date || '';
-
-      // Type: empty activeType = no selection, show everything
-      const typeOk = !activeType || ct === activeType;
-
-      // Timeframe: only applied when a type is selected
-      let tfOk = true;
-      if (activeType && activeTf !== 'all' && dateStr) {
-        const p = dateStr.split('-');
-        const cardDate = new Date(+p[0], +p[1] - 1, +p[2]);
-        if (activeTf === 'today') {
-          tfOk = cardDate.getTime() === today.getTime();
-        } else if (activeTf === 'week') {
-          const wEnd = new Date(today);
-          wEnd.setDate(today.getDate() + 7);
-          tfOk = cardDate >= today && cardDate < wEnd;
-        } else if (activeTf === 'month') {
-          tfOk = cardDate.getFullYear() === today.getFullYear() &&
-                 cardDate.getMonth() === today.getMonth();
-        }
-      }
-
-      card.style.display = typeOk && tfOk ? '' : 'none';
+      const typeOk  = !activeType || ct === activeType;
+      const dateOk  = activeDate === 'all' || dateStr === activeDate;
+      card.style.display = typeOk && dateOk ? '' : 'none';
     });
 
-    // Hide day-group wrappers when all their cards are hidden
     $$('.mv-day-group').forEach((group) => {
       const any = $$('.mv-class-card, .mv-upcoming-card', group).some(
         (c) => c.style.display !== 'none'
@@ -404,36 +378,15 @@
         const isTf   = !!btn.closest('#mv-timeframe-filters');
 
         if (isType) {
-          // Toggle: clicking the active type pill deselects it (shows all)
           const wasActive = btn.classList.contains('mv-active');
           $$('.mv-type-pill').forEach((b) => b.classList.remove('mv-active'));
           if (!wasActive) btn.classList.add('mv-active');
-
-          const tfRow = $('#mv-timeframe-filters');
-          if (tfRow) {
-            const show = btn.classList.contains('mv-active');
-            tfRow.style.display = show ? '' : 'none';
-            if (show) {
-              // Auto-activate "This Week" the first time the row opens
-              if (!$('.mv-timeframe-pill.mv-active', tfRow)) {
-                const weekPill = $('.mv-timeframe-pill[data-filter="week"]', tfRow);
-                if (weekPill) weekPill.classList.add('mv-active');
-              }
-            }
-          }
           applyCombinedFilter();
 
-        } else if (isTf) {
-          $$('.mv-timeframe-pill').forEach((b) => b.classList.remove('mv-active'));
-          btn.classList.add('mv-active');
-          applyCombinedFilter();
-
-        } else {
-          // Package-page pills
+        } else if (!isTf) {
+          // Package-page pills (not type, not timeframe)
           $$('.mv-pkg-pill-btn').forEach((b) => {
-            if (!b.closest('#mv-type-filters') && !b.closest('#mv-timeframe-filters')) {
-              b.classList.remove('mv-active');
-            }
+            if (!b.closest('#mv-type-filters')) b.classList.remove('mv-active');
           });
           btn.classList.add('mv-active');
           applyPackageFilter();
@@ -442,7 +395,44 @@
     });
 
     if ($('#mv-pkg-list')) applyPackageFilter();
-    if ($('#mv-type-filters')) applyCombinedFilter();
+
+    // Date dropdown for studio page — built from data-date attributes on class/booking cards
+    (function buildDateDropdown() {
+      const wrap = $('#mv-date-filter-wrap');
+      const sel  = $('#mv-date-select');
+      if (!wrap || !sel) return;
+      const cards = $$('.mv-class-card, .mv-upcoming-card');
+      if (!cards.length) return;
+      const seen = {}, dates = [];
+      cards.forEach((c) => {
+        const d = c.dataset.date;
+        if (d && !seen[d]) { seen[d] = true; dates.push(d); }
+      });
+      if (!dates.length) return;
+      const lang = (document.documentElement.lang || 'es_ES').replace('_', '-');
+      function fmtDate(dStr) {
+        const p = dStr.split('-');
+        const dt = new Date(+p[0], +p[1] - 1, +p[2]);
+        return dt.toLocaleDateString(lang, { day: 'numeric', month: 'long' });
+      }
+      const allLabel = lang.startsWith('ca') ? 'Totes les dates'
+                     : lang.startsWith('es') ? 'Todas las fechas'
+                     : 'All dates';
+      const allOpt = document.createElement('option');
+      allOpt.value = 'all';
+      allOpt.textContent = allLabel;
+      sel.appendChild(allOpt);
+      dates.forEach((d) => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = fmtDate(d);
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', applyCombinedFilter);
+      wrap.style.display = '';
+    }());
+
+    if ($('#mv-type-filters') || $('#mv-date-select')) applyCombinedFilter();
   }
 
   /* ── 10. Payment step — Next stays disabled until a method is

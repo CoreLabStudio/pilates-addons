@@ -137,6 +137,12 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         values['student_name'] = full_name.split()[0] if full_name else full_name
 
+        values['timeframe_labels'] = {
+            'week':  _('This week'),
+            'today': _('Today'),
+            'month': _('This month'),
+        }
+
         if active_view == 'schedule':
             values.update(self._schedule_values(partner))
         else:

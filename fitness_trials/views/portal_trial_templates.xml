@@ -21,6 +21,18 @@
                 .mv-slot-card:hover { border-color: #9ABACD; background: #f4f9fb; }
                 .mv-slot-card.mv-slot-selected { border-color: #9ABACD; background: #e8f3f8; }
                 .mv-slot-card input[type="radio"] { margin-top: 0.2rem; flex-shrink: 0; }
+                .mv-date-filters {
+                    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
+                }
+                .mv-date-pill {
+                    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+                    padding: 4px 12px; border-radius: 20px;
+                    border: 1.5px solid #c8bfb8; background: #fff; color: #357393;
+                    cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+                    white-space: nowrap;
+                }
+                .mv-date-pill:hover { border-color: #9ABACD; }
+                .mv-date-pill.mv-active { background: #7A6458; border-color: #7A6458; color: #fff; }
             </style>
 
             <!-- ── Success state ───────────────────────────────────────── -->
@@ -118,7 +130,11 @@
                     </div>
 
                     <!-- ── Barre section: live slot picker ────────────── -->
-                    <div id="mv-barre-section" class="mv-trial-conditional d-none">
+                    <div id="mv-barre-section" class="mv-trial-conditional d-none"
+                         t-att-data-lang="request.context.get('lang', 'es_ES')"
+                         t-att-data-today="'Avui' if request.context.get('lang') == 'ca_ES' else ('Today' if request.context.get('lang') == 'en_US' else 'Hoy')"
+                         t-att-data-tomorrow="'Demà' if request.context.get('lang') == 'ca_ES' else ('Tomorrow' if request.context.get('lang') == 'en_US' else 'Mañana')"
+                    >
 
                         <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
                             Selecciona tu clase de Barre
@@ -127,7 +143,8 @@
                         <t t-if="barre_slots">
                             <t t-foreach="barre_slots" t-as="slot">
                                 <label class="mv-slot-card"
-                                       t-att-for="'slot_' + str(slot['id'])">
+                                       t-att-for="'slot_' + str(slot['id'])"
+                                       t-att-data-date="str(slot['start_utc'].date())">
                                     <input type="radio" name="occurrence_id"
                                            t-att-id="'slot_' + str(slot['id'])"
                                            t-att-value="slot['id']"
@@ -146,13 +163,6 @@
                                             </t>
                                             <t t-if="slot['teacher']">
                                                 · <t t-esc="slot['teacher']"/>
-                                            </t>
-                                            <t t-if="slot['available'] is not None">
-                                                ·
-                                                <span class="text-success">
-                                                    <t t-esc="slot['available']"/>
-                                                    plaza<t t-if="slot['available'] != 1">s</t>
-                                                </span>
                                             </t>
                                         </div>
                                     </div>
@@ -315,6 +325,110 @@
                     }
 
                     toggleYears();
+
+                    // ── Date filter pills (client-side) ──────────────────
+                    (function () {
+                        var allCards = barreSection.querySelectorAll('.mv-slot-card[data-date]');
+                        if (!allCards.length) { return; }
+
+                        var _lblToday    = barreSection.dataset.today    || 'Hoy';
+                        var _lblTomorrow = barreSection.dataset.tomorrow || 'Mañana';
+                        var _lang        = barreSection.dataset.lang     || 'es_ES';
+
+                        var nowD      = new Date();
+                        var todayStr  = nowD.getFullYear() + '-' +
+                                        String(nowD.getMonth() + 1).padStart(2, '0') + '-' +
+                                        String(nowD.getDate()).padStart(2, '0');
+                        var tD = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate() + 1);
+                        var tomorrowStr = tD.getFullYear() + '-' +
+                                          String(tD.getMonth() + 1).padStart(2, '0') + '-' +
+                                          String(tD.getDate()).padStart(2, '0');
+
+                        function labelDate(dStr) {
+                            if (dStr === todayStr)    { return _lblToday; }
+                            if (dStr === tomorrowStr) { return _lblTomorrow; }
+                            try {
+                                var p  = dStr.split('-');
+                                var d  = new Date(+p[0], +p[1] - 1, +p[2]);
+                                var lc = _lang.replace('_', '-');
+                                var wd = d.toLocaleDateString(lc, {weekday: 'short'})
+                                           .replace(/\./g, '').trim();
+                                return wd.charAt(0).toUpperCase() + wd.slice(1) + ' ' + (+p[2]);
+                            } catch (e) { return dStr; }
+                        }
+
+                        // Collect unique ordered dates from slot cards
+                        var seenSet = {}, seenDates = [];
+                        allCards.forEach(function (c) {
+                            var d = c.dataset.date;
+                            if (d) {
+                                if (!seenSet[d]) { seenSet[d] = true; seenDates.push(d); }
+                            }
+                        });
+                        if (!seenDates.length) { return; }
+
+                        // Build pills and insert before first slot card
+                        var pillsWrap = document.createElement('div');
+                        pillsWrap.className = 'mv-date-filters';
+                        pillsWrap.id = 'mv-date-pills';
+                        var datePills = [];
+                        seenDates.forEach(function (dStr) {
+                            var btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'mv-date-pill';
+                            btn.dataset.date = dStr;
+                            btn.textContent = labelDate(dStr);
+                            pillsWrap.appendChild(btn);
+                            datePills.push(btn);
+                        });
+                        allCards[0].parentNode.insertBefore(pillsWrap, allCards[0]);
+
+                        function applyDateFilter(activeDate) {
+                            allCards.forEach(function (card) {
+                                card.style.display = (!activeDate || card.dataset.date === activeDate) ? '' : 'none';
+                            });
+                            var checked = document.querySelector('input[name="occurrence_id"]:checked');
+                            if (checked) {
+                                var pc = checked.closest('.mv-slot-card');
+                                if (pc) {
+                                    if (pc.style.display === 'none') {
+                                        checked.checked = false;
+                                        allCards.forEach(function (c) { c.classList.remove('mv-slot-selected'); });
+                                        updateSubmit();
+                                    }
+                                }
+                            }
+                        }
+
+                        datePills.forEach(function (pill) {
+                            pill.addEventListener('click', function () {
+                                datePills.forEach(function (p) { p.classList.remove('mv-active'); });
+                                this.classList.add('mv-active');
+                                applyDateFilter(this.dataset.date);
+                            });
+                        });
+
+                        // Auto-select: pre-checked slot's date (error re-render) or nearest future
+                        var defaultDate = null;
+                        var preChecked = document.querySelector('input[name="occurrence_id"]:checked');
+                        if (preChecked) {
+                            var preCard = preChecked.closest('.mv-slot-card');
+                            if (preCard) { defaultDate = preCard.dataset.date || null; }
+                        }
+                        if (!defaultDate) {
+                            seenDates.forEach(function (dStr) {
+                                if (!defaultDate) {
+                                    if (dStr >= todayStr) { defaultDate = dStr; }
+                                }
+                            });
+                        }
+                        if (defaultDate) {
+                            datePills.forEach(function (pill) {
+                                if (pill.dataset.date === defaultDate) { pill.classList.add('mv-active'); }
+                            });
+                            applyDateFilter(defaultDate);
+                        }
+                    }());
                 })();
                 </script>
             </t>

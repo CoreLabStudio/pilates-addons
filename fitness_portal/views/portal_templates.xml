@@ -476,10 +476,9 @@
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
                 </div>
 
-                <!-- Two-step hierarchical filter: Step 1 = class type, Step 2 = timeframe -->
-                <t t-if="studio_chips">
-                    <div id="mv-filter-hierarchy">
-                        <!-- Step 1: type selection (Barre / Reformer — no All) -->
+                <!-- Filter bar: discipline pills (when multiple disciplines) + date dropdown (always) -->
+                <div id="mv-filter-hierarchy">
+                    <t t-if="studio_chips">
                         <div class="mv-pkg-filters" id="mv-type-filters">
                             <t t-foreach="studio_chips" t-as="chip">
                                 <t t-if="chip['key'] != 'all'">
@@ -490,14 +489,13 @@
                                 </t>
                             </t>
                         </div>
-                        <!-- Step 2: timeframe — revealed only after a type is chosen -->
-                        <div class="mv-pkg-filters mv-timeframe-row" id="mv-timeframe-filters" style="display:none">
-                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill mv-active" data-filter="week">This Week</button>
-                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill" data-filter="today">Today</button>
-                            <button type="button" class="mv-pkg-pill-btn mv-timeframe-pill" data-filter="month">This Month</button>
-                        </div>
+                    </t>
+                    <div id="mv-date-filter-wrap" style="display:none; margin-bottom:4px;">
+                        <select id="mv-date-select"
+                                style="border:1.5px solid #c8bfb8;border-radius:20px;padding:5px 16px;font-size:0.78rem;font-weight:600;letter-spacing:0.03em;color:#5c4a3e;background:#faf9f6;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;">
+                        </select>
                     </div>
-                </t>
+                </div>
 
                 <!-- Flash banners -->
                 <t t-if="booked or cancelled or error_msg">

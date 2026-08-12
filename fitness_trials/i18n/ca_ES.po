@@ -113,3 +113,15 @@ msgstr "Selecciona un tipus de classe (Barre o Reformer)."
 #: code:addons/fitness_trials/controllers/trial.py:0
 msgid "Something went wrong. Please try again."
 msgstr "S'ha produït un error. Si us plau, torna-ho a intentar."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Today"
+msgstr "Avui"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Tomorrow"
+msgstr "Demà"
