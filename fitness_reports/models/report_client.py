@@ -10,6 +10,11 @@ class FitnessReportClient(models.Model):
 
     partner_id = fields.Many2one('res.partner', string='Client', readonly=True)
     is_active_client = fields.Boolean(string='Active Client', readonly=True)
+    is_churned = fields.Boolean(
+        string='Churned',
+        readonly=True,
+        help='True when the client has no active credits/subscription AND no class activity in the last 60 days.',
+    )
     first_order_date = fields.Date(string='First Order', readonly=True)
     total_revenue = fields.Float(
         string='Revenue ex-IVA',
@@ -24,6 +29,11 @@ class FitnessReportClient(models.Model):
         help='Attended classes divided by the number of months since the first order (minimum 1).',
     )
     last_attended_date = fields.Datetime(string='Last Attended', readonly=True)
+    days_inactive = fields.Integer(
+        string='Days Inactive',
+        readonly=True,
+        help='Days since last booked/attended/no-show class. 9999 = no booking history.',
+    )
     active_subscriptions = fields.Integer(string='Active Subscriptions', readonly=True)
     active_package_credits = fields.Integer(string='Pack Credits', readonly=True)
 
@@ -48,11 +58,22 @@ class FitnessReportClient(models.Model):
                     1
                 )                                            AS avg_classes_per_month,
                 att.last_attended_date,
+                CASE
+                    WHEN activity.last_activity_date IS NOT NULL
+                    THEN (CURRENT_DATE - activity.last_activity_date::date)
+                    ELSE 9999
+                END::integer                                 AS days_inactive,
                 COALESCE(sub.active_subscriptions, 0)        AS active_subscriptions,
                 COALESCE(pkg.active_package_credits, 0)      AS active_package_credits,
                 (COALESCE(sub.active_subscriptions, 0) > 0
                  OR COALESCE(pkg.active_package_credits, 0) > 0
-                )                                            AS is_active_client
+                )                                            AS is_active_client,
+                (
+                    (activity.last_activity_date IS NULL
+                     OR (CURRENT_DATE - activity.last_activity_date::date) > 60)
+                    AND COALESCE(sub.active_subscriptions, 0) = 0
+                    AND COALESCE(pkg.active_package_credits, 0) = 0
+                )                                            AS is_churned
             FROM res_partner p
             JOIN (
                 -- Fitness clients: has at least one confirmed package order OR any booking
@@ -79,6 +100,13 @@ class FitnessReportClient(models.Model):
                 WHERE state = 'attended'
                 GROUP BY student_id
             ) att ON att.student_id = p.id
+            LEFT JOIN (
+                SELECT student_id,
+                       MAX(class_start) AS last_activity_date
+                FROM fitness_booking
+                WHERE state IN ('booked', 'attended', 'no_show')
+                GROUP BY student_id
+            ) activity ON activity.student_id = p.id
             LEFT JOIN (
                 SELECT partner_id, COUNT(*) AS active_subscriptions
                 FROM sale_order

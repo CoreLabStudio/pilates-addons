@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_fitness_report_client_manager,fitness.report.client manager,model_fitness_report_client,fitness_core.group_fitness_manager,1,0,0,0
 access_fitness_report_class_manager,fitness.report.class manager,model_fitness_report_class,fitness_core.group_fitness_manager,1,0,0,0
+access_fitness_report_retention_manager,fitness.report.retention manager,model_fitness_report_retention,fitness_core.group_fitness_manager,1,0,0,0

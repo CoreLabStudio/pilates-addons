@@ -1,0 +1,420 @@
+{
+  "version": "18.5.10",
+  "sheets": [
+    {
+      "id": "98fa9373-c7d7-4d9a-8ed3-ffb73c4d4576",
+      "name": "Dashboard",
+      "colNumber": 10,
+      "rowNumber": 60,
+      "rows": {},
+      "cols": {},
+      "merges": [],
+      "cells": {},
+      "styles": {},
+      "formats": {},
+      "borders": {},
+      "conditionalFormats": [],
+      "dataValidationRules": [],
+      "figures": [
+        {
+          "id": "a90e5361-89e1-40fc-b777-62cc7b65b51a",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Clientes activos por mes"
+            },
+            "background": "#F0F6FA",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "period_month:month"
+              ],
+              "measure": "active_clients",
+              "order": null,
+              "resModel": "fitness.report.retention",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "period_month:month"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "Clientes"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "a90e5361-89e1-40fc-b777-62cc7b65b51a",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "9d86f741-2906-4674-b1a4-803712aa733c",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Ingresos ex-IVA por mes (€)"
+            },
+            "background": "#F0F6FA",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "period_month:month"
+              ],
+              "measure": "period_revenue",
+              "order": null,
+              "resModel": "fitness.report.retention",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "period_month:month"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "EUR"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "9d86f741-2906-4674-b1a4-803712aa733c",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 510,
+            "y": 0
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "f9f081a6-55ec-4ce5-82d7-14843bd7e328",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Tasa de retención mensual (%)"
+            },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "period_month:month"
+              ],
+              "measure": "retention_rate_pct",
+              "order": null,
+              "resModel": "fitness.report.retention",
+              "mode": "line",
+              "cumulatedStart": false
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "period_month:month"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_line",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "%"
+                }
+              }
+            },
+            "fillArea": true,
+            "chartId": "f9f081a6-55ec-4ce5-82d7-14843bd7e328",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 0,
+            "y": 310
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "0595b8e2-be51-4581-9e42-d22f3d120522",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "ARPU mensual (€ por cliente activo)"
+            },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "period_month:month"
+              ],
+              "measure": "arpu",
+              "order": null,
+              "resModel": "fitness.report.retention",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "period_month:month"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "EUR"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "0595b8e2-be51-4581-9e42-d22f3d120522",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 510,
+            "y": 310
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "24d7f9e2-83c6-4539-9523-c1c013b21a81",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Ocupación de clase por tipo (%)"
+            },
+            "background": "#F0F8F4",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "class_type_id"
+              ],
+              "measure": "occupancy_pct",
+              "order": null,
+              "resModel": "fitness.report.class",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "class_type_id"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "%"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "24d7f9e2-83c6-4539-9523-c1c013b21a81",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 0,
+            "y": 620
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "32f80678-068e-425a-aafa-8935cc1fd230",
+          "width": 490,
+          "height": 280,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Asistencias por tipo de clase"
+            },
+            "background": "#F0F8F4",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "class_type_id"
+              ],
+              "measure": "attended_count",
+              "order": null,
+              "resModel": "fitness.report.class",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "class_type_id"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "Clases"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "32f80678-068e-425a-aafa-8935cc1fd230",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 510,
+            "y": 620
+          },
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "ac49db53-8527-4407-ac65-b54f450f7f84",
+          "width": 1000,
+          "height": 290,
+          "tag": "chart",
+          "data": {
+            "title": {
+              "text": "Asistencias por profesor"
+            },
+            "background": "#F5F0F7",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": [
+                "teacher_user_id"
+              ],
+              "measure": "attended_count",
+              "order": "DESC",
+              "resModel": "fitness.report.class",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {},
+              "domain": [],
+              "groupBy": [
+                "teacher_user_id"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "dataSets": [],
+            "humanize": false,
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "cumulatedStart": false,
+            "axesDesign": {
+              "y": {
+                "title": {
+                  "text": "Asistencias"
+                }
+              }
+            },
+            "fillArea": false,
+            "chartId": "ac49db53-8527-4407-ac65-b54f450f7f84",
+            "fieldMatching": {}
+          },
+          "offset": {
+            "x": 0,
+            "y": 930
+          },
+          "col": 0,
+          "row": 0
+        }
+      ],
+      "tables": [],
+      "areGridLinesVisible": false,
+      "isVisible": true,
+      "headerGroups": {},
+      "comments": {}
+    }
+  ],
+  "styles": {},
+  "formats": {},
+  "borders": {},
+  "revisionId": "72878103-ae8d-437d-b19a-9b049254e83a",
+  "uniqueFigureIds": [
+    "a90e5361-89e1-40fc-b777-62cc7b65b51a",
+    "9d86f741-2906-4674-b1a4-803712aa733c",
+    "f9f081a6-55ec-4ce5-82d7-14843bd7e328",
+    "0595b8e2-be51-4581-9e42-d22f3d120522",
+    "24d7f9e2-83c6-4539-9523-c1c013b21a81",
+    "32f80678-068e-425a-aafa-8935cc1fd230",
+    "ac49db53-8527-4407-ac65-b54f450f7f84"
+  ],
+  "settings": {},
+  "pivots": {},
+  "pivotNextId": 1,
+  "customTableStyles": {},
+  "globalFilters": [],
+  "lists": {},
+  "listNextId": 1,
+  "chartOdooMenusReferences": {}
+}

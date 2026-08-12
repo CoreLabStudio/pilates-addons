@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         RETENTION REPORT — fitness.report.retention (SQL view)
+         One row per calendar month with active/new/returning
+         client counts, retention %, revenue and ARPU.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- LIST ─────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_retention_list" model="ir.ui.view">
+        <field name="name">fitness.report.retention.list</field>
+        <field name="model">fitness.report.retention</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" default_order="period_month desc">
+                <field name="period_month"       string="Mes"                  widget="date"/>
+                <field name="active_clients"     string="Clientes activos"     sum="Total"/>
+                <field name="new_clients"        string="Nuevos"               sum="Total"/>
+                <field name="returning_clients"  string="Retornantes"          sum="Total"/>
+                <field name="retention_rate_pct" string="Retención %"/>
+                <field name="period_revenue"     string="Ingresos ex-IVA (EUR)" sum="Total"/>
+                <field name="arpu"               string="ARPU (EUR)"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- PIVOT ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_retention_pivot" model="ir.ui.view">
+        <field name="name">fitness.report.retention.pivot</field>
+        <field name="model">fitness.report.retention</field>
+        <field name="arch" type="xml">
+            <pivot string="Retención mensual">
+                <field name="period_month"       type="row" interval="month"/>
+                <field name="active_clients"     type="measure"/>
+                <field name="new_clients"        type="measure"/>
+                <field name="returning_clients"  type="measure"/>
+                <field name="retention_rate_pct" type="measure"/>
+                <field name="period_revenue"     type="measure"/>
+                <field name="arpu"               type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_retention_graph" model="ir.ui.view">
+        <field name="name">fitness.report.retention.graph</field>
+        <field name="model">fitness.report.retention</field>
+        <field name="arch" type="xml">
+            <graph string="Retención mensual" type="bar" stacked="1">
+                <field name="period_month"      type="row" interval="month"/>
+                <field name="new_clients"       type="measure"/>
+                <field name="returning_clients" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH ───────────────────────────────────────────────── -->
+    <record id="view_fitness_report_retention_search" model="ir.ui.view">
+        <field name="name">fitness.report.retention.search</field>
+        <field name="model">fitness.report.retention</field>
+        <field name="arch" type="xml">
+            <search string="Buscar por período">
+                <filter name="filter_last_3_months"
+                        string="Últimos 3 meses"
+                        domain="[('period_month','&gt;=', (context_today() + relativedelta(months=-3, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_last_6_months"
+                        string="Últimos 6 meses"
+                        domain="[('period_month','&gt;=', (context_today() + relativedelta(months=-6, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_year"
+                        string="Este año"
+                        domain="[('period_month','&gt;=', context_today().strftime('%Y-01-01'))]"/>
+                <separator/>
+                <group>
+                    <filter name="group_month"
+                            string="Mes"
+                            context="{'group_by':'period_month:month'}"/>
+                    <filter name="group_quarter"
+                            string="Trimestre"
+                            context="{'group_by':'period_month:quarter'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION ───────────────────────────────────────────────── -->
+    <record id="action_fitness_retention_report" model="ir.actions.act_window">
+        <field name="name">Retention</field>
+        <field name="res_model">fitness.report.retention</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_fitness_report_retention_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_retention_list')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_retention_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_retention_graph')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay datos de retención disponibles todavía.
+            </p>
+        </field>
+    </record>
+
+</odoo>

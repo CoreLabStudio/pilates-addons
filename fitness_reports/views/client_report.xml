@@ -13,9 +13,11 @@
         <field name="arch" type="xml">
             <list create="false" edit="false" default_order="partner_id asc"
                   decoration-success="is_active_client"
-                  decoration-muted="not is_active_client">
-                <field name="partner_id"             string="Student"/>
-                <field name="is_active_client"       string="Activo"/>
+                  decoration-danger="is_churned"
+                  decoration-warning="not is_active_client and not is_churned and days_inactive >= 30 and days_inactive &lt; 9999">
+                <field name="partner_id"             string="Estudiante"/>
+                <field name="is_active_client"       string="Activo"  widget="boolean"/>
+                <field name="is_churned"             string="Baja"    widget="boolean"/>
                 <field name="first_order_date"       string="1er Pedido"/>
                 <field name="total_revenue"          string="Ingresos ex-IVA (EUR)"
                        sum="Total"/>
@@ -24,6 +26,7 @@
                 <field name="last_attended_date"     string="Última asistencia"/>
                 <field name="active_subscriptions"   string="Suscripciones activas"/>
                 <field name="active_package_credits" string="Créditos de pack"/>
+                <field name="days_inactive"          string="Días inactivo" optional="hide"/>
             </list>
         </field>
     </record>
@@ -62,22 +65,35 @@
             <search string="Buscar clientes">
                 <field name="partner_id"/>
                 <separator/>
-                <!-- B5: date range chips on first order -->
+                <!-- Date chips on first order -->
+                <filter name="filter_new_this_month"
+                        string="Nuevos este mes"
+                        domain="[('first_order_date','&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <filter name="filter_new_last_7_days"
+                        string="Nuevos últimos 7 días"
+                        domain="[('first_order_date','&gt;=', (context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_first_order_this_year"
                         string="Primer pedido este año"
                         domain="[('first_order_date','&gt;=', context_today().strftime('%Y-01-01')),
                                  ('first_order_date','&lt;',  (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
+                <!-- Status filters -->
                 <filter name="filter_active"
-                        string="Clientes activos"
+                        string="Activos"
                         domain="[('is_active_client','=',True)]"/>
-                <filter name="filter_inactive"
-                        string="Clientes inactivos"
-                        domain="[('is_active_client','=',False)]"/>
+                <filter name="filter_at_risk"
+                        string="En riesgo (30–60 días)"
+                        domain="[('is_active_client','=',False),
+                                 ('is_churned','=',False),
+                                 ('days_inactive','&gt;=',30),
+                                 ('days_inactive','&lt;=',60)]"/>
+                <filter name="filter_churned"
+                        string="Baja"
+                        domain="[('is_churned','=',True)]"/>
                 <separator/>
                 <group>
                     <filter name="group_partner"
-                            string="Student"
+                            string="Estudiante"
                             context="{'group_by':'partner_id'}"/>
                     <filter name="group_first_order_month"
                             string="Mes primer pedido"
@@ -85,6 +101,9 @@
                     <filter name="group_active"
                             string="Estado (activo)"
                             context="{'group_by':'is_active_client'}"/>
+                    <filter name="group_churned"
+                            string="Estado (baja)"
+                            context="{'group_by':'is_churned'}"/>
                 </group>
             </search>
         </field>

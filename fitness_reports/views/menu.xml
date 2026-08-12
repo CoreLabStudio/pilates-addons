@@ -42,11 +42,29 @@
     />
 
     <menuitem
+        id="menu_fitness_reports_class_summary"
+        name="Class Summary"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_class_summary_report"
+        sequence="35"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
         id="menu_fitness_reports_clients"
         name="Clients"
         parent="menu_fitness_reports_root"
         action="fitness_reports.action_fitness_client_report"
         sequence="40"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_reports_retention"
+        name="Retention"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_retention_report"
+        sequence="45"
         groups="fitness_core.group_fitness_manager"
     />
 
