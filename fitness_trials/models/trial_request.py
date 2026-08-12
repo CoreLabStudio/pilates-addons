@@ -33,6 +33,12 @@ class FitnessTrialRequest(models.Model):
     email = fields.Char(string='Email', required=True)
     phone = fields.Char(string='Phone')
     preferred_time_notes = fields.Text(string='Preferred Day / Time')
+    occurrence_id = fields.Many2one(
+        'calendar.event',
+        string='Barre Class Slot',
+        ondelete='set null',
+        index=True,
+    )
     lang = fields.Char(string='Language', default='en_US')
     class_interest = fields.Selection(
         selection=[
@@ -94,9 +100,13 @@ class FitnessTrialRequest(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            # Barre: auto-send "received" email (self-service flow)
-            # Reformer: hold in pending for admin review — no email until admin acts
-            if rec.class_interest != 'reformer':
+            if rec.class_interest == 'reformer':
+                pass  # held for admin review; no email at creation
+            elif rec.status == 'scheduled':
+                # Barre with a pre-selected slot: confirm immediately
+                rec._send_scheduled_email()
+                rec._send_barre_admin_notification()
+            else:
                 rec._send_pending_email()
         return records
 
@@ -148,6 +158,26 @@ class FitnessTrialRequest(models.Model):
             template.sudo().send_mail(self.id, force_send=True, raise_exception=False)
         except Exception:
             _logger.exception("Trial scheduled email failed for record %s", self.id)
+
+    def _send_barre_admin_notification(self):
+        template = self.env.ref(
+            'fitness_trials.mail_template_barre_trial_admin', raise_if_not_found=False
+        )
+        if not template:
+            return
+        admin_email = self.env.company.email
+        if not admin_email:
+            _logger.warning("No company email set; skipping admin notification for trial %s", self.id)
+            return
+        try:
+            template.sudo().send_mail(
+                self.id,
+                force_send=True,
+                raise_exception=False,
+                email_values={'email_to': admin_email},
+            )
+        except Exception:
+            _logger.exception("Barre admin notification failed for record %s", self.id)
 
     def _send_declined_email(self):
         template = self.env.ref(

@@ -81,6 +81,18 @@ msgstr "Solicitudes de clase de prueba"
 #. module: fitness_trials
 #. odoo-python
 #: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please select a Barre class slot."
+msgstr "Por favor, selecciona un horario de clase de Barre."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Invalid class slot selected."
+msgstr "El horario seleccionado no es válido."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
 msgid "Please provide your name."
 msgstr "Por favor, indica tu nombre."
 

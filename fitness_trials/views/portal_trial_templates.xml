@@ -1,37 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!--
-        Trial class request form — public, accessible at /trial
-        Uses web.login_layout so the CoreLab wordmark appears.
-        Class interest radio drives conditional section visibility via inline JS.
-
-        IMPORTANT — Barre timetable:
-        The timetable below is a PLACEHOLDER based on existing class types.
-        Replace the day/time rows with the actual Barre schedule from the meeting notes
-        before going live.
-    -->
     <template id="trial_request_form" name="Trial Class Request Form">
         <t t-call="web.login_layout">
+
+            <style>
+                .mv-slot-card {
+                    cursor: pointer;
+                    border: 1px solid #dee2e6;
+                    border-radius: 0.5rem;
+                    padding: 0.75rem 1rem;
+                    margin-bottom: 0.5rem;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    background: #fff;
+                    transition: border-color 0.15s, background 0.15s;
+                    width: 100%;
+                }
+                .mv-slot-card:hover { border-color: #9ABACD; background: #f4f9fb; }
+                .mv-slot-card.mv-slot-selected { border-color: #9ABACD; background: #e8f3f8; }
+                .mv-slot-card input[type="radio"] { margin-top: 0.2rem; flex-shrink: 0; }
+            </style>
 
             <!-- ── Success state ───────────────────────────────────────── -->
             <t t-if="success">
                 <div class="text-center mb-4 mt-2">
                     <div style="font-size:2rem;margin-bottom:0.75rem;">✓</div>
-                    <h5 class="fw-semibold mb-2">
-                        <t t-if="submitted_interest == 'reformer'">Solicitud recibida</t>
-                        <t t-else="">¡Solicitud enviada!</t>
-                    </h5>
                     <t t-if="submitted_interest == 'reformer'">
+                        <h5 class="fw-semibold mb-2">Solicitud recibida</h5>
                         <p class="text-muted small mb-0">
                             Hemos recibido tu solicitud de clase de prueba de Reformer.
                             Nuestro equipo la revisará y se pondrá en contacto contigo pronto.
                         </p>
                     </t>
                     <t t-else="">
+                        <h5 class="fw-semibold mb-2">¡Clase de prueba confirmada!</h5>
+                        <t t-if="submitted_slot">
+                            <p class="small fw-semibold mb-1" style="color:#4a4a4a;">
+                                <t t-esc="submitted_slot['name']"/>
+                                · <t t-esc="submitted_slot['day']"/>
+                                <t t-esc="submitted_slot['day_num']"/>
+                                <t t-esc="submitted_slot['month']"/>
+                                · <t t-esc="submitted_slot['time']"/>
+                                <t t-if="submitted_slot['duration']">
+                                    · <t t-esc="submitted_slot['duration']"/> min
+                                </t>
+                            </p>
+                        </t>
                         <p class="text-muted small mb-0">
-                            Hemos recibido tu solicitud de clase de prueba de Barre.
-                            Nos pondremos en contacto contigo en breve para confirmar día y hora.
+                            Hemos enviado un email de confirmación a tu dirección.
                         </p>
                     </t>
                 </div>
@@ -99,59 +117,58 @@
                         </div>
                     </div>
 
-                    <!-- ── Barre section (shown when Barre is selected) ── -->
+                    <!-- ── Barre section: live slot picker ────────────── -->
                     <div id="mv-barre-section" class="mv-trial-conditional d-none">
 
-                        <!-- Barre timetable
-                             TODO: Replace with actual Barre schedule from meeting notes.
-                             These are placeholder times based on the studio's Barre class types. -->
-                        <div class="mb-3 p-3 rounded" style="background:#f8f5f0;border:1px solid #e8e0d6;">
-                            <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">Horario semanal de Barre</p>
-                            <table class="table table-sm mb-0" style="font-size:0.85rem;">
-                                <thead>
-                                    <tr style="color:#9e8e7e;">
-                                        <th class="border-0 ps-0" style="font-weight:500;">Día</th>
-                                        <th class="border-0" style="font-weight:500;">Hora</th>
-                                        <th class="border-0" style="font-weight:500;">Clase</th>
-                                        <th class="border-0" style="font-weight:500;">Duración</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="ps-0">Lunes</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Lunes</td><td>18:30</td><td>Barre Blast</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Martes</td><td>13:00</td><td>Quick &amp; Dirty</td><td>45 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Miércoles</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Miércoles</td><td>18:30</td><td>Burn It Baby</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Jueves</td><td>13:00</td><td>Quick &amp; Dirty</td><td>45 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Viernes</td><td>10:00</td><td>Barre Blast</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Sábado</td><td>10:00</td><td>Barre Harmony</td><td>50 min</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-0">Sábado</td><td>11:30</td><td>Stronger than Ever</td><td>45 min</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p class="small text-muted mt-2 mb-0" style="font-size:0.78rem;">Aforo máximo: 10 personas por clase. La reserva definitiva se confirma por email.</p>
-                        </div>
+                        <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
+                            Selecciona tu clase de Barre
+                        </p>
+
+                        <t t-if="barre_slots">
+                            <t t-foreach="barre_slots" t-as="slot">
+                                <label class="mv-slot-card"
+                                       t-att-for="'slot_' + str(slot['id'])">
+                                    <input type="radio" name="occurrence_id"
+                                           t-att-id="'slot_' + str(slot['id'])"
+                                           t-att-value="slot['id']"
+                                           t-att-checked="'checked' if str(form_values.get('occurrence_id', '')) == str(slot['id']) else None"/>
+                                    <div style="flex:1;min-width:0;">
+                                        <div class="fw-semibold small" style="color:#3a3330;">
+                                            <t t-esc="slot['day']"/>
+                                            <t t-esc="slot['day_num']"/>
+                                            <t t-esc="slot['month']"/>
+                                            · <t t-esc="slot['time']"/>
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            <t t-esc="slot['name']"/>
+                                            <t t-if="slot['duration']">
+                                                · <t t-esc="slot['duration']"/> min
+                                            </t>
+                                            <t t-if="slot['teacher']">
+                                                · <t t-esc="slot['teacher']"/>
+                                            </t>
+                                            <t t-if="slot['available'] is not None">
+                                                ·
+                                                <span class="text-success">
+                                                    <t t-esc="slot['available']"/>
+                                                    plaza<t t-if="slot['available'] != 1">s</t>
+                                                </span>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </label>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-light small text-center mb-3">
+                                No hay clases de Barre disponibles en los próximos 14 días.
+                                Contáctanos directamente para encontrar un horario.
+                            </div>
+                        </t>
 
                     </div>
 
-                    <!-- ── Reformer section (shown when Reformer is selected) ── -->
+                    <!-- ── Reformer section ───────────────────────────── -->
                     <div id="mv-reformer-section" class="mv-trial-conditional d-none">
 
                         <div class="mb-3 p-3 rounded" style="background:#f8f5f0;border:1px solid #e8e0d6;">
@@ -162,9 +179,12 @@
                             </p>
                         </div>
 
-                        <!-- Intake question 1: first time -->
+                        <!-- Q1: first time with Reformer? -->
                         <div class="mb-3">
-                            <label class="form-label">¿Es la primera vez que practicas Reformer Pilates? <span class="text-danger">*</span></label>
+                            <label class="form-label">
+                                ¿Es la primera vez que practicas Reformer Pilates?
+                                <span class="text-danger">*</span>
+                            </label>
                             <div class="d-flex gap-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio"
@@ -181,24 +201,27 @@
                             </div>
                         </div>
 
-                        <!-- Intake question 2: years of experience -->
-                        <div class="mb-3">
-                            <label for="trial_reformer_years" class="form-label">¿Cuántos años de experiencia tienes con Reformer Pilates?</label>
+                        <!-- Q2: years of experience — only shown when first-timer = No -->
+                        <div id="mv-years-section" class="mb-3 d-none">
+                            <label for="trial_reformer_years" class="form-label">
+                                ¿Cuántos años de experiencia tienes con Reformer Pilates?
+                            </label>
                             <input type="text" id="trial_reformer_years" name="reformer_years_experience"
                                    class="form-control" style="max-width:200px;"
-                                   placeholder="p.ej. 0, 1, 3, 5+"
+                                   placeholder="p.ej. 1, 3, 5+"
                                    t-att-value="form_values.get('reformer_years_experience', '')"/>
                         </div>
 
-                    </div>
-
-                    <!-- ── Preferred time (always shown) ─────────────── -->
-                    <div id="mv-notes-section" class="d-none">
+                        <!-- Preferred time (Reformer only) -->
                         <div class="mb-3">
-                            <label for="trial_notes" class="form-label">Días / horarios preferidos</label>
+                            <label for="trial_notes" class="form-label">
+                                Días / horarios preferidos
+                                <span class="text-muted small">(opcional)</span>
+                            </label>
                             <textarea id="trial_notes" name="notes" class="form-control" rows="2"
                                       placeholder="p.ej. Lunes tarde, sábado por la mañana…"><t t-esc="form_values.get('notes', '')"/></textarea>
                         </div>
+
                     </div>
 
                     <!-- ── Submit ─────────────────────────────────────── -->
@@ -213,32 +236,85 @@
                     </p>
                 </form>
 
-                <!-- Inline JS: toggle conditional sections and submit button -->
                 <script>
                 (function () {
-                    var radios = document.querySelectorAll('input[name="class_interest"]');
-                    var barreSection    = document.getElementById('mv-barre-section');
-                    var reformerSection = document.getElementById('mv-reformer-section');
-                    var notesSection    = document.getElementById('mv-notes-section');
-                    var submitBtn       = document.getElementById('mv-trial-submit');
+                    var ciRadios     = document.querySelectorAll('input[name="class_interest"]');
+                    var barreSection = document.getElementById('mv-barre-section');
+                    var rfSection    = document.getElementById('mv-reformer-section');
+                    var yearsSection = document.getElementById('mv-years-section');
+                    var submitBtn    = document.getElementById('mv-trial-submit');
 
-                    function showSection(val) {
-                        var showBarre    = (val === 'barre');
-                        var showReformer = (val === 'reformer');
-                        barreSection.classList.toggle('d-none', !showBarre);
-                        reformerSection.classList.toggle('d-none', !showReformer);
-                        notesSection.classList.remove('d-none');
-                        submitBtn.disabled = false;
-                        submitBtn.removeAttribute('disabled');
+                    function updateSubmit() {
+                        var ci = document.querySelector('input[name="class_interest"]:checked');
+                        var enabled = false;
+                        if (ci) {
+                            if (ci.value === 'barre') {
+                                enabled = !!document.querySelector('input[name="occurrence_id"]:checked');
+                            } else if (ci.value === 'reformer') {
+                                enabled = true;
+                            }
+                        }
+                        if (enabled) {
+                            submitBtn.removeAttribute('disabled');
+                            submitBtn.disabled = false;
+                        } else {
+                            submitBtn.disabled = true;
+                        }
                     }
 
-                    radios.forEach(function (r) {
+                    function showSection(val) {
+                        barreSection.classList.toggle('d-none', val !== 'barre');
+                        rfSection.classList.toggle('d-none', val !== 'reformer');
+                        updateSubmit();
+                    }
+
+                    function toggleYears() {
+                        var checked = document.querySelector('input[name="reformer_is_first_time"]:checked');
+                        var showYears = !!(checked &amp;&amp; checked.value === 'no');
+                        if (yearsSection) {
+                            yearsSection.classList.toggle('d-none', !showYears);
+                            if (!showYears) {
+                                var inp = document.getElementById('trial_reformer_years');
+                                if (inp) { inp.value = ''; }
+                            }
+                        }
+                    }
+
+                    // Class interest change
+                    ciRadios.forEach(function (r) {
                         r.addEventListener('change', function () { showSection(this.value); });
                     });
 
-                    // Restore selection on back-navigation / server-side re-render with errors
-                    var checked = document.querySelector('input[name="class_interest"]:checked');
-                    if (checked) { showSection(checked.value); }
+                    // Slot selection — update submit state + highlight card
+                    barreSection.addEventListener('change', function (e) {
+                        if (e.target &amp;&amp; e.target.name === 'occurrence_id') {
+                            document.querySelectorAll('.mv-slot-card').forEach(function (c) {
+                                c.classList.remove('mv-slot-selected');
+                            });
+                            if (e.target.checked) {
+                                var card = e.target.closest('.mv-slot-card');
+                                if (card) { card.classList.add('mv-slot-selected'); }
+                            }
+                            updateSubmit();
+                        }
+                    });
+
+                    // Reformer first-timer toggle
+                    document.querySelectorAll('input[name="reformer_is_first_time"]').forEach(function (r) {
+                        r.addEventListener('change', toggleYears);
+                    });
+
+                    // Initialise on page load (restores state after server-side re-render on error)
+                    var checkedCi = document.querySelector('input[name="class_interest"]:checked');
+                    if (checkedCi) { showSection(checkedCi.value); }
+
+                    var checkedSlot = document.querySelector('input[name="occurrence_id"]:checked');
+                    if (checkedSlot) {
+                        var card = checkedSlot.closest('.mv-slot-card');
+                        if (card) { card.classList.add('mv-slot-selected'); }
+                    }
+
+                    toggleYears();
                 })();
                 </script>
             </t>

@@ -1,10 +1,12 @@
 import json as _json
 import logging
+import pytz
 import re
 import threading
 import time
+from datetime import timedelta
 
-from odoo import http, _
+from odoo import fields as _odoo_fields, http, _
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -22,6 +24,10 @@ _TARGET_DB_LOCK = threading.Lock()
 
 _VALID_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
 _VALID_CLASS_INTERESTS = frozenset({'barre', 'reformer'})
+
+_STUDIO_TZ = pytz.timezone('Europe/Lisbon')
+_DAYS_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+_MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 
 def _check_rate_limit(ip: str) -> bool:
@@ -96,7 +102,41 @@ def _json_err(msg: str, status: int = 200):
     )
 
 
+def _format_event(ev) -> dict:
+    """Convert a calendar.event record to a template-ready slot dict."""
+    dt_local = ev.start.replace(tzinfo=pytz.UTC).astimezone(_STUDIO_TZ)
+    duration = int((ev.stop - ev.start).total_seconds() // 60) if ev.stop else 0
+    available = max(0, ev.capacity - ev.booked_seats) if ev.capacity else None
+    return {
+        'id': ev.id,
+        'name': ev.name,
+        'day': _DAYS_ES[dt_local.weekday()],
+        'day_num': dt_local.day,
+        'month': _MONTHS_ES[dt_local.month - 1],
+        'time': dt_local.strftime('%H:%M'),
+        'duration': duration,
+        'teacher': ev.user_id.name if ev.user_id else '',
+        'available': available,
+        'start_utc': ev.start,
+    }
+
+
 class TrialRequestController(http.Controller):
+
+    def _get_barre_slots(self) -> list:
+        """Return formatted Barre class occurrences available in the next 14 days."""
+        now = _odoo_fields.Datetime.now()
+        events = request.env['calendar.event'].sudo().search([
+            ('is_fitness_class', '=', True),
+            ('start', '>', now),
+            ('start', '<', now + timedelta(days=14)),
+        ], order='start asc').filtered(
+            lambda e: (
+                e.class_type_id.classroom_type == 'barre'
+                and (not e.capacity or e.booked_seats < e.capacity)
+            )
+        )
+        return [_format_event(ev) for ev in events]
 
     # ──────────────────────────────────────────────────────────────
     # Portal form  GET /trial  /  POST /trial/submit
@@ -108,6 +148,7 @@ class TrialRequestController(http.Controller):
         return request.render('fitness_trials.trial_request_form', {
             'error': kw.get('error'),
             'form_values': {},
+            'barre_slots': self._get_barre_slots(),
         })
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
@@ -121,19 +162,19 @@ class TrialRequestController(http.Controller):
         notes           = (kw.get('notes')  or '').strip()[:1000]
         reformer_first  = (kw.get('reformer_is_first_time') or '').strip()
         reformer_years  = (kw.get('reformer_years_experience') or '').strip()[:40]
+        occurrence_raw  = (kw.get('occurrence_id') or '').strip()
         lang = request.context.get('lang', 'es_ES')
         if lang not in _VALID_LANGS:
             lang = 'es_ES'
 
-        # Preserve entered values for form re-display on error
         form_values = {
             'name': name, 'email': email, 'phone': phone,
             'class_interest': class_interest, 'notes': notes,
             'reformer_is_first_time': reformer_first,
             'reformer_years_experience': reformer_years,
+            'occurrence_id': occurrence_raw,
         }
 
-        # Validation
         errors = []
         if not name:
             errors.append(_('Please provide your name.'))
@@ -142,24 +183,56 @@ class TrialRequestController(http.Controller):
         if class_interest not in _VALID_CLASS_INTERESTS:
             errors.append(_('Please select a class type (Barre or Reformer).'))
 
+        # Barre: validate that a real, available slot was selected
+        occurrence = None
+        if class_interest == 'barre':
+            if not occurrence_raw:
+                errors.append(_('Please select a Barre class slot.'))
+            else:
+                try:
+                    occ_id = int(occurrence_raw)
+                    occ = request.env['calendar.event'].sudo().browse(occ_id)
+                    if (
+                        occ.exists()
+                        and occ.is_fitness_class
+                        and occ.class_type_id.classroom_type == 'barre'
+                        and (not occ.capacity or occ.booked_seats < occ.capacity)
+                    ):
+                        occurrence = occ
+                    else:
+                        errors.append(_('Invalid class slot selected.'))
+                except (ValueError, TypeError):
+                    errors.append(_('Invalid class slot selected.'))
+
         if errors:
             return request.render('fitness_trials.trial_request_form', {
                 'error': ' '.join(errors),
                 'form_values': form_values,
+                'barre_slots': self._get_barre_slots(),
             })
 
         vals = {
             'name': name,
             'email': email,
             'phone': phone or False,
-            'preferred_time_notes': notes or False,
             'class_interest': class_interest,
             'lang': lang,
         }
-        if class_interest == 'reformer':
+
+        submitted_slot = None
+        if class_interest == 'barre' and occurrence:
+            submitted_slot = _format_event(occurrence)
+            vals.update({
+                'occurrence_id': occurrence.id,
+                'scheduled_datetime': occurrence.start,
+                'status': 'scheduled',
+                'preferred_time_notes': False,
+            })
+        elif class_interest == 'reformer':
+            vals['preferred_time_notes'] = notes or False
             if reformer_first in ('yes', 'no'):
                 vals['reformer_is_first_time'] = reformer_first
-            if reformer_years:
+            if reformer_years and reformer_first == 'no':
                 vals['reformer_years_experience'] = reformer_years
 
         try:
@@ -169,12 +242,15 @@ class TrialRequestController(http.Controller):
             return request.render('fitness_trials.trial_request_form', {
                 'error': _('Something went wrong. Please try again.'),
                 'form_values': form_values,
+                'barre_slots': self._get_barre_slots(),
             })
 
         return request.render('fitness_trials.trial_request_form', {
             'success': True,
             'submitted_interest': class_interest,
+            'submitted_slot': submitted_slot,
             'form_values': {},
+            'barre_slots': [],
         })
 
     # ──────────────────────────────────────────────────────────────

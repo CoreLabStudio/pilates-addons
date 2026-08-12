@@ -19,6 +19,7 @@
                decoration-info="class_interest == 'barre'"/>
         <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
         <field name="status" widget="badge"/>
+        <field name="occurrence_id" string="Slot" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
         <field name="lang" optional="hide"/>
       </list>
@@ -52,6 +53,8 @@
           <group string="Scheduling">
             <group>
               <field name="status" string="Status"/>
+              <field name="occurrence_id" string="Barre Class Slot"
+                     invisible="class_interest != 'barre'"/>
               <field name="scheduled_datetime" string="Scheduled Date/Time"/>
               <field name="create_date" string="Request Received" readonly="1"/>
             </group>
