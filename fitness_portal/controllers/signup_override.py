@@ -95,8 +95,15 @@ class FitnessSignup(AuthSignupHome):
     # ------------------------------------------------------------------
 
     @http.route(
+        ['/en/web/signup', '/es/web/signup', '/ca/web/signup'],
+        type='http', auth='public', website=True, sitemap=False, multilang=False,
+    )
+    def web_auth_signup_lang_redirect(self, **kw):
+        return request.redirect('/web/signup', 301)
+
+    @http.route(
         '/web/signup', type='http', auth='public', website=True,
-        sitemap=False, captcha='signup',
+        sitemap=False, captcha='signup', multilang=False,
     )
     def web_auth_signup(self, *args, **kw):
         # During automated test runs (--test-enable) fall back to the base
