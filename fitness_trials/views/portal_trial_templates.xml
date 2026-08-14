@@ -131,9 +131,9 @@
 
                     <!-- ── Barre section: live slot picker ────────────── -->
                     <div id="mv-barre-section" class="mv-trial-conditional d-none"
-                         t-att-data-lang="request.context.get('lang', 'es_ES')"
-                         t-att-data-today="'Avui' if request.context.get('lang') == 'ca_ES' else ('Today' if request.context.get('lang') == 'en_US' else 'Hoy')"
-                         t-att-data-tomorrow="'Demà' if request.context.get('lang') == 'ca_ES' else ('Tomorrow' if request.context.get('lang') == 'en_US' else 'Mañana')"
+                         t-att-data-lang="'ca_ES' if request.context.get('lang') == 'ca_ES' else 'es_ES'"
+                         t-att-data-today="'Avui' if request.context.get('lang') == 'ca_ES' else 'Hoy'"
+                         t-att-data-tomorrow="'Demà' if request.context.get('lang') == 'ca_ES' else 'Mañana'"
                     >
 
                         <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
