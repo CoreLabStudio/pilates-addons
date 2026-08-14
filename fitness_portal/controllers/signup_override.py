@@ -112,6 +112,13 @@ class FitnessSignup(AuthSignupHome):
             raise werkzeug.exceptions.NotFound()
 
         if 'error' not in qcontext and request.httprequest.method == 'POST':
+            # Guarantee language for all rendered templates in this request:
+            # mv_lang cookie if set and valid, otherwise default to es_ES.
+            _mv_lang = request.cookies.get('mv_lang', 'es_ES')
+            if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
+                _mv_lang = 'es_ES'
+            request.update_context(lang=_mv_lang)
+
             try:
                 if not qcontext.get('token'):
                     # Block signup if terms consent is missing (server-side guard)
@@ -214,41 +221,71 @@ class FitnessSignup(AuthSignupHome):
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         verify_url = '%s/corelab/verify-email?%s' % (base_url, url_encode({'token': token}))
 
-        body_html = self._fitness_verification_email_body(user_sudo.name, verify_url)
+        # Determine email language: mv_lang cookie → default es_ES
+        _PORTAL_LANGS = {'en_US', 'es_ES', 'ca_ES'}
+        email_lang = request.cookies.get('mv_lang', 'es_ES')
+        if email_lang not in _PORTAL_LANGS:
+            email_lang = 'es_ES'
+
+        body_html = self._fitness_verification_email_body(user_sudo.name, verify_url, email_lang)
+        subject = (
+            'Verify your CoreLab account' if email_lang == 'en_US'
+            else 'Verifica tu compte de CoreLab' if email_lang == 'ca_ES'
+            else 'Verifica tu cuenta de CoreLab'
+        )
         email_from = (
             user_sudo.company_id.email_formatted
             or 'CoreLab Studio <noreply@corelab.studio>'
         )
         request.env['mail.mail'].sudo().create({
-            'subject': 'Verify your CoreLab account',
+            'subject': subject,
             'email_to': user_sudo.email,
             'email_from': email_from,
             'body_html': body_html,
             'auto_delete': True,
         }).send()
 
-    def _fitness_verification_email_body(self, name, verify_url):
+    def _fitness_verification_email_body(self, name, verify_url, lang='es_ES'):
         safe_name = escape(name)
         safe_url = escape(verify_url)
+
+        if lang == 'en_US':
+            greeting = 'Welcome to CoreLab, {name}.'
+            body = 'Please verify your email address to activate your account and access the studio portal.'
+            cta = 'Verify my email'
+            footer = 'This link expires in 6 days. If you did not create a CoreLab account, you can safely ignore this email.'
+        elif lang == 'ca_ES':
+            greeting = 'Benvingut/da a CoreLab, {name}.'
+            body = 'Verifica la teva adreça de correu electrònic per activar el teu compte i accedir al portal de l\'estudi.'
+            cta = 'Verificar el meu correu'
+            footer = 'Aquest enllaç caduca en 6 dies. Si no has creat un compte a CoreLab, pots ignorar aquest correu.'
+        else:  # es_ES (default)
+            greeting = 'Bienvenido/a a CoreLab, {name}.'
+            body = 'Verifica tu dirección de correo electrónico para activar tu cuenta y acceder al portal del estudio.'
+            cta = 'Verificar mi correo'
+            footer = 'Este enlace caduca en 6 días. Si no has creado una cuenta en CoreLab, puedes ignorar este correo.'
+
         return Markup("""<div style="font-family:Georgia,serif;color:#18110C;max-width:520px;margin:0 auto;padding:40px 24px;">
-  <p style="font-size:22px;font-weight:600;margin:0 0 20px;">Welcome to CoreLab, {name}.</p>
-  <p style="font-size:15px;line-height:1.7;color:#4a3728;margin:0 0 28px;">
-    Please verify your email address to activate your account and access the studio portal.
-  </p>
+  <p style="font-size:22px;font-weight:600;margin:0 0 20px;">{greeting}</p>
+  <p style="font-size:15px;line-height:1.7;color:#4a3728;margin:0 0 28px;">{body}</p>
   <div style="margin:0 0 32px;">
     <a href="{url}"
        style="background-color:#18110C;color:#F5F0E8;text-decoration:none;
               padding:14px 28px;border-radius:4px;font-size:14px;
               letter-spacing:0.05em;display:inline-block;">
-      Verify my email
+      {cta}
     </a>
   </div>
-  <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 32px;">
-    This link expires in 6 days. If you did not create a CoreLab account, you can safely ignore this email.
-  </p>
+  <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 32px;">{footer}</p>
   <hr style="border:none;border-top:1px solid #E8E0D5;margin:0 0 24px;"/>
   <p style="font-size:12px;color:#8a7060;margin:0;">CoreLab Studio</p>
-</div>""").format(name=safe_name, url=safe_url)
+</div>""").format(
+            greeting=escape(greeting).format(name=safe_name),
+            body=body,
+            url=safe_url,
+            cta=cta,
+            footer=footer,
+        )
 
     # ------------------------------------------------------------------
     # Email verification endpoint
@@ -258,6 +295,11 @@ class FitnessSignup(AuthSignupHome):
     def verify_email(self, token=None, **kw):
         if not token:
             return request.redirect('/web/login')
+
+        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
+        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
+            _mv_lang = 'es_ES'
+        request.update_context(lang=_mv_lang)
 
         try:
             partner = request.env['res.partner'].sudo()._signup_retrieve_partner(
@@ -298,6 +340,10 @@ class FitnessSignup(AuthSignupHome):
         user = request.env.user
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP) or user._is_internal():
             return request.redirect('/my/home')
+        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
+        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
+            _mv_lang = 'es_ES'
+        request.update_context(lang=_mv_lang)
         return request.render('fitness_portal.pending_verification', {
             'user_email': user.email or '',
         })
@@ -307,6 +353,10 @@ class FitnessSignup(AuthSignupHome):
         user = request.env.user
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP) or user._is_internal():
             return request.redirect('/my/home')
+        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
+        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
+            _mv_lang = 'es_ES'
+        request.update_context(lang=_mv_lang)
         try:
             self._send_fitness_verification_email(user.sudo())
             resent = True

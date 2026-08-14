@@ -15,10 +15,7 @@
                     <strong t-esc="email or 'your email address'"/>.
                 </p>
             </div>
-            <div class="alert alert-info small mb-3" role="status">
-                Click the link in the email to activate your account and access the studio portal.
-                The link is valid for 6 days.
-            </div>
+            <div class="alert alert-info small mb-3" role="status">Click the link in the email to activate your account and access the studio portal. The link is valid for 6 days.</div>
             <p class="text-center small text-muted mt-3 mb-0">
                 Already verified?
                 <a t-attf-href="/web/login?login={{ email }}" class="text-decoration-none">Sign in</a>
@@ -39,10 +36,7 @@
             <div class="text-center mb-4 mt-2">
                 <h5 class="fw-semibold mb-2">Link expired or invalid</h5>
             </div>
-            <div class="alert alert-danger small mb-3" role="alert">
-                This verification link is no longer valid. Links expire after 6 days, or become
-                invalid once used.
-            </div>
+            <div class="alert alert-danger small mb-3" role="alert">This verification link is no longer valid. Links expire after 6 days, or become invalid once used.</div>
             <div class="d-grid gap-2 mt-3">
                 <a href="/web/signup" class="btn btn-primary">Create a new account</a>
                 <a href="/web/login" class="btn btn-link btn-sm text-muted">Back to sign in</a>
@@ -65,14 +59,14 @@
 
             <t t-if="resent">
                 <div class="alert alert-success small mb-3" role="status">
-                    Verification email resent to <strong t-esc="user_email"/>.
-                    Check your inbox (and spam folder).
+                    <p class="mb-1">Verification email resent to <strong t-esc="user_email"/>.</p>
+                    <p class="mb-0">Check your inbox (and spam folder).</p>
                 </div>
             </t>
             <t t-else="">
                 <div class="alert alert-info small mb-3" role="status">
-                    We sent a verification link to <strong t-esc="user_email"/>.
-                    Click it to activate your account.
+                    <p class="mb-1">We sent a verification link to <strong t-esc="user_email"/>.</p>
+                    <p class="mb-0">Click it to activate your account.</p>
                 </div>
             </t>
 
