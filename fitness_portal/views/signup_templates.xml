@@ -4,26 +4,26 @@
     <!--
         "Check your email" page — shown immediately after self-signup.
         The user is NOT logged in at this point.
-        Uses web.login_layout so the CoreLab wordmark (from login_override.xml) appears.
+        Text is hardcoded in Spanish; the controller forces es_ES on this route.
     -->
-    <template id="signup_verify_email" name="CoreLab — Check Your Email">
+    <template id="signup_verify_email" name="CoreLab — Revisa tu correo">
         <t t-call="web.login_layout">
             <div class="text-center mb-4 mt-2">
-                <h5 class="fw-semibold mb-2">Check your email</h5>
+                <h5 class="fw-semibold mb-2">Revisa tu correo</h5>
                 <p class="text-muted small mb-0">
-                    We sent a verification link to
-                    <strong t-esc="email or 'your email address'"/>.
+                    Hemos enviado un enlace de verificación a
+                    <strong t-esc="email or 'tu dirección de correo'"/>.
                 </p>
             </div>
-            <div class="alert alert-info small mb-3" role="status">Click the link in the email to activate your account and access the studio portal. The link is valid for 6 days.</div>
+            <div class="alert alert-info small mb-3" role="status">Haz clic en el enlace del correo para activar tu cuenta y acceder al portal del estudio. El enlace es válido 6 días.</div>
             <p class="text-center small text-muted mt-3 mb-0">
-                Already verified?
-                <a t-attf-href="/web/login?login={{ email }}" class="text-decoration-none">Sign in</a>
+                ¿Ya verificado?
+                <a t-attf-href="/web/login?login={{ email }}" class="text-decoration-none">Iniciar sesión</a>
             </p>
             <p class="text-center small text-muted mt-2">
-                Didn't receive it? Check your spam folder, or
-                <a href="/web/signup" class="text-decoration-none">sign up again</a>
-                with the same email to resend.
+                ¿No lo has recibido? Revisa el spam o
+                <a href="/web/signup" class="text-decoration-none">regístrate de nuevo</a>
+                con el mismo correo para reenviarlo.
             </p>
         </t>
     </template>
@@ -31,15 +31,15 @@
     <!--
         Verification link is invalid or expired.
     -->
-    <template id="verify_email_failed" name="CoreLab — Verification Failed">
+    <template id="verify_email_failed" name="CoreLab — Enlace inválido">
         <t t-call="web.login_layout">
             <div class="text-center mb-4 mt-2">
-                <h5 class="fw-semibold mb-2">Link expired or invalid</h5>
+                <h5 class="fw-semibold mb-2">Enlace caducado o no válido</h5>
             </div>
-            <div class="alert alert-danger small mb-3" role="alert">This verification link is no longer valid. Links expire after 6 days, or become invalid once used.</div>
+            <div class="alert alert-danger small mb-3" role="alert">Este enlace de verificación ya no es válido. Los enlaces caducan a los 6 días o se invalidan una vez utilizados.</div>
             <div class="d-grid gap-2 mt-3">
-                <a href="/web/signup" class="btn btn-primary">Create a new account</a>
-                <a href="/web/login" class="btn btn-link btn-sm text-muted">Back to sign in</a>
+                <a href="/web/signup" class="btn btn-primary">Crear una cuenta nueva</a>
+                <a href="/web/login" class="btn btn-link btn-sm text-muted">Volver al inicio de sesión</a>
             </div>
         </t>
     </template>
@@ -48,36 +48,36 @@
         Pending verification — shown when a portal user logs in before verifying.
         The user IS logged in at this point (auth='user').
     -->
-    <template id="pending_verification" name="CoreLab — Please Verify Your Email">
+    <template id="pending_verification" name="CoreLab — Verifica tu correo">
         <t t-call="web.login_layout">
             <div class="text-center mb-4 mt-2">
-                <h5 class="fw-semibold mb-2">One more step</h5>
+                <h5 class="fw-semibold mb-2">Un paso más</h5>
                 <p class="text-muted small mb-0">
-                    Verify your email to access the CoreLab studio portal.
+                    Verifica tu correo para acceder al portal del estudio CoreLab.
                 </p>
             </div>
 
             <t t-if="resent">
                 <div class="alert alert-success small mb-3" role="status">
-                    <p class="mb-1">Verification email resent to <strong t-esc="user_email"/>.</p>
-                    <p class="mb-0">Check your inbox (and spam folder).</p>
+                    <p class="mb-1">Correo de verificación reenviado a <strong t-esc="user_email"/>.</p>
+                    <p class="mb-0">Revisa tu bandeja de entrada (y la carpeta de spam).</p>
                 </div>
             </t>
             <t t-else="">
                 <div class="alert alert-info small mb-3" role="status">
-                    <p class="mb-1">We sent a verification link to <strong t-esc="user_email"/>.</p>
-                    <p class="mb-0">Click it to activate your account.</p>
+                    <p class="mb-1">Hemos enviado un enlace de verificación a <strong t-esc="user_email"/>.</p>
+                    <p class="mb-0">Haz clic en él para activar tu cuenta.</p>
                 </div>
             </t>
 
             <form method="post" action="/corelab/resend-verification" class="mb-2">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Resend verification email</button>
+                    <button type="submit" class="btn btn-primary">Reenviar correo de verificación</button>
                 </div>
             </form>
             <div class="text-center">
-                <a href="/web/session/logout?redirect=/web/login" class="btn btn-link btn-sm text-muted">Sign out</a>
+                <a href="/web/session/logout?redirect=/web/login" class="btn btn-link btn-sm text-muted">Cerrar sesión</a>
             </div>
         </t>
     </template>
