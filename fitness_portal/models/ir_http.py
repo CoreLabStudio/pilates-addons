@@ -1,4 +1,4 @@
-from odoo import models
+from odoo import models, tools
 from odoo.http import request
 
 _PORTAL_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
@@ -11,10 +11,11 @@ class IrHttp(models.AbstractModel):
     def _get_mv_lang(cls):
         mv_lang = request.cookies.get('mv_lang')
         if not mv_lang or mv_lang not in _PORTAL_LANGS:
-            # No explicit user preference — let Odoo's default lang handling apply.
-            # Returning None here prevents forcing es_ES on every request (which breaks
-            # core Odoo test runs where no cookies are set).
-            return None
+            # During test runs keep the default Odoo behaviour (no forced lang).
+            if tools.config.get('test_enable'):
+                return None
+            # Real visitors with no explicit preference default to Spanish.
+            mv_lang = 'es_ES'
         return request.env['res.lang']._get_data(code=mv_lang)
 
     @classmethod

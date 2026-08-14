@@ -112,6 +112,13 @@ class FitnessSignup(AuthSignupHome):
         if tools.config.get('test_enable'):
             return super().web_auth_signup(*args, **kw)
 
+        # multilang=False on this route means Odoo's website language detection
+        # does not run. Set language explicitly here for both GET and POST.
+        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
+        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
+            _mv_lang = 'es_ES'
+        request.update_context(lang=_mv_lang)
+
         qcontext = self.get_auth_signup_qcontext()
 
         if not qcontext.get('token') and not qcontext.get('signup_enabled'):
