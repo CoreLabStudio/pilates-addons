@@ -37,4 +37,31 @@
         </xpath>
     </template>
 
+
+    <!--
+        On the LOGIN page, replace the plain "Don't have an account?" link with a
+        styled pill button that mirrors the "Already have an account?" pill on the
+        signup page.  JS reads the mv_lang cookie to display the right language.
+    -->
+    <template id="mv_login_signup_pill" name="CoreLab Login Signup Pill"
+              inherit_id="auth_signup.login">
+        <xpath expr="//a[@t-if='signup_enabled']" position="replace">
+            <a t-if="signup_enabled"
+               t-attf-href="/web/signup?{{ keep_query() }}"
+               class="mv-signup-pill">
+                <span class="mv-sp-es" style="display:none">¿No tienes cuenta? Regístrate</span>
+                <span class="mv-sp-en" style="display:none">Don't have an account? Sign up</span>
+                <span class="mv-sp-ca" style="display:none">No tens compte? Registra't</span>
+            </a>
+            <script>
+            (function(){
+              var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
+              var l=m?decodeURIComponent(m[1]):'es_ES';
+              var s=l==='en_US'?'.mv-sp-en':l==='ca_ES'?'.mv-sp-ca':'.mv-sp-es';
+              document.querySelectorAll(s).forEach(function(e){e.style.display='';});
+            }());
+            </script>
+        </xpath>
+    </template>
+
 </odoo>

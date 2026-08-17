@@ -24,6 +24,7 @@
   --mv-clay-dark:   #7AA0B8;   /* Heather blue hover/pressed state */
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
   --mv-ink:         #92786C;   /* Hemp brown */
+  --mv-paco:        #50423D;   /* Paco brown — dark, for headings and strong text */
   --mv-active-fill: #7A6458;   /* darkened hemp for active pill/segment — 5.26:1 on #FAF9F6 */
   --mv-muted:       #5E534A;   /* muted text */
   --mv-muted2:      #7A6D65;   /* lighter muted */
@@ -774,6 +775,61 @@ body.bg-100 .card {
 }
 /* Hide the default company logo; CoreLab lockup is injected via template */
 body.bg-100 .card-body > img { display: none !important; }
+
+/* Brand-color overrides for login/signup/reset pages — body.bg-100 is set
+   by Odoo automatically on all auth pages, so these reliably fire. */
+body.bg-100 label.form-label,
+body.bg-100 .oe_login_form label {
+  font-size: 0.78rem; font-weight: 600; color: var(--mv-muted);
+}
+body.bg-100 .form-control {
+  border: 1.5px solid var(--mv-border) !important;
+  border-radius: var(--mv-r-sm) !important;
+  color: var(--mv-paco) !important;
+  background: var(--mv-bg) !important;
+  font-size: 0.9rem;
+}
+body.bg-100 .form-control:focus {
+  border-color: var(--mv-clay) !important;
+  box-shadow: 0 0 0 3px rgba(154,186,205,0.35) !important;
+  background: var(--mv-card-bg) !important;
+}
+body.bg-100 .oe_login_buttons .btn-primary,
+body.bg-100 .oe_signup_form .btn-primary {
+  background: var(--mv-paco) !important;
+  border-color: var(--mv-paco) !important;
+  color: var(--mv-bg) !important;
+  border-radius: var(--mv-r) !important;
+  font-weight: 600; font-size: 0.9rem; padding: 12px;
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
+}
+body.bg-100 .oe_login_buttons .btn-primary:hover,
+body.bg-100 .oe_signup_form .btn-primary:hover {
+  background: #3D322E !important; border-color: #3D322E !important;
+}
+body.bg-100 .oe_login_buttons .btn-primary:active { transform: scale(0.97); opacity: 0.86; }
+body.bg-100 a { color: var(--mv-clay-text) !important; }
+body.bg-100 a:hover { color: var(--mv-clay) !important; }
+
+/* Signup pill button (login page) */
+.mv-signup-pill {
+  display: block;
+  text-align: center;
+  padding: 9px 20px;
+  border-radius: 20px;
+  border: 1.5px solid var(--mv-ink);
+  color: var(--mv-ink) !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none !important;
+  margin-top: 0.6rem;
+  transition: background var(--mv-t-fast), color var(--mv-t-fast);
+}
+.mv-signup-pill:hover {
+  background: rgba(146,120,108,0.08);
+  color: var(--mv-active-fill) !important;
+  border-color: var(--mv-active-fill);
+}
 
 /* Also triggered when template override succeeds and mv-login-body is set */
 .mv-login-body {
