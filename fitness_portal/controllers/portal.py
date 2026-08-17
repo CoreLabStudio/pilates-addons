@@ -54,6 +54,17 @@ class FitnessStudentPortal(http.Controller):
         return request.redirect('/my')
 
     # ══════════════════════════════════════════════════════════
+    #  ABOUT CORELAB  (/my/about)
+    # ══════════════════════════════════════════════════════════
+
+    @http.route('/my/about', type='http', auth='user', website=True, sitemap=False)
+    def portal_about(self, **kw):
+        is_teacher = request.env.user.has_group(TEACHER_GROUP)
+        return request.render('fitness_portal.portal_about_corelab', {
+            'is_teacher': is_teacher,
+        })
+
+    # ══════════════════════════════════════════════════════════
     #  HOME  (post-login landing page, bottom-nav tab 1)
     # ══════════════════════════════════════════════════════════
 

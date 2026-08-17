@@ -1616,6 +1616,110 @@
         </t>
     </template>
 
+    <!-- ── About CoreLab (/my/about) ────────────────────────────────────── -->
+    <template id="portal_about_corelab" name="About CoreLab">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-if="is_teacher">
+                    <t t-call="fitness_portal.mv_teacher_page_header"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_page_header"/>
+                </t>
+
+                <t t-set="_back_url" t-value="'/my'"/>
+                <t t-set="_back_label">Profile</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <!-- Trilingual content — JS cookie picks the visible block -->
+                <div class="mv-about-page" style="padding:0 16px 24px;">
+
+                    <!-- ES -->
+                    <div class="mv-cl-lang mv-cl-es" style="display:none">
+                        <div class="mv-about-hero">
+                            <h1 class="mv-cl-title" style="font-size:1.55rem;margin-bottom:6px;">¿Qué es Core Lab?</h1>
+                            <p style="font-size:0.8rem;color:var(--mv-muted);margin-bottom:20px;">Matadepera · Barcelona</p>
+                        </div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab es un estudio de entrenamiento boutique, especializado en ofrecer una experiencia de fitness cercana, personalizada y orientada a la comunidad.</p>
+                            <p>Un espacio para mujeres y hombres de todas las edades y niveles, desde quienes empiezan a entrenar hasta deportistas que buscan mejorar su rendimiento.</p>
+                            <p>Aquí no hay rutinas genéricas ni clases masificadas. Hay grupos reducidos, instructores comprometidos y un ambiente donde cada persona importa.</p>
+                        </div>
+                        <div class="mv-about-pillars-label">Los 4 pilares de CoreLab</div>
+                        <div class="mv-cl-pillars">
+                            <div class="mv-cl-pillar"><strong>Entrenamiento</strong> — fuerza, movimiento y rendimiento físico.</div>
+                            <div class="mv-cl-pillar"><strong>Comunidad</strong> — vínculos y sentimiento de pertenencia.</div>
+                            <div class="mv-cl-pillar"><strong>Experiencia</strong> — cada sesión, algo que se disfruta.</div>
+                            <div class="mv-cl-pillar"><strong>Bienestar</strong> — sentirse más fuerte, seguro y conectado.</div>
+                        </div>
+                        <p class="mv-cl-tagline" style="margin-top:16px;">Hacemos que entrenar sea intenso, motivador y adictivo. Aquí se viene a entrenar. A pasarlo bien. A superarse. A hacerse más fuerte. Y a formar parte de algo único.</p>
+                    </div>
+
+                    <!-- EN -->
+                    <div class="mv-cl-lang mv-cl-en" style="display:none">
+                        <div class="mv-about-hero">
+                            <h1 class="mv-cl-title" style="font-size:1.55rem;margin-bottom:6px;">What is Core Lab?</h1>
+                            <p style="font-size:0.8rem;color:var(--mv-muted);margin-bottom:20px;">Matadepera · Barcelona</p>
+                        </div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab is a boutique training studio built around a more personal, purposeful, and community-driven approach to fitness.</p>
+                            <p>A space for women and men of all ages and fitness levels — from those taking their first steps to experienced athletes looking to build strength and improve performance.</p>
+                            <p>No generic routines, no overcrowded classes. Small groups, dedicated instructors, and an environment where every person matters.</p>
+                        </div>
+                        <div class="mv-about-pillars-label">The 4 pillars of CoreLab</div>
+                        <div class="mv-cl-pillars">
+                            <div class="mv-cl-pillar"><strong>Training</strong> — building strength, improving movement and performance.</div>
+                            <div class="mv-cl-pillar"><strong>Community</strong> — genuine connections and a strong sense of belonging.</div>
+                            <div class="mv-cl-pillar"><strong>Experience</strong> — every session, something you genuinely look forward to.</div>
+                            <div class="mv-cl-pillar"><strong>Well-being</strong> — feeling stronger, more confident, and connected.</div>
+                        </div>
+                        <p class="mv-cl-tagline" style="margin-top:16px;">Training is challenging, motivating, and addictive. This is where you come to train. To have fun. To challenge yourself. To get stronger. And to be part of something unique.</p>
+                    </div>
+
+                    <!-- CA -->
+                    <div class="mv-cl-lang mv-cl-ca" style="display:none">
+                        <div class="mv-about-hero">
+                            <h1 class="mv-cl-title" style="font-size:1.55rem;margin-bottom:6px;">Què és Core Lab?</h1>
+                            <p style="font-size:0.8rem;color:var(--mv-muted);margin-bottom:20px;">Matadepera · Barcelona</p>
+                        </div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab és un estudi boutique d'entrenament que neix amb una manera més personal, exigent i humana d'entendre el fitness.</p>
+                            <p>Un espai pensat per a dones i homes de totes les edats i nivells, des de persones que comencen a entrenar fins a esportistes que volen millorar el seu rendiment.</p>
+                            <p>Aquí no hi ha rutines genèriques ni classes massificades. Grups reduïts, instructors compromesos i un ambient on cada persona compta.</p>
+                        </div>
+                        <div class="mv-about-pillars-label">Els 4 pilars de CoreLab</div>
+                        <div class="mv-cl-pillars">
+                            <div class="mv-cl-pillar"><strong>Entrenament</strong> — força, moviment i rendiment físic.</div>
+                            <div class="mv-cl-pillar"><strong>Comunitat</strong> — connexions reals i sentiment de pertinença.</div>
+                            <div class="mv-cl-pillar"><strong>Experiència</strong> — cada sessió, quelcom que realment esperes.</div>
+                            <div class="mv-cl-pillar"><strong>Benestar</strong> — sentir-se més fort, segur i connectat.</div>
+                        </div>
+                        <p class="mv-cl-tagline" style="margin-top:16px;">Entrenar és intens, exigent, motivador i addictiu. Aquí vens a entrenar. A gaudir. A superar-te. A fer-te més fort. I a formar part d'alguna cosa única.</p>
+                    </div>
+
+                    <script>
+(function(){
+  var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
+  var l=m?decodeURIComponent(m[1]):'es_ES';
+  var s=l==='en_US'?'.mv-cl-en':l==='ca_ES'?'.mv-cl-ca':'.mv-cl-es';
+  document.querySelectorAll(s).forEach(function(e){e.style.display='block';});
+}());
+                    </script>
+                </div>
+
+                <t t-if="is_teacher">
+                    <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_bottom_nav"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
     <!-- ── Terms and Conditions (/my/terms) ──────────────────────────────── -->
     <template id="portal_terms" name="Terms and Conditions">
         <t t-call="portal.frontend_layout">

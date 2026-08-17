@@ -1149,6 +1149,17 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-menu-row--danger .mv-menu-title { color: var(--mv-warn-ink); }
 .mv-menu-row--danger .mv-menu-icon  { stroke: var(--mv-warn-ink); }
 
+/* ── About CoreLab page ─────────────────────────────────────── */
+.mv-about-page { padding: 0 16px 24px; }
+.mv-about-hero { padding: 20px 0 4px; }
+.mv-about-pillars-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mv-muted);
+  margin: 20px 0 10px;
+}
+
 /* ── What is CoreLab section ────────────────────────────────── */
 .mv-corelab-about {
   background: var(--mv-info-bg);
