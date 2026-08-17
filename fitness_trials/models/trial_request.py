@@ -20,7 +20,7 @@ _MONTH_NAMES = {
     'ca_ES': ['gener', 'febrer', 'març', 'abril', 'maig', 'juny',
               'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'],
 }
-_LISBON_TZ = pytz.timezone('Europe/Lisbon')
+_STUDIO_TZ = pytz.timezone('Europe/Madrid')
 
 
 class FitnessTrialRequest(models.Model):
@@ -39,7 +39,7 @@ class FitnessTrialRequest(models.Model):
         ondelete='set null',
         index=True,
     )
-    lang = fields.Char(string='Language', default='en_US')
+    lang = fields.Char(string='Language', default='es_ES')
     class_interest = fields.Selection(
         selection=[
             ('barre', 'Barre'),
@@ -86,7 +86,7 @@ class FitnessTrialRequest(models.Model):
                 rec.scheduled_datetime_display = ''
                 continue
             dt_utc = rec.scheduled_datetime.replace(tzinfo=pytz.UTC)
-            dt_local = dt_utc.astimezone(_LISBON_TZ)
+            dt_local = dt_utc.astimezone(_STUDIO_TZ)
             lang = rec.lang or 'en_US'
             days = _DAY_NAMES.get(lang, _DAY_NAMES['en_US'])
             months = _MONTH_NAMES.get(lang, _MONTH_NAMES['en_US'])

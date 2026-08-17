@@ -25,7 +25,7 @@ _TARGET_DB_LOCK = threading.Lock()
 _VALID_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
 _VALID_CLASS_INTERESTS = frozenset({'barre', 'reformer'})
 
-_STUDIO_TZ = pytz.timezone('Europe/Lisbon')
+_STUDIO_TZ = pytz.timezone('Europe/Madrid')
 _DAYS_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 _MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
@@ -330,7 +330,7 @@ class TrialRequestController(http.Controller):
         email            = (data.get('email')            or '').strip()[:200]
         phone            = (data.get('phone')            or '').strip()[:40]
         notes            = (data.get('notes')            or '').strip()[:1000]
-        lang             = (data.get('lang')             or 'en_US').strip()[:10]
+        lang             = (data.get('lang')             or 'es_ES').strip()[:10]
         class_interest   = (data.get('class_interest')   or 'barre').strip()
         reformer_first   = (data.get('reformer_is_first_time')     or '').strip()
         reformer_years   = (data.get('reformer_years_experience')  or '').strip()[:40]
@@ -340,7 +340,7 @@ class TrialRequestController(http.Controller):
         if not email or not _EMAIL_RE.match(email):
             return _json_err('A valid email address is required.')
         if lang not in _VALID_LANGS:
-            lang = 'en_US'
+            lang = 'es_ES'
         if class_interest not in _VALID_CLASS_INTERESTS:
             class_interest = 'barre'
 
