@@ -110,12 +110,14 @@
 
     <!--
         Public Terms and Conditions — auth=public, opens in new tab from the signup form.
-        Fully multilingual: ES (default) / EN / CA, selected by request.lang.code.
+        Fully multilingual: ES (default) / EN / CA, selected by mv_lang cookie.
+        Uses request.httprequest.cookies.get('mv_lang') directly because website=True
+        routes override request.lang before QWeb rendering.
     -->
     <template id="public_terms" name="Terms and Conditions (Public)">
         <t t-call="web.login_layout">
 
-            <t t-if="request.lang.code == 'en_US'">
+            <t t-if="mv_lang == 'en_US'">
                 <div style="text-align:left;padding-bottom:1.5rem;">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Terms and Conditions</h1>
 
@@ -179,7 +181,7 @@
                 </div>
             </t>
 
-            <t t-elif="request.lang.code == 'ca_ES'">
+            <t t-elif="mv_lang == 'ca_ES'">
                 <div style="text-align:left;padding-bottom:1.5rem;">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Termes i Condicions</h1>
 
@@ -317,7 +319,7 @@
     <template id="public_privacy_policy" name="Privacy Policy (Public)">
         <t t-call="web.login_layout">
             <div style="text-align:left;padding-bottom:1.5rem;">
-                <t t-if="request.lang.code == 'en_US'">
+                <t t-if="mv_lang == 'en_US'">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Privacy Policy</h1>
                     <div class="alert alert-warning small mb-4">
                         <strong>Notice:</strong> The full Privacy Policy is pending publication.
@@ -328,7 +330,7 @@
                     <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Last updated: coming soon</p>
                     <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Back to sign up</a>
                 </t>
-                <t t-elif="request.lang.code == 'ca_ES'">
+                <t t-elif="mv_lang == 'ca_ES'">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Política de Privacitat</h1>
                     <div class="alert alert-warning small mb-4">
                         <strong>Avís:</strong> El text complet de la Política de Privacitat està pendent de

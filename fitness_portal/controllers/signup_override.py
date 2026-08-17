@@ -215,13 +215,19 @@ class FitnessSignup(AuthSignupHome):
     # Public legal pages (linked from signup form, auth=public)
     # ------------------------------------------------------------------
 
-    @http.route('/corelab/terms', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/corelab/terms', type='http', auth='public', website=True, sitemap=False, multilang=False)
     def public_terms(self, **kw):
-        return request.render('fitness_portal.public_terms', {})
+        _mv = request.httprequest.cookies.get('mv_lang', 'es_ES')
+        if _mv not in ('en_US', 'ca_ES', 'es_ES'):
+            _mv = 'es_ES'
+        return request.render('fitness_portal.public_terms', {'mv_lang': _mv})
 
-    @http.route('/corelab/privacy-policy', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/corelab/privacy-policy', type='http', auth='public', website=True, sitemap=False, multilang=False)
     def public_privacy_policy(self, **kw):
-        return request.render('fitness_portal.public_privacy_policy', {})
+        _mv = request.httprequest.cookies.get('mv_lang', 'es_ES')
+        if _mv not in ('en_US', 'ca_ES', 'es_ES'):
+            _mv = 'es_ES'
+        return request.render('fitness_portal.public_privacy_policy', {'mv_lang': _mv})
 
     # ------------------------------------------------------------------
     # Helpers
