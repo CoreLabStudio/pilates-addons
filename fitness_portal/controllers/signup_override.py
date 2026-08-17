@@ -296,7 +296,16 @@ class FitnessSignup(AuthSignupHome):
       {cta}
     </a>
   </div>
-  <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 32px;">{footer}</p>
+  <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 24px;">{footer}</p>
+  <div style="margin:0 0 28px;padding:18px 20px;background:#F7F3EF;border-radius:6px;border-left:3px solid #92786C;">
+    <p style="font-size:11px;font-weight:700;color:#50423D;margin:0 0 10px;letter-spacing:0.06em;text-transform:uppercase;">Guarda la app en tu m&#xF3;vil</p>
+    <ol style="font-size:13px;color:#4a3728;line-height:1.7;margin:0 0 10px;padding-left:20px;">
+      <li style="margin-bottom:5px;">Abre este correo en tu m&#xF3;vil y toca el enlace para iniciar sesi&#xF3;n.</li>
+      <li style="margin-bottom:5px;">En el navegador, busca &#x201C;A&#xF1;adir a pantalla de inicio&#x201D; o &#x201C;Instalar app&#x201D; &#x2014; normalmente en el icono de Compartir o en el men&#xFA; (&#x22EE;).</li>
+      <li style="margin-bottom:5px;">Toca <strong>A&#xF1;adir</strong> o <strong>Instalar</strong>.</li>
+    </ol>
+    <p style="font-size:12px;color:#8a7060;margin:0;line-height:1.6;">Una vez a&#xF1;adida, se abre como una app normal &#x2014; sin barra del navegador, solo toca el icono.</p>
+  </div>
   <hr style="border:none;border-top:1px solid #E8E0D5;margin:0 0 24px;"/>
   <p style="font-size:12px;color:#8a7060;margin:0;">CoreLab Studio</p>
 </div>""").format(
