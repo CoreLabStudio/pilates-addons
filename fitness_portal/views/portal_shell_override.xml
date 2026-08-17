@@ -166,6 +166,54 @@
                             </svg>
                         </a>
 
+                        <!-- ── What is CoreLab ──────────────────────────────── -->
+                        <div class="mv-corelab-about" style="margin:12px 0 4px;">
+                            <div class="mv-cl-lang mv-cl-es" style="display:none">
+                                <div class="mv-cl-title">¿Qué es Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab es un estudio de entrenamiento boutique, especializado en ofrecer una experiencia de fitness cercana, personalizada y orientada a la comunidad.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Entrenamiento</strong> — fuerza, movimiento y rendimiento físico.</div>
+                                        <div class="mv-cl-pillar"><strong>Comunidad</strong> — vínculos y sentimiento de pertenencia.</div>
+                                        <div class="mv-cl-pillar"><strong>Experiencia</strong> — cada sesión, algo que se disfruta.</div>
+                                        <div class="mv-cl-pillar"><strong>Bienestar</strong> — sentirse más fuerte, seguro y conectado.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mv-cl-lang mv-cl-en" style="display:none">
+                                <div class="mv-cl-title">What is Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab is a boutique training studio built around a more personal, purposeful, and community-driven approach to fitness.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Training</strong> — building strength, improving movement and performance.</div>
+                                        <div class="mv-cl-pillar"><strong>Community</strong> — genuine connections and a strong sense of belonging.</div>
+                                        <div class="mv-cl-pillar"><strong>Experience</strong> — every session, something you genuinely look forward to.</div>
+                                        <div class="mv-cl-pillar"><strong>Well-being</strong> — feeling stronger, more confident, and connected.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mv-cl-lang mv-cl-ca" style="display:none">
+                                <div class="mv-cl-title">Què és Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab és un estudi boutique d'entrenament que neix amb una manera més personal, exigent i humana d'entendre el fitness.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Entrenament</strong> — força, moviment i rendiment físic.</div>
+                                        <div class="mv-cl-pillar"><strong>Comunitat</strong> — connexions reals i sentiment de pertinença.</div>
+                                        <div class="mv-cl-pillar"><strong>Experiència</strong> — cada sessió, quelcom que realment esperes.</div>
+                                        <div class="mv-cl-pillar"><strong>Benestar</strong> — sentir-se més fort, segur i connectat.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+(function(){
+  var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
+  var l=m?decodeURIComponent(m[1]):'es_ES';
+  var s=l==='en_US'?'.mv-cl-en':l==='ca_ES'?'.mv-cl-ca':'.mv-cl-es';
+  document.querySelectorAll(s).forEach(function(e){e.style.display='block';});
+}());
+                            </script>
+                        </div>
+
                         <div class="mv-menu-divider"/>
 
                         <!-- Same Account position as the student hub, scoped to
@@ -325,6 +373,60 @@
                                 <polyline points="9 18 15 12 9 6"/>
                             </svg>
                         </a>
+
+                        <!-- ── What is CoreLab ──────────────────────────────── -->
+                        <div class="mv-corelab-about" style="margin:12px 0 4px;">
+                            <div class="mv-cl-lang mv-cl-es" style="display:none">
+                                <div class="mv-cl-title">¿Qué es Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab es un estudio de entrenamiento boutique, especializado en ofrecer una experiencia de fitness cercana, personalizada y orientada a la comunidad.</p>
+                                    <p>Un espacio para mujeres y hombres de todas las edades y niveles, desde quienes empiezan a entrenar hasta deportistas que buscan mejorar su rendimiento.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Entrenamiento</strong> — fuerza, movimiento y rendimiento físico.</div>
+                                        <div class="mv-cl-pillar"><strong>Comunidad</strong> — vínculos y sentimiento de pertenencia.</div>
+                                        <div class="mv-cl-pillar"><strong>Experiencia</strong> — cada sesión, algo que se disfruta.</div>
+                                        <div class="mv-cl-pillar"><strong>Bienestar</strong> — sentirse más fuerte, seguro y conectado.</div>
+                                    </div>
+                                    <p class="mv-cl-tagline">Hacemos que entrenar sea intenso, motivador y adictivo. Aquí se viene a entrenar. A pasarlo bien. A superarse. A hacerse más fuerte. Y a formar parte de algo único.</p>
+                                </div>
+                            </div>
+                            <div class="mv-cl-lang mv-cl-en" style="display:none">
+                                <div class="mv-cl-title">What is Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab is a boutique training studio built around a more personal, purposeful, and community-driven approach to fitness.</p>
+                                    <p>A space for women and men of all ages and fitness levels — from those taking their first steps to experienced athletes looking to build strength and improve performance.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Training</strong> — building strength, improving movement and performance.</div>
+                                        <div class="mv-cl-pillar"><strong>Community</strong> — genuine connections and a strong sense of belonging.</div>
+                                        <div class="mv-cl-pillar"><strong>Experience</strong> — every session, something you genuinely look forward to.</div>
+                                        <div class="mv-cl-pillar"><strong>Well-being</strong> — feeling stronger, more confident, and connected.</div>
+                                    </div>
+                                    <p class="mv-cl-tagline">Training is challenging, motivating, and addictive. This is where you come to train. To have fun. To challenge yourself. To get stronger. And to be part of something unique.</p>
+                                </div>
+                            </div>
+                            <div class="mv-cl-lang mv-cl-ca" style="display:none">
+                                <div class="mv-cl-title">Què és Core Lab?</div>
+                                <div class="mv-cl-body">
+                                    <p>Core Lab és un estudi boutique d'entrenament que neix amb una manera més personal, exigent i humana d'entendre el fitness.</p>
+                                    <p>Un espai pensat per a dones i homes de totes les edats i nivells, des de persones que comencen a entrenar fins a esportistes que volen millorar el seu rendiment.</p>
+                                    <div class="mv-cl-pillars">
+                                        <div class="mv-cl-pillar"><strong>Entrenament</strong> — força, moviment i rendiment físic.</div>
+                                        <div class="mv-cl-pillar"><strong>Comunitat</strong> — connexions reals i sentiment de pertinença.</div>
+                                        <div class="mv-cl-pillar"><strong>Experiència</strong> — cada sessió, quelcom que realment esperes.</div>
+                                        <div class="mv-cl-pillar"><strong>Benestar</strong> — sentir-se més fort, segur i connectat.</div>
+                                    </div>
+                                    <p class="mv-cl-tagline">Entrenar és intens, exigent, motivador i addictiu. Aquí vens a entrenar. A gaudir. A superar-te. A fer-te més fort. I a formar part d'alguna cosa única.</p>
+                                </div>
+                            </div>
+                            <script>
+(function(){
+  var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
+  var l=m?decodeURIComponent(m[1]):'es_ES';
+  var s=l==='en_US'?'.mv-cl-en':l==='ca_ES'?'.mv-cl-ca':'.mv-cl-es';
+  document.querySelectorAll(s).forEach(function(e){e.style.display='block';});
+}());
+                            </script>
+                        </div>
 
                         <div class="mv-menu-divider"/>
 

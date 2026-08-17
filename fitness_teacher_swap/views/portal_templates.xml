@@ -101,58 +101,6 @@
                     </div>
                 </t>
 
-                <!-- ── What is CoreLab ─────────────────────────────── -->
-                <div class="mv-spacer-24"/>
-                <div class="mv-corelab-about">
-                    <div class="mv-cl-lang mv-cl-es" style="display:none">
-                        <div class="mv-cl-title">¿Qué es Core Lab?</div>
-                        <div class="mv-cl-body">
-                            <p>Core Lab es un estudio de entrenamiento boutique, especializado en ofrecer una experiencia de fitness cercana, personalizada y orientada a la comunidad.</p>
-                            <div class="mv-cl-pillars">
-                                <div class="mv-cl-pillar"><strong>Entrenamiento</strong> — fuerza, movimiento y rendimiento físico.</div>
-                                <div class="mv-cl-pillar"><strong>Comunidad</strong> — vínculos y sentimiento de pertenencia.</div>
-                                <div class="mv-cl-pillar"><strong>Experiencia</strong> — cada sesión, algo que se disfruta.</div>
-                                <div class="mv-cl-pillar"><strong>Bienestar</strong> — sentirse más fuerte, seguro y conectado.</div>
-                            </div>
-                            <p class="mv-cl-tagline">Aquí se viene a entrenar. A pasarlo bien. A superarse. Y a formar parte de algo único.</p>
-                        </div>
-                    </div>
-                    <div class="mv-cl-lang mv-cl-en" style="display:none">
-                        <div class="mv-cl-title">What is Core Lab?</div>
-                        <div class="mv-cl-body">
-                            <p>Core Lab is a boutique training studio built around a more personal, purposeful, and community-driven approach to fitness.</p>
-                            <div class="mv-cl-pillars">
-                                <div class="mv-cl-pillar"><strong>Training</strong> — strength, movement and physical performance.</div>
-                                <div class="mv-cl-pillar"><strong>Community</strong> — genuine connections and belonging.</div>
-                                <div class="mv-cl-pillar"><strong>Experience</strong> — every session, something you look forward to.</div>
-                                <div class="mv-cl-pillar"><strong>Well-being</strong> — feeling stronger, confident, and connected.</div>
-                            </div>
-                            <p class="mv-cl-tagline">This is where you come to train. To have fun. To challenge yourself. And to be part of something unique.</p>
-                        </div>
-                    </div>
-                    <div class="mv-cl-lang mv-cl-ca" style="display:none">
-                        <div class="mv-cl-title">Què és Core Lab?</div>
-                        <div class="mv-cl-body">
-                            <p>Core Lab és un estudi boutique d'entrenament amb una manera més personal, exigent i humana d'entendre el fitness.</p>
-                            <div class="mv-cl-pillars">
-                                <div class="mv-cl-pillar"><strong>Entrenament</strong> — força, moviment i rendiment físic.</div>
-                                <div class="mv-cl-pillar"><strong>Comunitat</strong> — connexions reals i pertinença.</div>
-                                <div class="mv-cl-pillar"><strong>Experiència</strong> — cada sessió, quelcom que esperes.</div>
-                                <div class="mv-cl-pillar"><strong>Benestar</strong> — sentir-se més fort, segur i connectat.</div>
-                            </div>
-                            <p class="mv-cl-tagline">Aquí vens a entrenar. A gaudir. A superar-te. I a formar part d'alguna cosa única.</p>
-                        </div>
-                    </div>
-                    <script>
-(function(){
-  var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
-  var l=m?decodeURIComponent(m[1]):'es_ES';
-  var s=l==='en_US'?'.mv-cl-en':l==='ca_ES'?'.mv-cl-ca':'.mv-cl-es';
-  document.querySelectorAll(s).forEach(function(e){e.style.display='block';});
-}());
-                    </script>
-                </div>
-
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
             </div>
