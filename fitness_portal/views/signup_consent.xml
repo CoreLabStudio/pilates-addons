@@ -36,9 +36,10 @@
             </button>
         </xpath>
 
-        <!-- "Already have an account?" link -->
+        <!-- "Already have an account?" link — prominent so users can always find it -->
         <xpath expr="//div[hasclass('oe_login_buttons')]/a[hasclass('btn-link')]" position="replace">
-            <a t-attf-href="/web/login?{{ keep_query() }}" class="btn btn-link btn-sm mt-2" role="button">
+            <a t-attf-href="/web/login?{{ keep_query() }}" role="button"
+               style="display:block;margin-top:0.6rem;padding:0.55rem 1rem;font-size:0.9rem;font-weight:600;color:#92786C;text-align:center;border:1.5px solid #92786C;border-radius:999px;text-decoration:none;letter-spacing:0.01em;">
                 <t t-if="request.lang.code == 'en_US'">Already have an account?</t>
                 <t t-elif="request.lang.code == 'ca_ES'">Ja tens un compte?</t>
                 <t t-else="">¿Ya tienes una cuenta?</t>
