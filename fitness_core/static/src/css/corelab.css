@@ -955,16 +955,27 @@ body:has(.mv-bottom-nav) table.table th {
   vertical-align: middle;
 }
 
-/* Buttons */
-body:has(.mv-bottom-nav) .btn-primary {
+/* Buttons — portal pages (custom + Odoo standard invoice/sale-order) */
+body:has(.mv-bottom-nav) .btn-primary,
+.o_portal_wrap .btn-primary {
   background: var(--mv-btn-bg) !important;
   border-color: var(--mv-btn-bg) !important;
   color: var(--mv-btn-fg) !important;
   border-radius: var(--mv-r) !important;
 }
-body:has(.mv-bottom-nav) .btn-primary:hover {
+body:has(.mv-bottom-nav) .btn-primary:hover,
+.o_portal_wrap .btn-primary:hover {
   background: var(--mv-clay-dark) !important;
   border-color: var(--mv-clay-dark) !important;
+}
+.o_portal_wrap .btn-secondary {
+  border-color: var(--mv-clay) !important;
+  color: var(--mv-clay-text) !important;
+  border-radius: var(--mv-r) !important;
+  background: transparent !important;
+}
+.o_portal_wrap .btn-secondary:hover {
+  background: var(--mv-info-bg) !important;
 }
 
 /* Pagination */
@@ -974,9 +985,9 @@ body:has(.mv-bottom-nav) .o_portal_pager .page-link {
   background: transparent;
 }
 body:has(.mv-bottom-nav) .o_portal_pager .active .page-link {
-  background: var(--mv-accent);
-  border-color: var(--mv-accent);
-  color: var(--mv-ink);
+  background: var(--mv-clay);
+  border-color: var(--mv-clay);
+  color: var(--mv-btn-fg);
 }
 
 /* ── 18. Profile Hub — hide standard Odoo home grid ─────────────
@@ -1031,8 +1042,8 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: var(--mv-accent);
-  color: var(--mv-ink);
+  background: var(--mv-clay);
+  color: var(--mv-btn-fg);
   font-size: 1.6rem;
   font-weight: 700;
   display: flex;

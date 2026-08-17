@@ -87,7 +87,7 @@
                                                     </t>
                                                 </select>
                                                 <button type="submit"
-                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-accent);color:var(--mv-accent-fg);cursor:pointer;white-space:nowrap;">Confirm</button>
+                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-paco);color:var(--mv-accent-fg);cursor:pointer;white-space:nowrap;">Confirm</button>
                                             </form>
                                         </details>
                                     </t>
