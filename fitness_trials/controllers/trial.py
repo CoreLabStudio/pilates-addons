@@ -115,7 +115,7 @@ def _format_event(ev) -> dict:
         'month': _MONTHS_ES[dt_local.month - 1],
         'time': dt_local.strftime('%H:%M'),
         'duration': duration,
-        'teacher': ev.user_id.name if ev.user_id else '',
+        'teacher': ev.user_id.name if ev.user_id and ev.user_id.login != 'OdooBot' else '',
         'available': available,
         'start_utc': ev.start,
         'start_date': dt_local.date().isoformat(),
