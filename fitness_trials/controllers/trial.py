@@ -205,7 +205,7 @@ class TrialRequestController(http.Controller):
         reformer_first  = (kw.get('reformer_is_first_time') or '').strip()
         reformer_years  = (kw.get('reformer_years_experience') or '').strip()[:40]
         occurrence_raw  = (kw.get('occurrence_id') or '').strip()
-        lang = request.context.get('lang', 'es_ES')
+        lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
         if lang not in _VALID_LANGS:
             lang = 'es_ES'
 
