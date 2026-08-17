@@ -60,7 +60,7 @@ class FitnessStudentPortal(http.Controller):
     @http.route('/my/home', type='http', auth='user', website=True, sitemap=False)
     def portal_home(self, **kw):
         if request.env.user.has_group(TEACHER_GROUP):
-            return request.redirect('/my/teacher/classes')
+            return request.redirect('/my/instructor/classes')
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 

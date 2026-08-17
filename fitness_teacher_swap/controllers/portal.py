@@ -25,7 +25,7 @@ def _format_local(dt, user_tz):
 
 class FitnessTeacherSwapPortal(http.Controller):
 
-    @http.route('/my/teacher/classes', type='http', auth='user', website=True, sitemap=False)
+    @http.route('/my/instructor/classes', type='http', auth='user', website=True, sitemap=False)
     def my_classes(self, filter='all', **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
@@ -89,7 +89,7 @@ class FitnessTeacherSwapPortal(http.Controller):
             'success':        kw.get('success'),
         })
 
-    @http.route('/my/teacher/classes/<int:event_id>', type='http', auth='user',
+    @http.route('/my/instructor/classes/<int:event_id>', type='http', auth='user',
                 website=True, sitemap=False)
     def class_roster(self, event_id, **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
@@ -100,7 +100,7 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         if not event.exists() or event.user_id.id != request.env.user.id:
             return request.redirect(
-                '/my/teacher/classes?error=' + quote(_('Class not found or not assigned to you.'))
+                '/my/instructor/classes?error=' + quote(_('Class not found or not assigned to you.'))
             )
 
         # Search without sudo — teacher ir.rule scopes to own classes.
@@ -126,14 +126,14 @@ class FitnessTeacherSwapPortal(http.Controller):
             'error':         kw.get('error'),
         })
 
-    @http.route('/my/teacher/classes/<int:event_id>/mark', type='http', auth='user',
+    @http.route('/my/instructor/classes/<int:event_id>/mark', type='http', auth='user',
                 methods=['POST'], website=True, sitemap=False)
     def mark_attendance(self, event_id, **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
         _ = request.env._
-        roster_url = f'/my/teacher/classes/{event_id}'
+        roster_url = f'/my/instructor/classes/{event_id}'
 
         try:
             booking_id = int(kw.get('booking_id', 0) or 0)
@@ -147,7 +147,7 @@ class FitnessTeacherSwapPortal(http.Controller):
         event = request.env['calendar.event'].browse(event_id)
         if not event.exists() or event.user_id.id != request.env.user.id:
             return request.redirect(
-                '/my/teacher/classes?error=' + quote(_('Class not found or not assigned to you.'))
+                '/my/instructor/classes?error=' + quote(_('Class not found or not assigned to you.'))
             )
 
         # Teacher ir.rule scopes booking search to own classes at DB level.
@@ -173,7 +173,7 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         return request.redirect(f'{roster_url}?marked=1')
 
-    @http.route('/my/teacher/classes/<int:event_id>/reassign', type='http', auth='user',
+    @http.route('/my/instructor/classes/<int:event_id>/reassign', type='http', auth='user',
                 methods=['POST'], website=True, sitemap=False)
     def reassign(self, event_id, new_teacher_id=None, **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
@@ -183,10 +183,10 @@ class FitnessTeacherSwapPortal(http.Controller):
             event = request.env['calendar.event'].browse(int(event_id))
             event.fitness_reassign_teacher(int(new_teacher_id))
         except Exception as exc:
-            return request.redirect(f'/my/teacher/classes?error={quote(str(exc))}')
-        return request.redirect('/my/teacher/classes')
+            return request.redirect(f'/my/instructor/classes?error={quote(str(exc))}')
+        return request.redirect('/my/instructor/classes')
 
-    @http.route('/my/teacher/history', type='http', auth='user', website=True, sitemap=False)
+    @http.route('/my/instructor/history', type='http', auth='user', website=True, sitemap=False)
     def my_class_history(self, period=None, **kw):
         import re as _re
         if not request.env.user.has_group(TEACHER_GROUP):
@@ -277,3 +277,18 @@ class FitnessTeacherSwapPortal(http.Controller):
             'filter_period':   period,
             'available_months': available_months,
         })
+
+    # ── Legacy redirects — keep old /my/teacher/ URLs working (notification emails) ──
+    @http.route('/my/teacher/classes', type='http', auth='user', website=True, sitemap=False)
+    def _legacy_classes(self, **kw):
+        qs = request.httprequest.query_string.decode('utf-8')
+        return request.redirect('/my/instructor/classes' + ('?' + qs if qs else ''), code=301)
+
+    @http.route('/my/teacher/classes/<int:event_id>', type='http', auth='user', website=True, sitemap=False)
+    def _legacy_class_detail(self, event_id, **kw):
+        return request.redirect(f'/my/instructor/classes/{event_id}', code=301)
+
+    @http.route('/my/teacher/history', type='http', auth='user', website=True, sitemap=False)
+    def _legacy_history(self, **kw):
+        qs = request.httprequest.query_string.decode('utf-8')
+        return request.redirect('/my/instructor/history' + ('?' + qs if qs else ''), code=301)

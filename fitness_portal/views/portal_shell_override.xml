@@ -123,7 +123,7 @@
                              structure. Deliberately no Orders / Invoices /
                              Packages / Addresses — those are student-only. -->
                         <div class="mv-menu-section-label">My CoreLab Studio</div>
-                        <a href="/my/teacher/classes" class="mv-menu-row">
+                        <a href="/my/instructor/classes" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                                 <line x1="16" y1="2" x2="16" y2="6"/>
@@ -139,7 +139,7 @@
                             </svg>
                         </a>
 
-                        <a href="/my/teacher/history" class="mv-menu-row">
+                        <a href="/my/instructor/history" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"/>
                                 <polyline points="12 6 12 12 16 14"/>

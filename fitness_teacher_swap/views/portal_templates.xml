@@ -20,13 +20,13 @@
                 <!-- Filter pills: same pill style as student day-jump buttons -->
                 <t t-set="_af" t-value="request.params.get('filter') or 'all'"/>
                 <div style="display:flex;gap:8px;padding:0 16px 16px;flex-wrap:wrap;">
-                    <a href="/my/teacher/classes?filter=today"
+                    <a href="/my/instructor/classes?filter=today"
                        class="mv-day-jump-btn"
                        t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'today' else None">Today</a>
-                    <a href="/my/teacher/classes?filter=week"
+                    <a href="/my/instructor/classes?filter=week"
                        class="mv-day-jump-btn"
                        t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'week' else None">This week</a>
-                    <a href="/my/teacher/classes"
+                    <a href="/my/instructor/classes"
                        class="mv-day-jump-btn"
                        t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'all' else None">Upcoming</a>
                 </div>
@@ -49,7 +49,7 @@
                         <t t-if="_af == 'today'">No classes today.</t>
                         <t t-elif="_af == 'week'">No classes this week.</t>
                         <t t-else="">No upcoming classes.</t>
-                        <a href="/my/teacher/history">View class history →</a>
+                        <a href="/my/instructor/history">View class history →</a>
                     </div>
                 </t>
                 <t t-else="">
@@ -72,7 +72,7 @@
                                     <t t-if="other_teachers">
                                         <details class="mv-reassign-details">
                                             <summary>Reassign</summary>
-                                            <form t-attf-action="/my/teacher/classes/#{event.id}/reassign"
+                                            <form t-attf-action="/my/instructor/classes/#{event.id}/reassign"
                                                   method="post"
                                                   style="display:flex;gap:6px;align-items:center;margin-top:8px;">
                                                 <input type="hidden" name="csrf_token"
@@ -80,7 +80,7 @@
                                                 <select name="new_teacher_id"
                                                         style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
                                                         required="required">
-                                                    <option value="">Select teacher…</option>
+                                                    <option value="">Select instructor…</option>
                                                     <t t-foreach="other_teachers" t-as="teacher">
                                                         <option t-att-value="teacher.id"
                                                                 t-out="teacher.name"/>
@@ -93,13 +93,65 @@
                                     </t>
                                 </div>
                                 <div class="mv-class-row-right">
-                                    <a t-attf-href="/my/teacher/classes/#{event.id}"
+                                    <a t-attf-href="/my/instructor/classes/#{event.id}"
                                        class="mv-roster-link">Roster →</a>
                                 </div>
                             </div>
                         </t>
                     </div>
                 </t>
+
+                <!-- ── What is CoreLab ─────────────────────────────── -->
+                <div class="mv-spacer-24"/>
+                <div class="mv-corelab-about">
+                    <div class="mv-cl-lang mv-cl-es" style="display:none">
+                        <div class="mv-cl-title">¿Qué es Core Lab?</div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab es un estudio de entrenamiento boutique, especializado en ofrecer una experiencia de fitness cercana, personalizada y orientada a la comunidad.</p>
+                            <div class="mv-cl-pillars">
+                                <div class="mv-cl-pillar"><strong>Entrenamiento</strong> — fuerza, movimiento y rendimiento físico.</div>
+                                <div class="mv-cl-pillar"><strong>Comunidad</strong> — vínculos y sentimiento de pertenencia.</div>
+                                <div class="mv-cl-pillar"><strong>Experiencia</strong> — cada sesión, algo que se disfruta.</div>
+                                <div class="mv-cl-pillar"><strong>Bienestar</strong> — sentirse más fuerte, seguro y conectado.</div>
+                            </div>
+                            <p class="mv-cl-tagline">Aquí se viene a entrenar. A pasarlo bien. A superarse. Y a formar parte de algo único.</p>
+                        </div>
+                    </div>
+                    <div class="mv-cl-lang mv-cl-en" style="display:none">
+                        <div class="mv-cl-title">What is Core Lab?</div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab is a boutique training studio built around a more personal, purposeful, and community-driven approach to fitness.</p>
+                            <div class="mv-cl-pillars">
+                                <div class="mv-cl-pillar"><strong>Training</strong> — strength, movement and physical performance.</div>
+                                <div class="mv-cl-pillar"><strong>Community</strong> — genuine connections and belonging.</div>
+                                <div class="mv-cl-pillar"><strong>Experience</strong> — every session, something you look forward to.</div>
+                                <div class="mv-cl-pillar"><strong>Well-being</strong> — feeling stronger, confident, and connected.</div>
+                            </div>
+                            <p class="mv-cl-tagline">This is where you come to train. To have fun. To challenge yourself. And to be part of something unique.</p>
+                        </div>
+                    </div>
+                    <div class="mv-cl-lang mv-cl-ca" style="display:none">
+                        <div class="mv-cl-title">Què és Core Lab?</div>
+                        <div class="mv-cl-body">
+                            <p>Core Lab és un estudi boutique d'entrenament amb una manera més personal, exigent i humana d'entendre el fitness.</p>
+                            <div class="mv-cl-pillars">
+                                <div class="mv-cl-pillar"><strong>Entrenament</strong> — força, moviment i rendiment físic.</div>
+                                <div class="mv-cl-pillar"><strong>Comunitat</strong> — connexions reals i pertinença.</div>
+                                <div class="mv-cl-pillar"><strong>Experiència</strong> — cada sessió, quelcom que esperes.</div>
+                                <div class="mv-cl-pillar"><strong>Benestar</strong> — sentir-se més fort, segur i connectat.</div>
+                            </div>
+                            <p class="mv-cl-tagline">Aquí vens a entrenar. A gaudir. A superar-te. I a formar part d'alguna cosa única.</p>
+                        </div>
+                    </div>
+                    <script>
+(function(){
+  var m=document.cookie.match(/(?:^|; )mv_lang=([^;]*)/);
+  var l=m?decodeURIComponent(m[1]):'es_ES';
+  var s=l==='en_US'?'.mv-cl-en':l==='ca_ES'?'.mv-cl-ca':'.mv-cl-es';
+  document.querySelectorAll(s).forEach(function(e){e.style.display='block';});
+}());
+                    </script>
+                </div>
 
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
@@ -116,7 +168,7 @@
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_teacher_page_header"/>
 
-                <t t-set="_back_url" t-value="'/my/teacher/classes'"/>
+                <t t-set="_back_url" t-value="'/my/instructor/classes'"/>
                 <t t-set="_back_label">Classes</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
@@ -175,7 +227,7 @@
                                     <div class="mv-student-status-wrap">
                                         <t t-if="booking.state == 'booked'">
                                             <t t-if="class_started">
-                                                <form t-attf-action="/my/teacher/classes/#{event.id}/mark"
+                                                <form t-attf-action="/my/instructor/classes/#{event.id}/mark"
                                                       method="post" style="display:contents;">
                                                     <input type="hidden" name="csrf_token"
                                                            t-att-value="request.csrf_token()"/>
@@ -184,7 +236,7 @@
                                                     <input type="hidden" name="action" value="attended"/>
                                                     <button type="submit" class="mv-btn-attend">Attended</button>
                                                 </form>
-                                                <form t-attf-action="/my/teacher/classes/#{event.id}/mark"
+                                                <form t-attf-action="/my/instructor/classes/#{event.id}/mark"
                                                       method="post" style="display:contents;">
                                                     <input type="hidden" name="csrf_token"
                                                            t-att-value="request.csrf_token()"/>
@@ -225,7 +277,7 @@
                 <t t-call="portal.portal_docs_entry">
                     <t t-set="title">My Classes</t>
                     <t t-set="text">View rosters and reassign your upcoming classes</t>
-                    <t t-set="url" t-value="'/my/teacher/classes'"/>
+                    <t t-set="url" t-value="'/my/instructor/classes'"/>
                     <t t-set="config_card" t-value="True"/>
                 </t>
             </t>
@@ -241,7 +293,7 @@
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_teacher_page_header"/>
 
-                <t t-set="_back_url" t-value="'/my/teacher/classes'"/>
+                <t t-set="_back_url" t-value="'/my/instructor/classes'"/>
                 <t t-set="_back_label">My Classes</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
@@ -254,10 +306,10 @@
                     <select class="mv-period-select"
                             onchange="location.href=this.value"
                             aria-label="Filter period">
-                        <option t-att-value="'/my/teacher/history'"
+                        <option t-att-value="'/my/instructor/history'"
                                 t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
                         <t t-foreach="available_months" t-as="m">
-                            <option t-att-value="'/my/teacher/history?period=' + m['key']"
+                            <option t-att-value="'/my/instructor/history?period=' + m['key']"
                                     t-att-selected="'selected' if filter_period == m['key'] else None"
                                     t-out="m['label']"/>
                         </t>

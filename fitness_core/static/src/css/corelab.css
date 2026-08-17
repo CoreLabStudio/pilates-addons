@@ -1137,6 +1137,38 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-menu-row--danger .mv-menu-title { color: var(--mv-warn-ink); }
 .mv-menu-row--danger .mv-menu-icon  { stroke: var(--mv-warn-ink); }
 
+/* ── What is CoreLab section ────────────────────────────────── */
+.mv-corelab-about {
+  background: var(--mv-info-bg);
+  border-radius: var(--mv-r);
+  padding: 20px;
+  margin: 0 16px;
+}
+.mv-cl-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--mv-paco);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.mv-cl-body p { font-size: 0.855rem; color: var(--mv-ink); line-height: 1.65; margin-bottom: 10px; }
+.mv-cl-pillars { margin: 10px 0 12px; display: flex; flex-direction: column; gap: 6px; }
+.mv-cl-pillar {
+  font-size: 0.82rem;
+  color: var(--mv-ink);
+  line-height: 1.5;
+  padding-left: 10px;
+  border-left: 2px solid var(--mv-clay);
+}
+.mv-cl-tagline {
+  font-size: 0.82rem;
+  color: var(--mv-muted);
+  font-style: italic;
+  line-height: 1.55;
+  margin-bottom: 0 !important;
+}
+
 /* ── 16. Spacing helpers ────────────────────────────────────── */
 .mv-spacer-8  { height: 8px; }
 .mv-spacer-16 { height: 16px; }
@@ -1144,12 +1176,19 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-empty {
   padding: 40px 20px;
   text-align: center;
-  color: var(--mv-muted);
+  color: var(--mv-ink);
   font-size: 0.88rem;
 }
 .mv-empty a {
-  color: var(--mv-accent);
+  color: var(--mv-clay-text) !important;
   text-decoration: underline;
+}
+/* Calendar/browse icon in empty states — use Heather blue so it reads as interactive */
+.mv-empty-cal-link {
+  color: var(--mv-clay-text) !important;
+}
+.mv-empty-cal-link svg {
+  stroke: var(--mv-clay-text) !important;
 }
 
 /* ── 20. Header right group + bell icon ─────────────────────── */

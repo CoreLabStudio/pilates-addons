@@ -83,7 +83,7 @@ class CalendarEvent(models.Model):
                             'teacher_swap',
                             tenv.env._('Class assigned to you: %s', event.name),
                             tenv.env._('You have been assigned as teacher for this class.'),
-                            action_url=f'/my/teacher/classes/{event.id}',
+                            action_url=f'/my/instructor/classes/{event.id}',
                         )
                         _logger.info(
                             "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
@@ -124,7 +124,7 @@ class CalendarEvent(models.Model):
                             'class_rescheduled',
                             tenv.env._('Class rescheduled: %s', event.name),
                             tenv.env._('Your class has been moved to %s.', new_dt_str),
-                            action_url=f'/my/teacher/classes/{event.id}',
+                            action_url=f'/my/instructor/classes/{event.id}',
                         )
                     _logger.info(
                         "[RESCHEDULE] '%s' (id=%d): %s → %s, %d student(s) + teacher notified",
