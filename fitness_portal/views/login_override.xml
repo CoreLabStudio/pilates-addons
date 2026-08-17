@@ -3,8 +3,6 @@
 
     <!--
         Replace the company logo block with the CoreLab lockup.
-        Page background, card radius/shadow, inputs, and button are
-        all styled via corelab.css using body.bg-100 selectors.
     -->
     <template id="mv_login_logo" name="CoreLab Login Logo"
               inherit_id="web.login_layout">
@@ -18,13 +16,14 @@
     </template>
 
     <!--
-        Language switcher injected at the bottom of every login/signup card.
+        Language switcher injected at the TOP of every login/signup card
+        (immediately after the logo, before any form content).
         Sets the mv_lang cookie (read by ir_http.py) and reloads the page.
     -->
     <template id="mv_login_lang_switcher" name="CoreLab Login Language Switcher"
               inherit_id="web.login_layout">
-        <xpath expr="//div[hasclass('card-body')]" position="inside">
-            <div style="text-align:center;padding-top:1rem;margin-top:0.5rem;border-top:1px solid rgba(0,0,0,.08);">
+        <xpath expr="//div[hasclass('mv-login-logo')]" position="after">
+            <div style="text-align:center;padding:0.6rem 0 0.75rem;margin-bottom:0.25rem;border-bottom:1px solid rgba(0,0,0,.08);">
                 <button type="button"
                         style="background:none;border:1px solid #ccc;border-radius:20px;padding:3px 12px;margin:0 3px;font-size:0.7rem;font-weight:600;letter-spacing:0.12em;cursor:pointer;color:#777;"
                         onclick="document.cookie='mv_lang=es_ES;path=/;max-age=31536000';location.reload()">ES</button>

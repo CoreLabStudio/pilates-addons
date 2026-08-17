@@ -2,21 +2,74 @@
 <odoo>
 
     <!--
-        GDPR consent checkboxes injected into the stock auth_signup form.
-        Targets the button row so checkboxes appear directly above "Sign up".
-        Both start unchecked. consent_terms is required (HTML5 + server-side).
+        GDPR consent checkboxes + form label overrides for the signup page.
+        Inherits auth_signup.signup to override all hardcoded English labels and
+        inject multilingual consent checkboxes above the "Sign up" button.
+        Language is read via request.lang.code (set by ir_http.py from mv_lang cookie).
     -->
-    <template id="signup_consent_gdpr" inherit_id="auth_signup.signup" name="Signup GDPR Consent Checkboxes">
+    <template id="signup_consent_gdpr" inherit_id="auth_signup.signup" name="Signup — Multilingual Labels and GDPR Consent">
+
+        <!-- Name label -->
+        <xpath expr="//label[@for='name']" position="replace">
+            <label for="name" class="form-label">
+                <t t-if="request.lang.code == 'en_US'">Name</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Nom</t>
+                <t t-else="">Nombre</t>
+            </label>
+        </xpath>
+
+        <!-- Email label -->
+        <xpath expr="//label[@for='login']" position="replace">
+            <label for="login" class="form-label">
+                <t t-if="request.lang.code == 'en_US'">Email</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Correu electrònic</t>
+                <t t-else="">Correo electrónico</t>
+            </label>
+        </xpath>
+
+        <!-- Sign up button -->
+        <xpath expr="//div[hasclass('oe_login_buttons')]/button[@type='submit']" position="replace">
+            <button type="submit" class="btn btn-primary mb-1">
+                <t t-if="request.lang.code == 'en_US'">Sign up</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Registrar-se</t>
+                <t t-else="">Registrarse</t>
+            </button>
+        </xpath>
+
+        <!-- "Already have an account?" link -->
+        <xpath expr="//div[hasclass('oe_login_buttons')]/a[hasclass('btn-link')]" position="replace">
+            <a t-attf-href="/web/login?{{ keep_query() }}" class="btn btn-link btn-sm mt-2" role="button">
+                <t t-if="request.lang.code == 'en_US'">Already have an account?</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Ja tens un compte?</t>
+                <t t-else="">¿Ya tienes una cuenta?</t>
+            </a>
+        </xpath>
+
+        <!-- GDPR consent checkboxes — injected above the buttons row -->
         <xpath expr="//div[hasclass('oe_login_buttons')]" position="before">
             <div class="mv-signup-consent mb-3 pt-2">
                 <div class="form-check mb-2">
                     <input type="checkbox" class="form-check-input" id="consent_terms"
                            name="consent_terms" required="required"/>
                     <label class="form-check-label" style="font-size:0.85rem;" for="consent_terms">
-                        He leído y acepto los
-                        <a href="/corelab/terms" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
-                        y la
-                        <a href="/corelab/privacy-policy" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>.
+                        <t t-if="request.lang.code == 'en_US'">
+                            I have read and accept the
+                            <a href="/corelab/terms" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+                            and the
+                            <a href="/corelab/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+                        </t>
+                        <t t-elif="request.lang.code == 'ca_ES'">
+                            He llegit i accepto els
+                            <a href="/corelab/terms" target="_blank" rel="noopener noreferrer">Termes i Condicions</a>
+                            i la
+                            <a href="/corelab/privacy-policy" target="_blank" rel="noopener noreferrer">Política de Privacitat</a>.
+                        </t>
+                        <t t-else="">
+                            He leído y acepto los
+                            <a href="/corelab/terms" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
+                            y la
+                            <a href="/corelab/privacy-policy" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>.
+                        </t>
                         <span class="text-danger ms-1" aria-hidden="true">*</span>
                     </label>
                 </div>
@@ -24,99 +77,278 @@
                     <input type="checkbox" class="form-check-input" id="consent_marketing"
                            name="consent_marketing"/>
                     <label class="form-check-label" style="font-size:0.85rem;" for="consent_marketing">
-                        Deseo recibir noticias y promociones por email.
+                        <t t-if="request.lang.code == 'en_US'">I want to receive news and promotions by email.</t>
+                        <t t-elif="request.lang.code == 'ca_ES'">Desitjo rebre novetats i promocions per correu electrònic.</t>
+                        <t t-else="">Deseo recibir noticias y promociones por email.</t>
                     </label>
                 </div>
             </div>
         </xpath>
+
     </template>
 
     <!--
-        Public Terms &amp; Conditions page — auth=public, opens in new tab from the signup form.
-        Uses web.login_layout so the CoreLab wordmark appears (from login_override.xml).
+        Password / Confirm Password field labels — from auth_signup.fields template.
+    -->
+    <template id="signup_fields_i18n" inherit_id="auth_signup.fields" name="Signup — Multilingual Password Labels">
+        <xpath expr="//label[@for='password']" position="replace">
+            <label for="password" class="form-label">
+                <t t-if="request.lang.code == 'en_US'">Password</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Contrasenya</t>
+                <t t-else="">Contraseña</t>
+            </label>
+        </xpath>
+        <xpath expr="//label[@for='confirm_password']" position="replace">
+            <label for="confirm_password" class="form-label">
+                <t t-if="request.lang.code == 'en_US'">Confirm Password</t>
+                <t t-elif="request.lang.code == 'ca_ES'">Confirma la contrasenya</t>
+                <t t-else="">Confirmar contraseña</t>
+            </label>
+        </xpath>
+    </template>
+
+    <!--
+        Public Terms and Conditions — auth=public, opens in new tab from the signup form.
+        Fully multilingual: ES (default) / EN / CA, selected by request.lang.code.
     -->
     <template id="public_terms" name="Terms and Conditions (Public)">
         <t t-call="web.login_layout">
-            <div style="text-align:left;padding-bottom:1.5rem;">
-                <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Términos y Condiciones</h1>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducción</h3>
-                <p style="font-size:0.87rem;line-height:1.65;">Estos Términos y Condiciones ("Términos") rigen el uso de los servicios del estudio de pilates CoreLab, incluidas las reservas de clases, membresías, paquetes de créditos y el portal online proporcionado por Yoleyva Studio ("nosotros", "nos", "el Estudio"). Al reservar una clase o activar un paquete, aceptas estos Términos en su totalidad.</p>
+            <t t-if="request.lang.code == 'en_US'">
+                <div style="text-align:left;padding-bottom:1.5rem;">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Terms and Conditions</h1>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membresía y Cuenta</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Debes tener 16 años o más para registrarte de forma independiente. Los menores de 16 años requieren consentimiento escrito de sus padres o tutores.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Eres responsable de mantener la confidencialidad de tus credenciales de acceso. Notifícanos de inmediato si sospechas de acceso no autorizado a tu cuenta.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuentas son personales e intransferibles. No está permitido compartir credenciales de acceso para que un tercero asista a clases.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introduction</h3>
+                    <p style="font-size:0.87rem;line-height:1.65;">These Terms and Conditions ("Terms") govern the use of the services of CoreLab pilates studio, including class bookings, memberships, credit packages and the online portal provided by Yoleyva Studio ("we", "us", "the Studio"). By booking a class or activating a package, you accept these Terms in full.</p>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">3. Reserva de Clases</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las clases pueden reservarse a través del portal según disponibilidad.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Una reserva se confirma únicamente cuando se ha aplicado un crédito de clase o una suscripción válida.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio se reserva el derecho de cancelar o reprogramar una clase con aviso razonable. En tal caso, se devolverá cualquier crédito utilizado.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El aforo máximo por clase lo establece el Estudio; una vez completo, puede ofrecerse lista de espera a su discreción.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membership and Account</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">You must be 16 years of age or older to register independently. Users under 16 require written consent from a parent or guardian.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">You are responsible for maintaining the confidentiality of your access credentials. Notify us immediately if you suspect unauthorised access to your account.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Accounts are personal and non-transferable. Sharing login credentials so that a third party may attend classes is not permitted.</li>
+                    </ul>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">4. Política de Cancelación</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;"><strong>Debes cancelar al menos 2 horas antes del inicio de la clase</strong> para recuperar tu crédito.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cancelaciones con menos de 2 horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Para cancelar, usa la sección "Próximas Clases" del portal antes del tiempo límite.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">3. Class Booking</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Classes may be booked through the portal subject to availability.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">A booking is confirmed only once a class credit or valid subscription has been applied.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">The Studio reserves the right to cancel or reschedule a class with reasonable notice. Any credit used will be refunded in such cases.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Maximum class capacity is set by the Studio; once full, a waiting list may be offered at its discretion.</li>
+                    </ul>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">5. Política de Créditos</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos tienen validez durante el período indicado en el momento de la compra. Los créditos caducados no son reembolsables.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos son personales y no pueden transferirse a otra cuenta.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El saldo de créditos es visible en tu portal bajo "Saldo".</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">4. Cancellation Policy</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;"><strong>You must cancel at least 2 hours before the class starts</strong> to recover your credit.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Cancellations made less than 2 hours before the class, or no-shows, will result in full credit deduction with no refund.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">To cancel, use the "Upcoming Classes" section of the portal before the deadline.</li>
+                    </ul>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">6. Pagos y Reembolsos</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Todos los precios incluyen los impuestos aplicables salvo que se indique lo contrario.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los paquetes de créditos no son reembolsables una vez adquiridos, excepto cuando lo exija la legislación de protección al consumidor.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuotas de suscripción se cobran de forma recurrente. Puedes cancelar en cualquier momento; la cancelación surte efecto al final del ciclo de facturación en curso.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no almacena datos completos de tarjetas de pago; todos los pagos se procesan a través de un proveedor con certificación PCI-DSS.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">5. Credits Policy</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Credits are valid for the period stated at the time of purchase. Expired credits are non-refundable.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Credits are personal and cannot be transferred to another account.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Your credit balance is visible in your portal under "Balance".</li>
+                    </ul>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">7. Salud y Responsabilidad</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">La participación en clases de Pilates conlleva riesgos inherentes. Confirmas que estás en condición física adecuada para participar y has buscado asesoramiento médico cuando fue necesario.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Aceptas informar al Estudio de cualquier lesión, condición médica o embarazo antes de unirte a una clase.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no será responsable de ninguna lesión, pérdida o daño derivados de la participación en clases, salvo que sean causados por negligencia propia del Estudio.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">6. Payments and Refunds</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">All prices include applicable taxes unless otherwise stated.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Credit packages are non-refundable once purchased, except where required by consumer protection law.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Subscription fees are charged on a recurring basis. You may cancel at any time; cancellation takes effect at the end of the current billing cycle.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">The Studio does not store full payment card data; all payments are processed through a PCI-DSS certified provider.</li>
+                    </ul>
 
-                <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">8. Privacidad</h3>
-                <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Recopilamos y tratamos datos personales conforme a nuestra Política de Privacidad.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Tus datos se utilizan exclusivamente para gestionar tu cuenta, procesar reservas y comunicarnos contigo sobre los servicios del Estudio.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">No vendemos ni compartimos tus datos personales con terceros con fines comerciales.</li>
-                    <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Puedes solicitar el acceso, corrección o eliminación de tus datos personales contactándonos en el Estudio.</li>
-                </ul>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">7. Health and Liability</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Participating in Pilates classes involves inherent risks. You confirm that you are in adequate physical condition to participate and have sought medical advice where necessary.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">You agree to inform the Studio of any injury, medical condition or pregnancy before joining a class.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">The Studio will not be liable for any injury, loss or damage arising from participation in classes, unless caused by the Studio's own negligence.</li>
+                    </ul>
 
-                <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: agosto 2026</p>
-                <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
-            </div>
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">8. Privacy</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">We collect and process personal data in accordance with our Privacy Policy.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Your data is used exclusively to manage your account, process bookings and communicate with you about Studio services.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">We do not sell or share your personal data with third parties for commercial purposes.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">You may request access, correction or deletion of your personal data by contacting the Studio.</li>
+                    </ul>
+
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Last updated: August 2026</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Back to sign up</a>
+                </div>
+            </t>
+
+            <t t-elif="request.lang.code == 'ca_ES'">
+                <div style="text-align:left;padding-bottom:1.5rem;">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Termes i Condicions</h1>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducció</h3>
+                    <p style="font-size:0.87rem;line-height:1.65;">Aquests Termes i Condicions ("Termes") regulen l'ús dels serveis de l'estudi de pilates CoreLab, incloses les reserves de classes, membresies, paquets de crèdits i el portal en línia proporcionat per Yoleyva Studio ("nosaltres", "el nostre", "l'Estudi"). En reservar una classe o activar un paquet, acceptes aquests Termes en la seva totalitat.</p>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membres i Compte</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Has de tenir 16 anys o més per registrar-te de manera independent. Els menors de 16 anys necessiten el consentiment escrit d'un pare, mare o tutor.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Ets responsable de mantenir la confidencialitat de les teves credencials d'accés. Notifica'ns immediatament si sospites d'accés no autoritzat al teu compte.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Els comptes són personals i intransferibles. No es permet compartir credencials d'accés perquè un tercer assisteixi a les classes.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">3. Reserva de Classes</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Les classes es poden reservar a través del portal segons la disponibilitat.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Una reserva es confirma únicament quan s'ha aplicat un crèdit de classe o una subscripció vàlida.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">L'Estudi es reserva el dret de cancel·lar o reprogramar una classe amb avís raonable. En aquest cas, es retornarà qualsevol crèdit utilitzat.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">L'aforament màxim per classe el determina l'Estudi; un cop ple, es pot oferir llista d'espera a la seva discreció.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">4. Política de Cancel·lació</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;"><strong>Has de cancel·lar almenys 2 hores abans de l'inici de la classe</strong> per recuperar el teu crèdit.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Les cancel·lacions amb menys de 2 hores d'antelació, o les absències, comportaran la deducció completa del crèdit sense reemborsament.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Per cancel·lar, utilitza la secció "Pròximes Classes" del portal abans del termini límit.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">5. Política de Crèdits</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Els crèdits tenen validesa durant el període indicat en el moment de la compra. Els crèdits caducats no són reemborsables.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Els crèdits són personals i no es poden transferir a un altre compte.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El saldo de crèdits és visible al teu portal sota "Saldo".</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">6. Pagaments i Reemborsaments</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Tots els preus inclouen els impostos aplicables llevat que s'indiqui el contrari.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Els paquets de crèdits no són reemborsables un cop adquirits, excepte quan ho exigeixi la legislació de protecció al consumidor.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Les quotes de subscripció es cobren de forma recurrent. Pots cancel·lar en qualsevol moment; la cancel·lació té efecte al final del cicle de facturació en curs.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">L'Estudi no emmagatzema dades completes de targetes de pagament; tots els pagaments es processen a través d'un proveïdor amb certificació PCI-DSS.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">7. Salut i Responsabilitat</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">La participació en classes de Pilates comporta riscos inherents. Confirmes que estàs en condició física adequada per participar i que has buscat assessorament mèdic quan ha estat necessari.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Acceptes informar l'Estudi de qualsevol lesió, condició mèdica o embaràs abans d'unir-te a una classe.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">L'Estudi no serà responsable de cap lesió, pèrdua o dany derivats de la participació en classes, llevat que siguin causats per negligència pròpia de l'Estudi.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">8. Privacitat</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Recollim i tractem dades personals d'acord amb la nostra Política de Privacitat.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Les teves dades s'utilitzen exclusivament per gestionar el teu compte, processar reserves i comunicar-nos amb tu sobre els serveis de l'Estudi.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">No venem ni compartim les teves dades personals amb tercers amb fins comercials.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Pots sol·licitar l'accés, correcció o eliminació de les teves dades personals posant-te en contacte amb l'Estudi.</li>
+                    </ul>
+
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Darrera actualització: agost 2026</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Tornar al registre</a>
+                </div>
+            </t>
+
+            <t t-else="">
+                <!-- Spanish (default) -->
+                <div style="text-align:left;padding-bottom:1.5rem;">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Términos y Condiciones</h1>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducción</h3>
+                    <p style="font-size:0.87rem;line-height:1.65;">Estos Términos y Condiciones ("Términos") rigen el uso de los servicios del estudio de pilates CoreLab, incluidas las reservas de clases, membresías, paquetes de créditos y el portal online proporcionado por Yoleyva Studio ("nosotros", "nos", "el Estudio"). Al reservar una clase o activar un paquete, aceptas estos Términos en su totalidad.</p>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membresía y Cuenta</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Debes tener 16 años o más para registrarte de forma independiente. Los menores de 16 años requieren consentimiento escrito de sus padres o tutores.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Eres responsable de mantener la confidencialidad de tus credenciales de acceso. Notifícanos de inmediato si sospechas de acceso no autorizado a tu cuenta.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuentas son personales e intransferibles. No está permitido compartir credenciales de acceso para que un tercero asista a clases.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">3. Reserva de Clases</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las clases pueden reservarse a través del portal según disponibilidad.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Una reserva se confirma únicamente cuando se ha aplicado un crédito de clase o una suscripción válida.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio se reserva el derecho de cancelar o reprogramar una clase con aviso razonable. En tal caso, se devolverá cualquier crédito utilizado.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El aforo máximo por clase lo establece el Estudio; una vez completo, puede ofrecerse lista de espera a su discreción.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">4. Política de Cancelación</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;"><strong>Debes cancelar al menos 2 horas antes del inicio de la clase</strong> para recuperar tu crédito.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cancelaciones con menos de 2 horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Para cancelar, usa la sección "Próximas Clases" del portal antes del tiempo límite.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">5. Política de Créditos</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos tienen validez durante el período indicado en el momento de la compra. Los créditos caducados no son reembolsables.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los créditos son personales y no pueden transferirse a otra cuenta.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El saldo de créditos es visible en tu portal bajo "Saldo".</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">6. Pagos y Reembolsos</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Todos los precios incluyen los impuestos aplicables salvo que se indique lo contrario.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Los paquetes de créditos no son reembolsables una vez adquiridos, excepto cuando lo exija la legislación de protección al consumidor.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Las cuotas de suscripción se cobran de forma recurrente. Puedes cancelar en cualquier momento; la cancelación surte efecto al final del ciclo de facturación en curso.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no almacena datos completos de tarjetas de pago; todos los pagos se procesan a través de un proveedor con certificación PCI-DSS.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">7. Salud y Responsabilidad</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">La participación en clases de Pilates conlleva riesgos inherentes. Confirmas que estás en condición física adecuada para participar y has buscado asesoramiento médico cuando fue necesario.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Aceptas informar al Estudio de cualquier lesión, condición médica o embarazo antes de unirte a una clase.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">El Estudio no será responsable de ninguna lesión, pérdida o daño derivados de la participación en clases, salvo que sean causados por negligencia propia del Estudio.</li>
+                    </ul>
+
+                    <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">8. Privacidad</h3>
+                    <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Recopilamos y tratamos datos personales conforme a nuestra Política de Privacidad.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Tus datos se utilizan exclusivamente para gestionar tu cuenta, procesar reservas y comunicarnos contigo sobre los servicios del Estudio.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">No vendemos ni compartimos tus datos personales con terceros con fines comerciales.</li>
+                        <li style="font-size:0.87rem;line-height:1.65;margin-bottom:0.35rem;">Puedes solicitar el acceso, corrección o eliminación de tus datos personales contactándonos en el Estudio.</li>
+                    </ul>
+
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: agosto 2026</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
+                </div>
+            </t>
+
         </t>
     </template>
 
     <!--
         Public Privacy Policy — placeholder. DO NOT publish until client/lawyer supplies legal text.
-        Route: /corelab/privacy-policy
     -->
-    <template id="public_privacy_policy" name="Privacy Policy (Public — Placeholder)">
+    <template id="public_privacy_policy" name="Privacy Policy (Public)">
         <t t-call="web.login_layout">
             <div style="text-align:left;padding-bottom:1.5rem;">
-                <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Política de Privacidad</h1>
-                <div class="alert alert-warning small mb-4">
-                    <strong>Aviso:</strong> El texto completo de la Política de Privacidad está pendiente de
-                    publicación. Para cualquier consulta sobre el tratamiento de tus datos, contáctanos en
-                    <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
-                </div>
-                <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) trata tus datos personales de conformidad con el Reglamento General de Protección de Datos (RGPD) y la normativa española aplicable. Los datos recogidos durante el registro se utilizan exclusivamente para gestionar tu cuenta y la prestación de nuestros servicios.</p>
-                <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: próximamente</p>
-                <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
+                <t t-if="request.lang.code == 'en_US'">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Privacy Policy</h1>
+                    <div class="alert alert-warning small mb-4">
+                        <strong>Notice:</strong> The full Privacy Policy is pending publication.
+                        For any questions about data processing, contact us at
+                        <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
+                    </div>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) processes your personal data in accordance with the General Data Protection Regulation (GDPR) and applicable Spanish legislation. Data collected during registration is used exclusively to manage your account and provide our services.</p>
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Last updated: coming soon</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Back to sign up</a>
+                </t>
+                <t t-elif="request.lang.code == 'ca_ES'">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Política de Privacitat</h1>
+                    <div class="alert alert-warning small mb-4">
+                        <strong>Avís:</strong> El text complet de la Política de Privacitat està pendent de
+                        publicació. Per a qualsevol consulta sobre el tractament de les teves dades, contacta'ns a
+                        <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
+                    </div>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) tracta les teves dades personals de conformitat amb el Reglament General de Protecció de Dades (RGPD) i la normativa espanyola aplicable. Les dades recollides durant el registre s'utilitzen exclusivament per gestionar el teu compte i la prestació dels nostres serveis.</p>
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Darrera actualització: pròximament</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Tornar al registre</a>
+                </t>
+                <t t-else="">
+                    <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Política de Privacidad</h1>
+                    <div class="alert alert-warning small mb-4">
+                        <strong>Aviso:</strong> El texto completo de la Política de Privacidad está pendiente de
+                        publicación. Para cualquier consulta sobre el tratamiento de tus datos, contáctanos en
+                        <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
+                    </div>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) trata tus datos personales de conformidad con el Reglamento General de Protección de Datos (RGPD) y la normativa española aplicable. Los datos recogidos durante el registro se utilizan exclusivamente para gestionar tu cuenta y la prestación de nuestros servicios.</p>
+                    <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: próximamente</p>
+                    <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
+                </t>
             </div>
         </t>
     </template>
