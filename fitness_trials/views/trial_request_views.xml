@@ -21,6 +21,7 @@
         <field name="status" widget="badge"/>
         <field name="occurrence_id" string="Slot" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
+        <field name="confirmation_email_sent" string="Email Sent" optional="show"/>
         <field name="lang" optional="hide"/>
       </list>
     </field>
@@ -32,6 +33,15 @@
     <field name="arch" type="xml">
       <form string="Trial Class Request">
         <header>
+          <button name="action_send_confirmation_email"
+                  string="Send Confirmation Email"
+                  type="object"
+                  class="btn-primary"
+                  invisible="status != 'scheduled' or confirmation_email_sent"/>
+          <button name="action_send_confirmation_email"
+                  string="Resend Confirmation"
+                  type="object"
+                  invisible="status != 'scheduled' or not confirmation_email_sent"/>
           <field name="status" widget="statusbar"
                  statusbar_visible="pending,contacted,scheduled,declined"/>
         </header>
@@ -56,6 +66,9 @@
               <field name="occurrence_id" string="Barre Class Slot"
                      invisible="class_interest != 'barre'"/>
               <field name="scheduled_datetime" string="Scheduled Date/Time"/>
+              <field name="confirmation_email_sent" string="Confirmation Email Sent" readonly="1"/>
+              <field name="confirmation_email_sent_date" string="Confirmation Sent On"
+                     readonly="1" invisible="not confirmation_email_sent"/>
               <field name="create_date" string="Request Received" readonly="1"/>
             </group>
           </group>

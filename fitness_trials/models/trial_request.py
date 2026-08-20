@@ -77,6 +77,12 @@ class FitnessTrialRequest(models.Model):
         compute='_compute_scheduled_datetime_display',
         store=False,
     )
+    confirmation_email_sent = fields.Boolean(
+        string='Confirmation Email Sent', default=False, copy=False
+    )
+    confirmation_email_sent_date = fields.Datetime(
+        string='Confirmation Sent On', readonly=True, copy=False
+    )
     create_date = fields.Datetime(string='Received On', readonly=True)
 
     @api.depends('scheduled_datetime', 'lang')
@@ -103,8 +109,7 @@ class FitnessTrialRequest(models.Model):
             if rec.class_interest == 'reformer':
                 pass  # held for admin review; no email at creation
             elif rec.status == 'scheduled':
-                # Barre with a pre-selected slot: confirm immediately
-                rec._send_scheduled_email()
+                # Barre with a pre-selected slot: notify admin; student confirmation is sent manually
                 rec._send_barre_admin_notification()
             else:
                 rec._send_pending_email()
@@ -117,25 +122,43 @@ class FitnessTrialRequest(models.Model):
             if pre_schedule:
                 vals = dict(vals, status='scheduled')
 
-        # Capture the "schedulable" state before write to detect transitions
-        prev = {}
+        # Capture previous statuses for post-write side effects
+        prev_status = {}
         if 'status' in vals or 'scheduled_datetime' in vals:
-            prev = {
-                r.id: (r.status == 'scheduled' and bool(r.scheduled_datetime))
-                for r in self
-            }
+            prev_status = {r.id: r.status for r in self}
+
         result = super().write(vals)
-        if prev:
-            for rec in self:
-                was = prev.get(rec.id, False)
-                is_now = (rec.status == 'scheduled' and bool(rec.scheduled_datetime))
-                if not was and is_now:
-                    rec._send_scheduled_email()
-            # Handle declined transition separately
+
+        if prev_status:
             if vals.get('status') == 'declined':
                 for rec in self:
                     rec._send_declined_email()
+
+            # Reset confirmation tracking whenever a record leaves 'scheduled'
+            reset_ids = [
+                r.id for r in self
+                if prev_status.get(r.id) == 'scheduled' and r.status != 'scheduled'
+            ]
+            if reset_ids:
+                self.env.cr.execute(
+                    "UPDATE fitness_trial_request "
+                    "SET confirmation_email_sent = FALSE, confirmation_email_sent_date = NULL "
+                    "WHERE id = ANY(%s)",
+                    [reset_ids],
+                )
+                self.browse(reset_ids).invalidate_recordset(
+                    ['confirmation_email_sent', 'confirmation_email_sent_date']
+                )
+
         return result
+
+    def action_send_confirmation_email(self):
+        self.ensure_one()
+        self._send_scheduled_email()
+        self.write({
+            'confirmation_email_sent': True,
+            'confirmation_email_sent_date': fields.Datetime.now(),
+        })
 
     def _send_pending_email(self):
         template = self.env.ref(
