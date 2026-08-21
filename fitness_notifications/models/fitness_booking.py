@@ -66,6 +66,7 @@ class FitnessBookingNotifications(models.Model):
             self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
             self._maybe_notify_credit_zero(booking)
+            self._maybe_notify_teacher_new_booking(booking)
         return bookings
 
     def _maybe_notify_credit_used(self, booking):
@@ -150,12 +151,62 @@ class FitnessBookingNotifications(models.Model):
             lang_env.env._('Running low on credits. Browse packages to top up.'),
         )
 
+    def _maybe_notify_teacher_new_booking(self, booking):
+        """Notify the class teacher when a student books into their class."""
+        event = booking.calendar_event_id
+        teacher = event.user_id if event else False
+        if not teacher:
+            return
+        student_name = booking.student_id.name or 'A student'
+        booked = event.booked_seats or 0
+        cap = event.capacity
+        lang_env = self.with_context(lang=teacher.lang or 'en_US')
+        if cap:
+            body = lang_env.env._('%s just booked in. %d/%d seats booked.',
+                                  student_name, booked, cap)
+        else:
+            body = lang_env.env._('%s just booked in. %d seat(s) booked.',
+                                  student_name, booked)
+        self.env['fitness.notification'].sudo()._create_for_user(
+            teacher.id,
+            'teacher_new_booking',
+            lang_env.env._('New booking: %s', event.name or 'class'),
+            body,
+            action_url=f'/my/instructor/classes/{event.id}',
+        )
+
     # ─── Booking cancelled ───────────────────────────────────────────────────────
 
     def action_cancel(self):
+        # Snapshot before super(): the admin late-cancel path may return a wizard
+        # action WITHOUT cancelling, so we only notify bookings that really moved
+        # to 'cancelled'. event/student are captured up front because the cancel
+        # may unlink links we still need for the message.
+        pending = [
+            (b, b.calendar_event_id, b.student_id)
+            for b in self if b.state == 'booked'
+        ]
         super().action_cancel()
         if self._notif_enabled('send_cancellation'):
             self._send_notification('fitness_notifications.mail_template_booking_cancellation')
+        for booking, event, student in pending:
+            if booking.state == 'cancelled':
+                self._maybe_notify_teacher_cancellation(booking, event, student)
+
+    def _maybe_notify_teacher_cancellation(self, booking, event, student):
+        """Notify the class teacher when a student cancels out of their class."""
+        teacher = event.user_id if event else False
+        if not teacher:
+            return
+        student_name = student.name or 'A student'
+        lang_env = self.with_context(lang=teacher.lang or 'en_US')
+        self.env['fitness.notification'].sudo()._create_for_user(
+            teacher.id,
+            'teacher_cancellation',
+            lang_env.env._('Cancellation: %s', event.name or 'class'),
+            lang_env.env._('%s cancelled their booking.', student_name),
+            action_url=f'/my/instructor/classes/{event.id}',
+        )
 
     # ─── Class reminder (cron) ──────────────────────────────────────────────────
 
@@ -310,3 +361,54 @@ class FitnessBookingNotifications(models.Model):
 
         due.write({'bell_reminder_sent': True})
         _logger.info("[NOTIFICATIONS] Bell reminders: notified %d student(s).", notified)
+
+    # ─── Teacher class reminder (cron, ~2h before start) ─────────────────────────
+
+    @api.model
+    def _cron_teacher_class_reminder(self):
+        """Remind teachers ~2h before their class; flags low attendance (<30% cap).
+
+        Dedup is by action_url rather than a flag field: this cron is driven by
+        calendar.event, which carries no per-teacher 'sent' marker, and the URL
+        uniquely identifies the event. Runs every 30 min against a 1h45–2h15
+        window so no class falls through the gap.
+        """
+        now = fields.Datetime.now()
+        window_start = now + timedelta(hours=1, minutes=45)
+        window_end = now + timedelta(hours=2, minutes=15)
+
+        events = self.env['calendar.event'].sudo().search([
+            ('is_fitness_class', '=', True),
+            ('user_id', '!=', False),
+            ('start', '>=', window_start),
+            ('start', '<=', window_end),
+        ])
+        Notif = self.env['fitness.notification'].sudo()
+        sent = 0
+        for event in events:
+            teacher = event.user_id
+            action_url = f'/my/instructor/classes/{event.id}'
+            recent = Notif.search([
+                ('user_id', '=', teacher.id),
+                ('notification_type', '=', 'teacher_class_reminder'),
+                ('action_url', '=', action_url),
+                ('create_date', '>=', now - timedelta(hours=4)),
+            ], limit=1)
+            if recent:
+                continue
+            booked = event.booked_seats or 0
+            cap = event.capacity
+            lang_env = self.with_context(lang=teacher.lang or 'en_US')
+            if cap and booked < int(cap * 0.3):
+                body = lang_env.env._('Low attendance: %d/%d spots filled.', booked, cap)
+            else:
+                body = lang_env.env._('%d student(s) booked in.', booked)
+            Notif._create_for_user(
+                teacher.id,
+                'teacher_class_reminder',
+                lang_env.env._('%s starts in ~2h', event.name or 'Your class'),
+                body,
+                action_url=action_url,
+            )
+            sent += 1
+        _logger.info("[NOTIFICATIONS] Teacher reminders: sent %d.", sent)

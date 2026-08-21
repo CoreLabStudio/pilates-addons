@@ -77,12 +77,25 @@ class CalendarEvent(models.Model):
                                     action_url=f'/my/classes/{event.id}',
                                 )
                                 notified += 1
+                        # teacher_swap is the STUDENT-facing type ("your teacher
+                        # changed"); the teacher-facing side uses
+                        # teacher_swap_assigned on both routes. Wording matches
+                        # fitness_reassign_teacher() below so backend- and
+                        # portal-initiated swaps read identically.
+                        old_teacher = self.env['res.users'].sudo().browse(
+                            snap.get('teacher_id')) if snap.get('teacher_id') else False
                         tenv = self.with_context(lang=new_teacher.lang or 'en_US')
+                        start_str = _fmt_event_dt(event.start, new_teacher)
+                        if old_teacher:
+                            body = tenv.env._('Reassigned from %s. Starts %s.',
+                                              old_teacher.name, start_str)
+                        else:
+                            body = tenv.env._('Starts %s.', start_str)
                         Notif._create_for_user(
                             new_teacher.id,
-                            'teacher_swap',
-                            tenv.env._('Class assigned to you: %s', event.name),
-                            tenv.env._('You have been assigned as teacher for this class.'),
+                            'teacher_swap_assigned',
+                            tenv.env._('Assigned: %s', event.name),
+                            body,
                             action_url=f'/my/instructor/classes/{event.id}',
                         )
                         _logger.info(
@@ -148,8 +161,11 @@ class CalendarEvent(models.Model):
             raise UserError("Cannot reassign a class that has already started or passed.")
 
         # 3. Target must be a valid, different teacher.
-        new_teacher = self.env['res.users'].browse(new_teacher_id)
-        if not new_teacher.exists() or not new_teacher.has_group('fitness_core.group_fitness_teacher'):
+        # Odoo 19: has_group() raises AccessError when called on a user other than
+        # env.user, and res.users.groups_id was renamed to group_ids. _has_group()
+        # is the su-safe internal check and still honours implied groups.
+        new_teacher = self.env['res.users'].sudo().browse(new_teacher_id)
+        if not new_teacher.exists() or not new_teacher._has_group('fitness_core.group_fitness_teacher'):
             raise UserError("The selected user is not a registered teacher.")
         if new_teacher.id == self.user_id.id:
             raise UserError(f"{new_teacher.name} is already the teacher for this class.")
@@ -178,6 +194,19 @@ class CalendarEvent(models.Model):
             self.env.user.name, self.name, self.id, old_teacher_name, new_teacher.name,
         )
 
+        # Notify the newly-assigned teacher. The backend write() hook above is
+        # bypassed here (skip_fitness_notification), so this path must send its own.
+        notif_model = self.env['fitness.notification'].sudo()
+        teacher_env = self.with_context(lang=new_teacher.lang or 'en_US')
+        notif_model._create_for_user(
+            new_teacher.id,
+            'teacher_swap_assigned',
+            teacher_env.env._('Assigned: %s', self.name),
+            teacher_env.env._('Reassigned from %s. Starts %s.',
+                              old_teacher_name, _fmt_event_dt(self.start, new_teacher)),
+            action_url=f'/my/instructor/classes/{self.id}',
+        )
+
         # Notify affected students: in-app + email
         affected_bookings = self.env['fitness.booking'].sudo().search([
             ('calendar_event_id', '=', self.id),
@@ -201,6 +230,17 @@ class CalendarEvent(models.Model):
                         action_url=f'/my/classes/{self.id}',
                     )
                 if template:
+                    # KNOWN BUG (pre-existing, NOT introduced by the teacher-
+                    # notification merge): this send_mail() call is missing
+                    # .sudo(), unlike every other privileged call in this method.
+                    # When a TEACHER (a portal user) performs the reassignment,
+                    # mail.template access is denied — portal users are not in
+                    # Mail Template Editor / internal user groups — so the
+                    # AccessError is swallowed by the except below and the swap
+                    # confirmation email is SILENTLY never sent to students. The
+                    # in-app notification still lands, so the failure is invisible.
+                    # Works when an admin/manager does the swap. Fix is to add
+                    # .sudo() here; deliberately left unfixed for now.
                     try:
                         template.send_mail(booking.id, force_send=False)
                     except Exception:

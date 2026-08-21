@@ -27,6 +27,11 @@ class FitnessNotification(models.Model):
         ('message_reply', 'New Message Reply'),
         ('billing_reminder', 'Subscription Renewal Reminder'),
         ('class_reminder', 'Class Reminder'),
+        # ─── Teacher-facing ─────────────────────────────────────────
+        ('teacher_new_booking', 'Student Booked Your Class'),
+        ('teacher_cancellation', 'Student Cancelled from Your Class'),
+        ('teacher_class_reminder', 'Class Reminder (Teacher)'),
+        ('teacher_swap_assigned', 'Assigned to New Class'),
     ], required=True, default='booking_confirmed')
     read = fields.Boolean(default=False, index=True)
     action_url = fields.Char("Action URL")

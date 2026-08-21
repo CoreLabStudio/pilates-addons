@@ -35,5 +35,17 @@
             <field name="active">True</field>
         </record>
 
+        <!-- Teacher reminder: fires every 30 min, notifies the teacher ~2h before
+             their class starts, flagging low attendance (<30% of capacity). -->
+        <record id="ir_cron_teacher_class_reminder" model="ir.cron">
+            <field name="name">Fitness: Teacher Class Reminders</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_teacher_class_reminder()</field>
+            <field name="interval_number">30</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
     </data>
 </odoo>
