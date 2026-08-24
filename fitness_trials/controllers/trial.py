@@ -26,8 +26,16 @@ _VALID_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
 _VALID_CLASS_INTERESTS = frozenset({'barre', 'reformer'})
 
 _STUDIO_TZ = pytz.timezone('Europe/Madrid')
-_DAYS_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-_MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+_DAY_NAMES = {
+    'en_US': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    'es_ES': ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+    'ca_ES': ['Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte', 'Diumenge'],
+}
+_MONTH_NAMES = {
+    'en_US': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    'es_ES': ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+    'ca_ES': ['gen', 'feb', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'des'],
+}
 
 
 def _check_rate_limit(ip: str) -> bool:
@@ -102,17 +110,19 @@ def _json_err(msg: str, status: int = 200):
     )
 
 
-def _format_event(ev) -> dict:
+def _format_event(ev, lang: str = 'es_ES') -> dict:
     """Convert a calendar.event record to a template-ready slot dict."""
     dt_local = ev.start.replace(tzinfo=pytz.UTC).astimezone(_STUDIO_TZ)
     duration = int((ev.stop - ev.start).total_seconds() // 60) if ev.stop else 0
     available = max(0, ev.capacity - ev.booked_seats) if ev.capacity else None
+    days   = _DAY_NAMES.get(lang, _DAY_NAMES['es_ES'])
+    months = _MONTH_NAMES.get(lang, _MONTH_NAMES['es_ES'])
     return {
         'id': ev.id,
         'name': ev.name,
-        'day': _DAYS_ES[dt_local.weekday()],
+        'day': days[dt_local.weekday()],
         'day_num': dt_local.day,
-        'month': _MONTHS_ES[dt_local.month - 1],
+        'month': months[dt_local.month - 1],
         'time': dt_local.strftime('%H:%M'),
         'duration': duration,
         'teacher': ev.user_id.name if ev.user_id and ev.user_id.login != 'OdooBot' else '',
@@ -126,15 +136,15 @@ class TrialRequestController(http.Controller):
 
     def _get_barre_slots(self) -> list:
         """Return formatted Barre class occurrences available in the next 14 days."""
+        lang = request.context.get('lang', 'es_ES')
         now = _odoo_fields.Datetime.now()
         events = request.env['calendar.event'].sudo().search([
             ('is_fitness_class', '=', True),
+            ('class_type_id.classroom_type', '=', 'barre'),
             ('start', '>', now),
             ('start', '<', now + timedelta(days=14)),
-        ], order='start asc').filtered(
-            lambda e: e.class_type_id.classroom_type == 'barre'
-        )
-        return [_format_event(ev) for ev in events]
+        ], order='start asc')
+        return [_format_event(ev, lang) for ev in events]
 
     def _get_date_filters(self, slots: list) -> list:
         """Return [{key, label}] for each unique slot date — used by date-filter pills."""
@@ -264,7 +274,7 @@ class TrialRequestController(http.Controller):
 
         submitted_slot = None
         if class_interest == 'barre' and occurrence:
-            submitted_slot = _format_event(occurrence)
+            submitted_slot = _format_event(occurrence, lang)
             vals.update({
                 'occurrence_id': occurrence.id,
                 'scheduled_datetime': occurrence.start,
