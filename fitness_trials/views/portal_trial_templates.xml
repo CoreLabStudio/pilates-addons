@@ -4,6 +4,9 @@
     <template id="trial_request_form" name="Trial Class Request Form">
         <t t-call="web.login_layout">
 
+            <!-- Resolve language once; used throughout for t-if/_elif/_else branches. -->
+            <t t-set="_lang" t-value="request.lang.code"/>
+
             <style>
                 .mv-slot-card {
                     cursor: pointer;
@@ -40,14 +43,23 @@
                 <div class="text-center mb-4 mt-2">
                     <div style="font-size:2rem;margin-bottom:0.75rem;">✓</div>
                     <t t-if="submitted_interest == 'reformer'">
-                        <h5 class="fw-semibold mb-2">Solicitud recibida</h5>
+                        <h5 class="fw-semibold mb-2">
+                            <t t-if="_lang == 'en_US'">Request received</t>
+                            <t t-elif="_lang == 'ca_ES'">Sol·licitud rebuda</t>
+                            <t t-else="">Solicitud recibida</t>
+                        </h5>
                         <p class="text-muted small mb-0">
-                            Hemos recibido tu solicitud de clase de prueba de Reformer.
-                            Nuestro equipo la revisará y se pondrá en contacto contigo pronto.
+                            <t t-if="_lang == 'en_US'">We have received your Reformer trial class request. Our team will review it and get in touch with you shortly.</t>
+                            <t t-elif="_lang == 'ca_ES'">Hem rebut la teva sol·licitud de classe de prova de Reformer. El nostre equip la revisarà i es posarà en contacte amb tu aviat.</t>
+                            <t t-else="">Hemos recibido tu solicitud de clase de prueba de Reformer. Nuestro equipo la revisará y se pondrá en contacto contigo pronto.</t>
                         </p>
                     </t>
                     <t t-else="">
-                        <h5 class="fw-semibold mb-2">¡Clase de prueba confirmada!</h5>
+                        <h5 class="fw-semibold mb-2">
+                            <t t-if="_lang == 'en_US'">Trial class confirmed!</t>
+                            <t t-elif="_lang == 'ca_ES'">Classe de prova confirmada!</t>
+                            <t t-else="">¡Clase de prueba confirmada!</t>
+                        </h5>
                         <t t-if="submitted_slot">
                             <p class="small fw-semibold mb-1" style="color:#4a4a4a;">
                                 <t t-esc="submitted_slot['name']"/>
@@ -61,20 +73,34 @@
                             </p>
                         </t>
                         <p class="text-muted small mb-0">
-                            Hemos enviado un email de confirmación a tu dirección.
+                            <t t-if="_lang == 'en_US'">We have sent a confirmation email to your address.</t>
+                            <t t-elif="_lang == 'ca_ES'">Hem enviat un correu de confirmació a la teva adreça.</t>
+                            <t t-else="">Hemos enviado un email de confirmación a tu dirección.</t>
                         </p>
                     </t>
                 </div>
                 <div class="text-center mt-3">
-                    <a href="/trial" class="btn btn-link btn-sm text-muted">Enviar otra solicitud</a>
+                    <a href="/trial" class="btn btn-link btn-sm text-muted">
+                        <t t-if="_lang == 'en_US'">Submit another request</t>
+                        <t t-elif="_lang == 'ca_ES'">Enviar una altra sol·licitud</t>
+                        <t t-else="">Enviar otra solicitud</t>
+                    </a>
                 </div>
             </t>
 
             <!-- ── Form state ───────────────────────────────────────────── -->
             <t t-else="">
                 <div class="text-center mb-4 mt-1">
-                    <h5 class="fw-semibold mb-1">Solicitar clase de prueba</h5>
-                    <p class="text-muted small mb-0">Elige el tipo de clase y rellena el formulario.</p>
+                    <h5 class="fw-semibold mb-1">
+                        <t t-if="_lang == 'en_US'">Request a trial class</t>
+                        <t t-elif="_lang == 'ca_ES'">Sol·licitar una classe de prova</t>
+                        <t t-else="">Solicitar clase de prueba</t>
+                    </h5>
+                    <p class="text-muted small mb-0">
+                        <t t-if="_lang == 'en_US'">Choose your class type and fill in the form.</t>
+                        <t t-elif="_lang == 'ca_ES'">Tria el tipus de classe i omple el formulari.</t>
+                        <t t-else="">Elige el tipo de clase y rellena el formulario.</t>
+                    </p>
                 </div>
 
                 <t t-if="error">
@@ -86,29 +112,49 @@
                 <form method="post" action="/trial/submit" class="mv-trial-form">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <!-- ── Contact fields ──────────────────────────────── -->
+                    <!-- ── Name ───────────────────────────────────────────── -->
                     <div class="mb-3">
-                        <label for="trial_name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <label for="trial_name" class="form-label">
+                            <t t-if="_lang == 'en_US'">Name</t>
+                            <t t-elif="_lang == 'ca_ES'">Nom</t>
+                            <t t-else="">Nombre</t>
+                            <span class="text-danger">*</span>
+                        </label>
                         <input type="text" id="trial_name" name="name" class="form-control"
                                required="required" autocomplete="name"
                                t-att-value="form_values.get('name', '')"/>
                     </div>
+
+                    <!-- ── Email ──────────────────────────────────────────── -->
                     <div class="mb-3">
-                        <label for="trial_email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <label for="trial_email" class="form-label">
+                            Email <span class="text-danger">*</span>
+                        </label>
                         <input type="email" id="trial_email" name="email" class="form-control"
                                required="required" autocomplete="email"
                                t-att-value="form_values.get('email', '')"/>
                     </div>
+
+                    <!-- ── Phone ──────────────────────────────────────────── -->
                     <div class="mb-3">
-                        <label for="trial_phone" class="form-label">Teléfono <span class="text-muted small">(opcional)</span></label>
+                        <label for="trial_phone" class="form-label">
+                            <t t-if="_lang == 'en_US'">Phone <span class="text-muted small">(optional)</span></t>
+                            <t t-elif="_lang == 'ca_ES'">Telèfon <span class="text-muted small">(opcional)</span></t>
+                            <t t-else="">Teléfono <span class="text-muted small">(opcional)</span></t>
+                        </label>
                         <input type="tel" id="trial_phone" name="phone" class="form-control"
                                autocomplete="tel"
                                t-att-value="form_values.get('phone', '')"/>
                     </div>
 
-                    <!-- ── Class interest ──────────────────────────────── -->
+                    <!-- ── Class interest ──────────────────────────────────── -->
                     <div class="mb-3">
-                        <label class="form-label">Tipo de clase <span class="text-danger">*</span></label>
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Class type</t>
+                            <t t-elif="_lang == 'ca_ES'">Tipus de classe</t>
+                            <t t-else="">Tipo de clase</t>
+                            <span class="text-danger">*</span>
+                        </label>
                         <div class="d-flex gap-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="class_interest"
@@ -129,15 +175,17 @@
                         </div>
                     </div>
 
-                    <!-- ── Barre section: live slot picker ────────────── -->
+                    <!-- ── Barre section: live slot picker ────────────────── -->
                     <div id="mv-barre-section" class="mv-trial-conditional d-none"
-                         t-att-data-lang="'ca_ES' if request.context.get('lang') == 'ca_ES' else 'es_ES'"
-                         t-att-data-today="'Avui' if request.context.get('lang') == 'ca_ES' else 'Hoy'"
-                         t-att-data-tomorrow="'Demà' if request.context.get('lang') == 'ca_ES' else 'Mañana'"
+                         t-att-data-lang="request.lang.code"
+                         t-att-data-today="'Today' if _lang == 'en_US' else ('Avui' if _lang == 'ca_ES' else 'Hoy')"
+                         t-att-data-tomorrow="'Tomorrow' if _lang == 'en_US' else ('Demà' if _lang == 'ca_ES' else 'Mañana')"
                     >
 
                         <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
-                            Selecciona tu clase de Barre
+                            <t t-if="_lang == 'en_US'">Select your Barre class</t>
+                            <t t-elif="_lang == 'ca_ES'">Selecciona la teva classe de Barre</t>
+                            <t t-else="">Selecciona tu clase de Barre</t>
                         </p>
 
                         <t t-if="barre_slots">
@@ -171,8 +219,9 @@
                         </t>
                         <t t-else="">
                             <div class="alert alert-light small text-center mb-3">
-                                No hay clases de Barre disponibles en los próximos 14 días.
-                                Contáctanos directamente para encontrar un horario.
+                                <t t-if="_lang == 'en_US'">No Barre classes available in the next 14 days. Contact us directly to find a suitable time.</t>
+                                <t t-elif="_lang == 'ca_ES'">No hi ha classes de Barre disponibles els pròxims 14 dies. Contacta'ns directament per trobar un horari.</t>
+                                <t t-else="">No hay clases de Barre disponibles en los próximos 14 días. Contáctanos directamente para encontrar un horario.</t>
                             </div>
                         </t>
 
@@ -183,16 +232,18 @@
 
                         <div class="mb-3 p-3 rounded" style="background:#f8f5f0;border:1px solid #e8e0d6;">
                             <p class="small mb-0" style="font-size:0.85rem;color:#4a4a4a;line-height:1.6;">
-                                Las clases de Reformer en CoreLab tienen aforo reducido y requieren una
-                                valoración previa. Por favor responde las preguntas de abajo — te
-                                contactaremos para confirmar disponibilidad.
+                                <t t-if="_lang == 'en_US'">Reformer classes at CoreLab have limited capacity and require a prior assessment. Please answer the questions below — we will get in touch to confirm availability.</t>
+                                <t t-elif="_lang == 'ca_ES'">Les classes de Reformer a CoreLab tenen aforament reduït i requereixen una valoració prèvia. Si us plau, respon les preguntes de sota — et contactarem per confirmar disponibilitat.</t>
+                                <t t-else="">Las clases de Reformer en CoreLab tienen aforo reducido y requieren una valoración previa. Por favor responde las preguntas de abajo — te contactaremos para confirmar disponibilidad.</t>
                             </p>
                         </div>
 
                         <!-- Q1: first time with Reformer? -->
                         <div class="mb-3">
                             <label class="form-label">
-                                ¿Es la primera vez que practicas Reformer Pilates?
+                                <t t-if="_lang == 'en_US'">Is this your first time practising Reformer Pilates?</t>
+                                <t t-elif="_lang == 'ca_ES'">És la primera vegada que practiques Reformer Pilates?</t>
+                                <t t-else="">¿Es la primera vez que practicas Reformer Pilates?</t>
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="d-flex gap-3">
@@ -200,7 +251,10 @@
                                     <input class="form-check-input" type="radio"
                                            name="reformer_is_first_time" id="rft_yes" value="yes"
                                            t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'yes' else None"/>
-                                    <label class="form-check-label" for="rft_yes">Sí</label>
+                                    <label class="form-check-label" for="rft_yes">
+                                        <t t-if="_lang == 'en_US'">Yes</t>
+                                        <t t-else="">Sí</t>
+                                    </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio"
@@ -214,22 +268,25 @@
                         <!-- Q2: years of experience — only shown when first-timer = No -->
                         <div id="mv-years-section" class="mb-3 d-none">
                             <label for="trial_reformer_years" class="form-label">
-                                ¿Cuántos años de experiencia tienes con Reformer Pilates?
+                                <t t-if="_lang == 'en_US'">How many years of Reformer Pilates experience do you have?</t>
+                                <t t-elif="_lang == 'ca_ES'">Quants anys d'experiència tens amb el Reformer Pilates?</t>
+                                <t t-else="">¿Cuántos años de experiencia tienes con Reformer Pilates?</t>
                             </label>
                             <input type="text" id="trial_reformer_years" name="reformer_years_experience"
                                    class="form-control" style="max-width:200px;"
-                                   placeholder="p.ej. 1, 3, 5+"
+                                   t-att-placeholder="'e.g. 1, 3, 5+' if _lang == 'en_US' else ('p.ex. 1, 3, 5+' if _lang == 'ca_ES' else 'p.ej. 1, 3, 5+')"
                                    t-att-value="form_values.get('reformer_years_experience', '')"/>
                         </div>
 
                         <!-- Preferred time (Reformer only) -->
                         <div class="mb-3">
                             <label for="trial_notes" class="form-label">
-                                Días / horarios preferidos
-                                <span class="text-muted small">(opcional)</span>
+                                <t t-if="_lang == 'en_US'">Preferred days / times <span class="text-muted small">(optional)</span></t>
+                                <t t-elif="_lang == 'ca_ES'">Dies / horaris preferits <span class="text-muted small">(opcional)</span></t>
+                                <t t-else="">Días / horarios preferidos <span class="text-muted small">(opcional)</span></t>
                             </label>
                             <textarea id="trial_notes" name="notes" class="form-control" rows="2"
-                                      placeholder="p.ej. Lunes tarde, sábado por la mañana…"><t t-esc="form_values.get('notes', '')"/></textarea>
+                                      t-att-placeholder="'e.g. Monday evening, Saturday morning…' if _lang == 'en_US' else ('p.ex. Dilluns a la tarda, dissabte al mat\xed…' if _lang == 'ca_ES' else 'p.ej. Lunes tarde, s\xe1bado por la ma\xf1ana…')"><t t-esc="form_values.get('notes', '')"/></textarea>
                         </div>
 
                     </div>
@@ -237,12 +294,15 @@
                     <!-- ── Submit ─────────────────────────────────────── -->
                     <div class="d-grid mt-2">
                         <button type="submit" id="mv-trial-submit" class="btn btn-primary" disabled="disabled">
-                            Enviar solicitud
+                            <t t-if="_lang == 'en_US'">Submit request</t>
+                            <t t-elif="_lang == 'ca_ES'">Envia la sol·licitud</t>
+                            <t t-else="">Enviar solicitud</t>
                         </button>
                     </div>
                     <p class="text-center small text-muted mt-3 mb-0">
-                        ¿Ya tienes cuenta?
-                        <a href="/web/login" class="text-decoration-none">Inicia sesión</a>
+                        <t t-if="_lang == 'en_US'">Already have an account? <a href="/web/login" class="text-decoration-none">Log in</a></t>
+                        <t t-elif="_lang == 'ca_ES'">Ja tens compte? <a href="/web/login" class="text-decoration-none">Inicia sessió</a></t>
+                        <t t-else="">¿Ya tienes cuenta? <a href="/web/login" class="text-decoration-none">Inicia sesión</a></t>
                     </p>
                 </form>
 
