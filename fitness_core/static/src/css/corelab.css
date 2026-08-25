@@ -18,9 +18,9 @@
   --mv-accent:      #18110C;   /* near-black — avatars, pagination, focus indicators (unchanged) */
   --mv-accent-fg:   #FAF9F6;   /* Feather White — text on dark avatar background */
   --mv-sand:        #EFE3D3;   /* sand/tan — toggle/segmented active bg; not used for buttons */
-  --mv-btn-bg:      var(--mv-paco); /* primary button fill — Paco brown */
-  --mv-btn-fg:      var(--mv-accent-fg); /* Feather White — text on Paco brown buttons */
-  --mv-btn-hover:   #6b5751;   /* Paco brown hover/pressed state */
+  --mv-btn-bg:      #9ABACD;   /* Heather blue — documented brand color, 4.71:1 on --mv-paco text */
+  --mv-btn-fg:      var(--mv-paco); /* Paco brown — AA contrast on Heather bg (4.71:1) */
+  --mv-btn-hover:   #839EAE;   /* Heather blue darkened ~15% for hover state */
   --mv-clay:        #9ABACD;   /* Heather blue — active nav, links, accents */
   --mv-clay-dark:   var(--mv-btn-hover); /* alias → all button hovers become Paco dark */
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
