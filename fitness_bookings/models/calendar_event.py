@@ -24,24 +24,41 @@ class CalendarEvent(models.Model):
         ):
             raise UserError("Only studio managers can cancel an entire class.")
 
+        if self.class_state == 'cancelled':
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Already Cancelled',
+                    'message': 'This class has already been cancelled.',
+                    'type': 'warning',
+                    'sticky': False,
+                },
+            }
+
+        self.write({'class_state': 'cancelled'})
+
         active_bookings = self.booking_ids.filtered(lambda b: b.state == 'booked')
         if not active_bookings:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': 'No Active Bookings',
-                    'message': 'There are no active bookings to cancel for this class.',
-                    'type': 'warning',
+                    'title': 'Class Cancelled',
+                    'message': 'Class marked as cancelled. No active bookings to process.',
+                    'type': 'success',
                     'sticky': False,
                 },
             }
 
         n = len(active_bookings)
-        # Bypass wizard and 2-hour check; always refund (studio-initiated)
+        # Bypass wizard and 2-hour check; always refund (studio-initiated).
+        # _class_cancelled=True tells fitness_notifications to skip the per-booking
+        # in-app bell — the class-level notification below handles student alerts.
         active_bookings.with_context(
             _admin_cancel_direct=True,
             admin_force_refund=True,
+            _class_cancelled=True,
         ).action_cancel()
 
         # In-app bell notifications

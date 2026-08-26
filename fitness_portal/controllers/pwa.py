@@ -12,12 +12,12 @@ BRAND_BG = '#FAF9F6'
 BRAND_THEME = '#18110C'
 
 LOGO_CANDIDATES = [
-    ('fitness_core/static/src/img/corelab-logo.png', 'image/png'),
+    ('fitness_core/static/src/img/corelab-logo-blue-square.png', 'image/png'),
 ]
 ICON_CANDIDATES = [
-    ('fitness_core/static/src/img/corelab-icon.png', 'image/png'),
+    ('fitness_core/static/src/img/corelab-logo-blue-square.png', 'image/png'),
     ('fitness_core/static/src/img/corelab-icon.svg', 'image/svg+xml'),
-    ('fitness_core/static/src/img/corelab-logo.png', 'image/png'),
+    ('fitness_core/static/src/img/corelab-logo-blue-square.png', 'image/png'),
 ]
 
 

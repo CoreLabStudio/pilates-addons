@@ -8,7 +8,7 @@
               inherit_id="web.login_layout">
         <xpath expr="//div[hasclass('border-bottom') and hasclass('pb-3')]" position="replace">
             <div class="mv-login-logo">
-                <img src="/fitness_core/static/src/img/corelab-logo-header.png"
+                <img src="/fitness_core/static/src/img/corelab-logo-blue.png"
                      alt="CoreLab"
                      style="height:80px;width:auto;display:block;margin:0 auto;flex-shrink:0;"/>
             </div>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Student / Teacher profile: stat buttons on the res.users admin form ── -->
+    <!--                                                                            -->
+    <!-- Student buttons (share=True  = portal users):                             -->
+    <!--   Bookings · Packages · Memberships · Messages                            -->
+    <!--                                                                            -->
+    <!-- Teacher buttons (share=False + fitness_is_teacher=True):                  -->
+    <!--   Classes (taught) · Messages                                             -->
+    <!--                                                                            -->
+    <!-- Access restricted to Fitness Studio Managers in both cases.               -->
+
+    <record id="view_users_form_fitness_student" model="ir.ui.view">
+        <field name="name">res.users.form.fitness.student</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Load these fields so invisible expressions can reference their values -->
+            <xpath expr="//sheet" position="before">
+                <field name="fitness_is_teacher" invisible="True"/>
+                <field name="share" invisible="True"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+
+                <!-- ── Student buttons (portal users who are NOT teachers) ─── -->
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_student_bookings"
+                        icon="fa-calendar-check-o"
+                        invisible="not share or fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View booking history">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Bookings</span>
+                    </div>
+                </button>
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_student_packages"
+                        icon="fa-ticket"
+                        invisible="not share or fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View class packages">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Packages</span>
+                    </div>
+                </button>
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_student_subscriptions"
+                        icon="fa-rotate-right"
+                        invisible="not share or fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View memberships">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Memberships</span>
+                    </div>
+                </button>
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_student_messages"
+                        icon="fa-comments"
+                        invisible="not share or fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View messages">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Messages</span>
+                    </div>
+                </button>
+
+                <!-- ── Teacher buttons (internal users in teacher group only) ── -->
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_teacher_classes"
+                        icon="fa-calendar"
+                        invisible="not fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View classes this teacher teaches">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Classes</span>
+                    </div>
+                </button>
+
+                <button class="oe_stat_button" type="object"
+                        name="action_view_student_messages"
+                        icon="fa-comments"
+                        invisible="not fitness_is_teacher"
+                        groups="fitness_core.group_fitness_manager"
+                        title="View messages">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Messages</span>
+                    </div>
+                </button>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -21,7 +21,7 @@
         <t t-set="_mv_sname" t-value="student_name if student_name else (request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else '')"/>
         <header class="mv-header">
             <a href="/my/home" class="mv-wordmark" title="CoreLab">
-                <img src="/fitness_core/static/src/img/corelab-logo-header.png"
+                <img src="/fitness_core/static/src/img/corelab-logo-blue.png"
                      alt="CoreLab"
                      style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>
@@ -65,7 +65,7 @@
         <t t-set="_mv_tname" t-value="request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else ''"/>
         <header class="mv-header">
             <a href="/my/instructor/classes" class="mv-wordmark" title="CoreLab">
-                <img src="/fitness_core/static/src/img/corelab-logo-header.png"
+                <img src="/fitness_core/static/src/img/corelab-logo-blue.png"
                      alt="CoreLab"
                      style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>
@@ -1407,50 +1407,112 @@
                         </div>
                     </div>
 
-                    <form method="post" id="mv-payment-form"
-                          t-attf-action="/my/packages/#{product.id}/checkout">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <!-- ── Online payment (Stripe) path ── -->
+                    <t t-if="use_online_payment">
+                        <form method="post" id="mv-payment-form"
+                              t-attf-action="/my/packages/#{product.id}/checkout">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                        <p class="mv-panel-label" style="padding:0 2px;">Choose payment method</p>
+                            <div class="mv-spacer-8"/>
 
-                        <!-- Bizum -->
-                        <div class="mv-paymethod">
-                            <label class="mv-paymethod-head">
-                                <input type="radio" name="payment_method" value="bizum"
-                                       t-att-checked="'checked' if selected_method == 'bizum' else None"/>
-                                <span class="mv-paymethod-name">Bizum</span>
+                            <label class="mv-terms-row">
+                                <input type="checkbox" name="terms_accepted" value="1" id="mv-terms-check"/>
+                                <span><span t-out="terms_label"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}/checkout"><t t-out="terms_link_label"/></a></span>
                             </label>
-                            <dl class="mv-paymethod-detail">
-                                <dt>Send your payment to</dt>
-                                <dd t-out="payment_details['bizum_phone']"/>
-                            </dl>
-                        </div>
 
-                        <!-- Bank transfer -->
-                        <div class="mv-paymethod">
-                            <label class="mv-paymethod-head">
-                                <input type="radio" name="payment_method" value="transfer"
-                                       t-att-checked="'checked' if selected_method == 'transfer' else None"/>
-                                <span class="mv-paymethod-name">Bank Transfer</span>
+                            <button type="submit" class="mv-btn-primary-lg"
+                                    id="mv-payment-next" disabled="disabled">
+                                Pay online
+                            </button>
+                        </form>
+                    </t>
+
+                    <!-- ── Manual payment fallback (no Stripe configured) ── -->
+                    <t t-else="">
+                        <form method="post" id="mv-payment-form"
+                              t-attf-action="/my/packages/#{product.id}/checkout">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                            <p class="mv-panel-label" style="padding:0 2px;">Choose payment method</p>
+
+                            <!-- Bizum -->
+                            <div class="mv-paymethod">
+                                <label class="mv-paymethod-head">
+                                    <input type="radio" name="payment_method" value="bizum"
+                                           t-att-checked="'checked' if selected_method == 'bizum' else None"/>
+                                    <span class="mv-paymethod-name">Bizum</span>
+                                </label>
+                                <dl class="mv-paymethod-detail">
+                                    <dt>Send your payment to</dt>
+                                    <dd t-out="payment_details['bizum_phone']"/>
+                                </dl>
+                            </div>
+
+                            <!-- Bank transfer -->
+                            <div class="mv-paymethod">
+                                <label class="mv-paymethod-head">
+                                    <input type="radio" name="payment_method" value="transfer"
+                                           t-att-checked="'checked' if selected_method == 'transfer' else None"/>
+                                    <span class="mv-paymethod-name">Bank Transfer</span>
+                                </label>
+                                <dl class="mv-paymethod-detail">
+                                    <dt>Account holder</dt>
+                                    <dd t-out="payment_details['bank_holder']"/>
+                                    <dt>IBAN</dt>
+                                    <dd t-out="payment_details['bank_iban']"/>
+                                </dl>
+                            </div>
+
+                            <div class="mv-spacer-8"/>
+
+                            <label class="mv-terms-row">
+                                <input type="checkbox" name="terms_accepted" value="1" id="mv-terms-check"/>
+                                <span><span t-out="terms_label"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}/checkout"><t t-out="terms_link_label"/></a></span>
                             </label>
-                            <dl class="mv-paymethod-detail">
-                                <dt>Account holder</dt>
-                                <dd t-out="payment_details['bank_holder']"/>
-                                <dt>IBAN</dt>
-                                <dd t-out="payment_details['bank_iban']"/>
-                            </dl>
+
+                            <button type="submit" class="mv-btn-primary-lg"
+                                    id="mv-payment-next" disabled="disabled">Next</button>
+                        </form>
+                    </t>
+                </div>
+
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Online payment page (Stripe) ──────────────────────────────────── -->
+    <template id="portal_packages_pay" name="Package — Online Payment">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="back_url"/>
+                <t t-set="_back_label">Back</t>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-checkout">
+                    <!-- Order summary -->
+                    <div class="mv-panel" style="margin-bottom:16px;">
+                        <p class="mv-panel-label">Order summary</p>
+                        <div class="mv-summary-row">
+                            <p class="mv-summary-name" t-out="product.name if product else order.name"/>
+                            <span class="mv-summary-total">
+                                <t t-esc="'%.2f' % amount"/> <t t-esc="currency.symbol or '€'"/>
+                            </span>
                         </div>
+                    </div>
 
-                        <div class="mv-spacer-8"/>
-
-                        <label class="mv-terms-row">
-                            <input type="checkbox" name="terms_accepted" value="1" id="mv-terms-check"/>
-                            <span><span t-out="terms_label"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}/checkout"><t t-out="terms_link_label"/></a></span>
-                        </label>
-
-                        <button type="submit" class="mv-btn-primary-lg"
-                                id="mv-payment-next" disabled="disabled">Next</button>
-                    </form>
+                    <!-- Odoo payment form (Stripe Elements + Bizum) -->
+                    <div style="background:var(--mv-card);border-radius:16px;padding:20px 16px;">
+                        <p class="mv-panel-label" style="margin-bottom:12px;">Pay securely</p>
+                        <t t-call="payment.form">
+                            <t t-set="reference_prefix" t-value="'PKG-' + str(order.id)"/>
+                        </t>
+                    </div>
                 </div>
 
                 <t t-call="fitness_portal.mv_bottom_nav"/>

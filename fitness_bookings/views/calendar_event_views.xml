@@ -14,7 +14,7 @@
                         type="object"
                         class="btn-danger"
                         groups="fitness_core.group_fitness_manager"
-                        invisible="not is_fitness_class"
+                        invisible="not is_fitness_class or class_state == 'cancelled'"
                         confirm="This will cancel ALL active bookings and return credits to students. Continue?"/>
             </xpath>
         </field>

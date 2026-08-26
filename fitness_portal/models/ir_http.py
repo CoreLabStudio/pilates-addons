@@ -11,25 +11,17 @@ class IrHttp(models.AbstractModel):
     def _get_mv_lang(cls):
         mv_lang = request.cookies.get('mv_lang')
         if not mv_lang or mv_lang not in _PORTAL_LANGS:
-            # During test runs keep the default Odoo behaviour (no forced lang).
             if tools.config.get('test_enable'):
                 return None
-            # Real visitors with no explicit preference default to Spanish.
             mv_lang = 'es_ES'
         return request.env['res.lang']._get_data(code=mv_lang)
 
     @classmethod
     def _pre_dispatch(cls, rule, args):
         super()._pre_dispatch(rule, args)
-        # _frontend_pre_dispatch handles frontend routes already.
-        # For non-frontend auth='none' routes like /web/login, apply mv_lang here.
-        if not getattr(request, 'is_frontend', False):
-            try:
-                lang_data = cls._get_mv_lang()
-                if lang_data:
-                    request.update_context(lang=lang_data.code)
-            except Exception:
-                pass
+        # Portal language (mv_lang) applies only to frontend routes via
+        # _frontend_pre_dispatch below. Do NOT override language for backend
+        # routes — admins manage their language via their user preferences.
 
     @classmethod
     def _frontend_pre_dispatch(cls):
@@ -38,5 +30,4 @@ class IrHttp(models.AbstractModel):
         if lang_data:
             request.lang = lang_data
             request.update_context(lang=lang_data.code)
-            # Sync frontend_lang cookie so _match picks the right lang next request.
             request.future_response.set_cookie('frontend_lang', lang_data.code)

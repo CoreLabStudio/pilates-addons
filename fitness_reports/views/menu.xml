@@ -10,7 +10,7 @@
         id="menu_fitness_reports_root"
         name="Reports"
         parent="fitness_core.menu_fitness_root"
-        sequence="50"
+        sequence="70"
         groups="fitness_core.group_fitness_manager"
     />
 

@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Membership Sales — active member agreements, under Bookings dropdown -->
+    <!-- Membership Sales — active member agreements, under Students dropdown -->
     <menuitem
         id="menu_fitness_subscriptions"
         name="Membership Sales"
         parent="fitness_core.menu_group_bookings"
         action="action_fitness_subscriptions"
         sequence="25"
+    />
+
+    <!-- Membership Balances — live credit + weekly-usage summary per student -->
+    <menuitem
+        id="menu_fitness_membership_balances"
+        name="Membership Balances"
+        parent="fitness_core.menu_group_bookings"
+        action="action_fitness_membership_balances"
+        sequence="26"
     />
 
     <!-- Membership Plans — subscription product templates, under Catalog dropdown -->

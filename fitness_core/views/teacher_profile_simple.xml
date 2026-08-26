@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Simplified teacher profile form ────────────────────────────────────── -->
+    <!--                                                                            -->
+    <!-- Standalone (no inherit_id) so it is NOT affected by any inheritance on    -->
+    <!-- base.view_users_form. Pinned explicitly to action_fitness_teacher_list    -->
+    <!-- via view_ids. priority=32 ensures it never auto-wins over the technical   -->
+    <!-- form (priority=16) when no pin is active.                                 -->
+
+    <record id="view_teacher_profile_simple" model="ir.ui.view">
+        <field name="name">res.users.form.teacher.simple</field>
+        <field name="model">res.users</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <form string="Teacher" create="0">
+                <sheet>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_teacher_classes"
+                                icon="fa-calendar"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Classes</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_student_messages"
+                                icon="fa-comments"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Messages</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <field name="image_1920" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image_128'}" readonly="1"/>
+                    <div class="oe_title">
+                        <field name="name" readonly="1"/>
+                    </div>
+                    <group>
+                        <field name="email" string="Email" readonly="1"/>
+                        <field name="phone" string="Phone" readonly="1"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

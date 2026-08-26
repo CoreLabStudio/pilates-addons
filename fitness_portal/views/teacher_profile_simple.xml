@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Simplified teacher profile form ────────────────────────────────────── -->
+    <!--                                                                            -->
+    <!-- Lives in fitness_portal so all button methods (action_view_teacher_classes -->
+    <!-- action_view_student_messages) are already on res.users at load time.       -->
+    <!-- After this file loads, the action in fitness_core is re-pinned to use      -->
+    <!-- this view instead of base.view_users_form.                                 -->
+
+    <record id="view_teacher_profile_simple" model="ir.ui.view">
+        <field name="name">res.users.form.teacher.simple</field>
+        <field name="model">res.users</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <form string="Teacher" create="0">
+                <sheet>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_teacher_classes"
+                                icon="fa-calendar"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Classes</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_student_messages"
+                                icon="fa-comments"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Messages</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <field name="image_1920" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image_128'}" readonly="1"/>
+                    <div class="oe_title">
+                        <field name="name" readonly="1"/>
+                    </div>
+                    <group>
+                        <field name="email" string="Email" readonly="1"/>
+                        <field name="phone" string="Phone" readonly="1"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Re-pin the teacher list action (defined in fitness_core) to the simplified -->
+    <!-- teacher profile view defined above, instead of base.view_users_form.        -->
+
+    <record id="fitness_core.action_fitness_teacher_list" model="ir.actions.act_window">
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': ref('fitness_core.view_fitness_teacher_list')}),
+            (0, 0, {'sequence': 20, 'view_mode': 'form', 'view_id': ref('fitness_portal.view_teacher_profile_simple')}),
+        ]"/>
+    </record>
+
+</odoo>

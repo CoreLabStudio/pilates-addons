@@ -11,6 +11,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     fitness_payment_method = fields.Selection([
+        ('stripe', 'Stripe (Online)'),
         ('bizum', 'Bizum'),
         ('transfer', 'Bank Transfer'),
     ], string="Portal Payment Method", copy=False,

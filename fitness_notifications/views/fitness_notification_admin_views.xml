@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ──────────────────────────────────────────────────────────── -->
+
+    <record id="view_fitness_notification_list" model="ir.ui.view">
+        <field name="name">fitness.notification.list</field>
+        <field name="model">fitness.notification</field>
+        <field name="arch" type="xml">
+            <list string="Notifications" default_order="create_date desc"
+                  decoration-muted="is_read == True">
+                <field name="create_date" string="Sent" readonly="1"/>
+                <field name="user_id" string="Recipient" readonly="1"/>
+                <field name="title" string="Title" readonly="1"/>
+                <field name="notification_type" string="Type" widget="badge"
+                       decoration-info="notification_type in ('booking_confirmed','purchase_completed')"
+                       decoration-warning="notification_type in ('credit_low','credit_expiring','billing_reminder','class_reminder')"
+                       decoration-danger="notification_type in ('booking_cancelled','credit_zero')"
+                       decoration-success="notification_type == 'teacher_swap'"
+                       readonly="1"/>
+                <field name="is_read" string="Read" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ──────────────────────────────────────────────────────────── -->
+
+    <record id="view_fitness_notification_form" model="ir.ui.view">
+        <field name="name">fitness.notification.form</field>
+        <field name="model">fitness.notification</field>
+        <field name="arch" type="xml">
+            <form string="Notification" edit="0">
+                <sheet>
+                    <group>
+                        <group string="Recipient">
+                            <field name="user_id" readonly="1"/>
+                            <field name="is_read" readonly="1"/>
+                        </group>
+                        <group string="Type">
+                            <field name="notification_type" readonly="1" widget="badge"/>
+                            <field name="create_date" readonly="1" string="Sent At"/>
+                        </group>
+                    </group>
+                    <group string="Content">
+                        <field name="title" readonly="1" nolabel="1"/>
+                        <field name="body" readonly="1" nolabel="1" widget="text"/>
+                    </group>
+                    <group string="Link" invisible="not action_url">
+                        <field name="action_url" readonly="1" nolabel="1" widget="url"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search view ────────────────────────────────────────────────────────── -->
+
+    <record id="view_fitness_notification_search" model="ir.ui.view">
+        <field name="name">fitness.notification.search</field>
+        <field name="model">fitness.notification</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="title" string="Title"/>
+                <field name="user_id" string="Recipient"/>
+                <separator/>
+                <filter string="Unread" name="filter_unread" domain="[('is_read', '=', False)]"/>
+                <filter string="Read" name="filter_read" domain="[('is_read', '=', True)]"/>
+                <separator/>
+                <filter string="Teacher Swap" name="filter_swap"
+                        domain="[('notification_type', '=', 'teacher_swap')]"/>
+                <filter string="Booking" name="filter_booking"
+                        domain="[('notification_type', 'in', ['booking_confirmed', 'booking_cancelled'])]"/>
+                <filter string="Credits" name="filter_credit"
+                        domain="[('notification_type', 'in', ['credit_low', 'credit_expiring', 'credit_used', 'credit_zero'])]"/>
+                <group>
+                    <filter string="Recipient" name="group_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Type" name="group_type"
+                            context="{'group_by': 'notification_type'}"/>
+                    <filter string="Month" name="group_month"
+                            context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action (base — no domain; dashboard uses it with domain override) ─── -->
+
+    <record id="action_fitness_notification_admin" model="ir.actions.act_window">
+        <field name="name">Notifications</field>
+        <field name="res_model">fitness.notification</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': ref('fitness_notifications.view_fitness_notification_list')}),
+            (0, 0, {'sequence': 20, 'view_mode': 'form', 'view_id': ref('fitness_notifications.view_fitness_notification_form')}),
+        ]"/>
+    </record>
+
+</odoo>

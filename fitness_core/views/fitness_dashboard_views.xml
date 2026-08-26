@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Dashboard form view ──────────────────────────────────────────────── -->
+
+    <record id="view_fitness_admin_dashboard_form" model="ir.ui.view">
+        <field name="name">fitness.admin.dashboard.form</field>
+        <field name="model">fitness.admin.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard" create="0">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_today_classes"
+                                icon="fa-calendar-check-o">
+                            <field name="today_classes" widget="statinfo"
+                                   string="Classes Today"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_students"
+                                icon="fa-users">
+                            <field name="active_students" widget="statinfo"
+                                   string="Students"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_pending_trials"
+                                icon="fa-user-plus">
+                            <field name="pending_trials" widget="statinfo"
+                                   string="Pending Trials"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_unread_messages"
+                                icon="fa-comments">
+                            <field name="unread_messages" widget="statinfo"
+                                   string="Unread Messages"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_pending_swaps"
+                                icon="fa-exchange">
+                            <field name="pending_swaps" widget="statinfo"
+                                   string="Teacher Swaps"/>
+                        </button>
+                    </div>
+                    <div class="oe_title mt16">
+                        <h1>CoreLab Studio</h1>
+                        <h3 class="text-muted">Admin Dashboard</h3>
+                    </div>
+
+                    <!-- ── Preview panels ──────────────────────────────────── -->
+
+                    <div class="row mt24">
+                        <div class="col-lg-8 col-12 mb-3">
+                            <div class="card h-100">
+                                <div class="card-header fw-bold">
+                                    <i class="fa fa-calendar me-2"/>Today's Classes
+                                </div>
+                                <div class="card-body p-2">
+                                    <field name="preview_classes_html"
+                                           widget="html" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-12 mb-3">
+                            <div class="card h-100">
+                                <div class="card-header fw-bold">
+                                    <i class="fa fa-user-plus me-2"/>Pending Trials
+                                </div>
+                                <div class="card-body p-2">
+                                    <field name="preview_trials_html"
+                                           widget="html" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-12 mb-3">
+                            <div class="card">
+                                <div class="card-header fw-bold">
+                                    <i class="fa fa-comments me-2"/>Messages Awaiting Reply
+                                </div>
+                                <div class="card-body p-2">
+                                    <field name="preview_messages_html"
+                                           widget="html" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Server action — creates a fresh dashboard record on each visit ───── -->
+
+    <record id="action_open_fitness_dashboard" model="ir.actions.server">
+        <field name="name">Home</field>
+        <field name="model_id" ref="fitness_core.model_fitness_admin_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+rec = env['fitness.admin.dashboard'].create({})
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Home',
+    'res_model': 'fitness.admin.dashboard',
+    'res_id': rec.id,
+    'view_mode': 'form',
+    'views': [(False, 'form')],
+    'target': 'current',
+    'flags': {'mode': 'readonly'},
+}
+        </field>
+    </record>
+
+</odoo>

@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Notifications – Yoleyva Studio',
-    'version': '19.0.1.3.0',
+    'version': '19.0.1.4.0',
     'category': 'Services',
     'summary': 'Email and in-app notifications for booking lifecycle, credit status, and teacher changes',
     'author': 'Yoleyva Studio',
@@ -15,6 +15,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'views/fitness_notification_admin_views.xml',
         'data/mail_templates.xml',
         'data/mail_template_credit.xml',
         'data/ir_config_parameter.xml',
