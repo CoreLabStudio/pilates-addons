@@ -1727,6 +1727,24 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-stat-card:hover { text-decoration: none; }
 .mv-stat-card:active { transform: scale(0.97); opacity: 0.86; }
+
+/* Tap affordance — small Heather-blue chevron marks these cards as navigable.
+   Purely additive: absolutely positioned, so card bg/border/text/layout are untouched. */
+.mv-stat-card,
+.mv-credit-pager { position: relative; }
+.mv-stat-card::after,
+.mv-credit-pager::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid var(--mv-clay);
+  border-right: 1.5px solid var(--mv-clay);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
 .mv-stat-label {
   font-size: 0.67rem;
   font-weight: 700;
