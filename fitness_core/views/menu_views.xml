@@ -1,65 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Root app menu (Yoleyva home screen icon) -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Yoleyva / CoreLab Studio — admin menu structure
+         8 top-level sections under the root app icon.
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Root app menu (home screen icon) -->
     <menuitem
         id="menu_fitness_root"
-        name="Yoleyva"
+        name="CoreLab"
+        web_icon="fitness_core,static/description/icon.png"
         sequence="100"
     />
 
-    <!-- ── Top-level items under Yoleyva root ──────────────────────────────── -->
+    <!-- ─────────────────────────────────────────────────────────────────────
+         1. Home — dashboard (server action creates a fresh transient record)
+         ───────────────────────────────────────────────────────────────────── -->
 
-    <!-- 1. Schedule — direct action, most-used, stays at top level -->
+    <menuitem
+        id="menu_fitness_home"
+        name="Home"
+        parent="menu_fitness_root"
+        action="fitness_core.action_open_fitness_dashboard"
+        sequence="10"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- ─────────────────────────────────────────────────────────────────────
+         2. Trials — parent defined here; sub-items added by fitness_trials
+         ───────────────────────────────────────────────────────────────────── -->
+
+    <menuitem
+        id="menu_fitness_trials_root"
+        name="Trials"
+        parent="menu_fitness_root"
+        sequence="20"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- ─────────────────────────────────────────────────────────────────────
+         3. Classes & Schedule
+         ───────────────────────────────────────────────────────────────────── -->
+
+    <menuitem
+        id="menu_fitness_classes_root"
+        name="Classes"
+        parent="menu_fitness_root"
+        sequence="30"
+        groups="fitness_core.group_fitness_manager"
+    />
+
     <menuitem
         id="menu_fitness_schedule"
         name="Schedule"
-        parent="menu_fitness_root"
+        parent="menu_fitness_classes_root"
         action="fitness_core.action_fitness_schedule"
         sequence="10"
     />
 
-    <!-- 2. Bookings group — dropdown; children added by fitness_bookings + fitness_packages -->
+    <!-- ─────────────────────────────────────────────────────────────────────
+         4. Students — renamed from old "Bookings" group.
+              All fitness_bookings / fitness_packages / fitness_subscriptions
+              / fitness_portal children still reference this same XML ID
+              (menu_group_bookings) and will appear here automatically.
+         ───────────────────────────────────────────────────────────────────── -->
+
     <menuitem
         id="menu_group_bookings"
-        name="Bookings"
+        name="Students"
         parent="menu_fitness_root"
+        sequence="40"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- ─────────────────────────────────────────────────────────────────────
+         5. Teachers — NEW section
+         ───────────────────────────────────────────────────────────────────── -->
+
+    <menuitem
+        id="menu_fitness_teachers_root"
+        name="Teachers"
+        parent="menu_fitness_root"
+        sequence="50"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_teacher_list"
+        name="Teacher List"
+        parent="menu_fitness_teachers_root"
+        action="fitness_core.action_fitness_teacher_list_server"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_fitness_teacher_classes"
+        name="Assigned Classes"
+        parent="menu_fitness_teachers_root"
+        action="fitness_core.action_fitness_teacher_classes"
         sequence="20"
     />
 
-    <!-- 3. Catalog group — dropdown; children added by fitness_packages + fitness_subscriptions -->
+    <!-- ─────────────────────────────────────────────────────────────────────
+         6. Catalog — renamed from old "Catalog" group (same XML ID).
+              fitness_packages + fitness_subscriptions children still reference
+              menu_group_catalog and appear here automatically.
+         ───────────────────────────────────────────────────────────────────── -->
+
     <menuitem
         id="menu_group_catalog"
         name="Catalog"
         parent="menu_fitness_root"
-        sequence="30"
-    />
-
-    <!-- 4. Content group — News & Promotions posts -->
-    <menuitem
-        id="menu_group_content"
-        name="Content"
-        parent="menu_fitness_root"
-        sequence="35"
+        sequence="60"
+        groups="fitness_core.group_fitness_manager"
     />
 
     <menuitem
-        id="menu_fitness_news_posts"
-        name="News &amp; Promotions"
-        parent="menu_group_content"
-        action="action_fitness_news_post"
-        sequence="10"
-    />
-
-    <!-- 5. Configuration group — dropdown; children below -->
-    <menuitem
-        id="menu_group_configuration"
-        name="Configuration"
-        parent="menu_fitness_root"
+        id="menu_fitness_class_types"
+        name="Class Types"
+        parent="menu_group_catalog"
+        action="action_fitness_class_type"
         sequence="40"
     />
 
-    <!-- ── Configuration children ──────────────────────────────────────────── -->
+    <!-- ─────────────────────────────────────────────────────────────────────
+         7. Reports — defined and owned by fitness_reports module (seq 70).
+                      No entries here; fitness_reports adds its own root item
+                      with parent="fitness_core.menu_fitness_root".
+         ───────────────────────────────────────────────────────────────────── -->
+
+    <!-- ─────────────────────────────────────────────────────────────────────
+         8. Settings — renamed from old "Configuration" group (same XML ID).
+         ───────────────────────────────────────────────────────────────────── -->
+
+    <menuitem
+        id="menu_group_configuration"
+        name="Settings"
+        parent="menu_fitness_root"
+        sequence="80"
+        groups="fitness_core.group_fitness_manager"
+    />
 
     <menuitem
         id="menu_fitness_classrooms"
@@ -78,18 +159,19 @@
     />
 
     <menuitem
-        id="menu_fitness_class_types"
-        name="Class Types"
-        parent="menu_group_configuration"
-        action="action_fitness_class_type"
-        sequence="20"
-    />
-
-    <menuitem
         id="menu_fitness_session_types"
         name="Session Types"
         parent="menu_group_configuration"
         action="action_fitness_session_type"
+        sequence="20"
+    />
+
+    <!-- News & Promotions — moved from old "Content" group into Settings -->
+    <menuitem
+        id="menu_fitness_news_posts"
+        name="News &amp; Promotions"
+        parent="menu_group_configuration"
+        action="action_fitness_news_post"
         sequence="30"
     />
 

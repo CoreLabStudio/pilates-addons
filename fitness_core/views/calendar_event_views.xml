@@ -29,6 +29,10 @@
                                    invisible="not is_fitness_class"/>
                             <field name="session_type"
                                    invisible="not is_fitness_class"/>
+                            <field name="class_state" widget="badge"
+                                   decoration-success="class_state == 'scheduled'"
+                                   decoration-muted="class_state == 'cancelled'"
+                                   invisible="not is_fitness_class"/>
                         </group>
                         <group string="Capacity" invisible="not is_fitness_class">
                             <field name="capacity"/>
@@ -61,9 +65,12 @@
         <field name="model">calendar.event</field>
         <field name="arch" type="xml">
             <list default_order="start asc"
-                  decoration-muted="available_seats == 0">
+                  decoration-warning="available_seats == 0 and class_state == 'scheduled'">
                 <field name="name" string="Class"/>
                 <field name="start" string="Date / Time"/>
+                <field name="class_state" widget="badge"
+                       decoration-success="class_state == 'scheduled'"
+                       string="Status"/>
                 <field name="stop" string="End" optional="hide"/>
                 <field name="classroom_id" string="Studio"/>
                 <field name="class_type_id" string="Class Type"/>

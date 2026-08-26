@@ -89,6 +89,23 @@ class CalendarEvent(models.Model):
                             "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
                             event.name, new_teacher.name, notified,
                         )
+                        # Log a permanent swap record for the admin history view.
+                        old_teacher_id = snap.get('teacher_id')
+                        if old_teacher_id:
+                            try:
+                                self.env['fitness.teacher.swap'].sudo().create({
+                                    'class_name': event.name,
+                                    'calendar_event_id': event.id,
+                                    'class_start': event.start,
+                                    'class_type_id': event.class_type_id.id if event.class_type_id else False,
+                                    'original_teacher_id': old_teacher_id,
+                                    'new_teacher_id': new_teacher.id,
+                                    'initiated_by': 'admin',
+                                })
+                            except Exception:
+                                _logger.exception(
+                                    "[TEACHER-ASSIGN] Failed to log swap record for event %d", event.id
+                                )
 
             # ── Reschedule notifications ────────────────────────────────
             if changing_time:
@@ -133,7 +150,7 @@ class CalendarEvent(models.Model):
 
         return result
 
-    def fitness_reassign_teacher(self, new_teacher_id):
+    def fitness_reassign_teacher(self, new_teacher_id, reason=''):
         self.ensure_one()
 
         if not self.is_fitness_class:
@@ -169,14 +186,29 @@ class CalendarEvent(models.Model):
                 "at an overlapping time."
             )
 
-        old_teacher_name = self.user_id.name
+        old_teacher = self.user_id
         # skip_fitness_notification prevents our write() hook from firing;
         # this method sends its own notifications below.
         self.sudo().with_context(skip_fitness_notification=True).write({'user_id': new_teacher.id})
         _logger.info(
             "[TEACHER-SWAP] %s reassigned class %s (id=%d) from %s to %s",
-            self.env.user.name, self.name, self.id, old_teacher_name, new_teacher.name,
+            self.env.user.name, self.name, self.id, old_teacher.name, new_teacher.name,
         )
+
+        # Log a permanent swap record for the admin history view.
+        try:
+            self.env['fitness.teacher.swap'].sudo().create({
+                'class_name': self.name,
+                'calendar_event_id': self.id,
+                'class_start': self.start,
+                'class_type_id': self.class_type_id.id if self.class_type_id else False,
+                'original_teacher_id': old_teacher.id,
+                'new_teacher_id': new_teacher.id,
+                'reason': reason.strip() if reason else False,
+                'initiated_by': 'teacher',
+            })
+        except Exception:
+            _logger.exception("[TEACHER-SWAP] Failed to log swap record for class %d", self.id)
 
         # Notify affected students: in-app + email
         affected_bookings = self.env['fitness.booking'].sudo().search([

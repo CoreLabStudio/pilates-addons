@@ -445,7 +445,12 @@
     if (!next || !terms) return;
 
     const sync = () => {
-      const method = form.querySelector('input[name="payment_method"]:checked');
+      const methodInput = form.querySelector('input[name="payment_method"]');
+      // Online payment path (Stripe): no method radios present — only terms needed.
+      // Manual fallback path: both a selected method and terms are required.
+      const method = methodInput
+        ? form.querySelector('input[name="payment_method"]:checked')
+        : true;
       next.disabled = !(method && terms.checked);
     };
     form.addEventListener('change', sync);

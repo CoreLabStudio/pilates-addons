@@ -24,6 +24,13 @@ from odoo import http, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
+try:
+    from odoo.addons.payment.controllers.portal import PaymentPortal as _OdooPaymentPortal
+    _PAYMENT_OK = True
+except Exception:
+    _OdooPaymentPortal = http.Controller
+    _PAYMENT_OK = False
+
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
@@ -1128,8 +1135,9 @@ class FitnessStudentPortal(http.Controller):
     @http.route('/my/packages/<int:product_id>/checkout', type='http', auth='user',
                 website=True, sitemap=False, methods=['GET', 'POST'])
     def checkout_payment(self, product_id, **kw):
-        """Step 2 of 3. Collects a payment method + terms acceptance, then
-        creates the sale order and hands over to the signature step."""
+        """Step 2 — Terms acceptance + payment. If an online provider (Stripe)
+        is active the student is forwarded to the Stripe payment page instead
+        of the old manual bank-transfer/Bizum instructions."""
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -1141,32 +1149,51 @@ class FitnessStudentPortal(http.Controller):
         if not product.sale_ok:
             return request.redirect('/my/packages')
 
+        # Determine whether any enabled/test online payment provider is configured.
+        online_providers = request.env['payment.provider'].sudo().search([
+            ('state', 'in', ('enabled', 'test')),
+            ('company_id', '=', request.env.company.id),
+        ])
+        use_online = bool(online_providers)
+
         error_msg = None
         method = kw.get('payment_method')
 
         if request.httprequest.method == 'POST':
-            if method not in PAYMENT_METHODS:
-                error_msg = _('Please choose a payment method.')
-            elif not kw.get('terms_accepted'):
-                error_msg = _('Please accept the Terms and Conditions to continue.')
+            if use_online:
+                # Online (Stripe) path: only terms acceptance needed.
+                if not kw.get('terms_accepted'):
+                    error_msg = _('Please accept the Terms and Conditions to continue.')
+                else:
+                    order = self._create_order(partner, product, 'stripe')
+                    if not order:
+                        return request.redirect('/my/packages')
+                    return request.redirect(f'/my/packages/pay/{order.id}')
             else:
-                order = self._create_order(partner, product, method)
-                if not order:
-                    return request.redirect('/my/packages')
-                return request.redirect(f'/my/checkout/{order.id}/sign')
+                # Manual fallback path: payment method + terms.
+                if method not in PAYMENT_METHODS:
+                    error_msg = _('Please choose a payment method.')
+                elif not kw.get('terms_accepted'):
+                    error_msg = _('Please accept the Terms and Conditions to continue.')
+                else:
+                    order = self._create_order(partner, product, method)
+                    if not order:
+                        return request.redirect('/my/packages')
+                    return request.redirect(f'/my/checkout/{order.id}/sign')
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
-            'product':          product,
-            'is_subscription':  bool(product.fitness_is_subscription_plan),
-            'step':             'payment',
-            'selected_method':  method if method in PAYMENT_METHODS else None,
-            'payment_details':  self._payment_details(),
-            'error_msg':        error_msg,
-            'back_url':         f'/my/packages/{product.id}',
-            'student_name':     full_name.split()[0] if full_name else '',
-            'terms_label':      _('I agree to the'),
-            'terms_link_label': _('Terms and Conditions'),
+            'product':            product,
+            'is_subscription':    bool(product.fitness_is_subscription_plan),
+            'step':               'payment',
+            'selected_method':    method if method in PAYMENT_METHODS else None,
+            'payment_details':    self._payment_details(),
+            'error_msg':          error_msg,
+            'back_url':           f'/my/packages/{product.id}',
+            'student_name':       full_name.split()[0] if full_name else '',
+            'terms_label':        _('I agree to the'),
+            'terms_link_label':   _('Terms and Conditions'),
+            'use_online_payment': use_online,
         })
 
     @http.route('/my/checkout/<int:order_id>/sign', type='http', auth='user',
@@ -1491,7 +1518,7 @@ class FitnessStudentPortal(http.Controller):
     def notifications_count(self, **kw):
         count = request.env['fitness.notification'].sudo().search_count([
             ('user_id', '=', request.env.user.id),
-            ('read', '=', False),
+            ('is_read', '=', False),
         ])
         return request.make_response(
             json.dumps({'count': count}),
@@ -1512,14 +1539,14 @@ class FitnessStudentPortal(http.Controller):
         # which notifications are new during this visit.
         entries = [{
             'record':   n,
-            'is_new':   not n.read,
+            'is_new':   not n.is_read,
             'time_ago': _time_ago(now - n.create_date, _),
         } for n in notifs]
         unread_count = sum(1 for e in entries if e['is_new'])
 
         # Persist read state now — re-opening the archive will show all as read.
         if unread_count:
-            notifs.filtered(lambda n: not n.read).write({'read': True})
+            notifs.filtered(lambda n: not n.is_read).write({'is_read': True})
 
         partner = request.env.user.partner_id
         full_name = partner.name or ''
@@ -1540,8 +1567,8 @@ class FitnessStudentPortal(http.Controller):
                 website=True, sitemap=False, methods=['POST'])
     def notifications_read_all(self, **kw):
         request.env['fitness.notification'].sudo().search([
-            ('user_id', '=', request.env.user.id), ('read', '=', False),
-        ]).write({'read': True})
+            ('user_id', '=', request.env.user.id), ('is_read', '=', False),
+        ]).write({'is_read': True})
         return request.redirect('/my/notifications')
 
     @http.route('/my/notifications/data', type='http', auth='user',
@@ -1550,7 +1577,7 @@ class FitnessStudentPortal(http.Controller):
         _ = request.env._
         notif_model = request.env['fitness.notification'].sudo()
         notifs = notif_model.search(
-            [('user_id', '=', request.env.user.id), ('read', '=', False)], limit=20
+            [('user_id', '=', request.env.user.id), ('is_read', '=', False)], limit=20
         )
         now = fields.Datetime.now()
         result = []
@@ -1580,7 +1607,7 @@ class FitnessStudentPortal(http.Controller):
                     ('id', '=', nid), ('user_id', '=', request.env.user.id)
                 ], limit=1)
                 if notif:
-                    notif.write({'read': True})
+                    notif.write({'is_read': True})
             except Exception:
                 pass
         return request.make_response(
@@ -1953,3 +1980,99 @@ def _day_label(d, today, tomorrow, _=lambda s: s, lang='en_US'):
         except Exception:
             pass
     return d.strftime('%A') + ' ' + str(d.day) + ' ' + d.strftime('%b')
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  Stripe / online payment page for fitness package checkout
+# ──────────────────────────────────────────────────────────────────────────────
+
+class FitnessPackagePayment(_OdooPaymentPortal):
+    """Renders the Stripe (online) payment page for fitness package orders.
+
+    Inherits PaymentPortal only to get _create_transaction() / _validate_transaction_kwargs().
+    The actual transaction JSON route is the sale module's existing
+    /my/orders/<id>/transaction — we just render the payment form pointing there.
+    """
+
+    @http.route('/my/packages/pay/<int:order_id>', type='http', auth='user',
+                website=True, sitemap=False)
+    def packages_stripe_pay(self, order_id, **kw):
+        """Display the online payment form for a draft fitness package order."""
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        order_sudo = request.env['sale.order'].sudo().browse(order_id)
+        if not order_sudo.exists():
+            return request.redirect('/my/packages')
+        if order_sudo.partner_id != request.env.user.partner_id:
+            return request.redirect('/my/packages')
+        if order_sudo.state not in ('draft', 'sent'):
+            # Already confirmed (payment succeeded previously).
+            return request.redirect('/my/packages?bought=1')
+
+        partner = request.env.user.partner_id
+        company = request.env.company
+        currency = order_sudo.currency_id or company.currency_id
+        amount = order_sudo.amount_total
+
+        availability_report = {}
+        providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
+            company.id,
+            partner.id,
+            amount,
+            currency_id=currency.id,
+            report=availability_report,
+        )
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+            providers_sudo.ids,
+            partner.id,
+            currency_id=currency.id,
+            report=availability_report,
+        )
+        tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
+            providers_sudo.ids, partner.id,
+        )
+
+        # Ensure the order has an access token — the sale portal's transaction
+        # route (/my/orders/<id>/transaction) uses it for public-user auth.
+        # For logged-in portal users it acts as a fallback; the ACL check passes
+        # first, but sending it avoids a 403 if session ever expires mid-flow.
+        access_token = order_sudo._portal_ensure_token()
+
+        # payment.method_form template requires this mapping of provider_id → bool
+        # (whether to offer the "Save card" checkbox for each provider).
+        if _PAYMENT_OK and hasattr(self, '_compute_show_tokenize_input_mapping'):
+            show_tokenize_input_mapping = self._compute_show_tokenize_input_mapping(
+                providers_sudo
+            )
+        else:
+            show_tokenize_input_mapping = {
+                p.id: bool(p.allow_tokenization) and not request.env.user._is_public()
+                for p in providers_sudo
+            }
+
+        line = order_sudo.order_line[:1]
+        product = line.product_id.product_tmpl_id if line else None
+        full_name = partner.name or ''
+
+        return request.render('fitness_portal.portal_packages_pay', {
+            'order':                order_sudo,
+            'product':              product,
+            'amount':               amount,
+            'currency':             currency,
+            'partner_id':           partner.id,
+            'providers_sudo':       providers_sudo,
+            'payment_methods_sudo': payment_methods_sudo,
+            'tokens_sudo':          tokens_sudo,
+            'availability_report':  availability_report,
+            'show_tokenize_input_mapping': show_tokenize_input_mapping,
+            # Point at the sale portal's existing transaction-creation route so
+            # payment.transaction.sale_order_ids is set automatically and
+            # _post_process() can call order.action_confirm() on payment success.
+            'transaction_route':    f'/my/orders/{order_id}/transaction',
+            'landing_route':        '/my/packages',
+            'access_token':         access_token,
+            'student_name':         full_name.split()[0] if full_name else '',
+            'back_url':             (f'/my/packages/{product.id}/checkout'
+                                     if product else '/my/packages'),
+        })

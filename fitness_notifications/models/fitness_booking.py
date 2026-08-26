@@ -156,6 +156,32 @@ class FitnessBookingNotifications(models.Model):
         super().action_cancel()
         if self._notif_enabled('send_cancellation'):
             self._send_notification('fitness_notifications.mail_template_booking_cancellation')
+        # In-app bell: skip for class-wide cancellations (_class_cancelled=True)
+        # because action_cancel_class() already sends a class-level alert per student.
+        if self.env.context.get('skip_fitness_notification') or self.env.context.get('_class_cancelled'):
+            return
+        for booking in self:
+            user = booking.student_id.user_ids[:1]
+            if not user:
+                continue
+            class_name = booking.calendar_event_id.name or 'class'
+            event_start = booking.calendar_event_id.start
+            start_str = event_start.strftime('%d %b at %H:%M') if event_start else ''
+            body = (
+                f'Your booking for {class_name}'
+                + (f' on {start_str}' if start_str else '')
+                + ' has been cancelled. Check your credit balance for any refunds.'
+            )
+            try:
+                self.env['fitness.notification'].sudo()._create_for_user(
+                    user.id,
+                    'booking_cancelled',
+                    f'Booking cancelled: {class_name}',
+                    body,
+                    action_url='/my/classes',
+                )
+            except Exception:
+                pass
 
     # ─── Class reminder (cron) ──────────────────────────────────────────────────
 
