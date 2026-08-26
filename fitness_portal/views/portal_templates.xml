@@ -21,7 +21,7 @@
         <t t-set="_mv_sname" t-value="student_name if student_name else (request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else '')"/>
         <header class="mv-header">
             <a href="/my/home" class="mv-wordmark" title="CoreLab">
-                <img src="/fitness_core/static/src/img/corelab-logo-blue.png"
+                <img src="/fitness_core/static/src/img/corelab-logo-blue-header.png"
                      alt="CoreLab"
                      style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>
@@ -65,7 +65,7 @@
         <t t-set="_mv_tname" t-value="request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else ''"/>
         <header class="mv-header">
             <a href="/my/instructor/classes" class="mv-wordmark" title="CoreLab">
-                <img src="/fitness_core/static/src/img/corelab-logo-blue.png"
+                <img src="/fitness_core/static/src/img/corelab-logo-blue-header.png"
                      alt="CoreLab"
                      style="height:68px;width:auto;display:block;flex-shrink:0;"/>
             </a>

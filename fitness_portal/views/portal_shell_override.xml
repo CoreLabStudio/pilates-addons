@@ -529,7 +529,7 @@
         </xpath>
         <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
             <link rel="shortcut icon" type="image/png"
-                  href="/fitness_core/static/src/img/corelab-logo-blue-square.png"/>
+                  href="/fitness_core/static/src/img/corelab-logo.png"/>
         </xpath>
     </template>
 

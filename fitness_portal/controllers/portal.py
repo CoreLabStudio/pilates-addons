@@ -187,6 +187,7 @@ class FitnessStudentPortal(http.Controller):
 
         all_events = request.env['calendar.event'].sudo().search([
             ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
             ('start', '>', now),
             ('start', '<', window_end),
         ], order='start asc')
@@ -459,6 +460,10 @@ class FitnessStudentPortal(http.Controller):
         event = request.env['calendar.event'].sudo().browse(event_id)
         if not event.exists() or not event.is_fitness_class:
             qs = urlencode({'error': request.env._('Class not found.')})
+            return request.redirect(f'/my/studio?{qs}')
+        if event.class_state == 'cancelled':
+            qs = urlencode({'error': request.env._(
+                'This class has been cancelled and can no longer be booked.')})
             return request.redirect(f'/my/studio?{qs}')
 
         try:

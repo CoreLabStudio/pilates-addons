@@ -107,7 +107,9 @@ class FitnessStudioConversation(models.Model):
                 if is_admin:
                     wrap_align = 'align-self:flex-end;align-items:flex-end;'
                     bubble_style = (
-                        'background:#0d6efd;color:#fff;'
+                        # Heather blue with Paco brown text - the documented
+                        # brand pairing (4.71:1, AA). White on Heather is ~1.9:1.
+                        'background:#9ABACD;color:#50423D;'
                         'border-radius:16px 4px 16px 16px;'
                     )
                 else:
