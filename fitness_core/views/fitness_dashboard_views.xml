@@ -7,8 +7,15 @@
         <field name="name">fitness.admin.dashboard.form</field>
         <field name="model">fitness.admin.dashboard</field>
         <field name="arch" type="xml">
-            <form string="Dashboard" create="0">
+            <form string="Dashboard" create="0" class="o_fitness_dashboard">
                 <sheet>
+                    <div class="cl-banner">
+                        <div>
+                            <h1 class="cl-banner-title">CoreLab Studio</h1>
+                            <p class="cl-banner-sub">Admin Dashboard</p>
+                        </div>
+                        <i class="fa fa-tachometer cl-banner-icon" title="Dashboard"/>
+                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object"
                                 name="action_view_today_classes"
@@ -41,10 +48,6 @@
                                    string="Teacher Swaps"/>
                         </button>
                     </div>
-                    <div class="oe_title mt16">
-                        <h1>CoreLab Studio</h1>
-                        <h3 class="text-muted">Admin Dashboard</h3>
-                    </div>
 
                     <!-- ── Preview panels ──────────────────────────────────── -->
 
@@ -61,7 +64,7 @@
                             </div>
                         </div>
                         <div class="col-lg-4 col-12 mb-3">
-                            <div class="card h-100">
+                            <div class="card h-100 cl-panel-beige">
                                 <div class="card-header fw-bold">
                                     <i class="fa fa-user-plus me-2"/>Pending Trials
                                 </div>

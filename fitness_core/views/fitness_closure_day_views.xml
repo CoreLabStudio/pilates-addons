@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_closure_day_list" model="ir.ui.view">
+        <field name="name">fitness.closure.day.list</field>
+        <field name="model">fitness.closure.day</field>
+        <field name="arch" type="xml">
+            <list string="Closure Days" decoration-muted="state == 'draft'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="affected_count" string="Classes Suppressed"/>
+                <field name="refunded_booking_count" string="Bookings Refunded"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'applied'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_closure_day_form" model="ir.ui.view">
+        <field name="name">fitness.closure.day.form</field>
+        <field name="model">fitness.closure.day</field>
+        <field name="arch" type="xml">
+            <form string="Closure Day">
+                <header>
+                    <button name="action_preview" type="object" string="Preview Affected Classes"/>
+                    <button name="action_apply" type="object" string="Close This Day"
+                            class="btn-primary" invisible="state == 'applied'"
+                            confirm="This cancels every class on that date. Students with a booking are refunded and notified. Continue?"/>
+                    <button name="action_reopen" type="object" string="Reopen Day"
+                            invisible="state != 'applied'"
+                            confirm="This makes the classes bookable again. Students already refunded stay refunded. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,applied"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Christmas Day"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="tz"/>
+                        </group>
+                        <group>
+                            <field name="affected_count" readonly="1"/>
+                            <field name="refunded_booking_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="state == 'applied'">
+                        Closing a day suppresses the classes on that date only. The
+                        recurring schedule that produced them is left untouched and
+                        keeps generating normally on every other date.
+                    </div>
+                    <notebook invisible="state != 'applied'">
+                        <page string="Suppressed Classes">
+                            <field name="affected_event_ids" readonly="1">
+                                <list>
+                                    <field name="start"/>
+                                    <field name="name"/>
+                                    <field name="user_id" string="Teacher"/>
+                                    <field name="class_state"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_closure_day" model="ir.actions.act_window">
+        <field name="name">Closure Days</field>
+        <field name="res_model">fitness.closure.day</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Mark a holiday or studio closure</p>
+            <p>Classes on that date stop being bookable, and anyone already booked
+               is refunded and notified. Your recurring schedules are not changed.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_fitness_closure_day"
+              name="Closure Days"
+              parent="fitness_core.menu_fitness_classes_root"
+              action="action_fitness_closure_day"
+              sequence="30"/>
+
+</odoo>

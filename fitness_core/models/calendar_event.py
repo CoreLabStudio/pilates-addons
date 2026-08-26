@@ -18,7 +18,7 @@ class CalendarEvent(models.Model):
     class_state = fields.Selection([
         ('scheduled', 'Scheduled'),
         ('cancelled', 'Cancelled'),
-    ], string="Class Status", default='scheduled', index=True,
+    ], string="Class Status", default='scheduled', index=True, copy=False,
         help="Set to Cancelled when the studio cancels the entire class occurrence.")
     capacity = fields.Integer(
         "Capacity",
@@ -31,6 +31,7 @@ class CalendarEvent(models.Model):
         "Booked Seats",
         default=0,
         readonly=True,
+        copy=False,
         help="Maintained by the fitness_bookings module.",
     )
     available_seats = fields.Integer(

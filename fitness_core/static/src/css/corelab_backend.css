@@ -1,0 +1,148 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CoreLab — admin dashboard styling (backend).
+   Scoped to .o_fitness_dashboard so nothing here leaks into other Odoo views.
+
+   Brand palette:
+     Heather blue   #9ABACD
+     Hemp / Paco    #50423D
+     Feather White  #FAF9F6
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.o_fitness_dashboard {
+  --cl-blue: #9ABACD;
+  --cl-blue-dark: #839EAE;
+  --cl-brown: #50423D;
+  --cl-white: #FAF9F6;
+  --cl-tint-blue: #EDF3F7;
+  --cl-tint-beige: #F5EFE8;
+}
+
+.o_fitness_dashboard .o_form_sheet {
+  background: var(--cl-white);
+}
+
+/* ── Header banner ─────────────────────────────────────────────────────────
+   Replaces the plain white oe_title block. */
+.o_fitness_dashboard .cl-banner {
+  background: var(--cl-blue);
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.o_fitness_dashboard .cl-banner-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.1rem;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--cl-brown);
+}
+
+.o_fitness_dashboard .cl-banner-sub {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  color: var(--cl-brown);
+  opacity: 0.75;
+}
+
+.o_fitness_dashboard .cl-banner-icon {
+  font-size: 2rem;
+  color: var(--cl-brown);
+  opacity: 0.55;
+  flex: 0 0 auto;
+}
+
+/* ── Stat tiles ────────────────────────────────────────────────────────────
+   Odoo 19 renders these as .oe_stat_button inside .o-form-buttonbox (NOT the
+   older .oe_button_box). Target the button class directly. Give each a
+   card surface plus an alternating left-border accent. Counts are untouched. */
+.o_fitness_dashboard .o-form-buttonbox,
+.o_fitness_dashboard .oe_button_box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 22px;
+  border: 0;
+}
+
+.o_fitness_dashboard .oe_stat_button {
+  flex: 1 1 150px;
+  min-width: 150px;
+  height: auto;
+  margin: 0;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: 1px solid rgba(80, 66, 61, 0.08);
+  border-left: 4px solid var(--cl-blue);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(80, 66, 61, 0.06);
+  text-align: left;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.o_fitness_dashboard .oe_stat_button:hover {
+  box-shadow: 0 3px 10px rgba(80, 66, 61, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Alternating accent: 1st/3rd/5th blue, 2nd/4th brown. */
+.o_fitness_dashboard .oe_stat_button:nth-child(even) {
+  border-left-color: var(--cl-brown);
+}
+
+.o_fitness_dashboard .oe_stat_button .o_button_icon {
+  color: var(--cl-blue);
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+}
+
+.o_fitness_dashboard .oe_stat_button:nth-child(even) .o_button_icon {
+  color: var(--cl-brown);
+}
+
+.o_fitness_dashboard .oe_stat_button .o_stat_value {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+  color: var(--cl-brown);
+}
+
+.o_fitness_dashboard .oe_stat_button .o_stat_text {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(80, 66, 61, 0.65);
+  text-transform: none;
+  white-space: normal;
+}
+
+/* ── Panels ────────────────────────────────────────────────────────────────
+   Soft tinted headers instead of flat grey; icons already exist in the view. */
+.o_fitness_dashboard .card {
+  border: 1px solid rgba(80, 66, 61, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(80, 66, 61, 0.05);
+}
+
+.o_fitness_dashboard .card > .card-header {
+  border-bottom: 1px solid rgba(80, 66, 61, 0.07);
+  color: var(--cl-brown);
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  background: var(--cl-tint-blue);
+}
+
+/* Warm beige for the trials panel, cool blue-grey for the rest. */
+.o_fitness_dashboard .cl-panel-beige > .card-header {
+  background: var(--cl-tint-beige);
+}
+
+.o_fitness_dashboard .card > .card-header .fa {
+  color: var(--cl-brown);
+  opacity: 0.6;
+}

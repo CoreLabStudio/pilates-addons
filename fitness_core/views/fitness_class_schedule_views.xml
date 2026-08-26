@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_class_schedule_list" model="ir.ui.view">
+        <field name="name">fitness.class.schedule.list</field>
+        <field name="model">fitness.class.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Recurring Schedules">
+                <field name="weekday"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="class_type_id"/>
+                <field name="teacher_user_id"/>
+                <field name="classroom_id"/>
+                <field name="capacity"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="generated_until"/>
+                <field name="occurrence_count" string="Occurrences"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_class_schedule_form" model="ir.ui.view">
+        <field name="name">fitness.class.schedule.form</field>
+        <field name="model">fitness.class.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Recurring Schedule">
+                <header>
+                    <button name="action_generate" type="object" string="Generate Classes"
+                            class="btn-primary" invisible="recurrence_id"/>
+                    <button name="action_extend_now" type="object" string="Top Up Now"
+                            invisible="not recurrence_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_occurrences" icon="fa-calendar"
+                                invisible="not recurrence_id">
+                            <field name="occurrence_count" widget="statinfo" string="Occurrences"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="What">
+                            <field name="class_type_id"/>
+                            <field name="session_type"/>
+                            <field name="teacher_user_id"/>
+                            <field name="classroom_id"/>
+                            <field name="capacity"/>
+                        </group>
+                        <group string="When">
+                            <field name="weekday"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="duration" widget="float_time"/>
+                            <field name="tz"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="horizon_weeks"/>
+                        </group>
+                    </group>
+                    <group string="Generation" invisible="not recurrence_id">
+                        <field name="generated_until" readonly="1"/>
+                        <field name="base_event_id" readonly="1"/>
+                        <field name="recurrence_id" readonly="1"/>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_class_schedule" model="ir.actions.act_window">
+        <field name="name">Recurring Schedules</field>
+        <field name="res_model">fitness.class.schedule</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Set up a weekly recurring class</p>
+            <p>Pick the class, teacher, room, day and time once. Occurrences are
+               generated automatically and topped up every night.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_fitness_class_schedule"
+              name="Recurring Schedules"
+              parent="fitness_core.menu_fitness_classes_root"
+              action="action_fitness_class_schedule"
+              sequence="20"/>
+
+    <!-- Nightly top-up so the rolling window never runs dry. -->
+    <record id="ir_cron_extend_class_schedules" model="ir.cron">
+        <field name="name">Fitness: extend recurring class schedules</field>
+        <field name="model_id" ref="fitness_core.model_fitness_class_schedule"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_extend_schedules()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>

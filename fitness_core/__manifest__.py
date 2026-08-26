@@ -17,11 +17,16 @@
         'views/fitness_news_views.xml',
         'views/fitness_dashboard_views.xml',
         'views/fitness_teacher_admin_views.xml',
+        'views/fitness_class_schedule_views.xml',
+        'views/fitness_closure_day_views.xml',
         'views/menu_views.xml',
         'data/demo_classrooms.xml',
         'data/demo_session_types.xml',
     ],
     'assets': {
+        'web.assets_backend': [
+            'fitness_core/static/src/css/corelab_backend.css',
+        ],
         'web.assets_frontend': [
             'fitness_core/static/src/css/corelab.css',
             'fitness_core/static/src/js/corelab.js',
