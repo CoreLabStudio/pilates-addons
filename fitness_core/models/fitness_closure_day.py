@@ -45,9 +45,13 @@ class FitnessClosureDay(models.Model):
     affected_count = fields.Integer(compute='_compute_affected_count')
     refunded_booking_count = fields.Integer(readonly=True, copy=False)
 
-    _sql_constraints = [
-        ('unique_date', 'unique(date)', "That date is already marked as a closure day."),
-    ]
+    # Odoo 19 dropped _sql_constraints. It logs a warning and creates nothing,
+    # so this table had no unique index on date and the same day could be
+    # closed twice.
+    _unique_date = models.Constraint(
+        'unique (date)',
+        "That date is already marked as a closure day.",
+    )
 
     @api.depends('affected_event_ids')
     def _compute_affected_count(self):
