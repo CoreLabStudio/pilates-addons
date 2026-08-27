@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Dashboard form view (v7 layout) ──────────────────────────────────────
+         Layout only. Every counter and preview still comes from the same fields,
+         and all five click-through actions are preserved: the hero card and the
+         "See all" link both open today's classes, the two tiles open students and
+         teacher swaps, and the trials/messages badges open their own lists. -->
+
+    <record id="view_fitness_admin_dashboard_form" model="ir.ui.view">
+        <field name="name">fitness.admin.dashboard.form</field>
+        <field name="model">fitness.admin.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard" create="0" class="o_fitness_dashboard">
+                <sheet>
+                    <div class="cl-dash">
+
+                        <!-- Header: greeting + studio name, date on the right -->
+                        <div class="cl-head">
+                            <div class="cl-head-left">
+                                <div class="cl-eyebrow">
+                                    <field name="header_greeting" readonly="1" nolabel="1"/>
+                                </div>
+                                <h1 class="cl-title">CoreLab Studio</h1>
+                            </div>
+                            <div class="cl-date">
+                                <field name="header_date" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+
+                        <!-- Top row: Heather blue hero + two matched-height tiles -->
+                        <div class="cl-top">
+                            <button name="action_view_today_classes" type="object"
+                                    class="cl-hero" string="Classes today"
+                                    title="View today's classes">
+                                <span class="cl-hero-label">Classes Today</span>
+                                <span class="cl-hero-value">
+                                    <field name="today_classes" readonly="1" nolabel="1"/>
+                                </span>
+                            </button>
+
+                            <div class="cl-tiles">
+                                <button name="action_view_students" type="object"
+                                        class="cl-tile" string="Students"
+                                        title="View students">
+                                    <span class="cl-tile-value">
+                                        <field name="active_students" readonly="1" nolabel="1"/>
+                                    </span>
+                                    <span class="cl-tile-label">Students</span>
+                                </button>
+                                <button name="action_view_pending_swaps" type="object"
+                                        class="cl-tile" string="Teacher swaps"
+                                        title="View teacher swaps">
+                                    <span class="cl-tile-value">
+                                        <field name="pending_swaps" readonly="1" nolabel="1"/>
+                                    </span>
+                                    <span class="cl-tile-label">Teacher Swaps</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bottom row: 2:1, aligned with the top row -->
+                        <div class="cl-bottom">
+
+                            <div class="cl-card cl-card-main">
+                                <div class="cl-card-head">
+                                    <h3 class="cl-card-title">Today's Classes</h3>
+                                    <button name="action_view_today_classes" type="object"
+                                            class="cl-seeall" string="See all classes"
+                                            title="View today's classes">See all <span class="cl-arrow">→</span></button>
+                                </div>
+                                <div class="cl-card-body">
+                                    <field name="preview_classes_html"
+                                           widget="html" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+
+                            <div class="cl-side">
+                                <div class="cl-card">
+                                    <div class="cl-card-head">
+                                        <h3 class="cl-card-title">Pending Trials</h3>
+                                        <button name="action_view_pending_trials" type="object"
+                                                class="cl-badge cl-badge-warm" string="Pending trials"
+                                                title="View pending trials">
+                                            <field name="pending_trials" readonly="1" nolabel="1"/>
+                                        </button>
+                                    </div>
+                                    <div class="cl-card-body">
+                                        <field name="preview_trials_html"
+                                               widget="html" readonly="1" nolabel="1"/>
+                                    </div>
+                                </div>
+
+                                <div class="cl-card">
+                                    <div class="cl-card-head">
+                                        <h3 class="cl-card-title">Messages</h3>
+                                        <button name="action_view_unread_messages" type="object"
+                                                class="cl-badge cl-badge-blue" string="Unread messages"
+                                                title="View unread messages">
+                                            <field name="unread_messages" readonly="1" nolabel="1"/>
+                                        </button>
+                                    </div>
+                                    <div class="cl-card-body">
+                                        <field name="preview_messages_html"
+                                               widget="html" readonly="1" nolabel="1"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Server action — creates a fresh dashboard record on each visit ───── -->
+
+    <record id="action_open_fitness_dashboard" model="ir.actions.server">
+        <field name="name">Home</field>
+        <field name="model_id" ref="fitness_core.model_fitness_admin_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+rec = env['fitness.admin.dashboard'].create({})
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Home',
+    'res_model': 'fitness.admin.dashboard',
+    'res_id': rec.id,
+    'view_mode': 'form',
+    'views': [(False, 'form')],
+    'target': 'current',
+    'flags': {'mode': 'readonly'},
+}
+        </field>
+    </record>
+
+</odoo>

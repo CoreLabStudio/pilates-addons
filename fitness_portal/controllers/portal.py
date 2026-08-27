@@ -24,9 +24,19 @@ from odoo import http, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
+try:
+    from odoo.addons.payment.controllers.portal import PaymentPortal as _OdooPaymentPortal
+    _PAYMENT_OK = True
+except Exception:
+    _OdooPaymentPortal = http.Controller
+    _PAYMENT_OK = False
+
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
+# The Available list defaults to a week; 14 stays reachable from the chips.
+DEFAULT_LOOK_AHEAD_DAYS = 7
+RANGE_CHOICES = (1, 7, 14)
 SCHEDULE_LOOK_AHEAD_DAYS = 28
 
 # Mirror of constants in fitness_subscriptions.models.sale_order
@@ -129,7 +139,7 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/studio', type='http', auth='user', website=True, sitemap=False)
     def studio(self, view=None, booked=None, cancelled=None, credit_returned=None,
-               error=None, **kw):
+               error=None, days=None, **kw):
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -157,16 +167,28 @@ class FitnessStudentPortal(http.Controller):
         if active_view == 'schedule':
             values.update(self._schedule_values(partner))
         else:
-            values.update(self._available_values(partner))
+            values.update(self._available_values(partner, days))
 
         return request.render('fitness_portal.portal_student_studio', values)
 
-    def _available_values(self, partner):
-        """Day-grouped list of bookable classes (the 'Available' view)."""
+    def _available_values(self, partner, days=None):
+        """Day-grouped list of bookable classes (the 'Available' view).
+
+        The window defaults to a week. Loading the full fourteen days put
+        every class in the DOM at once, which on a phone meant a page tens
+        of thousands of pixels tall before the student saw anything useful.
+        """
         _ = request.env._
         lang = request.env.lang or 'en_US'
         now = fields.Datetime.now()
-        window_end = now + timedelta(days=LOOK_AHEAD_DAYS)
+
+        try:
+            sel_days = int(days)
+        except (TypeError, ValueError):
+            sel_days = DEFAULT_LOOK_AHEAD_DAYS
+        if sel_days not in RANGE_CHOICES:
+            sel_days = DEFAULT_LOOK_AHEAD_DAYS
+        window_end = now + timedelta(days=sel_days)
 
         eligible_types = self._eligible_class_types(partner.id)
 
@@ -180,6 +202,7 @@ class FitnessStudentPortal(http.Controller):
 
         all_events = request.env['calendar.event'].sudo().search([
             ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
             ('start', '>', now),
             ('start', '<', window_end),
         ], order='start asc')
@@ -269,10 +292,16 @@ class FitnessStudentPortal(http.Controller):
             'events':          events,
             'grouped_events':  grouped_events,
             'has_sources':     bool(eligible_types),
-            'look_ahead_days': LOOK_AHEAD_DAYS,
+            'look_ahead_days': sel_days,
+            'sel_days':        sel_days,
+            'range_chips':     [
+                {'days': 1,  'label': _('Today')},
+                {'days': 7,  'label': _('This week')},
+                {'days': 14, 'label': _('Next 14 days')},
+            ],
             'today_local':     today_local,
             'subtitle':        subtitle,
-            'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % LOOK_AHEAD_DAYS,
+            'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
             'no_sources_msg':  _("You don't have an active membership or class pack. Please contact the studio to get started."),
             'studio_chips':    studio_chips,
         }
@@ -453,6 +482,10 @@ class FitnessStudentPortal(http.Controller):
         if not event.exists() or not event.is_fitness_class:
             qs = urlencode({'error': request.env._('Class not found.')})
             return request.redirect(f'/my/studio?{qs}')
+        if event.class_state == 'cancelled':
+            qs = urlencode({'error': request.env._(
+                'This class has been cancelled and can no longer be booked.')})
+            return request.redirect(f'/my/studio?{qs}')
 
         try:
             request.env['fitness.booking'].create({
@@ -511,7 +544,7 @@ class FitnessStudentPortal(http.Controller):
 
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         lang_code = (request.lang.code if request.lang else None) or 'en_US'
 
         cutoff_start = cutoff_end = None
@@ -718,7 +751,7 @@ class FitnessStudentPortal(http.Controller):
     def _credit_total(self, partner):
         """Credits the student can actually book with right now:
         unexpired class-pack credits + subscription floating credits."""
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         total = 0
         lines = request.env['sale.order.line'].sudo().search([
             ('order_partner_id', '=', partner.id),
@@ -752,7 +785,7 @@ class FitnessStudentPortal(http.Controller):
         even when a student's records predate this page.
         """
         _ = request.env._
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         events = []
 
         # ── Class-pack purchases and expiries ────────────────────────
@@ -1128,8 +1161,9 @@ class FitnessStudentPortal(http.Controller):
     @http.route('/my/packages/<int:product_id>/checkout', type='http', auth='user',
                 website=True, sitemap=False, methods=['GET', 'POST'])
     def checkout_payment(self, product_id, **kw):
-        """Step 2 of 3. Collects a payment method + terms acceptance, then
-        creates the sale order and hands over to the signature step."""
+        """Step 2 — Terms acceptance + payment. If an online provider (Stripe)
+        is active the student is forwarded to the Stripe payment page instead
+        of the old manual bank-transfer/Bizum instructions."""
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -1141,32 +1175,51 @@ class FitnessStudentPortal(http.Controller):
         if not product.sale_ok:
             return request.redirect('/my/packages')
 
+        # Determine whether any enabled/test online payment provider is configured.
+        online_providers = request.env['payment.provider'].sudo().search([
+            ('state', 'in', ('enabled', 'test')),
+            ('company_id', '=', request.env.company.id),
+        ])
+        use_online = bool(online_providers)
+
         error_msg = None
         method = kw.get('payment_method')
 
         if request.httprequest.method == 'POST':
-            if method not in PAYMENT_METHODS:
-                error_msg = _('Please choose a payment method.')
-            elif not kw.get('terms_accepted'):
-                error_msg = _('Please accept the Terms and Conditions to continue.')
+            if use_online:
+                # Online (Stripe) path: only terms acceptance needed.
+                if not kw.get('terms_accepted'):
+                    error_msg = _('Please accept the Terms and Conditions to continue.')
+                else:
+                    order = self._create_order(partner, product, 'stripe')
+                    if not order:
+                        return request.redirect('/my/packages')
+                    return request.redirect(f'/my/packages/pay/{order.id}')
             else:
-                order = self._create_order(partner, product, method)
-                if not order:
-                    return request.redirect('/my/packages')
-                return request.redirect(f'/my/checkout/{order.id}/sign')
+                # Manual fallback path: payment method + terms.
+                if method not in PAYMENT_METHODS:
+                    error_msg = _('Please choose a payment method.')
+                elif not kw.get('terms_accepted'):
+                    error_msg = _('Please accept the Terms and Conditions to continue.')
+                else:
+                    order = self._create_order(partner, product, method)
+                    if not order:
+                        return request.redirect('/my/packages')
+                    return request.redirect(f'/my/checkout/{order.id}/sign')
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
-            'product':          product,
-            'is_subscription':  bool(product.fitness_is_subscription_plan),
-            'step':             'payment',
-            'selected_method':  method if method in PAYMENT_METHODS else None,
-            'payment_details':  self._payment_details(),
-            'error_msg':        error_msg,
-            'back_url':         f'/my/packages/{product.id}',
-            'student_name':     full_name.split()[0] if full_name else '',
-            'terms_label':      _('I agree to the'),
-            'terms_link_label': _('Terms and Conditions'),
+            'product':            product,
+            'is_subscription':    bool(product.fitness_is_subscription_plan),
+            'step':               'payment',
+            'selected_method':    method if method in PAYMENT_METHODS else None,
+            'payment_details':    self._payment_details(),
+            'error_msg':          error_msg,
+            'back_url':           f'/my/packages/{product.id}',
+            'student_name':       full_name.split()[0] if full_name else '',
+            'terms_label':        _('I agree to the'),
+            'terms_link_label':   _('Terms and Conditions'),
+            'use_online_payment': use_online,
         })
 
     @http.route('/my/checkout/<int:order_id>/sign', type='http', auth='user',
@@ -1421,7 +1474,7 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
 
         subs = request.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
@@ -1448,7 +1501,7 @@ class FitnessStudentPortal(http.Controller):
             period_end_str = ''
             if sub.next_invoice_date:
                 next_renewal = sub.next_invoice_date
-                today_date = fields.Date.today()
+                today_date = fields.Date.context_today(request.env.user)
                 # Advance stale dates forward — manual-payment studios don't
                 # trigger the Odoo billing cron so next_invoice_date can lag.
                 if next_renewal < today_date and sub.plan_id:
@@ -1491,7 +1544,7 @@ class FitnessStudentPortal(http.Controller):
     def notifications_count(self, **kw):
         count = request.env['fitness.notification'].sudo().search_count([
             ('user_id', '=', request.env.user.id),
-            ('read', '=', False),
+            ('is_read', '=', False),
         ])
         return request.make_response(
             json.dumps({'count': count}),
@@ -1512,14 +1565,14 @@ class FitnessStudentPortal(http.Controller):
         # which notifications are new during this visit.
         entries = [{
             'record':   n,
-            'is_new':   not n.read,
+            'is_new':   not n.is_read,
             'time_ago': _time_ago(now - n.create_date, _),
         } for n in notifs]
         unread_count = sum(1 for e in entries if e['is_new'])
 
         # Persist read state now — re-opening the archive will show all as read.
         if unread_count:
-            notifs.filtered(lambda n: not n.read).write({'read': True})
+            notifs.filtered(lambda n: not n.is_read).write({'is_read': True})
 
         partner = request.env.user.partner_id
         full_name = partner.name or ''
@@ -1540,8 +1593,8 @@ class FitnessStudentPortal(http.Controller):
                 website=True, sitemap=False, methods=['POST'])
     def notifications_read_all(self, **kw):
         request.env['fitness.notification'].sudo().search([
-            ('user_id', '=', request.env.user.id), ('read', '=', False),
-        ]).write({'read': True})
+            ('user_id', '=', request.env.user.id), ('is_read', '=', False),
+        ]).write({'is_read': True})
         return request.redirect('/my/notifications')
 
     @http.route('/my/notifications/data', type='http', auth='user',
@@ -1550,7 +1603,7 @@ class FitnessStudentPortal(http.Controller):
         _ = request.env._
         notif_model = request.env['fitness.notification'].sudo()
         notifs = notif_model.search(
-            [('user_id', '=', request.env.user.id), ('read', '=', False)], limit=20
+            [('user_id', '=', request.env.user.id), ('is_read', '=', False)], limit=20
         )
         now = fields.Datetime.now()
         result = []
@@ -1580,7 +1633,7 @@ class FitnessStudentPortal(http.Controller):
                     ('id', '=', nid), ('user_id', '=', request.env.user.id)
                 ], limit=1)
                 if notif:
-                    notif.write({'read': True})
+                    notif.write({'is_read': True})
             except Exception:
                 pass
         return request.make_response(
@@ -1736,7 +1789,7 @@ class FitnessStudentPortal(http.Controller):
         and by _primary_credit (single best pool for other pages).
         """
         _ = request.env._
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         pools = []
 
         # Active subscription first
@@ -1953,3 +2006,99 @@ def _day_label(d, today, tomorrow, _=lambda s: s, lang='en_US'):
         except Exception:
             pass
     return d.strftime('%A') + ' ' + str(d.day) + ' ' + d.strftime('%b')
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  Stripe / online payment page for fitness package checkout
+# ──────────────────────────────────────────────────────────────────────────────
+
+class FitnessPackagePayment(_OdooPaymentPortal):
+    """Renders the Stripe (online) payment page for fitness package orders.
+
+    Inherits PaymentPortal only to get _create_transaction() / _validate_transaction_kwargs().
+    The actual transaction JSON route is the sale module's existing
+    /my/orders/<id>/transaction — we just render the payment form pointing there.
+    """
+
+    @http.route('/my/packages/pay/<int:order_id>', type='http', auth='user',
+                website=True, sitemap=False)
+    def packages_stripe_pay(self, order_id, **kw):
+        """Display the online payment form for a draft fitness package order."""
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        order_sudo = request.env['sale.order'].sudo().browse(order_id)
+        if not order_sudo.exists():
+            return request.redirect('/my/packages')
+        if order_sudo.partner_id != request.env.user.partner_id:
+            return request.redirect('/my/packages')
+        if order_sudo.state not in ('draft', 'sent'):
+            # Already confirmed (payment succeeded previously).
+            return request.redirect('/my/packages?bought=1')
+
+        partner = request.env.user.partner_id
+        company = request.env.company
+        currency = order_sudo.currency_id or company.currency_id
+        amount = order_sudo.amount_total
+
+        availability_report = {}
+        providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
+            company.id,
+            partner.id,
+            amount,
+            currency_id=currency.id,
+            report=availability_report,
+        )
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+            providers_sudo.ids,
+            partner.id,
+            currency_id=currency.id,
+            report=availability_report,
+        )
+        tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
+            providers_sudo.ids, partner.id,
+        )
+
+        # Ensure the order has an access token — the sale portal's transaction
+        # route (/my/orders/<id>/transaction) uses it for public-user auth.
+        # For logged-in portal users it acts as a fallback; the ACL check passes
+        # first, but sending it avoids a 403 if session ever expires mid-flow.
+        access_token = order_sudo._portal_ensure_token()
+
+        # payment.method_form template requires this mapping of provider_id → bool
+        # (whether to offer the "Save card" checkbox for each provider).
+        if _PAYMENT_OK and hasattr(self, '_compute_show_tokenize_input_mapping'):
+            show_tokenize_input_mapping = self._compute_show_tokenize_input_mapping(
+                providers_sudo
+            )
+        else:
+            show_tokenize_input_mapping = {
+                p.id: bool(p.allow_tokenization) and not request.env.user._is_public()
+                for p in providers_sudo
+            }
+
+        line = order_sudo.order_line[:1]
+        product = line.product_id.product_tmpl_id if line else None
+        full_name = partner.name or ''
+
+        return request.render('fitness_portal.portal_packages_pay', {
+            'order':                order_sudo,
+            'product':              product,
+            'amount':               amount,
+            'currency':             currency,
+            'partner_id':           partner.id,
+            'providers_sudo':       providers_sudo,
+            'payment_methods_sudo': payment_methods_sudo,
+            'tokens_sudo':          tokens_sudo,
+            'availability_report':  availability_report,
+            'show_tokenize_input_mapping': show_tokenize_input_mapping,
+            # Point at the sale portal's existing transaction-creation route so
+            # payment.transaction.sale_order_ids is set automatically and
+            # _post_process() can call order.action_confirm() on payment success.
+            'transaction_route':    f'/my/orders/{order_id}/transaction',
+            'landing_route':        '/my/packages',
+            'access_token':         access_token,
+            'student_name':         full_name.split()[0] if full_name else '',
+            'back_url':             (f'/my/packages/{product.id}/checkout'
+                                     if product else '/my/packages'),
+        })

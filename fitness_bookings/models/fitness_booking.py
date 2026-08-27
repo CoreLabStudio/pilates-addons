@@ -15,6 +15,27 @@ class FitnessBooking(models.Model):
 
     name = fields.Char(compute='_compute_name', store=True)
 
+    def _mail_get_partner_fields(self, introspect_fields=False):
+        """Tell the mail layer that the customer on a booking is `student_id`.
+
+        Odoo's default only looks for `partner_id` / `partner_ids`. This model
+        names its customer `student_id`, so `_mail_get_partners()` found nobody,
+        `_message_get_default_recipients()` returned empty, and every template
+        rendered with `use_default_to=True` (the Odoo default) produced a
+        mail.mail with no partner_ids and no email_to. In other words all five
+        fitness notification emails were queued and could never be delivered,
+        regardless of SMTP.
+
+        Overriding this single hook is enough: it sits upstream of
+        `_message_get_default_recipients`, so the base implementation keeps
+        doing its own normalisation, ban-list and public-partner filtering, and
+        the chatter/followers subsystem resolves the student consistently too.
+        """
+        fnames = super()._mail_get_partner_fields(introspect_fields=introspect_fields)
+        if 'student_id' not in fnames:
+            fnames = list(fnames) + ['student_id']
+        return fnames
+
     @api.depends('student_id', 'calendar_event_id')
     def _compute_name(self):
         for rec in self:

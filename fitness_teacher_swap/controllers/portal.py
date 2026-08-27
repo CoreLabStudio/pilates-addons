@@ -175,13 +175,16 @@ class FitnessTeacherSwapPortal(http.Controller):
 
     @http.route('/my/instructor/classes/<int:event_id>/reassign', type='http', auth='user',
                 methods=['POST'], website=True, sitemap=False)
-    def reassign(self, event_id, new_teacher_id=None, **kw):
+    def reassign(self, event_id, new_teacher_id=None, reason='', **kw):
         if not request.env.user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
         try:
             event = request.env['calendar.event'].browse(int(event_id))
-            event.fitness_reassign_teacher(int(new_teacher_id))
+            event.fitness_reassign_teacher(
+                int(new_teacher_id),
+                reason=reason.strip() if reason else '',
+            )
         except Exception as exc:
             return request.redirect(f'/my/instructor/classes?error={quote(str(exc))}')
         return request.redirect('/my/instructor/classes')

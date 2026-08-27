@@ -15,6 +15,11 @@ class CalendarEvent(models.Model):
         ('private', 'Private (1-on-1)'),
         ('duo', 'Duo (2 people)'),
     ], string="Session Type", default='group')
+    class_state = fields.Selection([
+        ('scheduled', 'Scheduled'),
+        ('cancelled', 'Cancelled'),
+    ], string="Class Status", default='scheduled', index=True, copy=False,
+        help="Set to Cancelled when the studio cancels the entire class occurrence.")
     capacity = fields.Integer(
         "Capacity",
         compute='_compute_capacity',
@@ -26,11 +31,13 @@ class CalendarEvent(models.Model):
         "Booked Seats",
         default=0,
         readonly=True,
+        copy=False,
         help="Maintained by the fitness_bookings module.",
     )
     available_seats = fields.Integer(
         "Available Seats",
         compute='_compute_available_seats',
+        store=True,
     )
     fitness_note = fields.Text(
         "Class Note",

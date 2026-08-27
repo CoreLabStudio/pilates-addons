@@ -1,3 +1,5 @@
+import html as _html
+
 from odoo import models, fields, api
 
 import logging
@@ -37,6 +39,11 @@ class FitnessStudioConversation(models.Model):
         compute='_compute_display_name_field', store=False,
     )
     reply_body = fields.Text('Your Reply')
+    thread_html = fields.Html(
+        compute='_compute_thread_html',
+        sanitize=False,
+        string='Thread',
+    )
 
     @api.depends('message_ids', 'message_ids.create_date', 'message_ids.is_admin')
     def _compute_stats(self):
@@ -65,6 +72,65 @@ class FitnessStudioConversation(models.Model):
         for conv in self:
             name = conv.partner_id.name or conv.user_id.name or 'Unknown'
             conv.display_name_computed = f"{name} ({conv.role or 'member'})"
+
+    @api.depends(
+        'message_ids.body',
+        'message_ids.is_admin',
+        'message_ids.author_name',
+        'message_ids.create_date',
+    )
+    def _compute_thread_html(self):
+        for conv in self:
+            msgs = conv.message_ids.sorted('create_date')
+            if not msgs:
+                conv.thread_html = (
+                    '<div style="text-align:center;color:#888;padding:32px 16px;">'
+                    'No messages yet.</div>'
+                )
+                continue
+
+            parts = [
+                '<div style="display:flex;flex-direction:column;gap:10px;padding:16px;">'
+            ]
+            for msg in msgs:
+                is_admin = msg.is_admin
+                author = _html.escape(
+                    msg.author_name or ('Studio' if is_admin else 'Student')
+                )
+                body = _html.escape(msg.body or '').replace('\n', '<br/>')
+                try:
+                    local = fields.Datetime.context_timestamp(conv, msg.create_date)
+                    time_str = local.strftime('%d %b · %H:%M')
+                except Exception:
+                    time_str = ''
+
+                if is_admin:
+                    wrap_align = 'align-self:flex-end;align-items:flex-end;'
+                    bubble_style = (
+                        # Heather blue with Paco brown text - the documented
+                        # brand pairing (4.71:1, AA). White on Heather is ~1.9:1.
+                        'background:#9ABACD;color:#50423D;'
+                        'border-radius:16px 4px 16px 16px;'
+                    )
+                else:
+                    wrap_align = 'align-self:flex-start;align-items:flex-start;'
+                    bubble_style = (
+                        'background:#f0f0f0;color:#212529;'
+                        'border-radius:4px 16px 16px 16px;'
+                    )
+
+                parts.append(
+                    f'<div style="display:flex;flex-direction:column;{wrap_align}'
+                    f'max-width:80%;">'
+                    f'<div style="font-size:11px;color:#888;margin-bottom:3px;">'
+                    f'{author} · {time_str}</div>'
+                    f'<div style="padding:10px 14px;{bubble_style}'
+                    f'font-size:13px;line-height:1.5;word-break:break-word;">'
+                    f'{body}</div></div>'
+                )
+
+            parts.append('</div>')
+            conv.thread_html = ''.join(parts)
 
     def name_get(self):
         return [(r.id, r.display_name_computed or f"Conv #{r.id}") for r in self]

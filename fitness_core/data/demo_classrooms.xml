@@ -48,7 +48,7 @@
             <field name="level">intermediate</field>
             <field name="intensity">moderate</field>
             <field name="session_type">group</field>
-            <field name="description">This routine is designed at a slower, more controlled pace, focusing on movements that incorporate open rotations and twisting patterns. The emphasis is on depth, precision, and fluidity—allowing you to move with intention and control. Longer in duration and stronger in impact, this style of training builds mobility, strength, and body awareness while helping you connect more deeply with each movement.</field>
+            <field name="description">This routine is designed at a slower, more controlled pace, focusing on movements that incorporate open rotations and twisting patterns. The emphasis is on depth, precision, and fluidity, allowing you to move with intention and control. Longer in duration and stronger in impact, this style of training builds mobility, strength, and body awareness while helping you connect more deeply with each movement.</field>
             <field name="color">2</field>
         </record>
 
@@ -73,7 +73,7 @@
             <field name="level">intermediate</field>
             <field name="intensity">moderate_high</field>
             <field name="session_type">group</field>
-            <field name="description">This is core training turned all the way up. Designed to build unstoppable stamina, these routines keep your core under constant fire from start to finish. With fewer exercises and lightning-fast transitions, your heart rate stays high while your abs, obliques, and deep core muscles work non-stop to stabilize, power, and control every move. No breaks, no escape—just pure core activation. Each session finishes with an intense burnout that pushes your endurance to the edge and leaves your core shaking. Strong core. High intensity. No limits.</field>
+            <field name="description">This is core training turned all the way up. Designed to build unstoppable stamina, these routines keep your core under constant fire from start to finish. With fewer exercises and lightning-fast transitions, your heart rate stays high while your abs, obliques, and deep core muscles work non-stop to stabilize, power, and control every move. No breaks, no escape, just pure core activation. Each session finishes with an intense burnout that pushes your endurance to the edge and leaves your core shaking. Strong core. High intensity. No limits.</field>
             <field name="color">4</field>
         </record>
 
@@ -98,7 +98,7 @@
             <field name="intensity">very_high</field>
             <field name="session_type">group</field>
             <field name="equipment">Weights, fit ball, fit circle</field>
-            <field name="description">BURN!!! Is a full-on, high-intensity blast powered by an electrifying playlist that keeps your energy at maximum from the very first beat. This class is designed to spike your heart rate and keep it there, combining fast, dynamic movements with weights, a fit ball, and a fit circle for a seriously effective burn. Expect non-stop action, full-body engagement, and an addictive rhythm that pushes you harder every second. It's sweaty, it's powerful, and it hits different every time. You won't just feel it—you'll be blown away.</field>
+            <field name="description">BURN!!! Is a full-on, high-intensity blast powered by an electrifying playlist that keeps your energy at maximum from the very first beat. This class is designed to spike your heart rate and keep it there, combining fast, dynamic movements with weights, a fit ball, and a fit circle for a seriously effective burn. Expect non-stop action, full-body engagement, and an addictive rhythm that pushes you harder every second. It's sweaty, it's powerful, and it hits different every time. You won't just feel it. You'll be blown away.</field>
             <field name="color">6</field>
         </record>
 
@@ -139,7 +139,7 @@
             <field name="intensity">high</field>
             <field name="session_type">group</field>
             <field name="equipment">Weights, props</field>
-            <field name="description">Better known as Barre Blast, this is not your typical adult ballet class—it's faster, stronger, and way more fun. Get ready for 30 minutes of high-energy barre work, combining technical ballet exercises with weights and props to fire up your muscles and boost strength and precision. Then, take it to the floor for an intense 15-minute barre burn that challenges your core, endurance, and control. All set to a powerful, feel-good playlist that keeps you moving, motivated, and pushing your limits. Barre Blast is where technique meets sweat—a dynamic, full-body workout that leaves you feeling strong, energized, and unstoppable.</field>
+            <field name="description">Better known as Barre Blast, this is not your typical adult ballet class: it's faster, stronger, and way more fun. Get ready for 30 minutes of high-energy barre work, combining technical ballet exercises with weights and props to fire up your muscles and boost strength and precision. Then, take it to the floor for an intense 15-minute barre burn that challenges your core, endurance, and control. All set to a powerful, feel-good playlist that keeps you moving, motivated, and pushing your limits. Barre Blast is where technique meets sweat, a dynamic, full-body workout that leaves you feeling strong, energized, and unstoppable.</field>
             <field name="color">9</field>
         </record>
 
@@ -151,7 +151,7 @@
             <field name="level">intermediate_advanced</field>
             <field name="intensity">high</field>
             <field name="session_type">group</field>
-            <field name="description">Burn It Baby is your ultimate lower-body burner—designed to sculpt, lift, and set your glutes on fire. This high-intensity class zeroes in on the glute muscles while firing up your core, combining resistance, mobility, and control for serious, full-body results. Get ready for deep isometric holds, relentless slow pulses, and sliding exercises that push your muscles to the limit. Your core stays constantly engaged, building strength, stability, and control with every move. It's all about that shake, that burn, and that unstoppable energy. Feel it. Fight it. Love it.</field>
+            <field name="description">Burn It Baby is your ultimate lower-body burner, designed to sculpt, lift, and set your glutes on fire. This high-intensity class zeroes in on the glute muscles while firing up your core, combining resistance, mobility, and control for serious, full-body results. Get ready for deep isometric holds, relentless slow pulses, and sliding exercises that push your muscles to the limit. Your core stays constantly engaged, building strength, stability, and control with every move. It's all about that shake, that burn, and that unstoppable energy. Feel it. Fight it. Love it.</field>
             <field name="color">10</field>
         </record>
 

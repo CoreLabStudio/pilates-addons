@@ -28,7 +28,7 @@ class FitnessNotification(models.Model):
         ('billing_reminder', 'Subscription Renewal Reminder'),
         ('class_reminder', 'Class Reminder'),
     ], required=True, default='booking_confirmed')
-    read = fields.Boolean(default=False, index=True)
+    is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")
 
     @api.model

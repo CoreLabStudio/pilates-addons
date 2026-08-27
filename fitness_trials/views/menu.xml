@@ -1,13 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <menuitem
-    id="menu_fitness_trial_requests"
-    name="Trial Requests"
-    parent="fitness_core.menu_group_bookings"
-    action="fitness_trials.action_fitness_trial_request"
-    sequence="20"
-    groups="fitness_core.group_fitness_manager"
-  />
+    <!-- Pending Review sub-item -->
+    <menuitem
+        id="menu_fitness_trials_pending"
+        name="Pending Review"
+        parent="fitness_core.menu_fitness_trials_root"
+        action="fitness_trials.action_fitness_trial_pending"
+        sequence="10"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- Scheduled sub-item -->
+    <menuitem
+        id="menu_fitness_trials_scheduled"
+        name="Scheduled"
+        parent="fitness_core.menu_fitness_trials_root"
+        action="fitness_trials.action_fitness_trial_scheduled"
+        sequence="20"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- Barre Log sub-item -->
+    <menuitem
+        id="menu_fitness_trials_barre"
+        name="Barre Log"
+        parent="fitness_core.menu_fitness_trials_root"
+        action="fitness_trials.action_fitness_trial_barre"
+        sequence="30"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <!-- All Trial Requests -->
+    <menuitem
+        id="menu_fitness_trial_requests"
+        name="All Requests"
+        parent="fitness_core.menu_fitness_trials_root"
+        action="fitness_trials.action_fitness_trial_request"
+        sequence="40"
+        groups="fitness_core.group_fitness_manager"
+    />
 
 </odoo>

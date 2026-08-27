@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Extend calendar.event search: fitness filters + group-by options ─── -->
+
+    <record id="view_calendar_event_search_teacher" model="ir.ui.view">
+        <field name="name">calendar.event.search.fitness.teacher</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_search"/>
+        <field name="arch" type="xml">
+            <!-- Additional group-by options -->
+            <xpath expr="//group" position="inside">
+                <filter string="Teacher" name="group_by_teacher"
+                        context="{'group_by': 'user_id'}"/>
+                <filter string="Class Type" name="group_by_class_type"
+                        context="{'group_by': 'class_type_id'}"/>
+                <filter string="Studio" name="group_by_classroom"
+                        context="{'group_by': 'classroom_id'}"/>
+            </xpath>
+            <!-- Fitness-specific status filters before the group-by section -->
+            <xpath expr="//group" position="before">
+                <separator/>
+                <filter string="Scheduled" name="filter_scheduled"
+                        domain="[('class_state', '=', 'scheduled'), ('is_fitness_class', '=', True)]"/>
+                <filter string="Cancelled" name="filter_cancelled"
+                        domain="[('class_state', '=', 'cancelled'), ('is_fitness_class', '=', True)]"/>
+                <separator/>
+                <filter string="Has Space" name="filter_available"
+                        domain="[('available_seats', '&gt;', 0), ('is_fitness_class', '=', True)]"/>
+                <filter string="Full" name="filter_full"
+                        domain="[('available_seats', '=', 0), ('capacity', '&gt;', 0), ('is_fitness_class', '=', True)]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ── Teacher List — res.users filtered to teacher security group ───────── -->
+    <!-- priority=32 prevents this view from being auto-selected as the default   -->
+    <!-- for all res.users lists; view_ids pins it explicitly to this action only. -->
+
+    <record id="view_fitness_teacher_list" model="ir.ui.view">
+        <field name="name">fitness.teacher.list</field>
+        <field name="model">res.users</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <list string="Teachers" default_order="name asc">
+                <field name="name" string="Teacher"/>
+                <field name="login" string="Login / Email"/>
+                <field name="phone" optional="show"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- act_window kept as a plain base for programmatic reuse; menu uses the  -->
+    <!-- server action below so the domain is built via SQL (groups_id is not   -->
+    <!-- searchable in Odoo 19 Python domain evaluation).                        -->
+    <record id="action_fitness_teacher_list" model="ir.actions.act_window">
+        <field name="name">Teachers</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': ref('fitness_core.view_fitness_teacher_list')}),
+            (0, 0, {'sequence': 20, 'view_mode': 'form', 'view_id': ref('base.view_users_form')}),
+        ]"/>
+    </record>
+
+    <record id="action_fitness_teacher_list_server" model="ir.actions.server">
+        <field name="name">Teachers</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">
+teacher_g = env.ref('fitness_core.group_fitness_teacher', raise_if_not_found=False)
+if teacher_g:
+    env.cr.execute("SELECT uid FROM res_groups_users_rel WHERE gid = %s", [teacher_g.id])
+    ids = [r[0] for r in env.cr.fetchall()]
+else:
+    ids = []
+base_action = env.ref('fitness_core.action_fitness_teacher_list').read()[0]
+base_action['domain'] = [('id', 'in', ids)] if ids else [('id', '=', False)]
+action = base_action
+        </field>
+    </record>
+
+    <!-- ── Teacher Classes — calendar.event grouped by teacher ──────────────── -->
+
+    <record id="action_fitness_teacher_classes" model="ir.actions.act_window">
+        <field name="name">Teacher Classes</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="domain">[('is_fitness_class', '=', True)]</field>
+        <field name="context">{'default_is_fitness_class': True, 'search_default_group_by_teacher': 1}</field>
+    </record>
+
+</odoo>

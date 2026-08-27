@@ -66,7 +66,7 @@
                                         </t>
                                     </p>
                                     <p class="mv-class-row-sub">
-                                        <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                                        <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">Booked</div>
                                     </p>
                                     <!-- Reassign: show link only; form reveals on click -->
                                     <t t-if="other_teachers">
@@ -74,20 +74,25 @@
                                             <summary>Reassign</summary>
                                             <form t-attf-action="/my/instructor/classes/#{event.id}/reassign"
                                                   method="post"
-                                                  style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+                                                  style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
                                                 <input type="hidden" name="csrf_token"
                                                        t-att-value="request.csrf_token()"/>
-                                                <select name="new_teacher_id"
-                                                        style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
-                                                        required="required">
-                                                    <option value="">Select instructor…</option>
-                                                    <t t-foreach="other_teachers" t-as="teacher">
-                                                        <option t-att-value="teacher.id"
-                                                                t-out="teacher.name"/>
-                                                    </t>
-                                                </select>
-                                                <button type="submit"
-                                                        style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-paco);color:var(--mv-accent-fg);cursor:pointer;white-space:nowrap;">Confirm</button>
+                                                <div style="display:flex;gap:6px;align-items:center;">
+                                                    <select name="new_teacher_id"
+                                                            style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
+                                                            required="required">
+                                                        <option value="">Select instructor…</option>
+                                                        <t t-foreach="other_teachers" t-as="teacher">
+                                                            <option t-att-value="teacher.id"
+                                                                    t-out="teacher.name"/>
+                                                        </t>
+                                                    </select>
+                                                    <button type="submit"
+                                                            style="font-size:0.72rem;padding:5px 12px;border:none;border-radius:999px;background:var(--mv-paco);color:var(--mv-accent-fg);cursor:pointer;white-space:nowrap;">Confirm</button>
+                                                </div>
+                                                <textarea name="reason" rows="2"
+                                                          placeholder="Reason for reassignment (optional)"
+                                                          style="font-size:0.78rem;padding:6px 10px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);resize:vertical;width:100%;box-sizing:border-box;"/>
                                             </form>
                                         </details>
                                     </t>
@@ -150,7 +155,7 @@
                         </p>
                         <span class="mv-roster-pill">
                             <t t-out="len(bookings)"/> /
-                            <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                            <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">Booked</div>
                         </span>
                         <t t-if="not class_started">
                             <div class="mv-roster-pill" style="margin-left:6px;">Attendance opens at class start</div>
@@ -165,7 +170,7 @@
 
                     <!-- Student list -->
                     <t t-if="not bookings">
-                        <div class="mv-empty">No students booked into this class.</div>
+                        <div class="mv-empty">Nobody is booked into this class yet.</div>
                     </t>
                     <t t-else="">
                         <div class="mv-student-list">

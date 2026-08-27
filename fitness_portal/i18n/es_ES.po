@@ -1822,8 +1822,8 @@ msgstr "Leer más"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/signup_override.py:0
-msgid "Email verified — please sign in."
-msgstr "Correo verificado — por favor, inicia sesión."
+msgid "Email verified. Please sign in."
+msgstr "Correo verificado. Por favor, inicia sesión."
 
 #. module: fitness_portal
 #. odoo-python
@@ -1964,3 +1964,16 @@ msgstr "Próxima renovación"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Unlimited"
 msgstr "Ilimitado"
+
+# ── QA review fixes ──
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Pay online"
+msgstr "Pagar en línea"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Next 14 days"
+msgstr "Próximos 14 días"

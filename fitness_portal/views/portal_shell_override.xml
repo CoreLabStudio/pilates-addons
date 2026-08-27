@@ -543,4 +543,53 @@
         </xpath>
     </template>
 
+    <!-- Bare frontend pages: Odoo templates that call portal.frontend_layout
+         directly without going through portal.portal_layout. /payment/status and
+         the 404 page are the ones students actually hit, and they rendered as raw
+         Odoo: default navbar, company logo, no CoreLab chrome at all.
+
+         Three-way discriminator, so this fires exactly once and only where needed:
+           - CoreLab's own 21 pages set no_header=True and draw their own header
+           - portal.portal_layout pages set is_portal=True and are handled by
+             mv_portal_layout_shell above
+           - anything else (payment/status, 404) sets neither -> handled here
+    -->
+    <template id="mv_frontend_layout_shell" name="CoreLab Frontend Layout Shell"
+              inherit_id="portal.frontend_layout">
+
+        <xpath expr="//div[@id='wrapwrap']" position="before">
+            <t t-set="mv_bare_frontend" t-value="(not no_header) and (not is_portal) and (
+                request.env.user.has_group('fitness_core.group_fitness_student')
+                or request.env.user.has_group('fitness_core.group_fitness_teacher'))"/>
+        </xpath>
+
+        <!-- Suppress Odoo's default navbar (company logo + user dropdown) so we
+             do not end up with two headers stacked. -->
+        <xpath expr="//div[@id='wrapwrap']/header/nav" position="attributes">
+            <attribute name="t-if">not mv_bare_frontend</attribute>
+        </xpath>
+
+        <xpath expr="//div[@id='wrapwrap']/header" position="after">
+            <t t-if="mv_bare_frontend">
+                <t t-if="request.env.user.has_group('fitness_core.group_fitness_student')">
+                    <t t-call="fitness_portal.mv_page_header"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_teacher_page_header"/>
+                </t>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <t t-if="mv_bare_frontend">
+                <t t-if="request.env.user.has_group('fitness_core.group_fitness_student')">
+                    <t t-call="fitness_portal.mv_bottom_nav"/>
+                </t>
+                <t t-else="">
+                    <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
 </odoo>
