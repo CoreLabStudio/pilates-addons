@@ -7,3 +7,4 @@ from . import fitness_class_schedule
 from . import fitness_closure_day
 from . import fitness_news_post
 from . import fitness_dashboard
+from . import payment_method

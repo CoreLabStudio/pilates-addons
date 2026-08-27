@@ -5,7 +5,7 @@
         <record id="mail_template_teacher_swap" model="mail.template">
             <field name="name">Fitness: Teacher Change Notification</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
-            <field name="subject">{{ 'Your class instructor has changed' if object.student_id.lang == 'en_US' else ('El/La professor/a de la teva classe ha canviat' if object.student_id.lang == 'ca_ES' else 'El/La instructor/a de tu clase ha cambiado') }}</field>
+            <field name="subject">{{ 'Your class instructor has changed' if object.student_id.lang == 'en_US' else ("L'instructor/a de la teva classe ha canviat" if object.student_id.lang == 'ca_ES' else 'El/La instructor/a de tu clase ha cambiado') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
             <field name="body_html" type="html">
@@ -22,10 +22,10 @@
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
-    <p>Et volem informar que el/la professor/a de la teva classe propera ha canviat:</p>
+    <p>Et volem informar que l'instructor/a de la teva classe propera ha canviat:</p>
     <ul>
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Nou/nova professor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Per confirmar'"/></li>
+      <li>Nou/nova instructor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Per confirmar'"/></li>
     </ul>
     <p>La resta es mant&#233; igual. Ens veiem a classe!</p>
     <p>L'equip de m&#333;va</p>

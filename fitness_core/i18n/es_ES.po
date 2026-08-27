@@ -135,3 +135,135 @@ msgstr ""
 "Esta clase está diseñada para disparar tu frecuencia cardíaca y mantenerla arriba, combinando movimientos rápidos y dinámicos con pesas, fit ball y fit circle para un burn brutal. "
 "Prepárate para acción sin pausa, activación total del cuerpo y un ritmo adictivo que te empuja a dar más en cada segundo. "
 "Es sudor, es potencia y es una experiencia que se siente diferente cada vez. No solo lo vas a sentir... te va a sorprender."
+
+# ── Admin dashboard ──
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Good morning"
+msgstr "Buenos días"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Good afternoon"
+msgstr "Buenas tardes"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Good evening"
+msgstr "Buenas noches"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Classes Today"
+msgstr "Clases de hoy"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Students"
+msgstr "Estudiantes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Teacher Swaps"
+msgstr "Cambios de instructor"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Today's Classes"
+msgstr "Clases de hoy"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Pending Trials"
+msgstr "Pruebas pendientes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "See all"
+msgstr "Ver todo"
+
+# ── Dashboard, exact QWeb terms ──
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "<span class=\"cl-hero-label\">Classes Today</span>"
+msgstr "<span class=\"cl-hero-label\">Clases de hoy</span>"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "<span class=\"cl-tile-label\">Students</span>"
+msgstr "<span class=\"cl-tile-label\">Estudiantes</span>"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "<span class=\"cl-tile-label\">Teacher Swaps</span>"
+msgstr "<span class=\"cl-tile-label\">Cambios de instructor</span>"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "See all <span class=\"cl-arrow\">→</span>"
+msgstr "Ver todo <span class=\"cl-arrow\">→</span>"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Classes today"
+msgstr "Clases de hoy"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "View today's classes"
+msgstr "Ver las clases de hoy"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "View students"
+msgstr "Ver estudiantes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Teacher swaps"
+msgstr "Cambios de instructor"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "View teacher swaps"
+msgstr "Ver cambios de instructor"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "See all classes"
+msgstr "Ver todas las clases"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Pending trials"
+msgstr "Pruebas pendientes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "View pending trials"
+msgstr "Ver pruebas pendientes"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Unread messages"
+msgstr "Mensajes sin leer"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "View unread messages"
+msgstr "Ver mensajes sin leer"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Dashboard"
+msgstr "Panel"

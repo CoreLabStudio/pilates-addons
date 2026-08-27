@@ -23,7 +23,7 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         result = super().action_confirm()
         for order in self:
-            today = fields.Date.today()
+            today = fields.Date.context_today(self)
             for line in order.order_line:
                 if not line.product_id.fitness_is_package:
                     continue

@@ -895,9 +895,12 @@ body.bg-100 a:hover { color: var(--mv-clay) !important; }
    for the few layout tweaks that must only apply once our shell is present. */
 
 /* Hide default Odoo navbar/footer — CoreLab provides its own header */
-body.o_portal #wrapwrap > header,
+/* :not(.mv-header) matters: the CoreLab header is itself a <header> and, on
+   bare frontend pages (payment/status, 404), it is injected as a direct child
+   of #wrapwrap. Without the exclusion this rule hides our own header. */
+body.o_portal #wrapwrap > header:not(.mv-header),
 body.o_portal #wrapwrap > footer,
-body:has(.mv-bottom-nav) #wrapwrap > header,
+body:has(.mv-bottom-nav) #wrapwrap > header:not(.mv-header),
 body:has(.mv-bottom-nav) #wrapwrap > footer {
   display: none !important;
 }
@@ -2766,3 +2769,157 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 }
 .mv-news-card-img { position: relative; height: 160px; overflow: hidden; }
 .mv-news-card-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+
+/* ── 14. Portal body templates (orders, invoices, security) ──────────────
+   Odoo renders these pages' bodies itself. The CoreLab shell already wraps
+   them, so this section only restyles the stock markup inside. Guarded by
+   :has(.mv-header) so it never touches a backend/admin session. */
+
+#wrapwrap.o_portal:has(.mv-header) {
+  color: var(--mv-paco);
+}
+
+/* Breadcrumb: Odoo's default is a bootstrap bar with a purple home icon. */
+#wrapwrap.o_portal:has(.mv-header) .breadcrumb {
+  background: transparent;
+  padding: 0 0 4px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+#wrapwrap.o_portal:has(.mv-header) .breadcrumb,
+#wrapwrap.o_portal:has(.mv-header) .breadcrumb a,
+#wrapwrap.o_portal:has(.mv-header) .breadcrumb .fa {
+  color: var(--mv-muted2);
+}
+#wrapwrap.o_portal:has(.mv-header) .breadcrumb a:hover {
+  color: var(--mv-clay-text);
+}
+
+/* Tables: drop the striping and heavy borders for the studio's lighter rhythm. */
+#wrapwrap.o_portal:has(.mv-header) table {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  color: var(--mv-paco);
+  border-color: var(--mv-border);
+}
+#wrapwrap.o_portal:has(.mv-header) table > :not(caption) > * > * {
+  background: transparent;
+  border-bottom-color: var(--mv-border);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+#wrapwrap.o_portal:has(.mv-header) table thead th {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  border-bottom: 1px solid var(--mv-border);
+}
+/* Bootstrap 5.3 stripes rows with an inset box-shadow, not a background, so
+   the background rule above cannot reach it. Swap the neutral grey wash for a
+   faint Heather tint; striping still aids scanning a long order list. */
+#wrapwrap.o_portal:has(.mv-header) .table-striped > tbody > tr:nth-of-type(odd) > *,
+#wrapwrap.o_portal:has(.mv-header) table > tbody > tr:nth-of-type(odd) > * {
+  box-shadow: inset 0 0 0 9999px rgba(154, 186, 205, 0.07);
+}
+#wrapwrap.o_portal:has(.mv-header) table tbody tr:hover > * {
+  background: rgba(154, 186, 205, 0.08);
+}
+#wrapwrap.o_portal:has(.mv-header) table a {
+  color: var(--mv-clay-text);
+  text-decoration: none;
+}
+
+/* Badges: Odoo uses bootstrap semantic colours that clash with the palette. */
+#wrapwrap.o_portal:has(.mv-header) .badge {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+#wrapwrap.o_portal:has(.mv-header) .badge.text-bg-success,
+#wrapwrap.o_portal:has(.mv-header) .badge.bg-success {
+  background: var(--mv-ok-bg) !important;
+  color: var(--mv-ok-ink) !important;
+}
+#wrapwrap.o_portal:has(.mv-header) .badge.text-bg-danger,
+#wrapwrap.o_portal:has(.mv-header) .badge.bg-danger {
+  background: var(--mv-warn-bg) !important;
+  color: var(--mv-warn-ink) !important;
+}
+#wrapwrap.o_portal:has(.mv-header) .badge.text-bg-info,
+#wrapwrap.o_portal:has(.mv-header) .badge.bg-info,
+#wrapwrap.o_portal:has(.mv-header) .badge.text-bg-secondary,
+#wrapwrap.o_portal:has(.mv-header) .badge.bg-secondary,
+#wrapwrap.o_portal:has(.mv-header) .badge.text-bg-warning,
+#wrapwrap.o_portal:has(.mv-header) .badge.bg-warning {
+  background: var(--mv-info-bg) !important;
+  color: var(--mv-paco) !important;
+}
+
+/* Buttons: match the portal CTA (Heather blue on Paco brown, 4.71:1 AA). */
+#wrapwrap.o_portal:has(.mv-header) .btn-primary {
+  background: var(--mv-btn-bg);
+  border-color: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
+  border-radius: 999px;
+  font-weight: 600;
+}
+#wrapwrap.o_portal:has(.mv-header) .btn-primary:hover {
+  background: var(--mv-btn-hover);
+  border-color: var(--mv-btn-hover);
+  color: var(--mv-btn-fg);
+}
+#wrapwrap.o_portal:has(.mv-header) .btn-secondary,
+#wrapwrap.o_portal:has(.mv-header) .btn-outline-secondary {
+  background: transparent;
+  border-color: var(--mv-border);
+  color: var(--mv-paco);
+  border-radius: 999px;
+}
+#wrapwrap.o_portal:has(.mv-header) .btn-secondary:hover,
+#wrapwrap.o_portal:has(.mv-header) .btn-outline-secondary:hover {
+  background: var(--mv-sand);
+  border-color: var(--mv-border);
+  color: var(--mv-paco);
+}
+
+/* Cards / panels Odoo emits on the document pages. */
+#wrapwrap.o_portal:has(.mv-header) .card {
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 12px;
+}
+#wrapwrap.o_portal:has(.mv-header) .card-header {
+  background: var(--mv-info-bg);
+  border-bottom-color: var(--mv-border);
+  color: var(--mv-paco);
+}
+
+/* Bottom nav overlaps the last rows without a little breathing room. */
+#wrapwrap.o_portal:has(.mv-header) #wrap {
+  padding-bottom: 96px;
+}
+
+/* Odoo renders the studio contact avatar at whatever size the column allows,
+   which on mobile became a ~180px block. Cap it so it reads as an avatar. */
+#wrapwrap.o_portal:has(.mv-header) img.o_avatar {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+/* Odoo's "Connect with your software!" CTA opens an EDI integration modal.
+   Irrelevant to a pilates student looking at their order, so hide it inside
+   the CoreLab shell only. Staff/backend sessions are unaffected. */
+#wrapwrap.o_portal:has(.mv-header) #portal_connect_software_modal_btn {
+  display: none;
+}

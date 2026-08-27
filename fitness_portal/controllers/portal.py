@@ -34,6 +34,9 @@ except Exception:
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
+# The Available list defaults to a week; 14 stays reachable from the chips.
+DEFAULT_LOOK_AHEAD_DAYS = 7
+RANGE_CHOICES = (1, 7, 14)
 SCHEDULE_LOOK_AHEAD_DAYS = 28
 
 # Mirror of constants in fitness_subscriptions.models.sale_order
@@ -136,7 +139,7 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/studio', type='http', auth='user', website=True, sitemap=False)
     def studio(self, view=None, booked=None, cancelled=None, credit_returned=None,
-               error=None, **kw):
+               error=None, days=None, **kw):
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -164,16 +167,28 @@ class FitnessStudentPortal(http.Controller):
         if active_view == 'schedule':
             values.update(self._schedule_values(partner))
         else:
-            values.update(self._available_values(partner))
+            values.update(self._available_values(partner, days))
 
         return request.render('fitness_portal.portal_student_studio', values)
 
-    def _available_values(self, partner):
-        """Day-grouped list of bookable classes (the 'Available' view)."""
+    def _available_values(self, partner, days=None):
+        """Day-grouped list of bookable classes (the 'Available' view).
+
+        The window defaults to a week. Loading the full fourteen days put
+        every class in the DOM at once, which on a phone meant a page tens
+        of thousands of pixels tall before the student saw anything useful.
+        """
         _ = request.env._
         lang = request.env.lang or 'en_US'
         now = fields.Datetime.now()
-        window_end = now + timedelta(days=LOOK_AHEAD_DAYS)
+
+        try:
+            sel_days = int(days)
+        except (TypeError, ValueError):
+            sel_days = DEFAULT_LOOK_AHEAD_DAYS
+        if sel_days not in RANGE_CHOICES:
+            sel_days = DEFAULT_LOOK_AHEAD_DAYS
+        window_end = now + timedelta(days=sel_days)
 
         eligible_types = self._eligible_class_types(partner.id)
 
@@ -277,10 +292,16 @@ class FitnessStudentPortal(http.Controller):
             'events':          events,
             'grouped_events':  grouped_events,
             'has_sources':     bool(eligible_types),
-            'look_ahead_days': LOOK_AHEAD_DAYS,
+            'look_ahead_days': sel_days,
+            'sel_days':        sel_days,
+            'range_chips':     [
+                {'days': 1,  'label': _('Today')},
+                {'days': 7,  'label': _('This week')},
+                {'days': 14, 'label': _('Next 14 days')},
+            ],
             'today_local':     today_local,
             'subtitle':        subtitle,
-            'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % LOOK_AHEAD_DAYS,
+            'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
             'no_sources_msg':  _("You don't have an active membership or class pack. Please contact the studio to get started."),
             'studio_chips':    studio_chips,
         }
@@ -523,7 +544,7 @@ class FitnessStudentPortal(http.Controller):
 
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         lang_code = (request.lang.code if request.lang else None) or 'en_US'
 
         cutoff_start = cutoff_end = None
@@ -730,7 +751,7 @@ class FitnessStudentPortal(http.Controller):
     def _credit_total(self, partner):
         """Credits the student can actually book with right now:
         unexpired class-pack credits + subscription floating credits."""
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         total = 0
         lines = request.env['sale.order.line'].sudo().search([
             ('order_partner_id', '=', partner.id),
@@ -764,7 +785,7 @@ class FitnessStudentPortal(http.Controller):
         even when a student's records predate this page.
         """
         _ = request.env._
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         events = []
 
         # ── Class-pack purchases and expiries ────────────────────────
@@ -1453,7 +1474,7 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
 
         subs = request.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
@@ -1480,7 +1501,7 @@ class FitnessStudentPortal(http.Controller):
             period_end_str = ''
             if sub.next_invoice_date:
                 next_renewal = sub.next_invoice_date
-                today_date = fields.Date.today()
+                today_date = fields.Date.context_today(request.env.user)
                 # Advance stale dates forward — manual-payment studios don't
                 # trigger the Odoo billing cron so next_invoice_date can lag.
                 if next_renewal < today_date and sub.plan_id:
@@ -1768,7 +1789,7 @@ class FitnessStudentPortal(http.Controller):
         and by _primary_credit (single best pool for other pages).
         """
         _ = request.env._
-        today = fields.Date.today()
+        today = fields.Date.context_today(request.env.user)
         pools = []
 
         # Active subscription first

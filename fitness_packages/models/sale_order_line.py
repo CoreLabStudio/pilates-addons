@@ -38,7 +38,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('fitness_validity_end_date')
     def _compute_fitness_is_expired(self):
-        today = fields.Date.today()
+        today = fields.Date.context_today(self)
         for line in self:
             if line.fitness_validity_end_date:
                 line.fitness_is_expired = line.fitness_validity_end_date < today

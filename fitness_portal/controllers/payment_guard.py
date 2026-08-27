@@ -23,8 +23,9 @@ Two conditions are refused:
 """
 
 import logging
+from datetime import timedelta
 
-from odoo import _
+from odoo import _, fields
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -34,6 +35,13 @@ _logger = logging.getLogger(__name__)
 
 # A transaction in any of these states means money is already committed or moving.
 BLOCKING_TX_STATES = ('pending', 'authorized', 'done')
+
+# 'pending' is not always temporary. Bizum sits pending while the customer
+# authorises on their banking app, and an abandoned authorisation never
+# resolves. Blocking on it forever would lock the order, so a pending
+# transaction only blocks while it is recent enough to still be in flight.
+# 'authorized' and 'done' mean money really is committed and never expire.
+PENDING_GRACE_MINUTES = 30
 
 
 class FitnessPaymentPortal(PaymentPortal):
@@ -52,8 +60,13 @@ class FitnessPaymentPortal(PaymentPortal):
                     "This order has already been paid. You have not been charged again."
                 ))
 
+            cutoff = fields.Datetime.now() - timedelta(minutes=PENDING_GRACE_MINUTES)
             in_flight = order_sudo.transaction_ids.filtered(
-                lambda tx: tx.state in BLOCKING_TX_STATES
+                lambda tx: (
+                    tx.state in ('authorized', 'done')
+                    or (tx.state == 'pending'
+                        and (tx.last_state_change or tx.create_date or cutoff) >= cutoff)
+                )
             )
             if in_flight:
                 _logger.warning(

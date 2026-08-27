@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Bizum via Stripe.
+
+        Verified end-to-end on this database: order S00183, Stripe PaymentIntent
+        pi_3U8xIQPsCpAdBQvP1RXykSZ2, invoice INV/2026/00009 posted and fully
+        reconciled, driven inline by Stripe's Payment Element.
+
+        Odoo will not maintain this link on its own, so fitness_core re-asserts it
+        on every upgrade. See _corelab_ensure_bizum_stripe for why this is a
+        function call rather than a <record>: the two fields must be written
+        separately and in order, and overriding payment's own xml id here would
+        clear the noupdate flag that protects it upstream.
+
+        noupdate is deliberately left off (0) - the point is that this reapplies,
+        not that it only seeds once.
+    -->
+    <function model="payment.method" name="_corelab_ensure_bizum_stripe"/>
+</odoo>

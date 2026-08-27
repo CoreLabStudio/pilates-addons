@@ -5,7 +5,7 @@
     'summary': 'Core models for Yoleyva Pilates & Barre Studio',
     'author': 'Yoleyva Studio',
     'license': 'LGPL-3',
-    'depends': ['base', 'calendar'],
+    'depends': ['base', 'calendar', 'payment'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
@@ -20,6 +20,7 @@
         'views/fitness_class_schedule_views.xml',
         'views/fitness_closure_day_views.xml',
         'views/menu_views.xml',
+        'data/payment_method_bizum.xml',
         'data/demo_classrooms.xml',
         'data/demo_session_types.xml',
     ],

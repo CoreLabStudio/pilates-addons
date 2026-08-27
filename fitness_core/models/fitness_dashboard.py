@@ -1,7 +1,14 @@
 import html as _html
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
-from odoo import models, fields, api
+import pytz
+
+from odoo import models, fields, api, _
+from odoo.tools import format_date
+
+# The studio is in Spain. Times on this dashboard follow the studio's clock,
+# not the server's and not whichever timezone the viewing user is set to.
+DEFAULT_TZ = 'Europe/Madrid'
 
 
 class FitnessAdminDashboard(models.TransientModel):
@@ -17,6 +24,30 @@ class FitnessAdminDashboard(models.TransientModel):
     pending_swaps = fields.Integer(string='Teacher Swaps', compute='_compute_stats')
     unread_messages = fields.Integer(string='Unread Messages', compute='_compute_stats')
     active_students = fields.Integer(string='Students', compute='_compute_stats')
+
+    # ── Header (greeting + date) ──────────────────────────────────────────────
+
+    header_greeting = fields.Char(compute='_compute_header')
+    header_date = fields.Char(compute='_compute_header')
+
+    def _compute_header(self):
+        """Greeting and date, in the viewing user's timezone and language."""
+        for rec in self:
+            now = rec._studio_now()
+            hour = now.hour
+            if hour < 12:
+                rec.header_greeting = _("Good morning")
+            elif hour < 19:
+                rec.header_greeting = _("Good afternoon")
+            else:
+                rec.header_greeting = _("Good evening")
+            # e.g. "Wednesday, 26 August" - locale aware via babel through Odoo
+            try:
+                rec.header_date = format_date(
+                    rec.env, now.date(), date_format='EEEE, d MMMM'
+                )
+            except Exception:
+                rec.header_date = now.strftime('%A, %d %B')
 
     # ── Preview panels ────────────────────────────────────────────────────────
 
@@ -61,16 +92,34 @@ class FitnessAdminDashboard(models.TransientModel):
         )
         return [row[0] for row in self.env.cr.fetchall()]
 
+    def _studio_tz(self):
+        """The studio's timezone, from the company, falling back to Madrid."""
+        return pytz.timezone(self.env.company.partner_id.tz or DEFAULT_TZ)
+
+    def _studio_now(self):
+        """Right now, in the studio's timezone."""
+        return pytz.utc.localize(fields.Datetime.now()).astimezone(self._studio_tz())
+
+    def _today_bounds(self):
+        """Start and end of today in the studio's timezone, as naive UTC.
+
+        Returned naive so the values can go straight into an ORM domain.
+        """
+        tz = self._studio_tz()
+        start_local = tz.localize(datetime.combine(self._studio_now().date(), time.min))
+        end_local = start_local + timedelta(days=1)
+        to_utc = lambda d: d.astimezone(pytz.utc).replace(tzinfo=None)
+        return to_utc(start_local), to_utc(end_local)
+
     def _compute_stats(self):
-        today = fields.Date.today()
-        tomorrow = today + timedelta(days=1)
+        day_start, day_end = self._today_bounds()
         teacher_ids = self._teacher_user_ids()
 
         for rec in self:
             rec.today_classes = self.env['calendar.event'].search_count([
                 ('is_fitness_class', '=', True),
-                ('start', '>=', fields.Datetime.to_datetime(today)),
-                ('start', '<', fields.Datetime.to_datetime(tomorrow)),
+                ('start', '>=', day_start),
+                ('start', '<', day_end),
             ])
             rec.pending_trials = rec._safe_count(
                 'fitness.trial.request', [('status', '=', 'pending')]
@@ -84,36 +133,45 @@ class FitnessAdminDashboard(models.TransientModel):
                 domain.append(('id', 'not in', teacher_ids))
             rec.active_students = self.env['res.users'].sudo().search_count(domain)
 
+    @staticmethod
+    def _record_url(model, res_id):
+        """Backend form-view URL for one record."""
+        return '/odoo/%s/%s' % (model, res_id)
+
     # ── Preview panel compute ─────────────────────────────────────────────────
 
     def _compute_previews(self):
-        today = fields.Date.today()
-        tomorrow = today + timedelta(days=1)
+        day_start, day_end = self._today_bounds()
+        studio_tz = self._studio_tz()
 
         for rec in self:
             # ── Today's classes ───────────────────────────────────────────────
             classes = self.env['calendar.event'].search([
                 ('is_fitness_class', '=', True),
-                ('start', '>=', fields.Datetime.to_datetime(today)),
-                ('start', '<', fields.Datetime.to_datetime(tomorrow)),
+                ('start', '>=', day_start),
+                ('start', '<', day_end),
             ], order='start asc', limit=5)
 
             if classes:
                 rows = ''
                 for cls in classes:
-                    local = fields.Datetime.context_timestamp(rec, cls.start)
+                    local = pytz.utc.localize(cls.start).astimezone(studio_tz)
                     time_str = local.strftime('%H:%M')
                     teacher = _html.escape(cls.user_id.name or '—')
                     name = _html.escape(cls.name or '—')
                     booked = cls.booked_seats or 0
                     cap = str(cls.capacity) if cls.capacity else '∞'
+                    url = rec._record_url('calendar.event', cls.id)
                     rows += (
-                        f'<tr><td>{time_str}</td><td>{name}</td>'
-                        f'<td>{teacher}</td><td>{booked}/{cap}</td></tr>'
+                        f'<tr><td>{time_str}</td>'
+                        f'<td><a class="cl-rowlink" href="{url}">{name}</a></td>'
+                        f'<td>{teacher}</td><td>{booked}/{cap}</td>'
+                        f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
+                        f'title="Open this class">→</a></td></tr>'
                     )
                 rec.preview_classes_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Time</th><th>Class</th><th>Teacher</th><th>Seats</th></tr></thead>'
+                    '<thead><tr><th>Time</th><th>Class</th><th>Teacher</th><th>Seats</th><th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:
@@ -133,10 +191,16 @@ class FitnessAdminDashboard(models.TransientModel):
                 for t in trials:
                     name = _html.escape(t.name or '—')
                     interest = _html.escape(t.class_interest or '—')
-                    rows += f'<tr><td>{name}</td><td>{interest}</td></tr>'
+                    url = rec._record_url('fitness.trial.request', t.id)
+                    rows += (
+                        f'<tr><td><a class="cl-rowlink" href="{url}">{name}</a></td>'
+                        f'<td>{interest}</td>'
+                        f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
+                        f'title="Open this trial request">→</a></td></tr>'
+                    )
                 rec.preview_trials_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Name</th><th>Interest</th></tr></thead>'
+                    '<thead><tr><th>Name</th><th>Interest</th><th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:
@@ -159,15 +223,19 @@ class FitnessAdminDashboard(models.TransientModel):
                     )
                     role = _html.escape(conv.role or '—')
                     last = (
-                        fields.Datetime.context_timestamp(rec, conv.last_activity).strftime('%d %b %H:%M')
+                        pytz.utc.localize(conv.last_activity).astimezone(studio_tz).strftime('%d %b %H:%M')
                         if conv.last_activity else '—'
                     )
+                    url = rec._record_url('fitness.studio.conversation', conv.id)
                     rows += (
-                        f'<tr><td>{student}</td><td>{role}</td><td>{last}</td></tr>'
+                        f'<tr><td><a class="cl-rowlink" href="{url}">{student}</a></td>'
+                        f'<td>{role}</td><td>{last}</td>'
+                        f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
+                        f'title="Open this conversation">→</a></td></tr>'
                     )
                 rec.preview_messages_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Student</th><th>Role</th><th>Last Activity</th></tr></thead>'
+                    '<thead><tr><th>Student</th><th>Role</th><th>Last Activity</th><th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:
@@ -178,8 +246,7 @@ class FitnessAdminDashboard(models.TransientModel):
     # ── Stat tile click actions ────────────────────────────────────────────────
 
     def action_view_today_classes(self):
-        today = fields.Date.today()
-        tomorrow = today + timedelta(days=1)
+        day_start, day_end = self._today_bounds()
         return {
             'type': 'ir.actions.act_window',
             'name': "Today's Classes",
@@ -187,8 +254,8 @@ class FitnessAdminDashboard(models.TransientModel):
             'view_mode': 'list,form',
             'domain': [
                 ('is_fitness_class', '=', True),
-                ('start', '>=', fields.Datetime.to_datetime(today)),
-                ('start', '<', fields.Datetime.to_datetime(tomorrow)),
+                ('start', '>=', day_start),
+                ('start', '<', day_end),
             ],
         }
 

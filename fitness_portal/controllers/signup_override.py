@@ -71,7 +71,7 @@ class FitnessSignup(AuthSignupHome):
 
         # Show "email verified" success message on the login page
         if hasattr(response, 'qcontext') and request.params.get('message') == 'verified':
-            response.qcontext['message'] = _("Email verified — please sign in.")
+            response.qcontext['message'] = _("Email verified. Please sign in.")
 
         # Post-login safety net for successful POST logins
         if (
@@ -274,16 +274,37 @@ class FitnessSignup(AuthSignupHome):
             body = 'Please verify your email address to activate your account and access the studio portal.'
             cta = 'Verify my email'
             footer = 'This link expires in 6 days. If you did not create a CoreLab account, you can safely ignore this email.'
+            pwa_title = 'Save the app to your phone'
+            pwa_1 = 'Open this email on your phone and tap the link to sign in.'
+            pwa_2 = ('In your browser, look for “Add to Home Screen” or “Install app”, '
+                     'usually under the Share icon or the menu (⋮).')
+            pwa_3 = 'Tap Add or Install.'
+            pwa_note = ('Once added it opens like a normal app, with no browser bar. '
+                        'Just tap the icon.')
         elif lang == 'ca_ES':
             greeting = 'Benvingut/da a CoreLab, {name}.'
             body = 'Verifica la teva adreça de correu electrònic per activar el teu compte i accedir al portal de l\'estudi.'
             cta = 'Verificar el meu correu'
             footer = 'Aquest enllaç caduca en 6 dies. Si no has creat un compte a CoreLab, pots ignorar aquest correu.'
+            pwa_title = "Desa l'app al teu mòbil"
+            pwa_1 = "Obre aquest correu al teu mòbil i toca l'enllaç per iniciar sessió."
+            pwa_2 = ('Al navegador, busca “Afegir a la pantalla d\'inici” o “Instal·lar app”, '
+                     'normalment a la icona de Compartir o al menú (⋮).')
+            pwa_3 = 'Toca Afegeix o Instal·la.'
+            pwa_note = ("Un cop afegida, s'obre com una app normal, sense barra del navegador. "
+                        'Només cal tocar la icona.')
         else:  # es_ES (default)
             greeting = 'Bienvenido/a a CoreLab, {name}.'
             body = 'Verifica tu dirección de correo electrónico para activar tu cuenta y acceder al portal del estudio.'
             cta = 'Verificar mi correo'
             footer = 'Este enlace caduca en 6 días. Si no has creado una cuenta en CoreLab, puedes ignorar este correo.'
+            pwa_title = 'Guarda la app en tu móvil'
+            pwa_1 = 'Abre este correo en tu móvil y toca el enlace para iniciar sesión.'
+            pwa_2 = ('En el navegador, busca “Añadir a pantalla de inicio” o “Instalar app”, '
+                     'normalmente en el icono de Compartir o en el menú (⋮).')
+            pwa_3 = 'Toca Añadir o Instalar.'
+            pwa_note = ('Una vez añadida, se abre como una app normal, sin barra del navegador. '
+                        'Solo toca el icono.')
 
         return Markup("""<div style="font-family:Georgia,serif;color:#18110C;max-width:520px;margin:0 auto;padding:40px 24px;">
   <p style="font-size:22px;font-weight:600;margin:0 0 20px;">{greeting}</p>
@@ -298,13 +319,13 @@ class FitnessSignup(AuthSignupHome):
   </div>
   <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 24px;">{footer}</p>
   <div style="margin:0 0 28px;padding:18px 20px;background:#F7F3EF;border-radius:6px;border-left:3px solid #92786C;">
-    <p style="font-size:11px;font-weight:700;color:#50423D;margin:0 0 10px;letter-spacing:0.06em;text-transform:uppercase;">Guarda la app en tu m&#xF3;vil</p>
+    <p style="font-size:11px;font-weight:700;color:#50423D;margin:0 0 10px;letter-spacing:0.06em;text-transform:uppercase;">{pwa_title}</p>
     <ol style="font-size:13px;color:#4a3728;line-height:1.7;margin:0 0 10px;padding-left:20px;">
-      <li style="margin-bottom:5px;">Abre este correo en tu m&#xF3;vil y toca el enlace para iniciar sesi&#xF3;n.</li>
-      <li style="margin-bottom:5px;">En el navegador, busca &#x201C;A&#xF1;adir a pantalla de inicio&#x201D; o &#x201C;Instalar app&#x201D; &#x2014; normalmente en el icono de Compartir o en el men&#xFA; (&#x22EE;).</li>
-      <li style="margin-bottom:5px;">Toca <strong>A&#xF1;adir</strong> o <strong>Instalar</strong>.</li>
+      <li style="margin-bottom:5px;">{pwa_1}</li>
+      <li style="margin-bottom:5px;">{pwa_2}</li>
+      <li style="margin-bottom:5px;">{pwa_3}</li>
     </ol>
-    <p style="font-size:12px;color:#8a7060;margin:0;line-height:1.6;">Una vez a&#xF1;adida, se abre como una app normal &#x2014; sin barra del navegador, solo toca el icono.</p>
+    <p style="font-size:12px;color:#8a7060;margin:0;line-height:1.6;">{pwa_note}</p>
   </div>
   <hr style="border:none;border-top:1px solid #E8E0D5;margin:0 0 24px;"/>
   <p style="font-size:12px;color:#8a7060;margin:0;">CoreLab Studio</p>
@@ -314,6 +335,11 @@ class FitnessSignup(AuthSignupHome):
             url=safe_url,
             cta=cta,
             footer=footer,
+            pwa_title=pwa_title,
+            pwa_1=pwa_1,
+            pwa_2=pwa_2,
+            pwa_3=pwa_3,
+            pwa_note=pwa_note,
         )
 
     # ------------------------------------------------------------------

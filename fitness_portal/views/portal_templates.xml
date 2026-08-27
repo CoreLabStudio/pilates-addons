@@ -478,6 +478,18 @@
 
                 <!-- Filter bar: discipline pills (when multiple disciplines) + date dropdown (always) -->
                 <div id="mv-filter-hierarchy">
+                    <!-- Date range. The list defaults to a week so a phone is not
+                         handed every class in the window at once. -->
+                    <t t-if="range_chips">
+                        <div class="mv-pkg-filters" id="mv-range-filters">
+                            <t t-foreach="range_chips" t-as="rc">
+                                <a t-att-href="'/my/studio?days=%s' % rc['days']"
+                                   class="mv-pkg-pill-btn"
+                                   t-att-style="'border-color:var(--mv-ink);color:var(--mv-ink);font-weight:700;' if rc['days'] == sel_days else None"
+                                   t-out="rc['label']"/>
+                            </t>
+                        </div>
+                    </t>
                     <t t-if="studio_chips">
                         <div class="mv-pkg-filters" id="mv-type-filters">
                             <t t-foreach="studio_chips" t-as="chip">

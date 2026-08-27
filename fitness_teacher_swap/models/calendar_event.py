@@ -72,7 +72,7 @@ class CalendarEvent(models.Model):
                                 Notif._create_for_user(
                                     student_user.id,
                                     'teacher_swap',
-                                    senv.env._('Teacher updated: %s', event.name),
+                                    senv.env._('Instructor updated: %s', event.name),
                                     senv.env._('Your class will now be taught by %s.', new_teacher.name),
                                     action_url=f'/my/classes/{event.id}',
                                 )
@@ -82,7 +82,7 @@ class CalendarEvent(models.Model):
                             new_teacher.id,
                             'teacher_swap',
                             tenv.env._('Class assigned to you: %s', event.name),
-                            tenv.env._('You have been assigned as teacher for this class.'),
+                            tenv.env._('You have been assigned as instructor for this class.'),
                             action_url=f'/my/instructor/classes/{event.id}',
                         )
                         _logger.info(
@@ -228,7 +228,7 @@ class CalendarEvent(models.Model):
                     notif_model._create_for_user(
                         student_user.id,
                         'teacher_swap',
-                        student_env.env._('Teacher updated: %s', self.name),
+                        student_env.env._('Instructor updated: %s', self.name),
                         student_env.env._('Your class will now be taught by %s.', new_teacher.name),
                         action_url=f'/my/classes/{self.id}',
                     )

@@ -66,7 +66,7 @@
                                         </t>
                                     </p>
                                     <p class="mv-class-row-sub">
-                                        <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                                        <t t-out="ctx['booked']"/> / <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">Booked</div>
                                     </p>
                                     <!-- Reassign: show link only; form reveals on click -->
                                     <t t-if="other_teachers">
@@ -155,7 +155,7 @@
                         </p>
                         <span class="mv-roster-pill">
                             <t t-out="len(bookings)"/> /
-                            <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">students</div>
+                            <t t-out="event.capacity or '∞'"/> <div class="mv-inline-label">Booked</div>
                         </span>
                         <t t-if="not class_started">
                             <div class="mv-roster-pill" style="margin-left:6px;">Attendance opens at class start</div>
@@ -170,7 +170,7 @@
 
                     <!-- Student list -->
                     <t t-if="not bookings">
-                        <div class="mv-empty">No students booked into this class.</div>
+                        <div class="mv-empty">Nobody is booked into this class yet.</div>
                     </t>
                     <t t-else="">
                         <div class="mv-student-list">

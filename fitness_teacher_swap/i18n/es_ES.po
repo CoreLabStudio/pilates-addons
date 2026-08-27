@@ -231,3 +231,47 @@ msgstr "Clase asignada a ti: %s"
 #: code:addons/fitness_teacher_swap/models/calendar_event.py:0
 msgid "You have been assigned as teacher for this class."
 msgstr "Has sido asignado/a como instructor/a de esta clase."
+
+# ── Teacher portal filter pills and empty states ───────────────────────────
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Today"
+msgstr "Hoy"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "This week"
+msgstr "Esta semana"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Upcoming"
+msgstr "Próximas"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "No classes today."
+msgstr "No hay clases hoy."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "No classes this week."
+msgstr "No hay clases esta semana."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "No upcoming classes."
+msgstr "No hay clases próximas."
+
+# ── QA review fixes ──
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Booked"
+msgstr "Reservadas"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
+msgid "Nobody is booked into this class yet."
+msgstr "Todavía no hay reservas para esta clase."

@@ -215,7 +215,7 @@ class FitnessBookingNotifications(models.Model):
         """Notify students whose credit pack expires within 7 days (once per pack per week)."""
         if not self._notif_enabled('send_credit_expiry'):
             return
-        today = fields.Date.today()
+        today = fields.Date.context_today(self)
         expiry_window = today + timedelta(days=7)
 
         expiring_lines = self.env['sale.order.line'].sudo().search([
@@ -257,7 +257,7 @@ class FitnessBookingNotifications(models.Model):
     def _cron_send_billing_reminders(self):
         """Notify subscribers 3 days before their next renewal/billing date."""
         LEAD_DAYS = 3
-        today = fields.Date.today()
+        today = fields.Date.context_today(self)
         target_date = today + timedelta(days=LEAD_DAYS)
 
         due_subs = self.env['sale.order'].sudo().search([

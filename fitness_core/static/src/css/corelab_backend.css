@@ -1,148 +1,202 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   CoreLab — admin dashboard styling (backend).
-   Scoped to .o_fitness_dashboard so nothing here leaks into other Odoo views.
-
-   Brand palette:
-     Heather blue   #9ABACD
-     Hemp / Paco    #50423D
-     Feather White  #FAF9F6
+   CoreLab — admin dashboard (v7 layout).
+   Scoped to .o_fitness_dashboard so nothing leaks into other Odoo views.
+     Heather blue #9ABACD · Hemp/Paco #50423D · Feather White #FAF9F6
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .o_fitness_dashboard {
   --cl-blue: #9ABACD;
   --cl-blue-dark: #839EAE;
   --cl-brown: #50423D;
-  --cl-white: #FAF9F6;
-  --cl-tint-blue: #EDF3F7;
-  --cl-tint-beige: #F5EFE8;
+  --cl-white: #FFFFFF;
+  --cl-canvas: #EDE9E2;
+  --cl-muted: #8A7F76;
+  --cl-line: rgba(80, 66, 61, 0.10);
+  --cl-warm: #D89A62;
+  --cl-shadow: 0 2px 10px rgba(80, 66, 61, 0.07);
+  --cl-radius: 16px;
 }
 
-.o_fitness_dashboard .o_form_sheet {
-  background: var(--cl-white);
-}
-
-/* ── Header banner ─────────────────────────────────────────────────────────
-   Replaces the plain white oe_title block. */
-.o_fitness_dashboard .cl-banner {
-  background: var(--cl-blue);
-  border-radius: 14px;
-  padding: 22px 26px;
-  margin-bottom: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.o_fitness_dashboard .cl-banner-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 2.1rem;
-  line-height: 1.1;
-  margin: 0;
-  color: var(--cl-brown);
-}
-
-.o_fitness_dashboard .cl-banner-sub {
-  margin: 2px 0 0;
-  font-size: 0.95rem;
-  color: var(--cl-brown);
-  opacity: 0.75;
-}
-
-.o_fitness_dashboard .cl-banner-icon {
-  font-size: 2rem;
-  color: var(--cl-brown);
-  opacity: 0.55;
-  flex: 0 0 auto;
-}
-
-/* ── Stat tiles ────────────────────────────────────────────────────────────
-   Odoo 19 renders these as .oe_stat_button inside .o-form-buttonbox (NOT the
-   older .oe_button_box). Target the button class directly. Give each a
-   card surface plus an alternating left-border accent. Counts are untouched. */
-.o_fitness_dashboard .o-form-buttonbox,
-.o_fitness_dashboard .oe_button_box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 22px;
+.o_fitness_dashboard .o_form_sheet,
+.o_fitness_dashboard .o_form_sheet_bg {
+  background: var(--cl-canvas) !important;
+  box-shadow: none;
   border: 0;
 }
-
-.o_fitness_dashboard .oe_stat_button {
-  flex: 1 1 150px;
-  min-width: 150px;
-  height: auto;
-  margin: 0;
-  padding: 14px 16px;
-  background: #FFFFFF;
-  border: 1px solid rgba(80, 66, 61, 0.08);
-  border-left: 4px solid var(--cl-blue);
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(80, 66, 61, 0.06);
-  text-align: left;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+.o_fitness_dashboard .o_form_sheet {
+  /* Odoo caps form sheets; the dashboard is a full-width canvas, not a form. */
+  max-width: none; width: 100%; padding: 26px 30px 40px;
 }
-
-.o_fitness_dashboard .oe_stat_button:hover {
-  box-shadow: 0 3px 10px rgba(80, 66, 61, 0.12);
-  transform: translateY(-1px);
+/* Odoo caps the sheet background at 1400px too, which left the right of a wide
+   screen empty. Nothing renders in that space on this view, so release both. */
+.o_fitness_dashboard .o_form_sheet_bg {
+  max-width: none; width: 100%; padding: 0;
 }
-
-/* Alternating accent: 1st/3rd/5th blue, 2nd/4th brown. */
-.o_fitness_dashboard .oe_stat_button:nth-child(even) {
-  border-left-color: var(--cl-brown);
+/* The sheet only grows to fit its content, so on a tall screen the area under
+   it stayed pale. Painting the containers the same canvas colour removes the
+   strip without fighting Odoo's flex heights. */
+.o_fitness_dashboard,
+.o_fitness_dashboard .o_form_renderer {
+  background: var(--cl-canvas);
 }
+.o_fitness_dashboard .o_form_renderer, .o_fitness_dashboard .o_form_view { width: 100%; }
+.o_fitness_dashboard .cl-dash { display: flex; flex-direction: column; gap: 20px; }
 
-.o_fitness_dashboard .oe_stat_button .o_button_icon {
-  color: var(--cl-blue);
-  font-size: 1.15rem;
-  margin-bottom: 4px;
+/* Header */
+.o_fitness_dashboard .cl-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
 }
-
-.o_fitness_dashboard .oe_stat_button:nth-child(even) .o_button_icon {
-  color: var(--cl-brown);
+.o_fitness_dashboard .cl-eyebrow,
+.o_fitness_dashboard .cl-eyebrow .o_field_widget {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--cl-blue);
 }
-
-.o_fitness_dashboard .oe_stat_button .o_stat_value {
+.o_fitness_dashboard .cl-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.7rem;
-  font-weight: 400;
-  color: var(--cl-brown);
+  font-size: 2.5rem; font-weight: 400; line-height: 1.1;
+  margin: 4px 0 0; color: var(--cl-brown);
+}
+.o_fitness_dashboard .cl-date,
+.o_fitness_dashboard .cl-date .o_field_widget {
+  font-size: 0.95rem; color: var(--cl-muted); white-space: nowrap; padding-top: 6px;
 }
 
-.o_fitness_dashboard .oe_stat_button .o_stat_text {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: rgba(80, 66, 61, 0.65);
-  text-transform: none;
-  white-space: normal;
+/* Top + bottom share one 2:1 grid so the columns line up */
+.o_fitness_dashboard .cl-top,
+.o_fitness_dashboard .cl-bottom {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 18px;
+}
+/* Top row keeps equal heights; its height comes from the hero's own content. */
+.o_fitness_dashboard .cl-top { align-items: stretch; }
+/* Bottom row sizes each card to what is in it, so no card is padded out. */
+.o_fitness_dashboard .cl-bottom { align-items: start; }
+.o_fitness_dashboard .cl-tiles, .o_fitness_dashboard .cl-side { display: grid; gap: 18px; }
+.o_fitness_dashboard .cl-tiles { grid-template-columns: 1fr 1fr; }
+.o_fitness_dashboard .cl-side { align-content: start; }
+
+/* Hero */
+.o_fitness_dashboard .cl-hero {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  gap: 2px; padding: 26px 30px;
+  background: var(--cl-blue); border: 0; border-radius: var(--cl-radius);
+  text-align: left; transition: background .15s ease, transform .15s ease;
+}
+.o_fitness_dashboard .cl-hero:hover { background: var(--cl-blue-dark); transform: translateY(-1px); }
+.o_fitness_dashboard .cl-hero-label {
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--cl-brown);
+}
+.o_fitness_dashboard .cl-hero-value,
+.o_fitness_dashboard .cl-hero-value .o_field_widget {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 3.4rem; font-weight: 400; line-height: 1; color: var(--cl-brown);
 }
 
-/* ── Panels ────────────────────────────────────────────────────────────────
-   Soft tinted headers instead of flat grey; icons already exist in the view. */
-.o_fitness_dashboard .card {
-  border: 1px solid rgba(80, 66, 61, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(80, 66, 61, 0.05);
+/* Tiles */
+.o_fitness_dashboard .cl-tile {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  gap: 2px; padding: 22px 24px;
+  background: var(--cl-white); border: 0; border-radius: var(--cl-radius);
+  box-shadow: var(--cl-shadow); text-align: left;
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+.o_fitness_dashboard .cl-tile:hover {
+  box-shadow: 0 4px 16px rgba(80,66,61,.13); transform: translateY(-1px);
+}
+.o_fitness_dashboard .cl-tile-value,
+.o_fitness_dashboard .cl-tile-value .o_field_widget {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.6rem; font-weight: 400; line-height: 1; color: var(--cl-brown);
+}
+.o_fitness_dashboard .cl-tile-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--cl-muted);
 }
 
-.o_fitness_dashboard .card > .card-header {
-  border-bottom: 1px solid rgba(80, 66, 61, 0.07);
-  color: var(--cl-brown);
-  font-size: 0.95rem;
-  padding: 12px 16px;
-  background: var(--cl-tint-blue);
+/* Cards */
+.o_fitness_dashboard .cl-card {
+  background: var(--cl-white); border-radius: var(--cl-radius);
+  box-shadow: var(--cl-shadow); padding: 22px 24px; overflow: hidden;
+}
+.o_fitness_dashboard .cl-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.o_fitness_dashboard .cl-card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem; font-weight: 400; margin: 0; color: var(--cl-brown);
 }
 
-/* Warm beige for the trials panel, cool blue-grey for the rest. */
-.o_fitness_dashboard .cl-panel-beige > .card-header {
-  background: var(--cl-tint-beige);
+/* See all → */
+.o_fitness_dashboard .cl-seeall {
+  background: transparent; border: 0; padding: 0;
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--cl-blue); display: inline-flex; align-items: center; gap: 8px;
+}
+.o_fitness_dashboard .cl-seeall:hover { color: var(--cl-blue-dark); }
+.o_fitness_dashboard .cl-arrow { font-size: 1rem; line-height: 1; transition: transform .15s ease; }
+.o_fitness_dashboard .cl-seeall:hover .cl-arrow { transform: translateX(3px); }
+
+/* Badges */
+.o_fitness_dashboard .cl-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 30px; padding: 0 9px; border: 0; border-radius: 999px;
+  font-size: 0.9rem; font-weight: 600; color: #FFF; line-height: 1;
+}
+.o_fitness_dashboard .cl-badge .o_field_widget { color: #FFF; }
+.o_fitness_dashboard .cl-badge-warm { background: var(--cl-warm); }
+.o_fitness_dashboard .cl-badge-blue { background: var(--cl-blue); }
+.o_fitness_dashboard .cl-badge:hover { filter: brightness(0.94); }
+
+/* List bodies */
+.o_fitness_dashboard .cl-card-body table { width: 100%; margin: 0; border-collapse: collapse; }
+/* The approved layout shows no column headers; the underlying data is unchanged. */
+.o_fitness_dashboard .cl-card-body thead { display: none; }
+.o_fitness_dashboard .cl-card-body td {
+  padding: 11px 0; border-top: 1px solid var(--cl-line);
+  font-size: 0.95rem; color: var(--cl-brown); vertical-align: middle;
+}
+.o_fitness_dashboard .cl-card-body tr:first-child td { border-top: 0; }
+/* Cells had no horizontal padding, so neighbouring columns ran together. */
+.o_fitness_dashboard .cl-card-body td + td { padding-left: 16px; }
+/* The blue fixed-width time column belongs to Today's Classes only. */
+.o_fitness_dashboard .cl-card-main .cl-card-body td:first-child {
+  color: var(--cl-blue); width: 74px; white-space: nowrap;
+}
+.o_fitness_dashboard .cl-side .cl-card-body td:first-child {
+  color: var(--cl-brown); width: auto; white-space: normal;
+}
+.o_fitness_dashboard .cl-card-body td:nth-last-child(2) {
+  text-align: right; color: var(--cl-muted); white-space: nowrap;
 }
 
-.o_fitness_dashboard .card > .card-header .fa {
-  color: var(--cl-brown);
-  opacity: 0.6;
+/* Rows link through to their own record, so they need to look interactive.
+   Odoo's own `.o_field_html a:not(.btn)` rule paints links teal and outranks a
+   plain two-class selector, so these carry the element in the selector to sit
+   above it and keep the brand colours. */
+.o_fitness_dashboard .cl-card-body a.cl-rowlink {
+  color: inherit; text-decoration: none;
+}
+.o_fitness_dashboard .cl-card-body a.cl-rowlink:hover { color: var(--cl-blue); }
+.o_fitness_dashboard .cl-card-body td.cl-go {
+  width: 22px; padding-left: 10px; text-align: right; white-space: nowrap;
+}
+.o_fitness_dashboard .cl-card-body td.cl-go a.cl-rowlink {
+  display: inline-block; color: var(--cl-blue); font-size: 0.95rem; line-height: 1;
+  opacity: 0.55; transition: transform .15s ease, opacity .15s ease;
+}
+.o_fitness_dashboard .cl-card-body tr:hover td { background: rgba(154, 186, 205, 0.10); }
+.o_fitness_dashboard .cl-card-body tr:hover td.cl-go a.cl-rowlink {
+  opacity: 1; transform: translateX(3px);
+}
+.o_fitness_dashboard .cl-card-body p { margin: 0; color: var(--cl-muted); font-size: 0.92rem; }
+
+/* Odoo chrome we do not want here */
+.o_fitness_dashboard .o_form_sheet > .oe_button_box,
+.o_fitness_dashboard .oe_title { display: none; }
+.o_fitness_dashboard button:focus { outline: none; box-shadow: none; }
+
+@media (max-width: 900px) {
+  .o_fitness_dashboard .cl-top,
+  .o_fitness_dashboard .cl-bottom { grid-template-columns: 1fr; }
 }
