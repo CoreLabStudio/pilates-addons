@@ -2923,3 +2923,70 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 #wrapwrap.o_portal:has(.mv-header) #portal_connect_software_modal_btn {
   display: none;
 }
+
+/* ── Home buy prompts ──────────────────────────────────────────────────────
+   One tile per shop category the student owns nothing in. Intentionally
+   lighter than .mv-stat-card: these are nudges sitting under the real stats,
+   so they take a plain border rather than the stat card's shadow. */
+.mv-prompt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+/* With only one of the two categories missing, a half-width tile looks like a
+   layout bug, so it takes the full row instead. */
+.mv-prompt-grid-one { grid-template-columns: 1fr; }
+.mv-prompt-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid #E6E1D6;
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-prompt-tile:hover { text-decoration: none; }
+.mv-prompt-tile:active { transform: scale(0.98); opacity: 0.9; }
+.mv-prompt-wide { margin-top: 10px; }
+.mv-prompt-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mv-prompt-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #92786C;
+}
+.mv-prompt-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: #92786C;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+.mv-prompt-status {
+  font-size: 0.87rem;
+  line-height: 1.3;
+  color: #6B5D52;
+}
+.mv-prompt-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #357393;
+}
+.mv-prompt-chev { font-size: 1rem; line-height: 1; }
+.mv-prompt-tile:hover .mv-prompt-cta { text-decoration: underline; }

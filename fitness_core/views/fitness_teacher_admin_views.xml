@@ -43,7 +43,9 @@
         <field name="model">res.users</field>
         <field name="priority">32</field>
         <field name="arch" type="xml">
-            <list string="Teachers" default_order="name asc">
+            <!-- create="false": teachers are not made from this list. The view is
+                 pinned to this action only, so other res.users lists keep New. -->
+            <list string="Teachers" default_order="name asc" create="false">
                 <field name="name" string="Teacher"/>
                 <field name="login" string="Login / Email"/>
                 <field name="phone" optional="show"/>

@@ -558,6 +558,8 @@ msgstr "Inici"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Classes"
 msgstr "Classes"
 
@@ -587,6 +589,7 @@ msgstr "Les meves classes"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_step_indicator
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Package"
 msgstr "Bo"
 
@@ -619,6 +622,7 @@ msgstr "Horari"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
 msgid "Credits"
 msgstr "Crèdits"
 
@@ -859,6 +863,7 @@ msgstr "Bons de classes"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Expired"
 msgstr "Caducat"
 
@@ -941,6 +946,8 @@ msgstr "La teva comanda està confirmada. Gràcies!"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Buy"
 msgstr "Comprar"
 
@@ -968,11 +975,13 @@ msgstr "Estat"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Purchased"
 msgstr "Comprat"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Remaining"
 msgstr "Restant"
 
@@ -988,6 +997,7 @@ msgstr "Vàlid fins"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Order"
 msgstr "Comanda"
 
@@ -1429,6 +1439,8 @@ msgstr "Veure plans →"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Classes"
 msgstr "Classes"
 
@@ -1574,6 +1586,7 @@ msgstr "Sense activitat de crèdit al mes seleccionat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Order"
 msgstr "Comanda"
 
@@ -1606,6 +1619,7 @@ msgstr "Facturat"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Order"
 msgstr "Comanda"
 
@@ -1636,12 +1650,14 @@ msgstr "Total de la comanda"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Purchased"
 msgstr "Comprat"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Remaining"
 msgstr "Restant"
 
@@ -1977,3 +1993,74 @@ msgstr "Pagar en línia"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Next 14 days"
 msgstr "Pròxims 14 dies"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Membership"
+msgstr "Membresia"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No active membership"
+msgstr "Sense membresia activa"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "View plans"
+msgstr "Veure plans"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No credits"
+msgstr "Sense crèdits"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No active class"
+msgstr "Sense classe activa"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "View classes"
+msgstr "Veure classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_list
+msgid "Students"
+msgstr "Alumnes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_list
+msgid "Student"
+msgstr "Alumne"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+msgid "Used"
+msgstr "Utilitzats"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+msgid "Valid Until"
+msgstr "Vàlid fins"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_credit_available
+msgid "Credits Available"
+msgstr "Crèdits disponibles"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_credit_purchased
+msgid "Credits Purchased"
+msgstr "Crèdits comprats"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_credit_used
+msgid "Credits Used"
+msgstr "Crèdits utilitzats"

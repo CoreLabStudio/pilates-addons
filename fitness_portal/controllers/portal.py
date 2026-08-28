@@ -120,6 +120,28 @@ class FitnessStudentPortal(http.Controller):
         )
 
         credit_pools = self._credit_pools(partner.id)
+
+        # Prompts for shop categories the student owns nothing in. Independent
+        # of Next up, which is about booking with what you already have; this is
+        # about not owning anything in the first place. Each tile links to the
+        # tab that sells that category.
+        missing = partner._fitness_missing_purchases()
+        purchase_prompts = [p for p in (
+            {'key': 'membership', 'show': missing['membership'],
+             'label': _('Membership'), 'status': _('No active membership'),
+             'cta': _('View plans'), 'href': '/my/packages?tab=subscriptions'},
+            {'key': 'package', 'show': missing['package'],
+             'label': _('Credits'), 'status': _('No credits'),
+             'cta': _('Buy'), 'href': '/my/packages?tab=packages'},
+            {'key': 'class', 'show': missing['class'],
+             'label': _('Classes'), 'status': _('No active class'),
+             'cta': _('View classes'), 'href': '/my/packages?tab=classes'},
+        ) if p['show']]
+        # Membership and credits sit side by side; the class tile spans
+        # the row underneath. Split here rather than in QWeb so the
+        # template stays free of list comprehensions.
+        prompt_pair = [p for p in purchase_prompts if p['key'] != 'class']
+        prompt_wide = [p for p in purchase_prompts if p['key'] == 'class']
         return request.render('fitness_portal.portal_student_home', {
             'welcome':          welcome,
             'student_name':     student_name,
@@ -128,6 +150,9 @@ class FitnessStudentPortal(http.Controller):
             'schedule_hint':    schedule_hint,
             'primary_credit':   credit_pools[0] if credit_pools else None,
             'credit_pools':     credit_pools,
+            'purchase_prompts': purchase_prompts,
+            'prompt_pair':      prompt_pair,
+            'prompt_wide':      prompt_wide,
             'has_any_bookings': has_any_bookings,
             'news_posts':       news_posts,
             'lbl_lets_book':    _("Let's book your first class."),
@@ -749,27 +774,8 @@ class FitnessStudentPortal(http.Controller):
         })
 
     def _credit_total(self, partner):
-        """Credits the student can actually book with right now:
-        unexpired class-pack credits + subscription floating credits."""
-        today = fields.Date.context_today(request.env.user)
-        total = 0
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-        ])
-        for line in lines:
-            vend = line.fitness_validity_end_date
-            if vend and vend < today:
-                continue
-            total += line.fitness_remaining_classes
-
-        subs = request.env['sale.order'].sudo().search([
-            ('partner_id', '=', partner.id),
-            ('subscription_state', '=', '3_progress'),
-        ])
-        total += sum(subs.mapped('fitness_floating_credits'))
-        return total
+        """Credits the student can book with right now. See res.partner."""
+        return partner.sudo()._fitness_credit_total()
 
     def _credit_ledger(self, partner):
         """Chronological ledger of every event that moved the credit count.
@@ -1779,68 +1785,14 @@ class FitnessStudentPortal(http.Controller):
         return order
 
     def _credit_pools(self, partner_id):
-        """Return ALL active credit pools for the pager stat card.
+        """All active credit pools for the stat card, newest-expiring last.
 
-        Returns a list ordered by priority:
-        1. Active subscription weekly slots (most time-sensitive)
-        2. Active credit packs (soonest-expiring first, non-expired)
-
-        Used by portal_home for the paged Credits card (multiple pools)
-        and by _primary_credit (single best pool for other pages).
+        The arithmetic lives on res.partner so the admin backend shows the
+        student exactly the number the student sees. Do not reimplement it
+        here: two copies drift the first time a credit rule changes.
         """
-        _ = request.env._
-        today = fields.Date.context_today(request.env.user)
-        pools = []
-
-        # Active subscription first
-        active_sub = request.env['sale.order'].sudo().search([
-            ('partner_id', '=', partner_id),
-            ('is_subscription', '=', True),
-            ('subscription_state', '=', '3_progress'),
-            ('fitness_subscription_product_id', '!=', False),
-        ], order='id desc', limit=1)
-
-        if active_sub:
-            weekly_cap = active_sub.fitness_weekly_class_allowance or 0
-            used_this_week = active_sub.fitness_weekly_used_this_week or 0
-            remaining_week = max(0, weekly_cap - used_this_week)
-            ct = active_sub.fitness_class_type or 'reformer'
-            type_label = {'barre': 'barre', 'reformer': 'reformer'}.get(ct, 'class')
-            label = _('%s slots this week') % type_label
-            pools.append({
-                'remaining':              remaining_week,
-                'total':                  weekly_cap,
-                'display':                ('%s / %s' % (remaining_week, weekly_cap)) if weekly_cap else str(remaining_week),
-                'label':                  label,
-                'credits_available_text': _('%d %s slot(s) left this week') % (remaining_week, type_label),
-            })
-
-        # Credit packs with remaining credits and valid expiry
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner_id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-        ], order='fitness_validity_end_date asc nulls last')
-        for line in lines:
-            vend = line.fitness_validity_end_date
-            if vend and vend < today:
-                continue
-            ct = getattr(line.product_id, 'fitness_class_type', 'any') or 'any'
-            label = {
-                'barre': _('barre credits'),
-                'reformer': _('reformer credits'),
-            }.get(ct, _('class credits'))
-            remaining = line.fitness_remaining_classes
-            total = line.fitness_original_class_count
-            pools.append({
-                'remaining':              remaining,
-                'total':                  total,
-                'display':                ('%s / %s' % (remaining, int(total))) if total else str(remaining),
-                'label':                  label,
-                'credits_available_text': _('%d %s available') % (remaining, label),
-            })
-
-        return pools
+        partner = request.env['res.partner'].sudo().browse(partner_id)
+        return partner._fitness_credit_pools() if partner.exists() else []
 
     def _primary_credit(self, partner_id):
         """Return the most relevant credit pool, or None. Used by pages that
