@@ -573,8 +573,7 @@
                     <t t-if="not has_sources">
                         <div class="mv-callout">
                             <div t-out="no_sources_msg"/>
-                            <a href="/my/packages" class="mv-empty-cal-link"
-                               style="margin-top:10px;display:inline-block;" t-out="no_sources_cta"/>
+                            <a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
                         </div>
                     </t>
                     <t t-elif="not grouped_events">
@@ -672,7 +671,7 @@
                         <div class="mv-empty">
                             <t t-if="not has_sources">
                                 <t t-out="no_sources_msg"/>
-                                <br/><a href="/my/packages" t-out="no_sources_cta"/>
+                                <br/><a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
                             </t>
                             <t t-else="">
                                 <t t-out="schedule_empty"/>

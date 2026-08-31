@@ -333,7 +333,7 @@ class FitnessStudentPortal(http.Controller):
             'today_local':     today_local,
             'subtitle':        subtitle,
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
-            'no_sources_msg':  _("You don't have an active membership or package yet."),
+            'no_sources_msg':  _('Time to move! Pick a membership, package, or class and reserve your spot.'),
             'no_sources_cta':  _('See options'),
             'studio_chips':    studio_chips,
         }
@@ -391,7 +391,7 @@ class FitnessStudentPortal(http.Controller):
         return {
             'grouped_bookings':  grouped,
             'has_sources':       has_sources,
-            'no_sources_msg':    _("You don't have an active membership or package yet."),
+            'no_sources_msg':    _('Time to move! Pick a membership, package, or class and reserve your spot.'),
             'no_sources_cta':    _('See options'),
             'look_ahead_days':   look_ahead,
             'subtitle':          _('Next %d days') % look_ahead,

@@ -1342,6 +1342,26 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   color: var(--mv-clay-text) !important;
   text-decoration: underline;
 }
+/* Empty-state call to action. The studio's filled button (Heather on Paco),
+   sized to its own label rather than the full width used inside a class card. */
+a.mv-empty-cta, .mv-empty a.mv-empty-cta {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 12px 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--mv-btn-fg) !important;
+  background: var(--mv-btn-bg);
+  border-radius: var(--mv-r);
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: transform var(--mv-t-fast), background var(--mv-t-fast);
+}
+a.mv-empty-cta:hover, .mv-empty a.mv-empty-cta:hover { background: var(--mv-clay-dark); color: var(--mv-btn-fg) !important; }
+a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97); opacity: 0.86; }
+
 /* Calendar/browse icon in empty states — use Heather blue so it reads as interactive */
 .mv-empty-cal-link {
   color: var(--mv-clay-text) !important;
