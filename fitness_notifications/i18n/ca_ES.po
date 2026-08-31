@@ -95,3 +95,24 @@ msgstr "La subscripció es renova en %d dies"
 #, python-format
 msgid "Your %s plan renews on %s. No action needed."
 msgstr "El teu pla %s es renova el %s. No cal que facis res."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Booking confirmed: %(cls)s"
+msgstr "Reserva confirmada: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your place is booked for %(cls)s on %(when)s."
+msgstr "La teva plaça està reservada per a %(cls)s el %(when)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your place is booked for %(cls)s."
+msgstr "La teva plaça està reservada per a %(cls)s."

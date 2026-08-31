@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from odoo import models, fields, api
+from odoo.tools import format_datetime
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -86,7 +87,16 @@ class FitnessBookingNotifications(models.Model):
         class_name = booking.calendar_event_id.name or 'class'
         event_start = booking.calendar_event_id.start
         lang_env = self.with_context(lang=user.lang or 'en_US')
-        start_str = event_start.strftime('%d %b at %H:%M') if event_start else ''
+        # Locale-aware and in the student's timezone: strftime would hand a
+        # Spanish reader "02 Sep" on a UTC clock. Same helper the dashboard
+        # uses, with its strftime fallback if babel is unavailable.
+        start_str = ''
+        if event_start:
+            try:
+                start_str = format_datetime(
+                    lang_env.env, event_start, dt_format='d MMM HH:mm')
+            except Exception:
+                start_str = event_start.strftime('%d %b %H:%M')
         body = (lang_env.env._('Your place is booked for %(cls)s on %(when)s.',
                                cls=class_name, when=start_str)
                 if start_str else
