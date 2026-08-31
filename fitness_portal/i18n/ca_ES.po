@@ -2089,8 +2089,8 @@ msgstr "Botiga"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "You don't have an active membership or package yet."
-msgstr "Encara no tens cap membresia o paquet actiu."
+msgid "Time to move! Pick a membership, package, or class and reserve your spot."
+msgstr "És hora de moure't! Tria la teva membresia, paquet o classe i reserva el teu lloc."
 
 #. module: fitness_portal
 #. odoo-python
