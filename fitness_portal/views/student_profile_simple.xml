@@ -26,6 +26,15 @@
                             </div>
                         </button>
                         <button class="oe_stat_button" type="object"
+                                name="action_view_student_credits"
+                                icon="fa-ticket"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="fitness_credit_available"/></span>
+                                <span class="o_stat_text">Credits</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object"
                                 name="action_view_student_packages"
                                 icon="fa-ticket"
                                 groups="fitness_core.group_fitness_manager">
@@ -70,15 +79,58 @@
     <!-- breadcrumb navigation. action_view_students() reads this and adds domain,   -->
     <!-- exactly like action_fitness_teacher_list_server does for teachers.           -->
 
+    <!-- ── Student List ──────────────────────────────────────────────────────── -->
+    <!-- Exists so create="false" can be scoped to this action. The action used  -->
+    <!-- to fall back to base.view_users_tree, which Settings > Users also uses; -->
+    <!-- setting create="false" there would have removed New from that list too. -->
+    <!-- priority=32 keeps it from being picked as the default res.users list.   -->
+
+    <record id="view_fitness_student_list" model="ir.ui.view">
+        <field name="name">fitness.student.list</field>
+        <field name="model">res.users</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <list string="Students" default_order="name asc" create="false">
+                <field name="name" string="Student"/>
+                <field name="login" string="Login / Email"/>
+                <field name="phone" optional="show"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
     <record id="action_fitness_student_list" model="ir.actions.act_window">
         <field name="name">Students</field>
         <field name="res_model">res.users</field>
         <field name="view_mode">list,form</field>
         <field name="view_ids" eval="[
             (5, 0, 0),
-            (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': False}),
+            (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': ref('fitness_portal.view_fitness_student_list')}),
             (0, 0, {'sequence': 20, 'view_mode': 'form', 'view_id': ref('fitness_portal.view_student_profile_simple')}),
         ]"/>
+    </record>
+
+
+    <!-- ── Credit ledger ────────────────────────────────────────────────────── -->
+    <!-- The rows the balance is summed from. Opened by the Credits smart button  -->
+    <!-- so an admin reads the same records the portal totals, rather than        -->
+    <!-- tallying them by hand off the Packages list.                             -->
+
+    <record id="view_fitness_credit_line_list" model="ir.ui.view">
+        <field name="name">fitness.credit.line.list</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <list string="Credits" create="false" default_order="fitness_validity_end_date asc">
+                <field name="order_id" string="Order"/>
+                <field name="product_id" string="Package"/>
+                <field name="fitness_original_class_count" string="Purchased" sum="Purchased"/>
+                <field name="fitness_classes_used" string="Used" sum="Used"/>
+                <field name="fitness_remaining_classes" string="Remaining" sum="Remaining"/>
+                <field name="fitness_validity_end_date" string="Valid Until"/>
+                <field name="fitness_is_expired" string="Expired"/>
+            </list>
+        </field>
     </record>
 
 </odoo>

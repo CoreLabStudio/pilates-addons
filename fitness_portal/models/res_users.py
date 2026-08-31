@@ -57,6 +57,25 @@ class ResUsers(models.Model):
             ],
         }
 
+    def action_view_student_credits(self):
+        """Open the package lines the student's balance is summed from.
+
+        Note this lists package credits only. Subscription floating credits are
+        counted in the balance but live on the sale.order, so they are reached
+        through the Memberships button instead; one act_window cannot span both
+        models.
+        """
+        self.ensure_one()
+        lines = self.partner_id._fitness_active_package_lines()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'Credits — {self.name}',
+            'res_model': 'sale.order.line',
+            'view_mode': 'list',
+            'views': [(self.env.ref('fitness_portal.view_fitness_credit_line_list').id, 'list')],
+            'domain': [('id', 'in', lines.ids)],
+        }
+
     def action_view_student_messages(self):
         self.ensure_one()
         return {

@@ -183,7 +183,11 @@
                     <line x1="14" y1="11.5" x2="14" y2="14"/>
                     <line x1="14" y1="16.5" x2="14" y2="19"/>
                 </svg>
-                <div>Packages &amp; Memberships</div>
+                <!-- "Shop" rather than the page's own title: the tab is ~70px
+                     wide, and "Packages, Memberships & Classes" cannot live
+                     there. It also sidesteps Bonos/Paquetes, which the longer
+                     label was inconsistent about. -->
+                <div>Shop</div>
             </a>
             <!-- Profile — person -->
             <a href="/my" class="mv-nav-tab">
@@ -288,7 +292,50 @@
                         </a>
                     </t>
                 </div>
+                </t>
 
+                <!-- Buy prompts. One tile per shop category the student has
+                     nothing active in, so a new student sees all three and
+                     someone fully stocked sees none. Deliberately outside the
+                     has_any_bookings guard: not owning anything is exactly the
+                     state a student with no bookings is in. -->
+                <t t-if="purchase_prompts">
+                    <div class="mv-spacer-16"/>
+                    <t t-if="prompt_pair">
+                        <div t-att-class="'mv-prompt-grid' if len(prompt_pair) == 2 else 'mv-prompt-grid mv-prompt-grid-one'">
+                            <t t-foreach="prompt_pair" t-as="p">
+                                <a t-att-href="p['href']" class="mv-prompt-tile">
+                                  <div class="mv-prompt-top">
+                                    <span class="mv-prompt-label" t-out="p['label']"/>
+                                    <svg class="mv-prompt-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <t t-if="p['key'] == 'membership'"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="14.5" x2="12" y2="14.5"/></t>
+                                    <t t-if="p['key'] == 'package'"><path d="M3 9.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.1a2.2 2.2 0 0 0 0 4.4v1.1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.1a2.2 2.2 0 0 0 0-4.4z"/><line x1="14" y1="7.5" x2="14" y2="16.5"/></t>
+                                    <t t-if="p['key'] == 'class'"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="3" x2="7.5" y2="6"/><line x1="16.5" y1="3" x2="16.5" y2="6"/></t>
+                                    </svg>
+                                  </div>
+                                  <div class="mv-prompt-status" t-out="p['status']"/>
+                                  <div class="mv-prompt-cta"><span t-out="p['cta']"/><span class="mv-prompt-chev">›</span></div>
+                                </a>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-foreach="prompt_wide" t-as="p">
+                        <a t-att-href="p['href']" class="mv-prompt-tile mv-prompt-wide">
+                          <div class="mv-prompt-top">
+                            <span class="mv-prompt-label" t-out="p['label']"/>
+                            <svg class="mv-prompt-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <t t-if="p['key'] == 'membership'"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="14.5" x2="12" y2="14.5"/></t>
+                            <t t-if="p['key'] == 'package'"><path d="M3 9.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.1a2.2 2.2 0 0 0 0 4.4v1.1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.1a2.2 2.2 0 0 0 0-4.4z"/><line x1="14" y1="7.5" x2="14" y2="16.5"/></t>
+                            <t t-if="p['key'] == 'class'"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="3" x2="7.5" y2="6"/><line x1="16.5" y1="3" x2="16.5" y2="6"/></t>
+                            </svg>
+                          </div>
+                          <div class="mv-prompt-status" t-out="p['status']"/>
+                          <div class="mv-prompt-cta"><span t-out="p['cta']"/><span class="mv-prompt-chev">›</span></div>
+                        </a>
+                    </t>
+                </t>
+
+                <t t-if="has_any_bookings">
                 <!-- Next up -->
                 <div class="mv-spacer-16"/>
                 <div class="mv-section-label">Next up</div>
@@ -337,7 +384,9 @@
                 </t>
                 </t>
 
-                <!-- Packages &amp; Memberships shortcut -->
+                <!-- Shop shortcut. Full enumeration here rather than the nav's
+                     "Tienda": this is a wide row with room for it, and it names
+                     the page it opens. -->
                 <div class="mv-spacer-16"/>
                 <a href="/my/packages" class="mv-link-row">
                     <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -347,7 +396,7 @@
                         <line x1="14" y1="16.5" x2="14" y2="19"/>
                     </svg>
                     <div class="mv-menu-text">
-                        <div class="mv-menu-title">Packages &amp; Memberships</div>
+                        <div class="mv-menu-title">Packages, Memberships &amp; Classes</div>
                         <div class="mv-menu-desc">Top up your credits or start a plan</div>
                     </div>
                     <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
@@ -470,7 +519,7 @@
                 <div class="mv-segmented" role="tablist">
                     <a href="/my/studio"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'available' else '')"
-                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">CoreLab Classes</a>
+                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">Reserve your class</a>
                     <a href="/my/studio?view=schedule"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'schedule' else '')"
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
@@ -1138,7 +1187,7 @@
                 <!-- Title + quiet credit line + circular search toggle -->
                 <div class="mv-title-row">
                     <div>
-                        <p class="mv-greeting-name">Packages &amp; Memberships</p>
+                        <p class="mv-greeting-name">Packages, Memberships &amp; Classes</p>
                         <t t-if="credit_line">
                             <a href="/my/credits" class="mv-credit-line" t-out="credit_line"/>
                         </t>

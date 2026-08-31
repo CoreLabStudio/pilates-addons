@@ -95,3 +95,59 @@ msgstr "La suscripción se renueva en %d días"
 #, python-format
 msgid "Your %s plan renews on %s. No action needed."
 msgstr "Tu plan %s se renueva el %s. No necesitas hacer nada."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Booking confirmed: %(cls)s"
+msgstr "Reserva confirmada: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your place is booked for %(cls)s on %(when)s."
+msgstr "Tu plaza está reservada para %(cls)s el %(when)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your place is booked for %(cls)s."
+msgstr "Tu plaza está reservada para %(cls)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Class in ~%d hours"
+msgstr "Clase en ~%d horas"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Reminder: %s is coming up soon. See you there!"
+msgstr "Recordatorio: %s empieza pronto. ¡Nos vemos allí!"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Booking cancelled: %(cls)s"
+msgstr "Reserva cancelada: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s on %(when)s has been cancelled. Check your credit balance for any refunds."
+msgstr "Tu reserva para %(cls)s el %(when)s ha sido cancelada. Revisa tu saldo de créditos por si hay algún reembolso."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s has been cancelled. Check your credit balance for any refunds."
+msgstr "Tu reserva para %(cls)s ha sido cancelada. Revisa tu saldo de créditos por si hay algún reembolso."

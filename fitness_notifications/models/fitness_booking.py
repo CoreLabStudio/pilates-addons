@@ -1,9 +1,14 @@
 from datetime import timedelta
 
 from odoo import models, fields, api
+from odoo.tools import format_datetime
 
 import logging
 _logger = logging.getLogger(__name__)
+
+# The studio's own timezone, used when a student has none set on their user.
+# Matches DEFAULT_TZ in fitness_core's schedule and closure-day models.
+STUDIO_TZ = 'Europe/Madrid'
 
 
 class FitnessBookingNotifications(models.Model):
@@ -63,10 +68,53 @@ class FitnessBookingNotifications(models.Model):
         if self._notif_enabled('send_confirmation'):
             bookings._send_notification('fitness_notifications.mail_template_booking_confirmation')
         for booking in bookings:
+            self._maybe_notify_booking_confirmed(booking)
             self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
             self._maybe_notify_credit_zero(booking)
         return bookings
+
+    def _maybe_notify_booking_confirmed(self, booking):
+        """In-app bell for a new booking.
+
+        booking_confirmed was declared on the model, decorated in the admin list
+        and offered as an admin filter, but nothing ever created one — which is
+        why it had no action_url to fix: it had no call site at all. The email
+        went out and the bell stayed silent, even though cancelling the same
+        booking did ring it.
+        """
+        if self.env.context.get('skip_fitness_notification'):
+            return
+        user = booking.student_id.user_ids[:1]
+        if not user:
+            return
+        class_name = booking.calendar_event_id.name or 'class'
+        event_start = booking.calendar_event_id.start
+        lang_env = self.with_context(lang=user.lang or 'en_US')
+        # Locale-aware and in the student's timezone: strftime would hand a
+        # Spanish reader "02 Sep" on a UTC clock. Same helper the dashboard
+        # uses, with its strftime fallback if babel is unavailable.
+        start_str = ''
+        if event_start:
+            try:
+                start_str = format_datetime(
+                    lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                    dt_format='d MMM HH:mm', lang_code=user.lang or 'en_US')
+            except Exception:
+                start_str = event_start.strftime('%d %b %H:%M')
+        body = (lang_env.env._('Your place is booked for %(cls)s on %(when)s.',
+                               cls=class_name, when=start_str)
+                if start_str else
+                lang_env.env._('Your place is booked for %(cls)s.', cls=class_name))
+        self.env['fitness.notification'].sudo()._create_for_user(
+            user.id,
+            'booking_confirmed',
+            lang_env.env._('Booking confirmed: %(cls)s', cls=class_name),
+            body,
+            # Same destination as booking_cancelled and class_reminder: the
+            # class list is where you go to see what you just booked.
+            action_url='/my/classes',
+        )
 
     def _maybe_notify_credit_used(self, booking):
         """Notify student when a credit pack credit is used for a booking.
@@ -148,6 +196,7 @@ class FitnessBookingNotifications(models.Model):
             'credit_low',
             lang_env.env._('Only %d credit(s) left', remaining),
             lang_env.env._('Running low on credits. Browse packages to top up.'),
+            action_url='/my/packages',
         )
 
     # ─── Booking cancelled ───────────────────────────────────────────────────────
@@ -166,17 +215,36 @@ class FitnessBookingNotifications(models.Model):
                 continue
             class_name = booking.calendar_event_id.name or 'class'
             event_start = booking.calendar_event_id.start
-            start_str = event_start.strftime('%d %b at %H:%M') if event_start else ''
+            lang_env = self.with_context(lang=user.lang or 'en_US')
+            # Was f-strings, so no .po entry could ever reach it, and the date
+            # was raw strftime: English month, UTC clock, an English "at"
+            # wedged mid-sentence. Same treatment as booking_confirmed - the
+            # connector lives in the translatable string so each language
+            # places it itself.
+            start_str = ''
+            if event_start:
+                try:
+                    start_str = format_datetime(
+                        lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                        dt_format='d MMM HH:mm', lang_code=user.lang or 'en_US')
+                except Exception:
+                    start_str = event_start.strftime('%d %b %H:%M')
             body = (
-                f'Your booking for {class_name}'
-                + (f' on {start_str}' if start_str else '')
-                + ' has been cancelled. Check your credit balance for any refunds.'
+                lang_env.env._(
+                    'Your booking for %(cls)s on %(when)s has been cancelled.'
+                    ' Check your credit balance for any refunds.',
+                    cls=class_name, when=start_str)
+                if start_str else
+                lang_env.env._(
+                    'Your booking for %(cls)s has been cancelled.'
+                    ' Check your credit balance for any refunds.',
+                    cls=class_name)
             )
             try:
                 self.env['fitness.notification'].sudo()._create_for_user(
                     user.id,
                     'booking_cancelled',
-                    f'Booking cancelled: {class_name}',
+                    lang_env.env._('Booking cancelled: %(cls)s', cls=class_name),
                     body,
                     action_url='/my/classes',
                 )
@@ -247,6 +315,7 @@ class FitnessBookingNotifications(models.Model):
                 'credit_expiring',
                 lang_env.env._('%d credit(s) expiring in %d day(s)', remaining, days_left),
                 lang_env.env._('Your pack expires on %s. Use your remaining credits before they expire.', expire_date_str),
+                action_url='/my/packages',
             )
             notified += 1
         _logger.info("[NOTIFICATIONS] Credit expiry: notified %d student(s).", notified)

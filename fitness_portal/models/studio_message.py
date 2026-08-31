@@ -241,7 +241,10 @@ class FitnessStudioMessage(models.Model):
                             'message_reply',
                             lang_env.env._('Reply from %s', sender),
                             msg.body[:200] if msg.body else None,
-                            action_url=f'/my/messages/{conv.id}',
+                            # /my/messages/<id> is not a route: the page shows
+                            # the user's own single conversation, so the id was
+                            # never addressable and the link 404'd.
+                            action_url='/my/messages',
                         )
                     except Exception:
                         _logger.exception(

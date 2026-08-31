@@ -40,7 +40,11 @@ class AccountMove(models.Model):
             body = translate('Amount due: %(amount)s') % {
                 'amount': self._fitness_format_amount(move),
             }
-            Notif._create_for_user(user.id, 'invoice_issued', title, body)
+            # /my/invoices/<id> is the account module's portal view; the
+            # notification is about a specific invoice, so it should open it
+            # rather than dead-end.
+            Notif._create_for_user(user.id, 'invoice_issued', title, body,
+                                   action_url='/my/invoices/%d' % move.id)
             _logger.info('[NOTIFICATIONS] Invoice %s -> student %s', move.name, user.login)
 
     @staticmethod

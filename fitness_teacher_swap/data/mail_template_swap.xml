@@ -3,6 +3,7 @@
     <data noupdate="0">
 
         <record id="mail_template_teacher_swap" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
             <field name="name">Fitness: Teacher Change Notification</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
             <field name="subject">{{ 'Your class instructor has changed' if object.student_id.lang == 'en_US' else ("L'instructor/a de la teva classe ha canviat" if object.student_id.lang == 'ca_ES' else 'El/La instructor/a de tu clase ha cambiado') }}</field>

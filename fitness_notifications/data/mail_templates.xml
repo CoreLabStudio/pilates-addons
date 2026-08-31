@@ -7,6 +7,7 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_booking_confirmation" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
             <field name="name">Fitness: Booking Confirmation</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
             <field name="subject">{{ 'Booking Confirmed' if object.student_id.lang == 'en_US' else ('Reserva Confirmada' if object.student_id.lang == 'ca_ES' else 'Reserva Confirmada') }}</field>
@@ -89,6 +90,7 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_booking_cancellation" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
             <field name="name">Fitness: Booking Cancellation</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
             <field name="subject">{{ 'Booking Cancelled' if object.student_id.lang == 'en_US' else ('Reserva Cancel·lada' if object.student_id.lang == 'ca_ES' else 'Reserva Cancelada') }}</field>
@@ -150,6 +152,7 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_class_reminder" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
             <field name="name">Fitness: Class Reminder</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
             <field name="subject">{{ 'Class Reminder' if object.student_id.lang == 'en_US' else ('Recordatori de Classe' if object.student_id.lang == 'ca_ES' else 'Recordatorio de Clase') }}</field>
