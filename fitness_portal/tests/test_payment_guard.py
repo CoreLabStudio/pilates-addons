@@ -21,10 +21,13 @@ let the request through or the request never arrived. Assert arrival, then
 assert behaviour.
 """
 import json
+from unittest.mock import patch
 from datetime import timedelta
 
 from odoo import fields
 from odoo.tests import HttpCase, tagged
+
+from odoo.addons.payment.controllers.portal import PaymentPortal
 
 GUARD_IN_FLIGHT = "already being processed"
 GUARD_ALREADY_PAID = "already been paid"
@@ -133,9 +136,38 @@ class TestDuplicatePaymentGuard(HttpCase):
         )
 
     def _assert_allowed(self, order, msg):
-        body = self._attempt_payment(order)
+        """The guard must let this through - and the request must reach super().
+
+        These tests deliberately post only what the guard reads, order_id and
+        access_token, because the guard runs long before a payment payload is
+        touched. Letting the call fall through to real transaction creation
+        therefore reached PaymentPortal._create_transaction without the seven
+        payment parameters the request never carried:
+
+            TypeError: _create_transaction() missing 7 required positional
+            arguments: 'provider_id', 'payment_method_id', 'token_id',
+            'amount', 'flow', 'tokenization_requested', 'landing_route'
+
+        JSON-RPC reports that inside a 200, so every assertion here still
+        passed while the traceback went to the log - and odoo.sh fails a build
+        on a logged ERROR. Stubbing creation keeps the test about the guard,
+        and asserting the stub ran makes "not blocked" mean "super() was
+        reached" rather than merely "no guard message came back".
+        """
+        # Reuse whatever transaction the test already attached: references
+        # are unique per (order, state), so creating a second draft here
+        # collides with the one test_abandoned_draft_attempt_is_allowed adds.
+        stub_tx = order.transaction_ids[:1] or self._add_transaction(order, "draft", 0)
+        with patch.object(
+            PaymentPortal, "_create_transaction", return_value=stub_tx
+        ) as created:
+            body = self._attempt_payment(order)
         self.assertNotIn(GUARD_IN_FLIGHT, body, msg)
         self.assertNotIn(GUARD_ALREADY_PAID, body, msg)
+        self.assertTrue(
+            created.called,
+            "%s the request never reached super(), so the guard blocked it" % msg,
+        )
 
     # ── the payment must go through ───────────────────────────────────────
     def test_first_payment_is_allowed(self):
