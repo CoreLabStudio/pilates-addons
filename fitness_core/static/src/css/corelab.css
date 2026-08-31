@@ -854,10 +854,12 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
   border-color: var(--mv-active-fill);
 }
 
-/* ── Login/signup split: heather-blue photo panel ──────────────────
-   Desktop only. Below 992px the panel is not rendered at all, so the
-   auth form keeps the full width of a phone screen and pays no download
-   cost for an image it will never show.
+/* ── Auth photo: split panel on desktop, top banner on mobile ──────
+   One element, two geometries. Everything that makes it look the way it
+   does - the crop, the grayscale, the heather blend - is declared once
+   here, so the banner cannot drift into looking like a different design
+   from the panel. Only position, size and the edge fade differ per
+   breakpoint, and they switch at the same 992px the split always used.
 
    PHOTO SOURCE — Unsplash, free for commercial use under the Unsplash
    License (no attribution required; credited here as good practice).
@@ -866,66 +868,95 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
      file: fitness_core/static/src/img/login-pilates-reformer.jpg (1600x2263)
    Replacing this with a real CoreLab studio photo is a one-file swap:
    drop the new image in at the same path and nothing below changes. */
-.mv-auth-photo { display: none; }
+.mv-auth-photo {
+  display: block;
+  overflow: hidden;
+  /* own stacking context, so the blend below cannot reach the page */
+  z-index: 0;
+}
+.mv-auth-photo-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/fitness_core/static/src/img/login-pilates-reformer.jpg');
+  background-size: cover;
+  /* the subject sits high in the frame; bias the crop up so a short
+     viewport keeps her rather than the reformer rails */
+  background-position: 50% 32%;
+  /* Strip the colour entirely first. A partial desaturation leaves the
+     photo's own warm browns fighting the tint and the result reads grey
+     rather than heather; going fully monochrome here is what lets the
+     blend below put a single clean hue back. */
+  filter: grayscale(1) contrast(1.06) brightness(1.03);
+}
+/* The duotone itself. mix-blend-mode:color takes the hue from this layer
+   and the luminance from the photo, which is what separates a duotone
+   from a flat blue rectangle laid over the image. */
+.mv-auth-photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--mv-clay);
+  /* high enough that the hue actually lands — at ~0.6 the panel still
+     reads as a grey photo with a hint of blue rather than a duotone */
+  mix-blend-mode: color;
+  opacity: 0.88;
+}
+.mv-auth-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
 
+/* ── Mobile and tablet: a banner across the top ─────────────────────
+   Absolute rather than fixed so it scrolls away: a fixed band would hold
+   36vh hostage while someone is filling in the form on a short phone. */
+@media (max-width: 991.98px) {
+  .mv-auth-photo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 36vh;
+  }
+  /* Fade out at the bottom instead of the side, so the banner hands over
+     to the page rather than ending on a hard line above the card. */
+  .mv-auth-photo::after {
+    background:
+      linear-gradient(180deg, rgba(80, 66, 61, 0.16) 0%, rgba(80, 66, 61, 0) 38%),
+      linear-gradient(0deg, var(--mv-bg) 0%, rgba(250, 249, 246, 0) 22%);
+  }
+  /* Push the form clear of the banner. The card itself is untouched.
+     !important is needed, not decorative: Bootstrap 5 spacing utilities are
+     themselves !important, so .py-5's padding-top: 3rem wins on cascade
+     regardless of how specific this selector is - which is exactly what left
+     the card sitting on top of the banner at first. */
+  .container.mv-auth-wrap {
+    position: relative;
+    z-index: 1;
+    padding-top: calc(36vh + 1.25rem) !important;
+  }
+}
+
+/* ── Desktop: the original right-hand split panel, unchanged ────────── */
 @media (min-width: 992px) {
   .mv-auth-photo {
-    display: block;
     position: fixed;
     inset: 0 0 0 auto;
     width: 42vw;
-    overflow: hidden;
-    /* own stacking context, so the blend below cannot reach the page */
-    z-index: 0;
-  }
-  .mv-auth-photo-img {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: url('/fitness_core/static/src/img/login-pilates-reformer.jpg');
-    background-size: cover;
-    /* the subject sits high in the frame; bias the crop up so a short
-       viewport keeps her rather than the reformer rails */
-    background-position: 50% 32%;
-    /* Strip the colour entirely first. A partial desaturation leaves the
-       photo's own warm browns fighting the tint and the result reads grey
-       rather than heather; going fully monochrome here is what lets the
-       blend below put a single clean hue back. */
-    filter: grayscale(1) contrast(1.06) brightness(1.03);
-  }
-  /* The duotone itself. mix-blend-mode:color takes the hue from this layer
-     and the luminance from the photo, which is what separates a duotone
-     from a flat blue rectangle laid over the image. */
-  .mv-auth-photo::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: var(--mv-clay);
-    mix-blend-mode: color;
-    /* high enough that the hue actually lands — at ~0.6 the panel still
-       reads as a grey photo with a hint of blue rather than a duotone */
-    opacity: 0.88;
   }
   /* Feather-white fade on the inner edge so the panel meets the form
      without a hard seam, plus a little weight at the base. */
   .mv-auth-photo::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 2;
     background:
       linear-gradient(90deg, var(--mv-bg) 0%, rgba(250, 249, 246, 0) 15%),
       linear-gradient(0deg, rgba(80, 66, 61, 0.18) 0%, rgba(80, 66, 61, 0) 45%);
   }
   /* Hand the form the remaining width. The card keeps its own max-width
      and stays centred in what is left, so the form itself is untouched.
-
-     Gated on .mv-auth-split, which only the login page carries. Signup,
-     reset password and /trial share this layout and get .mv-auth-body
-     without it, so they keep a normally centred form and no reserved
-     column. The .container qualifier is what outranks Bootstrap's own
-     .container padding. */
+     The .container qualifier is what outranks Bootstrap's own padding. */
   body.mv-auth-split .container.mv-auth-wrap {
     max-width: none;
     padding-right: 44vw;
