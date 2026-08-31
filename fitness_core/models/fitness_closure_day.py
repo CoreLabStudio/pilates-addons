@@ -115,6 +115,50 @@ class FitnessClosureDay(models.Model):
                          rec.name, rec.date, len(open_events), refunded)
         return True
 
+    @api.model
+    def _reapply_to_new_classes(self, date_from=None, date_to=None):
+        """Sweep applied closures for classes that appeared after the fact.
+
+        Generation builds occurrences straight from the recurrence pattern, and
+        that pattern knows nothing about closures. So extending the rolling
+        window into an already-closed date brings its classes back, bookable,
+        on a day the studio is shut - and the nightly cron does it unattended.
+
+        Closing that gap here rather than in the schedule keeps one source of
+        truth: the schedule asks, this decides, and the cancellation itself is
+        still action_cancel_class, exactly as a manual Apply would do it.
+
+        Applied closures only. A draft closure has not been actioned by anyone
+        yet, and generation is not the place to decide it should be.
+        """
+        domain = [('state', '=', 'applied')]
+        if date_from:
+            domain.append(('date', '>=', date_from))
+        if date_to:
+            domain.append(('date', '<=', date_to))
+        swept = 0
+        for rec in self.search(domain):
+            fresh = rec._classes_on_day().filtered(
+                lambda e: e.class_state != 'cancelled')
+            if not fresh:
+                continue
+            refunded = 0
+            for event in fresh:
+                refunded += len(event.booking_ids.filtered(
+                    lambda b: b.state == 'booked'))
+                event.action_cancel_class()
+            # Keep the closure's own record of what it suppressed accurate, so
+            # the admin sees the regenerated classes listed alongside the rest.
+            rec.write({
+                'affected_event_ids': [(4, e.id) for e in fresh],
+                'refunded_booking_count': rec.refunded_booking_count + refunded,
+            })
+            swept += len(fresh)
+            _logger.info(
+                "Closure %s (%s): swept %s regenerated class(es), refunded %s booking(s)",
+                rec.name, rec.date, len(fresh), refunded)
+        return swept
+
     def action_reopen(self):
         """Undo the suppression flag on the classes.
 

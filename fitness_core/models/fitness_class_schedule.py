@@ -200,6 +200,9 @@ class FitnessClassSchedule(models.Model):
             })
             _logger.info("Schedule %s: created recurrence %s until %s",
                          rec.name, event.recurrence_id.id, event.recurrence_id.until)
+            # The pattern has no notion of closures, so anything it just laid
+            # down on a closed date has to be taken straight back out.
+            rec._apply_closures(first, event.recurrence_id.until)
         return True
 
     def _extend(self):
@@ -217,7 +220,25 @@ class FitnessClassSchedule(models.Model):
             rec.recurrence_id._apply_recurrence()
             rec.generated_until = target
             _logger.info("Schedule %s: extended to %s", rec.name, target)
+            # Only the stretch just added needs sweeping; dates before `current`
+            # were dealt with when they were generated.
+            rec._apply_closures(current or fields.Date.context_today(rec), target)
         return True
+
+    def _apply_closures(self, date_from, date_to):
+        """Hand the newly generated range to the closure days to police.
+
+        Generation deliberately does not know how to cancel a class: it asks
+        fitness.closure.day, which runs the same action_cancel_class path a
+        manual Apply does, so refunds, the in-app bell and the email are
+        identical however the class came to exist.
+        """
+        swept = self.env['fitness.closure.day']._reapply_to_new_classes(
+            date_from=date_from, date_to=date_to)
+        if swept:
+            _logger.info("Schedule %s: %s generated class(es) cancelled by closure days",
+                         self.name, swept)
+        return swept
 
     def action_extend_now(self):
         return self._extend()
