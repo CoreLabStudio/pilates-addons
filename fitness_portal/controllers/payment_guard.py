@@ -25,7 +25,7 @@ Two conditions are refused:
 import logging
 from datetime import timedelta
 
-from odoo import _, fields
+from odoo import _, fields, http
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -46,6 +46,15 @@ PENDING_GRACE_MINUTES = 30
 
 class FitnessPaymentPortal(PaymentPortal):
 
+    # @http.route() with no arguments re-uses the parent route's definition.
+    # Without it Odoo logs "not decorated by @route(), decorating it myself"
+    # and invents a default one, which does not carry the payment parameters:
+    # provider_id, payment_method_id, token_id, amount, flow,
+    # tokenization_requested and landing_route are stripped before they reach
+    # here, kwargs arrives empty, and the empty call reaches
+    # PaymentPortal._create_transaction as "missing 7 required positional
+    # arguments" by way of sale_subscription.
+    @http.route()
     def portal_order_transaction(self, order_id, access_token, **kwargs):
         order_sudo = request.env['sale.order'].sudo().browse(order_id).exists()
 
