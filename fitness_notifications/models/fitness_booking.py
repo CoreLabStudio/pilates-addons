@@ -63,10 +63,43 @@ class FitnessBookingNotifications(models.Model):
         if self._notif_enabled('send_confirmation'):
             bookings._send_notification('fitness_notifications.mail_template_booking_confirmation')
         for booking in bookings:
+            self._maybe_notify_booking_confirmed(booking)
             self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
             self._maybe_notify_credit_zero(booking)
         return bookings
+
+    def _maybe_notify_booking_confirmed(self, booking):
+        """In-app bell for a new booking.
+
+        booking_confirmed was declared on the model, decorated in the admin list
+        and offered as an admin filter, but nothing ever created one — which is
+        why it had no action_url to fix: it had no call site at all. The email
+        went out and the bell stayed silent, even though cancelling the same
+        booking did ring it.
+        """
+        if self.env.context.get('skip_fitness_notification'):
+            return
+        user = booking.student_id.user_ids[:1]
+        if not user:
+            return
+        class_name = booking.calendar_event_id.name or 'class'
+        event_start = booking.calendar_event_id.start
+        lang_env = self.with_context(lang=user.lang or 'en_US')
+        start_str = event_start.strftime('%d %b at %H:%M') if event_start else ''
+        body = (lang_env.env._('Your place is booked for %(cls)s on %(when)s.',
+                               cls=class_name, when=start_str)
+                if start_str else
+                lang_env.env._('Your place is booked for %(cls)s.', cls=class_name))
+        self.env['fitness.notification'].sudo()._create_for_user(
+            user.id,
+            'booking_confirmed',
+            lang_env.env._('Booking confirmed: %(cls)s', cls=class_name),
+            body,
+            # Same destination as booking_cancelled and class_reminder: the
+            # class list is where you go to see what you just booked.
+            action_url='/my/classes',
+        )
 
     def _maybe_notify_credit_used(self, booking):
         """Notify student when a credit pack credit is used for a booking.
