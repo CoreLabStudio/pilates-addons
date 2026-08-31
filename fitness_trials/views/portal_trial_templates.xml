@@ -4,6 +4,11 @@
     <template id="trial_request_form" name="Trial Class Request Form">
         <t t-call="web.login_layout">
 
+            <!-- Opts this page into the split photo panel that fitness_portal
+                 adds to web.login_layout. Set per page because that layout is
+                 shared with pages which should not have it. -->
+            <t t-set="mv_login_photo" t-value="True"/>
+
             <!-- Resolve language once; used throughout for t-if/_elif/_else branches. -->
             <t t-set="_lang" t-value="request.lang.code"/>
 
