@@ -384,7 +384,9 @@
                 </t>
                 </t>
 
-                <!-- Packages &amp; Memberships shortcut -->
+                <!-- Shop shortcut. Full enumeration here rather than the nav's
+                     "Tienda": this is a wide row with room for it, and it names
+                     the page it opens. -->
                 <div class="mv-spacer-16"/>
                 <a href="/my/packages" class="mv-link-row">
                     <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -394,7 +396,7 @@
                         <line x1="14" y1="16.5" x2="14" y2="19"/>
                     </svg>
                     <div class="mv-menu-text">
-                        <div class="mv-menu-title">Packages &amp; Memberships</div>
+                        <div class="mv-menu-title">Packages, Memberships &amp; Classes</div>
                         <div class="mv-menu-desc">Top up your credits or start a plan</div>
                     </div>
                     <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">

@@ -148,6 +148,7 @@ class FitnessBookingNotifications(models.Model):
             'credit_low',
             lang_env.env._('Only %d credit(s) left', remaining),
             lang_env.env._('Running low on credits. Browse packages to top up.'),
+            action_url='/my/packages',
         )
 
     # ─── Booking cancelled ───────────────────────────────────────────────────────
@@ -247,6 +248,7 @@ class FitnessBookingNotifications(models.Model):
                 'credit_expiring',
                 lang_env.env._('%d credit(s) expiring in %d day(s)', remaining, days_left),
                 lang_env.env._('Your pack expires on %s. Use your remaining credits before they expire.', expire_date_str),
+                action_url='/my/packages',
             )
             notified += 1
         _logger.info("[NOTIFICATIONS] Credit expiry: notified %d student(s).", notified)

@@ -3,6 +3,7 @@
     <data noupdate="0">
 
         <record id="mail_template_credit_expiring" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
             <field name="name">Fitness: Credits Expiring Soon</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
             <field name="subject">{{ 'Your credits are expiring soon' if object.student_id.lang == 'en_US' else ('Els teus crèdits caduquen aviat' if object.student_id.lang == 'ca_ES' else 'Tus créditos caducan pronto') }}</field>
