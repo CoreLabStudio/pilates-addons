@@ -116,3 +116,38 @@ msgstr "La teva plaça està reservada per a %(cls)s el %(when)s."
 #, python-format
 msgid "Your place is booked for %(cls)s."
 msgstr "La teva plaça està reservada per a %(cls)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Class in ~%d hours"
+msgstr "Classe en ~%d hores"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Reminder: %s is coming up soon. See you there!"
+msgstr "Recordatori: %s comença aviat. Ens hi veiem!"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Booking cancelled: %(cls)s"
+msgstr "Reserva cancel·lada: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s on %(when)s has been cancelled. Check your credit balance for any refunds."
+msgstr "La teva reserva per a %(cls)s el %(when)s s'ha cancel·lat. Revisa el teu saldo de crèdits per si hi ha cap reemborsament."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s has been cancelled. Check your credit balance for any refunds."
+msgstr "La teva reserva per a %(cls)s s'ha cancel·lat. Revisa el teu saldo de crèdits per si hi ha cap reemborsament."

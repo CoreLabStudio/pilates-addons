@@ -6,6 +6,10 @@ from odoo.tools import format_datetime
 import logging
 _logger = logging.getLogger(__name__)
 
+# The studio's own timezone, used when a student has none set on their user.
+# Matches DEFAULT_TZ in fitness_core's schedule and closure-day models.
+STUDIO_TZ = 'Europe/Madrid'
+
 
 class FitnessBookingNotifications(models.Model):
     """Extends fitness.booking with email notifications on booking lifecycle events.
@@ -94,7 +98,8 @@ class FitnessBookingNotifications(models.Model):
         if event_start:
             try:
                 start_str = format_datetime(
-                    lang_env.env, event_start, dt_format='d MMM HH:mm')
+                    lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                    dt_format='d MMM HH:mm', lang_code=user.lang or 'en_US')
             except Exception:
                 start_str = event_start.strftime('%d %b %H:%M')
         body = (lang_env.env._('Your place is booked for %(cls)s on %(when)s.',
@@ -210,17 +215,36 @@ class FitnessBookingNotifications(models.Model):
                 continue
             class_name = booking.calendar_event_id.name or 'class'
             event_start = booking.calendar_event_id.start
-            start_str = event_start.strftime('%d %b at %H:%M') if event_start else ''
+            lang_env = self.with_context(lang=user.lang or 'en_US')
+            # Was f-strings, so no .po entry could ever reach it, and the date
+            # was raw strftime: English month, UTC clock, an English "at"
+            # wedged mid-sentence. Same treatment as booking_confirmed - the
+            # connector lives in the translatable string so each language
+            # places it itself.
+            start_str = ''
+            if event_start:
+                try:
+                    start_str = format_datetime(
+                        lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                        dt_format='d MMM HH:mm', lang_code=user.lang or 'en_US')
+                except Exception:
+                    start_str = event_start.strftime('%d %b %H:%M')
             body = (
-                f'Your booking for {class_name}'
-                + (f' on {start_str}' if start_str else '')
-                + ' has been cancelled. Check your credit balance for any refunds.'
+                lang_env.env._(
+                    'Your booking for %(cls)s on %(when)s has been cancelled.'
+                    ' Check your credit balance for any refunds.',
+                    cls=class_name, when=start_str)
+                if start_str else
+                lang_env.env._(
+                    'Your booking for %(cls)s has been cancelled.'
+                    ' Check your credit balance for any refunds.',
+                    cls=class_name)
             )
             try:
                 self.env['fitness.notification'].sudo()._create_for_user(
                     user.id,
                     'booking_cancelled',
-                    f'Booking cancelled: {class_name}',
+                    lang_env.env._('Booking cancelled: %(cls)s', cls=class_name),
                     body,
                     action_url='/my/classes',
                 )
