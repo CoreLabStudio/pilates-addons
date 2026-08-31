@@ -126,6 +126,9 @@ class FitnessStudentPortal(http.Controller):
         # about not owning anything in the first place. Each tile links to the
         # tab that sells that category.
         missing = partner._fitness_missing_purchases()
+        # Owns nothing in any category: the hero's "Book a Class" would drop
+        # them into an empty calendar, so it points at the shop instead.
+        has_no_purchases = all(missing.values())
         purchase_prompts = [p for p in (
             {'key': 'membership', 'show': missing['membership'],
              'label': _('Membership'), 'status': _('No active membership'),
@@ -154,6 +157,9 @@ class FitnessStudentPortal(http.Controller):
             'prompt_pair':      prompt_pair,
             'prompt_wide':      prompt_wide,
             'has_any_bookings': has_any_bookings,
+            'has_no_purchases': has_no_purchases,
+            'lbl_choose_plan':  _('Start by choosing your plan.'),
+            'lbl_explore_shop': _('Explore packages, memberships & classes'),
             'news_posts':       news_posts,
             'lbl_lets_book':    _("Let's book your first class."),
         })
@@ -327,13 +333,16 @@ class FitnessStudentPortal(http.Controller):
             'today_local':     today_local,
             'subtitle':        subtitle,
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
-            'no_sources_msg':  _("You don't have an active membership or class pack. Please contact the studio to get started."),
+            'no_sources_msg':  _("You don't have an active membership or package yet."),
+            'no_sources_cta':  _('See options'),
             'studio_chips':    studio_chips,
         }
 
     def _schedule_values(self, partner):
         """Day-grouped list of the student's upcoming bookings ('My Schedule')."""
         _ = request.env._
+        missing = partner._fitness_missing_purchases()
+        has_sources = not all(missing.values())
         lang = request.env.lang or 'en_US'
         now = fields.Datetime.now()
 
@@ -381,6 +390,9 @@ class FitnessStudentPortal(http.Controller):
 
         return {
             'grouped_bookings':  grouped,
+            'has_sources':       has_sources,
+            'no_sources_msg':    _("You don't have an active membership or package yet."),
+            'no_sources_cta':    _('See options'),
             'look_ahead_days':   look_ahead,
             'subtitle':          _('Next %d days') % look_ahead,
             'schedule_empty':    _('No upcoming classes in the next %d days.') % look_ahead,
@@ -933,7 +945,7 @@ class FitnessStudentPortal(http.Controller):
     # ══════════════════════════════════════════════════════════
 
     @http.route('/my/packages', type='http', auth='user', website=True, sitemap=False)
-    def packages_list(self, tab=None, **kw):
+    def packages_list(self, tab=None, discipline=None, **kw):
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -942,6 +954,11 @@ class FitnessStudentPortal(http.Controller):
         active_tab = ('subscriptions' if tab == 'subscriptions'
                       else 'classes' if tab == 'classes'
                       else 'packages')
+        # Pre-select a discipline chip so a link can land on Reformer only.
+        # The chips already filter client-side and corelab.js applies whichever
+        # one carries mv-active on load, so marking it server-side is the whole
+        # mechanism - nothing new to filter, just a different starting chip.
+        active_chip = discipline if discipline in ('barre', 'reformer', 'any') else 'all'
 
         if active_tab == 'subscriptions':
             domain = [('fitness_is_subscription_plan', '=', True)]
@@ -1041,6 +1058,7 @@ class FitnessStudentPortal(http.Controller):
             'active_tab':               active_tab,
             'groups':                   groups,
             'chips':                    chips,
+            'active_chip':              active_chip,
             'products':                 products,
             'pkg_meta':                 pkg_meta,
             'active_product_tmpl_ids':  active_product_tmpl_ids,

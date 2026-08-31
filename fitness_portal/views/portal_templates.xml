@@ -236,12 +236,24 @@
                     <t t-if="has_any_bookings">
                         <p class="mv-home-sub">Ready for your next class?</p>
                     </t>
-                    <t t-else="">
+                    <t t-elif="not has_no_purchases">
                         <p class="mv-home-sub" t-out="lbl_lets_book"/>
                     </t>
+                    <!-- Someone who owns nothing gets the "choose a plan" line
+                         below instead; telling them to book their first class
+                         when they have nothing to book with reads as a taunt. -->
                 </div>
 
-                <a href="/my/studio" class="mv-home-cta">Book a Class</a>
+                <!-- Someone who owns nothing cannot book anything, so sending
+                     them to the calendar just shows an empty list. Point the
+                     hero at the shop until they have something to book with. -->
+                <t t-if="has_no_purchases">
+                    <p class="mv-home-sub" t-out="lbl_choose_plan"/>
+                    <a href="/my/packages" class="mv-home-cta" t-out="lbl_explore_shop"/>
+                </t>
+                <t t-else="">
+                    <a href="/my/studio" class="mv-home-cta">Book a Class</a>
+                </t>
 
                 <t t-if="has_any_bookings">
                 <!-- Two quick stats. Both are tappable. -->
@@ -383,26 +395,6 @@
                     </div>
                 </t>
                 </t>
-
-                <!-- Shop shortcut. Full enumeration here rather than the nav's
-                     "Tienda": this is a wide row with room for it, and it names
-                     the page it opens. -->
-                <div class="mv-spacer-16"/>
-                <a href="/my/packages" class="mv-link-row">
-                    <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2a2.3 2.3 0 0 0 0 4.6v1.2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.2a2.3 2.3 0 0 0 0-4.6z"/>
-                        <line x1="14" y1="6.5" x2="14" y2="9"/>
-                        <line x1="14" y1="11.5" x2="14" y2="14"/>
-                        <line x1="14" y1="16.5" x2="14" y2="19"/>
-                    </svg>
-                    <div class="mv-menu-text">
-                        <div class="mv-menu-title">Packages, Memberships &amp; Classes</div>
-                        <div class="mv-menu-desc">Top up your credits or start a plan</div>
-                    </div>
-                    <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                        <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                </a>
 
                 <!-- Latest News &amp; Promotions — hidden entirely when no active posts -->
                 <t t-if="news_posts">
@@ -579,7 +571,11 @@
                 <!-- ══ View 1: Available ══ -->
                 <t t-if="active_view == 'available'">
                     <t t-if="not has_sources">
-                        <div class="mv-callout" t-out="no_sources_msg"/>
+                        <div class="mv-callout">
+                            <div t-out="no_sources_msg"/>
+                            <a href="/my/packages" class="mv-empty-cal-link"
+                               style="margin-top:10px;display:inline-block;" t-out="no_sources_cta"/>
+                        </div>
                     </t>
                     <t t-elif="not grouped_events">
                         <div class="mv-empty" t-out="empty_state"/>
@@ -674,8 +670,14 @@
                 <t t-else="">
                     <t t-if="not grouped_bookings">
                         <div class="mv-empty">
-                            <t t-out="schedule_empty"/>
-                            <br/><a href="/my/studio">Browse &amp; book classes</a>
+                            <t t-if="not has_sources">
+                                <t t-out="no_sources_msg"/>
+                                <br/><a href="/my/packages" t-out="no_sources_cta"/>
+                            </t>
+                            <t t-else="">
+                                <t t-out="schedule_empty"/>
+                                <br/><a href="/my/studio">Browse &amp; book classes</a>
+                            </t>
                         </div>
                     </t>
                     <t t-else="">
@@ -1234,7 +1236,7 @@
                         <div class="mv-pkg-filters">
                             <t t-foreach="chips" t-as="chip">
                                 <button type="button"
-                                        t-att-class="'mv-pkg-pill-btn' + (' mv-active' if chip['key'] == 'all' else '')"
+                                        t-att-class="'mv-pkg-pill-btn' + (' mv-active' if chip['key'] == (active_chip or 'all') else '')"
                                         t-att-data-filter="chip['key']"
                                         t-out="chip['label']"/>
                             </t>

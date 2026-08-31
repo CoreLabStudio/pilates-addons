@@ -808,6 +808,11 @@ body.mv-auth-body .form-control:focus {
 /* Heather blue on Paco brown, the same pair the portal CTA uses (4.71:1).
    The old values here were Paco-on-cream, written before the CTA colour
    change and never seen on screen because the selector was dead. */
+/* .card .btn-primary catches the ones that are not in a login/signup form at
+   all: the verification pages use <a class="btn btn-primary">, which the three
+   form-scoped selectors below miss, leaving Odoo's plum on an otherwise
+   branded page. Scoped to the auth card so it cannot reach the portal. */
+body.mv-auth-body .card .btn-primary,
 body.mv-auth-body .oe_login_buttons .btn-primary,
 body.mv-auth-body .oe_signup_form .btn-primary,
 body.mv-auth-body form button[type="submit"].btn-primary {
@@ -818,6 +823,7 @@ body.mv-auth-body form button[type="submit"].btn-primary {
   font-weight: 600; font-size: 0.9rem; padding: 12px;
   transition: transform var(--mv-t-fast), background var(--mv-t-fast);
 }
+body.mv-auth-body .card .btn-primary:hover,
 body.mv-auth-body .oe_login_buttons .btn-primary:hover,
 body.mv-auth-body .oe_signup_form .btn-primary:hover,
 body.mv-auth-body form button[type="submit"].btn-primary:hover {
