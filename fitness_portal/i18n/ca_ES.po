@@ -2085,3 +2085,27 @@ msgstr "Paquets, Membresies i Classes"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 msgid "Shop"
 msgstr "Botiga"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You don't have an active membership or package yet."
+msgstr "Encara no tens cap membresia o paquet actiu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "See options"
+msgstr "Veure opcions"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Start by choosing your plan."
+msgstr "Comença triant el teu pla."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Explore packages, memberships & classes"
+msgstr "Explorar paquets, membresies i classes"

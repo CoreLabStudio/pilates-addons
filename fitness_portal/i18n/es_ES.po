@@ -2085,3 +2085,27 @@ msgstr "Paquetes, Membresías y Clases"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 msgid "Shop"
 msgstr "Tienda"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You don't have an active membership or package yet."
+msgstr "Aún no tienes una membresía o paquete activo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "See options"
+msgstr "Ver opciones"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Start by choosing your plan."
+msgstr "Empieza por elegir tu plan."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Explore packages, memberships & classes"
+msgstr "Explorar paquetes, membresías y clases"

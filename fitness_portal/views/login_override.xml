@@ -82,7 +82,13 @@
         <xpath expr="//div[hasclass('container')]" position="attributes">
             <attribute name="class" add="mv-auth-wrap" separator=" "/>
         </xpath>
-        <xpath expr="//div[hasclass('container')]" position="inside">
+        <!-- A sibling of the container, not a child. As a child, the mobile
+             banner's `absolute` resolved against the container and inherited
+             its max-width, so it stopped 720px short of the screen edges on a
+             tablet. Outside it, absolute resolves against the page and the
+             banner spans the full width; the desktop panel is `fixed`, so it
+             does not care either way. -->
+        <xpath expr="//div[hasclass('container')]" position="before">
             <aside t-if="mv_login_photo" class="mv-auth-photo" aria-hidden="true">
                 <div class="mv-auth-photo-img"/>
             </aside>
@@ -113,15 +119,34 @@
     </template>
 
     <!--
-        Sets the flag the two templates above read. Inheriting web.login (not
-        the shared layout) is what confines the photo to the login page: the
-        t-call body is evaluated before the layout renders, so the value is in
-        scope there, and on signup/reset/trial it is simply never set and
-        reads as falsy.
+        Sets the flag the two templates above read. The flag is set per page
+        rather than on the shared layout because web.login_layout is used by
+        more than the four pages that want a photo: the e-mail verification
+        pages, terms and privacy, and Odoo's own TOTP and session-timeout
+        screens all render through it. Opting pages in one at a time keeps the
+        panel off those.
+
+        The t-call body is evaluated before the layout renders, so a value set
+        here is in scope when the panel and the body class are decided.
     -->
     <template id="mv_login_photo_flag" name="CoreLab Login Photo Flag"
               inherit_id="web.login">
         <xpath expr="//div[@id='oe_structure_login_top']" position="before">
+            <t t-set="mv_login_photo" t-value="True"/>
+        </xpath>
+    </template>
+
+    <!-- Signup, reset password and /trial join login in showing the panel. -->
+    <template id="mv_signup_photo_flag" name="CoreLab Signup Photo Flag"
+              inherit_id="auth_signup.signup">
+        <xpath expr="//div[@id='oe_structure_signup_top']" position="before">
+            <t t-set="mv_login_photo" t-value="True"/>
+        </xpath>
+    </template>
+
+    <template id="mv_reset_password_photo_flag" name="CoreLab Reset Password Photo Flag"
+              inherit_id="auth_signup.reset_password">
+        <xpath expr="//div[@id='oe_structure_reset_password_top']" position="before">
             <t t-set="mv_login_photo" t-value="True"/>
         </xpath>
     </template>
