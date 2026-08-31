@@ -2077,5 +2077,5 @@ msgstr "Descubre nuestros paquetes"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Packages, Memberships & Classes"
+msgid "Packages, Memberships &amp; Classes"
 msgstr "Paquetes, Membresías y Clases"

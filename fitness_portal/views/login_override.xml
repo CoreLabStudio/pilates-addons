@@ -64,4 +64,29 @@
         </xpath>
     </template>
 
+    <!--
+        Desktop split: the auth form keeps the left of the screen and a
+        full-height photo panel takes the right. The panel is dropped
+        entirely below 992px (see .mv-auth-photo in corelab.css), so on a
+        phone the form is exactly what it was before.
+
+        The card div carries t-attf-class rather than class, so hasclass()
+        cannot match it; "inside" appends the panel after it instead, which
+        is the same place in the DOM.
+
+        Photo credit / source is recorded next to the background-image rule
+        in fitness_core/static/src/css/corelab.css.
+    -->
+    <template id="mv_login_photo_panel" name="CoreLab Login Photo Panel"
+              inherit_id="web.login_layout">
+        <xpath expr="//div[hasclass('container')]" position="attributes">
+            <attribute name="class" add="mv-auth-wrap" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('container')]" position="inside">
+            <aside class="mv-auth-photo" aria-hidden="true">
+                <div class="mv-auth-photo-img"/>
+            </aside>
+        </xpath>
+    </template>
+
 </odoo>

@@ -832,6 +832,86 @@ body.bg-100 a:hover { color: var(--mv-clay) !important; }
   border-color: var(--mv-active-fill);
 }
 
+/* ── Login/signup split: heather-blue photo panel ──────────────────
+   Desktop only. Below 992px the panel is not rendered at all, so the
+   auth form keeps the full width of a phone screen and pays no download
+   cost for an image it will never show.
+
+   PHOTO SOURCE — Unsplash, free for commercial use under the Unsplash
+   License (no attribution required; credited here as good practice).
+     "Woman does pilates exercise on a reformer machine"
+     ROXANA POPOVICI  ·  https://unsplash.com/photos/aY5uOJ2o96g
+     file: fitness_core/static/src/img/login-pilates-reformer.jpg (1600x2263)
+   Replacing this with a real CoreLab studio photo is a one-file swap:
+   drop the new image in at the same path and nothing below changes. */
+.mv-auth-photo { display: none; }
+
+@media (min-width: 992px) {
+  .mv-auth-photo {
+    display: block;
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: 42vw;
+    overflow: hidden;
+    /* own stacking context, so the blend below cannot reach the page */
+    z-index: 0;
+  }
+  .mv-auth-photo-img {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/fitness_core/static/src/img/login-pilates-reformer.jpg');
+    background-size: cover;
+    /* the subject sits high in the frame; bias the crop up so a short
+       viewport keeps her rather than the reformer rails */
+    background-position: 50% 32%;
+    /* Strip the colour entirely first. A partial desaturation leaves the
+       photo's own warm browns fighting the tint and the result reads grey
+       rather than heather; going fully monochrome here is what lets the
+       blend below put a single clean hue back. */
+    filter: grayscale(1) contrast(1.06) brightness(1.03);
+  }
+  /* The duotone itself. mix-blend-mode:color takes the hue from this layer
+     and the luminance from the photo, which is what separates a duotone
+     from a flat blue rectangle laid over the image. */
+  .mv-auth-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--mv-clay);
+    mix-blend-mode: color;
+    /* high enough that the hue actually lands — at ~0.6 the panel still
+       reads as a grey photo with a hint of blue rather than a duotone */
+    opacity: 0.88;
+  }
+  /* Feather-white fade on the inner edge so the panel meets the form
+     without a hard seam, plus a little weight at the base. */
+  .mv-auth-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+      linear-gradient(90deg, var(--mv-bg) 0%, rgba(250, 249, 246, 0) 15%),
+      linear-gradient(0deg, rgba(80, 66, 61, 0.18) 0%, rgba(80, 66, 61, 0) 45%);
+  }
+  /* Hand the form the remaining width. The card keeps its own max-width
+     and stays centred in what is left, so the form itself is untouched.
+
+     Deliberately NOT scoped to body.bg-100: web.login_layout asks for that
+     class but Enterprise's login layout replaces it with
+     o_home_menu_background, so a body.bg-100 qualifier never matches here.
+     .container.mv-auth-wrap outranks Bootstrap's own .container padding
+     without depending on the body class at all. */
+  .container.mv-auth-wrap {
+    max-width: none;
+    padding-right: 44vw;
+    position: relative;
+    z-index: 1;
+  }
+}
+
 /* Also triggered when template override succeeds and mv-login-body is set */
 .mv-login-body {
   background: var(--mv-bg) !important;
