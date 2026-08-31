@@ -1368,7 +1368,6 @@ msgstr "El meu estudi CoreLab"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "CoreLab Classes"
 msgstr "Classes CoreLab"
 
@@ -2015,12 +2014,6 @@ msgstr "Veure plans"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "No credits"
-msgstr "Sense crèdits"
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "No active class"
 msgstr "Sense classe activa"
 
@@ -2064,3 +2057,25 @@ msgstr "Crèdits comprats"
 #: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_credit_used
 msgid "Credits Used"
 msgstr "Crèdits utilitzats"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+msgid "Reserve your class"
+msgstr "Reserva la teva classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class packages"
+msgstr "Paquets"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Discover our packages"
+msgstr "Descobreix els nostres paquets"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Packages, Memberships & Classes"
+msgstr "Paquets, Membresies i Classes"

@@ -513,7 +513,7 @@
                 <div class="mv-segmented" role="tablist">
                     <a href="/my/studio"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'available' else '')"
-                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">CoreLab Classes</a>
+                       t-att-aria-selected="'true' if active_view == 'available' else 'false'">Reserve your class</a>
                     <a href="/my/studio?view=schedule"
                        t-att-class="'mv-segment' + (' mv-active' if active_view == 'schedule' else '')"
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
@@ -1181,7 +1181,7 @@
                 <!-- Title + quiet credit line + circular search toggle -->
                 <div class="mv-title-row">
                     <div>
-                        <p class="mv-greeting-name">Packages &amp; Memberships</p>
+                        <p class="mv-greeting-name">Packages, Memberships &amp; Classes</p>
                         <t t-if="credit_line">
                             <a href="/my/credits" class="mv-credit-line" t-out="credit_line"/>
                         </t>

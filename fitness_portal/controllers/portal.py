@@ -131,13 +131,13 @@ class FitnessStudentPortal(http.Controller):
              'label': _('Membership'), 'status': _('No active membership'),
              'cta': _('View plans'), 'href': '/my/packages?tab=subscriptions'},
             {'key': 'package', 'show': missing['package'],
-             'label': _('Credits'), 'status': _('No credits'),
+             'label': _('Class packages'), 'status': _('Discover our packages'),
              'cta': _('Buy'), 'href': '/my/packages?tab=packages'},
             {'key': 'class', 'show': missing['class'],
              'label': _('Classes'), 'status': _('No active class'),
              'cta': _('View classes'), 'href': '/my/packages?tab=classes'},
         ) if p['show']]
-        # Membership and credits sit side by side; the class tile spans
+        # Membership and packages sit side by side; the class tile spans
         # the row underneath. Split here rather than in QWeb so the
         # template stays free of list comprehensions.
         prompt_pair = [p for p in purchase_prompts if p['key'] != 'class']
