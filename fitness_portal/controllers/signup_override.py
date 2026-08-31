@@ -49,6 +49,24 @@ class FitnessSignup(AuthSignupHome):
                 return '/my/home'
         return super()._login_redirect(uid, redirect=redirect)
 
+    def _mv_apply_portal_lang(self):
+        """Put the mv_lang cookie into effect for this request.
+
+        Mirrors ir_http._frontend_pre_dispatch. Kept defensive: /web/login is an
+        auth='none' route, so a failure here must never cost anyone the ability
+        to sign in — the page simply renders in the default language instead.
+        """
+        if not request.db:
+            return
+        try:
+            lang_data = request.env['ir.http']._get_mv_lang()
+            if lang_data:
+                request.lang = lang_data
+                request.update_context(lang=lang_data.code)
+        except Exception:  # noqa: BLE001 - never block the login page
+            _logger.warning('CoreLab: could not apply portal language to /web/login',
+                            exc_info=True)
+
     @http.route()
     def web_login(self, redirect=None, **kw):
         # During automated test runs, let base auth_signup handle everything so
@@ -68,6 +86,19 @@ class FitnessSignup(AuthSignupHome):
                 return request.redirect(dest)
 
         response = super().web_login(redirect=redirect, **kw)
+
+        # Language. Signup, reset-password and /trial pick the mv_lang cookie up
+        # through ir_http._frontend_pre_dispatch, but /web/login never does: that
+        # hook only runs for frontend requests, and the override marking login as
+        # one lives in the website module, which is not installed here. So the
+        # ES/EN/CA switcher on the login card did nothing and the page always
+        # came out en_US.
+        #
+        # This has to run after super(), not before: base web_login calls
+        # ir.http._auth_method_public(), which swaps the environment for the
+        # public user and takes any language set earlier down with it. Rendering
+        # is lazy, so setting it here still reaches the template.
+        self._mv_apply_portal_lang()
 
         # Show "email verified" success message on the login page
         if hasattr(response, 'qcontext') and request.params.get('message') == 'verified':

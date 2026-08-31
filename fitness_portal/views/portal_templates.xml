@@ -183,7 +183,11 @@
                     <line x1="14" y1="11.5" x2="14" y2="14"/>
                     <line x1="14" y1="16.5" x2="14" y2="19"/>
                 </svg>
-                <div>Packages &amp; Memberships</div>
+                <!-- "Shop" rather than the page's own title: the tab is ~70px
+                     wide, and "Packages, Memberships & Classes" cannot live
+                     there. It also sidesteps Bonos/Paquetes, which the longer
+                     label was inconsistent about. -->
+                <div>Shop</div>
             </a>
             <!-- Profile — person -->
             <a href="/my" class="mv-nav-tab">

@@ -2079,3 +2079,8 @@ msgstr "Descobreix els nostres paquets"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 msgid "Packages, Memberships &amp; Classes"
 msgstr "Paquets, Membresies i Classes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+msgid "Shop"
+msgstr "Botiga"
