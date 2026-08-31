@@ -83,9 +83,46 @@
             <attribute name="class" add="mv-auth-wrap" separator=" "/>
         </xpath>
         <xpath expr="//div[hasclass('container')]" position="inside">
-            <aside class="mv-auth-photo" aria-hidden="true">
+            <aside t-if="mv_login_photo" class="mv-auth-photo" aria-hidden="true">
                 <div class="mv-auth-photo-img"/>
             </aside>
+        </xpath>
+    </template>
+
+    <!--
+        web.login_layout is shared by /web/login, /web/signup,
+        /web/reset_password and /trial, so anything added to it lands on all
+        four. Two flags keep that straight:
+
+          mv-auth-body   — on every one of them; carries the brand styling.
+          mv-auth-split  — login only; reserves the right half for the photo.
+
+        Enterprise replaces body_classname with o_home_menu_background in
+        web_enterprise.webclient_login, which is why the brand rules keyed on
+        Odoo's own bg-100 never fired. Re-setting it after Enterprise (higher
+        priority, same insertion point) is what makes them apply again. Its
+        class is kept alongside ours rather than dropped, so nothing that
+        depends on it changes; corelab.css just overrides the background.
+    -->
+    <template id="mv_auth_body_class" name="CoreLab Auth Body Class"
+              inherit_id="web.login_layout" priority="99">
+        <xpath expr="//t[@t-call='web.frontend_layout']/t[last()]" position="after">
+            <t t-set="body_classname"
+               t-value="'o_home_menu_background mv-auth-body' + (' mv-auth-split' if mv_login_photo else '')"/>
+        </xpath>
+    </template>
+
+    <!--
+        Sets the flag the two templates above read. Inheriting web.login (not
+        the shared layout) is what confines the photo to the login page: the
+        t-call body is evaluated before the layout renders, so the value is in
+        scope there, and on signup/reset/trial it is simply never set and
+        reads as falsy.
+    -->
+    <template id="mv_login_photo_flag" name="CoreLab Login Photo Flag"
+              inherit_id="web.login">
+        <xpath expr="//div[@id='oe_structure_login_top']" position="before">
+            <t t-set="mv_login_photo" t-value="True"/>
         </xpath>
     </template>
 
