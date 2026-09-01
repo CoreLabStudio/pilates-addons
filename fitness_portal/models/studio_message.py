@@ -155,7 +155,7 @@ class FitnessStudioConversation(models.Model):
             "SELECT 1 FROM res_groups_users_rel WHERE gid = %s AND uid = %s LIMIT 1",
             (teacher_g.id, uid),
         )
-        return 'Teacher' if self.env.cr.fetchone() else 'Student'
+        return 'Instructor' if self.env.cr.fetchone() else 'Student'
 
     @api.model_create_multi
     def create(self, vals_list):

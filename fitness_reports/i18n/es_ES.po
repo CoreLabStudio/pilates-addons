@@ -22,7 +22,7 @@ msgstr "Informes"
 #: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_bookings
 #: model:ir.actions.act_window,name:fitness_reports.action_fitness_booking_report
 msgid "Bookings"
-msgstr "Reservas"
+msgstr "Analítica de reservas"
 
 #. module: fitness_reports
 #: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_revenue
@@ -52,19 +52,19 @@ msgstr "Resumen de clases"
 #: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_team
 #: model:ir.actions.act_window,name:fitness_reports.action_fitness_team_report
 msgid "Team"
-msgstr "Equipo"
-
-# ── Field-level labels (view string= overrides) ───────────────────────────────
+msgstr "Estadísticas de instructores"
 
 #. module: fitness_reports
+# ── Field-level labels (view string= overrides)
+# ───────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_client_report_list
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_revenue_report_list
 msgid "Student"
 msgstr "Alumna"
 
-# ── revenue_type selection values (sale.order extend) ────────────────────────
-
 #. module: fitness_reports
+# ── revenue_type selection values (sale.order extend)
+# ────────────────────────
 #: model:ir.model.fields.selection,name:fitness_reports.selection__sale_order__revenue_type__membership
 msgid "Membership"
 msgstr "Membresía"
@@ -79,9 +79,9 @@ msgstr "Bono"
 msgid "Single"
 msgstr "Clase suelta"
 
-# ── Python field string labels ────────────────────────────────────────────────
-
 #. module: fitness_reports
+# ── Python field string labels
+# ────────────────────────────────────────────────
 #: model:ir.model.fields,field_description:fitness_reports.field_sale_order__revenue_type
 msgid "Revenue Type"
 msgstr "Tipo de ingreso"
@@ -90,3 +90,8 @@ msgstr "Tipo de ingreso"
 #: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__avg_classes_per_month
 msgid "Avg Classes / Month"
 msgstr "Media clases / mes"
+
+#. module: fitness_reports
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_retention
+msgid "Retention"
+msgstr "Retención"

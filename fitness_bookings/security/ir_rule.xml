@@ -7,7 +7,7 @@
              (fitness_core.group_fitness_manager) are not members of this group, so they are
              unaffected by this rule and keep full access via the base ACLs. -->
         <record id="fitness_booking_rule_teacher_own_classes" model="ir.rule">
-            <field name="name">Fitness Booking: teacher sees only own classes</field>
+            <field name="name">Fitness Booking: instructor sees only own classes</field>
             <field name="model_id" ref="model_fitness_booking"/>
             <field name="domain_force">[('calendar_event_id.user_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('fitness_core.group_fitness_teacher'))]"/>

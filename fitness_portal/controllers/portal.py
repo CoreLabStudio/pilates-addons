@@ -1938,7 +1938,7 @@ class FitnessStudentPortal(http.Controller):
         if len(body) > 2000:
             return request.redirect('/my/messages?error=toolong')
 
-        role = 'Teacher' if is_teacher else 'Student'
+        role = 'Instructor' if is_teacher else 'Student'
 
         Conv = request.env['fitness.studio.conversation'].sudo()
         conversation = Conv.search([('user_id', '=', user.id)], order='write_date desc', limit=1)

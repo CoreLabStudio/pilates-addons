@@ -15,8 +15,9 @@ msgstr ""
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness.trial.request,class_interest
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__class_interest
 msgid "Class Interest"
-msgstr "Tipus de classe"
+msgstr "Interès de classe"
 
 #. module: fitness_trials
 #: model:ir.model.fields.selection,name:fitness.trial.request.class_interest,barre
@@ -30,6 +31,7 @@ msgstr "Reformer"
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness.trial.request,reformer_is_first_time
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__reformer_is_first_time
 msgid "First time with Reformer Pilates?"
 msgstr "Primera vegada amb Reformer Pilates?"
 
@@ -45,13 +47,15 @@ msgstr "No"
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness.trial.request,reformer_years_experience
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__reformer_years_experience
 msgid "Years of Reformer Experience"
 msgstr "Anys d'experiència amb Reformer"
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness.trial.request,preferred_time_notes
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__preferred_time_notes
 msgid "Preferred Day / Time"
-msgstr "Dia / Horari preferit"
+msgstr "Dia i hora preferits"
 
 #. module: fitness_trials
 #: model:ir.model.fields.selection,name:fitness.trial.request.status,pending
@@ -125,3 +129,73 @@ msgstr "Avui"
 #: code:addons/fitness_trials/controllers/trial.py:0
 msgid "Tomorrow"
 msgstr "Demà"
+
+#. module: fitness_trials
+#: model:ir.ui.menu,name:fitness_trials.menu_fitness_trials_barre
+msgid "Barre Log"
+msgstr "Registre de Barre"
+
+#. module: fitness_trials
+#: model:ir.ui.menu,name:fitness_trials.menu_fitness_trials_scheduled
+msgid "Scheduled"
+msgstr "Programades"
+
+#. module: fitness_trials
+#: model:ir.ui.menu,name:fitness_trials.menu_fitness_trials_pending
+msgid "Pending Review"
+msgstr "Pendents de revisió"
+
+#. module: fitness_trials
+#: model:ir.ui.menu,name:fitness_trials.menu_fitness_trial_requests
+msgid "All Requests"
+msgstr "Totes les sol·licituds"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__email
+msgid "Email"
+msgstr "Correu electrònic"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__phone
+msgid "Phone"
+msgstr "Telèfon"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__occurrence_id
+msgid "Barre Class Slot"
+msgstr "Franja de classe de Barre"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__lang
+msgid "Language"
+msgstr "Idioma"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__status
+msgid "Status"
+msgstr "Estat"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__scheduled_datetime
+msgid "Scheduled Date/Time"
+msgstr "Data i hora programades"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__scheduled_datetime_display
+msgid "Formatted Date/Time"
+msgstr "Data i hora"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__confirmation_email_sent
+msgid "Confirmation Email Sent"
+msgstr "Correu de confirmació enviat"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__confirmation_email_sent_date
+msgid "Confirmation Sent On"
+msgstr "Confirmació enviada el"

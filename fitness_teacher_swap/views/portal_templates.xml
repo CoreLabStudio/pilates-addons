@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- ── Teacher class list ────────────────────────────────────────────── -->
-    <template id="portal_my_classes" name="My Classes (Teacher)">
+    <template id="portal_my_classes" name="My Classes (Instructor)">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
@@ -113,7 +113,7 @@
     </template>
 
     <!-- ── Class roster ───────────────────────────────────────────────────── -->
-    <template id="portal_teacher_roster" name="Class Roster (Teacher)">
+    <template id="portal_teacher_roster" name="Class Roster (Instructor)">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
@@ -238,7 +238,7 @@
     </template>
 
     <!-- ── Teacher classes history ──────────────────────────────────────────── -->
-    <template id="portal_teacher_history" name="Classes History (Teacher)">
+    <template id="portal_teacher_history" name="Classes History (Instructor)">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>

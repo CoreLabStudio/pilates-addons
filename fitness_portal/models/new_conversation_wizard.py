@@ -31,7 +31,7 @@ class FitnessStudioNewConversationWizard(models.TransientModel):
         )
         if not conv:
             teacher_g = self.env.ref('fitness_core.group_fitness_teacher', raise_if_not_found=False)
-            role = 'Teacher' if teacher_g and self.user_id in teacher_g.user_ids else 'Student'
+            role = 'Instructor' if teacher_g and self.user_id in teacher_g.user_ids else 'Student'
             conv = Conversation.create({
                 'user_id': self.user_id.id,
                 'partner_id': self.user_id.partner_id.id,

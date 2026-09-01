@@ -148,7 +148,7 @@
 
     <!-- ACTION — Team ────────────────────────────────────────── -->
     <record id="action_fitness_team_report" model="ir.actions.act_window">
-        <field name="name">Teacher Stats</field>
+        <field name="name">Instructor Stats</field>
         <field name="res_model">fitness.report.class</field>
         <field name="view_mode">pivot,graph,list</field>
         <field name="search_view_id" ref="view_fitness_class_report_search"/>

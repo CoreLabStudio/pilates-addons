@@ -20,7 +20,7 @@ class FitnessNotification(models.Model):
         ('credit_expiring', 'Credits Expiring'),
         ('credit_used', 'Credit Used'),
         ('credit_zero', 'No Credits Left'),
-        ('teacher_swap', 'Teacher Changed'),
+        ('teacher_swap', 'Instructor Changed'),
         ('class_rescheduled', 'Class Rescheduled'),
         ('invoice_issued', 'Invoice Issued'),
         ('purchase_completed', 'Purchase Completed'),

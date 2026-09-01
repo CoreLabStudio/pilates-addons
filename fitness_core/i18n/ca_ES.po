@@ -16,91 +16,137 @@ msgstr ""
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_barre_classic_flow
 msgid ""
-"Barre Harmony is a dynamic class designed to help you tone, sweat, and enjoy movement to a classic, feel-good playlist. "
-"This low-impact workout is based on isometric exercises that target and strengthen deep muscle groups, improving both stability and endurance. "
-"The class emphasizes precise technique and controlled movement, helping you build body awareness and alignment. "
-"It incorporates elements of functional Pilates, while primarily drawing inspiration from ballet-inspired movements. "
-"Barre Harmony is accessible and welcoming, making it an excellent choice for beginners as well as anyone looking for a mindful yet effective workout."
+"Barre Harmony is a dynamic class designed to help you tone, sweat, and enjoy"
+" movement to a classic, feel-good playlist. This low-impact workout is based"
+" on isometric exercises that target and strengthen deep muscle groups, "
+"improving both stability and endurance. The class emphasizes precise "
+"technique and controlled movement, helping you build body awareness and "
+"alignment. It incorporates elements of functional Pilates, while primarily "
+"drawing inspiration from ballet-inspired movements. Barre Harmony is "
+"accessible and welcoming, making it an excellent choice for beginners as "
+"well as anyone looking for a mindful yet effective workout."
 msgstr ""
-"Barre Harmony és una classe dinàmica dissenyada per ajudar-te a tonificar, suar i gaudir del moviment amb una selecció musical clàssica i motivadora. "
-"Aquest entrenament de baix impacte es basa en exercicis isomètrics que treballen i enforteixen la musculatura profunda, millorant tant l'estabilitat com la resistència. "
-"La classe posa èmfasi en la tècnica precisa i el control del moviment, ajudant-te a desenvolupar consciència corporal i una millor alineació. "
-"Incorpora elements del Pilates funcional, tot i que s'inspira principalment en moviments de ballet. "
-"Barre Harmony és accessible i acollidora, fet que la converteix en una excel·lent opció tant per a principiants com per a qualsevol persona que busqui un entrenament conscient i efectiu."
+"Barre Harmony és una classe dinàmica dissenyada per ajudar-te a tonificar, "
+"suar i gaudir del moviment amb una selecció musical clàssica i motivadora. "
+"Aquest entrenament de baix impacte es basa en exercicis isomètrics que "
+"treballen i enforteixen la musculatura profunda, millorant tant "
+"l'estabilitat com la resistència. La classe posa èmfasi en la tècnica "
+"precisa i el control del moviment, ajudant-te a desenvolupar consciència "
+"corporal i una millor alineació. Incorpora elements del Pilates funcional, "
+"tot i que s'inspira principalment en moviments de ballet. Barre Harmony és "
+"accessible i acollidora, fet que la converteix en una excel·lent opció tant "
+"per a principiants com per a qualsevol persona que busqui un entrenament "
+"conscient i efectiu."
 
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_barre_blast
 msgid ""
-"Better known as Barre Blast, this is not your typical adult ballet class—it's faster, stronger, and way more fun. "
-"Get ready for 30 minutes of high-energy barre work, combining technical ballet exercises with weights and props to fire up your muscles and boost strength and precision. "
-"Then, take it to the floor for an intense 15-minute barre burn that challenges your core, endurance, and control. "
-"All set to a powerful, feel-good playlist that keeps you moving, motivated, and pushing your limits. "
-"Barre Blast is where technique meets sweat—a dynamic, full-body workout that leaves you feeling strong, energized, and unstoppable."
+"Better known as Barre Blast, this is not your typical adult ballet "
+"class—it's faster, stronger, and way more fun. Get ready for 30 minutes of "
+"high-energy barre work, combining technical ballet exercises with weights "
+"and props to fire up your muscles and boost strength and precision. Then, "
+"take it to the floor for an intense 15-minute barre burn that challenges "
+"your core, endurance, and control. All set to a powerful, feel-good playlist"
+" that keeps you moving, motivated, and pushing your limits. Barre Blast is "
+"where technique meets sweat—a dynamic, full-body workout that leaves you "
+"feeling strong, energized, and unstoppable."
 msgstr ""
-"Més coneguda com a Barre Blast, aquesta no és la típica classe de ballet per a adults: és més ràpida, més intensa i molt més divertida. "
-"Prepara't per a 30 minuts de treball a la barra d'alta energia, combinant exercicis tècnics de ballet amb peses i accessoris per activar la musculatura i potenciar la força i la precisió. "
-"Després, passem al terra amb 15 minuts intensos de floor barre que posaran a prova el teu core, la teva resistència i el teu control. "
-"Tot acompanyat d'una playlist potent i motivadora que et mantindrà en moviment, concentrada i superant els teus límits. "
-"Barre Blast és on la tècnica es troba amb l'esforç: un entrenament dinàmic de cos complet que et farà sentir forta, plena d'energia i imparable."
+"Més coneguda com a Barre Blast, aquesta no és la típica classe de ballet per"
+" a adults: és més ràpida, més intensa i molt més divertida. Prepara't per a "
+"30 minuts de treball a la barra d'alta energia, combinant exercicis tècnics "
+"de ballet amb peses i accessoris per activar la musculatura i potenciar la "
+"força i la precisió. Després, passem al terra amb 15 minuts intensos de "
+"floor barre que posaran a prova el teu core, la teva resistència i el teu "
+"control. Tot acompanyat d'una playlist potent i motivadora que et mantindrà "
+"en moviment, concentrada i superant els teus límits. Barre Blast és on la "
+"tècnica es troba amb l'esforç: un entrenament dinàmic de cos complet que et "
+"farà sentir forta, plena d'energia i imparable."
 
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_burn_barre
 msgid ""
-"Burn It Baby is your ultimate lower-body burner—designed to sculpt, lift, and set your glutes on fire. "
-"This high-intensity class zeroes in on the glute muscles while firing up your core, combining resistance, mobility, and control for serious, full-body results. "
-"Get ready for deep isometric holds, relentless slow pulses, and sliding exercises that push your muscles to the limit. "
-"Your core stays constantly engaged, building strength, stability, and control with every move. "
-"It's all about that shake, that burn, and that unstoppable energy. Feel it. Fight it. Love it."
+"Burn It Baby is your ultimate lower-body burner—designed to sculpt, lift, "
+"and set your glutes on fire. This high-intensity class zeroes in on the "
+"glute muscles while firing up your core, combining resistance, mobility, and"
+" control for serious, full-body results. Get ready for deep isometric holds,"
+" relentless slow pulses, and sliding exercises that push your muscles to the"
+" limit. Your core stays constantly engaged, building strength, stability, "
+"and control with every move. It's all about that shake, that burn, and that "
+"unstoppable energy. Feel it. Fight it. Love it."
 msgstr ""
-"Burn It Baby és el teu entrenament definitiu de tren inferior, dissenyat per esculpir, elevar i fer cremar els teus glutis. "
-"Aquesta classe d'alta intensitat se centra en els músculs glútis mentre activa constantment el core, combinant resistència, mobilitat i control per aconseguir resultats potents a tot el cos. "
-"Prepara't per a isometries profundes, polsos lents i intensos i exercicis de lliscament que porten els teus músculs al límit. "
-"El teu core treballa en tot moment, desenvolupant força, estabilitat i control en cada moviment. "
-"Aquí tot va d'aquell tremolor, aquell burn i aquella energia imparable. Sent-ho. Supera-ho. Gaudeix-ho."
+"Burn It Baby és el teu entrenament definitiu de tren inferior, dissenyat per"
+" esculpir, elevar i fer cremar els teus glutis. Aquesta classe d'alta "
+"intensitat se centra en els músculs glútis mentre activa constantment el "
+"core, combinant resistència, mobilitat i control per aconseguir resultats "
+"potents a tot el cos. Prepara't per a isometries profundes, polsos lents i "
+"intensos i exercicis de lliscament que porten els teus músculs al límit. El "
+"teu core treballa en tot moment, desenvolupant força, estabilitat i control "
+"en cada moviment. Aquí tot va d'aquell tremolor, aquell burn i aquella "
+"energia imparable. Sent-ho. Supera-ho. Gaudeix-ho."
 
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_reformer_alignment
 msgid ""
-"This routine is designed at a slower, more controlled pace, focusing on movements that incorporate open rotations and twisting patterns. "
-"The emphasis is on depth, precision, and fluidity—allowing you to move with intention and control. "
-"Longer in duration and stronger in impact, this style of training builds mobility, strength, and body awareness while helping you connect more deeply with each movement."
+"This routine is designed at a slower, more controlled pace, focusing on "
+"movements that incorporate open rotations and twisting patterns. The "
+"emphasis is on depth, precision, and fluidity—allowing you to move with "
+"intention and control. Longer in duration and stronger in impact, this style"
+" of training builds mobility, strength, and body awareness while helping you"
+" connect more deeply with each movement."
 msgstr ""
-"Aquesta rutina està dissenyada a un ritme més lent i controlat, centrada en moviments que incorporen rotacions obertes i patrons de torsió. "
-"L'èmfasi es posa en la profunditat, la precisió i la fluïdesa, permetent-te moure't amb intenció i control. "
-"Més llarga en durada i amb un impacte més intens, aquest estil d'entrenament desenvolupa la mobilitat, la força i la consciència corporal, ajudant-te a connectar de manera més profunda amb cada moviment."
+"Aquesta rutina està dissenyada a un ritme més lent i controlat, centrada en "
+"moviments que incorporen rotacions obertes i patrons de torsió. L'èmfasi es "
+"posa en la profunditat, la precisió i la fluïdesa, permetent-te moure't amb "
+"intenció i control. Més llarga en durada i amb un impacte més intens, aquest"
+" estil d'entrenament desenvolupa la mobilitat, la força i la consciència "
+"corporal, ajudant-te a connectar de manera més profunda amb cada moviment."
 
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_reformer_tone
 msgid ""
-"This is core training turned all the way up. Designed to build unstoppable stamina, these routines keep your core under constant fire from start to finish. "
-"With fewer exercises and lightning-fast transitions, your heart rate stays high while your abs, obliques, and deep core muscles work non-stop to stabilize, power, and control every move. "
-"No breaks, no escape—just pure core activation. "
-"Each session finishes with an intense burnout that pushes your endurance to the edge and leaves your core shaking. "
-"Strong core. High intensity. No limits."
+"This is core training turned all the way up. Designed to build unstoppable "
+"stamina, these routines keep your core under constant fire from start to "
+"finish. With fewer exercises and lightning-fast transitions, your heart rate"
+" stays high while your abs, obliques, and deep core muscles work non-stop to"
+" stabilize, power, and control every move. No breaks, no escape—just pure "
+"core activation. Each session finishes with an intense burnout that pushes "
+"your endurance to the edge and leaves your core shaking. Strong core. High "
+"intensity. No limits."
 msgstr ""
-"Això és entrenament de core portat al màxim. Dissenyat per construir una resistència imparable, aquestes rutines mantenen el teu core en activació constant de principi a fi. "
-"Amb menys exercicis i transicions ràpides, la teva freqüència cardíaca es manté alta mentre els abdominals, els oblics i la musculatura profunda treballen sense descans per estabilitzar, impulsar i controlar cada moviment. "
-"Sense pauses, sense escapament: pura activació. "
-"Cada sessió acaba amb un burnout intens que porta la teva resistència al límit i deixa el teu core tremolant. "
-"Core fort. Alta intensitat. Sense límits."
+"Això és entrenament de core portat al màxim. Dissenyat per construir una "
+"resistència imparable, aquestes rutines mantenen el teu core en activació "
+"constant de principi a fi. Amb menys exercicis i transicions ràpides, la "
+"teva freqüència cardíaca es manté alta mentre els abdominals, els oblics i "
+"la musculatura profunda treballen sense descans per estabilitzar, impulsar i"
+" controlar cada moviment. Sense pauses, sense escapament: pura activació. "
+"Cada sessió acaba amb un burnout intens que porta la teva resistència al "
+"límit i deixa el teu core tremolant. Core fort. Alta intensitat. Sense "
+"límits."
 
 #. module: fitness_core
 #: model:fitness.class.type,description:fitness_core.class_type_pump_it_reformer
 msgid ""
-"BURN!!! Is a full-on, high-intensity blast powered by an electrifying playlist that keeps your energy at maximum from the very first beat. "
-"This class is designed to spike your heart rate and keep it there, combining fast, dynamic movements with weights, a fit ball, and a fit circle for a seriously effective burn. "
-"Expect non-stop action, full-body engagement, and an addictive rhythm that pushes you harder every second. "
-"It's sweaty, it's powerful, and it hits different every time. You won't just feel it—you'll be blown away."
+"BURN!!! Is a full-on, high-intensity blast powered by an electrifying "
+"playlist that keeps your energy at maximum from the very first beat. This "
+"class is designed to spike your heart rate and keep it there, combining "
+"fast, dynamic movements with weights, a fit ball, and a fit circle for a "
+"seriously effective burn. Expect non-stop action, full-body engagement, and "
+"an addictive rhythm that pushes you harder every second. It's sweaty, it's "
+"powerful, and it hits different every time. You won't just feel it—you'll be"
+" blown away."
 msgstr ""
-"BURN!!! És una explosió d'alta intensitat impulsada per una playlist electritzant que manté la teva energia al màxim des del primer beat. "
-"Aquesta classe està dissenyada per disparar la teva freqüència cardíaca i mantenir-la alta, combinant moviments ràpids i dinàmics amb manuelles, fit ball i fit circle per a un burn brutal. "
-"Prepara't per a acció sense pausa, activació total del cos i un ritme addictiu que t'empeny a donar més a cada segon. "
-"És suor, és potència i és una experiència que es viu diferent cada vegada. No només ho sentiràs... et sorprendrà."
-
-# ── Admin dashboard ──
+"BURN!!! És una explosió d'alta intensitat impulsada per una playlist "
+"electritzant que manté la teva energia al màxim des del primer beat. Aquesta"
+" classe està dissenyada per disparar la teva freqüència cardíaca i mantenir-"
+"la alta, combinant moviments ràpids i dinàmics amb manuelles, fit ball i fit"
+" circle per a un burn brutal. Prepara't per a acció sense pausa, activació "
+"total del cos i un ritme addictiu que t'empeny a donar més a cada segon. És "
+"suor, és potència i és una experiència que es viu diferent cada vegada. No "
+"només ho sentiràs... et sorprendrà."
 
 #. module: fitness_core
 #. odoo-python
+# ── Admin dashboard ──
 #: code:addons/fitness_core/models/fitness_dashboard.py:0
 msgid "Good morning"
 msgstr "Bon dia"
@@ -129,7 +175,7 @@ msgstr "Estudiants"
 
 #. module: fitness_core
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "Teacher Swaps"
+msgid "Instructor Swaps"
 msgstr "Canvis d'instructor"
 
 #. module: fitness_core
@@ -152,9 +198,8 @@ msgstr "Missatges"
 msgid "See all"
 msgstr "Veure-ho tot"
 
-# ── Dashboard, exact QWeb terms ──
-
 #. module: fitness_core
+# ── Dashboard, exact QWeb terms ──
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "<span class=\"cl-hero-label\">Classes Today</span>"
 msgstr "<span class=\"cl-hero-label\">Classes d'avui</span>"
@@ -166,7 +211,7 @@ msgstr "<span class=\"cl-tile-label\">Estudiants</span>"
 
 #. module: fitness_core
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "<span class=\"cl-tile-label\">Teacher Swaps</span>"
+msgid "<span class=\"cl-tile-label\">Instructor Swaps</span>"
 msgstr "<span class=\"cl-tile-label\">Canvis d'instructor</span>"
 
 #. module: fitness_core
@@ -191,12 +236,12 @@ msgstr "Veure estudiants"
 
 #. module: fitness_core
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "Teacher swaps"
+msgid "Instructor swaps"
 msgstr "Canvis d'instructor"
 
 #. module: fitness_core
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "View teacher swaps"
+msgid "View instructor swaps"
 msgstr "Veure canvis d'instructor"
 
 #. module: fitness_core
@@ -228,3 +273,327 @@ msgstr "Veure missatges sense llegir"
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Dashboard"
 msgstr "Tauler"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_home
+msgid "Home"
+msgstr "Inici"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_trials_root
+msgid "Trials"
+msgstr "Classes de prova"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_bookings
+msgid "Students"
+msgstr "Estudiants"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_closure_day
+msgid "Closure Days"
+msgstr "Dies de tancament"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_class_schedule
+msgid "Recurring Schedules"
+msgstr "Horaris recurrents"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_news_posts
+msgid "News & Promotions"
+msgstr "Notícies i promocions"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_class_categories
+msgid "Class Categories"
+msgstr "Categories de classe"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_teacher_classes
+msgid "Assigned Classes"
+msgstr "Classes assignades"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_teachers_root
+msgid "Instructors"
+msgstr "Instructors"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_teacher_list
+msgid "Instructor List"
+msgstr "Llista d'instructors"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_classes_root
+msgid "Classes"
+msgstr "Classes"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_catalog
+msgid "Catalog"
+msgstr "Catàleg"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_class_types
+msgid "Class Types"
+msgstr "Tipus de classe"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_classrooms
+msgid "Classrooms"
+msgstr "Sales"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_schedule
+msgid "Schedule"
+msgstr "Horari"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_session_types
+msgid "Session Types"
+msgstr "Tipus de sessió"
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_group_configuration
+msgid "Settings"
+msgstr "Configuració"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__active
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__active
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__active
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__active
+msgid "Active"
+msgstr "Actiu"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__class_type_id
+msgid "Class Type"
+msgstr "Tipus de classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__teacher_user_id
+msgid "Instructor"
+msgstr "Instructor"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__classroom_id
+msgid "Studio / Room"
+msgstr "Estudi / Sala"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__weekday
+msgid "Weekday"
+msgstr "Dia de la setmana"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__start_time
+msgid "Start Time"
+msgstr "Hora d'inici"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__duration
+msgid "Duration (hours)"
+msgstr "Durada (hores)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__capacity
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__capacity
+msgid "Capacity"
+msgstr "Capacitat"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__session_type
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__session_type
+msgid "Session Type"
+msgstr "Tipus de sessió"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__tz
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__tz
+msgid "Studio Timezone"
+msgstr "Zona horària de l'estudi"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__date_start
+msgid "First Class"
+msgstr "Primera classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__date_end
+msgid "Last Class"
+msgstr "Última classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__horizon_weeks
+msgid "Weeks Ahead"
+msgstr "Setmanes per endavant"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__base_event_id
+msgid "Base Event"
+msgstr "Esdeveniment base"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__recurrence_id
+msgid "Recurrence"
+msgstr "Recurrència"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__generated_until
+msgid "Generated Until"
+msgstr "Generat fins"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__occurrence_count
+msgid "Occurrence Count"
+msgstr "Nombre d'ocurrències"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__name
+msgid "Class Name"
+msgstr "Nom de la classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__classroom_type
+msgid "Studio Type"
+msgstr "Tipus d'estudi"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__classroom_id
+msgid "Default Classroom"
+msgstr "Sala per defecte"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__duration
+msgid "Duration (min)"
+msgstr "Durada (min)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__level
+msgid "Level"
+msgstr "Nivell"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__intensity
+msgid "Intensity"
+msgstr "Intensitat"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__max_capacity
+msgid "Max Capacity"
+msgstr "Capacitat màxima"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__equipment
+msgid "Equipment / Props"
+msgstr "Equipament / material"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__description
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__description
+msgid "Description"
+msgstr "Descripció"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__category_id
+msgid "Category"
+msgstr "Categoria"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__image_1920
+msgid "Photo"
+msgstr "Foto"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__image_512
+msgid "Photo (512)"
+msgstr "Foto (512)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__color
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__color
+msgid "Color Index"
+msgstr "Índex de color"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__classroom_type
+msgid "Type"
+msgstr "Tipus"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__fixed_capacity
+msgid "Fixed Capacity"
+msgstr "Capacitat fixa"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__equipment
+msgid "Equipment"
+msgstr "Equipament"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__name
+msgid "Reason"
+msgstr "Motiu"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__date
+msgid "Date"
+msgstr "Data"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__state
+msgid "State"
+msgstr "Estat"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__affected_event_ids
+msgid "Suppressed Classes"
+msgstr "Classes suprimides"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__affected_count
+msgid "Affected Count"
+msgstr "Classes afectades"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__refunded_booking_count
+msgid "Refunded Booking Count"
+msgstr "Reserves reemborsades"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__title
+msgid "Title"
+msgstr "Títol"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__body
+msgid "Body"
+msgstr "Contingut"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__image
+msgid "Image"
+msgstr "Imatge"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__publish_date
+msgid "Publish Date"
+msgstr "Data de publicació"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__sequence
+msgid "Sequence"
+msgstr "Seqüència"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__body_excerpt
+msgid "Body Excerpt"
+msgstr "Extracte"

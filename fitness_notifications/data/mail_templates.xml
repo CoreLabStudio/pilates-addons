@@ -22,7 +22,7 @@
       <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Date/Time: <t t-out="object.class_start or ''"/></li>
       <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
-      <li>Teacher: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
+      <li>Instructor: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Credits remaining on your package: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
@@ -44,7 +44,7 @@
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
       <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
-      <li>Professor/a: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
+      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Crèdits restants del teu paquet: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
@@ -66,7 +66,7 @@
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
       <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
-      <li>Profesor/a: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
+      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Créditos restantes en tu paquete: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>

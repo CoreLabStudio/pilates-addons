@@ -56,7 +56,7 @@ class FitnessClassSchedule(models.Model):
     class_type_id = fields.Many2one(
         'fitness.class.type', string="Class Type", required=True, ondelete='restrict')
     teacher_user_id = fields.Many2one(
-        'res.users', string="Teacher", required=True,
+        'res.users', string="Instructor", required=True,
         help="Becomes the organiser (user_id) on each generated class.")
     classroom_id = fields.Many2one(
         'fitness.classroom', string="Studio / Room", ondelete='restrict')
