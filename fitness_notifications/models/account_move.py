@@ -1,6 +1,11 @@
 from odoo import models
 
 import logging
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 _logger = logging.getLogger(__name__)
 
 
@@ -31,7 +36,7 @@ class AccountMove(models.Model):
             if not user or not user.has_group('fitness_core.group_fitness_student'):
                 continue
             # Notify in the recipient's own language, not the poster's.
-            lang = user.lang or self.env.lang or 'en_US'
+            lang = user.lang or self.env.lang or DEFAULT_LANG
             translate = self.with_context(lang=lang).env._
             title = translate('Invoice %(number)s received from %(studio)s') % {
                 'number': move.name or '',

@@ -1847,6 +1847,14 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted);
   margin: 5px 0 0;
 }
+/* The zero-purchase branch renders this line as a direct child of .mv-app
+   rather than inside .mv-home-hero, so it misses the hero's 20px and sits
+   flush to the screen edge while the CTA right below it is inset. Only a
+   student who owns nothing ever sees it, which is how it survived the first
+   alignment pass. Scoped to the direct child so the two copies inside the
+   hero keep the hero's padding and do not end up on 40px. Inset with margin,
+   like .mv-home-cta below, so the box edge is the visual edge. */
+.mv-app > .mv-home-sub { margin: 5px 20px 0; }
 .mv-home-cta {
   display: block;
   margin: 16px 20px 0;

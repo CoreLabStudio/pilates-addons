@@ -3,6 +3,11 @@ import re
 import pytz
 from odoo import models, fields, api
 
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 _logger = logging.getLogger(__name__)
 
 _EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
@@ -93,9 +98,9 @@ class FitnessTrialRequest(models.Model):
                 continue
             dt_utc = rec.scheduled_datetime.replace(tzinfo=pytz.UTC)
             dt_local = dt_utc.astimezone(_STUDIO_TZ)
-            lang = rec.lang or 'en_US'
-            days = _DAY_NAMES.get(lang, _DAY_NAMES['en_US'])
-            months = _MONTH_NAMES.get(lang, _MONTH_NAMES['en_US'])
+            lang = rec.lang or DEFAULT_LANG
+            days = _DAY_NAMES.get(lang, _DAY_NAMES[DEFAULT_LANG])
+            months = _MONTH_NAMES.get(lang, _MONTH_NAMES[DEFAULT_LANG])
             rec.scheduled_datetime_display = (
                 f"{days[dt_local.weekday()]}, {dt_local.day} "
                 f"{months[dt_local.month - 1]} {dt_local.year} · "

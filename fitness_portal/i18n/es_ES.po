@@ -700,8 +700,9 @@ msgid "<strong>Booking cancelled.</strong>"
 msgstr "<strong>Reserva cancelada.</strong>"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "<strong>Oops:</strong>"
 msgstr "<strong>Error:</strong>"
 
@@ -1028,12 +1029,14 @@ msgstr "Activo"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_subpage_back
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid "Back"
 msgstr "Atrás"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
 msgid "Order summary"
 msgstr "Resumen del pedido"
 
@@ -2109,3 +2112,14 @@ msgstr "Empieza por elegir tu plan."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Explore packages, memberships & classes"
 msgstr "Explorar paquetes, membresías y clases"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
+msgid "Pay securely"
+msgstr "Pago seguro"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Card (online)"
+msgstr "Tarjeta (en línea)"

@@ -7,6 +7,11 @@ from dateutil.relativedelta import relativedelta as _relativedelta
 from itertools import groupby as _groupby
 from urllib.parse import urlencode
 
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 _logger = logging.getLogger(__name__)
 
 import pytz
@@ -210,7 +215,7 @@ class FitnessStudentPortal(http.Controller):
         of thousands of pixels tall before the student saw anything useful.
         """
         _ = request.env._
-        lang = request.env.lang or 'en_US'
+        lang = request.env.lang or DEFAULT_LANG
         now = fields.Datetime.now()
 
         try:
@@ -348,7 +353,7 @@ class FitnessStudentPortal(http.Controller):
         # "can book something right now" - it counts running memberships and only
         # unexpired package lines with credits remaining.
         has_sources = bool(self._eligible_class_types(partner.id))
-        lang = request.env.lang or 'en_US'
+        lang = request.env.lang or DEFAULT_LANG
         now = fields.Datetime.now()
 
         ICP = request.env['ir.config_parameter'].sudo()
@@ -455,7 +460,7 @@ class FitnessStudentPortal(http.Controller):
         local_stop = pytz.UTC.localize(event.stop).astimezone(user_tz)
 
         _ = request.env._
-        lang = request.env.lang or 'en_US'
+        lang = request.env.lang or DEFAULT_LANG
 
         if _BABEL_OK:
             try:
@@ -587,7 +592,7 @@ class FitnessStudentPortal(http.Controller):
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
         today = fields.Date.context_today(request.env.user)
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
 
         cutoff_start = cutoff_end = None
         if period and _re.match(r'^\d{4}-\d{2}$', period):
@@ -706,7 +711,7 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
         all_entries = self._credit_ledger(partner)
 
         # Validate and apply period filter
@@ -1110,7 +1115,7 @@ class FitnessStudentPortal(http.Controller):
 
         # Check if student holds an active instance of this product
         active_info = None
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
 
         def _fmt_date(d):
             if not d:
@@ -1372,7 +1377,7 @@ class FitnessStudentPortal(http.Controller):
         product_name = line.product_id.display_name if line else order.name
         for manager in managers:
             translate = request.env(context=dict(request.env.context,
-                                                 lang=manager.lang or 'en_US'))._
+                                                 lang=manager.lang or DEFAULT_LANG))._
             # The raw selection label came through in English inside an
             # otherwise-translated message. Translate it in the recipient's
             # language like everything else. "Bizum" is a Spanish payment
@@ -1749,6 +1754,9 @@ class FitnessStudentPortal(http.Controller):
     def _payment_method_label(method):
         _ = request.env._
         return {
+            # 'stripe' was missing, so a card order's own summary told the
+            # student it was "paid by Not selected" on the signature step.
+            'stripe':   _('Card (online)'),
             'bizum':    _('Bizum'),
             'transfer': _('Bank Transfer'),
         }.get(method, _('Not selected'))
@@ -1968,7 +1976,7 @@ class FitnessStudentPortal(http.Controller):
         })
 
     @http.route('/my/set_lang', type='http', auth='user', website=False, sitemap=False, csrf=False)
-    def set_lang(self, lang='en_US', redirect='/my', **kw):
+    def set_lang(self, lang=DEFAULT_LANG, redirect='/my', **kw):
         valid_langs = {'en_US', 'es_ES', 'ca_ES'}
         if lang in valid_langs:
             request.env.user.sudo().write({'lang': lang})
@@ -1994,7 +2002,7 @@ def _time_ago(diff, _=lambda s: s):
     return _('Just now')
 
 
-def _day_label(d, today, tomorrow, _=lambda s: s, lang='en_US'):
+def _day_label(d, today, tomorrow, _=lambda s: s, lang=DEFAULT_LANG):
     """Return a translated, formatted day label for a given date."""
     if d == today:
         return _('Today')

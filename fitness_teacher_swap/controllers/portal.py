@@ -4,6 +4,11 @@ from urllib.parse import quote
 
 import pytz
 
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 try:
     from babel.dates import format_date as _babel_format_date
     _BABEL_OK = True
@@ -196,7 +201,7 @@ class FitnessTeacherSwapPortal(http.Controller):
             return request.redirect('/my')
 
         now = fields.Datetime.now()
-        lang_code = (request.lang.code if request.lang else None) or 'en_US'
+        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
 
         cutoff_start = cutoff_end = None
         if period and _re.match(r'^\d{4}-\d{2}$', period):
