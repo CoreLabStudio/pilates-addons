@@ -267,23 +267,3 @@ msgstr "Ver mensajes sin leer"
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Dashboard"
 msgstr "Panel"
-
-#. module: fitness_core
-#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "Odoo Dashboard"
-msgstr "Odoo Dashboard"
-
-#. module: fitness_core
-#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "Full analytics & reports"
-msgstr "Analíticas e informes completos"
-
-#. module: fitness_core
-#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "<span class=\"cl-odoo-dash-title\">Odoo Dashboard</span>"
-msgstr "<span class=\"cl-odoo-dash-title\">Odoo Dashboard</span>"cl-odoo-dash-title\">Panel de Odoo</span>"cl-odoo-dash-title\">Odoo Dashboard</span>"
-
-#. module: fitness_core
-#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
-msgid "<span class=\"cl-odoo-dash-sub\">Full analytics &amp; reports</span>"
-msgstr "<span class=\"cl-odoo-dash-sub\">Analiticas e informes completos</span>"cl-odoo-dash-sub\">Analíticas e informes completos</span>"
