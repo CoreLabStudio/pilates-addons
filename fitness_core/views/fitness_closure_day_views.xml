@@ -57,7 +57,7 @@
                                 <list>
                                     <field name="start"/>
                                     <field name="name"/>
-                                    <field name="user_id" string="Teacher"/>
+                                    <field name="user_id" string="Instructor"/>
                                     <field name="class_state"/>
                                 </list>
                             </field>

@@ -6,7 +6,7 @@ class ResUsers(models.Model):
 
     fitness_is_teacher = fields.Boolean(
         compute='_compute_fitness_is_teacher',
-        string='Is Teacher',
+        string='Is Instructor',
     )
 
     @api.depends('all_group_ids')

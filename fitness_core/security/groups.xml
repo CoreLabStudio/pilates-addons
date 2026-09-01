@@ -9,7 +9,7 @@
 
         <!-- Fitness Teacher: portal-level with attendance access -->
         <record id="group_fitness_teacher" model="res.groups">
-            <field name="name">Fitness Studio Teacher</field>
+            <field name="name">Fitness Studio Instructor</field>
         </record>
 
         <!-- Fitness Student: portal users who can browse and book classes -->

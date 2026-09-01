@@ -1,5 +1,4 @@
-# Spanish (Spain) translations for fitness_bookings
-# Copyright (C) Yoleyva Pilates
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
@@ -7,7 +6,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-09 00:00+0000\n"
 "PO-Revision-Date: 2026-07-09 00:00+0000\n"
 "Language-Team: Spanish (Spain)\n"
-"Language: es_ES\n"
+"Language: ca_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,69 +14,68 @@ msgstr ""
 
 #. module: fitness_bookings
 #: model:ir.ui.menu,name:fitness_bookings.menu_fitness_bookings
-#: model:ir.actions.act_window,name:fitness_bookings.action_fitness_booking
-msgid "Bookings"
-msgstr "Reservas de estudiantes"
+msgid "Student Bookings"
+msgstr "Reserves d'estudiants"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__name
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nom"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__student_id
 msgid "Student"
-msgstr "Estudiante"
+msgstr "Estudiant"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__calendar_event_id
 msgid "Class"
-msgstr "Clase"
+msgstr "Classe"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__booking_date
 msgid "Booked At"
-msgstr "Reservado el"
+msgstr "Reservat el"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__state
 msgid "Status"
-msgstr "Estado"
+msgstr "Estat"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__package_order_line_id
 msgid "Package Credit Used"
-msgstr "Crédito de pack usado"
+msgstr "Crèdit de bo utilitzat"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__subscription_id
 msgid "Subscription Used"
-msgstr "Membresía usada"
+msgstr "Membresia utilitzada"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__manager_override_timewindow
 msgid "Manager Override: Skip 24h Window"
-msgstr "Excepción de gestor: omitir ventana de 24 h"
+msgstr "Excepció de gestor: ometre finestra de 24 h"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__cancellation_date
 msgid "Cancelled At"
-msgstr "Cancelado el"
+msgstr "Cancel·lat el"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__credit_returned
 msgid "Credit Returned"
-msgstr "Crédito devuelto"
+msgstr "Crèdit retornat"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__marked_by_id
 msgid "Marked By"
-msgstr "Marcado por"
+msgstr "Marcat per"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__marked_date
 msgid "Marked At"
-msgstr "Marcado el"
+msgstr "Marcat el"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__classroom_id
@@ -87,7 +85,7 @@ msgstr "Sala"
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__class_type_id
 msgid "Class Type"
-msgstr "Tipo de clase"
+msgstr "Tipus de classe"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__teacher_user_id
@@ -97,4 +95,4 @@ msgstr "Instructor"
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__class_start
 msgid "Class Start"
-msgstr "Inicio de la clase"
+msgstr "Inici de la classe"

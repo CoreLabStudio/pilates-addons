@@ -130,7 +130,7 @@ class FitnessBooking(models.Model):
     teacher_user_id = fields.Many2one(
         'res.users',
         related='calendar_event_id.user_id',
-        store=True, string="Teacher",
+        store=True, string="Instructor",
     )
     class_start = fields.Datetime(
         related='calendar_event_id.start',

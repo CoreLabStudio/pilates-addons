@@ -61,7 +61,7 @@
     </template>
 
     <!-- Teacher page header — logo links to the teacher class list -->
-    <template id="mv_teacher_page_header" name="CoreLab Teacher Page Header">
+    <template id="mv_teacher_page_header" name="CoreLab Instructor Page Header">
         <t t-set="_mv_tname" t-value="request.env.user.partner_id.name.split()[0] if request.env.user.partner_id.name else ''"/>
         <header class="mv-header">
             <a href="/my/instructor/classes" class="mv-wordmark" title="CoreLab">
@@ -125,7 +125,7 @@
     </template>
 
     <!-- Teacher bottom nav — 2 tabs: My Classes + Profile -->
-    <template id="mv_teacher_bottom_nav" name="CoreLab Teacher Bottom Nav">
+    <template id="mv_teacher_bottom_nav" name="CoreLab Instructor Bottom Nav">
         <nav class="mv-bottom-nav" aria-label="Main navigation">
             <a href="/my/instructor/classes" class="mv-nav-tab">
                 <svg viewBox="0 0 24 24" aria-hidden="true">

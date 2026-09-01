@@ -13,10 +13,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-# ── Code translations (Python controllers) ───────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Code translations (Python controllers)
+# ───────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 #, python-format
 msgid "Welcome back, %s"
@@ -72,14 +72,21 @@ msgstr "A punt per reservar una classe?"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #, python-format
-msgid "No classes available in the next %d days for your plan. Check back soon!"
-msgstr "No hi ha classes disponibles en els propers %d dies per al teu pla. Torna a mirar aviat!"
+msgid ""
+"No classes available in the next %d days for your plan. Check back soon!"
+msgstr ""
+"No hi ha classes disponibles en els propers %d dies per al teu pla. Torna a "
+"mirar aviat!"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "You don't have an active membership or class pack. Please contact the studio to get started."
-msgstr "No tens cap subscripció activa ni cap bo de classes. Contacta amb l'estudi per començar."
+msgid ""
+"You don't have an active membership or class pack. Please contact the studio"
+" to get started."
+msgstr ""
+"No tens cap subscripció activa ni cap bo de classes. Contacta amb l'estudi "
+"per començar."
 
 #. module: fitness_portal
 #. odoo-python
@@ -141,8 +148,12 @@ msgstr "Reserva no trobada o que no pertany al teu compte."
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "This class starts in less than 2 hours and can no longer be cancelled online. Please contact the studio."
-msgstr "Aquesta classe comença en menys de 2 hores i ja no es pot cancel·lar en línia. Contacta amb l'estudi."
+msgid ""
+"This class starts in less than 2 hours and can no longer be cancelled "
+"online. Please contact the studio."
+msgstr ""
+"Aquesta classe comença en menys de 2 hores i ja no es pot cancel·lar en "
+"línia. Contacta amb l'estudi."
 
 #. module: fitness_portal
 #. odoo-python
@@ -323,10 +334,10 @@ msgstr "%(remaining)s / %(total)s crèdits"
 msgid "%d credits"
 msgstr "%d crèdits"
 
-# ── Credit history ledger ────────────────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Credit history ledger
+# ────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "No credit activity yet. Buy a package to get started."
 msgstr "Encara no hi ha moviments de crèdits. Compra un bo per començar."
@@ -405,10 +416,10 @@ msgstr "Absència · crèdit no retornat"
 msgid "Class booked · covered by subscription"
 msgstr "Classe reservada · coberta per la subscripció"
 
-# ── Checkout flow ────────────────────────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Checkout flow
+# ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Bizum"
 msgstr "Bizum"
@@ -457,10 +468,10 @@ msgstr "Signa dins del requadre abans de completar la compra."
 msgid "The signature could not be read. Please try again."
 msgstr "No s'ha pogut llegir la signatura. Torna-ho a provar."
 
-# ── Active orders ────────────────────────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Active orders
+# ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Awaiting signature"
 msgstr "Pendent de signatura"
@@ -477,9 +488,9 @@ msgstr "Pendent de factura"
 msgid "You have no active orders. Everything is settled."
 msgstr "No tens comandes actives. Tot està al dia."
 
-# ── Sale order fields (models/sale_order.py) ─────────────────────────────────
-
 #. module: fitness_portal
+# ── Sale order fields (models/sale_order.py)
+# ─────────────────────────────────
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order__fitness_payment_method
 msgid "Portal Payment Method"
 msgstr "Mètode de pagament del portal"
@@ -489,10 +500,11 @@ msgstr "Mètode de pagament del portal"
 msgid "Terms Accepted On"
 msgstr "Termes acceptats el"
 
-# ══ VIEW TERMS ═══════════════════════════════════════════════════════════════
-# ── Page header — mv_page_header ─────────────────────────────────────────────
-
 #. module: fitness_portal
+# ══ VIEW TERMS
+# ═══════════════════════════════════════════════════════════════
+# ── Page header — mv_page_header
+# ─────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
@@ -532,17 +544,21 @@ msgstr "Nova compra: %(product)s"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #, python-format
-msgid "%(customer)s bought %(product)s for %(amount)s. Payment method: %(method)s. Order %(order)s needs invoicing."
-msgstr "%(customer)s ha comprat %(product)s per %(amount)s. Mètode de pagament: %(method)s. La comanda %(order)s necessita facturació."
+msgid ""
+"%(customer)s bought %(product)s for %(amount)s. Payment method: %(method)s. "
+"Order %(order)s needs invoicing."
+msgstr ""
+"%(customer)s ha comprat %(product)s per %(amount)s. Mètode de pagament: "
+"%(method)s. La comanda %(order)s necessita facturació."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
 msgid "Loading…"
 msgstr "Carregant…"
 
-# ── Bottom navigation — mv_bottom_nav / mv_teacher_bottom_nav ────────────────
-
 #. module: fitness_portal
+# ── Bottom navigation — mv_bottom_nav / mv_teacher_bottom_nav
+# ────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
 msgid "Main navigation"
@@ -555,10 +571,10 @@ msgid "Home"
 msgstr "Inici"
 
 #. module: fitness_portal
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
-#. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Classes"
 msgstr "Classes"
@@ -585,9 +601,9 @@ msgstr "Perfil"
 msgid "My Classes"
 msgstr "Les meves classes"
 
-# ── Checkout step indicator — mv_step_indicator ──────────────────────────────
-
 #. module: fitness_portal
+# ── Checkout step indicator — mv_step_indicator
+# ──────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_step_indicator
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Package"
@@ -603,9 +619,9 @@ msgstr "Pagament"
 msgid "Sign"
 msgstr "Signatura"
 
-# ── Home tab — portal_student_home ───────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Home tab — portal_student_home
+# ───────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Ready for your next class?"
 msgstr "A punt per a la teva propera classe?"
@@ -675,9 +691,9 @@ msgstr "Bons i membresies"
 msgid "Top up your credits or start a plan"
 msgstr "Recarrega els teus crèdits o comença un pla"
 
-# ── Studio tab — portal_student_studio ───────────────────────────────────────
-
 #. module: fitness_portal
+# ── Studio tab — portal_student_studio
+# ───────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "My Schedule"
@@ -687,12 +703,16 @@ msgstr "El meu horari"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "<strong>Booked!</strong> Your spot is confirmed. See you in class."
-msgstr "<strong>Reservada!</strong> La teva plaça està confirmada. Ens veiem a classe."
+msgstr ""
+"<strong>Reservada!</strong> La teva plaça està confirmada. Ens veiem a "
+"classe."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
-msgid "<strong>Booking cancelled.</strong> A credit has been returned to your pack."
-msgstr "<strong>Reserva cancel·lada.</strong> S'ha retornat un crèdit al teu bo."
+msgid ""
+"<strong>Booking cancelled.</strong> A credit has been returned to your pack."
+msgstr ""
+"<strong>Reserva cancel·lada.</strong> S'ha retornat un crèdit al teu bo."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
@@ -741,9 +761,9 @@ msgstr "Aquesta setmana"
 msgid "This Month"
 msgstr "Aquest mes"
 
-# ── Class detail — portal_student_class_detail ───────────────────────────────
-
 #. module: fitness_portal
+# ── Class detail — portal_student_class_detail
+# ───────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Back to Classes"
 msgstr "Tornar a les classes"
@@ -773,9 +793,9 @@ msgstr "Aquesta classe està completa"
 msgid "Booking not available — contact the studio."
 msgstr "Reserva no disponible — contacta amb l'estudi."
 
-# ── History page — portal_student_history ────────────────────────────────────
-
 #. module: fitness_portal
+# ── History page — portal_student_history
+# ────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Reservations"
@@ -893,9 +913,9 @@ msgstr "Encara no hi ha res registrat."
 msgid "Book your first class"
 msgstr "Reserva la teva primera classe"
 
-# ── Credit history — portal_credit_history ───────────────────────────────────
-
 #. module: fitness_portal
+# ── Credit history — portal_credit_history
+# ───────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
 msgid "Balance"
@@ -922,9 +942,9 @@ msgstr "Saldo"
 msgid "Browse packages"
 msgstr "Veure bons"
 
-# ── Packages tab — portal_packages ───────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Packages tab — portal_packages
+# ───────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 msgid "Search"
 msgstr "Cercar"
@@ -946,8 +966,8 @@ msgid "Your order is confirmed. Thank you!"
 msgstr "La teva comanda està confirmada. Gràcies!"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #. odoo-python
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Buy"
 msgstr "Comprar"
@@ -957,9 +977,9 @@ msgstr "Comprar"
 msgid "Nothing matches your search."
 msgstr "No hi ha resultats per a la teva cerca."
 
-# ── Package detail — portal_package_detail ───────────────────────────────────
-
 #. module: fitness_portal
+# ── Package detail — portal_package_detail
+# ───────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
 msgid "Price"
 msgstr "Preu"
@@ -1023,9 +1043,9 @@ msgstr "Contactar"
 msgid "Active"
 msgstr "Actiu"
 
-# ── Checkout payment step — portal_checkout_payment ──────────────────────────
-
 #. module: fitness_portal
+# ── Checkout payment step — portal_checkout_payment
+# ──────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_subpage_back
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
@@ -1071,9 +1091,9 @@ msgstr "Termes i condicions"
 msgid "Next"
 msgstr "Següent"
 
-# ── Checkout signature step — portal_checkout_sign ───────────────────────────
-
 #. module: fitness_portal
+# ── Checkout signature step — portal_checkout_sign
+# ───────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
 msgid "You are confirming"
 msgstr "Estàs confirmant"
@@ -1103,17 +1123,27 @@ msgstr "Esborrar"
 msgid "Complete Purchase"
 msgstr "Completar la compra"
 
-# ── Terms page — portal_terms ────────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Terms page — portal_terms
+# ────────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid "1. Introduction"
 msgstr "1. Introducció"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "These Terms and Conditions (\"Terms\") govern your use of the CoreLab Pilates studio services, including class bookings, memberships, credit packages, and the online portal provided by Yoleyva Studio (\"we\", \"us\", \"the Studio\"). By booking a class or activating a package you agree to these Terms in full."
-msgstr "Aquests Termes i Condicions (\"Termes\") regulen l'ús dels serveis de l'estudi CoreLab Pilates, incloent-hi les reserves de classes, subscripcions, bons de crèdits i el portal en línia proporcionat per Yoleyva Studio (\"nosaltres\", \"nos\", \"l'Estudi\"). En reservar una classe o activar un bo, acceptes aquests Termes en la seva totalitat."
+msgid ""
+"These Terms and Conditions (\"Terms\") govern your use of the CoreLab "
+"Pilates studio services, including class bookings, memberships, credit "
+"packages, and the online portal provided by Yoleyva Studio (\"we\", \"us\", "
+"\"the Studio\"). By booking a class or activating a package you agree to "
+"these Terms in full."
+msgstr ""
+"Aquests Termes i Condicions (\"Termes\") regulen l'ús dels serveis de "
+"l'estudi CoreLab Pilates, incloent-hi les reserves de classes, "
+"subscripcions, bons de crèdits i el portal en línia proporcionat per Yoleyva"
+" Studio (\"nosaltres\", \"nos\", \"l'Estudi\"). En reservar una classe o "
+"activar un bo, acceptes aquests Termes en la seva totalitat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1122,18 +1152,32 @@ msgstr "2. Subscripció i compte"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "You must be 16 years of age or older to register independently. Under-16s require written parental or guardian consent."
-msgstr "Has de tenir 16 anys o més per registrar-te de manera independent. Els menors de 16 anys necessiten el consentiment escrit dels pares o tutors."
+msgid ""
+"You must be 16 years of age or older to register independently. Under-16s "
+"require written parental or guardian consent."
+msgstr ""
+"Has de tenir 16 anys o més per registrar-te de manera independent. Els "
+"menors de 16 anys necessiten el consentiment escrit dels pares o tutors."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "You are responsible for maintaining the confidentiality of your login credentials. Notify us immediately if you suspect unauthorised access to your account."
-msgstr "Ets responsable de mantenir la confidencialitat de les teves credencials d'accés. Notifica'ns immediatament si sospites d'un accés no autoritzat al teu compte."
+msgid ""
+"You are responsible for maintaining the confidentiality of your login "
+"credentials. Notify us immediately if you suspect unauthorised access to "
+"your account."
+msgstr ""
+"Ets responsable de mantenir la confidencialitat de les teves credencials "
+"d'accés. Notifica'ns immediatament si sospites d'un accés no autoritzat al "
+"teu compte."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Accounts are personal and non-transferable. Sharing login details to allow a third party to attend classes is not permitted."
-msgstr "Els comptes són personals i intransferibles. No està permès compartir les credencials d'accés perquè un tercer assisteixi a les classes."
+msgid ""
+"Accounts are personal and non-transferable. Sharing login details to allow a"
+" third party to attend classes is not permitted."
+msgstr ""
+"Els comptes són personals i intransferibles. No està permès compartir les "
+"credencials d'accés perquè un tercer assisteixi a les classes."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1143,22 +1187,35 @@ msgstr "3. Reserva de classes"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid "Classes can be booked through the portal subject to availability."
-msgstr "Les classes es poden reservar a través del portal subjecte a disponibilitat."
+msgstr ""
+"Les classes es poden reservar a través del portal subjecte a disponibilitat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "A booking is confirmed only when a class credit or valid subscription has been applied."
-msgstr "Una reserva es confirma únicament quan s'aplica un crèdit de classe o una subscripció vàlida."
+msgid ""
+"A booking is confirmed only when a class credit or valid subscription has "
+"been applied."
+msgstr ""
+"Una reserva es confirma únicament quan s'aplica un crèdit de classe o una "
+"subscripció vàlida."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio reserves the right to cancel or reschedule a class with reasonable notice. In such cases, any used credit will be returned."
-msgstr "L'Estudi es reserva el dret de cancel·lar o reprogramar una classe amb avís raonable. En aquests casos, es retornarà qualsevol crèdit utilitzat."
+msgid ""
+"The Studio reserves the right to cancel or reschedule a class with "
+"reasonable notice. In such cases, any used credit will be returned."
+msgstr ""
+"L'Estudi es reserva el dret de cancel·lar o reprogramar una classe amb avís "
+"raonable. En aquests casos, es retornarà qualsevol crèdit utilitzat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Maximum occupancy per class is set by the Studio; once full, a waiting-list may be offered at the Studio's discretion."
-msgstr "L'ocupació màxima per classe la estableix l'Estudi; un cop plena, pot oferir-se una llista d'espera a criteri de l'Estudi."
+msgid ""
+"Maximum occupancy per class is set by the Studio; once full, a waiting-list "
+"may be offered at the Studio's discretion."
+msgstr ""
+"L'ocupació màxima per classe la estableix l'Estudi; un cop plena, pot "
+"oferir-se una llista d'espera a criteri de l'Estudi."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1167,23 +1224,41 @@ msgstr "4. Política de cancel·lació"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "<strong>You must cancel at least 2 hours before the scheduled class start time</strong> to have your credit returned."
-msgstr "<strong>Has de cancel·lar almenys 2 hores abans de l'hora d'inici programada de la classe</strong> per rebre el teu crèdit de tornada."
+msgid ""
+"<strong>You must cancel at least 2 hours before the scheduled class start "
+"time</strong> to have your credit returned."
+msgstr ""
+"<strong>Has de cancel·lar almenys 2 hores abans de l'hora d'inici programada"
+" de la classe</strong> per rebre el teu crèdit de tornada."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Cancellations made within 2 hours of the class, or no-shows, will result in the full credit deduction with no refund."
-msgstr "Les cancel·lacions fetes dins de les 2 hores anteriors a la classe, o les absències, comportaran la deducció del crèdit complet sense reemborsament."
+msgid ""
+"Cancellations made within 2 hours of the class, or no-shows, will result in "
+"the full credit deduction with no refund."
+msgstr ""
+"Les cancel·lacions fetes dins de les 2 hores anteriors a la classe, o les "
+"absències, comportaran la deducció del crèdit complet sense reemborsament."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "To cancel, use the \"Upcoming Classes\" section in your portal before the cut-off time."
-msgstr "Per cancel·lar, utilitza la secció \"Properes classes\" del teu portal abans del termini límit."
+msgid ""
+"To cancel, use the \"Upcoming Classes\" section in your portal before the "
+"cut-off time."
+msgstr ""
+"Per cancel·lar, utilitza la secció \"Properes classes\" del teu portal abans"
+" del termini límit."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio may waive the policy in exceptional circumstances (medical emergency, etc.) at its sole discretion. Contact us as soon as possible if this applies."
-msgstr "L'Estudi pot fer una excepció a aquesta política en circumstàncies extraordinàries (emergència mèdica, etc.) a la seva entera discreció. Contacta'ns el més aviat possible si és el teu cas."
+msgid ""
+"The Studio may waive the policy in exceptional circumstances (medical "
+"emergency, etc.) at its sole discretion. Contact us as soon as possible if "
+"this applies."
+msgstr ""
+"L'Estudi pot fer una excepció a aquesta política en circumstàncies "
+"extraordinàries (emergència mèdica, etc.) a la seva entera discreció. "
+"Contacta'ns el més aviat possible si és el teu cas."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1192,8 +1267,12 @@ msgstr "5. Política de crèdits"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Credits are valid for the duration stated at the time of purchase. Expired credits are non-refundable."
-msgstr "Els crèdits són vàlids durant el període indicat en el moment de la compra. Els crèdits caducats no es reemborsaran."
+msgid ""
+"Credits are valid for the duration stated at the time of purchase. Expired "
+"credits are non-refundable."
+msgstr ""
+"Els crèdits són vàlids durant el període indicat en el moment de la compra. "
+"Els crèdits caducats no es reemborsaran."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1207,8 +1286,12 @@ msgstr "El saldo de crèdits es pot consultar al portal, a la secció \"Saldo\".
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio reserves the right to correct any credit balance errors (over- or under-credited) with prior notice to the account holder."
-msgstr "L'Estudi es reserva el dret de corregir qualsevol error en el saldo de crèdits (excés o defecte) amb previ avís al titular del compte."
+msgid ""
+"The Studio reserves the right to correct any credit balance errors (over- or"
+" under-credited) with prior notice to the account holder."
+msgstr ""
+"L'Estudi es reserva el dret de corregir qualsevol error en el saldo de "
+"crèdits (excés o defecte) amb previ avís al titular del compte."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1217,23 +1300,43 @@ msgstr "6. Pagaments i reemborsaments"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "All prices are stated in the currency displayed on the Studio's portal and are inclusive of applicable taxes unless stated otherwise."
-msgstr "Tots els preus s'expressen en la moneda mostrada al portal de l'Estudi i inclouen els impostos aplicables, tret que s'indiqui el contrari."
+msgid ""
+"All prices are stated in the currency displayed on the Studio's portal and "
+"are inclusive of applicable taxes unless stated otherwise."
+msgstr ""
+"Tots els preus s'expressen en la moneda mostrada al portal de l'Estudi i "
+"inclouen els impostos aplicables, tret que s'indiqui el contrari."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Credit packages are non-refundable once purchased, except where required by applicable consumer-protection law."
-msgstr "Els bons de crèdits no es reemborsaran un cop comprats, excepte quan ho exigeixi la legislació de protecció al consumidor aplicable."
+msgid ""
+"Credit packages are non-refundable once purchased, except where required by "
+"applicable consumer-protection law."
+msgstr ""
+"Els bons de crèdits no es reemborsaran un cop comprats, excepte quan ho "
+"exigeixi la legislació de protecció al consumidor aplicable."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Subscription fees are charged on a recurring basis as described at the time of sign-up. You may cancel your subscription at any time; the cancellation takes effect at the end of the current billing cycle."
-msgstr "Les quotes de subscripció es cobren de manera periòdica tal com s'indica en el moment de l'alta. Pots cancel·lar la teva subscripció en qualsevol moment; la cancel·lació tindrà efecte al final del cicle de facturació en curs."
+msgid ""
+"Subscription fees are charged on a recurring basis as described at the time "
+"of sign-up. You may cancel your subscription at any time; the cancellation "
+"takes effect at the end of the current billing cycle."
+msgstr ""
+"Les quotes de subscripció es cobren de manera periòdica tal com s'indica en "
+"el moment de l'alta. Pots cancel·lar la teva subscripció en qualsevol "
+"moment; la cancel·lació tindrà efecte al final del cicle de facturació en "
+"curs."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio does not store full payment card details; all payments are processed via a PCI-DSS-compliant payment provider."
-msgstr "L'Estudi no emmagatzema dades completes de targetes de pagament; tots els pagaments es processen a través d'un proveïdor de pagaments amb certificació PCI-DSS."
+msgid ""
+"The Studio does not store full payment card details; all payments are "
+"processed via a PCI-DSS-compliant payment provider."
+msgstr ""
+"L'Estudi no emmagatzema dades completes de targetes de pagament; tots els "
+"pagaments es processen a través d'un proveïdor de pagaments amb certificació"
+" PCI-DSS."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1242,23 +1345,43 @@ msgstr "7. Salut i responsabilitat"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Participation in Pilates and fitness classes carries inherent risk. You confirm that you are in adequate physical condition to participate and that you have sought medical advice where necessary."
-msgstr "La participació en classes de Pilates i fitness comporta riscos inherents. Confirmes que et trobes en condicions físiques adequades per participar i que has consultat un metge si cal."
+msgid ""
+"Participation in Pilates and fitness classes carries inherent risk. You "
+"confirm that you are in adequate physical condition to participate and that "
+"you have sought medical advice where necessary."
+msgstr ""
+"La participació en classes de Pilates i fitness comporta riscos inherents. "
+"Confirmes que et trobes en condicions físiques adequades per participar i "
+"que has consultat un metge si cal."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "You agree to inform the Studio of any injuries, medical conditions, or pregnancy before joining a class."
-msgstr "Acceptes informar l'Estudi de qualsevol lesió, afecció mèdica o embaràs abans d'unir-te a una classe."
+msgid ""
+"You agree to inform the Studio of any injuries, medical conditions, or "
+"pregnancy before joining a class."
+msgstr ""
+"Acceptes informar l'Estudi de qualsevol lesió, afecció mèdica o embaràs "
+"abans d'unir-te a una classe."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio shall not be liable for any injury, loss, or damage arising from participation in classes, except where caused by the Studio's own negligence."
-msgstr "L'Estudi no serà responsable de cap lesió, pèrdua o dany derivat de la participació en les classes, excepte quan sigui causat per negligència del propi Estudi."
+msgid ""
+"The Studio shall not be liable for any injury, loss, or damage arising from "
+"participation in classes, except where caused by the Studio's own "
+"negligence."
+msgstr ""
+"L'Estudi no serà responsable de cap lesió, pèrdua o dany derivat de la "
+"participació en les classes, excepte quan sigui causat per negligència del "
+"propi Estudi."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "The Studio's equipment and premises are maintained to a reasonable standard. Report any hazards to staff immediately."
-msgstr "Les instal·lacions i l'equipament de l'Estudi es mantenen en condicions raonables. Comunica immediatament al personal qualsevol perill detectat."
+msgid ""
+"The Studio's equipment and premises are maintained to a reasonable standard."
+" Report any hazards to staff immediately."
+msgstr ""
+"Les instal·lacions i l'equipament de l'Estudi es mantenen en condicions "
+"raonables. Comunica immediatament al personal qualsevol perill detectat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
@@ -1267,32 +1390,49 @@ msgstr "8. Privacitat"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "We collect and process personal data as described in our Privacy Policy, available on request."
-msgstr "Recollim i processem dades personals tal com es descriu a la nostra Política de Privacitat, disponible a petició."
+msgid ""
+"We collect and process personal data as described in our Privacy Policy, "
+"available on request."
+msgstr ""
+"Recollim i processem dades personals tal com es descriu a la nostra Política"
+" de Privacitat, disponible a petició."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Your data is used solely to manage your account, process bookings, and communicate with you about the Studio's services."
-msgstr "Les teves dades s'utilitzen exclusivament per gestionar el teu compte, processar reserves i comunicar-nos amb tu sobre els serveis de l'Estudi."
+msgid ""
+"Your data is used solely to manage your account, process bookings, and "
+"communicate with you about the Studio's services."
+msgstr ""
+"Les teves dades s'utilitzen exclusivament per gestionar el teu compte, "
+"processar reserves i comunicar-nos amb tu sobre els serveis de l'Estudi."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "We do not sell or share your personal data with third parties for marketing purposes."
-msgstr "No venem ni compartim les teves dades personals amb tercers amb finalitats de màrqueting."
+msgid ""
+"We do not sell or share your personal data with third parties for marketing "
+"purposes."
+msgstr ""
+"No venem ni compartim les teves dades personals amb tercers amb finalitats "
+"de màrqueting."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "You may request access to, correction of, or deletion of your personal data by contacting us at the Studio."
-msgstr "Pots sol·licitar l'accés, la rectificació o l'eliminació de les teves dades personals posant-te en contacte amb nosaltres a l'Estudi."
+msgid ""
+"You may request access to, correction of, or deletion of your personal data "
+"by contacting us at the Studio."
+msgstr ""
+"Pots sol·licitar l'accés, la rectificació o l'eliminació de les teves dades "
+"personals posant-te en contacte amb nosaltres a l'Estudi."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid "Last updated: August 2026 — DRAFT, pending legal review."
-msgstr "Última actualització: agost de 2026 — ESBORRANY, pendent de revisió legal."
-
-# ── Active orders — portal_active_orders ─────────────────────────────────────
+msgstr ""
+"Última actualització: agost de 2026 — ESBORRANY, pendent de revisió legal."
 
 #. module: fitness_portal
+# ── Active orders — portal_active_orders
+# ─────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
 msgid "All orders"
 msgstr "Totes les comandes"
@@ -1309,17 +1449,17 @@ msgstr "Comandes actives"
 msgid "Purchases not yet settled"
 msgstr "Compres que encara no estan liquidades"
 
-# ── Language picker — portal_language_picker ─────────────────────────────────
-
 #. module: fitness_portal
+# ── Language picker — portal_language_picker
+# ─────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Language"
 msgstr "Idioma"
 
-# ── Profile Hub — mv_portal_my_home_hub ──────────────────────────────────────
-
 #. module: fitness_portal
+# ── Profile Hub — mv_portal_my_home_hub
+# ──────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Change photo"
 msgstr "Canviar foto"
@@ -1410,16 +1550,20 @@ msgstr "Factures"
 msgid "Addresses"
 msgstr "Adreces"
 
-# ── Password hint — mv_portal_my_security_pw_hint ────────────────────────────
-
 #. module: fitness_portal
+# ── Password hint — mv_portal_my_security_pw_hint
+# ────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_security_pw_hint
-msgid "<strong>Requirements:</strong> at least 8 characters, at least one letter, at least one number. Must differ from your current password."
-msgstr "<strong>Requisits:</strong> com a mínim 8 caràcters, com a mínim una lletra i com a mínim un número. Ha de ser diferent de la teva contrasenya actual."
-
-# ── Subscription status page (/my/subscription) ──────────────────────────────
+msgid ""
+"<strong>Requirements:</strong> at least 8 characters, at least one letter, "
+"at least one number. Must differ from your current password."
+msgstr ""
+"<strong>Requisits:</strong> com a mínim 8 caràcters, com a mínim una lletra "
+"i com a mínim un número. Ha de ser diferent de la teva contrasenya actual."
 
 #. module: fitness_portal
+# ── Subscription status page (/my/subscription)
+# ──────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 msgid "My Subscription"
 msgstr "La meva subscripció"
@@ -1440,8 +1584,8 @@ msgid "Browse plans →"
 msgstr "Veure plans →"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 #. odoo-python
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Classes"
 msgstr "Classes"
@@ -1471,24 +1615,24 @@ msgstr "Propera renovació"
 msgid "Fixed weekly schedule"
 msgstr "Horari fix setmanal"
 
-# ── Active orders — new strings ───────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Active orders — new strings
+# ───────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
 msgid "All your purchases"
 msgstr "Totes les teves compres"
 
-# ── Profile Hub — updated Orders row ─────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Profile Hub — updated Orders row
+# ─────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "All purchases &amp; active status"
 msgstr "Totes les compres i estat actiu"
 
-# ── Task 4 — new translatable strings ────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Task 4 — new translatable strings
+# ────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Active"
 msgstr "Actiu"
@@ -1535,10 +1679,10 @@ msgstr "Signa aquí"
 msgid "Welcome, %s"
 msgstr "Benvingut/da, %s"
 
-# ── Credit history ────────────────────────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Credit history
+# ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Balance"
 msgstr "Saldo"
@@ -1584,9 +1728,9 @@ msgstr "Crèdits totals"
 msgid "No credit activity in the selected month."
 msgstr "Sense activitat de crèdit al mes seleccionat."
 
-# ── Order detail ──────────────────────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Order detail
+# ──────────────────────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
 msgid "Order"
@@ -1693,9 +1837,9 @@ msgstr "Inscrit"
 msgid "Next billing"
 msgstr "Propera facturació"
 
-# ── Task 1: Period filter ─────────────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Task 1: Period filter
+# ─────────────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "All time"
@@ -1711,23 +1855,25 @@ msgstr "Aquest mes"
 msgid "This week"
 msgstr "Aquesta setmana"
 
-# ── Task 3: Cancellation policy ───────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Task 3: Cancellation policy
+# ───────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Cancel up to 2 hours before class to keep your credit."
-msgstr "Pots cancel·lar fins a 2 hores abans de la classe per conservar el teu crèdit."
-
-# ── Task 4: Per-class note ────────────────────────────────────────────────────
+msgstr ""
+"Pots cancel·lar fins a 2 hores abans de la classe per conservar el teu "
+"crèdit."
 
 #. module: fitness_portal
+# ── Task 4: Per-class note
+# ────────────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Note from studio"
 msgstr "Nota de l'estudi"
 
-# ── Task 5: Message the Studio ────────────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Task 5: Message the Studio
+# ────────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Message the Studio"
@@ -1769,10 +1915,10 @@ msgstr "Escriu el teu missatge aquí…"
 msgid "Send"
 msgstr "Envia"
 
-# ── Admin reply notification (studio_message.py) ─────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Admin reply notification (studio_message.py)
+# ─────────────────────────────
 #: code:addons/fitness_portal/models/studio_message.py:0
 #, python-format
 msgid "Reply from %s"
@@ -1784,9 +1930,9 @@ msgstr "Resposta de %s"
 msgid "the studio"
 msgstr "l'estudi"
 
-# ── Messages history — portal_messages ───────────────────────────────────────
-
 #. module: fitness_portal
+# ── Messages history — portal_messages
+# ───────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "Inbox"
@@ -1823,9 +1969,9 @@ msgstr "Historial de conversa"
 msgid "No messages yet. Write the first one above."
 msgstr "Encara no hi ha missatges. Escriu el primer dalt."
 
-# ── Home — News & Promotions section ─────────────────────────────────────────
-
 #. module: fitness_portal
+# ── Home — News & Promotions section
+# ─────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Latest News &amp; Promotions"
 msgstr "Últimes notícies i promocions"
@@ -1835,10 +1981,10 @@ msgstr "Últimes notícies i promocions"
 msgid "Read more"
 msgstr "Llegir més"
 
-# ── Email verification flow ───────────────────────────────────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Email verification flow
+# ───────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/signup_override.py:0
 msgid "Email verified. Please sign in."
 msgstr "Correu verificat. Si us plau, inicia sessió."
@@ -1868,8 +2014,12 @@ msgstr "T'hem enviat un enllaç de verificació a"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
-msgid "Click the link in the email to activate your account and access the studio portal. The link is valid for 6 days."
-msgstr "Fes clic a l'enllaç del correu per activar el teu compte i accedir al portal de l'estudi. L'enllaç és vàlid durant 6 dies."
+msgid ""
+"Click the link in the email to activate your account and access the studio "
+"portal. The link is valid for 6 days."
+msgstr ""
+"Fes clic a l'enllaç del correu per activar el teu compte i accedir al portal"
+" de l'estudi. L'enllaç és vàlid durant 6 dies."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.signup_verify_email
@@ -1903,8 +2053,12 @@ msgstr "Enllaç caducat o no vàlid"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
-msgid "This verification link is no longer valid. Links expire after 6 days, or become invalid once used."
-msgstr "Aquest enllaç de verificació ja no és vàlid. Els enllaços caduquen als 6 dies o s'invaliden un cop usats."
+msgid ""
+"This verification link is no longer valid. Links expire after 6 days, or "
+"become invalid once used."
+msgstr ""
+"Aquest enllaç de verificació ja no és vàlid. Els enllaços caduquen als 6 "
+"dies o s'invaliden un cop usats."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.verify_email_failed
@@ -1951,10 +2105,10 @@ msgstr "Reenviar el correu de verificació"
 msgid "Sign out"
 msgstr "Tanca sessió"
 
-# ── Home/subscription labels passed via Python controller ────────────────────
-
 #. module: fitness_portal
 #. odoo-python
+# ── Home/subscription labels passed via Python controller
+# ────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Let's book your first class."
 msgstr "Reserva la teva primera classe."
@@ -1983,9 +2137,8 @@ msgstr "Propera renovació"
 msgid "Unlimited"
 msgstr "Il·limitat"
 
-# ── QA review fixes ──
-
 #. module: fitness_portal
+# ── QA review fixes ──
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
 msgid "Pay online"
 msgstr "Pagar en línia"
@@ -2092,8 +2245,11 @@ msgstr "Botiga"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Time to move! Pick a membership, package, or class and reserve your spot."
-msgstr "És hora de moure't! Tria la teva membresia, paquet o classe i reserva el teu lloc."
+msgid ""
+"Time to move! Pick a membership, package, or class and reserve your spot."
+msgstr ""
+"És hora de moure't! Tria la teva membresia, paquet o classe i reserva el teu"
+" lloc."
 
 #. module: fitness_portal
 #. odoo-python
@@ -2123,3 +2279,33 @@ msgstr "Pagament segur"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Card (online)"
 msgstr "Targeta (en línia)"
+
+#. module: fitness_portal
+#: model:ir.ui.menu,name:fitness_portal.menu_fitness_studio_messages
+msgid "Messages"
+msgstr "Missatges"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__conversation_id
+msgid "Conversation"
+msgstr "Conversa"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__author_id
+msgid "Author"
+msgstr "Autor"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__author_name
+msgid "Author Name"
+msgstr "Nom de l'autor"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__is_admin
+msgid "From Admin"
+msgstr "Des d'administració"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__body
+msgid "Message"
+msgstr "Missatge"

@@ -27,10 +27,10 @@ msgstr "Has recibido la factura %(number)s de %(studio)s"
 msgid "Amount due: %(amount)s"
 msgstr "Importe a pagar: %(amount)s"
 
-# ── In-app notification content (fitness_booking.py) ─────────────────────────
-
 #. module: fitness_notifications
 #. odoo-python
+# ── In-app notification content (fitness_booking.py)
+# ─────────────────────────
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
 msgid "1 credit used for %s"
@@ -79,8 +79,10 @@ msgstr "%d crédito(s) caducan en %d día(s)"
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
-msgid "Your pack expires on %s. Use your remaining credits before they expire."
-msgstr "Tu bono caduca el %s. Usa tus créditos restantes antes de que caduquen."
+msgid ""
+"Your pack expires on %s. Use your remaining credits before they expire."
+msgstr ""
+"Tu bono caduca el %s. Usa tus créditos restantes antes de que caduquen."
 
 #. module: fitness_notifications
 #. odoo-python
@@ -142,12 +144,30 @@ msgstr "Reserva cancelada: %(cls)s"
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
-msgid "Your booking for %(cls)s on %(when)s has been cancelled. Check your credit balance for any refunds."
-msgstr "Tu reserva para %(cls)s el %(when)s ha sido cancelada. Revisa tu saldo de créditos por si hay algún reembolso."
+msgid ""
+"Your booking for %(cls)s on %(when)s has been cancelled. Check your credit "
+"balance for any refunds."
+msgstr ""
+"Tu reserva para %(cls)s el %(when)s ha sido cancelada. Revisa tu saldo de "
+"créditos por si hay algún reembolso."
 
 #. module: fitness_notifications
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
-msgid "Your booking for %(cls)s has been cancelled. Check your credit balance for any refunds."
-msgstr "Tu reserva para %(cls)s ha sido cancelada. Revisa tu saldo de créditos por si hay algún reembolso."
+msgid ""
+"Your booking for %(cls)s has been cancelled. Check your credit balance for "
+"any refunds."
+msgstr ""
+"Tu reserva para %(cls)s ha sido cancelada. Revisa tu saldo de créditos por "
+"si hay algún reembolso."
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__reminder_sent
+msgid "Reminder Sent"
+msgstr "Recordatorio enviado"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__bell_reminder_sent
+msgid "Bell Reminder Sent"
+msgstr "Recordatorio enviado"

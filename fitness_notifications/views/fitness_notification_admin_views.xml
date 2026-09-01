@@ -66,7 +66,7 @@
                 <filter string="Unread" name="filter_unread" domain="[('is_read', '=', False)]"/>
                 <filter string="Read" name="filter_read" domain="[('is_read', '=', True)]"/>
                 <separator/>
-                <filter string="Teacher Swap" name="filter_swap"
+                <filter string="Instructor Swap" name="filter_swap"
                         domain="[('notification_type', '=', 'teacher_swap')]"/>
                 <filter string="Booking" name="filter_booking"
                         domain="[('notification_type', 'in', ['booking_confirmed', 'booking_cancelled'])]"/>

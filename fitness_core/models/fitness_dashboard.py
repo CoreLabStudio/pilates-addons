@@ -27,7 +27,7 @@ class FitnessAdminDashboard(models.TransientModel):
 
     today_classes = fields.Integer(string='Classes Today', compute='_compute_stats')
     pending_trials = fields.Integer(string='Pending Trials', compute='_compute_stats')
-    pending_swaps = fields.Integer(string='Teacher Swaps', compute='_compute_stats')
+    pending_swaps = fields.Integer(string='Instructor Swaps', compute='_compute_stats')
     unread_messages = fields.Integer(string='Unread Messages', compute='_compute_stats')
     active_students = fields.Integer(string='Students', compute='_compute_stats')
 
@@ -180,7 +180,7 @@ class FitnessAdminDashboard(models.TransientModel):
                     )
                 rec.preview_classes_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Time</th><th>Class</th><th>Teacher</th><th>Seats</th><th></th></tr></thead>'
+                    '<thead><tr><th>Time</th><th>Class</th><th>Instructor</th><th>Seats</th><th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:

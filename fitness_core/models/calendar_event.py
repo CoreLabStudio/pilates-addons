@@ -41,7 +41,7 @@ class CalendarEvent(models.Model):
     )
     fitness_note = fields.Text(
         "Class Note",
-        help="Optional note for this specific class occurrence, visible to the teacher and students.",
+        help="Optional note for this specific class occurrence, visible to the instructor and students.",
     )
     image_1920 = fields.Image(
         "Class Photo",

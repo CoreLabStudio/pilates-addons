@@ -74,12 +74,12 @@
                                     <span class="cl-tile-label">Students</span>
                                 </button>
                                 <button name="action_view_pending_swaps" type="object"
-                                        class="cl-tile" string="Teacher swaps"
-                                        title="View teacher swaps">
+                                        class="cl-tile" string="Instructor swaps"
+                                        title="View instructor swaps">
                                     <span class="cl-tile-value">
                                         <field name="pending_swaps" readonly="1" nolabel="1"/>
                                     </span>
-                                    <span class="cl-tile-label">Teacher Swaps</span>
+                                    <span class="cl-tile-label">Instructor Swaps</span>
                                 </button>
                             </div>
                         </div>
