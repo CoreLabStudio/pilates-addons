@@ -352,7 +352,8 @@ body:has(.mv-app) #wrapwrap > main {
 
 /* ── 9. Upcoming bookings ───────────────────────────────────── */
 .mv-upcoming-list {
-  padding: 0 16px;
+  /* 20px to match .mv-section-label above it, on both Home and My Schedule */
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1867,7 +1868,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 16px 16px 4px;
+  padding: 16px 20px 4px;
 }
 .mv-stat-card {
   background: var(--mv-card-bg);
@@ -2805,7 +2806,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 .mv-news-cards--page { padding: 0 16px 24px; }
 
@@ -3085,6 +3086,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  padding: 0 20px;
 }
 /* With only one of the two categories missing, a half-width tile looks like a
    layout bug, so it takes the full row instead. */
@@ -3103,7 +3105,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 }
 .mv-prompt-tile:hover { text-decoration: none; }
 .mv-prompt-tile:active { transform: scale(0.98); opacity: 0.9; }
-.mv-prompt-wide { margin-top: 10px; }
+.mv-prompt-wide { margin: 10px 20px 0; }
 .mv-prompt-top {
   display: flex;
   align-items: flex-start;

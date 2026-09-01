@@ -341,8 +341,13 @@ class FitnessStudentPortal(http.Controller):
     def _schedule_values(self, partner):
         """Day-grouped list of the student's upcoming bookings ('My Schedule')."""
         _ = request.env._
-        missing = partner._fitness_missing_purchases()
-        has_sources = not all(missing.values())
+        # Same signal the Classes view uses (see _classes_values), deliberately:
+        # _fitness_missing_purchases() answers "owns a category", which stays true
+        # for a single class already spent, so My Schedule invited a student with
+        # nothing left to book to go and book. _eligible_class_types() answers
+        # "can book something right now" - it counts running memberships and only
+        # unexpired package lines with credits remaining.
+        has_sources = bool(self._eligible_class_types(partner.id))
         lang = request.env.lang or 'en_US'
         now = fields.Datetime.now()
 
@@ -1310,6 +1315,32 @@ class FitnessStudentPortal(http.Controller):
             qs = urlencode({'error': _('The signature could not be read. Please try again.')})
             return request.redirect(f'/my/checkout/{order_id}/sign?{qs}')
 
+        # A signature is not a payment.
+        #
+        # PAYMENT_METHODS are the two the studio settles by hand (Bizum, bank
+        # transfer); for those, signing really is all the portal can ask for and
+        # the manager's "needs invoicing" notification is what chases the money.
+        # Anything else was routed to Stripe, and confirming it on a signature
+        # alone hands out credits for free: this route is reachable directly, so
+        # a student who opened the pay page could simply visit the signature step
+        # instead. Verified: order S00195 confirmed with 10 credits and zero
+        # payment transactions before this check existed.
+        if order.fitness_payment_method not in PAYMENT_METHODS:
+            paid_tx = order.sudo().transaction_ids.filtered(
+                lambda t: t.state == 'done'
+            )
+            if not paid_tx:
+                _logger.warning(
+                    "Blocked unpaid confirmation: order %s (method=%s) reached "
+                    "the signature step with no successful transaction.",
+                    order.name, order.fitness_payment_method or 'unset',
+                )
+                qs = urlencode({'error': _(
+                    'This order has not been paid yet. Please complete the '
+                    'payment before confirming your purchase.'
+                )})
+                return request.redirect(f'/my/packages/pay/{order.id}?{qs}')
+
         try:
             order.sudo().write({
                 'signature': signature,
@@ -2071,4 +2102,7 @@ class FitnessPackagePayment(_OdooPaymentPortal):
             'student_name':         full_name.split()[0] if full_name else '',
             'back_url':             (f'/my/packages/{product.id}/checkout'
                                      if product else '/my/packages'),
+            # Set when a signature-step confirmation was refused for want of a
+            # payment, so the student is told why they landed back here.
+            'error_msg':            kw.get('error') or None,
         })

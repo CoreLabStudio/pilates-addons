@@ -1557,6 +1557,9 @@
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
                 <div class="mv-checkout">
+                    <t t-if="error_msg">
+                        <div class="mv-flash mv-flash-err"><strong>Oops:</strong><span style="margin-left:5px;" t-out="error_msg"/></div>
+                    </t>
                     <!-- Order summary -->
                     <div class="mv-panel" style="margin-bottom:16px;">
                         <p class="mv-panel-label">Order summary</p>

@@ -23,8 +23,33 @@
                                 </div>
                                 <h1 class="cl-title">CoreLab Studio</h1>
                             </div>
-                            <div class="cl-date">
-                                <field name="header_date" readonly="1" nolabel="1"/>
+                            <div class="cl-head-right">
+                                <div class="cl-date">
+                                    <field name="header_date" readonly="1" nolabel="1"/>
+                                </div>
+                                <button name="action_open_odoo_dashboard" type="object"
+                                        class="cl-odoo-dash" string="Odoo Dashboard"
+                                        title="Open Odoo's own Dashboards app">
+                                    <span class="cl-odoo-dash-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                                        </svg>
+                                    </span>
+                                    <span class="cl-odoo-dash-text">
+                                        <span class="cl-odoo-dash-title">Odoo Dashboard</span>
+                                        <span class="cl-odoo-dash-sub">Full analytics &amp; reports</span>
+                                    </span>
+                                    <span class="cl-odoo-dash-chev" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </span>
+                                </button>
                             </div>
                         </div>
 

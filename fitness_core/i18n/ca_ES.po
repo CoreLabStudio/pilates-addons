@@ -228,3 +228,23 @@ msgstr "Veure missatges sense llegir"
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Dashboard"
 msgstr "Tauler"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Odoo Dashboard"
+msgstr "Odoo Dashboard"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "Full analytics & reports"
+msgstr "Analítiques i informes complets"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "<span class=\"cl-odoo-dash-title\">Odoo Dashboard</span>"
+msgstr "<span class=\"cl-odoo-dash-title\">Odoo Dashboard</span>"cl-odoo-dash-title\">Tauler d Odoo</span>"cl-odoo-dash-title\">Odoo Dashboard</span>"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
+msgid "<span class=\"cl-odoo-dash-sub\">Full analytics &amp; reports</span>"
+msgstr "<span class=\"cl-odoo-dash-sub\">Analitiques i informes complets</span>"cl-odoo-dash-sub\">Analítiques i informes complets</span>"

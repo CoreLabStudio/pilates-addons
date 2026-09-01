@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Remove the "Skip →" link from the payment-processing screen.
+
+        Odoo shows it while a transaction is still processing, pointing at
+        tx.landing_route. Following it leaves /payment/status, which is the only
+        page that drives /payment/status/poll - and that poll is what calls
+        _post_process(), which confirms the order, grants the class credits,
+        fires the purchase notification and generates the invoice.
+
+        A customer who taps Skip therefore pays and gets nothing: the money is
+        captured, the order stays a quotation, and they are told nothing is
+        wrong. Reproduced locally - abandoning that page left a done transaction
+        against a draft order with zero credits. The 10-minute post-processing
+        cron usually recovers it, but only while is_post_processed is still
+        False, so it is not a guarantee.
+
+        The link is a convenience for internal users watching a slow provider.
+        It is not something a paying student should be able to reach.
+    -->
+    <template id="payment_state_header_no_skip"
+              inherit_id="payment.state_header"
+              name="Payment status: no Skip link">
+        <xpath expr="//a[hasclass('alert-link')]" position="replace"/>
+    </template>
+
+</odoo>
