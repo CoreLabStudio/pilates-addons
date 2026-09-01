@@ -3,6 +3,11 @@ import html as _html
 from odoo import models, fields, api
 
 import logging
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 _logger = logging.getLogger(__name__)
 
 
@@ -234,7 +239,7 @@ class FitnessStudioMessage(models.Model):
                 if conv.user_id and conv.user_id != self.env.user:
                     try:
                         recipient = conv.user_id
-                        lang_env = self.with_context(lang=recipient.lang or 'en_US')
+                        lang_env = self.with_context(lang=recipient.lang or DEFAULT_LANG)
                         sender = msg.author_name or lang_env.env._('the studio')
                         self.env['fitness.notification'].sudo()._create_for_user(
                             recipient.id,

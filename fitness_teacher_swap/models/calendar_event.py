@@ -4,6 +4,11 @@ from odoo import models, fields
 from odoo.exceptions import UserError
 
 import logging
+
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
 _logger = logging.getLogger(__name__)
 
 
@@ -68,7 +73,7 @@ class CalendarEvent(models.Model):
                         for booking in bookings:
                             student_user = booking.student_id.user_ids[:1]
                             if student_user:
-                                senv = self.with_context(lang=student_user.lang or 'en_US')
+                                senv = self.with_context(lang=student_user.lang or DEFAULT_LANG)
                                 Notif._create_for_user(
                                     student_user.id,
                                     'teacher_swap',
@@ -77,7 +82,7 @@ class CalendarEvent(models.Model):
                                     action_url=f'/my/classes/{event.id}',
                                 )
                                 notified += 1
-                        tenv = self.with_context(lang=new_teacher.lang or 'en_US')
+                        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
                         Notif._create_for_user(
                             new_teacher.id,
                             'teacher_swap',
@@ -124,7 +129,7 @@ class CalendarEvent(models.Model):
                         student_user = booking.student_id.user_ids[:1]
                         if student_user:
                             new_dt_str = _fmt_event_dt(new_start, student_user)
-                            senv = self.with_context(lang=student_user.lang or 'en_US')
+                            senv = self.with_context(lang=student_user.lang or DEFAULT_LANG)
                             Notif._create_for_user(
                                 student_user.id,
                                 'class_rescheduled',
@@ -135,7 +140,7 @@ class CalendarEvent(models.Model):
                             notified += 1
                     if teacher and teacher.id:
                         new_dt_str = _fmt_event_dt(new_start, teacher)
-                        tenv = self.with_context(lang=teacher.lang or 'en_US')
+                        tenv = self.with_context(lang=teacher.lang or DEFAULT_LANG)
                         Notif._create_for_user(
                             teacher.id,
                             'class_rescheduled',
@@ -224,7 +229,7 @@ class CalendarEvent(models.Model):
             for booking in affected_bookings:
                 student_user = booking.student_id.user_ids[:1]
                 if student_user:
-                    student_env = self.with_context(lang=student_user.lang or 'en_US')
+                    student_env = self.with_context(lang=student_user.lang or DEFAULT_LANG)
                     notif_model._create_for_user(
                         student_user.id,
                         'teacher_swap',
