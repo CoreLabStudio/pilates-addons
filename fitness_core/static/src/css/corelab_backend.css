@@ -43,6 +43,64 @@
 .o_fitness_dashboard .cl-dash { display: flex; flex-direction: column; gap: 20px; }
 
 /* Header */
+/* Header link out to Odoo's own Dashboards app.
+
+   This was an outline button and did not read as clickable - the developer
+   looked straight past it on the live page. It now uses the same solid-card
+   affordance as the stat cards: heather fill, icon in a translucent tile, and
+   a trailing chevron, which is what marks a card as tappable everywhere else
+   on this dashboard. */
+.o_fitness_dashboard .cl-head-right {
+  display: flex; align-items: center; gap: 14px;
+}
+.o_fitness_dashboard .cl-odoo-dash {
+  display: inline-flex; align-items: center; gap: 10px;
+  width: auto;                 /* sized to content, not the header */
+  padding: 10px 14px;
+  border: 0; border-radius: 10px;
+  background: #9ABACD;         /* same heather as the Classes Today card */
+  text-align: left; cursor: pointer;
+  transition: filter .15s, transform .15s;
+}
+.o_fitness_dashboard .cl-odoo-dash:hover  { filter: brightness(0.96); }
+.o_fitness_dashboard .cl-odoo-dash:active { transform: scale(0.98); }
+.o_fitness_dashboard .cl-odoo-dash:focus-visible {
+  outline: 2px solid #1E3A47; outline-offset: 2px;
+}
+.o_fitness_dashboard .cl-odoo-dash-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; width: 28px; height: 28px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #1E3A47;
+}
+.o_fitness_dashboard .cl-odoo-dash-icon svg { width: 15px; height: 15px; display: block; }
+.o_fitness_dashboard .cl-odoo-dash-text {
+  display: flex; flex-direction: column; gap: 1px; line-height: 1.25;
+}
+.o_fitness_dashboard .cl-odoo-dash-title {
+  font-size: 12px; font-weight: 500; color: #1E3A47;
+}
+.o_fitness_dashboard .cl-odoo-dash-sub {
+  font-size: 10px; font-weight: 400; color: #2C4A58;
+}
+.o_fitness_dashboard .cl-odoo-dash-chev {
+  display: inline-flex; align-items: center; flex: none;
+  margin-left: 2px; color: #1E3A47;
+}
+.o_fitness_dashboard .cl-odoo-dash-chev svg { width: 14px; height: 14px; display: block; }
+/* The two labels are fields, so strip the form-widget block/margins that would
+   otherwise break them onto their own lines. */
+.o_fitness_dashboard .cl-odoo-dash .o_field_widget,
+.o_fitness_dashboard .cl-odoo-dash .o_field_widget span {
+  display: inline; margin: 0; padding: 0; font: inherit; color: inherit;
+}
+@media (max-width: 640px) {
+  .o_fitness_dashboard .cl-head-right { gap: 8px; }
+  .o_fitness_dashboard .cl-odoo-dash { padding: 8px 11px; gap: 8px; }
+  .o_fitness_dashboard .cl-odoo-dash-icon { width: 24px; height: 24px; }
+}
+
 .o_fitness_dashboard .cl-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
 }
@@ -68,8 +126,13 @@
 }
 /* Top row keeps equal heights; its height comes from the hero's own content. */
 .o_fitness_dashboard .cl-top { align-items: stretch; }
-/* Bottom row sizes each card to what is in it, so no card is padded out. */
-.o_fitness_dashboard .cl-bottom { align-items: start; }
+/* Bottom row: the left card matches the right column's combined height, so the
+   page background stops showing through beside it. The extra height is filled
+   with more class rows (see preview_classes_html), never with blank padding,
+   and the card never scrolls internally - "See all" handles the overflow. */
+.o_fitness_dashboard .cl-bottom { align-items: stretch; }
+.o_fitness_dashboard .cl-card-main { display: flex; flex-direction: column; }
+.o_fitness_dashboard .cl-card-main .cl-card-body { flex: 1 1 auto; }
 .o_fitness_dashboard .cl-tiles, .o_fitness_dashboard .cl-side { display: grid; gap: 18px; }
 .o_fitness_dashboard .cl-tiles { grid-template-columns: 1fr 1fr; }
 .o_fitness_dashboard .cl-side { align-content: start; }

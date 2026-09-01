@@ -3,12 +3,18 @@ from datetime import datetime, time, timedelta
 
 import pytz
 
+from odoo.exceptions import UserError
 from odoo import models, fields, api, _
 from odoo.tools import format_date
 
 # The studio is in Spain. Times on this dashboard follow the studio's clock,
 # not the server's and not whichever timezone the viewing user is set to.
 DEFAULT_TZ = 'Europe/Madrid'
+
+
+# Rows shown in the dashboard's "Today's Classes" card. Chosen so the card
+# reaches the height of Pending Trials + Messages stacked beside it.
+PREVIEW_CLASSES_LIMIT = 8
 
 
 class FitnessAdminDashboard(models.TransientModel):
@@ -146,11 +152,14 @@ class FitnessAdminDashboard(models.TransientModel):
 
         for rec in self:
             # ── Today's classes ───────────────────────────────────────────────
+            # 5 rows left the card short of the two stacked cards beside it.
+            # The height is matched with real classes rather than padding;
+            # anything past this is what the "See all" link is for.
             classes = self.env['calendar.event'].search([
                 ('is_fitness_class', '=', True),
                 ('start', '>=', day_start),
                 ('start', '<', day_end),
-            ], order='start asc', limit=5)
+            ], order='start asc', limit=PREVIEW_CLASSES_LIMIT)
 
             if classes:
                 rows = ''
@@ -244,6 +253,25 @@ class FitnessAdminDashboard(models.TransientModel):
                 )
 
     # ── Stat tile click actions ────────────────────────────────────────────────
+
+    def action_open_odoo_dashboard(self):
+        """Open Odoo's own Dashboards app.
+
+        Resolved by xmlid rather than hardcoding an id, and it degrades to a
+        clear message instead of a traceback if the Dashboards app is not
+        installed on a given database.
+        """
+        self.ensure_one()
+        action = self.env.ref(
+            'spreadsheet_dashboard.ir_actions_dashboard_action',
+            raise_if_not_found=False,
+        )
+        if not action:
+            raise UserError(self.env._(
+                "Odoo's Dashboards app is not installed on this database. "
+                "Install it from Apps to use this link."
+            ))
+        return action.read()[0]
 
     def action_view_today_classes(self):
         day_start, day_end = self._today_bounds()
