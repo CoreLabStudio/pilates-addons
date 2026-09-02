@@ -35,6 +35,11 @@ class TestLegalDetails(HttpCase):
             ])],
         })
         cls.company = cls.env.company
+        # Write the details rather than assume the database carries them: a
+        # freshly built database has none, which is what made these fail on
+        # odoo.sh. What is under test here is the rendering, not the data.
+        from odoo.addons.fitness_core.company_defaults import apply_company_details
+        apply_company_details(cls.env)
 
     def _terms(self):
         # the HTTP request reads from the database, so pending ORM writes have
@@ -80,9 +85,15 @@ class TestLegalDetails(HttpCase):
 
     def test_details_appear_on_the_payment_step(self):
         """Who the customer is buying from, before they commit."""
-        product = self.env["product.template"].sudo().search(
-            [("fitness_is_package", "=", True), ("sale_ok", "=", True)], limit=1)
-        self.assertTrue(product, "no purchasable package to open a checkout for")
+        product = self.env["product.template"].sudo().create({
+            "name": "Legal Test Pack",
+            "list_price": 50.0,
+            "sale_ok": True,
+            "type": "service",
+            "fitness_is_package": True,
+            "fitness_class_type": "reformer",
+            "fitness_class_count": 5,
+        })
         self.env.flush_all()
         self.authenticate(self.user.login, self.password)
         res = self.url_open("/my/packages/%d/checkout" % product.id)

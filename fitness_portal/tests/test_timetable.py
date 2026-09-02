@@ -145,6 +145,21 @@ class TestTimetablePage(HttpCase):
                          "got the login page, not %s - the session was lost" % url)
         return res.text
 
+
+    def _use_lang(self, lang):
+        """Switch the student's language, activating it if the database lacks it.
+
+        A build database ships with English only, so assuming es_ES/ca_ES were
+        installed made these tests pass locally and fail on odoo.sh for a
+        reason that had nothing to do with the translations themselves.
+        """
+        # _activate_lang only flips the active flag - it does not import the
+        # .po files, so on a database that never had the language the page
+        # would still render in English and the assertion would fail for the
+        # wrong reason. _activate_and_install_lang loads the translations too.
+        self.env['res.lang']._activate_and_install_lang(lang)
+        self.user.lang = lang
+
     @staticmethod
     def _pane_is_hidden(html, discipline):
         """Whether one discipline's pane is the hidden one."""
@@ -343,7 +358,7 @@ class TestTimetablePage(HttpCase):
             "ca_ES": ("Horari complet", "Totes les nostres classes, setmana a setmana"),
         }
         for lang, (title, subtitle) in expected.items():
-            self.user.lang = lang
+            self._use_lang(lang)
             html = self._get()
             self.assertIn(title, html, "%s title not translated" % lang)
             self.assertIn(subtitle, html, "%s subtitle not translated" % lang)
@@ -353,7 +368,7 @@ class TestTimetablePage(HttpCase):
 
     def test_full_flag_is_translated(self):
         """`Full` had a code reference but no odoo-python marker."""
-        self.user.lang = "es_ES"
+        self._use_lang("es_ES")
         try:
             self.assertEqual(
                 self.env["base"].with_context(lang="es_ES").env._("Full"),

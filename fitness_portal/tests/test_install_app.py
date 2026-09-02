@@ -42,6 +42,21 @@ class TestInstallApp(HttpCase):
         self.assertNotIn('name="password"', res.text, "got the login page, not %s" % url)
         return res.text
 
+
+    def _use_lang(self, lang):
+        """Switch the student's language, activating it if the database lacks it.
+
+        A build database ships with English only, so assuming es_ES/ca_ES were
+        installed made these tests pass locally and fail on odoo.sh for a
+        reason that had nothing to do with the translations themselves.
+        """
+        # _activate_lang only flips the active flag - it does not import the
+        # .po files, so on a database that never had the language the page
+        # would still render in English and the assertion would fail for the
+        # wrong reason. _activate_and_install_lang loads the translations too.
+        self.env['res.lang']._activate_and_install_lang(lang)
+        self.user.lang = lang
+
     # ── the service worker ───────────────────────────────────────────────
 
     def test_service_worker_is_served(self):
@@ -106,7 +121,7 @@ class TestInstallApp(HttpCase):
             "ca_ES": ("Instal·la CoreLab", "Ara no"),
         }
         for lang, (title, dismiss) in expected.items():
-            self.user.lang = lang
+            self._use_lang(lang)
             html = self._get("/my/home")
             self.assertIn(title, html, "%s install title not translated" % lang)
             self.assertIn(dismiss, html, "%s dismiss label not translated" % lang)
@@ -121,7 +136,7 @@ class TestInstallApp(HttpCase):
             "ca_ES": "Afegeix a la pantalla",
         }
         for lang, step in expected.items():
-            self.user.lang = lang
+            self._use_lang(lang)
             html = self._get("/my/home")
             self.assertIn(step, html, "%s iOS steps not translated" % lang)
         self.user.lang = "en_US"

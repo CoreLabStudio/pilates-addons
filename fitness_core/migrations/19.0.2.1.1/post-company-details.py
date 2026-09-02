@@ -14,53 +14,13 @@ once, on the upgrade to this version.
 
 Only empty fields are filled, so the studio's own edits always win over this.
 """
-import logging
+from odoo import api, SUPERUSER_ID
 
-_logger = logging.getLogger(__name__)
-
-# Supplied by the studio. The VAT is stored country-prefixed because that is
-# what Odoo, VIES and EU invoicing expect; the portal strips the ES prefix
-# when displaying it, since a Spanish legal notice shows the bare NIF.
-DETAILS = {
-    'street': 'Carrer de la Noguera 39',
-    'zip': '08230',
-    'city': 'Matadepera',
-    'vat': 'ESB88940010',
-    'email': 'info@corelabstudio.es',
-}
-COUNTRY_CODE = 'ES'
-STATE_NAME = 'Barcelona'
+from odoo.addons.fitness_core.company_defaults import apply_company_details
 
 
 def migrate(cr, version):
+    """Existing databases. A fresh one is handled by post_init_hook instead."""
     if not version:
         return
-
-    from odoo import api, SUPERUSER_ID
-    env = api.Environment(cr, SUPERUSER_ID, {})
-
-    company = env.ref('base.main_company', raise_if_not_found=False)
-    if not company:
-        _logger.warning('main company not found; legal details not written')
-        return
-
-    vals = {f: v for f, v in DETAILS.items() if not company[f]}
-
-    # country and province are decided independently: this database already
-    # had the country set, which on the first pass skipped the province with it
-    country = company.country_id or env['res.country'].search(
-        [('code', '=', COUNTRY_CODE)], limit=1)
-    if country and not company.country_id:
-        vals['country_id'] = country.id
-    if country and not company.state_id:
-        state = env['res.country.state'].search(
-            [('country_id', '=', country.id), ('name', '=', STATE_NAME)], limit=1)
-        if state:
-            vals['state_id'] = state.id
-
-    if not vals:
-        _logger.info('company legal details already set; nothing to do')
-        return
-
-    company.write(vals)
-    _logger.info('company legal details written: %s', ', '.join(sorted(vals)))
+    apply_company_details(api.Environment(cr, SUPERUSER_ID, {}))
