@@ -121,8 +121,9 @@
                 <div style="text-align:left;padding-bottom:1.5rem;">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Terms and Conditions</h1>
 
+                    <t t-call="fitness_portal.mv_company_details"/>
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introduction</h3>
-                    <p style="font-size:0.87rem;line-height:1.65;">These Terms and Conditions ("Terms") govern the use of the services of CoreLab pilates studio, including class bookings, memberships, credit packages and the online portal provided by Yoleyva Studio ("we", "us", "the Studio"). By booking a class or activating a package, you accept these Terms in full.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">These Terms and Conditions ("Terms") govern the use of the services of CoreLab pilates studio, including class bookings, memberships, credit packages and the online portal provided by Core Lab Studio, S.L. ("we", "us", "the Studio"). By booking a class or activating a package, you accept these Terms in full.</p>
 
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membership and Account</h3>
                     <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
@@ -185,8 +186,9 @@
                 <div style="text-align:left;padding-bottom:1.5rem;">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Termes i Condicions</h1>
 
+                    <t t-call="fitness_portal.mv_company_details"/>
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducció</h3>
-                    <p style="font-size:0.87rem;line-height:1.65;">Aquests Termes i Condicions ("Termes") regulen l'ús dels serveis de l'estudi de pilates CoreLab, incloses les reserves de classes, membresies, paquets de crèdits i el portal en línia proporcionat per Yoleyva Studio ("nosaltres", "el nostre", "l'Estudi"). En reservar una classe o activar un paquet, acceptes aquests Termes en la seva totalitat.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">Aquests Termes i Condicions ("Termes") regulen l'ús dels serveis de l'estudi de pilates CoreLab, incloses les reserves de classes, membresies, paquets de crèdits i el portal en línia proporcionat per Core Lab Studio, S.L. ("nosaltres", "el nostre", "l'Estudi"). En reservar una classe o activar un paquet, acceptes aquests Termes en la seva totalitat.</p>
 
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membres i Compte</h3>
                     <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
@@ -250,8 +252,9 @@
                 <div style="text-align:left;padding-bottom:1.5rem;">
                     <h1 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Términos y Condiciones</h1>
 
+                    <t t-call="fitness_portal.mv_company_details"/>
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">1. Introducción</h3>
-                    <p style="font-size:0.87rem;line-height:1.65;">Estos Términos y Condiciones ("Términos") rigen el uso de los servicios del estudio de pilates CoreLab, incluidas las reservas de clases, membresías, paquetes de créditos y el portal online proporcionado por Yoleyva Studio ("nosotros", "nos", "el Estudio"). Al reservar una clase o activar un paquete, aceptas estos Términos en su totalidad.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">Estos Términos y Condiciones ("Términos") rigen el uso de los servicios del estudio de pilates CoreLab, incluidas las reservas de clases, membresías, paquetes de créditos y el portal online proporcionado por Core Lab Studio, S.L. ("nosotros", "nos", "el Estudio"). Al reservar una clase o activar un paquete, aceptas estos Términos en su totalidad.</p>
 
                     <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:1.25rem 0 0.4rem;">2. Membresía y Cuenta</h3>
                     <ul style="padding-left:1.2rem;margin:0.4rem 0 0.75rem;">
@@ -326,7 +329,7 @@
                         For any questions about data processing, contact us at
                         <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
                     </div>
-                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) processes your personal data in accordance with the General Data Protection Regulation (GDPR) and applicable Spanish legislation. Data collected during registration is used exclusively to manage your account and provide our services.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Core Lab Studio, S.L.) processes your personal data in accordance with the General Data Protection Regulation (GDPR) and applicable Spanish legislation. Data collected during registration is used exclusively to manage your account and provide our services.</p>
                     <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Last updated: coming soon</p>
                     <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Back to sign up</a>
                 </t>
@@ -337,7 +340,7 @@
                         publicació. Per a qualsevol consulta sobre el tractament de les teves dades, contacta'ns a
                         <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
                     </div>
-                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) tracta les teves dades personals de conformitat amb el Reglament General de Protecció de Dades (RGPD) i la normativa espanyola aplicable. Les dades recollides durant el registre s'utilitzen exclusivament per gestionar el teu compte i la prestació dels nostres serveis.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Core Lab Studio, S.L.) tracta les teves dades personals de conformitat amb el Reglament General de Protecció de Dades (RGPD) i la normativa espanyola aplicable. Les dades recollides durant el registre s'utilitzen exclusivament per gestionar el teu compte i la prestació dels nostres serveis.</p>
                     <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Darrera actualització: pròximament</p>
                     <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Tornar al registre</a>
                 </t>
@@ -348,7 +351,7 @@
                         publicación. Para cualquier consulta sobre el tratamiento de tus datos, contáctanos en
                         <a href="mailto:info@corelabstudio.es">info@corelabstudio.es</a>.
                     </div>
-                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Yoleyva Studio) trata tus datos personales de conformidad con el Reglamento General de Protección de Datos (RGPD) y la normativa española aplicable. Los datos recogidos durante el registro se utilizan exclusivamente para gestionar tu cuenta y la prestación de nuestros servicios.</p>
+                    <p style="font-size:0.87rem;line-height:1.65;">CoreLab Studio (Core Lab Studio, S.L.) trata tus datos personales de conformidad con el Reglamento General de Protección de Datos (RGPD) y la normativa española aplicable. Los datos recogidos durante el registro se utilizan exclusivamente para gestionar tu cuenta y la prestación de nuestros servicios.</p>
                     <p style="font-size:0.8rem;color:#888;margin-top:1.5rem;">Última actualización: próximamente</p>
                     <a href="/web/signup" style="display:inline-block;margin-top:0.75rem;font-size:0.85rem;">← Volver al registro</a>
                 </t>

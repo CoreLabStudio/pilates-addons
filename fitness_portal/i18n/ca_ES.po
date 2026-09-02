@@ -727,6 +727,8 @@ msgid "<strong>Oops:</strong>"
 msgstr "<strong>Error:</strong>"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Full"
 msgstr "Completa"
@@ -2309,3 +2311,142 @@ msgstr "Des d'administració"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__body
 msgid "Message"
 msgstr "Missatge"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Timetable"
+msgstr "Horari complet"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Every class we run, week by week"
+msgstr "Totes les nostres classes, setmana a setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes scheduled for this discipline yet."
+msgstr "Encara no hi ha classes programades per a aquesta disciplina."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid ""
+"You have no credit for these classes yet — tap any class to see the options."
+msgstr ""
+"Encara no tens crèdits per a aquestes classes: toca qualsevol classe per "
+"veure les opcions."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Weekly Timetable"
+msgstr "Horari setmanal"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "View timetable"
+msgstr "Veure horari complet"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Add CoreLab to your Home Screen"
+msgstr "Afegeix CoreLab a la teva pantalla d'inici"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Tap the Share button at the bottom of Safari."
+msgstr "Toca el botó Comparteix a la part inferior del Safari."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Scroll down and tap \"Add to Home Screen\"."
+msgstr "Desplaça't cap avall i toca \"Afegeix a la pantalla d'inici\"."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Tap \"Add\" in the top right corner."
+msgstr "Toca \"Afegeix\" a la cantonada superior dreta."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "CoreLab will then open like any other app, without the browser bars."
+msgstr ""
+"CoreLab s'obrirà com qualsevol altra app, sense les barres del navegador."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Install CoreLab"
+msgstr "Instal·la CoreLab"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Add it to your home screen for one-tap booking."
+msgstr "Afegeix-la a la teva pantalla d'inici per reservar amb un toc."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Install"
+msgstr "Instal·lar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Not now"
+msgstr "Ara no"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Install the app"
+msgstr "Instal·lar l'app"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Add CoreLab to your home screen"
+msgstr "Afegeix CoreLab a la teva pantalla d'inici"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Booking opens"
+msgstr "Les reserves obren el"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid ""
+"Classes open for booking a week ahead. Come back then to reserve your spot."
+msgstr ""
+"Les classes s'obren per reservar una setmana abans. Torna llavors per "
+"reservar el teu lloc."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "You don’t have credit for this class yet."
+msgstr "Encara no tens crèdit per a aquesta classe."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Explore memberships, packages & classes"
+msgstr "Explora membresies, paquets i classes"

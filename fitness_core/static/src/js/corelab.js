@@ -435,6 +435,191 @@
     if ($('#mv-type-filters') || $('#mv-date-select')) applyCombinedFilter();
   }
 
+  /* ── 12. Timetable — Reformer/Barre toggle ───────────────────
+     Swaps which pane is shown. The first version linked to
+     /my/timetable?discipline=..., so every switch was a full page load: the
+     browser restored the old scroll offset against a page whose height had
+     changed, which is the up-and-down jump that was reported. Toggling a
+     hidden attribute cannot move the scroll position at all.
+     The URL is kept in step with history.replaceState so a reload or a
+     shared link still opens on the discipline being looked at, without
+     pushing a history entry per tap. */
+  function scrollHost() {
+    const b = document.body;
+    const de = document.scrollingElement || document.documentElement;
+    if (b && b.scrollHeight - b.clientHeight > 1 &&
+        /auto|scroll/.test(getComputedStyle(b).overflowY)) {
+      return b;
+    }
+    return de;
+  }
+
+  function setupTimetableToggle() {
+    const toggle = $('#mv-tt-toggle');
+    if (!toggle) return;
+    const panes = $$('.mv-tt-pane');
+    if (!panes.length) return;
+
+    toggle.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-discipline]');
+      if (!btn) return;
+      const want = btn.dataset.discipline;
+
+      $$('[data-discipline]', toggle).forEach((b) => {
+        const on = b.dataset.discipline === want;
+        b.classList.toggle('mv-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      // Removing the navigation fixes the reported jump, but swapping panes
+      // still changes the scroll height, and a view sitting near the bottom of
+      // the taller pane gets clamped when the shorter one replaces it. Pin the
+      // offset across the swap.
+      //
+      // The portal shell scrolls <body> (overflow-y:auto), not the document,
+      // so window.scrollY is permanently 0 here and pinning that would do
+      // nothing at all. Ask which element actually overflows.
+      const host = scrollHost();
+      const y = host.scrollTop;
+      panes.forEach((p) => { p.hidden = p.dataset.discipline !== want; });
+      if (host.scrollTop !== y) host.scrollTop = y;
+
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.set('discipline', want);
+        window.history.replaceState({}, '', u);
+      } catch (err) { /* URL unavailable - the toggle still works */ }
+    });
+  }
+
+  /* ── 13. Install the app ─────────────────────────────────────
+     Three situations, and the browser is the only thing that knows which
+     one applies, so nothing here is decided server-side:
+
+       * already installed        -> show nothing at all
+       * prompt available         -> the button fires the browser's own
+                                     install prompt (Android, Chrome, Edge)
+       * no prompt API (iOS)      -> the button opens the instructions,
+                                     because Apple exposes no way to trigger
+                                     installation from a page
+
+     beforeinstallprompt only fires when a service worker with a fetch
+     handler is registered, which is why registerServiceWorker() runs first.
+
+     Dismissal is remembered permanently rather than per session: a prompt
+     that returns on every visit reads as nagging, and the Profile row is
+     always there for anyone who changes their mind. That is the whole
+     reason the row exists. */
+  const INSTALL_DISMISSED = 'mv_install_dismissed';
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.matchMedia('(display-mode: fullscreen)').matches ||
+           window.matchMedia('(display-mode: minimal-ui)').matches ||
+           // iOS Safari predates display-mode and uses its own flag
+           window.navigator.standalone === true;
+  }
+
+  function isIos() {
+    const ua = window.navigator.userAgent || '';
+    // iPadOS 13+ reports itself as a Mac, so the touch check is what
+    // separates an iPad from a desktop Safari
+    return /iPad|iPhone|iPod/.test(ua) ||
+           (/Macintosh/.test(ua) && 'ontouchend' in document);
+  }
+
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    // scope /my/ matches where the worker is served from
+    navigator.serviceWorker.register('/my/sw.js', { scope: '/my/' })
+      .catch(() => { /* installability is a bonus; never break the page */ });
+  }
+
+  function setupInstallApp() {
+    const triggers = $$('[data-install-trigger]');
+    const card = $('#mv-install-card');
+    const row = $('#mv-install-row');
+    const sheet = $('#mv-ios-sheet');
+    if (!triggers.length && !card && !row) return;
+
+    // Installed already: every one of these would be a dead end.
+    if (isStandalone()) return;
+
+    const ios = isIos();
+
+    // The Profile row is the persistent way in, so it is always available.
+    // Whether the browser has offered a prompt only changes what tapping it
+    // does, not whether it can be found.
+    if (row) row.hidden = false;
+
+    // The Home card is an interruption rather than a menu entry, so it only
+    // appears when it can lead somewhere useful: a real prompt, or the iOS
+    // instructions. And never once dismissed.
+    const showCard = () => {
+      if (!card) return;
+      let dismissed = false;
+      try { dismissed = localStorage.getItem(INSTALL_DISMISSED) === '1'; } catch (e) { /* private mode */ }
+      if (!dismissed) card.hidden = false;
+    };
+    if (ios || window.mvInstallEvent) showCard();
+
+    // the head script may still catch the event after this point
+    document.addEventListener('mv-install-available', showCard);
+    document.addEventListener('mv-install-done', () => {
+      if (card) card.hidden = true;
+      if (row) row.hidden = true;
+      if (sheet) sheet.hidden = true;
+    });
+
+    const openSheet = () => {
+      if (!sheet) return;
+      // one sheet, two sets of steps: Safari's Share menu, or the browser's
+      // own install control everywhere else
+      const wanted = ios ? 'ios' : 'other';
+      $$('[data-steps]', sheet).forEach((el) => {
+        el.hidden = el.dataset.steps !== wanted;
+      });
+      sheet.hidden = false;
+    };
+    const closeSheet = () => { if (sheet) sheet.hidden = true; };
+
+    triggers.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const deferred = window.mvInstallEvent;
+        if (deferred) {
+          deferred.prompt();
+          try {
+            const choice = await deferred.userChoice;
+            if (choice && choice.outcome === 'accepted') {
+              if (card) card.hidden = true;
+              if (row) row.hidden = true;
+            }
+          } catch (err) { /* a prompt can only be used once */ }
+          window.mvInstallEvent = null;
+        } else {
+          openSheet();
+        }
+      });
+    });
+
+    const closeBtn = $('#mv-ios-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeSheet);
+    if (sheet) {
+      sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sheet && !sheet.hidden) closeSheet();
+    });
+
+    const dismiss = $('#mv-install-dismiss');
+    if (dismiss) {
+      dismiss.addEventListener('click', () => {
+        if (card) card.hidden = true;
+        try { localStorage.setItem(INSTALL_DISMISSED, '1'); } catch (err) { /* private mode */ }
+      });
+    }
+  }
+
   /* ── 10. Payment step — Next stays disabled until a method is
            chosen AND the terms box is ticked. Server re-checks both. */
   function setupCheckoutGate() {
@@ -558,6 +743,9 @@
     setupPackageControls();
     setupCheckoutGate();
     setupSignaturePad();
+    setupTimetableToggle();
+    registerServiceWorker();
+    setupInstallApp();
   }
 
   if (document.readyState === 'loading') {
