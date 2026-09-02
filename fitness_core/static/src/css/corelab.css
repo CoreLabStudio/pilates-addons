@@ -1832,6 +1832,238 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   box-shadow: 0 1px 3px rgba(80,66,61,0.10);
 }
 
+/* Discipline toggle (Reformer / Barre) on the timetable page.
+   Same shape and behaviour as the website's toggle - pill, two options,
+   Reformer selected by default, brown on the unselected side. The selected
+   fill uses the portal's own heather/Paco pairing rather than the site's
+   white-on-#5A8BA6: this file already documents that combination at 4.71:1,
+   whereas white on #5A8BA6 measures 3.70:1 and misses AA at this text size. */
+.mv-discipline-toggle .mv-segment {
+  color: var(--mv-paco);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mv-discipline-toggle .mv-segment.mv-active {
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
+  box-shadow: none;
+}
+.mv-discipline-toggle .mv-segment:hover { color: var(--mv-paco); }
+.mv-discipline-toggle .mv-segment.mv-active:hover { color: var(--mv-btn-fg); }
+
+/* Timetable — day cards, matching the public site's weekly grid */
+.mv-timetable-hint {
+  margin: 0 20px 12px;
+  padding: 10px 14px;
+  background: var(--mv-info-bg);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: var(--mv-paco);
+  line-height: 1.45;
+}
+.mv-tt-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 0 20px;
+}
+@media (min-width: 680px)  { .mv-tt-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .mv-tt-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.mv-tt-day {
+  border: 1px solid var(--mv-border);
+  border-radius: 14px;
+  background: var(--mv-card-bg);
+  overflow: hidden;
+}
+.mv-tt-day-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px 8px;
+}
+.mv-tt-day-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--mv-paco);
+  text-transform: capitalize;
+}
+.mv-tt-day-flag {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--mv-muted);
+}
+.mv-tt-day-list { padding: 0 14px 12px; }
+
+.mv-tt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--mv-border);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-tt-row:hover { text-decoration: none; }
+.mv-tt-row:active { opacity: 0.6; }
+.mv-tt-time {
+  flex-shrink: 0;
+  min-width: 44px;
+  padding-top: 1px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mv-clay-text);
+}
+.mv-tt-body { flex: 1; min-width: 0; }
+.mv-tt-name {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--mv-paco);
+  line-height: 1.3;
+}
+/* The studio writes full marketing paragraphs on a class type, which at full
+   length turns one day card into a page of its own and destroys the point of
+   a timetable. Clamped to two lines, the same way the class cards on the
+   studio page already handle this field. */
+.mv-tt-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--mv-ink);
+}
+.mv-tt-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.72rem;
+  color: var(--mv-muted);
+  line-height: 1.3;
+}
+/* Install-app prompt (Home) and the iOS instruction sheet.
+   Both ship hidden and are revealed by corelab.js once the browser has told
+   us which situation applies - see setupInstallApp(). */
+.mv-install-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 20px 0;
+  padding: 14px 16px;
+  background: var(--mv-info-bg);
+  border-radius: 14px;
+}
+.mv-install-text { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 2px; }
+.mv-install-title { font-size: 0.92rem; font-weight: 600; color: var(--mv-paco); }
+.mv-install-sub { font-size: 0.78rem; line-height: 1.4; color: var(--mv-ink); }
+.mv-install-actions { display: flex; align-items: center; gap: 10px; }
+.mv-install-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 9px 20px;
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background var(--mv-t-fast);
+}
+.mv-install-btn:hover { background: var(--mv-btn-hover); }
+.mv-install-dismiss {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 6px 2px;
+  font-size: 0.78rem;
+  color: var(--mv-muted);
+  text-decoration: underline;
+}
+
+.mv-ios-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(24, 17, 12, 0.45);
+}
+.mv-ios-panel {
+  width: 100%;
+  max-width: 460px;
+  background: var(--mv-bg);
+  border-radius: 18px 18px 0 0;
+  padding: 18px 20px calc(22px + env(safe-area-inset-bottom));
+}
+@media (min-width: 560px) {
+  .mv-ios-sheet { align-items: center; }
+  .mv-ios-panel { border-radius: 18px; }
+}
+.mv-ios-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mv-ios-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--mv-paco);
+}
+.mv-ios-close {
+  border: none; background: none; cursor: pointer;
+  font-size: 1.6rem; line-height: 1; color: var(--mv-muted); padding: 0 4px;
+}
+.mv-ios-steps {
+  margin: 14px 0 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--mv-paco);
+}
+.mv-ios-foot {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--mv-ink);
+}
+
+/* Class detail — the two non-bookable states. Both explain themselves; the
+   page never shows a Reserve button it cannot honour. */
+.mv-class-soon {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 14px 0 6px;
+  padding: 14px 16px;
+  background: var(--mv-info-bg);
+  border-radius: 12px;
+}
+.mv-class-soon-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mv-paco);
+}
+.mv-class-soon-sub {
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--mv-ink);
+}
+
+.mv-tt-flag {
+  flex-shrink: 0;
+  padding-top: 2px;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mv-muted);
+}
+
 /* ── 26. Home page ──────────────────────────────────────────────── */
 .mv-home-hero { padding: 4px 20px 18px; }
 .mv-home-title {

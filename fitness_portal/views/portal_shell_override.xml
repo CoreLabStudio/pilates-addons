@@ -342,6 +342,48 @@
                             </svg>
                         </a>
 
+                        <a href="/my/timetable" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="4.5" width="18" height="16.5" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="3" x2="7.5" y2="6"/><line x1="16.5" y1="3" x2="16.5" y2="6"/>
+                                <line x1="9" y1="14" x2="9" y2="14.01"/>
+                                <line x1="13" y1="14" x2="13" y2="14.01"/>
+                                <line x1="17" y1="14" x2="17" y2="14.01"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Timetable</div>
+                                <div class="mv-menu-desc">Every class we run, week by week</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <a href="#" class="mv-menu-row" data-install-trigger="1"
+                           id="mv-install-row" hidden="hidden">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="7" y="2.5" width="10" height="19" rx="2.2"/><line x1="11" y1="18.6" x2="13" y2="18.6"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Install the app</div>
+                                <div class="mv-menu-desc">Add CoreLab to your home screen</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
+                        <!-- the hub renders outside our controller, so the
+                             sheet's labels are set here rather than passed in -->
+                        <t t-set="lbl_ios_title">Add CoreLab to your Home Screen</t>
+                        <t t-set="lbl_ios_step1">Tap the Share button at the bottom of Safari.</t>
+                        <t t-set="lbl_ios_step2">Scroll down and tap "Add to Home Screen".</t>
+                        <t t-set="lbl_ios_step3">Tap "Add" in the top right corner.</t>
+                        <t t-set="lbl_gen_step1">Open your browser menu.</t>
+                        <t t-set="lbl_gen_step2">Choose "Install app" or "Add to Home screen".</t>
+                        <t t-set="lbl_ios_foot">CoreLab will then open like any other app, without the browser bars.</t>
+                        <t t-call="fitness_portal.mv_install_ios_sheet"/>
+
+
                         <!-- ── What is CoreLab link ─────────────────────────── -->
                         <a href="/my/about" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">

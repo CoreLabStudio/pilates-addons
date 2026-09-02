@@ -347,6 +347,22 @@
                     </t>
                 </t>
 
+                <t t-call="fitness_portal.mv_install_prompt"/>
+                <t t-call="fitness_portal.mv_install_ios_sheet"/>
+
+                <!-- Full timetable. Shown to everyone, including a student who
+                     owns nothing: knowing what the studio runs is exactly what
+                     they need before choosing a plan. -->
+                <div class="mv-spacer-16"/>
+                <a href="/my/timetable" class="mv-prompt-tile mv-prompt-wide">
+                  <div class="mv-prompt-top">
+                    <span class="mv-prompt-label" t-out="lbl_timetable"/>
+                    <svg class="mv-prompt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="3" x2="7.5" y2="6"/><line x1="16.5" y1="3" x2="16.5" y2="6"/></svg>
+                  </div>
+                  <div class="mv-prompt-status" t-out="lbl_timetable_desc"/>
+                  <div class="mv-prompt-cta"><span t-out="lbl_timetable_cta"/><span class="mv-prompt-chev">&#8250;</span></div>
+                </a>
+
                 <t t-if="has_any_bookings">
                 <!-- Next up -->
                 <div class="mv-spacer-16"/>
@@ -724,7 +740,17 @@
                             </div>
                         </t>
                         <div class="mv-empty">
-                            <a href="/my/studio">Browse &amp; book more classes</a>
+                            <!-- Same eligibility signal as the empty state above.
+                                 A student whose last credit was spent by the very
+                                 booking shown above this line cannot book anything
+                                 else, so offering to browse more is a dead end. -->
+                            <t t-if="not has_sources">
+                                <t t-out="no_sources_msg"/>
+                                <br/><a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
+                            </t>
+                            <t t-else="">
+                                <a href="/my/studio">Browse &amp; book more classes</a>
+                            </t>
                         </div>
                     </t>
                 </t>
@@ -844,8 +870,25 @@
                             <button type="submit" class="mv-btn-book-lg">Reserve My Spot</button>
                         </form>
                     </t>
-                    <t t-elif="seats_left is not None and seats_left == 0">
+                    <t t-elif="book_state == 'full'">
                         <div class="mv-class-full">This class is full</div>
+                    </t>
+                    <!-- Has credit, but this occurrence is not open yet. The
+                         date is the point of the message, so it is stated
+                         rather than left as "not available". -->
+                    <t t-elif="book_state == 'not_open'">
+                        <div class="mv-class-soon">
+                            <span class="mv-class-soon-title">Booking opens <t t-out="opens_on"/></span>
+                            <span class="mv-class-soon-sub">Classes open for booking a week ahead. Come back then to reserve your spot.</span>
+                        </div>
+                    </t>
+                    <!-- Nothing to book it with. Same purchase prompt the rest
+                         of the app uses rather than a dead end. -->
+                    <t t-elif="book_state == 'buy'">
+                        <div class="mv-class-soon">
+                            <span class="mv-class-soon-sub">You don’t have credit for this class yet.</span>
+                        </div>
+                        <a t-att-href="shop_href" class="mv-btn-book-lg">Explore memberships, packages &amp; classes</a>
                     </t>
                     <t t-else="">
                         <div class="mv-class-full">Booking not available — contact the studio.</div>
@@ -1165,6 +1208,27 @@
             <t t-set="pwa_name"
                t-value="request.env['ir.config_parameter'].sudo().get_param('web.web_app_name') or 'CoreLab'"/>
             <meta name="apple-mobile-web-app-title" t-att-content="pwa_name"/>
+            <!-- Catch beforeinstallprompt here, not in corelab.js.
+                 Chrome fires it around load and never fires it again, while
+                 corelab.js arrives in the lazy asset bundle roughly a second
+                 later - so the event was always missed and the install button
+                 never appeared on Android or desktop. This runs in <head>,
+                 stashes the event, and lets the app pick it up whenever it
+                 finishes loading. -->
+            <script type="text/javascript">
+                (function () {
+                    window.mvInstallEvent = null;
+                    window.addEventListener('beforeinstallprompt', function (e) {
+                        e.preventDefault();
+                        window.mvInstallEvent = e;
+                        document.dispatchEvent(new CustomEvent('mv-install-available'));
+                    });
+                    window.addEventListener('appinstalled', function () {
+                        window.mvInstallEvent = null;
+                        document.dispatchEvent(new CustomEvent('mv-install-done'));
+                    });
+                })();
+            </script>
         </xpath>
         <!-- Override Odoo's default shortcut icon (favicon.ico) with the CoreLab icon -->
         <xpath expr="//link[@rel='shortcut icon']" position="replace">
@@ -1486,6 +1550,11 @@
                                     id="mv-payment-next" disabled="disabled">
                                 Pay online
                             </button>
+
+                            <!-- who the customer is actually buying from,
+                                 stated before they commit rather than only
+                                 behind the Terms link -->
+                            <t t-call="fitness_portal.mv_company_details"/>
                         </form>
                     </t>
 
@@ -1534,6 +1603,8 @@
 
                             <button type="submit" class="mv-btn-primary-lg"
                                     id="mv-payment-next" disabled="disabled">Next</button>
+
+                            <t t-call="fitness_portal.mv_company_details"/>
                         </form>
                     </t>
                 </div>
@@ -1578,6 +1649,10 @@
                             <t t-set="reference_prefix" t-value="'PKG-' + str(order.id)"/>
                         </t>
                     </div>
+
+                    <!-- the card-entry step is the last thing before money
+                         moves, so the seller is identified here too -->
+                    <t t-call="fitness_portal.mv_company_details"/>
                 </div>
 
                 <t t-call="fitness_portal.mv_bottom_nav"/>
@@ -1848,6 +1923,35 @@
     </template>
 
     <!-- ── Terms and Conditions (/my/terms) ──────────────────────────────── -->
+    <!-- ── Company details, rendered from res.company ──────────────────────── -->
+    <!--                                                                        -->
+    <!-- Deliberately not hardcoded: the studio fills Settings > Companies once  -->
+    <!-- and the Terms, the signup consent and its invoices all agree. Empty     -->
+    <!-- fields render a visible marker so a missing address is obvious rather   -->
+    <!-- than an invisible gap.                                                  -->
+    <template id="mv_company_details" name="CoreLab Company Details">
+        <t t-set="_co" t-value="request.env.company.sudo()"/>
+        <div class="mv-legal-details">
+            <p class="mv-legal-name">Core Lab Studio, S.L.</p>
+            <p>
+                <t t-if="_co.street"><t t-out="_co.street"/><br/></t>
+                <t t-if="_co.street2"><t t-out="_co.street2"/><br/></t>
+                <t t-if="_co.zip or _co.city">
+                    <t t-out="' '.join(filter(None, [_co.zip, _co.city]))"/><br/>
+                </t>
+                <t t-if="_co.country_id"><t t-out="_co.country_id.name"/><br/></t>
+                <t t-if="not (_co.street or _co.city)">
+                    <span class="mv-legal-pending">[Domicilio social pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</span><br/>
+                </t>
+            </p>
+            <p>
+                <t t-if="_co.vat">NIF: <t t-out="_co.vat[2:] if _co.vat[:2].upper() == 'ES' else _co.vat"/></t>
+                <t t-else=""><span class="mv-legal-pending">[NIF pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</span></t>
+                <t t-if="_co.email"><br/><t t-out="_co.email"/></t>
+            </p>
+        </div>
+    </template>
+
     <template id="portal_terms" name="Terms and Conditions">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
@@ -1868,8 +1972,11 @@
 
                 <div class="mv-prose">
 
+                    <h2>Company details</h2>
+                    <t t-call="fitness_portal.mv_company_details"/>
+
                     <h2>1. Introduction</h2>
-                    <p>These Terms and Conditions ("Terms") govern your use of the CoreLab Pilates studio services, including class bookings, memberships, credit packages, and the online portal provided by Yoleyva Studio ("we", "us", "the Studio"). By booking a class or activating a package you agree to these Terms in full.</p>
+                    <p>These Terms and Conditions ("Terms") govern your use of the CoreLab Pilates studio services, including class bookings, memberships, credit packages, and the online portal provided by Core Lab Studio, S.L. ("we", "us", "the Studio"). By booking a class or activating a package you agree to these Terms in full.</p>
 
                     <h2>2. Membership &amp; Account</h2>
                     <ul>
@@ -2457,6 +2564,170 @@
                     </t>
                 </div>
             </div>
+        </t>
+    </template>
+
+    <!-- ── Install the app ─────────────────────────────────────────────────── -->
+    <!--                                                                        -->
+    <!-- Everything here starts hidden and is revealed by corelab.js, because    -->
+    <!-- only the browser knows which of the three situations applies:           -->
+    <!--   * already installed  -> nothing is shown at all                       -->
+    <!--   * install prompt available (Android/Chrome/Edge) -> the button fires  -->
+    <!--     the browser's own prompt                                           -->
+    <!--   * iOS/Safari -> no programmatic install exists, so the button opens   -->
+    <!--     the instructions instead                                           -->
+    <!-- Rendering server-side and hiding would flash a button at someone who    -->
+    <!-- already installed, so the default state is hidden. -->
+    <template id="mv_install_prompt" name="CoreLab Install App Prompt">
+        <div class="mv-install-card" id="mv-install-card" hidden="hidden">
+            <div class="mv-install-text">
+                <span class="mv-install-title" t-out="lbl_install_title"/>
+                <span class="mv-install-sub" t-out="lbl_install_sub"/>
+            </div>
+            <div class="mv-install-actions">
+                <button type="button" class="mv-install-btn" data-install-trigger="1"
+                        t-out="lbl_install_cta"/>
+                <button type="button" class="mv-install-dismiss" id="mv-install-dismiss"
+                        t-att-aria-label="lbl_install_dismiss" t-out="lbl_install_dismiss"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- The iOS steps. Apple exposes no install API, so the only honest thing
+         to do is tell the student exactly which buttons to press. -->
+    <template id="mv_install_ios_sheet" name="CoreLab iOS Install Steps">
+        <div class="mv-ios-sheet" id="mv-ios-sheet" hidden="hidden" role="dialog"
+             aria-modal="true" t-att-aria-label="lbl_ios_title">
+            <div class="mv-ios-panel">
+                <div class="mv-ios-head">
+                    <span class="mv-ios-title" t-out="lbl_ios_title"/>
+                    <button type="button" class="mv-ios-close" id="mv-ios-close"
+                            aria-label="Close">&#215;</button>
+                </div>
+                <!-- Safari has no install API, so these are the actual taps.
+                     Shown by default because iOS is the case that can never
+                     do better than instructions. -->
+                <ol class="mv-ios-steps" data-steps="ios">
+                    <li t-out="lbl_ios_step1"/>
+                    <li t-out="lbl_ios_step2"/>
+                    <li t-out="lbl_ios_step3"/>
+                </ol>
+                <!-- Any other browser that did not offer us a prompt: Firefox,
+                     or Chrome before it has decided the site qualifies. Naming
+                     Safari's Share button there would be wrong. -->
+                <ol class="mv-ios-steps" data-steps="other" hidden="hidden">
+                    <li t-out="lbl_gen_step1"/>
+                    <li t-out="lbl_gen_step2"/>
+                </ol>
+                <p class="mv-ios-foot" t-out="lbl_ios_foot"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- ── Full weekly timetable ───────────────────────────────────────────── -->
+    <!--                                                                        -->
+    <!-- A reference view: everything the studio runs, whether or not this       -->
+    <!-- student can book it. /my/studio answers the other question ("what can   -->
+    <!-- I book now") and hides the rest, which left a student with no credit    -->
+    <!-- unable to find out what the studio even offers before buying.           -->
+    <!--                                                                        -->
+    <!-- Laid out as day cards to match the public site's weekly grid, with the  -->
+    <!-- class description inline so a student can tell what a class is without  -->
+    <!-- leaving the page. Both disciplines are rendered; the toggle swaps a     -->
+    <!-- class rather than navigating, so switching cannot move the scroll.      -->
+    <template id="portal_timetable" name="Timetable (Student)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name" t-out="title"/>
+                        <p class="mv-greeting-sub" t-out="subtitle"/>
+                    </div>
+                </div>
+
+                <div class="mv-segmented mv-discipline-toggle" role="tablist"
+                     t-att-aria-label="title" id="mv-tt-toggle">
+                    <button type="button" role="tab" data-discipline="reformer"
+                            t-att-aria-selected="'true' if active_discipline == 'reformer' else 'false'"
+                            t-attf-class="mv-segment#{' mv-active' if active_discipline == 'reformer' else ''}"
+                            t-out="lbl_reformer"/>
+                    <button type="button" role="tab" data-discipline="barre"
+                            t-att-aria-selected="'true' if active_discipline == 'barre' else 'false'"
+                            t-attf-class="mv-segment#{' mv-active' if active_discipline == 'barre' else ''}"
+                            t-out="lbl_barre"/>
+                </div>
+
+                <t t-if="not has_credit">
+                    <p class="mv-timetable-hint" t-out="lbl_buy_hint"/>
+                </t>
+
+                <t t-foreach="['reformer', 'barre']" t-as="disc">
+                    <div class="mv-tt-pane" t-att-data-discipline="disc"
+                         t-att-hidden="None if disc == active_discipline else 'hidden'">
+                        <t t-set="days" t-value="disciplines.get(disc) or []"/>
+                        <t t-if="not days">
+                            <div class="mv-empty" t-out="lbl_empty"/>
+                        </t>
+                        <div class="mv-tt-grid">
+                            <t t-foreach="days" t-as="day">
+                                <div class="mv-tt-day">
+                                    <div class="mv-tt-day-head">
+                                        <span class="mv-tt-day-name" t-out="day['label']"/>
+                                        <span class="mv-tt-day-flag" t-out="lbl_open"/>
+                                    </div>
+                                    <div class="mv-tt-day-list">
+                                        <t t-foreach="day['slots']" t-as="slot">
+                                            <a t-att-href="slot['href']" class="mv-tt-row">
+                                                <t t-call="fitness_portal.mv_tt_row_body"/>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- One row of the timetable. Split out so the linked and unlinked forms
+         cannot drift apart. -->
+    <template id="mv_tt_row_body" name="CoreLab Timetable Row">
+        <span class="mv-tt-time" t-out="slot['time']"/>
+        <span class="mv-tt-body">
+            <span class="mv-tt-name" t-out="slot['name']"/>
+            <t t-if="slot['desc']">
+                <span class="mv-tt-desc" t-out="slot['desc']"/>
+            </t>
+            <span class="mv-tt-meta">
+                <t t-if="slot['teacher']"><t t-out="slot['teacher']"/></t>
+                <t t-if="slot['teacher'] and slot['room']"> · </t>
+                <t t-if="slot['room']"><t t-out="slot['room']"/></t>
+            </span>
+        </span>
+        <!-- status only, never a blocker: whichever of these shows, the row
+             is still a link to the class's own page -->
+        <t t-if="slot['state'] == 'booked'">
+            <span class="mv-badge-confirmed" t-out="lbl_booked"/>
+        </t>
+        <t t-elif="slot['state'] == 'full'">
+            <span class="mv-tt-flag" t-out="lbl_full"/>
+        </t>
+        <t t-else="">
+            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
         </t>
     </template>
 

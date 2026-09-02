@@ -75,6 +75,34 @@ class FitnessPortalBrand(http.Controller):
             ('Cache-Control', 'public, max-age=86400'),
         ])
 
+    # Chrome and Edge refuse to fire beforeinstallprompt unless a service
+    # worker with a fetch handler is registered, so without this the install
+    # button would simply never become available on Android or desktop.
+    #
+    # The handler is deliberately a pass-through with no caching. This is a
+    # live booking portal: a cache would happily serve a student a stale class
+    # list or a stale credit balance, which is a far worse bug than not being
+    # installable. Served from /my/ so its scope covers the portal and nothing
+    # else on the database.
+    SERVICE_WORKER = """// CoreLab portal service worker.
+// Exists so the browser considers the portal installable. It deliberately
+// does not cache: stale class availability or credit counts would be worse
+// than no offline support.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', () => {});
+"""
+
+    @http.route('/my/sw.js', type='http', auth='public', methods=['GET'], sitemap=False)
+    def portal_service_worker(self):
+        return request.make_response(self.SERVICE_WORKER, [
+            ('Content-Type', 'text/javascript; charset=utf-8'),
+            # the worker itself must not be cached hard, or a future change to
+            # it can take a week to reach an installed phone
+            ('Cache-Control', 'no-cache'),
+            ('Service-Worker-Allowed', '/my/'),
+        ])
+
     @http.route('/my/manifest.webmanifest', type='http', auth='public',
                 methods=['GET'], readonly=True)
     def portal_manifest(self):

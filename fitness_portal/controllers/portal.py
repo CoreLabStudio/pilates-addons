@@ -29,6 +29,10 @@ from odoo import http, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
+# The booking rule itself lives on the model; importing it keeps the
+# timetable's "booking opens ..." notice honest if the studio changes it.
+from odoo.addons.fitness_bookings.models.fitness_booking import BOOKING_WINDOW_DAYS
+
 try:
     from odoo.addons.payment.controllers.portal import PaymentPortal as _OdooPaymentPortal
     _PAYMENT_OK = True
@@ -57,6 +61,7 @@ PAYMENT_PARAM_DEFAULTS = {
 }
 
 PAYMENT_METHODS = ('bizum', 'transfer')
+
 
 
 class FitnessStudentPortal(http.Controller):
@@ -167,6 +172,20 @@ class FitnessStudentPortal(http.Controller):
             'lbl_explore_shop': _('Explore packages, memberships & classes'),
             'news_posts':       news_posts,
             'lbl_lets_book':    _("Let's book your first class."),
+            'lbl_timetable':      _('Weekly Timetable'),
+            'lbl_install_title':   _('Install CoreLab'),
+            'lbl_install_sub':     _('Add it to your home screen for one-tap booking.'),
+            'lbl_install_cta':     _('Install'),
+            'lbl_install_dismiss': _('Not now'),
+            'lbl_ios_title':       _('Add CoreLab to your Home Screen'),
+            'lbl_ios_step1':       _('Tap the Share button at the bottom of Safari.'),
+            'lbl_ios_step2':       _('Scroll down and tap "Add to Home Screen".'),
+            'lbl_ios_step3':       _('Tap "Add" in the top right corner.'),
+            'lbl_gen_step1':       _('Open your browser menu.'),
+            'lbl_gen_step2':       _('Choose "Install app" or "Add to Home screen".'),
+            'lbl_ios_foot':        _('CoreLab will then open like any other app, without the browser bars.'),
+            'lbl_timetable_desc': _('Every class we run, week by week'),
+            'lbl_timetable_cta':  _('View timetable'),
         })
 
     # ══════════════════════════════════════════════════════════
@@ -447,13 +466,45 @@ class FitnessStudentPortal(http.Controller):
         eligible_types = self._eligible_class_types(partner.id)
         discipline_ok = self._discipline_matches(event, eligible_types)
         seats_left = max(0, event.capacity - event.booked_seats) if event.capacity else None
+
+        # The booking window is decided here rather than left to the booking
+        # route. That route can only answer by redirecting to /my/studio with
+        # the error in the query string, which threw the student off the page
+        # they were reading. Checking first means the page can simply say when
+        # booking opens, and never offer a button that cannot work.
+        opens_at = event.start - timedelta(days=BOOKING_WINDOW_DAYS)
+        in_window = opens_at <= now
+
         can_book = (
             not existing
             and bool(eligible_types)
             and discipline_ok
+            and in_window
             and (seats_left is None or seats_left > 0)
             and event.start > now
         )
+
+        # Exactly one state drives the call to action. Ordered by what the
+        # student can actually act on: no point saying "booking opens Tuesday"
+        # to someone who has nothing to book it with, or offering either to
+        # someone looking at a class that is already full.
+        if existing:
+            book_state = 'booked'
+        elif event.start <= now:
+            book_state = 'past'
+        elif seats_left == 0:
+            book_state = 'full'
+        elif not (eligible_types and discipline_ok):
+            book_state = 'buy'
+        elif not in_window:
+            book_state = 'not_open'
+        else:
+            book_state = 'book'
+
+        shop_href = '/my/packages?%s' % urlencode({
+            'tab': 'classes',
+            'discipline': event.class_type_id.classroom_type or 'reformer',
+        })
 
         user_tz = self._user_tz()
         local_start = pytz.UTC.localize(event.start).astimezone(user_tz)
@@ -503,6 +554,12 @@ class FitnessStudentPortal(http.Controller):
         return request.render('fitness_portal.portal_student_class_detail', {
             'event':               event,
             'can_book':            can_book,
+            'book_state':          book_state,
+            'shop_href':           shop_href,
+            'opens_on': (
+                self._short_date(pytz.UTC.localize(opens_at).astimezone(user_tz))
+                if book_state == 'not_open' else None
+            ),
             'already_booked':      bool(existing),
             'seats_left':          seats_left,
             'seats_status_label':  seats_status_label,
@@ -1895,6 +1952,180 @@ class FitnessStudentPortal(http.Controller):
         if not event.class_type_id:
             return False
         return event.class_type_id.classroom_type in eligible_types
+
+
+    # ══════════════════════════════════════════════════════════
+    #  FULL WEEKLY TIMETABLE
+    # ══════════════════════════════════════════════════════════
+
+    # The studio's own timezone. Used only as a fallback for the timetable:
+    # _user_tz() answers UTC when a student has no tz set, and on a page whose
+    # entire purpose is "what time is this class" that would silently show
+    # every slot two hours out. A physical studio's timetable is far better
+    # defaulted to the studio's clock than to UTC.
+    STUDIO_TZ = 'Europe/Madrid'
+
+    def _timetable_tz(self):
+        student_tz = request.env.user.tz
+        try:
+            return pytz.timezone(student_tz or self.STUDIO_TZ)
+        except pytz.UnknownTimeZoneError:
+            return pytz.timezone(self.STUDIO_TZ)
+
+    @http.route('/my/timetable', type='http', auth='user', website=True, sitemap=False)
+    def timetable(self, discipline=None, **kw):
+        """The studio's full weekly timetable, independent of what a student owns.
+
+        A reference view, deliberately distinct from /my/studio: that page
+        answers "what can I book right now" and hides everything a student has
+        no credit for. This one answers "what does the studio run, and when",
+        which a student needs before deciding what to buy.
+
+        Rows come from fitness.class.schedule - the recurring definitions the
+        studio actually edits - so there is no second copy of the timetable to
+        drift. Each row is then matched to its next real occurrence through
+        recurrence_id, which is what makes a slot tappable and gives the times
+        a concrete instant to be converted from (a weekday plus a float hour
+        cannot be converted across a DST boundary on its own).
+
+        BOTH disciplines are rendered and the toggle switches them client-side.
+        The first version navigated between two URLs, which reloaded the page
+        and made the view jump as the browser restored scroll against a
+        different layout height. Nothing here is secret, the payload is small,
+        and swapping a class on two containers cannot jump.
+        """
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        _ = request.env._
+        partner = request.env.user.partner_id
+        now = fields.Datetime.now()
+        tz = self._timetable_tz()
+
+        active = discipline if discipline in ('reformer', 'barre') else 'reformer'
+        eligible_types = self._eligible_class_types(partner.id)
+
+        schedules = request.env['fitness.class.schedule'].sudo().search([
+            ('active', '=', True),
+        ])
+
+        # One batched read of upcoming occurrences for every schedule on the
+        # page, then matched back in Python. Asking per row turned this into
+        # one search per slot.
+        recurrences = schedules.mapped('recurrence_id')
+        upcoming = request.env['calendar.event'].sudo().search([
+            ('recurrence_id', 'in', recurrences.ids),
+            ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
+            ('start', '>', now),
+        ], order='start asc')
+        next_by_recurrence = {}
+        for ev in upcoming:
+            next_by_recurrence.setdefault(ev.recurrence_id.id, ev)
+
+        booked_event_ids = set(
+            request.env['fitness.booking'].search([
+                ('student_id', '=', partner.id),
+                ('state', 'in', ('booked', 'no_show')),
+                ('class_start', '>', now),
+            ]).mapped('calendar_event_id.id')
+        )
+
+        day_names = self._weekday_labels()
+        buckets = {'reformer': {}, 'barre': {}}
+
+        for sched in schedules:
+            disc = sched.class_type_id.classroom_type
+            if disc not in buckets:
+                continue
+            ev = next_by_recurrence.get(sched.recurrence_id.id)
+            if not ev:
+                # Schedule ended, or the horizon cron has not run. There is no
+                # class to show and nothing to link to, and a row that cannot
+                # be tapped is exactly what this page is meant not to have.
+                continue
+            local = pytz.UTC.localize(ev.start).astimezone(tz)
+            time_label = local.strftime('%H:%M')
+            weekday = local.weekday()
+
+            already = ev.id in booked_event_ids
+            seats_left = max(0, ev.capacity - ev.booked_seats) if ev.capacity else None
+
+            # Every row is an ordinary link to the class's own page, which is
+            # where the three booking states are explained. The grid used to
+            # decide them itself and render unbookable classes as dead rows,
+            # so a student could see a class and have no way to find out why
+            # they could not have it.
+            state = 'book'
+            if already:
+                state = 'booked'
+            elif seats_left == 0:
+                state = 'full'
+
+            buckets[disc].setdefault(weekday, []).append({
+                'time': time_label,
+                'name': sched.class_type_id.name,
+                'desc': sched.class_type_id.description or '',
+                'teacher': sched.teacher_user_id.name or '',
+                'room': sched.classroom_id.name or '',
+                'state': state,
+                'href': '/my/classes/%d' % ev.id,
+                'event_id': ev.id,
+            })
+
+        disciplines = {}
+        for disc, by_weekday in buckets.items():
+            days = []
+            for idx in range(7):
+                slots = sorted(by_weekday.get(idx, []), key=lambda s: s['time'])
+                if slots:
+                    days.append({'label': day_names[idx], 'slots': slots})
+            disciplines[disc] = days
+
+        return request.render('fitness_portal.portal_timetable', {
+            'page_name': 'timetable',
+            'disciplines': disciplines,
+            'active_discipline': active,
+            'has_credit': bool(eligible_types),
+            'tz_label': str(tz),
+            'title': _('Timetable'),
+            'subtitle': _('Every class we run, week by week'),
+            'lbl_reformer': _('Reformer'),
+            'lbl_barre': _('Barre'),
+            'lbl_empty': _('No classes scheduled for this discipline yet.'),
+            'lbl_booked': _('Booked'),
+            'lbl_full': _('Full'),
+            'lbl_open': _('Open'),
+            'lbl_buy_hint': _('You have no credit for these classes yet — tap any class to see the options.'),
+        })
+
+    def _short_date(self, dt):
+        """"Mon 8 Sep" in the active language, for the booking-window notice."""
+        lang = request.env.lang or DEFAULT_LANG
+        if _BABEL_OK:
+            try:
+                return _babel_format_date(dt.date(), format='EEE d MMM', locale=lang)
+            except Exception:
+                pass
+        return dt.strftime('%d/%m')
+
+    def _weekday_labels(self):
+        """Monday-first weekday names in the active language."""
+        lang = request.env.lang or DEFAULT_LANG
+        if _BABEL_OK:
+            try:
+                # 2024-01-01 was a Monday, so +idx walks Mon..Sun.
+                base = _date_cls(2024, 1, 1)
+                return [
+                    _babel_format_date(base + timedelta(days=i), format='EEEE',
+                                       locale=lang).capitalize()
+                    for i in range(7)
+                ]
+            except Exception:
+                pass
+        _ = request.env._
+        return [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'),
+                _('Friday'), _('Saturday'), _('Sunday')]
 
     # ══════════════════════════════════════════════════════════
     #  Message the Studio

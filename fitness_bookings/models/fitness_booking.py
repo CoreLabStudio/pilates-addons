@@ -4,6 +4,11 @@ from odoo.exceptions import ValidationError, UserError
 import logging
 _logger = logging.getLogger(__name__)
 
+# How far ahead a student may book. The portal timetable reads this so it can
+# say "booking opens on ..." in place instead of letting the student tap
+# through and bounce off the ValidationError below.
+BOOKING_WINDOW_DAYS = 7
+
 
 class FitnessBooking(models.Model):
     _name = 'fitness.booking'
@@ -179,7 +184,7 @@ class FitnessBooking(models.Model):
                 or self.env.user.has_group('base.group_system')
             )
         )
-        if not _tw_override and time_until.total_seconds() > 604800:
+        if not _tw_override and time_until.total_seconds() > BOOKING_WINDOW_DAYS * 86400:
             raise ValidationError(
                 f"Booking opens 7 days before the class. "
                 f"This class starts in {time_until.days}d "
