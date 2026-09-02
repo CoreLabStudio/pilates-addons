@@ -8,6 +8,8 @@
     <field name="subject">{{ 'Trial class request received · CoreLab' if object.lang == 'en_US' else ('Sol·licitud de classe de prova rebuda · CoreLab' if object.lang == 'ca_ES' else 'Solicitud de clase de prueba recibida · CoreLab') }}</field>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
+    <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
 
@@ -58,6 +60,8 @@
     <field name="subject">{{ 'Your CoreLab trial class is confirmed' if object.lang == 'en_US' else ('La teva classe de prova a CoreLab és confirmada' if object.lang == 'ca_ES' else 'Tu clase de prueba en CoreLab está confirmada') }}</field>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
+    <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
 
@@ -120,6 +124,8 @@
     <field name="subject">New Barre trial booked — {{ object.name }}</field>
     <field name="email_to"></field>
     <field name="auto_delete" eval="False"/>
+    <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="reply_to">{{ object.email or user.company_id.email_formatted }}</field>
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
   <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Admin</p>
@@ -166,6 +172,8 @@
     <field name="subject">{{ 'About your CoreLab trial class request' if object.lang == 'en_US' else ('Sobre la teva sol·licitud de classe de prova a CoreLab' if object.lang == 'ca_ES' else 'Sobre tu solicitud de clase de prueba en CoreLab') }}</field>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
+    <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
 

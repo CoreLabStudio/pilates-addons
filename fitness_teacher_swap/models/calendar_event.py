@@ -171,7 +171,11 @@ class CalendarEvent(models.Model):
 
         # 3. Target must be a valid, different teacher.
         new_teacher = self.env['res.users'].browse(new_teacher_id)
-        if not new_teacher.exists() or not new_teacher.has_group('fitness_core.group_fitness_teacher'):
+        # sudo() because has_group() refuses to answer about anyone but the
+        # current user unless the caller is superuser or an internal user -
+        # and an instructor is a portal user, so the check raised AccessError
+        # and every reassignment failed. Everything below already uses sudo().
+        if not new_teacher.exists() or not new_teacher.sudo().has_group('fitness_core.group_fitness_teacher'):
             raise UserError("The selected user is not a registered teacher.")
         if new_teacher.id == self.user_id.id:
             raise UserError(f"{new_teacher.name} is already the teacher for this class.")
