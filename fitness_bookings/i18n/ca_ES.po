@@ -24,11 +24,13 @@ msgstr "Nom"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__student_id
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__student_name
 msgid "Student"
 msgstr "Estudiant"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__calendar_event_id
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__class_name
 msgid "Class"
 msgstr "Classe"
 
@@ -96,3 +98,297 @@ msgstr "Instructor"
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__class_start
 msgid "Class Start"
 msgstr "Inici de la classe"
+
+#. module: fitness_bookings
+#: model:ir.model,name:fitness_bookings.model_fitness_booking_cancel_wizard
+msgid "Admin Late Cancellation"
+msgstr "Cancel·lació fora de termini (gestor)"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+msgid "Cancel Booking"
+msgstr "Cancel·lar reserva"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+msgid "Cancel Booking (Late)"
+msgstr "Cancel·lar reserva (fora de termini)"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+msgid "Discard"
+msgstr "Descartar"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__restore_credit
+msgid "Restore Credit"
+msgstr "Retornar el crèdit"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__restore_credit
+msgid ""
+"Return the student's credit even though this cancellation is within 2 hours "
+"of class."
+msgstr ""
+"Retorna el crèdit a l'estudiant encara que la cancel·lació sigui dins de les"
+" 2 hores prèvies a la classe."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_needaction
+msgid "Action Needed"
+msgstr "Requereix acció"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_ids
+msgid "Activities"
+msgstr "Activitats"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoració d'excepció d'activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_state
+msgid "Activity State"
+msgstr "Estat de l'activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icona del tipus d'activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_attachment_count
+msgid "Attachment Count"
+msgstr "Nombre d'adjunts"
+
+#. modules: fitness_bookings, fitness_notifications
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__booking_id
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_search
+msgid "Booking"
+msgstr "Reserva"
+
+#. modules: fitness_bookings, fitness_core, fitness_notifications,
+#. fitness_portal, fitness_subscriptions, fitness_teacher_swap, fitness_trials
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__create_uid
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__create_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__create_uid
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__create_uid
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__create_uid
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__create_uid
+msgid "Created by"
+msgstr "Creat per"
+
+#. modules: fitness_bookings, fitness_core, fitness_notifications,
+#. fitness_portal, fitness_subscriptions, fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__create_date
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__create_date
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__create_date
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_follower_ids
+msgid "Followers"
+msgstr "Seguidors"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidors (contactes)"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__has_message
+msgid "Has Message"
+msgstr "Té missatges"
+
+#. modules: fitness_bookings, fitness_core, fitness_notifications,
+#. fitness_packages, fitness_portal, fitness_reports, fitness_subscriptions,
+#. fitness_teacher_swap, fitness_trials
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__id
+#: model:ir.model.fields,field_description:fitness_core.field_payment_method__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_account_move__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__id
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_ir_http__id
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__id
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_booking__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__id
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_calendar_event__id
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__id
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_exception_icon
+msgid "Icon"
+msgstr "Icona"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_is_follower
+msgid "Is Follower"
+msgstr "És seguidor"
+
+#. modules: fitness_bookings, fitness_core, fitness_notifications,
+#. fitness_portal, fitness_subscriptions, fitness_teacher_swap, fitness_trials
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__write_uid
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__write_uid
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__write_uid
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__write_uid
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__write_uid
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__write_uid
+msgid "Last Updated by"
+msgstr "Última modificació per"
+
+#. modules: fitness_bookings, fitness_core, fitness_notifications,
+#. fitness_portal, fitness_subscriptions, fitness_teacher_swap, fitness_trials
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__write_date
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__write_date
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__write_date
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__write_date
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__write_date
+msgid "Last Updated on"
+msgstr "Última modificació el"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de lliurament del missatge"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Data límit de la meva activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Esdeveniment de la propera activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Data límit de la propera activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resum de la propera activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_type_id
+msgid "Next Activity Type"
+msgstr "Tipus de la propera activitat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Nombre d'accions"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_has_error_counter
+msgid "Number of errors"
+msgstr "Nombre d'errors"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__rating_ids
+msgid "Ratings"
+msgstr "Valoracions"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__activity_user_id
+msgid "Responsible User"
+msgstr "Usuari responsable"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de lliurament de l'SMS"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__website_message_ids
+msgid "Website Messages"
+msgstr "Missatges del lloc web"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__class_start
+msgid "Start Time"
+msgstr "Hora d'inici"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__display_name
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_ids
+msgid "Messages"
+msgstr "Missatges"

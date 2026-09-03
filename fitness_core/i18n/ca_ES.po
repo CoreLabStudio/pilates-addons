@@ -164,6 +164,7 @@ msgid "Good evening"
 msgstr "Bon vespre"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__today_classes
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Classes Today"
 msgstr "Classes d'avui"
@@ -174,6 +175,7 @@ msgid "Students"
 msgstr "Estudiants"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__pending_swaps
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Instructor Swaps"
 msgstr "Canvis d'instructor"
@@ -184,6 +186,7 @@ msgid "Today's Classes"
 msgstr "Classes d'avui"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__pending_trials
 #: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_admin_dashboard_form
 msgid "Pending Trials"
 msgstr "Proves pendents"
@@ -285,6 +288,7 @@ msgid "Trials"
 msgstr "Classes de prova"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__active_students
 #: model:ir.ui.menu,name:fitness_core.menu_group_bookings
 msgid "Students"
 msgstr "Estudiants"
@@ -360,6 +364,8 @@ msgid "Settings"
 msgstr "Configuració"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__name
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__name
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__name
 msgid "Name"
@@ -370,6 +376,7 @@ msgstr "Nom"
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__active
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__active
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__active
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__active
 msgid "Active"
 msgstr "Actiu"
 
@@ -412,6 +419,7 @@ msgstr "Capacitat"
 #. module: fitness_core
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__session_type
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__session_type
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__name
 msgid "Session Type"
 msgstr "Tipus de sessió"
 
@@ -499,6 +507,7 @@ msgstr "Equipament / material"
 #. module: fitness_core
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__description
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__description
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__description
 msgid "Description"
 msgstr "Descripció"
 
@@ -579,6 +588,7 @@ msgid "Body"
 msgstr "Contingut"
 
 #. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__image_1920
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__image
 msgid "Image"
 msgstr "Imatge"
@@ -590,6 +600,7 @@ msgstr "Data de publicació"
 
 #. module: fitness_core
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__sequence
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__sequence
 msgid "Sequence"
 msgstr "Seqüència"
 
@@ -597,3 +608,206 @@ msgstr "Seqüència"
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__body_excerpt
 msgid "Body Excerpt"
 msgstr "Extracte"
+
+#. module: fitness_core
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_closure_day__state__applied
+msgid "Applied"
+msgstr "Aplicat"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_list
+msgid "Bookings Refunded"
+msgstr "Reserves reemborsades"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_list
+msgid "Classes Suppressed"
+msgstr "Classes suprimides"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_closure_day.py:0
+msgid "Classes on %s"
+msgstr "Classes del %s"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_form
+msgid "Close This Day"
+msgstr "Tancar aquest dia"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_form
+msgid "Closure Day"
+msgstr "Dia de tancament"
+
+#. module: fitness_core
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_closure_day__state__draft
+msgid "Draft"
+msgstr "Esborrany"
+
+#. module: fitness_core
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_teacher_classes
+msgid "Instructor Classes"
+msgstr "Classes de l'instructor"
+
+#. module: fitness_core
+#: model_terms:ir.actions.act_window,help:fitness_core.action_fitness_closure_day
+msgid "Mark a holiday or studio closure"
+msgstr "Marca un festiu o un tancament de l'estudi"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "New Schedule"
+msgstr "Horari nou"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid ""
+"Odoo's Dashboards app is not installed on this database. Install it from "
+"Apps to use this link."
+msgstr ""
+"L'aplicació Taulers d'Odoo no està instal·lada en aquesta base de dades. "
+"Instal·la-la des d'Aplicacions per fer servir aquest enllaç."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_form
+msgid "Preview Affected Classes"
+msgstr "Veure classes afectades"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_form
+msgid "Reopen Day"
+msgstr "Reobrir el dia"
+
+#. module: fitness_core
+#: model:ir.model,name:fitness_core.model_fitness_closure_day
+msgid "Studio Closure Day"
+msgstr "Dia de tancament de l'estudi"
+
+#. module: fitness_core
+#: model:ir.model.constraint,message:fitness_core.constraint_fitness_closure_day_unique_date
+msgid "That date is already marked as a closure day."
+msgstr "Aquesta data ja està marcada com a dia de tancament."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "The first %(day)s on or after %(start)s falls after the end date."
+msgstr ""
+"El primer %(day)s a partir del %(start)s queda després de la data de fi."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_closure_day.py:0
+msgid "This closure day has already been applied."
+msgstr "Aquest dia de tancament ja s'ha aplicat."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_closure_day_form
+msgid "e.g. Christmas Day"
+msgstr "p. ex. Nadal"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_closure_day__name
+msgid "e.g. Christmas Day, staff training"
+msgstr "p. ex. Nadal, formació de l'equip"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__available_seats
+msgid "Available Seats"
+msgstr "Places disponibles"
+
+#. modules: fitness_core, fitness_reports
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__booked_seats
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__booked_count
+msgid "Booked Seats"
+msgstr "Places reservades"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__fitness_note
+msgid "Class Note"
+msgstr "Nota de la classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__image_1920
+msgid "Class Photo"
+msgstr "Foto de la classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__image_512
+msgid "Class Photo (512)"
+msgstr "Foto de la classe (512)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__class_state
+msgid "Class Status"
+msgstr "Estat de la classe"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__preview_classes_html
+msgid "Classes Preview"
+msgstr "Vista prèvia de classes"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__code
+msgid "Code"
+msgstr "Codi"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__header_date
+msgid "Header Date"
+msgstr "Data de capçalera"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__header_greeting
+msgid "Header Greeting"
+msgstr "Salutació de capçalera"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__image_512
+msgid "Image (512)"
+msgstr "Imatge (512)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__is_fitness_class
+msgid "Is Fitness Class"
+msgstr "És classe de l'estudi"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__capacity_max
+msgid "Max Participants"
+msgstr "Participants màxims"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__preview_messages_html
+msgid "Messages Preview"
+msgstr "Vista prèvia de missatges"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__capacity_min
+msgid "Min Participants"
+msgstr "Participants mínims"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__preview_trials_html
+msgid "Trials Preview"
+msgstr "Vista prèvia de classes de prova"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__unread_messages
+msgid "Unread Messages"
+msgstr "Missatges sense llegir"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__display_name
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"

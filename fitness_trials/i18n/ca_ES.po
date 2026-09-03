@@ -199,3 +199,13 @@ msgstr "Correu de confirmació enviat"
 #: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__confirmation_email_sent_date
 msgid "Confirmation Sent On"
 msgstr "Confirmació enviada el"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__create_date
+msgid "Received On"
+msgstr "Rebut el"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"

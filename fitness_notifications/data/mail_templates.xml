@@ -46,7 +46,7 @@
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
-      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
+      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Crèdits restants del teu paquet: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
@@ -68,7 +68,7 @@
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
-      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
+      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Créditos restantes en tu paquete: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>

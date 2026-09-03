@@ -421,6 +421,7 @@ msgstr "Classe reservada · coberta per la subscripció"
 # ── Checkout flow
 # ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_portal.selection__sale_order__fitness_payment_method__bizum
 msgid "Bizum"
 msgstr "Bizum"
 
@@ -771,9 +772,11 @@ msgid "Back to Classes"
 msgstr "Tornar a les classes"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Instructor"
-msgstr "Instructora"
+msgstr "Instructor"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
@@ -1848,6 +1851,8 @@ msgid "All time"
 msgstr "Sempre"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "This month"
 msgstr "Aquest mes"
@@ -2283,6 +2288,7 @@ msgid "Card (online)"
 msgstr "Targeta (en línia)"
 
 #. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__message_ids
 #: model:ir.ui.menu,name:fitness_portal.menu_fitness_studio_messages
 msgid "Messages"
 msgstr "Missatges"
@@ -2309,6 +2315,7 @@ msgstr "Des d'administració"
 
 #. module: fitness_portal
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__body
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__body
 msgid "Message"
 msgstr "Missatge"
 
@@ -2450,3 +2457,249 @@ msgstr "Encara no tens crèdit per a aquesta classe."
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Explore memberships, packages & classes"
 msgstr "Explora membresies, paquets i classes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "+%d class"
+msgstr "+%d classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Choose \"Install app\" or \"Add to Home screen\"."
+msgstr "Tria \"Instal·lar app\" o \"Afegeix a la pantalla d'inici\"."
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__fri
+msgid "Friday"
+msgstr "Divendres"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__mon
+msgid "Monday"
+msgstr "Dilluns"
+
+#. module: fitness_portal
+#: model:ir.actions.act_window,name:fitness_portal.action_new_conversation_wizard
+#: model:ir.actions.server,name:fitness_portal.server_action_new_conversation
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_new_conversation_wizard_form
+msgid "New Message"
+msgstr "Missatge nou"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes available right now."
+msgstr "Ara mateix no hi ha classes disponibles."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No orders found."
+msgstr "No s'han trobat comandes."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Open"
+msgstr "Obert"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Open your browser menu."
+msgstr "Obre el menú del teu navegador."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Opening promo bonus"
+msgstr "Bonus de promoció d'obertura"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__sat
+msgid "Saturday"
+msgstr "Dissabte"
+
+#. module: fitness_portal
+#: model:ir.model,name:fitness_portal.model_fitness_studio_new_conversation_wizard
+msgid "Start a new admin-initiated conversation"
+msgstr "Iniciar una conversa des d'administració"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__sun
+msgid "Sunday"
+msgstr "Diumenge"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "This class has been cancelled and can no longer be booked."
+msgstr "Aquesta classe s'ha cancel·lat i ja no es pot reservar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/payment_guard.py:0
+msgid "This order has already been paid. You have not been charged again."
+msgstr "Aquesta comanda ja està pagada. No se t'ha cobrat de nou."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid ""
+"This order has not been paid yet. Please complete the payment before "
+"confirming your purchase."
+msgstr ""
+"Aquesta comanda encara no s'ha pagat. Completa el pagament abans de "
+"confirmar la compra."
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__thu
+msgid "Thursday"
+msgstr "Dijous"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__tue
+msgid "Tuesday"
+msgstr "Dimarts"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__wed
+msgid "Wednesday"
+msgstr "Dimecres"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Welcome"
+msgstr "Benvinguda"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__display_name_computed
+msgid "Display Name Computed"
+msgstr "Nom mostrat (calculat)"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__has_unread
+msgid "Has Unread"
+msgstr "Té sense llegir"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_is_teacher
+msgid "Is Instructor"
+msgstr "És instructor"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__last_activity
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_studio_conversation_list
+msgid "Last Activity"
+msgstr "Última activitat"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__consent_marketing_date
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__consent_marketing_date
+msgid "Marketing Consent On"
+msgstr "Consentiment de màrqueting el"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__consent_marketing
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__consent_marketing
+msgid "Marketing Email Consent"
+msgstr "Consentiment de correus de màrqueting"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__message_count
+msgid "Message Count"
+msgstr "Nombre de missatges"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__partner_id
+msgid "Partner"
+msgstr "Contacte"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__role
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_studio_conversation_list
+msgid "Role"
+msgstr "Rol"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__thread_html
+msgid "Thread"
+msgstr "Conversa"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__reply_body
+msgid "Your Reply"
+msgstr "La teva resposta"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__user_id
+msgid "User"
+msgstr "Usuari"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Description"
+msgstr "Descripció"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Duration"
+msgstr "Durada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Room"
+msgstr "Sala"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Note from the studio"
+msgstr "Nota de l'estudi"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%d h"
+msgstr "%d h"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%d min"
+msgstr "%d min"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(h)d h %(m)d min"
+msgstr "%(h)d h %(m)d min"
