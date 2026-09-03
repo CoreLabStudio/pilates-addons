@@ -32,6 +32,7 @@ from odoo.http import request
 # The booking rule itself lives on the model; importing it keeps the
 # timetable's "booking opens ..." notice honest if the studio changes it.
 from odoo.addons.fitness_bookings.models.fitness_booking import BOOKING_WINDOW_DAYS
+from odoo.addons.fitness_core import class_colors
 
 try:
     from odoo.addons.payment.controllers.portal import PaymentPortal as _OdooPaymentPortal
@@ -2065,6 +2066,13 @@ class FitnessStudentPortal(http.Controller):
             buckets[disc].setdefault(weekday, []).append({
                 'time': time_label,
                 'name': sched.class_type_id.name,
+                # Reformer reads blue and Barre brown, so the two rooms are
+                # tellable apart in the list and not only by which tab is
+                # selected. One flat colour per discipline, matching the
+                # toggle: the per-class-type shading in class_colors is held
+                # back for the calendar view. One class sets the background
+                # and its measured text colour together.
+                'shade': class_colors.solid_class(disc),
                 'desc': sched.class_type_id.description or '',
                 'teacher': sched.teacher_user_id.name or '',
                 'room': sched.classroom_id.name or '',

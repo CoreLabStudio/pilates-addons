@@ -2704,7 +2704,11 @@
     <!-- One row of the timetable. Split out so the linked and unlinked forms
          cannot drift apart. -->
     <template id="mv_tt_row_body" name="CoreLab Timetable Row">
-        <span class="mv-tt-time" t-out="slot['time']"/>
+        <!-- The time carries the class type's shade: blue for reformer,
+             brown for barre, darker the harder the class. The one class sets
+             background and text colour together - they were measured as a
+             pair and must not be combined independently. -->
+        <span t-attf-class="mv-tt-time #{slot.get('shade') or ''}" t-out="slot['time']"/>
         <span class="mv-tt-body">
             <span class="mv-tt-name" t-out="slot['name']"/>
             <t t-if="slot['desc']">

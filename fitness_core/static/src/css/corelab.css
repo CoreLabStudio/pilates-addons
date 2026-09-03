@@ -25,8 +25,56 @@
   --mv-clay-dark:   var(--mv-btn-hover); /* alias → all button hovers become Paco dark */
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
   --mv-ink:         #92786C;   /* Hemp brown */
+
+  /* Discipline colour coding. Reformer reads blue, Barre brown, and within
+     each family three shades run light -> deep with the class type's
+     intensity. Three tiers rather than one shade per class type: the studio
+     runs twenty types, and twenty shades of two hues cannot be told apart in
+     a list, which is what the coding is for.
+
+     Measured against WCAG AA (4.5:1; all of these carry small text). Light
+     and mid shades take Paco brown, only the deep shades are dark enough for
+     cream. Never pair a shade with a text colour other than the one named:
+       reformer-light #CFE0EA + #50423D = 7.09:1
+       reformer-mid   #A9C2D0 + #50423D = 5.17:1
+       reformer-deep  #3D6B87 + #FAF9F6 = 5.46:1
+       barre-light    #CBBFB8 + #50423D = 5.34:1
+       barre-mid      #92786C + #18110C = 4.56:1
+       barre-deep     #68554C + #FAF9F6 = 6.67:1
+     reformer-mid is the logo's own blue. reformer-deep is the brand heather
+     darkened: heather #5A8BA6 carries white at only 3.70:1 and misses AA. */
+  /* The flat discipline colours are the logo's own two, read out of the logo
+     PNG: 96.2% of the mark is #92786C and 3.8% is #A9C2D0. Fills only, and
+     only with near-black text - the one text colour clearing AA on both:
+       #A9C2D0 + #18110C = 10.06:1
+       #92786C + #18110C =  4.56:1   (passes, with almost no headroom)
+     White and cream FAIL on both, so never pair one with a light text.
+     Neither is readable as text on cream either (1.76:1 and 3.89:1). */
+  --mv-discipline-reformer: #A9C2D0;
+  --mv-discipline-barre:    #92786C;
+  --mv-on-discipline:       #18110C;
+
+  --mv-reformer-light: #CFE0EA;
+  --mv-reformer-mid:   #A9C2D0;
+  --mv-reformer-deep:  #3D6B87;
+  /* Derived from the logo brown, so no chocolate-based brown is left standing
+     in as a Barre colour. Mid IS the logo brown, mirroring the Reformer family
+     whose mid tier is the logo blue. Mid takes near-black text, not Paco - the
+     logo brown is too light for Paco to be read on it (2.34:1). */
+  --mv-barre-light:    #CBBFB8;
+  --mv-barre-mid:      #92786C;
+  --mv-barre-deep:     #68554C;
+  --mv-on-shade-light: #50423D;
+  --mv-on-shade-deep:  #FAF9F6;
   --mv-paco:        #50423D;   /* Paco brown — dark, for headings and strong text */
   --mv-active-fill: #7A6458;   /* darkened hemp for active pill/segment — 5.26:1 on #FAF9F6 */
+  /* Brown TEXT. The logo brown #92786C is the brand's brown for fills, but as
+     text on cream it measures 3.89:1 and misses AA - product names and prices
+     on the shop were failing. This is the same darkened hemp the active pill
+     already uses, not a new colour: 5.26:1 on cream, 5.54:1 on white.
+     It is still not dark enough for the info-panel ground #EDE6DC (4.47:1),
+     so the one element sitting on that uses --mv-paco instead. */
+  --mv-ink-text:    var(--mv-active-fill);
   --mv-muted:       #5E534A;   /* muted text */
   --mv-muted2:      #7A6D65;   /* lighter muted */
   --mv-ok-bg:       #E6EDEA;
@@ -76,7 +124,7 @@ body:has(.mv-app) #wrapwrap > main {
 
 .mv-app {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-bg);
   min-height: 100svh;
   padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
@@ -163,7 +211,7 @@ body:has(.mv-app) #wrapwrap > main {
   -webkit-tap-highlight-color: transparent;
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
 }
-.mv-photo-upload-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-photo-upload-btn:active { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 
 /* ── 5. Curved-line divider (SVG inline) ────────────────────── */
 .mv-curve {
@@ -185,7 +233,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.1;
 }
@@ -199,7 +247,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-credit-badge { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; text-align: center; }
 /* Rendered from a single value built in Python (e.g. "7 / 10") so the markup
    holds no translatable fragments. */
-.mv-credit-count { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink); line-height: 1; }
+.mv-credit-count { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink-text); line-height: 1; }
 .mv-credit-label { font-size: 0.68rem; color: var(--mv-muted2); letter-spacing: 0.01em; margin-top: 2px; }
 
 /* ── 7. Section / day labels ────────────────────────────────── */
@@ -294,7 +342,10 @@ body:has(.mv-app) #wrapwrap > main {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   background: rgba(250,249,246,0.84);
-  color: var(--mv-ink);
+  /* The logo brown measures 3.89:1 on this near-white pill and misses AA at
+     10px. Paco takes it to 9.12:1. The logo brown stays the brand's brown for
+     fills; it is simply not dark enough to be read as text. */
+  color: var(--mv-paco);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -312,7 +363,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   text-decoration: none !important;
   display: block;
@@ -374,7 +425,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 2px;
 }
 .mv-upcoming-meta {
@@ -460,7 +511,7 @@ body:has(.mv-app) #wrapwrap > main {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-size: 1rem;
   transition: transform var(--mv-t-fast);
   border: none;
@@ -478,7 +529,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.65rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.15;
 }
@@ -490,7 +541,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-detail-desc {
   font-size: 0.91rem;
   line-height: 1.72;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   white-space: pre-line;
 }
@@ -516,7 +567,7 @@ body:has(.mv-app) #wrapwrap > main {
 }
 .mv-teacher-name {
   font-size: 0.9rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-weight: 500;
   margin: 0 0 1px;
 }
@@ -683,7 +734,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-roster-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.2rem; font-weight: 400;
-  color: var(--mv-ink); margin: 0 0 4px;
+  color: var(--mv-ink-text); margin: 0 0 4px;
 }
 .mv-roster-sub  { font-size:0.8rem; color:var(--mv-muted); margin:0; }
 .mv-roster-pill {
@@ -842,7 +893,7 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
   padding: 9px 20px;
   border-radius: 20px;
   border: 1.5px solid var(--mv-ink);
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
   font-weight: 600;
   font-size: 0.875rem;
   text-decoration: none !important;
@@ -1000,7 +1051,7 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
 .mv-login-body .form-control {
   border: 1.5px solid var(--mv-border) !important;
   border-radius: var(--mv-r-sm) !important;
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
   background: var(--mv-bg) !important;
   font-size: 0.9rem;
 }
@@ -1045,7 +1096,7 @@ body:has(.mv-bottom-nav) #wrapwrap,
 body:has(.mv-bottom-nav) #wrap {
   background: var(--mv-bg) !important;
   font-family: 'Inter', system-ui, sans-serif !important;
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
 }
 
 body.o_portal #wrapwrap > main,
@@ -1069,14 +1120,14 @@ body:has(.mv-bottom-nav) h2,
 body:has(.mv-bottom-nav) h3 {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 body:has(.mv-bottom-nav) .o_portal_wrap h1 { font-size: 1.4rem; }
 
 /* Tables */
 body:has(.mv-bottom-nav) table.table {
   font-size: 0.85rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 body:has(.mv-bottom-nav) table.table thead th {
   font-size: 0.72rem;
@@ -1118,7 +1169,7 @@ body:has(.mv-bottom-nav) .btn-primary:hover,
 
 /* Pagination */
 body:has(.mv-bottom-nav) .o_portal_pager .page-link {
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   border-color: var(--mv-border);
   background: transparent;
 }
@@ -1198,7 +1249,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 4px;
   line-height: 1.1;
 }
@@ -1231,12 +1282,12 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   border-radius: var(--mv-r-sm);
   margin-bottom: 8px;
   text-decoration: none;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   box-shadow: 0 1px 3px rgba(80,66,61,0.05);
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-menu-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-menu-row:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-menu-row:active { transform: scale(0.98); opacity: 0.82; }
 
 .mv-menu-icon {
@@ -1259,7 +1310,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-menu-title {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-menu-desc {
   font-size: 0.75rem;
@@ -1312,11 +1363,11 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   margin-bottom: 10px;
   line-height: 1.2;
 }
-.mv-cl-body p { font-size: 0.855rem; color: var(--mv-ink); line-height: 1.65; margin-bottom: 10px; }
+.mv-cl-body p { font-size: 0.855rem; color: var(--mv-ink-text); line-height: 1.65; margin-bottom: 10px; }
 .mv-cl-pillars { margin: 10px 0 12px; display: flex; flex-direction: column; gap: 6px; }
 .mv-cl-pillar {
   font-size: 0.82rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
   padding-left: 10px;
   border-left: 2px solid var(--mv-clay);
@@ -1336,7 +1387,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-empty {
   padding: 40px 20px;
   text-align: center;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-size: 0.88rem;
 }
 .mv-empty a {
@@ -1393,7 +1444,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   border: none;
   cursor: pointer;
   padding: 0;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   border-radius: 50%;
   -webkit-tap-highlight-color: transparent;
   transition: background var(--mv-t-fast);
@@ -1472,7 +1523,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-notif-title {
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-notif-body {
   font-size: 0.76rem;
@@ -1496,7 +1547,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   gap: 5px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-card-bg);
   border-radius: 999px;
   padding: 7px 14px;
@@ -1522,7 +1573,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   padding: 5px 14px;
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
 }
-.mv-day-jump-btn:hover { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-day-jump-btn:hover { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 
 /* ── 21. Packages grid ──────────────────────────────────────── */
 .mv-pkg-grid {
@@ -1558,6 +1609,46 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   background: var(--mv-active-fill);
   border-color: var(--mv-active-fill);
   color: var(--mv-bg);
+}
+
+/* Discipline-aware accents on the shop.
+   The Buy button was fixed to heather blue, so a Barre package carried a blue
+   button; the active filter pill was fixed to the neutral brown fill, so the
+   Reformer filter went brown when you picked it. Both now take the colour of
+   the discipline they actually belong to.
+
+   No markup was needed: the cards already carry data-ct and the pills already
+   carry data-filter. Overriding the button tokens on the card lets the button
+   follow without touching its own rule.
+
+   The fills are the logo's own colours and the text on them is near-black,
+   the only text colour that clears AA on both.
+
+   Hover LIGHTENS the fill rather than darkening it. The usual darken-on-hover
+   would have taken #92786C to #82695E, which drops near-black text to 3.67:1
+   and fails - with dark text on a mid-tone fill, darkening the fill closes the
+   gap instead of opening it.
+     #18110C on #A9C2D0 10.06:1, hover #B6CCD8 11.22:1
+     #18110C on #92786C  4.56:1, hover #9E877C  5.52:1 */
+.mv-pkg-card[data-ct="reformer"] {
+  --mv-btn-bg: var(--mv-discipline-reformer);
+  --mv-btn-fg: var(--mv-on-discipline);
+  --mv-clay-dark: #B6CCD8;
+}
+.mv-pkg-card[data-ct="barre"] {
+  --mv-btn-bg: var(--mv-discipline-barre);
+  --mv-btn-fg: var(--mv-on-discipline);
+  --mv-clay-dark: #9E877C;
+}
+.mv-pkg-pill-btn.mv-active[data-filter="reformer"] {
+  background: var(--mv-discipline-reformer);
+  border-color: var(--mv-discipline-reformer);
+  color: var(--mv-on-discipline);
+}
+.mv-pkg-pill-btn.mv-active[data-filter="barre"] {
+  background: var(--mv-discipline-barre);
+  border-color: var(--mv-discipline-barre);
+  color: var(--mv-on-discipline);
 }
 
 /* Hierarchical filter — timeframe row (step 2) */
@@ -1597,7 +1688,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 300;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 
 .mv-pkg-discipline {
@@ -1618,7 +1709,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.2;
 }
@@ -1626,7 +1717,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-pkg-price {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1;
 }
@@ -1711,7 +1802,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
 }
 
@@ -1741,7 +1832,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   -webkit-tap-highlight-color: transparent; user-select: none;
 }
 .mv-month-group > summary::-webkit-details-marker { display: none; }
-.mv-month-label { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink); flex: 1; }
+.mv-month-label { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink-text); flex: 1; }
 .mv-month-count { font-size: 0.7rem; color: var(--mv-muted); background: var(--mv-border); border-radius: 999px; padding: 2px 8px; }
 .mv-month-chevron { flex-shrink: 0; stroke: var(--mv-muted); fill: none; width: 15px; height: 15px; transition: transform 0.2s ease; }
 details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
@@ -1795,7 +1886,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   flex-shrink: 0;
 }
 .mv-back-link:hover,
-.mv-back-link:active { color: var(--mv-ink); text-decoration: none; }
+.mv-back-link:active { color: var(--mv-ink-text); text-decoration: none; }
 /* The generic wording is a translation carrier for corelab.js; keep it out of
    the layout even if a framework reset re-declares display on spans. */
 .mv-back-link [hidden] { display: none !important; }
@@ -1825,7 +1916,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   transition: background var(--mv-t-fast), color var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-segment:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-segment:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-segment.mv-active {
   background: var(--mv-card-bg);
   color: var(--mv-active-fill);
@@ -1851,6 +1942,21 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-discipline-toggle .mv-segment:hover { color: var(--mv-paco); }
 .mv-discipline-toggle .mv-segment.mv-active:hover { color: var(--mv-btn-fg); }
+
+/* The selected pill is no longer one fixed "selected" colour - it takes the
+   discipline's own family, so the colour itself says which room is showing.
+   The attribute selector outranks the plain .mv-active rules above, including
+   their hover forms, in either source order. */
+.mv-discipline-toggle .mv-segment[data-discipline="reformer"].mv-active,
+.mv-discipline-toggle .mv-segment[data-discipline="reformer"].mv-active:hover {
+  background: var(--mv-discipline-reformer);
+  color: var(--mv-on-discipline);
+}
+.mv-discipline-toggle .mv-segment[data-discipline="barre"].mv-active,
+.mv-discipline-toggle .mv-segment[data-discipline="barre"].mv-active:hover {
+  background: var(--mv-discipline-barre);
+  color: var(--mv-on-discipline);
+}
 
 /* Timetable — day cards, matching the public site's weekly grid */
 .mv-timetable-hint {
@@ -1919,6 +2025,33 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-weight: 600;
   color: var(--mv-clay-text);
 }
+
+/* A coloured time reads as a chip. These come after .mv-tt-time so they win
+   its colour on equal specificity, and each sets background and text colour
+   together - the pair is what was measured. */
+.mv-tt-time[class*="mv-solid-"],
+.mv-tt-time[class*="mv-shade-"] {
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+/* What the portal uses today: one flat colour per discipline, the same one the
+   selected toggle pill takes, so a page reads as one discipline throughout. */
+.mv-solid-reformer { background: var(--mv-discipline-reformer); color: var(--mv-on-discipline); }
+.mv-solid-barre    { background: var(--mv-discipline-barre);    color: var(--mv-on-discipline); }
+
+/* RESERVED FOR THE CALENDAR VIEW, NOT YET BUILT. Three shades per discipline,
+   for a grid where different class types sit side by side in one row and the
+   shade is the only thing separating them. Down a single list column they read
+   as noise, so the list uses the solid pair above instead. */
+.mv-shade-reformer-light { background: var(--mv-reformer-light); color: var(--mv-on-shade-light); }
+.mv-shade-reformer-mid   { background: var(--mv-reformer-mid);   color: var(--mv-on-shade-light); }
+.mv-shade-reformer-deep  { background: var(--mv-reformer-deep);  color: var(--mv-on-shade-deep); }
+.mv-shade-barre-light    { background: var(--mv-barre-light);    color: var(--mv-on-shade-light); }
+.mv-shade-barre-mid      { background: var(--mv-barre-mid);      color: var(--mv-on-discipline); }
+.mv-shade-barre-deep     { background: var(--mv-barre-deep);     color: var(--mv-on-shade-deep); }
+
 .mv-tt-body { flex: 1; min-width: 0; }
 .mv-tt-name {
   display: block;
@@ -1938,7 +2071,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin-top: 2px;
   font-size: 0.75rem;
   line-height: 1.4;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-tt-meta {
   display: block;
@@ -1962,7 +2095,8 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-install-text { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 2px; }
 .mv-install-title { font-size: 0.92rem; font-weight: 600; color: var(--mv-paco); }
-.mv-install-sub { font-size: 0.78rem; line-height: 1.4; color: var(--mv-ink); }
+/* On --mv-info-bg #EDE6DC the darkened hemp reaches only 4.47:1; Paco is 7.75:1 */
+.mv-install-sub { font-size: 0.78rem; line-height: 1.4; color: var(--mv-paco); }
 .mv-install-actions { display: flex; align-items: center; gap: 10px; }
 .mv-install-btn {
   border: none;
@@ -2030,7 +2164,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 14px 0 0;
   font-size: 0.78rem;
   line-height: 1.5;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 
 /* Class detail — the two non-bookable states. Both explain themselves; the
@@ -2052,7 +2186,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-class-soon-sub {
   font-size: 0.83rem;
   line-height: 1.5;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 
 .mv-tt-flag {
@@ -2070,7 +2204,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.6rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.15;
 }
@@ -2153,7 +2287,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.1;
 }
 .mv-stat-value small {
@@ -2230,12 +2364,12 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   background: var(--mv-card-bg);
   border-radius: var(--mv-r-sm);
   text-decoration: none;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   box-shadow: 0 1px 3px rgba(80,66,61,0.05);
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-link-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-link-row:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-link-row:active { transform: scale(0.98); opacity: 0.82; }
 
 /* ── 27. Packages tab — title row + collapsing search ───────────── */
@@ -2254,7 +2388,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 5px 0 0;
   border-bottom: 1px solid transparent;
 }
-.mv-credit-line:hover { color: var(--mv-ink); border-bottom-color: var(--mv-border); text-decoration: none; }
+.mv-credit-line:hover { color: var(--mv-ink-text); border-bottom-color: var(--mv-border); text-decoration: none; }
 
 .mv-search-btn {
   width: 36px; height: 36px;
@@ -2287,7 +2421,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   width: 100%;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-card-bg);
   border: 1px solid var(--mv-border);
   border-radius: 999px;
@@ -2333,7 +2467,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-ledger-info { flex: 1; min-width: 0; }
 .mv-ledger-title {
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-weight: 500;
   margin: 0 0 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -2348,7 +2482,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.1;
 }
 .mv-ledger-balance-lbl {
@@ -2391,7 +2525,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-step--done .mv-step-dot     { background: var(--mv-sage); border-color: var(--mv-sage); }
 .mv-step--done .mv-step-label   { color: var(--mv-muted); }
 .mv-step--current .mv-step-dot  { background: var(--mv-accent); border-color: var(--mv-accent); }
-.mv-step--current .mv-step-label{ color: var(--mv-ink); font-weight: 700; }
+.mv-step--current .mv-step-label{ color: var(--mv-ink-text); font-weight: 700; }
 .mv-step-line {
   flex: 1;
   height: 1px;
@@ -2426,13 +2560,13 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-summary-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
 }
 .mv-summary-total {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.35rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   white-space: nowrap;
 }
 
@@ -2456,7 +2590,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   -webkit-tap-highlight-color: transparent;
 }
 .mv-paymethod-head input { accent-color: var(--mv-accent); width: 18px; height: 18px; flex-shrink: 0; }
-.mv-paymethod-name { font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); }
+.mv-paymethod-name { font-size: 0.9rem; font-weight: 500; color: var(--mv-ink-text); }
 /* Details stay collapsed until that method is the selected one. */
 .mv-paymethod-detail { display: none; padding: 0 14px 14px 44px; }
 .mv-paymethod:has(input:checked) .mv-paymethod-detail { display: block; }
@@ -2465,7 +2599,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted2); font-weight: 700; margin: 0 0 2px;
 }
 .mv-paymethod-detail dd {
-  font-size: 0.92rem; color: var(--mv-ink); margin: 0 0 8px;
+  font-size: 0.92rem; color: var(--mv-ink-text); margin: 0 0 8px;
   font-variant-numeric: tabular-nums; word-break: break-all;
 }
 .mv-paymethod-detail dd:last-child { margin-bottom: 0; }
@@ -2476,7 +2610,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 10px;
   padding: 4px 2px 18px;
   font-size: 0.85rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
 }
 .mv-terms-row input {
@@ -2485,7 +2619,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin-top: 1px;
   flex-shrink: 0;
 }
-.mv-terms-row a { color: var(--mv-ink); text-decoration: underline; }
+.mv-terms-row a { color: var(--mv-ink-text); text-decoration: underline; }
 
 .mv-btn-primary-lg {
   display: block;
@@ -2554,7 +2688,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   width: 100%;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.9rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-bg);
   border: 1.5px solid var(--mv-border);
   border-radius: var(--mv-r-sm);
@@ -2572,7 +2706,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   padding: 4px 20px 40px;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-prose p { margin: 0 0 14px; }
 
@@ -2596,14 +2730,14 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-order-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 2px;
 }
 .mv-order-meta { font-size: 0.74rem; color: var(--mv-muted); margin: 0; }
 .mv-order-amount {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -2613,8 +2747,9 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 
 /* ── 33c. Active package badge on card image ──────────────────── */
 .mv-card-tag-active {
+  /* White measured 2.68:1 on sage. Near-black is 6.97:1 and keeps the sage. */
   background: var(--mv-sage);
-  color: #fff;
+  color: var(--mv-on-discipline);
   top: auto;
   bottom: 6px;
   right: 6px;
@@ -2623,8 +2758,10 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 
 /* ── 33d. Private / contact-only card ─────────────────────────── */
 .mv-card-tag-private {
+  /* White measured 3.53:1 on this fill and missed AA. Near-black takes it to
+     5.29:1 and keeps the fill, rather than inventing another brown. */
   background: #9A8478;
-  color: #fff;
+  color: var(--mv-on-discipline);
 }
 .mv-pkg-card--contact {
   opacity: 0.92;
@@ -2648,7 +2785,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-sub-plan-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 14px;
 }
 .mv-sub-stat-row {
@@ -2667,7 +2804,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-sub-stat-value {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.92rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   text-align: right;
 }
 .mv-sub-progress-wrap {
@@ -2693,7 +2830,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-sub-slot {
   font-size: 0.84rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   padding: 5px 0;
   border-bottom: 1px solid var(--mv-divider);
 }
@@ -2740,7 +2877,7 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 .mv-notif-card--linked:hover { box-shadow: 0 2px 8px rgba(80,66,61,0.14); opacity: 0.93; }
 .mv-notif-card-main { flex: 1; min-width: 0; }
 .mv-notif-card-title {
-  font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); margin: 0 0 3px;
+  font-size: 0.9rem; font-weight: 500; color: var(--mv-ink-text); margin: 0 0 3px;
 }
 .mv-notif-card-body {
   font-size: 0.8rem; color: var(--mv-muted); margin: 0 0 4px;
@@ -2758,15 +2895,15 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
   cursor: pointer; white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
-.mv-mark-read-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-mark-read-btn:active { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 .mv-notif-viewall {
   display: block; text-align: center;
   padding: 10px 16px 2px; margin-top: 4px;
   border-top: 1px solid var(--mv-border);
   font-size: 0.78rem; font-weight: 600;
-  color: var(--mv-ink); text-decoration: none;
+  color: var(--mv-ink-text); text-decoration: none;
 }
-.mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink); }
+.mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink-text); }
 
 /* ── 35. Message thread (/my/messages) ──────────────────────── */
 .mv-msg-history {
@@ -2795,11 +2932,11 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 }
 .mv-msg-author {
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-msg-body {
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -2821,7 +2958,7 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 }
 .mv-msg-reply-text {
   font-size: 0.86rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -2837,13 +2974,13 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.08rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 24px 0 6px;
 }
 .mv-prose h3 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 16px 0 4px;
 }
 .mv-prose ul {
@@ -2977,7 +3114,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   border-radius: 0 var(--mv-r-sm) var(--mv-r-sm) 0;
   padding: 10px 14px;
   font-size: 0.82rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
   margin: 12px 0 0;
   white-space: pre-wrap;
@@ -3000,7 +3137,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   border: 1px solid var(--mv-border);
   border-radius: var(--mv-r);
   background: var(--mv-card-bg);
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-family: inherit;
   font-size: 0.9rem;
   resize: vertical;
@@ -3086,7 +3223,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
   font-weight: 500;
-  color: #92786C;
+  color: var(--mv-ink-text);
   margin: 0 0 3px;
   line-height: 1.3;
 }
@@ -3150,7 +3287,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 4px;
   line-height: 1.25;
 }
@@ -3357,14 +3494,14 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #92786C;
+  color: var(--mv-ink-text);
 }
 .mv-prompt-icon {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
   fill: none;
-  stroke: #92786C;
+  stroke: var(--mv-ink);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
