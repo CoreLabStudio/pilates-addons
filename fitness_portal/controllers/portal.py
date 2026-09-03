@@ -524,6 +524,17 @@ class FitnessStudentPortal(http.Controller):
         else:
             local_date_label = local_start.strftime('%A, %d %B')
 
+        minutes = int(round((event.stop - event.start).total_seconds() / 60)) if event.stop else 0
+        if minutes >= 60 and minutes % 60 == 0:
+            hours = minutes // 60
+            duration_label = _('%d h') % hours
+        elif minutes > 60:
+            duration_label = _('%(h)d h %(m)d min') % {'h': minutes // 60, 'm': minutes % 60}
+        elif minutes:
+            duration_label = _('%d min') % minutes
+        else:
+            duration_label = None
+
         if seats_left is None:
             seats_status_label = None
         elif seats_left == 0:
@@ -564,6 +575,12 @@ class FitnessStudentPortal(http.Controller):
             'already_booked':      bool(existing),
             'seats_left':          seats_left,
             'seats_status_label':  seats_status_label,
+            'duration_label':      duration_label,
+            'lbl_description':     _('Description'),
+            'lbl_duration':        _('Duration'),
+            'lbl_instructor':      _('Instructor'),
+            'lbl_room':            _('Room'),
+            'lbl_studio_note':     _('Note from the studio'),
             'local_start':         local_start,
             'local_stop':          local_stop,
             'local_date_label':    local_date_label,

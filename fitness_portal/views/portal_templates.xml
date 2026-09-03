@@ -826,29 +826,42 @@
                         </t>
                     </div>
 
-                    <!-- Description -->
+                    <!-- Labelled facts. The description used to open the page
+                         as an unlabelled block of copy, with the room buried in
+                         a meta line and the instructor implied by an avatar. -->
                     <t t-if="ct and ct.description">
-                        <p class="mv-detail-desc" t-out="ct.description"/>
+                        <div class="mv-detail-field">
+                            <div class="mv-detail-label" t-out="lbl_description"/>
+                            <p class="mv-detail-desc" t-out="ct.description"/>
+                        </div>
                     </t>
+
+                    <div class="mv-detail-facts">
+                        <t t-if="duration_label">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_duration"/>
+                                <span class="mv-detail-value" t-out="duration_label"/>
+                            </div>
+                        </t>
+                        <t t-if="event.user_id">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_instructor"/>
+                                <span class="mv-detail-value" t-out="event.user_id.name"/>
+                            </div>
+                        </t>
+                        <t t-if="event.classroom_id">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_room"/>
+                                <span class="mv-detail-value" t-out="event.classroom_id.name"/>
+                            </div>
+                        </t>
+                    </div>
 
                     <!-- Per-class note from studio (Task 4) -->
                     <t t-if="event.fitness_note">
                         <div class="mv-class-note">
-                            <div class="mv-class-note-label">Note from studio</div>
+                            <div class="mv-class-note-label" t-out="lbl_studio_note"/>
                             <t t-out="event.fitness_note"/>
-                        </div>
-                    </t>
-
-                    <!-- Teacher row -->
-                    <t t-if="event.user_id">
-                        <div class="mv-teacher-row">
-                            <div class="mv-teacher-avatar">
-                                <t t-out="(event.user_id.name[:1] if event.user_id.name else 'T').upper()"/>
-                            </div>
-                            <div>
-                                <p class="mv-teacher-name" t-out="event.user_id.name"/>
-                                <p class="mv-teacher-seats">Instructor</p>
-                            </div>
                         </div>
                     </t>
 

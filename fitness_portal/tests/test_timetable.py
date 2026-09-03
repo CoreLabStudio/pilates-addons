@@ -60,6 +60,14 @@ class TestTimetablePage(HttpCase):
             "group_ids": [(6, 0, [cls.env.ref("base.group_portal").id])],
         })
 
+        # a real room, so the class page has a Room to label - without one the
+        # row is correctly omitted and the label test fails for the wrong reason
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "TT Studio B",
+            "classroom_type": "reformer",
+            "capacity": 6,
+        })
+
         def class_type(name, discipline, desc=""):
             return cls.env["fitness.class.type"].create({
                 "name": name,
@@ -102,6 +110,7 @@ class TestTimetablePage(HttpCase):
                 "weekday": WEEKDAY_CODES[when.weekday()],
                 "start_time": hour,
                 "duration": 1.0,
+                "classroom_id": cls.room.id,
                 "date_start": when,
                 "horizon_weeks": 6,
             })
@@ -309,6 +318,30 @@ class TestTimetablePage(HttpCase):
         self.assertIn("/my/packages?tab=classes&amp;discipline=barre", html,
                       "barre class did not offer barre in the shop link")
         self.assertNotIn("Reserve My Spot", html)
+
+    def test_detail_labels_are_present_and_translated(self):
+        """Part B: the facts are labelled, not run together as prose."""
+        self.line.fitness_remaining_classes = 5
+        ev = self._next_event(self.sched_reformer)
+        html = self._detail(ev)
+        for label in ("Description", "Duration", "Instructor", "Room"):
+            self.assertIn(label, html, "%s label missing from the class page" % label)
+        self.assertIn("mv-detail-facts", html, "labelled facts block missing")
+
+        for lang, expected in (("es_ES", ("Descripci", "Duraci", "Sala")),
+                               ("ca_ES", ("Descripci", "Durada", "Sala"))):
+            self._use_lang(lang)
+            html = self._detail(ev)
+            for term in expected:
+                self.assertIn(term, html, "%s: %r missing" % (lang, term))
+        self._use_lang("en_US")
+
+    def test_duration_is_shown(self):
+        """Read off the event, so a one-off change to a class is reflected."""
+        self.line.fitness_remaining_classes = 5
+        html = self._detail(self._next_event(self.sched_reformer))
+        # the fixture schedules a one-hour class
+        self.assertIn("1 h", html, "duration not rendered")
 
     # ── data source and timezone ─────────────────────────────────────────
 

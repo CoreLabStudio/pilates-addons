@@ -68,6 +68,10 @@
                     <group>
                         <field name="email" string="Email" readonly="1"/>
                         <field name="phone" string="Phone" readonly="1"/>
+                        <!-- the one editable field on this form: the rest is a
+                             read-only view of what the student manages -->
+                        <field name="fitness_is_vip" string="VIP"
+                               groups="fitness_core.group_fitness_manager"/>
                     </group>
 
                 </sheet>
@@ -94,8 +98,29 @@
                 <field name="name" string="Student"/>
                 <field name="login" string="Login / Email"/>
                 <field name="phone" optional="show"/>
+                <field name="fitness_is_vip" string="VIP" optional="show"/>
                 <field name="active" optional="hide"/>
             </list>
+        </field>
+    </record>
+
+    <!-- VIP is a filter on this list, not a list of its own: opening a VIP
+         student has to land on the ordinary student form with its bookings,
+         packages and history, which a separate action would not do. -->
+    <record id="view_fitness_student_search" model="ir.ui.view">
+        <field name="name">fitness.student.search</field>
+        <field name="model">res.users</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <search string="Students">
+                <field name="name" string="Student"/>
+                <field name="login" string="Login / Email"/>
+                <filter name="filter_vip" string="VIP"
+                        domain="[('fitness_is_vip', '=', True)]"/>
+                <separator/>
+                <filter name="group_vip" string="VIP"
+                        context="{'group_by': 'fitness_is_vip'}"/>
+            </search>
         </field>
     </record>
 
@@ -108,6 +133,7 @@
             (0, 0, {'sequence': 10, 'view_mode': 'list', 'view_id': ref('fitness_portal.view_fitness_student_list')}),
             (0, 0, {'sequence': 20, 'view_mode': 'form', 'view_id': ref('fitness_portal.view_student_profile_simple')}),
         ]"/>
+        <field name="search_view_id" ref="fitness_portal.view_fitness_student_search"/>
     </record>
 
 
