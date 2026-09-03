@@ -15,18 +15,18 @@
                   decoration-success="is_active_client"
                   decoration-danger="is_churned"
                   decoration-warning="not is_active_client and not is_churned and days_inactive >= 30 and days_inactive &lt; 9999">
-                <field name="partner_id"             string="Estudiante"/>
-                <field name="is_active_client"       string="Activo"  widget="boolean"/>
-                <field name="is_churned"             string="Baja"    widget="boolean"/>
-                <field name="first_order_date"       string="1er Pedido"/>
-                <field name="total_revenue"          string="Ingresos ex-IVA (EUR)"
+                <field name="partner_id"             string="Student"/>
+                <field name="is_active_client"       string="Active"  widget="boolean"/>
+                <field name="is_churned"             string="Churned"    widget="boolean"/>
+                <field name="first_order_date"       string="First Order"/>
+                <field name="total_revenue"          string="Revenue excl. VAT (EUR)"
                        sum="Total"/>
-                <field name="attended_classes"       string="Clases asistidas" sum="Total"/>
-                <field name="avg_classes_per_month"  string="Media / mes"/>
-                <field name="last_attended_date"     string="Última asistencia"/>
-                <field name="active_subscriptions"   string="Suscripciones activas"/>
-                <field name="active_package_credits" string="Créditos de pack"/>
-                <field name="days_inactive"          string="Días inactivo" optional="hide"/>
+                <field name="attended_classes"       string="Attended Classes" sum="Total"/>
+                <field name="avg_classes_per_month"  string="Avg / Month"/>
+                <field name="last_attended_date"     string="Last Attended"/>
+                <field name="active_subscriptions"   string="Active Subscriptions"/>
+                <field name="active_package_credits" string="Pack Credits"/>
+                <field name="days_inactive"          string="Days Inactive" optional="hide"/>
             </list>
         </field>
     </record>
@@ -36,7 +36,7 @@
         <field name="name">fitness.report.client.pivot</field>
         <field name="model">fitness.report.client</field>
         <field name="arch" type="xml">
-            <pivot string="Clientes">
+            <pivot string="Clients">
                 <field name="first_order_date" type="row" interval="month"/>
                 <field name="is_active_client" type="col"/>
                 <field name="total_revenue"    type="measure"/>
@@ -50,7 +50,7 @@
         <field name="name">fitness.report.client.graph</field>
         <field name="model">fitness.report.client</field>
         <field name="arch" type="xml">
-            <graph string="Ingresos por cliente" type="bar">
+            <graph string="Revenue by Client" type="bar">
                 <field name="partner_id"    type="row"/>
                 <field name="total_revenue" type="measure"/>
             </graph>
@@ -62,47 +62,47 @@
         <field name="name">fitness.report.client.search</field>
         <field name="model">fitness.report.client</field>
         <field name="arch" type="xml">
-            <search string="Buscar clientes">
+            <search string="Search Clients">
                 <field name="partner_id"/>
                 <separator/>
                 <!-- Date chips on first order -->
                 <filter name="filter_new_this_month"
-                        string="Nuevos este mes"
+                        string="New This Month"
                         domain="[('first_order_date','&gt;=', context_today().strftime('%Y-%m-01'))]"/>
                 <filter name="filter_new_last_7_days"
-                        string="Nuevos últimos 7 días"
+                        string="New in Last 7 Days"
                         domain="[('first_order_date','&gt;=', (context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_first_order_this_year"
-                        string="Primer pedido este año"
+                        string="First Order This Year"
                         domain="[('first_order_date','&gt;=', context_today().strftime('%Y-01-01')),
                                  ('first_order_date','&lt;',  (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <!-- Status filters -->
                 <filter name="filter_active"
-                        string="Activos"
+                        string="Active Clients"
                         domain="[('is_active_client','=',True)]"/>
                 <filter name="filter_at_risk"
-                        string="En riesgo (30–60 días)"
+                        string="At Risk (30–60 days)"
                         domain="[('is_active_client','=',False),
                                  ('is_churned','=',False),
                                  ('days_inactive','&gt;=',30),
                                  ('days_inactive','&lt;=',60)]"/>
                 <filter name="filter_churned"
-                        string="Baja"
+                        string="Churned"
                         domain="[('is_churned','=',True)]"/>
                 <separator/>
                 <group>
                     <filter name="group_partner"
-                            string="Estudiante"
+                            string="Student"
                             context="{'group_by':'partner_id'}"/>
                     <filter name="group_first_order_month"
-                            string="Mes primer pedido"
+                            string="First Order Month"
                             context="{'group_by':'first_order_date:month'}"/>
                     <filter name="group_active"
-                            string="Estado (activo)"
+                            string="Status (active)"
                             context="{'group_by':'is_active_client'}"/>
                     <filter name="group_churned"
-                            string="Estado (baja)"
+                            string="Status (churned)"
                             context="{'group_by':'is_churned'}"/>
                 </group>
             </search>

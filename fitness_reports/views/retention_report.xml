@@ -13,12 +13,12 @@
         <field name="model">fitness.report.retention</field>
         <field name="arch" type="xml">
             <list create="false" edit="false" default_order="period_month desc">
-                <field name="period_month"       string="Mes"                  widget="date"/>
-                <field name="active_clients"     string="Clientes activos"     sum="Total"/>
-                <field name="new_clients"        string="Nuevos"               sum="Total"/>
-                <field name="returning_clients"  string="Retornantes"          sum="Total"/>
-                <field name="retention_rate_pct" string="Retención %"/>
-                <field name="period_revenue"     string="Ingresos ex-IVA (EUR)" sum="Total"/>
+                <field name="period_month"       string="Month"                  widget="date"/>
+                <field name="active_clients"     string="Active Clients"     sum="Total"/>
+                <field name="new_clients"        string="New"               sum="Total"/>
+                <field name="returning_clients"  string="Returning"          sum="Total"/>
+                <field name="retention_rate_pct" string="Retention %"/>
+                <field name="period_revenue"     string="Revenue excl. VAT (EUR)" sum="Total"/>
                 <field name="arpu"               string="ARPU (EUR)"/>
             </list>
         </field>
@@ -29,7 +29,7 @@
         <field name="name">fitness.report.retention.pivot</field>
         <field name="model">fitness.report.retention</field>
         <field name="arch" type="xml">
-            <pivot string="Retención mensual">
+            <pivot string="Monthly Retention">
                 <field name="period_month"       type="row" interval="month"/>
                 <field name="active_clients"     type="measure"/>
                 <field name="new_clients"        type="measure"/>
@@ -46,7 +46,7 @@
         <field name="name">fitness.report.retention.graph</field>
         <field name="model">fitness.report.retention</field>
         <field name="arch" type="xml">
-            <graph string="Retención mensual" type="bar" stacked="1">
+            <graph string="Monthly Retention" type="bar" stacked="1">
                 <field name="period_month"      type="row" interval="month"/>
                 <field name="new_clients"       type="measure"/>
                 <field name="returning_clients" type="measure"/>
@@ -59,23 +59,23 @@
         <field name="name">fitness.report.retention.search</field>
         <field name="model">fitness.report.retention</field>
         <field name="arch" type="xml">
-            <search string="Buscar por período">
+            <search string="Search by Period">
                 <filter name="filter_last_3_months"
-                        string="Últimos 3 meses"
+                        string="Last 3 Months"
                         domain="[('period_month','&gt;=', (context_today() + relativedelta(months=-3, day=1)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_last_6_months"
-                        string="Últimos 6 meses"
+                        string="Last 6 Months"
                         domain="[('period_month','&gt;=', (context_today() + relativedelta(months=-6, day=1)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_this_year"
-                        string="Este año"
+                        string="This Year"
                         domain="[('period_month','&gt;=', context_today().strftime('%Y-01-01'))]"/>
                 <separator/>
                 <group>
                     <filter name="group_month"
-                            string="Mes"
+                            string="Month"
                             context="{'group_by':'period_month:month'}"/>
                     <filter name="group_quarter"
-                            string="Trimestre"
+                            string="Quarter"
                             context="{'group_by':'period_month:quarter'}"/>
                 </group>
             </search>

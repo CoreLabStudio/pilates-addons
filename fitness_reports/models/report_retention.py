@@ -20,7 +20,7 @@ class FitnessReportRetention(models.Model):
         help='Returning clients / active clients × 100.',
     )
     period_revenue = fields.Float(
-        string='Revenue ex-IVA', readonly=True, digits=(16, 2),
+        string='Revenue excl. VAT', readonly=True, digits=(16, 2),
         help='Sum of amount_untaxed on confirmed sale orders in this month.',
     )
     arpu = fields.Float(

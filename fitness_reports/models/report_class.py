@@ -24,7 +24,7 @@ class FitnessReportClass(models.Model):
         aggregator='avg',
     )
     attributed_revenue = fields.Float(
-        string='Ingresos atribuidos (aprox., puede solapar)',
+        string='Attributed Revenue (approx., may overlap)',
         readonly=True,
         digits=(16, 2),
         help=(
