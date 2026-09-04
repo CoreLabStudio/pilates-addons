@@ -735,6 +735,8 @@ msgid "Full"
 msgstr "Completa"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Book"
 msgstr "Reservar"
@@ -2703,3 +2705,57 @@ msgstr "%d min"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "%(h)d h %(m)d min"
 msgstr "%(h)d h %(m)d min"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Day"
+msgstr "Dia"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Week"
+msgstr "Setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Month"
+msgstr "Mes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Already used"
+msgstr "Ja utilitzada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Free — booking accepts the Terms"
+msgstr "Gratuït — en reservar acceptes els"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All dates"
+msgstr "Totes les dates"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes in this period."
+msgstr "No hi ha classes en aquest període."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Calendar view"
+msgstr "Vista de calendari"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "List view"
+msgstr "Vista de llista"
