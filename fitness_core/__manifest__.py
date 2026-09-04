@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – Yoleyva Studio',
-    'version': '19.0.2.2.8',
+    'version': '19.0.2.6.12',
     'category': 'Services',
     'summary': 'Core models for Yoleyva Pilates & Barre Studio',
     'author': 'Yoleyva Studio',
@@ -17,6 +17,7 @@
         'views/fitness_news_views.xml',
         'views/fitness_dashboard_views.xml',
         'views/fitness_teacher_admin_views.xml',
+        'views/fitness_teacher_hours_views.xml',
         # menu_views.xml defines menu_fitness_classes_root, which the two
         # files below attach their menu items to. It has to load first or a
         # fresh install fails on a missing parent; an upgrade hides this
