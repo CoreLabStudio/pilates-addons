@@ -14,6 +14,36 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Full price"
+msgstr "Precio completo"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Free"
+msgstr "Gratis"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Free until %(date)s"
+msgstr "Gratis hasta el %(date)s"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "%(pct)s%% off"
+msgstr "%(pct)s%% de descuento"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "%(pct)s%% off until %(date)s"
+msgstr "%(pct)s%% de descuento hasta el %(date)s"
+
+#. module: fitness_packages
 #: model:ir.actions.act_window,name:fitness_packages.action_fitness_package_products
 #: model:ir.ui.menu,name:fitness_packages.menu_fitness_packages
 msgid "Packages"

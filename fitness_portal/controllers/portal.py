@@ -1222,6 +1222,7 @@ class FitnessStudentPortal(http.Controller):
             'booked':                   bool(kw.get('booked')),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
+            'lbl_price_free':           _('Free'),
             'lbl_free_used':            _('Already used'),
             'lbl_free_terms':           _('Free — booking accepts the Terms'),
             'primary_credit':           credit,
@@ -1325,6 +1326,7 @@ class FitnessStudentPortal(http.Controller):
             'free_claimed':    (self._is_free_product(product)
                                 and self._free_already_claimed(partner, product)),
             'lbl_book_free':   _('Book'),
+            'lbl_price_free':  _('Free'),
             'lbl_free_used':   _('Already used'),
             'lbl_free_terms':  _('Free — booking accepts the Terms'),
             'error_msg':       kw.get('error') or '',

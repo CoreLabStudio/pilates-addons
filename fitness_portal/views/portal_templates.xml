@@ -1415,7 +1415,7 @@
                                                     </t>
                                                     <t t-else="">
                                                         <span class="mv-pkg-price-inline">
-                                                            <t t-call="fitness_portal.mv_price_tag"/><span style="font-size:0.65rem;color:var(--mv-muted);font-weight:400;margin-left:3px;">+ IVA</span>
+                                                            <t t-call="fitness_portal.mv_price_tag"/>
                                                         </span>
                                                         <t t-if="_is_active">
                                                             <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
@@ -1541,7 +1541,7 @@
                         <!-- Price + buy -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/> <span style="font-size:0.72rem;">+ IVA</span></span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/><t t-if="not is_free"> <span style="font-size:0.72rem;">+ IVA</span></t></span>
                                 <span class="mv-price-lg" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-call="fitness_portal.mv_price_tag"/>
                                 </span>
@@ -2068,20 +2068,31 @@
     <template id="mv_price_tag" name="CoreLab Price Tag">
         <t t-set="_now" t-value="product.fitness_price_now"/>
         <t t-set="_live" t-value="product.fitness_promo_is_live"/>
+        <!-- Free is a price of zero, however it got there. Keying this off
+             the promotion meant a product whose own list price is 0.00 - no
+             promotion involved - rendered "0.00 EUR + IVA" instead of FREE. -->
+        <t t-set="_free" t-value="not _now"/>
         <t t-if="_live">
             <span class="mv-price-was">
                 <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '&#8364;'"/>
             </span>
         </t>
-        <t t-if="_live and not _now">
-            <span class="mv-price-now mv-price-free">Free</span>
+        <t t-if="_free">
+            <span class="mv-price-now mv-price-free" t-out="lbl_price_free or 'Free'"/>
         </t>
         <t t-else="">
             <span class="mv-price-now">
                 <t t-out="'%.2f' % _now"/> <t t-out="product.currency_id.symbol or '&#8364;'"/>
             </span>
+            <!-- Only where tax is actually added to a real price. "Free + IVA"
+                 reads as though something is still owed on top of nothing. -->
+            <span class="mv-price-tax">+ IVA</span>
         </t>
-        <t t-if="_live">
+        <!-- The badge names the offer. On a free item with no end date it
+             would just repeat the word already standing next to it, so the
+             card read "FREE ... FREE". It earns its place when it adds
+             something: a percentage, or a date the offer runs out. -->
+        <t t-if="_live and not (_free and not product.fitness_promo_end)">
             <span class="mv-price-badge" t-out="product.fitness_promo_summary"/>
         </t>
     </template>

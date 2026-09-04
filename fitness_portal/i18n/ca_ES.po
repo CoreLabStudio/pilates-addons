@@ -2739,6 +2739,12 @@ msgstr "Gratuït — en reservar acceptes els"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Free"
+msgstr "GRATIS"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "All dates"
 msgstr "Totes les dates"
 
