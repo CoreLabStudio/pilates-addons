@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="action_fitness_news_post" model="ir.actions.act_window">
-        <field name="name">News &amp; Promotions</field>
-        <field name="res_model">fitness.news.post</field>
-        <field name="view_mode">list,form</field>
-        <field name="context">{'default_active': True}</field>
-    </record>
-
     <!-- List view -->
     <record id="view_fitness_news_post_list" model="ir.ui.view">
         <field name="name">fitness.news.post.list</field>
         <field name="model">fitness.news.post</field>
         <field name="arch" type="xml">
-            <list string="News &amp; Promotions" editable="top">
+            <!-- Not editable. With editable="top" a click on a row started an
+                 inline rename of the title instead of opening the record, so
+                 the form - and with it the body and the image field - could
+                 not be reached from here at all. The drag handle still
+                 reorders posts without it. -->
+            <list string="News &amp; Promotions">
                 <field name="sequence" widget="handle"/>
                 <field name="title"/>
                 <field name="publish_date"/>
+                <field name="body_excerpt" string="Description"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
@@ -36,24 +35,43 @@
                                    options='{"terminology": "archive"}'/>
                         </button>
                     </div>
+                    <!-- Top right and full size, so the one field people came
+                         looking for is the first thing on the page rather than
+                         a thumbnail in the second column of a group. The
+                         portal card crops it square. -->
+                    <field name="image" widget="image" class="oe_avatar"
+                           options="{'size': [180, 180]}"/>
+                    <div class="oe_title">
+                        <label for="title" string="Title"/>
+                        <h1><field name="title" placeholder="e.g. August Promotion"/></h1>
+                    </div>
                     <group>
                         <group>
-                            <field name="title"/>
                             <field name="publish_date"/>
                             <field name="sequence"/>
                         </group>
-                        <group>
-                            <field name="image" widget="image"/>
-                        </group>
                     </group>
                     <notebook>
-                        <page string="Content">
-                            <field name="body" widget="html"/>
+                        <page string="Description" name="description">
+                            <!-- This is what students read under the title on
+                                 the portal card and on the post's own page. -->
+                            <field name="body" widget="html" nolabel="1"
+                                   placeholder="What the studio wants students to read."/>
                         </page>
                     </notebook>
                 </sheet>
             </form>
         </field>
+    </record>
+
+    <record id="action_fitness_news_post" model="ir.actions.act_window">
+        <field name="name">News &amp; Promotions</field>
+        <field name="res_model">fitness.news.post</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_fitness_news_post_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_fitness_news_post_form')})]"/>
+        <field name="context">{'default_active': True}</field>
     </record>
 
 </odoo>

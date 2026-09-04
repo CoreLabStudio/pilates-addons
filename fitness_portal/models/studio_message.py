@@ -212,6 +212,10 @@ class FitnessStudioMessage(models.Model):
     _name = 'fitness.studio.message'
     _description = 'Studio Thread Message'
     _order = 'create_date asc'
+    # Same trap as the news post: with no field called name, Odoo prints the
+    # model and id, so this menu's breadcrumb read "fitness.studio.message,7".
+    # The author is the useful half of a message in a list of them.
+    _rec_name = 'author_name'
 
     conversation_id = fields.Many2one(
         'fitness.studio.conversation', 'Conversation',

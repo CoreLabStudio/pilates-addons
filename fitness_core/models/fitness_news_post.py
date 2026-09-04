@@ -6,6 +6,11 @@ class FitnessNewsPost(models.Model):
     _name = 'fitness.news.post'
     _description = 'News Post / Promotion'
     _order = 'sequence asc, publish_date desc, id desc'
+    # The title, not "name". Without this Odoo looks for a field called name,
+    # finds none, and falls back to printing the model and id - so the
+    # breadcrumb over an open post read "fitness.news.post,1", and so did every
+    # other place a record refers to itself.
+    _rec_name = 'title'
 
     title = fields.Char("Title", required=True, translate=True)
     body = fields.Html("Body", sanitize=True, translate=True)
