@@ -17,7 +17,7 @@ class FitnessReportClient(models.Model):
     )
     first_order_date = fields.Date(string='First Order', readonly=True)
     total_revenue = fields.Float(
-        string='Revenue ex-IVA',
+        string='Revenue excl. VAT',
         readonly=True,
         digits=(16, 2),
     )

@@ -14,6 +14,36 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Full price"
+msgstr "Preu complet"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Free"
+msgstr "Gratis"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "Free until %(date)s"
+msgstr "Gratis fins al %(date)s"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "%(pct)s%% off"
+msgstr "%(pct)s%% de descompte"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "%(pct)s%% off until %(date)s"
+msgstr "%(pct)s%% de descompte fins al %(date)s"
+
+#. module: fitness_packages
 #: model:ir.actions.act_window,name:fitness_packages.action_fitness_package_products
 #: model:ir.ui.menu,name:fitness_packages.menu_fitness_packages
 msgid "Packages"
@@ -31,9 +61,9 @@ msgstr "Vendes de bons"
 msgid "Package Balances"
 msgstr "Saldo de bons"
 
-# ── Packages product list — view_product_template_packages_list ──────────────
-
 #. module: fitness_packages
+# ── Packages product list — view_product_template_packages_list
+# ──────────────
 #: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
 msgid "Package Name"
 msgstr "Nom del bo"
@@ -67,3 +97,35 @@ msgstr "Preu"
 #: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
 msgid "Can be Sold"
 msgstr "Es pot vendre"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__fitness_original_class_count
+msgid "Classes Purchased"
+msgstr "Classes comprades"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__fitness_remaining_classes
+msgid "Classes Remaining"
+msgstr "Classes restants"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__fitness_classes_used
+msgid "Classes Used"
+msgstr "Classes utilitzades"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_class_count
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_class_count
+msgid "Classes in Pack"
+msgstr "Classes del bo"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order__fitness_is_package
+msgid "Contains Fitness Package"
+msgstr "Conté un bo"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_is_package
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_is_package
+msgid "Is Fitness Package"
+msgstr "És bo de classes"

@@ -286,6 +286,69 @@ class FitnessTeacherSwapPortal(http.Controller):
             'available_months': available_months,
         })
 
+    @http.route('/my/instructor/swaps', type='http', auth='user', website=True,
+                sitemap=False)
+    def my_swap_history(self, **kw):
+        """An instructor's own swap history.
+
+        Every swap was already recorded - the admin reads them in Cambios de
+        Instructor - but an instructor had no way to see their own. That is the
+        one person who most needs it: which of their classes somebody else took
+        and which they picked up, so a disagreement about who was meant to be
+        in the room is settled by a record rather than by memory.
+
+        A swap has two sides and the same record is both, so it is read once
+        and split by which side this user is on. "Given away" and "picked up"
+        are the two questions actually being asked, and a single merged list
+        answers neither at a glance.
+        """
+        user = request.env.user
+        if not user.has_group(TEACHER_GROUP):
+            return request.redirect('/my')
+
+        try:
+            user_tz = pytz.timezone(user.tz or 'UTC')
+        except pytz.UnknownTimeZoneError:
+            user_tz = pytz.UTC
+
+        # sudo: a swap names two instructors, and the other one is the whole
+        # point of the record. Read is scoped to rows this user is a party to
+        # by the domain itself, so this widens nothing else.
+        swaps = request.env['fitness.teacher.swap'].sudo().search([
+            '|',
+            ('original_teacher_id', '=', user.id),
+            ('new_teacher_id', '=', user.id),
+        ], order='class_start desc, create_date desc', limit=300)
+
+        source_labels = dict(
+            request.env['fitness.teacher.swap']._fields['initiated_by'].selection)
+
+        def row(sw):
+            mine_was_given = sw.original_teacher_id.id == user.id
+            other = sw.new_teacher_id if mine_was_given else sw.original_teacher_id
+            return {
+                'id': sw.id,
+                'class_name': sw.class_name or (sw.class_type_id.name or ''),
+                'when': _format_local(sw.class_start, user_tz),
+                'logged': _format_local(sw.create_date, user_tz),
+                'other': other.name or '',
+                'reason': (sw.reason or '').strip(),
+                'source': source_labels.get(sw.initiated_by, sw.initiated_by or ''),
+                'event_id': sw.calendar_event_id.id if sw.calendar_event_id else 0,
+                # A swap of a class that has already happened is history; one
+                # still ahead is something the instructor may need to act on.
+                'past': bool(sw.class_start and sw.class_start < fields.Datetime.now()),
+            }
+
+        given = [row(s) for s in swaps if s.original_teacher_id.id == user.id]
+        taken = [row(s) for s in swaps if s.new_teacher_id.id == user.id]
+
+        return request.render('fitness_teacher_swap.portal_teacher_swaps', {
+            'given': given,
+            'taken': taken,
+            'total': len(given) + len(taken),
+        })
+
     # ── Legacy redirects — keep old /my/teacher/ URLs working (notification emails) ──
     @http.route('/my/teacher/classes', type='http', auth='user', website=True, sitemap=False)
     def _legacy_classes(self, **kw):

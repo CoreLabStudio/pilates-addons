@@ -4,6 +4,16 @@ from odoo import models, fields, api
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    # Admin-only. Deliberately not exposed anywhere in the portal: a student
+    # seeing "VIP" on their own profile is a different product decision from
+    # the studio tagging someone internally, and only the latter was asked for.
+    fitness_is_vip = fields.Boolean(
+        string='VIP',
+        default=False,
+        help="Internal flag for the studio. Filters the Students list; it "
+             "grants no privileges and is never shown to the student.",
+    )
+
     fitness_is_teacher = fields.Boolean(
         compute='_compute_fitness_is_teacher',
         string='Is Instructor',

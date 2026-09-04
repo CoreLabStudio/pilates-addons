@@ -14,6 +14,11 @@ class SaleOrder(models.Model):
         ('stripe', 'Stripe (Online)'),
         ('bizum', 'Bizum'),
         ('transfer', 'Bank Transfer'),
+        # Not a method so much as the absence of one: the order came to zero,
+        # so nothing was charged and no provider was involved. Recorded rather
+        # than left blank so a free order is tellable from one whose method was
+        # never set, which is what the unpaid-confirmation guard keys on.
+        ('free', 'Free (no payment)'),
     ], string="Portal Payment Method", copy=False,
         help="Payment method the student selected during portal checkout.")
 

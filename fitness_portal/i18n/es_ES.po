@@ -421,6 +421,7 @@ msgstr "Clase reservada · cubierta por la suscripción"
 # ── Checkout flow
 # ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_portal.selection__sale_order__fitness_payment_method__bizum
 msgid "Bizum"
 msgstr "Bizum"
 
@@ -726,11 +727,15 @@ msgid "<strong>Oops:</strong>"
 msgstr "<strong>Error:</strong>"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Full"
 msgstr "Completa"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Book"
 msgstr "Reservar"
@@ -768,9 +773,11 @@ msgid "Back to Classes"
 msgstr "Volver a las clases"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 msgid "Instructor"
-msgstr "Instructora"
+msgstr "Instructor"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
@@ -1847,6 +1854,8 @@ msgid "All time"
 msgstr "Siempre"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "This month"
 msgstr "Este mes"
@@ -2280,6 +2289,7 @@ msgid "Card (online)"
 msgstr "Tarjeta (en línea)"
 
 #. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__message_ids
 #: model:ir.ui.menu,name:fitness_portal.menu_fitness_studio_messages
 msgid "Messages"
 msgstr "Mensajes"
@@ -2306,5 +2316,451 @@ msgstr "Desde administración"
 
 #. module: fitness_portal
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__body
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__body
 msgid "Message"
 msgstr "Mensaje"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Timetable"
+msgstr "Horario completo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Every class we run, week by week"
+msgstr "Todas nuestras clases, semana a semana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes scheduled for this discipline yet."
+msgstr "Todavía no hay clases programadas para esta disciplina."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid ""
+"You have no credit for these classes yet — tap any class to see the options."
+msgstr ""
+"Aún no tienes créditos para estas clases: toca cualquier clase para ver las "
+"opciones."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Weekly Timetable"
+msgstr "Horario semanal"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "View timetable"
+msgstr "Ver horario completo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Add CoreLab to your Home Screen"
+msgstr "Añade CoreLab a tu pantalla de inicio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Tap the Share button at the bottom of Safari."
+msgstr "Toca el botón Compartir en la parte inferior de Safari."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Scroll down and tap \"Add to Home Screen\"."
+msgstr "Desplázate hacia abajo y toca \"Añadir a pantalla de inicio\"."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Tap \"Add\" in the top right corner."
+msgstr "Toca \"Añadir\" en la esquina superior derecha."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "CoreLab will then open like any other app, without the browser bars."
+msgstr ""
+"CoreLab se abrirá como cualquier otra app, sin las barras del navegador."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Install CoreLab"
+msgstr "Instala CoreLab"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Add it to your home screen for one-tap booking."
+msgstr "Añádela a tu pantalla de inicio para reservar con un toque."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Install"
+msgstr "Instalar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Not now"
+msgstr "Ahora no"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Install the app"
+msgstr "Instalar la app"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Add CoreLab to your home screen"
+msgstr "Añade CoreLab a tu pantalla de inicio"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Booking opens"
+msgstr "Las reservas abren el"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid ""
+"Classes open for booking a week ahead. Come back then to reserve your spot."
+msgstr ""
+"Las clases se abren para reservar una semana antes. Vuelve entonces para "
+"reservar tu lugar."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "You don’t have credit for this class yet."
+msgstr "Todavía no tienes crédito para esta clase."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Explore memberships, packages & classes"
+msgstr "Explora membresías, packs y clases"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "+%d class"
+msgstr "+%d clase"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Choose \"Install app\" or \"Add to Home screen\"."
+msgstr "Elige \"Instalar app\" o \"Añadir a pantalla de inicio\"."
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__fri
+msgid "Friday"
+msgstr "Viernes"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__mon
+msgid "Monday"
+msgstr "Lunes"
+
+#. module: fitness_portal
+#: model:ir.actions.act_window,name:fitness_portal.action_new_conversation_wizard
+#: model:ir.actions.server,name:fitness_portal.server_action_new_conversation
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_new_conversation_wizard_form
+msgid "New Message"
+msgstr "Mensaje nuevo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes available right now."
+msgstr "Ahora mismo no hay clases disponibles."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No orders found."
+msgstr "No se han encontrado pedidos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Open"
+msgstr "Abierto"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Open your browser menu."
+msgstr "Abre el menú de tu navegador."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Opening promo bonus"
+msgstr "Bonus de promoción de apertura"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__sat
+msgid "Saturday"
+msgstr "Sábado"
+
+#. module: fitness_portal
+#: model:ir.model,name:fitness_portal.model_fitness_studio_new_conversation_wizard
+msgid "Start a new admin-initiated conversation"
+msgstr "Iniciar una conversación desde administración"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__sun
+msgid "Sunday"
+msgstr "Domingo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "This class has been cancelled and can no longer be booked."
+msgstr "Esta clase ha sido cancelada y ya no se puede reservar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/payment_guard.py:0
+msgid "This order has already been paid. You have not been charged again."
+msgstr "Este pedido ya está pagado. No se te ha cobrado de nuevo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid ""
+"This order has not been paid yet. Please complete the payment before "
+"confirming your purchase."
+msgstr ""
+"Este pedido todavía no se ha pagado. Completa el pago antes de confirmar la "
+"compra."
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__thu
+msgid "Thursday"
+msgstr "Jueves"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__tue
+msgid "Tuesday"
+msgstr "Martes"
+
+#. modules: fitness_core, fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__wed
+msgid "Wednesday"
+msgstr "Miércoles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Welcome"
+msgstr "Bienvenida"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__display_name_computed
+msgid "Display Name Computed"
+msgstr "Nombre mostrado (calculado)"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__has_unread
+msgid "Has Unread"
+msgstr "Tiene sin leer"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_is_teacher
+msgid "Is Instructor"
+msgstr "Es instructor"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__last_activity
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_studio_conversation_list
+msgid "Last Activity"
+msgstr "Última actividad"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__consent_marketing_date
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__consent_marketing_date
+msgid "Marketing Consent On"
+msgstr "Consentimiento de marketing el"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__consent_marketing
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__consent_marketing
+msgid "Marketing Email Consent"
+msgstr "Consentimiento de emails de marketing"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__message_count
+msgid "Message Count"
+msgstr "Número de mensajes"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__partner_id
+msgid "Partner"
+msgstr "Contacto"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__role
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_studio_conversation_list
+msgid "Role"
+msgstr "Rol"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__thread_html
+msgid "Thread"
+msgstr "Conversación"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__reply_body
+msgid "Your Reply"
+msgstr "Tu respuesta"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__user_id
+msgid "User"
+msgstr "Usuario"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Description"
+msgstr "Descripción"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Duration"
+msgstr "Duración"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Room"
+msgstr "Sala"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Note from the studio"
+msgstr "Nota del estudio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%d h"
+msgstr "%d h"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%d min"
+msgstr "%d min"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(h)d h %(m)d min"
+msgstr "%(h)d h %(m)d min"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Day"
+msgstr "Día"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Week"
+msgstr "Semana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Month"
+msgstr "Mes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Already used"
+msgstr "Ya utilizada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Free — booking accepts the Terms"
+msgstr "Gratis — al reservar aceptas los"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Free"
+msgstr "GRATIS"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "All dates"
+msgstr "Todas las fechas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No classes in this period."
+msgstr "No hay clases en este periodo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Calendar view"
+msgstr "Vista de calendario"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "List view"
+msgstr "Vista de lista"

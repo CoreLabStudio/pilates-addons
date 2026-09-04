@@ -19,14 +19,22 @@ msgid "Reports"
 msgstr "Informes"
 
 #. module: fitness_reports
-#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_bookings
 #: model:ir.actions.act_window,name:fitness_reports.action_fitness_booking_report
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
 msgid "Bookings"
-msgstr "Analítica de reservas"
+msgstr "Reservas"
 
 #. module: fitness_reports
-#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_revenue
 #: model:ir.actions.act_window,name:fitness_reports.action_sale_order_report
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_revenue
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_pivot
 msgid "Revenue"
 msgstr "Ingresos"
 
@@ -37,14 +45,18 @@ msgid "Classes"
 msgstr "Clases"
 
 #. module: fitness_reports
-#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_clients
 #: model:ir.actions.act_window,name:fitness_reports.action_fitness_client_report
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_clients
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_pivot
 msgid "Clients"
 msgstr "Clientes"
 
 #. module: fitness_reports
-#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_class_summary
 #: model:ir.actions.act_window,name:fitness_reports.action_fitness_class_summary_report
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_class_summary
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_pivot
 msgid "Class Summary"
 msgstr "Resumen de clases"
 
@@ -57,10 +69,22 @@ msgstr "Estadísticas de instructores"
 #. module: fitness_reports
 # ── Field-level labels (view string= overrides)
 # ───────────────────────────────
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_client_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_revenue_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
 msgid "Student"
-msgstr "Alumna"
+msgstr "Alumno"
 
 #. module: fitness_reports
 # ── revenue_type selection values (sale.order extend)
@@ -95,3 +119,525 @@ msgstr "Media clases / mes"
 #: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_retention
 msgid "Retention"
 msgstr "Retención"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__arpu
+msgid "ARPU"
+msgstr "ARPU"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__is_active_client
+msgid "Active Client"
+msgstr "Cliente activo"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__active_clients
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+msgid "Active Clients"
+msgstr "Clientes activos"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__active_subscriptions
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Active Subscriptions"
+msgstr "Suscripciones activas"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__attended_classes
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Attended Classes"
+msgstr "Clases asistidas"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__is_churned
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "Churned"
+msgstr "Baja"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__partner_id
+msgid "Client"
+msgstr "Cliente"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__days_inactive
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Days Inactive"
+msgstr "Días inactivo"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__first_order_date
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "First Order"
+msgstr "1er Pedido"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__last_attended_date
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Last Attended"
+msgstr "Última asistencia"
+
+#. modules: fitness_notifications, fitness_reports, fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__period_month
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.view_fitness_teacher_swap_search
+msgid "Month"
+msgstr "Mes"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__new_clients
+msgid "New Clients"
+msgstr "Clientes nuevos"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__occupancy_pct
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Occupancy %"
+msgstr "Ocupación %"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__active_package_credits
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Pack Credits"
+msgstr "Créditos de pack"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__retention_rate_pct
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+msgid "Retention %"
+msgstr "Retención %"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__returning_clients
+msgid "Returning Clients"
+msgstr "Clientes que repiten"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__attended_count
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Attended"
+msgstr "Asistido"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__cancelled_count
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__capacity
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Capacity"
+msgstr "Aforo"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__class_date
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Date"
+msgstr "Fecha"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__class_type_id
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+msgid "Class Type"
+msgstr "Tipo de clase"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__display_name
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__display_name
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__event_id
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+msgid "Class"
+msgstr "Clase"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__no_show_count
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+msgid "No-show"
+msgstr "No presentado"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Active"
+msgstr "Activo"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "At Risk (30–60 days)"
+msgstr "En riesgo (30–60 días)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_team_report_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_team_report_graph
+msgid "Attendance by Instructor"
+msgstr "Asistencia por instructor"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__attributed_revenue
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Attributed Revenue (approx., may overlap)"
+msgstr "Ingresos atribuidos (aprox., puede solapar)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+msgid "Avg / Month"
+msgstr "Media / mes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_graph
+msgid "Bookings by Month"
+msgstr "Reservas por mes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+msgid "Class Date"
+msgstr "Fecha clase"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "Class Packs"
+msgstr "Packs de clases"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_pivot
+msgid "Classes Taught"
+msgstr "Clases impartidas"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_graph
+msgid "Classes by Instructor"
+msgstr "Clases por instructor"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "First Order Month"
+msgstr "Mes primer pedido"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "First Order This Year"
+msgstr "Primer pedido este año"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_team_report_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_team_report_pivot
+msgid "Instructor Performance"
+msgstr "Rendimiento por instructor"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+msgid "Last 3 Months"
+msgstr "Últimos 3 meses"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+msgid "Last 6 Months"
+msgstr "Últimos 6 meses"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "Last Month"
+msgstr "Mes anterior"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_pivot
+msgid "Monthly Retention"
+msgstr "Retención mensual"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+msgid "New"
+msgstr "Nuevos"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "New This Month"
+msgstr "Nuevos este mes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "New in Last 7 Days"
+msgstr "Nuevos últimos 7 días"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_graph
+msgid "Occupancy by Instructor"
+msgstr "Ocupación por instructor"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_graph
+msgid "Revenue by Client"
+msgstr "Ingresos por cliente"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_graph
+msgid "Revenue by Month"
+msgstr "Ingresos por mes"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__total_revenue
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__period_revenue
+msgid "Revenue excl. VAT"
+msgstr "Ingresos sin IVA"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+msgid "Revenue excl. VAT (EUR)"
+msgstr "Ingresos sin IVA (EUR)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+msgid "Search Classes"
+msgstr "Buscar clases"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "Search Clients"
+msgstr "Buscar clientes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "Search Revenue"
+msgstr "Buscar ingresos"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+msgid "Search by Period"
+msgstr "Buscar por período"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "Status (active)"
+msgstr "Estado (activo)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "This Month"
+msgstr "Este mes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "This Year"
+msgstr "Este año"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "Total (approx.)"
+msgstr "Total (aprox.)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "Type (subscription / pack / class)"
+msgstr "Tipo (suscripción / pack / clase)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+msgid "Booked"
+msgstr "Reservado"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+msgid "Booked On"
+msgstr "Reservado el"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+msgid "No-shows"
+msgstr "No presentados"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Order"
+msgstr "Pedido"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_search
+msgid "Quarter"
+msgstr "Trimestre"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_retention_list
+msgid "Returning"
+msgstr "Retornantes"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+msgid "Room"
+msgstr "Sala"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+msgid "Search Bookings"
+msgstr "Buscar reservas"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+msgid "Status"
+msgstr "Estado"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_client_search
+msgid "Status (churned)"
+msgstr "Estado (baja)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Subscription"
+msgstr "Suscripción"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_search
+msgid "Subscriptions"
+msgstr "Suscripciones"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Taxable Base"
+msgstr "Base imponible"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Total (VAT incl.)"
+msgstr "Total (IVA incl.)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
+msgid "Type"
+msgstr "Tipo"

@@ -213,7 +213,7 @@ msgstr "Nota del estudio"
 #: code:addons/fitness_teacher_swap/models/calendar_event.py:0
 #, python-format
 msgid "Instructor updated: %s"
-msgstr "Instructora actualizada: %s"
+msgstr "Instructor actualizado: %s"
 
 #. module: fitness_teacher_swap
 #. odoo-python
@@ -321,3 +321,8 @@ msgstr "Motivo"
 #: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__initiated_by
 msgid "Source"
 msgstr "Origen"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"

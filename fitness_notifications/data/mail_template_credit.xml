@@ -9,6 +9,8 @@
             <field name="subject">{{ 'Your credits are expiring soon' if object.student_id.lang == 'en_US' else ('Els teus crèdits caduquen aviat' if object.student_id.lang == 'ca_ES' else 'Tus créditos caducan pronto') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
+            <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:13px;">
   <t t-if="object.student_id.lang == 'en_US'">

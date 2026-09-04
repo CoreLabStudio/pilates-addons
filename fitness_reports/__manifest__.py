@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Reports – Yoleyva',
-    'version': '19.0.2.2.3',
+    'version': '19.0.2.3.0',
     'category': 'Fitness',
     'summary': 'Manager-only analytics: bookings, revenue, clients, class occupancy (pivot/graph/list)',
     'author': 'Yoleyva Studio',

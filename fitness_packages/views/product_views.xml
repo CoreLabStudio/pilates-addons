@@ -24,7 +24,13 @@
                 <field name="fitness_session_type" string="Session"/>
                 <field name="fitness_class_count" string="Classes"/>
                 <field name="fitness_validity_days" string="Validity (days)"/>
-                <field name="list_price" string="Price" optional="show"/>
+                <field name="list_price" string="Full Price" optional="show"/>
+                <!-- Which products are on offer, without opening each one. -->
+                <field name="fitness_promo_summary" string="Promotion"
+                       decoration-success="fitness_promo_is_live"
+                       optional="show"/>
+                <field name="fitness_price_now" string="Price Today" optional="show"/>
+                <field name="fitness_promo_is_live" column_invisible="True"/>
                 <field name="sale_ok" string="Can be Sold" widget="boolean" optional="hide"/>
                 <field name="active" column_invisible="True"/>
             </list>
@@ -62,6 +68,37 @@
                         <group string="Restrictions" invisible="not fitness_is_package">
                             <field name="fitness_class_type"/>
                             <field name="fitness_session_type"/>
+                        </group>
+                    </group>
+                    <!-- Set the offer here rather than editing the sales price.
+                         The sales price stays the real price; this decides what
+                         is charged while the window is open, and the window
+                         closing is what ends the offer - there is nothing to
+                         put back afterwards. -->
+                    <group string="Promotion" invisible="not fitness_is_package">
+                        <group>
+                            <field name="fitness_promo_mode" widget="radio"/>
+                            <field name="fitness_promo_percent"
+                                   invisible="fitness_promo_mode != 'percent'"
+                                   required="fitness_promo_mode == 'percent'"/>
+                            <field name="fitness_promo_start"
+                                   invisible="fitness_promo_mode == 'none'"/>
+                            <field name="fitness_promo_end"
+                                   invisible="fitness_promo_mode == 'none'"/>
+                        </group>
+                        <group string="What a student pays today">
+                            <field name="fitness_promo_summary" readonly="1"/>
+                            <field name="fitness_price_now" readonly="1"
+                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="fitness_promo_saving" readonly="1"
+                                   invisible="not fitness_promo_is_live"
+                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="fitness_promo_is_live" invisible="1"/>
+                            <div class="text-muted" colspan="2"
+                                 invisible="fitness_promo_mode == 'none'">
+                                Outside the dates above the product sells at its
+                                full sales price again, automatically.
+                            </div>
                         </group>
                     </group>
                 </page>

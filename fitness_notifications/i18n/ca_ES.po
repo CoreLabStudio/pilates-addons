@@ -171,3 +171,52 @@ msgstr "Recordatori enviat"
 #: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__bell_reminder_sent
 msgid "Bell Reminder Sent"
 msgstr "Recordatori enviat"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "%s confirmed"
+msgstr "%s confirmada"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "You have %d class credit(s) ready to book."
+msgstr "Tens %d crèdit(s) de classe a punt per reservar."
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__action_url
+msgid "Action URL"
+msgstr "URL d'acció"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__notification_type
+msgid "Notification Type"
+msgstr "Tipus de notificació"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__is_read
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_list
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_search
+msgid "Read"
+msgstr "Llegit"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__body
+msgid "Body"
+msgstr "Contingut"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__title
+msgid "Title"
+msgstr "TÃ­tol"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__user_id
+msgid "User"
+msgstr "Usuari"

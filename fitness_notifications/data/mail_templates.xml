@@ -13,6 +13,8 @@
             <field name="subject">{{ 'Booking Confirmed' if object.student_id.lang == 'en_US' else ('Reserva Confirmada' if object.student_id.lang == 'ca_ES' else 'Reserva Confirmada') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
+            <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:13px;">
   <t t-if="object.student_id.lang == 'en_US'">
@@ -20,8 +22,8 @@
     <p>Your booking is confirmed:</p>
     <ul>
       <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
       <li>Instructor: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
@@ -42,9 +44,9 @@
     <p>La teva reserva està confirmada:</p>
     <ul>
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
-      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
+      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Crèdits restants del teu paquet: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
@@ -64,9 +66,9 @@
     <p>Tu reserva está confirmada:</p>
     <ul>
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
-      <li>Instructor/a: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
+      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
       <p>Créditos restantes en tu paquete: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
@@ -96,6 +98,8 @@
             <field name="subject">{{ 'Booking Cancelled' if object.student_id.lang == 'en_US' else ('Reserva Cancel·lada' if object.student_id.lang == 'ca_ES' else 'Reserva Cancelada') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
+            <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:13px;">
   <t t-if="object.student_id.lang == 'en_US'">
@@ -103,8 +107,8 @@
     <p>Your booking has been cancelled:</p>
     <ul>
       <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>Your credit has been returned (cancelled more than 2 hours before the class).</p>
@@ -118,8 +122,8 @@
     <p>La teva reserva ha estat cancel·lada:</p>
     <ul>
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>El teu crèdit s'ha retornat (cancel·lat amb més de 2 hores d'antelació).</p>
@@ -133,8 +137,8 @@
     <p>Tu reserva ha sido cancelada:</p>
     <ul>
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>Tu crédito ha sido devuelto (cancelado con más de 2 horas de antelación).</p>
@@ -158,6 +162,8 @@
             <field name="subject">{{ 'Class Reminder' if object.student_id.lang == 'en_US' else ('Recordatori de Classe' if object.student_id.lang == 'ca_ES' else 'Recordatorio de Clase') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
+            <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:13px;">
   <t t-if="object.student_id.lang == 'en_US'">
@@ -165,8 +171,8 @@
     <p>Reminder — you have an upcoming class:</p>
     <ul>
       <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="object.class_start or ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <p>See you there!</p>
   </t>
@@ -175,8 +181,8 @@
     <p>Recordatori — tens una classe properament:</p>
     <ul>
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <p>Ens veiem allà!</p>
   </t>
@@ -185,8 +191,8 @@
     <p>Recordatorio — tienes una clase próximamente:</p>
     <ul>
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="object.class_start or ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or ''"/></li>
+      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <p>¡Nos vemos allí!</p>
   </t>
