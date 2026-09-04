@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – Yoleyva Studio',
-    'version': '19.0.2.1.2',
+    'version': '19.0.2.6.12',
     'category': 'Services',
     'summary': 'Core models for Yoleyva Pilates & Barre Studio',
     'author': 'Yoleyva Studio',
@@ -22,6 +22,12 @@
         # fresh install fails on a missing parent; an upgrade hides this
         # because the menu already exists in the database.
         'views/menu_views.xml',
+        # After menu_views.xml, not before it: this file hangs a menuitem off
+        # menu_fitness_teachers_root, which menu_views.xml creates. Loading it
+        # first works on an upgrade, where the menu is already in the database,
+        # and fails on a fresh install with "External ID not found" - which is
+        # exactly how odoo.sh builds a branch.
+        'views/fitness_teacher_hours_views.xml',
         'views/fitness_class_schedule_views.xml',
         'views/fitness_closure_day_views.xml',
         'data/payment_method_bizum.xml',
@@ -38,6 +44,7 @@
         ],
     },
     'installable': True,
+    'post_init_hook': 'post_init_hook',
     'application': True,
     'auto_install': False,
 }

@@ -60,6 +60,14 @@ class TestTimetablePage(HttpCase):
             "group_ids": [(6, 0, [cls.env.ref("base.group_portal").id])],
         })
 
+        # a real room, so the class page has a Room to label - without one the
+        # row is correctly omitted and the label test fails for the wrong reason
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "TT Studio B",
+            "classroom_type": "reformer",
+            "capacity": 6,
+        })
+
         def class_type(name, discipline, desc=""):
             return cls.env["fitness.class.type"].create({
                 "name": name,
@@ -78,22 +86,28 @@ class TestTimetablePage(HttpCase):
 
         # Applied closure days cancel occurrences in place, which would move a
         # fixture's first class to the following week and silently change what
-        # these tests are exercising. Pick offsets that dodge them instead.
-        closed = set(cls.env["fitness.closure.day"].sudo().search(
-            [("state", "=", "applied")]).mapped("date"))
-
-        def pick(min_offset):
-            d = date.today() + timedelta(days=min_offset)
-            while d in closed:
-                d += timedelta(days=1)
-            return d
-
-        # inside the booking window, so the slot is bookable
-        cls.date_soon = pick(2)
-        # outside it, so the page has to explain itself rather than link
-        cls.date_later = pick(BOOKING_WINDOW_DAYS + 3)
+        # these tests are exercising. Dodging them by walking forward worked
+        # until the studio closed every day up to its 16 September opening:
+        # there is then no open day left inside the seven-day booking window,
+        # and "pick the next open day" walks straight out of the window the
+        # fixture exists to sit inside.
+        #
+        # So the days are chosen first - the offsets are what these tests mean
+        # - and any closure standing on them is lifted for the duration of the
+        # test instead. The transaction is rolled back, so the studio's real
+        # closure calendar is untouched.
+        cls.date_soon = date.today() + timedelta(days=2)
+        cls.date_later = date.today() + timedelta(days=BOOKING_WINDOW_DAYS + 3)
         assert (cls.date_soon - date.today()).days <= BOOKING_WINDOW_DAYS
         assert (cls.date_later - date.today()).days > BOOKING_WINDOW_DAYS
+
+        # The schedules below run weekly, so a closure on any later occurrence
+        # would cancel it too; clear the whole span the fixtures cover.
+        cls.env["fitness.closure.day"].sudo().search([
+            ("state", "=", "applied"),
+            ("date", ">=", date.today()),
+            ("date", "<=", date.today() + timedelta(days=90)),
+        ]).unlink()
 
         def schedule(ct, when, hour):
             s = cls.env["fitness.class.schedule"].create({
@@ -102,6 +116,7 @@ class TestTimetablePage(HttpCase):
                 "weekday": WEEKDAY_CODES[when.weekday()],
                 "start_time": hour,
                 "duration": 1.0,
+                "classroom_id": cls.room.id,
                 "date_start": when,
                 "horizon_weeks": 6,
             })
@@ -144,6 +159,21 @@ class TestTimetablePage(HttpCase):
         self.assertNotIn('name="password"', res.text,
                          "got the login page, not %s - the session was lost" % url)
         return res.text
+
+
+    def _use_lang(self, lang):
+        """Switch the student's language, activating it if the database lacks it.
+
+        A build database ships with English only, so assuming es_ES/ca_ES were
+        installed made these tests pass locally and fail on odoo.sh for a
+        reason that had nothing to do with the translations themselves.
+        """
+        # _activate_lang only flips the active flag - it does not import the
+        # .po files, so on a database that never had the language the page
+        # would still render in English and the assertion would fail for the
+        # wrong reason. _activate_and_install_lang loads the translations too.
+        self.env['res.lang']._activate_and_install_lang(lang)
+        self.user.lang = lang
 
     @staticmethod
     def _pane_is_hidden(html, discipline):
@@ -199,13 +229,50 @@ class TestTimetablePage(HttpCase):
 
     # ── layout ───────────────────────────────────────────────────────────
 
-    def test_laid_out_as_day_cards_with_descriptions(self):
+    def test_laid_out_as_day_cards_showing_the_class_name_only(self):
+        """A row is the time and the class name, and nothing else.
+
+        It used to carry the description and an instructor/room line as well.
+        That gave every row a different height, turned the timetable into a
+        wall of small grey text, and repeated in full what the page the row
+        already links to says anyway. So the list names the class and the
+        detail page carries the rest - which is what the next test checks, so
+        that "removed from the list" can never quietly become "lost".
+        """
         self.line.fitness_remaining_classes = 5
         html = self._get()
         self.assertIn("mv-tt-grid", html, "no day grid")
         self.assertIn("mv-tt-day-head", html, "day cards have no header")
-        self.assertIn("Long controlled sets on spring resistance.", html,
-                      "class description not shown inline")
+        self.assertIn(self.ct_reformer.name, html, "class name missing from the list")
+        # Stop at the calendar: it renders the same classes a second time.
+        grid = html[html.index('mv-tt-grid'):html.index('id="mv-cal"')]
+        self.assertNotIn("mv-tt-desc", grid, "description is back on the list rows")
+        self.assertNotIn("mv-tt-meta", grid, "instructor/room line is back on the rows")
+        self.assertNotIn("Long controlled sets on spring resistance.", grid,
+                         "the description text is still rendered inline")
+        self.assertNotIn(self.teacher.name, grid,
+                         "the instructor name is still rendered inline")
+
+    def test_what_the_list_drops_is_on_the_detail_page(self):
+        """The other half of the rule above.
+
+        Taking the description and the instructor off the row is only correct
+        while the page it links to still has them; without this test the two
+        changes could drift apart and the information would simply be gone.
+        """
+        self.line.fitness_remaining_classes = 5
+        event = self.env["calendar.event"].search(
+            [("class_type_id", "=", self.ct_reformer.id)], order="start", limit=1)
+        self.assertTrue(event, "no class to open")
+        self.authenticate(self.user.login, self.password)
+        res = self.url_open("/my/classes/%d" % event.id)
+        self.assertEqual(res.status_code, 200)
+        detail = res.text
+        self.assertIn("Long controlled sets on spring resistance.", detail,
+                      "description missing from the detail page")
+        self.assertIn(self.teacher.name, detail,
+                      "instructor missing from the detail page")
+        self.assertIn(self.room.name, detail, "room missing from the detail page")
 
     def test_slot_shown_even_with_no_credit(self):
         self.line.fitness_remaining_classes = 0
@@ -224,7 +291,10 @@ class TestTimetablePage(HttpCase):
         """
         self.line.fitness_remaining_classes = 0      # the worst case
         html = self._get()
-        grid = html[html.index('mv-tt-grid'):html.index('mv-bottom-nav')]
+        # Stop at the calendar, not the bottom nav: the same classes are
+        # rendered a second time below as calendar cells, and counting those
+        # would measure the list against both copies of itself.
+        grid = html[html.index('mv-tt-grid'):html.index('id="mv-cal"')]
         self.assertNotIn('mv-tt-row-static', grid, "grid still has non-tappable rows")
         # count the href rather than a whole opening tag: QWeb decides
         # attribute order, so matching "<a href=..." is brittle
@@ -238,7 +308,10 @@ class TestTimetablePage(HttpCase):
         """That explanation belongs on the detail page now."""
         self.line.fitness_remaining_classes = 5
         html = self._get()
-        grid = html[html.index('mv-tt-grid'):html.index('mv-bottom-nav')]
+        # Stop at the calendar, not the bottom nav: the same classes are
+        # rendered a second time below as calendar cells, and counting those
+        # would measure the list against both copies of itself.
+        grid = html[html.index('mv-tt-grid'):html.index('id="mv-cal"')]
         self.assertNotIn('Booking opens', grid,
                          "the window notice is still being rendered in the grid")
 
@@ -295,6 +368,30 @@ class TestTimetablePage(HttpCase):
                       "barre class did not offer barre in the shop link")
         self.assertNotIn("Reserve My Spot", html)
 
+    def test_detail_labels_are_present_and_translated(self):
+        """Part B: the facts are labelled, not run together as prose."""
+        self.line.fitness_remaining_classes = 5
+        ev = self._next_event(self.sched_reformer)
+        html = self._detail(ev)
+        for label in ("Description", "Duration", "Instructor", "Room"):
+            self.assertIn(label, html, "%s label missing from the class page" % label)
+        self.assertIn("mv-detail-facts", html, "labelled facts block missing")
+
+        for lang, expected in (("es_ES", ("Descripci", "Duraci", "Sala")),
+                               ("ca_ES", ("Descripci", "Durada", "Sala"))):
+            self._use_lang(lang)
+            html = self._detail(ev)
+            for term in expected:
+                self.assertIn(term, html, "%s: %r missing" % (lang, term))
+        self._use_lang("en_US")
+
+    def test_duration_is_shown(self):
+        """Read off the event, so a one-off change to a class is reflected."""
+        self.line.fitness_remaining_classes = 5
+        html = self._detail(self._next_event(self.sched_reformer))
+        # the fixture schedules a one-hour class
+        self.assertIn("1 h", html, "duration not rendered")
+
     # ── data source and timezone ─────────────────────────────────────────
 
     def test_time_is_rendered_in_the_students_timezone(self):
@@ -343,7 +440,7 @@ class TestTimetablePage(HttpCase):
             "ca_ES": ("Horari complet", "Totes les nostres classes, setmana a setmana"),
         }
         for lang, (title, subtitle) in expected.items():
-            self.user.lang = lang
+            self._use_lang(lang)
             html = self._get()
             self.assertIn(title, html, "%s title not translated" % lang)
             self.assertIn(subtitle, html, "%s subtitle not translated" % lang)
@@ -353,7 +450,7 @@ class TestTimetablePage(HttpCase):
 
     def test_full_flag_is_translated(self):
         """`Full` had a code reference but no odoo-python marker."""
-        self.user.lang = "es_ES"
+        self._use_lang("es_ES")
         try:
             self.assertEqual(
                 self.env["base"].with_context(lang="es_ES").env._("Full"),

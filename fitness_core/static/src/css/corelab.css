@@ -25,8 +25,72 @@
   --mv-clay-dark:   var(--mv-btn-hover); /* alias → all button hovers become Paco dark */
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
   --mv-ink:         #92786C;   /* Hemp brown */
+
+  /* Discipline colour coding. Reformer reads blue, Barre brown, and within
+     each family three shades run light -> deep with the class type's
+     intensity. Three tiers rather than one shade per class type: the studio
+     runs twenty types, and twenty shades of two hues cannot be told apart in
+     a list, which is what the coding is for.
+
+     Measured against WCAG AA (4.5:1; all of these carry small text). Light
+     and mid shades take Paco brown, only the deep shades are dark enough for
+     cream. Never pair a shade with a text colour other than the one named:
+       reformer-light #CFE0EA + #50423D = 7.09:1
+       reformer-mid   #A9C2D0 + #50423D = 5.17:1
+       reformer-deep  #3D6B87 + #FAF9F6 = 5.46:1
+       barre-light    #CBBFB8 + #50423D = 5.34:1
+       barre-mid      #92786C + #18110C = 4.56:1
+       barre-deep     #68554C + #FAF9F6 = 6.67:1
+     reformer-mid is the logo's own blue. reformer-deep is the brand heather
+     darkened: heather #5A8BA6 carries white at only 3.70:1 and misses AA. */
+  /* The flat discipline colours are the logo's own two, read out of the logo
+     PNG: 96.2% of the mark is #92786C and 3.8% is #A9C2D0. Fills only, and
+     only with near-black text - the one text colour clearing AA on both:
+       #A9C2D0 + #18110C = 10.06:1
+       #92786C + #18110C =  4.56:1   (passes, with almost no headroom)
+     White and cream FAIL on both, so never pair one with a light text.
+     Neither is readable as text on cream either (1.76:1 and 3.89:1). */
+  --mv-discipline-reformer: #A9C2D0;
+  --mv-discipline-barre:    #92786C;
+  --mv-on-discipline:       #18110C;
+
+  --mv-reformer-light: #DAE8F1;
+  --mv-reformer-mid:   #7FA8C4;
+  --mv-reformer-deep:  #2F5A75;
+  /* Derived from the logo brown, so no chocolate-based brown is left standing
+     in as a Barre colour. Mid IS the logo brown, mirroring the Reformer family
+     whose mid tier is the logo blue. Mid takes near-black text, not Paco - the
+     logo brown is too light for Paco to be read on it (2.34:1). */
+  --mv-barre-light:    #E4DAD1;
+  --mv-barre-mid:      #A88D7A;
+  --mv-barre-deep:     #573F30;
+  --mv-on-shade-light: #50423D;
+  --mv-on-shade-deep:  #FAF9F6;
   --mv-paco:        #50423D;   /* Paco brown — dark, for headings and strong text */
   --mv-active-fill: #7A6458;   /* darkened hemp for active pill/segment — 5.26:1 on #FAF9F6 */
+  /* Brown TEXT. The logo brown #92786C is the brand's brown for fills, but as
+     text on cream it measures 3.89:1 and misses AA - product names and prices
+     on the shop were failing. This is the same darkened hemp the active pill
+     already uses, not a new colour: 5.26:1 on cream, 5.54:1 on white.
+     It is still not dark enough for the info-panel ground #EDE6DC (4.47:1),
+     so the one element sitting on that uses --mv-paco instead. */
+  --mv-ink-text:    var(--mv-active-fill);
+
+  /* One elevation for every card in the portal. The cards used to sit on a
+     1px hairline over a cream ground, which at phone brightness read as a
+     faint seam rather than as a separate surface. Two layers: a tight one so
+     the edge stays crisp, and a wide soft one carrying the actual lift.
+     Anything that reads as a card uses this - not a per-component value, so
+     they cannot drift apart again.
+
+     The first attempt at this was 0.06/0.18 with a -6px spread. It was applied
+     everywhere and perfectly consistent, and on screen it was invisible: white
+     cards on a cream ground need far more separation than a hairline shadow
+     gives. "Applied" and "visible" are different tests and only the second one
+     matters here. */
+  --mv-card-shadow: 0 1px 2px rgba(80,66,61,0.10), 0 10px 22px -4px rgba(80,66,61,0.30);
+  /* Pressed: the card drops toward the page rather than losing its edge. */
+  --mv-card-shadow-pressed: 0 1px 2px rgba(80,66,61,0.16);
   --mv-muted:       #5E534A;   /* muted text */
   --mv-muted2:      #7A6D65;   /* lighter muted */
   --mv-ok-bg:       #E6EDEA;
@@ -76,7 +140,7 @@ body:has(.mv-app) #wrapwrap > main {
 
 .mv-app {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-bg);
   min-height: 100svh;
   padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
@@ -163,7 +227,7 @@ body:has(.mv-app) #wrapwrap > main {
   -webkit-tap-highlight-color: transparent;
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
 }
-.mv-photo-upload-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-photo-upload-btn:active { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 
 /* ── 5. Curved-line divider (SVG inline) ────────────────────── */
 .mv-curve {
@@ -185,7 +249,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.1;
 }
@@ -199,7 +263,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-credit-badge { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; text-align: center; }
 /* Rendered from a single value built in Python (e.g. "7 / 10") so the markup
    holds no translatable fragments. */
-.mv-credit-count { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink); line-height: 1; }
+.mv-credit-count { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: var(--mv-ink-text); line-height: 1; }
 .mv-credit-label { font-size: 0.68rem; color: var(--mv-muted2); letter-spacing: 0.01em; margin-top: 2px; }
 
 /* ── 7. Section / day labels ────────────────────────────────── */
@@ -230,7 +294,7 @@ body:has(.mv-app) #wrapwrap > main {
   background: var(--mv-card-bg);
   border-radius: var(--mv-r);
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  box-shadow: var(--mv-card-shadow);
   cursor: pointer;
   transition: transform var(--mv-t-fast), box-shadow var(--mv-t-fast);
   will-change: transform;
@@ -251,7 +315,7 @@ body:has(.mv-app) #wrapwrap > main {
 }
 .mv-class-card:active {
   transform: scale(0.968);
-  box-shadow: 0 0 2px rgba(80,66,61,0.07);
+  box-shadow: var(--mv-card-shadow-pressed);
 }
 
 /* ── 8b. Card image area ────────────────────────────────────── */
@@ -294,7 +358,10 @@ body:has(.mv-app) #wrapwrap > main {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   background: rgba(250,249,246,0.84);
-  color: var(--mv-ink);
+  /* The logo brown measures 3.89:1 on this near-white pill and misses AA at
+     10px. Paco takes it to 9.12:1. The logo brown stays the brand's brown for
+     fills; it is simply not dark enough to be read as text. */
+  color: var(--mv-paco);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -312,7 +379,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   text-decoration: none !important;
   display: block;
@@ -367,14 +434,14 @@ body:has(.mv-app) #wrapwrap > main {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
   animation: mv-card-rise 280ms ease both;
 }
 .mv-upcoming-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 2px;
 }
 .mv-upcoming-meta {
@@ -460,7 +527,7 @@ body:has(.mv-app) #wrapwrap > main {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-size: 1rem;
   transition: transform var(--mv-t-fast);
   border: none;
@@ -478,7 +545,7 @@ body:has(.mv-app) #wrapwrap > main {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.65rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.15;
 }
@@ -490,7 +557,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-detail-desc {
   font-size: 0.91rem;
   line-height: 1.72;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   white-space: pre-line;
 }
@@ -516,7 +583,7 @@ body:has(.mv-app) #wrapwrap > main {
 }
 .mv-teacher-name {
   font-size: 0.9rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-weight: 500;
   margin: 0 0 1px;
 }
@@ -577,7 +644,7 @@ body:has(.mv-app) #wrapwrap > main {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
   animation: mv-card-rise 280ms ease both;
 }
 .mv-history-card:nth-child(1) { animation-delay:  0ms; }
@@ -616,7 +683,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-pack-card {
   background:var(--mv-card-bg); border-radius:var(--mv-r-sm);
   padding:14px 16px; margin-bottom:10px;
-  box-shadow:0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
 }
 .mv-pack-name {
   font-family:'Cormorant Garamond',Georgia,serif; font-size:0.95rem;
@@ -678,12 +745,12 @@ body:has(.mv-app) #wrapwrap > main {
   border-radius: var(--mv-r);
   padding: 16px 18px;
   margin-bottom: 18px;
-  box-shadow: 0 1px 4px rgba(80,66,61,0.07);
+  box-shadow: var(--mv-card-shadow);
 }
 .mv-roster-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.2rem; font-weight: 400;
-  color: var(--mv-ink); margin: 0 0 4px;
+  color: var(--mv-ink-text); margin: 0 0 4px;
 }
 .mv-roster-sub  { font-size:0.8rem; color:var(--mv-muted); margin:0; }
 .mv-roster-pill {
@@ -703,7 +770,7 @@ body:has(.mv-app) #wrapwrap > main {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
   animation: mv-card-rise 250ms ease both;
 }
 .mv-student-card:nth-child(1) { animation-delay:  0ms; }
@@ -734,7 +801,7 @@ body:has(.mv-app) #wrapwrap > main {
   background:var(--mv-card-bg); border-radius:var(--mv-r-sm);
   padding:14px 16px;
   display:flex; align-items:center; justify-content:space-between; gap:12px;
-  box-shadow:0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
   animation: mv-card-rise 280ms ease both;
 }
 .mv-class-row:nth-child(1){animation-delay:0ms}
@@ -842,7 +909,7 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
   padding: 9px 20px;
   border-radius: 20px;
   border: 1.5px solid var(--mv-ink);
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
   font-weight: 600;
   font-size: 0.875rem;
   text-decoration: none !important;
@@ -1000,7 +1067,7 @@ body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
 .mv-login-body .form-control {
   border: 1.5px solid var(--mv-border) !important;
   border-radius: var(--mv-r-sm) !important;
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
   background: var(--mv-bg) !important;
   font-size: 0.9rem;
 }
@@ -1045,7 +1112,7 @@ body:has(.mv-bottom-nav) #wrapwrap,
 body:has(.mv-bottom-nav) #wrap {
   background: var(--mv-bg) !important;
   font-family: 'Inter', system-ui, sans-serif !important;
-  color: var(--mv-ink) !important;
+  color: var(--mv-ink-text) !important;
 }
 
 body.o_portal #wrapwrap > main,
@@ -1069,14 +1136,14 @@ body:has(.mv-bottom-nav) h2,
 body:has(.mv-bottom-nav) h3 {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 body:has(.mv-bottom-nav) .o_portal_wrap h1 { font-size: 1.4rem; }
 
 /* Tables */
 body:has(.mv-bottom-nav) table.table {
   font-size: 0.85rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 body:has(.mv-bottom-nav) table.table thead th {
   font-size: 0.72rem;
@@ -1118,7 +1185,7 @@ body:has(.mv-bottom-nav) .btn-primary:hover,
 
 /* Pagination */
 body:has(.mv-bottom-nav) .o_portal_pager .page-link {
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   border-color: var(--mv-border);
   background: transparent;
 }
@@ -1198,7 +1265,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 4px;
   line-height: 1.1;
 }
@@ -1231,12 +1298,12 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   border-radius: var(--mv-r-sm);
   margin-bottom: 8px;
   text-decoration: none;
-  color: var(--mv-ink);
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  color: var(--mv-ink-text);
+  box-shadow: var(--mv-card-shadow);
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-menu-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-menu-row:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-menu-row:active { transform: scale(0.98); opacity: 0.82; }
 
 .mv-menu-icon {
@@ -1259,7 +1326,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-menu-title {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-menu-desc {
   font-size: 0.75rem;
@@ -1312,11 +1379,11 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
   margin-bottom: 10px;
   line-height: 1.2;
 }
-.mv-cl-body p { font-size: 0.855rem; color: var(--mv-ink); line-height: 1.65; margin-bottom: 10px; }
+.mv-cl-body p { font-size: 0.855rem; color: var(--mv-ink-text); line-height: 1.65; margin-bottom: 10px; }
 .mv-cl-pillars { margin: 10px 0 12px; display: flex; flex-direction: column; gap: 6px; }
 .mv-cl-pillar {
   font-size: 0.82rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
   padding-left: 10px;
   border-left: 2px solid var(--mv-clay);
@@ -1336,7 +1403,7 @@ body:has(.mv-profile-hub) #wrap .row.justify-content-between {
 .mv-empty {
   padding: 40px 20px;
   text-align: center;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-size: 0.88rem;
 }
 .mv-empty a {
@@ -1393,7 +1460,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   border: none;
   cursor: pointer;
   padding: 0;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   border-radius: 50%;
   -webkit-tap-highlight-color: transparent;
   transition: background var(--mv-t-fast);
@@ -1472,7 +1539,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-notif-title {
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-notif-body {
   font-size: 0.76rem;
@@ -1496,11 +1563,11 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   gap: 5px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-card-bg);
   border-radius: 999px;
   padding: 7px 14px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.08);
+  box-shadow: var(--mv-card-shadow);
   cursor: pointer;
   user-select: none;
 }
@@ -1522,7 +1589,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   padding: 5px 14px;
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
 }
-.mv-day-jump-btn:hover { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-day-jump-btn:hover { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 
 /* ── 21. Packages grid ──────────────────────────────────────── */
 .mv-pkg-grid {
@@ -1546,6 +1613,10 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  /* All four chips in the row share this, so the day picker - which is a
+     <select> and centres nothing by default - lines up with the three
+     anchors instead of sitting hard left beside them. */
+  text-align: center;
   color: var(--mv-muted);
   background: var(--mv-card-bg);
   border: 1px solid var(--mv-border);
@@ -1554,10 +1625,136 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   cursor: pointer;
   transition: color var(--mv-t-fast), border-color var(--mv-t-fast), background var(--mv-t-fast);
 }
+/* Every way of narrowing the list by date sits on one row: the three ranges
+   and the day picker. They answer the same question, so they get the same
+   shape and the same line.
+
+   nowrap plus overflow means the row can never break onto a second line -
+   with four controls and the longest translation ("Aquesta setmana" alone is
+   139px) there is no width where all four fit on a 320px phone, so the row
+   scrolls sideways instead of stacking. The scrollbar is hidden; the row
+   still scrolls by touch and trackpad. */
+#mv-range-filters {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+#mv-range-filters::-webkit-scrollbar { display: none; }
+#mv-range-filters > * { flex: 0 0 auto; }
+#mv-date-filter-wrap { display: inline-flex; }
+
+/* The day picker is a pill like the others, not a browser select. */
+.mv-date-select {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  max-width: 46vw;
+  text-overflow: ellipsis;
+  /* A <select> does not inherit the buttons' centring: the three chips are
+     <a> elements, which centre their own text, while this sat hard left and
+     read as misaligned next to them. text-align-last is the property that
+     moves the closed select's own label, not text-align. */
+  text-align: center;
+  text-align-last: center;
+  text-indent: 0;
+}
+/* Firefox centres the closed value from the option list instead. */
+.mv-date-select option { text-align: center; }
+
+/* The date row must stay on one line. Its width is set by the longest
+   translation, not by English: "Aquesta setmana" measures 154px against
+   "This week" at 100px, which pushed the third chip onto a second line at
+   375px - the commonest phone width there is. Tighten the padding and the
+   tracking as the viewport narrows rather than shortening the words. */
+@media (max-width: 400px) {
+  #mv-range-filters { gap: 6px; }
+  #mv-range-filters .mv-pkg-pill-btn {
+    padding: 6px 10px;
+    letter-spacing: 0.02em;
+  }
+}
+@media (max-width: 340px) {
+  #mv-range-filters .mv-pkg-pill-btn {
+    padding: 6px 8px;
+    font-size: 0.66rem;
+  }
+}
+
+/* Company address block.
+   The lines were <t t-if> blocks separated by <br/>, and QWeb leaves the
+   newline and indentation between them in the output as text nodes: every
+   line came out with leading whitespace and the gaps between them were
+   uneven. The controller now hands over a clean list of lines and each one
+   gets its own row here, so there is no <br/> and no stray whitespace to
+   align around. */
+.mv-legal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mv-legal-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+.mv-legal-line {
+  margin: 0;
+  line-height: 1.45;
+}
+.mv-legal-name { font-weight: 600; }
+
 .mv-pkg-pill-btn.mv-active {
   background: var(--mv-active-fill);
   border-color: var(--mv-active-fill);
   color: var(--mv-bg);
+}
+
+/* Discipline-aware accents on the shop.
+   The Buy button was fixed to heather blue, so a Barre package carried a blue
+   button; the active filter pill was fixed to the neutral brown fill, so the
+   Reformer filter went brown when you picked it. Both now take the colour of
+   the discipline they actually belong to.
+
+   No markup was needed: the cards already carry data-ct and the pills already
+   carry data-filter. Overriding the button tokens on the card lets the button
+   follow without touching its own rule.
+
+   The fills are the logo's own colours and the text on them is near-black,
+   the only text colour that clears AA on both.
+
+   Hover LIGHTENS the fill rather than darkening it. The usual darken-on-hover
+   would have taken #92786C to #82695E, which drops near-black text to 3.67:1
+   and fails - with dark text on a mid-tone fill, darkening the fill closes the
+   gap instead of opening it.
+     #18110C on #A9C2D0 10.06:1, hover #B6CCD8 11.22:1
+     #18110C on #92786C  4.56:1, hover #9E877C  5.52:1 */
+/* Every card that belongs to one room, not just the shop's: a Barre class
+   with a blue Reserve button is the same inconsistency the shop had. */
+.mv-class-card[data-ct="reformer"],
+.mv-upcoming-card[data-ct="reformer"],
+.mv-pkg-card[data-ct="reformer"] {
+  --mv-btn-bg: var(--mv-discipline-reformer);
+  --mv-btn-fg: var(--mv-on-discipline);
+  --mv-clay-dark: #B6CCD8;
+}
+.mv-class-card[data-ct="barre"],
+.mv-upcoming-card[data-ct="barre"],
+.mv-pkg-card[data-ct="barre"] {
+  --mv-btn-bg: var(--mv-discipline-barre);
+  --mv-btn-fg: var(--mv-on-discipline);
+  --mv-clay-dark: #9E877C;
+}
+.mv-pkg-pill-btn.mv-active[data-filter="reformer"] {
+  background: var(--mv-discipline-reformer);
+  border-color: var(--mv-discipline-reformer);
+  color: var(--mv-on-discipline);
+}
+.mv-pkg-pill-btn.mv-active[data-filter="barre"] {
+  background: var(--mv-discipline-barre);
+  border-color: var(--mv-discipline-barre);
+  color: var(--mv-on-discipline);
 }
 
 /* Hierarchical filter — timeframe row (step 2) */
@@ -1586,7 +1783,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   background: var(--mv-card-bg);
   border-radius: var(--mv-r);
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  box-shadow: var(--mv-card-shadow);
   display: flex;
   flex-direction: column;
   animation: mv-card-rise 320ms ease both;
@@ -1597,7 +1794,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 300;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 
 .mv-pkg-discipline {
@@ -1618,7 +1815,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.2;
 }
@@ -1626,7 +1823,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-pkg-price {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1;
 }
@@ -1711,7 +1908,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
 }
 
@@ -1741,7 +1938,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   -webkit-tap-highlight-color: transparent; user-select: none;
 }
 .mv-month-group > summary::-webkit-details-marker { display: none; }
-.mv-month-label { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink); flex: 1; }
+.mv-month-label { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem; color: var(--mv-ink-text); flex: 1; }
 .mv-month-count { font-size: 0.7rem; color: var(--mv-muted); background: var(--mv-border); border-radius: 999px; padding: 2px 8px; }
 .mv-month-chevron { flex-shrink: 0; stroke: var(--mv-muted); fill: none; width: 15px; height: 15px; transition: transform 0.2s ease; }
 details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
@@ -1795,7 +1992,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   flex-shrink: 0;
 }
 .mv-back-link:hover,
-.mv-back-link:active { color: var(--mv-ink); text-decoration: none; }
+.mv-back-link:active { color: var(--mv-ink-text); text-decoration: none; }
 /* The generic wording is a translation carrier for corelab.js; keep it out of
    the layout even if a framework reset re-declares display on spans. */
 .mv-back-link [hidden] { display: none !important; }
@@ -1825,7 +2022,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   transition: background var(--mv-t-fast), color var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-segment:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-segment:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-segment.mv-active {
   background: var(--mv-card-bg);
   color: var(--mv-active-fill);
@@ -1852,6 +2049,21 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-discipline-toggle .mv-segment:hover { color: var(--mv-paco); }
 .mv-discipline-toggle .mv-segment.mv-active:hover { color: var(--mv-btn-fg); }
 
+/* The selected pill is no longer one fixed "selected" colour - it takes the
+   discipline's own family, so the colour itself says which room is showing.
+   The attribute selector outranks the plain .mv-active rules above, including
+   their hover forms, in either source order. */
+.mv-discipline-toggle .mv-segment[data-discipline="reformer"].mv-active,
+.mv-discipline-toggle .mv-segment[data-discipline="reformer"].mv-active:hover {
+  background: var(--mv-discipline-reformer);
+  color: var(--mv-on-discipline);
+}
+.mv-discipline-toggle .mv-segment[data-discipline="barre"].mv-active,
+.mv-discipline-toggle .mv-segment[data-discipline="barre"].mv-active:hover {
+  background: var(--mv-discipline-barre);
+  color: var(--mv-on-discipline);
+}
+
 /* Timetable — day cards, matching the public site's weekly grid */
 .mv-timetable-hint {
   margin: 0 20px 12px;
@@ -1872,6 +2084,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 @media (min-width: 1024px) { .mv-tt-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .mv-tt-day {
+  box-shadow: var(--mv-card-shadow);
   border: 1px solid var(--mv-border);
   border-radius: 14px;
   background: var(--mv-card-bg);
@@ -1919,6 +2132,33 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-weight: 600;
   color: var(--mv-clay-text);
 }
+
+/* A coloured time reads as a chip. These come after .mv-tt-time so they win
+   its colour on equal specificity, and each sets background and text colour
+   together - the pair is what was measured. */
+.mv-tt-time[class*="mv-solid-"],
+.mv-tt-time[class*="mv-shade-"] {
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+/* What the portal uses today: one flat colour per discipline, the same one the
+   selected toggle pill takes, so a page reads as one discipline throughout. */
+.mv-solid-reformer { background: var(--mv-discipline-reformer); color: var(--mv-on-discipline); }
+.mv-solid-barre    { background: var(--mv-discipline-barre);    color: var(--mv-on-discipline); }
+
+/* RESERVED FOR THE CALENDAR VIEW, NOT YET BUILT. Three shades per discipline,
+   for a grid where different class types sit side by side in one row and the
+   shade is the only thing separating them. Down a single list column they read
+   as noise, so the list uses the solid pair above instead. */
+.mv-shade-reformer-light { background: var(--mv-reformer-light); color: var(--mv-on-shade-light); }
+.mv-shade-reformer-mid   { background: var(--mv-reformer-mid);   color: var(--mv-on-discipline); }
+.mv-shade-reformer-deep  { background: var(--mv-reformer-deep);  color: var(--mv-on-shade-deep); }
+.mv-shade-barre-light    { background: var(--mv-barre-light);    color: var(--mv-on-shade-light); }
+.mv-shade-barre-mid      { background: var(--mv-barre-mid);      color: var(--mv-on-discipline); }
+.mv-shade-barre-deep     { background: var(--mv-barre-deep);     color: var(--mv-on-shade-deep); }
+
 .mv-tt-body { flex: 1; min-width: 0; }
 .mv-tt-name {
   display: block;
@@ -1938,7 +2178,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin-top: 2px;
   font-size: 0.75rem;
   line-height: 1.4;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-tt-meta {
   display: block;
@@ -1959,10 +2199,13 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   padding: 14px 16px;
   background: var(--mv-info-bg);
   border-radius: 14px;
+  /* A card in name and in shape, and the only one on Home without the token. */
+  box-shadow: var(--mv-card-shadow);
 }
 .mv-install-text { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 2px; }
 .mv-install-title { font-size: 0.92rem; font-weight: 600; color: var(--mv-paco); }
-.mv-install-sub { font-size: 0.78rem; line-height: 1.4; color: var(--mv-ink); }
+/* On --mv-info-bg #EDE6DC the darkened hemp reaches only 4.47:1; Paco is 7.75:1 */
+.mv-install-sub { font-size: 0.78rem; line-height: 1.4; color: var(--mv-paco); }
 .mv-install-actions { display: flex; align-items: center; gap: 10px; }
 .mv-install-btn {
   border: none;
@@ -2030,7 +2273,37 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 14px 0 0;
   font-size: 0.78rem;
   line-height: 1.5;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
+}
+
+/* Class detail — labelled facts. Each fact is named so a student can find
+   the room or the instructor without reading the description. */
+.mv-detail-field { margin: 16px 20px 0; }
+.mv-detail-label {
+  display: block;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mv-muted);
+  margin-bottom: 4px;
+}
+.mv-detail-facts {
+  margin: 16px 20px 0;
+  border-top: 1px solid var(--mv-border);
+}
+.mv-detail-fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--mv-border);
+}
+.mv-detail-fact .mv-detail-label { margin-bottom: 0; }
+.mv-detail-value {
+  font-size: 0.88rem;
+  color: var(--mv-paco);
+  text-align: right;
 }
 
 /* Class detail — the two non-bookable states. Both explain themselves; the
@@ -2052,7 +2325,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-class-soon-sub {
   font-size: 0.83rem;
   line-height: 1.5;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 
 .mv-tt-flag {
@@ -2070,7 +2343,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.6rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
   line-height: 1.15;
 }
@@ -2115,7 +2388,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   border-radius: var(--mv-r);
   padding: 14px 16px;
   text-decoration: none;
-  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  box-shadow: var(--mv-card-shadow);
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -2153,7 +2426,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.1;
 }
 .mv-stat-value small {
@@ -2167,7 +2440,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-credit-pager {
   background: var(--mv-card-bg);
   border-radius: var(--mv-r);
-  box-shadow: 0 1px 4px rgba(80,66,61,0.07), 0 0 0 1px rgba(80,66,61,0.04);
+  box-shadow: var(--mv-card-shadow);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   display: flex;
@@ -2230,12 +2503,12 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   background: var(--mv-card-bg);
   border-radius: var(--mv-r-sm);
   text-decoration: none;
-  color: var(--mv-ink);
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  color: var(--mv-ink-text);
+  box-shadow: var(--mv-card-shadow);
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
-.mv-link-row:hover { text-decoration: none; color: var(--mv-ink); }
+.mv-link-row:hover { text-decoration: none; color: var(--mv-ink-text); }
 .mv-link-row:active { transform: scale(0.98); opacity: 0.82; }
 
 /* ── 27. Packages tab — title row + collapsing search ───────────── */
@@ -2254,7 +2527,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin: 5px 0 0;
   border-bottom: 1px solid transparent;
 }
-.mv-credit-line:hover { color: var(--mv-ink); border-bottom-color: var(--mv-border); text-decoration: none; }
+.mv-credit-line:hover { color: var(--mv-ink-text); border-bottom-color: var(--mv-border); text-decoration: none; }
 
 .mv-search-btn {
   width: 36px; height: 36px;
@@ -2287,7 +2560,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   width: 100%;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-card-bg);
   border: 1px solid var(--mv-border);
   border-radius: 999px;
@@ -2314,7 +2587,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
 }
 .mv-ledger-delta {
   font-family: 'Cormorant Garamond', Georgia, serif;
@@ -2333,7 +2606,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-ledger-info { flex: 1; min-width: 0; }
 .mv-ledger-title {
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-weight: 500;
   margin: 0 0 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -2348,7 +2621,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.1;
 }
 .mv-ledger-balance-lbl {
@@ -2391,7 +2664,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-step--done .mv-step-dot     { background: var(--mv-sage); border-color: var(--mv-sage); }
 .mv-step--done .mv-step-label   { color: var(--mv-muted); }
 .mv-step--current .mv-step-dot  { background: var(--mv-accent); border-color: var(--mv-accent); }
-.mv-step--current .mv-step-label{ color: var(--mv-ink); font-weight: 700; }
+.mv-step--current .mv-step-label{ color: var(--mv-ink-text); font-weight: 700; }
 .mv-step-line {
   flex: 1;
   height: 1px;
@@ -2426,13 +2699,13 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-summary-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0;
 }
 .mv-summary-total {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.35rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   white-space: nowrap;
 }
 
@@ -2456,7 +2729,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   -webkit-tap-highlight-color: transparent;
 }
 .mv-paymethod-head input { accent-color: var(--mv-accent); width: 18px; height: 18px; flex-shrink: 0; }
-.mv-paymethod-name { font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); }
+.mv-paymethod-name { font-size: 0.9rem; font-weight: 500; color: var(--mv-ink-text); }
 /* Details stay collapsed until that method is the selected one. */
 .mv-paymethod-detail { display: none; padding: 0 14px 14px 44px; }
 .mv-paymethod:has(input:checked) .mv-paymethod-detail { display: block; }
@@ -2465,7 +2738,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   color: var(--mv-muted2); font-weight: 700; margin: 0 0 2px;
 }
 .mv-paymethod-detail dd {
-  font-size: 0.92rem; color: var(--mv-ink); margin: 0 0 8px;
+  font-size: 0.92rem; color: var(--mv-ink-text); margin: 0 0 8px;
   font-variant-numeric: tabular-nums; word-break: break-all;
 }
 .mv-paymethod-detail dd:last-child { margin-bottom: 0; }
@@ -2476,7 +2749,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 10px;
   padding: 4px 2px 18px;
   font-size: 0.85rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
 }
 .mv-terms-row input {
@@ -2485,7 +2758,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   margin-top: 1px;
   flex-shrink: 0;
 }
-.mv-terms-row a { color: var(--mv-ink); text-decoration: underline; }
+.mv-terms-row a { color: var(--mv-ink-text); text-decoration: underline; }
 
 .mv-btn-primary-lg {
   display: block;
@@ -2554,7 +2827,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   width: 100%;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.9rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   background: var(--mv-bg);
   border: 1.5px solid var(--mv-border);
   border-radius: var(--mv-r-sm);
@@ -2572,7 +2845,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   padding: 4px 20px 40px;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-prose p { margin: 0 0 14px; }
 
@@ -2587,7 +2860,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   padding: 13px 15px;
   margin-bottom: 8px;
   text-decoration: none;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
   transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
@@ -2596,14 +2869,14 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-order-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.95rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 2px;
 }
 .mv-order-meta { font-size: 0.74rem; color: var(--mv-muted); margin: 0; }
 .mv-order-amount {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -2613,8 +2886,9 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 
 /* ── 33c. Active package badge on card image ──────────────────── */
 .mv-card-tag-active {
+  /* White measured 2.68:1 on sage. Near-black is 6.97:1 and keeps the sage. */
   background: var(--mv-sage);
-  color: #fff;
+  color: var(--mv-on-discipline);
   top: auto;
   bottom: 6px;
   right: 6px;
@@ -2623,8 +2897,10 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 
 /* ── 33d. Private / contact-only card ─────────────────────────── */
 .mv-card-tag-private {
+  /* White measured 3.53:1 on this fill and missed AA. Near-black takes it to
+     5.29:1 and keeps the fill, rather than inventing another brown. */
   background: #9A8478;
-  color: #fff;
+  color: var(--mv-on-discipline);
 }
 .mv-pkg-card--contact {
   opacity: 0.92;
@@ -2641,14 +2917,14 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-sub-card {
   background: var(--mv-card-bg);
   border-radius: var(--mv-r);
-  box-shadow: 0 1px 3px rgba(80,66,61,0.06);
+  box-shadow: var(--mv-card-shadow);
   padding: 18px 16px;
   margin: 0 16px 14px;
 }
 .mv-sub-plan-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 14px;
 }
 .mv-sub-stat-row {
@@ -2667,7 +2943,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-sub-stat-value {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 0.92rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   text-align: right;
 }
 .mv-sub-progress-wrap {
@@ -2693,7 +2969,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-sub-slot {
   font-size: 0.84rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   padding: 5px 0;
   border-bottom: 1px solid var(--mv-divider);
 }
@@ -2732,7 +3008,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.05);
+  box-shadow: var(--mv-card-shadow);
 }
 .mv-notif-card--unread { background: rgba(154,186,205,0.12); }
 a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit; }
@@ -2740,7 +3016,7 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 .mv-notif-card--linked:hover { box-shadow: 0 2px 8px rgba(80,66,61,0.14); opacity: 0.93; }
 .mv-notif-card-main { flex: 1; min-width: 0; }
 .mv-notif-card-title {
-  font-size: 0.9rem; font-weight: 500; color: var(--mv-ink); margin: 0 0 3px;
+  font-size: 0.9rem; font-weight: 500; color: var(--mv-ink-text); margin: 0 0 3px;
 }
 .mv-notif-card-body {
   font-size: 0.8rem; color: var(--mv-muted); margin: 0 0 4px;
@@ -2758,15 +3034,15 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
   cursor: pointer; white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
-.mv-mark-read-btn:active { color: var(--mv-ink); border-color: var(--mv-muted); }
+.mv-mark-read-btn:active { color: var(--mv-ink-text); border-color: var(--mv-muted); }
 .mv-notif-viewall {
   display: block; text-align: center;
   padding: 10px 16px 2px; margin-top: 4px;
   border-top: 1px solid var(--mv-border);
   font-size: 0.78rem; font-weight: 600;
-  color: var(--mv-ink); text-decoration: none;
+  color: var(--mv-ink-text); text-decoration: none;
 }
-.mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink); }
+.mv-notif-viewall:hover { text-decoration: underline; color: var(--mv-ink-text); }
 
 /* ── 35. Message thread (/my/messages) ──────────────────────── */
 .mv-msg-history {
@@ -2777,7 +3053,7 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
   border-radius: var(--mv-r);
   padding: 14px 15px;
   margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(80,66,61,0.06);
+  box-shadow: var(--mv-card-shadow);
   border-left: 3px solid transparent;
 }
 /* Admin replies get a sage accent to visually distinguish them */
@@ -2795,11 +3071,11 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 }
 .mv-msg-author {
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
 }
 .mv-msg-body {
   font-size: 0.88rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -2821,7 +3097,7 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 }
 .mv-msg-reply-text {
   font-size: 0.86rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -2837,13 +3113,13 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.08rem;
   font-weight: 500;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 24px 0 6px;
 }
 .mv-prose h3 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 16px 0 4px;
 }
 .mv-prose ul {
@@ -2977,7 +3253,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   border-radius: 0 var(--mv-r-sm) var(--mv-r-sm) 0;
   padding: 10px 14px;
   font-size: 0.82rem;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   line-height: 1.5;
   margin: 12px 0 0;
   white-space: pre-wrap;
@@ -3000,7 +3276,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   border: 1px solid var(--mv-border);
   border-radius: var(--mv-r);
   background: var(--mv-card-bg);
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   font-family: inherit;
   font-size: 0.9rem;
   resize: vertical;
@@ -3050,89 +3326,149 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 }
 .mv-news-cards--page { padding: 0 16px 24px; }
 
-/* White card — client-approved design */
+/* The ticket card: photo, what it says, and the date standing behind a
+   perforation. Photo-left-text-right was already here; what was missing was
+   the date column, and it is the date column that makes the reference read as
+   a ticket rather than as a list row. */
 .mv-news-card {
-  display: block;
-  text-decoration: none;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
   background: #fff;
-  border: 0.5px solid #E5DFD6;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: var(--mv-card-shadow);
+  text-decoration: none;
+  color: inherit;
   -webkit-tap-highlight-color: transparent;
-  animation: mv-card-rise 320ms ease both;
 }
+.mv-news-card:hover { text-decoration: none; }
+.mv-news-card:active { box-shadow: var(--mv-card-shadow-pressed); opacity: 0.9; }
 
-/* Thumbnail — fixed aspect-ratio, object-fit:cover for any source size */
-.mv-news-card-thumb {
-  position: relative;
-  padding-top: 52%;
+/* Square and inset rather than bled to the card edge - the reference sits the
+   photo inside the card with the same corner radius as the card itself. */
+.mv-news-card-media {
+  flex: 0 0 96px;
+  width: 96px;
+  align-self: stretch;
+  min-height: 96px;
+  border-radius: 10px;
+  background: var(--mv-info-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 .mv-news-thumb-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center;
   display: block;
 }
-
-/* Info area below image or noimg row */
-.mv-news-card-info {
-  padding: 10px 14px 14px;
-}
-.mv-news-card-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #92786C;
-  margin: 0 0 3px;
-  line-height: 1.3;
-}
-.mv-news-card-date {
-  font-size: 0.68rem;
-  color: #8A7A72;
-  margin: 0;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-/* No-image variant: muted icon circle + date on one row */
-.mv-news-card-noimg {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px 6px;
-}
 .mv-news-card-icon {
-  flex-shrink: 0;
   width: 34px;
   height: 34px;
-  background: var(--mv-info-bg);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .mv-news-card-icon svg {
-  width: 15px;
-  height: 15px;
-  stroke: #8A7A72;
+  width: 26px;
+  height: 26px;
   fill: none;
-  stroke-width: 1.5;
+  stroke: var(--mv-muted);
+  stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+.mv-news-card-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+.mv-news-card-title {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--mv-paco);
+  overflow-wrap: anywhere;
+}
 .mv-news-card-excerpt {
+  margin: 0;
   font-size: 0.78rem;
-  color: #8A7A72;
-  margin: 3px 0 0;
-  line-height: 1.5;
+  line-height: 1.45;
+  color: var(--mv-ink-text);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* The date, behind the perforation. A dashed left border is the whole trick -
+   it is what a torn ticket stub looks like. */
+.mv-news-card-when {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 58px;
+  padding: 6px 4px 6px 12px;
+  border-left: 2px dashed var(--mv-border);
+  color: var(--mv-paco);
+  line-height: 1;
+}
+.mv-news-when-month {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  text-transform: capitalize;
+}
+.mv-news-when-day {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.1rem;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.mv-news-when-year {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--mv-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Read by a screen reader, seen by nobody: the date above is three separate
+   fragments and reads as gibberish out loud. */
+.mv-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A phone has room for all three columns, but not at these sizes. */
+@media (max-width: 420px) {
+  .mv-news-card { gap: 10px; padding: 8px; }
+  .mv-news-card-media { flex-basis: 76px; width: 76px; min-height: 76px; }
+  .mv-news-card-title { font-size: 1.1rem; }
+  .mv-news-card-excerpt { -webkit-line-clamp: 2; font-size: 0.74rem; }
+  .mv-news-card-when { min-width: 48px; padding-left: 9px; }
+  .mv-news-when-day { font-size: 1.7rem; }
+  .mv-news-when-month { font-size: 0.82rem; }
 }
 
 /* News detail page */
@@ -3150,7 +3486,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.1rem;
   font-weight: 400;
-  color: var(--mv-ink);
+  color: var(--mv-ink-text);
   margin: 0 0 4px;
   line-height: 1.25;
 }
@@ -3340,9 +3676,16 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   border-radius: 12px;
   padding: 12px 14px;
   text-decoration: none;
-  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast);
+  /* These sit directly beneath the stat cards on Home and are the same shape,
+     so the two rows read as one set - except these were the only ones lying
+     flat on the page. Measured: the stat cards paint a shadow, these painted
+     nothing. */
+  box-shadow: var(--mv-card-shadow);
+  transition: transform var(--mv-t-fast), opacity var(--mv-t-fast),
+              box-shadow var(--mv-t-fast);
   -webkit-tap-highlight-color: transparent;
 }
+.mv-prompt-tile:active { box-shadow: var(--mv-card-shadow-pressed); }
 .mv-prompt-tile:hover { text-decoration: none; }
 .mv-prompt-tile:active { transform: scale(0.98); opacity: 0.9; }
 .mv-prompt-wide { margin: 10px 20px 0; }
@@ -3357,14 +3700,14 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #92786C;
+  color: var(--mv-ink-text);
 }
 .mv-prompt-icon {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
   fill: none;
-  stroke: #92786C;
+  stroke: var(--mv-ink);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -3385,3 +3728,561 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 }
 .mv-prompt-chev { font-size: 1rem; line-height: 1; }
 .mv-prompt-tile:hover .mv-prompt-cta { text-decoration: underline; }
+
+/* ── Calendar view ───────────────────────────────────────────────────────
+   Shared by the timetable, the booking list and My Schedule. Same fonts,
+   same card elevation and the same discipline colours as the rest of the
+   portal, so it reads as the same app rather than a component bolted on.
+
+   Every day cell is in the DOM once; day, week and month are the browser
+   choosing which cells to show. Class colour is the light/mid/deep tier from
+   class_colors - side by side in a row the shade is the only thing telling
+   two class types apart, which is what that scale was built for. */
+/* Deliberately prominent. This was a 28px outline square that sat quietly
+   under the page title; nobody found it. It is now a filled tile at the top
+   right of the greeting row - the same weight as the credit badge beside it -
+   because switching to the calendar is the one thing on these pages a student
+   is most likely to want and least likely to guess at.
+   align-self keeps it level with the top line of the title rather than
+   stretching down the height of the row. */
+.mv-cal-toggle {
+  flex-shrink: 0;
+  order: 9;               /* last in the greeting row, whatever else is there */
+  align-self: flex-start;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--mv-active-fill);
+  background: var(--mv-active-fill);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--mv-card-shadow);
+  transition: background var(--mv-t-fast), color var(--mv-t-fast),
+              box-shadow var(--mv-t-fast);
+}
+.mv-cal-toggle svg {
+  width: 22px; height: 22px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mv-cal-toggle:hover { background: var(--mv-paco); border-color: var(--mv-paco); }
+.mv-cal-toggle:active { box-shadow: var(--mv-card-shadow-pressed); }
+.mv-cal-toggle .mv-cal-ico-list { display: none; }
+/* Open: inverted, so the control reads as switched on rather than as a
+   second, different button. */
+.mv-cal-toggle[aria-pressed="true"] {
+  background: var(--mv-sand);
+  color: var(--mv-active-fill);
+  border-color: var(--mv-active-fill);
+}
+.mv-cal-toggle[aria-pressed="true"] .mv-cal-ico-cal { display: none; }
+.mv-cal-toggle[aria-pressed="true"] .mv-cal-ico-list { display: block; }
+
+.mv-cal {
+  padding: 0 16px;
+  /* one hour of the time grid. --mv-cal-span (how many hours the grid covers)
+     is set on this element by the server from the classes themselves. */
+  --mv-cal-hour-h: 46px;
+  --mv-cal-head-h: 22px;
+}
+.mv-cal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mv-cal-period {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--mv-paco);
+  text-align: center;
+  flex: 1;
+}
+.mv-cal-nav {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--mv-border);
+  background: var(--mv-card-bg);
+  color: var(--mv-paco);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mv-cal-nav svg {
+  width: 16px; height: 16px;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mv-cal-nav[disabled] { opacity: 0.3; cursor: default; }
+.mv-cal-modes { margin: 0 0 12px; }
+
+/* Weekday header. Hidden in day mode, where a single column needs no key. */
+.mv-cal-dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.mv-cal-dow span {
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+}
+.mv-cal[data-mode="day"] .mv-cal-dow { display: none; }
+
+.mv-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.mv-cal[data-mode="day"] .mv-cal-grid { grid-template-columns: 1fr; }
+
+.mv-cal-cell {
+  min-height: 72px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.mv-cal-cell[hidden] { display: none; }
+/* The day's contents. Stacked everywhere except the time grid, where it
+   becomes the surface the blocks are positioned onto. */
+.mv-cal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mv-cal-daynum {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--mv-muted);
+  line-height: 1;
+}
+.mv-cal-today { border-color: var(--mv-paco); }
+.mv-cal-today .mv-cal-daynum { color: var(--mv-paco); }
+.mv-cal-past { opacity: 0.45; }
+
+/* One class. Name only - the cell is too small for more, and the detail page
+   carries the rest. Colour and text colour arrive together from the shade
+   class; they were measured as a pair. */
+.mv-cal-item {
+  display: block;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 0.58rem;
+  line-height: 1.2;
+  font-weight: 600;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mv-cal-item:hover { text-decoration: none; opacity: 0.85; }
+.mv-cal-booked { outline: 1.5px solid var(--mv-paco); outline-offset: -1.5px; }
+
+/* Day and week give each class room to breathe. */
+.mv-cal[data-mode="day"] .mv-cal-cell,
+.mv-cal[data-mode="week"] .mv-cal-cell { min-height: 96px; }
+.mv-cal[data-mode="day"] .mv-cal-item {
+  font-size: 0.84rem;
+  padding: 8px 10px;
+  white-space: normal;
+  margin-bottom: 2px;
+}
+.mv-cal[data-mode="week"] .mv-cal-item { font-size: 0.6rem; }
+
+.mv-cal-empty-msg {
+  padding: 28px 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--mv-muted);
+}
+
+@media (min-width: 600px) {
+  .mv-cal-cell { min-height: 104px; }
+  .mv-cal-item { font-size: 0.68rem; padding: 3px 6px; }
+  .mv-cal[data-mode="week"] .mv-cal-item { font-size: 0.72rem; }
+}
+
+/* Month view on a phone. Seven columns across 390px leaves a 48px cell, and
+   every real class name ("Reformer Sculpt", "Barre Harmony") truncates to
+   three characters - measured, not guessed. A name nobody can read is not
+   showing the name.
+
+   So on narrow screens month becomes what a month view is for: which days
+   have classes, and of what kind. Colour still carries discipline and
+   intensity. Tapping a day opens that day, where the names are full size and
+   tappable - the drill-down every phone calendar uses. Week and day views are
+   unchanged and still show names. */
+@media (max-width: 599px) {
+  .mv-cal[data-mode="month"] .mv-cal-cell { cursor: pointer; }
+  .mv-cal[data-mode="month"] .mv-cal-item {
+    font-size: 0;
+    line-height: 0;
+    padding: 0;
+    height: 7px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    pointer-events: none;   /* the whole day is the target, not a 7px sliver */
+  }
+  .mv-cal[data-mode="month"] .mv-cal-cell:active { background: var(--mv-sand); }
+}
+
+/* The weekday name inside a cell. Only needed when the grid is one column
+   wide, where the column header no longer says which day a row is. */
+.mv-cal-dow-inline { display: none; }
+.mv-cal[data-mode="day"] .mv-cal-dow-inline { display: inline; margin-right: 6px; }
+
+@media (max-width: 599px) {
+  /* Week on a phone is seven columns of 48px, so names truncate exactly as
+     they do in month. Stack it instead: one day per row, names full size and
+     directly tappable. The column header is meaningless once stacked, so the
+     day names move into the rows. */
+  .mv-cal[data-mode="week"] .mv-cal-grid { grid-template-columns: 1fr; }
+  .mv-cal[data-mode="week"] .mv-cal-dow { display: none; }
+  .mv-cal[data-mode="week"] .mv-cal-dow-inline { display: inline; margin-right: 6px; }
+  .mv-cal[data-mode="week"] .mv-cal-cell { min-height: 0; padding: 8px 10px; }
+  .mv-cal[data-mode="week"] .mv-cal-item {
+    font-size: 0.84rem;
+    padding: 7px 10px;
+    white-space: normal;
+    margin-bottom: 3px;
+  }
+  /* An empty day in a stacked week is just a thin line, not a big blank box */
+  .mv-cal[data-mode="week"] .mv-cal-empty { opacity: 0.5; }
+}
+
+/* ── Time grid ───────────────────────────────────────────────────────────
+   Day, and week once there is room for seven real columns, put the hours down
+   the side and place each class where it actually falls. The class is added by
+   the script, not by data-mode, because week is a time grid on a desktop and
+   the stacked list on a phone - one mode, two layouts, decided by width.
+
+   The hour range comes from the classes, so the studio's real day is what gets
+   drawn: a packed 07:00-10:00, the single 13:00 class, the empty afternoon,
+   then 18:00-21:00. That hole is the shape of the studio's day and is left
+   uncompressed on purpose - it is the thing a list cannot show you. */
+.mv-cal-timed { display: block; }
+.mv-cal-hours { display: none; }
+
+.mv-cal.mv-cal-timegrid .mv-cal-timed {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.mv-cal.mv-cal-timegrid .mv-cal-grid { flex: 1 1 auto; min-width: 0; }
+
+/* The gutter is a sibling of the grid, not a column inside it, so the seven
+   day columns stay seven equal columns. */
+.mv-cal.mv-cal-timegrid .mv-cal-hours {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 40px;
+  /* clears the day-number header and the rule under it, so 08:00 in the
+     gutter sits on the 08:00 line drawn inside every day */
+  padding-top: calc(var(--mv-cal-head-h) + 2px);
+}
+.mv-cal-hour {
+  height: var(--mv-cal-hour-h);
+  font-size: 0.58rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: right;
+  padding-right: 4px;
+  color: var(--mv-muted);
+  font-variant-numeric: tabular-nums;
+  /* the label reads as sitting on its line rather than under it; relative so
+     it shifts without moving the one below it */
+  position: relative;
+  top: -0.35em;
+}
+
+/* Each day: a fixed-height header, then an area exactly as tall as the range
+   with an hour rule ruled across it. */
+.mv-cal.mv-cal-timegrid .mv-cal-cell { padding: 0; min-height: 0; }
+.mv-cal.mv-cal-timegrid .mv-cal-daynum {
+  height: var(--mv-cal-head-h);
+  line-height: var(--mv-cal-head-h);
+  padding: 0 5px;
+  border-bottom: 1px solid var(--mv-border);
+}
+.mv-cal.mv-cal-timegrid .mv-cal-body {
+  position: relative;
+  display: block;
+  height: calc(var(--mv-cal-span, 0) * var(--mv-cal-hour-h));
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--mv-border),
+    var(--mv-border) 1px,
+    transparent 1px,
+    transparent var(--mv-cal-hour-h));
+}
+/* Beats .mv-cal[data-mode="day"] .mv-cal-item, which sets the stacked
+   day view's much larger type. */
+.mv-cal.mv-cal-timegrid .mv-cal-body .mv-cal-item {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 5px;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  line-height: 1.15;
+  white-space: normal;
+  overflow: hidden;
+}
+
+/* Seven day-name column headers no longer line up once the gutter takes width
+   off the left, so the name moves into each day beside its number - which is
+   what a time grid shows in that spot anyway. */
+.mv-cal.mv-cal-timegrid .mv-cal-dow { display: none; }
+.mv-cal.mv-cal-timegrid .mv-cal-dow-inline { display: inline; margin-right: 4px; }
+
+@media (min-width: 600px) {
+  .mv-cal.mv-cal-timegrid .mv-cal-body .mv-cal-item {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+  }
+  .mv-cal.mv-cal-timegrid[data-mode="day"] .mv-cal-body .mv-cal-item {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 599px) {
+  /* Only day is a time grid on a phone; one column has room for it. Week stays
+     the stacked list above. */
+  .mv-cal { --mv-cal-hour-h: 42px; }
+  .mv-cal.mv-cal-timegrid .mv-cal-hours { width: 36px; }
+  .mv-cal.mv-cal-timegrid .mv-cal-body .mv-cal-item { font-size: 0.72rem; }
+}
+
+/* ── Instructor: swap history ────────────────────────────────────────────
+   Two lists, not one. "Who taught my class" and "whose class did I teach"
+   are different questions, and a single merged list answers neither without
+   the reader working out which way round each row goes. */
+.mv-teacher-links {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+  flex-wrap: wrap;
+}
+.mv-teacher-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--mv-border);
+  background: var(--mv-card-bg);
+  color: var(--mv-ink-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mv-teacher-link:hover { text-decoration: none; border-color: var(--mv-active-fill); }
+.mv-teacher-link svg {
+  width: 15px; height: 15px; flex-shrink: 0;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+.mv-swap-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 0 16px;
+}
+.mv-swap-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mv-swap-title {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--mv-paco);
+}
+.mv-swap-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--mv-sand);
+  color: var(--mv-ink-text);
+  font-variant-numeric: tabular-nums;
+}
+.mv-swap-sub {
+  margin: 2px 0 10px;
+  font-size: 0.76rem;
+  color: var(--mv-muted);
+}
+.mv-swap-none {
+  font-size: 0.8rem;
+  color: var(--mv-muted);
+  padding: 10px 0 2px;
+}
+.mv-swap-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--mv-card-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+/* A swap of a class that has already happened is a record; one still ahead is
+   something the instructor may still have to act on, so it stays at full
+   strength and the finished ones step back. */
+.mv-swap-past { opacity: 0.72; }
+.mv-swap-card-main { flex: 1 1 auto; min-width: 0; }
+.mv-swap-class {
+  margin: 0 0 2px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--mv-paco);
+  overflow-wrap: anywhere;
+}
+.mv-swap-class a { color: inherit; text-decoration: none; }
+.mv-swap-class a:hover { text-decoration: underline; }
+.mv-swap-meta {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--mv-muted);
+  font-variant-numeric: tabular-nums;
+}
+.mv-swap-who {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--mv-ink-text);
+}
+.mv-swap-who strong { font-weight: 600; margin-left: 4px; }
+.mv-swap-reason {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--mv-ink-text);
+  padding-left: 9px;
+  border-left: 2px solid var(--mv-border);
+  overflow-wrap: anywhere;
+}
+.mv-swap-card-side {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  text-align: right;
+}
+.mv-swap-source {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mv-muted);
+  white-space: nowrap;
+}
+.mv-swap-logged {
+  font-size: 0.66rem;
+  color: var(--mv-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  /* The side column costs more width than it earns on a phone. */
+  .mv-swap-card { flex-direction: column; gap: 6px; }
+  .mv-swap-card-side { flex-direction: row; align-items: center; gap: 8px; text-align: left; }
+}
+
+/* ── Promotional price ───────────────────────────────────────────────────
+   Full price struck through, today's price beside it, and a badge naming the
+   offer. The struck-through number is deliberately quiet: it is context for
+   the price that matters, not a second price to read. */
+.mv-price-was {
+  text-decoration: line-through;
+  color: var(--mv-muted);
+  font-weight: 400;
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.mv-price-now {
+  font-weight: 700;
+  color: var(--mv-ink-text);
+  font-variant-numeric: tabular-nums;
+}
+.mv-price-free { text-transform: uppercase; letter-spacing: 0.04em; }
+.mv-price-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--mv-active-fill);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+/* On the product page the tag sits inside a large serif number, so the badge
+   would otherwise inherit 1.6rem. */
+.mv-price-lg .mv-price-badge { font-size: 0.55rem; }
+.mv-price-lg .mv-price-was { font-size: 1.05rem; }
+
+/* Checkout summary rows for a discounted order. */
+.mv-summary-discount .mv-summary-name,
+.mv-summary-discount .mv-summary-total {
+  color: var(--mv-active-fill);
+  font-weight: 600;
+}
+.mv-summary-sub {
+  padding-top: 4px;
+  border-top: 1px solid var(--mv-border);
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+.mv-summary-tax { padding-top: 4px; margin-top: 8px; }
+/* Without a discount block above it, the tax row carries the dividing rule. */
+.mv-summary-row.mv-summary-tax:not(.mv-summary-sub ~ .mv-summary-tax) {
+  border-top: 1px solid var(--mv-border);
+}
+
+/* The non-iOS install note. One sentence where iOS gets a numbered list,
+   because iOS is the only platform with no way to install from the page. */
+.mv-ios-note {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--mv-ink-text);
+}
+
+/* The one-tap Book button sits in a form, which is a block element and would
+   otherwise break the card's price/button row onto two lines. */
+.mv-book-free-form { display: inline; margin: 0; }
+.mv-book-free-form .mv-btn-book { border: 0; cursor: pointer; font: inherit; }
+/* Consent still has to be visible and still has to be recorded, even with the
+   checkout page gone. */
+.mv-free-terms-note {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--mv-muted);
+  text-align: center;
+}
+.mv-free-terms-note a { color: var(--mv-ink-text); }

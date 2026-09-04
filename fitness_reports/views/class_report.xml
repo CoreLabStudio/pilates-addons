@@ -13,16 +13,16 @@
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
             <list create="false" edit="false" default_order="class_date desc">
-                <field name="class_date"      string="Fecha"/>
-                <field name="event_id"        string="Clase"/>
+                <field name="class_date"      string="Date"/>
+                <field name="event_id"        string="Class"/>
                 <field name="teacher_user_id" string="Instructor"/>
-                <field name="class_type_id"   string="Tipo"/>
-                <field name="capacity"        string="Aforo"         sum="Total aforo"/>
-                <field name="booked_count"    string="Reservas"      sum="Total"/>
-                <field name="attended_count"  string="Asistidos"     sum="Total"/>
-                <field name="no_show_count"   string="No presentados" sum="Total"/>
-                <field name="cancelled_count" string="Cancelados"    sum="Total"/>
-                <field name="occupancy_pct"   string="Ocupación %"/>
+                <field name="class_type_id"   string="Type"/>
+                <field name="capacity"        string="Capacity"         sum="Total aforo"/>
+                <field name="booked_count"    string="Bookings"      sum="Total"/>
+                <field name="attended_count"  string="Attended"     sum="Total"/>
+                <field name="no_show_count"   string="No-shows" sum="Total"/>
+                <field name="cancelled_count" string="Cancelled"    sum="Total"/>
+                <field name="occupancy_pct"   string="Occupancy %"/>
             </list>
         </field>
     </record>
@@ -32,7 +32,7 @@
         <field name="name">fitness.report.class.classes.pivot</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <pivot string="Clases impartidas">
+            <pivot string="Classes Taught">
                 <field name="class_date"      type="row" interval="month"/>
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_type_id"   type="col"/>
@@ -48,7 +48,7 @@
         <field name="name">fitness.report.class.classes.graph</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <graph string="Clases por instructor" type="bar">
+            <graph string="Classes by Instructor" type="bar">
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_type_id"   type="col"/>
                 <field name="booked_count"    type="measure"/>
@@ -61,22 +61,22 @@
         <field name="name">fitness.report.class.classes.search</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <search string="Buscar clases">
-                <field name="event_id"        string="Clase"/>
+            <search string="Search Classes">
+                <field name="event_id"        string="Class"/>
                 <field name="teacher_user_id" string="Instructor"/>
-                <field name="class_type_id"   string="Tipo de clase"/>
+                <field name="class_type_id"   string="Class Type"/>
                 <separator/>
                 <!-- B5: visible date-range chips -->
                 <filter name="filter_this_month"
-                        string="Este mes"
+                        string="This Month"
                         domain="[('class_date','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
                                  ('class_date','&lt;',  (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_last_month"
-                        string="Mes anterior"
+                        string="Last Month"
                         domain="[('class_date','&gt;=', (context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')),
                                  ('class_date','&lt;',  (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_this_year"
-                        string="Este año"
+                        string="This Year"
                         domain="[('class_date','&gt;=', context_today().strftime('%Y-01-01')),
                                  ('class_date','&lt;',  (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
@@ -85,10 +85,10 @@
                             string="Instructor"
                             context="{'group_by':'teacher_user_id'}"/>
                     <filter name="group_class_type"
-                            string="Tipo de clase"
+                            string="Class Type"
                             context="{'group_by':'class_type_id'}"/>
                     <filter name="group_month"
-                            string="Mes"
+                            string="Month"
                             context="{'group_by':'class_date:month'}"/>
                 </group>
             </search>
@@ -123,7 +123,7 @@
         <field name="name">fitness.report.class.team.pivot</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <pivot string="Rendimiento por instructor">
+            <pivot string="Instructor Performance">
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_date"      type="col" interval="month"/>
                 <field name="booked_count"    type="measure"/>
@@ -138,7 +138,7 @@
         <field name="name">fitness.report.class.team.graph</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <graph string="Asistencia por instructor" type="bar">
+            <graph string="Attendance by Instructor" type="bar">
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_date"      type="col" interval="month"/>
                 <field name="attended_count"  type="measure"/>

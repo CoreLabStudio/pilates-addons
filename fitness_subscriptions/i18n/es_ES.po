@@ -34,3 +34,134 @@ msgstr "Saldos de membresía"
 #: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_booking__fitness_used_floating_credit
 msgid "Paid with Floating Credit"
 msgstr "Pagado con crédito flexible"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__calendar_event_id
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_sale_order_form_fitness_subscription
+msgid "Anchor Class Event"
+msgstr "Clase de referencia"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_subscription_used_classes
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_sale_order_form_fitness_subscription
+msgid "Classes This Period (reporting)"
+msgstr "Clases de este periodo (informes)"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_period_start_date
+msgid "Current Period Start"
+msgstr "Inicio del periodo actual"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_effective_weekly_allowance_display
+msgid "Effective Weekly Cap"
+msgstr "Límite semanal efectivo"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_subscription_product_id
+msgid "Fitness Subscription Product"
+msgstr "Producto de membresía"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_clase_fija_ids
+msgid "Fixed Class Slots"
+msgstr "Franjas de clase fija"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_floating_credits
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_fitness_membership_balances_list
+msgid "Floating Credits"
+msgstr "Créditos flexibles"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_is_clase_fija
+msgid "Is Clase Fija"
+msgstr "Es clase fija"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__fitness_is_clase_fija
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__fitness_is_clase_fija
+msgid "Is Clase Fija Plan"
+msgstr "Es plan de clase fija"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__fitness_is_subscription_plan
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__fitness_is_subscription_plan
+msgid "Is Fitness Subscription Plan"
+msgstr "Es plan de membresía"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_is_reformer_mensual
+msgid "Is Reformer Mensual"
+msgstr "Es Reformer Mensual"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__fitness_is_reformer_mensual
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__fitness_is_reformer_mensual
+msgid "Is Reformer Mensual Plan"
+msgstr "Es plan Reformer Mensual"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__name
+msgid "Label"
+msgstr "Etiqueta"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_monthly_class_allowance
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_sale_order_form_fitness_subscription
+msgid "Monthly Allowance (legacy)"
+msgstr "Cupo mensual (heredado)"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__monthly_class_allowance
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__monthly_class_allowance
+msgid "Monthly Class Allowance (legacy / reporting only)"
+msgstr "Cupo mensual de clases (heredado / solo informes)"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__fitness_promo_first_cycle_bonus
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__fitness_promo_first_cycle_bonus
+msgid "Promo First-Cycle Bonus (Floating Credits)"
+msgstr "Bonus promocional del primer ciclo (créditos flexibles)"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_weekly_used_this_week
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_fitness_membership_balances_list
+msgid "Used This Week"
+msgstr "Usadas esta semana"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_weekly_class_allowance
+msgid "Weekly Allowance"
+msgstr "Cupo semanal"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_weekly_allowance_override
+msgid "Weekly Allowance Override"
+msgstr "Excepción del cupo semanal"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_product__weekly_class_allowance
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__weekly_class_allowance
+msgid "Weekly Class Allowance"
+msgstr "Cupo semanal de clases"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__subscription_id
+msgid "Subscription"
+msgstr "MembresÃ­a"

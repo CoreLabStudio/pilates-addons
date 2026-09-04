@@ -422,41 +422,8 @@
                     <div class="mv-news-cards">
                         <t t-foreach="news_posts" t-as="post">
                             <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
-                                <t t-if="post.image">
-                                    <div class="mv-news-card-thumb">
-                                        <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
-                                             t-att-alt="post.title"
-                                             class="mv-news-thumb-img"
-                                             loading="lazy"/>
-                                    </div>
-                                    <div class="mv-news-card-info">
-                                        <p class="mv-news-card-title" t-field="post.title"/>
-                                        <p class="mv-news-card-date">
-                                            <span t-field="post.publish_date"
-                                                  t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
-                                        </p>
-                                    </div>
-                                </t>
-                                <t t-else="">
-                                    <div class="mv-news-card-noimg">
-                                        <div class="mv-news-card-icon">
-                                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
-                                                <polyline points="14 2 14 8 20 8"/>
-                                                <path d="M2 15h10M9 19H2M7 11H2"/>
-                                            </svg>
-                                        </div>
-                                        <p class="mv-news-card-date">
-                                            <span t-field="post.publish_date"
-                                                  t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
-                                        </p>
-                                    </div>
-                                    <div class="mv-news-card-info">
-                                        <p class="mv-news-card-title" t-field="post.title"/>
-                                        <p class="mv-news-card-excerpt" t-out="post.body_excerpt"/>
-                                    </div>
-                                </t>
-                            </a>
+                            <t t-call="fitness_portal.mv_news_card_body"/>
+                        </a>
                         </t>
                     </div>
                 </t>
@@ -521,6 +488,27 @@
                             <div class="mv-credit-label" t-out="primary_credit['label']"/>
                         </a>
                     </t>
+                    <!-- Always visible, both views. Swaps the list for the
+                         calendar and back; the icon shows what you get. Last
+                         in the row, so it sits at the top right. -->
+                    <button type="button" id="mv-cal-toggle" class="mv-cal-toggle"
+                            t-att-aria-label="lbl_cal_open" t-att-title="lbl_cal_open"
+                            aria-pressed="false">
+                        <svg class="mv-cal-ico-cal" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="16" rx="2"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <line x1="8" y1="3" x2="8" y2="7"/>
+                            <line x1="16" y1="3" x2="16" y2="7"/>
+                        </svg>
+                        <svg class="mv-cal-ico-list" viewBox="0 0 24 24" aria-hidden="true">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <circle cx="4" cy="6" r="1"/>
+                            <circle cx="4" cy="12" r="1"/>
+                            <circle cx="4" cy="18" r="1"/>
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- Segmented toggle: two views, one tab -->
@@ -533,37 +521,58 @@
                        t-att-aria-selected="'true' if active_view == 'schedule' else 'false'">My Schedule</a>
                 </div>
 
+                <!-- Which room. Same segmented shape as the switcher above and
+                     the same colours as the timetable and shop toggles, so the
+                     control means the same thing everywhere. Filters in the
+                     browser rather than reloading: the classes are already on
+                     the page and a round trip would lose the scroll position.
+                     Rendered only when both rooms have classes - see
+                     _discipline_tabs. -->
+                <t t-if="discipline_tabs">
+                    <div class="mv-segmented mv-discipline-toggle" role="tablist"
+                         id="mv-studio-discipline">
+                        <t t-foreach="discipline_tabs" t-as="tab">
+                            <button type="button" role="tab"
+                                    t-att-data-discipline="tab['key']"
+                                    t-att-aria-selected="'true' if tab_index == 0 else 'false'"
+                                    t-attf-class="mv-segment#{' mv-active' if tab_index == 0 else ''}"
+                                    t-out="tab['label']"/>
+                        </t>
+                    </div>
+                </t>
+
                 <!-- Filter bar: discipline pills (when multiple disciplines) + date dropdown (always) -->
                 <div id="mv-filter-hierarchy">
                     <!-- Date range. The list defaults to a week so a phone is not
                          handed every class in the window at once. -->
                     <t t-if="range_chips">
-                        <div class="mv-pkg-filters" id="mv-range-filters">
+                        <div class="mv-pkg-filters mv-filter-row" id="mv-range-filters">
                             <t t-foreach="range_chips" t-as="rc">
                                 <a t-att-href="'/my/studio?days=%s' % rc['days']"
                                    class="mv-pkg-pill-btn"
-                                   t-att-style="'border-color:var(--mv-ink);color:var(--mv-ink);font-weight:700;' if rc['days'] == sel_days else None"
+                                   t-att-style="'border-color:var(--mv-ink-text);color:var(--mv-ink-text);font-weight:700;' if rc['days'] == sel_days else None"
                                    t-out="rc['label']"/>
                             </t>
+                            <!-- The date picker belongs on this row, not under
+                                 it: it narrows the same list by the same thing.
+                                 JS reveals the wrapper once it has dates to
+                                 offer, so it starts hidden. -->
+                            <span id="mv-date-filter-wrap" style="display:none;">
+                                <!-- The language comes from the server. This
+                                     dropdown formats its own dates in the
+                                     browser, and <html lang> is empty on
+                                     portal pages, so reading it there rendered
+                                     every language's dates - and the "all"
+                                     option - in the fallback locale. The label
+                                     is translated here rather than picked from
+                                     a table of three languages in the script. -->
+                                <select id="mv-date-select"
+                                        class="mv-pkg-pill-btn mv-date-select"
+                                        t-att-data-lang="cal_lang"
+                                        t-att-data-all-label="lbl_all_dates"/>
+                            </span>
                         </div>
                     </t>
-                    <t t-if="studio_chips">
-                        <div class="mv-pkg-filters" id="mv-type-filters">
-                            <t t-foreach="studio_chips" t-as="chip">
-                                <t t-if="chip['key'] != 'all'">
-                                    <button type="button"
-                                            class="mv-pkg-pill-btn mv-type-pill"
-                                            t-att-data-filter="chip['key']"
-                                            t-out="chip['label']"/>
-                                </t>
-                            </t>
-                        </div>
-                    </t>
-                    <div id="mv-date-filter-wrap" style="display:none; margin-bottom:4px;">
-                        <select id="mv-date-select"
-                                style="border:1.5px solid #c8bfb8;border-radius:20px;padding:5px 16px;font-size:0.78rem;font-weight:600;letter-spacing:0.03em;color:#5c4a3e;background:#faf9f6;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;">
-                        </select>
-                    </div>
                 </div>
 
                 <!-- Flash banners -->
@@ -584,6 +593,7 @@
                     </div>
                 </t>
 
+                <div id="mv-list-view">
                 <!-- ══ View 1: Available ══ -->
                 <t t-if="active_view == 'available'">
                     <t t-if="not has_sources">
@@ -755,6 +765,10 @@
                     </t>
                 </t>
 
+                </div>
+
+                <t t-call="fitness_portal.mv_calendar"/>
+
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
@@ -826,29 +840,42 @@
                         </t>
                     </div>
 
-                    <!-- Description -->
+                    <!-- Labelled facts. The description used to open the page
+                         as an unlabelled block of copy, with the room buried in
+                         a meta line and the instructor implied by an avatar. -->
                     <t t-if="ct and ct.description">
-                        <p class="mv-detail-desc" t-out="ct.description"/>
+                        <div class="mv-detail-field">
+                            <div class="mv-detail-label" t-out="lbl_description"/>
+                            <p class="mv-detail-desc" t-out="ct.description"/>
+                        </div>
                     </t>
+
+                    <div class="mv-detail-facts">
+                        <t t-if="duration_label">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_duration"/>
+                                <span class="mv-detail-value" t-out="duration_label"/>
+                            </div>
+                        </t>
+                        <t t-if="event.user_id">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_instructor"/>
+                                <span class="mv-detail-value" t-out="event.user_id.name"/>
+                            </div>
+                        </t>
+                        <t t-if="event.classroom_id">
+                            <div class="mv-detail-fact">
+                                <span class="mv-detail-label" t-out="lbl_room"/>
+                                <span class="mv-detail-value" t-out="event.classroom_id.name"/>
+                            </div>
+                        </t>
+                    </div>
 
                     <!-- Per-class note from studio (Task 4) -->
                     <t t-if="event.fitness_note">
                         <div class="mv-class-note">
-                            <div class="mv-class-note-label">Note from studio</div>
+                            <div class="mv-class-note-label" t-out="lbl_studio_note"/>
                             <t t-out="event.fitness_note"/>
-                        </div>
-                    </t>
-
-                    <!-- Teacher row -->
-                    <t t-if="event.user_id">
-                        <div class="mv-teacher-row">
-                            <div class="mv-teacher-avatar">
-                                <t t-out="(event.user_id.name[:1] if event.user_id.name else 'T').upper()"/>
-                            </div>
-                            <div>
-                                <p class="mv-teacher-name" t-out="event.user_id.name"/>
-                                <p class="mv-teacher-seats">Instructor</p>
-                            </div>
                         </div>
                     </t>
 
@@ -862,6 +889,19 @@
                     <!-- Call to action -->
                     <t t-if="already_booked">
                         <div class="mv-already-booked">You’re booked for this class ✓</div>
+                        <!-- Reaching this page from the calendar used to be a
+                             dead end: it said you were booked and gave you no
+                             way out. Same route, same refund and notification
+                             as the My Schedule list. -->
+                        <t t-if="existing_booking">
+                            <form method="post" class="mv-cancel-form"
+                                  t-attf-action="/my/classes/#{existing_booking.id}/cancel">
+                                <input type="hidden" name="csrf_token"
+                                       t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="mv-cancel-btn mv-cancel-btn-lg">Cancel booking</button>
+                            </form>
+                            <p class="mv-cancel-policy">Cancel up to 2 hours before class to keep your credit.</p>
+                        </t>
                     </t>
                     <t t-elif="can_book">
                         <form method="post" t-attf-action="/my/classes/#{event.id}/book">
@@ -1289,6 +1329,21 @@
                         <div class="mv-flash mv-flash-ok">Your order is confirmed. Thank you!</div>
                     </div>
                 </t>
+                <t t-if="booked">
+                    <div class="mv-flashes">
+                        <div class="mv-flash mv-flash-ok">
+                            <strong>Booked!</strong> Your free class is confirmed.
+                        </div>
+                    </div>
+                </t>
+                <!-- A refusal arrives here as a redirect now that the free
+                     booking has no page of its own. Without this the button
+                     would simply do nothing and say nothing. -->
+                <t t-if="error_msg">
+                    <div class="mv-flashes">
+                        <div class="mv-flash mv-flash-err"><strong>Oops:</strong><span style="margin-left:5px;" t-out="error_msg"/></div>
+                    </div>
+                </t>
 
                 <t t-if="not products">
                     <div class="mv-empty" t-out="empty_msg"/>
@@ -1360,10 +1415,25 @@
                                                     </t>
                                                     <t t-else="">
                                                         <span class="mv-pkg-price-inline">
-                                                            <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/><span style="font-size:0.65rem;color:var(--mv-muted);font-weight:400;margin-left:3px;">+ IVA</span>
+                                                            <t t-call="fitness_portal.mv_price_tag"/><span style="font-size:0.65rem;color:var(--mv-muted);font-weight:400;margin-left:3px;">+ IVA</span>
                                                         </span>
                                                         <t t-if="_is_active">
                                                             <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
+                                                        </t>
+                                                        <t t-elif="product.id in claimed_free_ids">
+                                                            <span class="mv-btn-book mv-btn-disabled"
+                                                                  style="text-decoration:none;pointer-events:none;opacity:0.5;"
+                                                                  t-out="lbl_free_used"/>
+                                                        </t>
+                                                        <t t-elif="product.id in free_ids">
+                                                            <!-- Nothing to pay and nothing to choose, so there is
+                                                                 nothing for a checkout page to ask. This books it. -->
+                                                            <form method="post" class="mv-book-free-form"
+                                                                  t-attf-action="/my/packages/#{product.id}/book-free">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <input type="hidden" name="back" value="/my/packages"/>
+                                                                <button type="submit" class="mv-btn-book" t-out="lbl_book_free"/>
+                                                            </form>
                                                         </t>
                                                         <t t-else="">
                                                             <a t-attf-href="/my/packages/#{product.id}/checkout"
@@ -1472,13 +1542,40 @@
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
                                 <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/> <span style="font-size:0.72rem;">+ IVA</span></span>
-                                <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
-                                    <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                <span class="mv-price-lg" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
+                                    <t t-call="fitness_portal.mv_price_tag"/>
                                 </span>
                             </div>
-                            <a t-attf-href="/my/packages/#{product.id}/checkout"
-                               class="mv-pkg-buy-btn"
-                               style="display:block;text-align:center;text-decoration:none;line-height:1.4;">Buy now</a>
+                            <t t-if="free_claimed">
+                                <span class="mv-pkg-buy-btn mv-btn-disabled"
+                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
+                                      t-out="lbl_free_used"/>
+                            </t>
+                            <t t-elif="is_free">
+                                <!-- One tap. A checkout page collects a payment
+                                     method and a signature; a free trial has
+                                     neither, so the page was a screen whose only
+                                     content was a second button. -->
+                                <form method="post"
+                                      t-attf-action="/my/packages/#{product.id}/book-free">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="back" t-attf-value="/my/packages/#{product.id}"/>
+                                    <button type="submit" class="mv-pkg-buy-btn"
+                                            style="display:block;width:100%;text-align:center;line-height:1.4;"
+                                            t-out="lbl_book_free"/>
+                                </form>
+                                <!-- The terms are still agreed to, and still
+                                     recorded on the order; losing the page must
+                                     not mean losing the consent. -->
+                                <p class="mv-free-terms-note">
+                                    <t t-out="lbl_free_terms"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}"><t t-out="terms_link_label or 'Terms and Conditions'"/></a>
+                                </p>
+                            </t>
+                            <t t-else="">
+                                <a t-attf-href="/my/packages/#{product.id}/checkout"
+                                   class="mv-pkg-buy-btn"
+                                   style="display:block;text-align:center;text-decoration:none;line-height:1.4;">Buy now</a>
+                            </t>
                         </div>
                     </t>
                 </div>
@@ -1513,25 +1610,55 @@
                     <!-- Order summary -->
                     <div class="mv-panel">
                         <p class="mv-panel-label">Order summary</p>
+                        <!-- Every number here is computed in the controller,
+                             through the same tax call the sale order makes. The
+                             template used to multiply by 1.21 itself, which was
+                             exact at full price and a cent out as soon as a
+                             discount produced a half-cent: the page said 27.22
+                             and Stripe asked for 27.23. -->
+                        <t t-set="_live" t-value="product.fitness_promo_is_live"/>
                         <div class="mv-summary-row">
                             <p class="mv-summary-name" t-out="product.name"/>
                             <span class="mv-summary-total">
-                                <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                <t t-out="'%.2f' % co_full"/> <t t-out="co_currency"/>
                             </span>
                         </div>
-                        <div class="mv-summary-row" style="padding-top:4px;border-top:1px solid var(--mv-border);margin-top:8px;">
-                            <p class="mv-summary-name" style="color:var(--mv-muted);font-size:0.8rem;">IVA (21%)</p>
-                            <span class="mv-summary-total" style="color:var(--mv-muted);font-size:0.8rem;">
-                                <t t-out="'%.2f' % (product.list_price * 0.21)"/> <t t-out="product.currency_id.symbol or '€'"/>
-                            </span>
-                        </div>
+                        <t t-if="_live">
+                            <div class="mv-summary-row mv-summary-discount">
+                                <p class="mv-summary-name" t-out="product.fitness_promo_summary"/>
+                                <span class="mv-summary-total">
+                                    &#8722;<t t-out="'%.2f' % co_discount"/> <t t-out="co_currency"/>
+                                </span>
+                            </div>
+                            <div class="mv-summary-row mv-summary-sub">
+                                <p class="mv-summary-name">Subtotal</p>
+                                <span class="mv-summary-total">
+                                    <t t-out="'%.2f' % co_subtotal"/> <t t-out="co_currency"/>
+                                </span>
+                            </div>
+                        </t>
+                        <t t-if="co_tax">
+                            <div class="mv-summary-row mv-summary-tax">
+                                <p class="mv-summary-name" style="color:var(--mv-muted);font-size:0.8rem;">IVA</p>
+                                <span class="mv-summary-total" style="color:var(--mv-muted);font-size:0.8rem;">
+                                    <t t-out="'%.2f' % co_tax"/> <t t-out="co_currency"/>
+                                </span>
+                            </div>
+                        </t>
                         <div class="mv-summary-row" style="padding-top:6px;font-weight:600;">
                             <p class="mv-summary-name">Total</p>
                             <span class="mv-summary-total">
-                                <t t-out="'%.2f' % (product.list_price * 1.21)"/> <t t-out="product.currency_id.symbol or '€'"/>
+                                <t t-out="'%.2f' % co_total"/> <t t-out="co_currency"/>
                             </span>
                         </div>
                     </div>
+
+                    <!-- There is deliberately no branch here for a free item.
+                         The route redirects a zero-price product back to its
+                         own page, where Book completes the booking outright, so
+                         this template is only ever reached by something that
+                         costs money. A second branch would be a second way to
+                         buy the same thing, and the one most likely to drift. -->
 
                     <!-- ── Online payment (Stripe) path ── -->
                     <t t-if="use_online_payment">
@@ -1929,26 +2056,68 @@
     <!-- and the Terms, the signup consent and its invoices all agree. Empty     -->
     <!-- fields render a visible marker so a missing address is obvious rather   -->
     <!-- than an invisible gap.                                                  -->
+    <!-- One line per row, no <br/>.
+         The address used to be t-if blocks separated by <br/>, and QWeb keeps
+         the newline and indentation between them as real text nodes: every
+         line came out with leading whitespace and the gaps between them were
+         uneven. Building the list first and looping over it leaves nothing to
+         align around. -->
+    <!-- One price, shown the same way everywhere.
+         `product` is a product.template; the number comes from the product's
+         own effective price, so the page and the charge cannot disagree. -->
+    <template id="mv_price_tag" name="CoreLab Price Tag">
+        <t t-set="_now" t-value="product.fitness_price_now"/>
+        <t t-set="_live" t-value="product.fitness_promo_is_live"/>
+        <t t-if="_live">
+            <span class="mv-price-was">
+                <t t-out="'%.2f' % product.list_price"/> <t t-out="product.currency_id.symbol or '&#8364;'"/>
+            </span>
+        </t>
+        <t t-if="_live and not _now">
+            <span class="mv-price-now mv-price-free">Free</span>
+        </t>
+        <t t-else="">
+            <span class="mv-price-now">
+                <t t-out="'%.2f' % _now"/> <t t-out="product.currency_id.symbol or '&#8364;'"/>
+            </span>
+        </t>
+        <t t-if="_live">
+            <span class="mv-price-badge" t-out="product.fitness_promo_summary"/>
+        </t>
+    </template>
+
     <template id="mv_company_details" name="CoreLab Company Details">
         <t t-set="_co" t-value="request.env.company.sudo()"/>
+        <!-- The country alone is not an address. Basing "is it filled in" on
+             the whole list would let a company with nothing but a country set
+             render as complete, and the pending notice would never appear. -->
+        <t t-set="_has_addr" t-value="bool(_co.street or _co.city)"/>
+        <t t-set="_addr" t-value="[l for l in [
+            _co.street, _co.street2,
+            ' '.join([p for p in [_co.zip, _co.city] if p]),
+            _co.country_id.name if _co.country_id else ''] if l] if _has_addr else []"/>
+        <t t-set="_vat" t-value="(_co.vat[2:] if _co.vat and _co.vat[:2].upper() == 'ES' else _co.vat) or ''"/>
         <div class="mv-legal-details">
-            <p class="mv-legal-name">Core Lab Studio, S.L.</p>
-            <p>
-                <t t-if="_co.street"><t t-out="_co.street"/><br/></t>
-                <t t-if="_co.street2"><t t-out="_co.street2"/><br/></t>
-                <t t-if="_co.zip or _co.city">
-                    <t t-out="' '.join(filter(None, [_co.zip, _co.city]))"/><br/>
+            <div class="mv-legal-block">
+                <p class="mv-legal-line mv-legal-name">Core Lab Studio, S.L.</p>
+                <t t-foreach="_addr" t-as="_line">
+                    <p class="mv-legal-line" t-out="_line"/>
                 </t>
-                <t t-if="_co.country_id"><t t-out="_co.country_id.name"/><br/></t>
-                <t t-if="not (_co.street or _co.city)">
-                    <span class="mv-legal-pending">[Domicilio social pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</span><br/>
+                <t t-if="not _has_addr">
+                    <p class="mv-legal-line mv-legal-pending">[Domicilio social pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</p>
                 </t>
-            </p>
-            <p>
-                <t t-if="_co.vat">NIF: <t t-out="_co.vat[2:] if _co.vat[:2].upper() == 'ES' else _co.vat"/></t>
-                <t t-else=""><span class="mv-legal-pending">[NIF pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</span></t>
-                <t t-if="_co.email"><br/><t t-out="_co.email"/></t>
-            </p>
+            </div>
+            <div class="mv-legal-block">
+                <t t-if="_vat">
+                    <p class="mv-legal-line">NIF: <t t-out="_vat"/></p>
+                </t>
+                <t t-else="">
+                    <p class="mv-legal-line mv-legal-pending">[NIF pendiente &#8212; Ajustes &#8250; Compa&#241;&#237;as]</p>
+                </t>
+                <t t-if="_co.email">
+                    <p class="mv-legal-line" t-out="_co.email"/>
+                </t>
+            </div>
         </div>
     </template>
 
@@ -2513,6 +2682,151 @@
     </template>
 
     <!-- ── News list page ───────────────────────────────────────────────────── -->
+    <!-- One news card: photo left, content right. Split out so the home page
+         and the news list cannot drift apart, the way the timetable row
+         already is.
+
+         The image is requested at 320x320 rather than at full size. The field
+         stores up to 1600x900 and the card paints it into a ~108px column, so
+         the full file would be roughly ten times the pixels a phone needs.
+         Odoo resizes on the fly and caches the result.
+
+         A post with no image keeps the same shape and shows the placeholder
+         mark in the same column, so the list keeps one rhythm instead of
+         changing layout per post. -->
+    <!-- One calendar, used by the timetable, the booking list and My Schedule.
+         The caller supplies calendar_days; everything below is identical in
+         all three, which is the point - three copies would drift.
+
+         Every day cell is rendered once. Day, week and month are the browser
+         choosing which cells to show, not three sets of markup and not a
+         round trip to change view. -->
+    <template id="mv_calendar" name="CoreLab Calendar">
+        <div class="mv-cal" id="mv-cal" hidden="hidden" data-mode="month"
+             t-att-data-lang="cal_lang"
+             t-att-data-hour-start="calendar_meta.get('hour_start', 0)"
+             t-attf-style="--mv-cal-span: #{len(calendar_meta.get('hours', []))}">
+            <div class="mv-cal-bar">
+                <button type="button" class="mv-cal-nav" data-cal-nav="-1"
+                        aria-label="Previous">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="mv-cal-period" id="mv-cal-period"/>
+                <button type="button" class="mv-cal-nav" data-cal-nav="1"
+                        aria-label="Next">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+            <div class="mv-segmented mv-cal-modes" role="tablist">
+                <button type="button" role="tab" data-cal-mode="day"
+                        class="mv-segment" t-out="lbl_cal_day"/>
+                <button type="button" role="tab" data-cal-mode="week"
+                        class="mv-segment" t-out="lbl_cal_week"/>
+                <button type="button" role="tab" data-cal-mode="month"
+                        class="mv-segment mv-active" t-out="lbl_cal_month"/>
+            </div>
+            <div class="mv-cal-dow" aria-hidden="true">
+                <t t-foreach="cal_dow" t-as="d"><span t-out="d"/></t>
+            </div>
+            <!-- The hour gutter sits beside the grid rather than inside it,
+                 so the seven day columns stay seven columns and the labels
+                 line up with the hour rules drawn on each day. It is shown
+                 only in the time-grid modes; month and the stacked phone week
+                 render from these same cells with it hidden. -->
+            <div class="mv-cal-timed" id="mv-cal-timed">
+                <div class="mv-cal-hours" aria-hidden="true">
+                    <span class="mv-cal-hour-pad"/>
+                    <t t-foreach="calendar_meta.get('hours', [])" t-as="ch">
+                        <span class="mv-cal-hour" t-out="ch"/>
+                    </t>
+                </div>
+                <div class="mv-cal-grid" id="mv-cal-grid">
+                    <t t-foreach="calendar_days" t-as="cday">
+                        <div t-att-data-iso="cday['iso']"
+                             t-att-data-month="cday['month']"
+                             t-attf-class="mv-cal-cell#{' mv-cal-past' if cday['in_past'] else ''}#{' mv-cal-today' if cday['is_today'] else ''}#{'' if cday['slots'] else ' mv-cal-empty'}">
+                            <span class="mv-cal-daynum">
+                                <span class="mv-cal-dow-inline" t-out="cday['dow']"/>
+                                <t t-out="cday['day']"/>
+                            </span>
+                            <!-- The day's own area. Stacked in month and on a
+                                 phone week; the positioning surface the timed
+                                 views place blocks onto. -->
+                            <div class="mv-cal-body">
+                                <t t-foreach="cday['slots']" t-as="cs">
+                                    <!-- name only: the cell is too small for
+                                         anything else, and in a time grid the
+                                         position already says when it is -->
+                                    <a t-att-href="cs['href']"
+                                       t-att-data-ct="cs['ct']"
+                                       t-att-data-start="cs['start_min']"
+                                       t-att-data-dur="cs['dur_min']"
+                                       t-attf-class="mv-cal-item #{cs['shade']}#{' mv-cal-booked' if cs['booked'] else ''}"
+                                       t-att-title="cs['time'] + ' - ' + cs['name']"
+                                       t-out="cs['name']"/>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+            <div class="mv-cal-empty-msg" id="mv-cal-empty" hidden="hidden"
+                 t-out="lbl_cal_none"/>
+        </div>
+    </template>
+
+    <!-- Three columns, like the ticket the studio asked for: the photo, then
+         what the post says, then the date standing on its own behind a
+         perforation. The date used to be a small grey line above the title,
+         which is the part that made this read as a list of rows rather than a
+         set of cards. -->
+    <template id="mv_news_card_body" name="CoreLab News Card">
+        <div class="mv-news-card-media">
+            <t t-if="post.image">
+                <img t-attf-src="/web/image/fitness.news.post/#{post.id}/image/400x400"
+                     t-att-alt="post.title"
+                     class="mv-news-thumb-img" loading="lazy"/>
+            </t>
+            <t t-else="">
+                <!-- No photo uploaded yet. Still a filled panel rather than an
+                     empty box, so a post without one keeps the card's shape. -->
+                <span class="mv-news-card-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <circle cx="8.5" cy="9.5" r="1.8"/>
+                        <polyline points="21 16 15.5 10.5 6 20"/>
+                    </svg>
+                </span>
+            </t>
+        </div>
+        <div class="mv-news-card-info">
+            <p class="mv-news-card-title" t-field="post.title"/>
+            <t t-if="post.body_excerpt">
+                <p class="mv-news-card-excerpt" t-out="post.body_excerpt"/>
+            </t>
+        </div>
+        <div class="mv-news-card-when" aria-hidden="true">
+            <span class="mv-news-when-month">
+                <span t-field="post.publish_date"
+                      t-options='{"widget": "date", "format": "MMM"}'/>
+            </span>
+            <span class="mv-news-when-day">
+                <span t-field="post.publish_date"
+                      t-options='{"widget": "date", "format": "d"}'/>
+            </span>
+            <span class="mv-news-when-year">
+                <span t-field="post.publish_date"
+                      t-options='{"widget": "date", "format": "yyyy"}'/>
+            </span>
+        </div>
+        <!-- The date is decorative above; screen readers get it once, in full,
+             rather than as three unlabelled fragments. -->
+        <span class="mv-visually-hidden">
+            <span t-field="post.publish_date"
+                  t-options='{"widget": "date", "format": "d MMMM yyyy"}'/>
+        </span>
+    </template>
+
     <template id="portal_news_list" name="News List (Student)">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>
@@ -2524,39 +2838,7 @@
                 <div class="mv-news-cards mv-news-cards--page">
                     <t t-foreach="posts" t-as="post">
                         <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
-                            <t t-if="post.image">
-                                <div class="mv-news-card-thumb">
-                                    <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
-                                         t-att-alt="post.title"
-                                         class="mv-news-thumb-img" loading="lazy"/>
-                                </div>
-                                <div class="mv-news-card-info">
-                                    <p class="mv-news-card-title" t-field="post.title"/>
-                                    <p class="mv-news-card-date">
-                                        <span t-field="post.publish_date"
-                                              t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
-                                    </p>
-                                </div>
-                            </t>
-                            <t t-else="">
-                                <div class="mv-news-card-noimg">
-                                    <div class="mv-news-card-icon">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
-                                            <polyline points="14 2 14 8 20 8"/>
-                                            <path d="M2 15h10M9 19H2M7 11H2"/>
-                                        </svg>
-                                    </div>
-                                    <p class="mv-news-card-date">
-                                        <span t-field="post.publish_date"
-                                              t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
-                                    </p>
-                                </div>
-                                <div class="mv-news-card-info">
-                                    <p class="mv-news-card-title" t-field="post.title"/>
-                                    <p class="mv-news-card-excerpt" t-out="post.body_excerpt"/>
-                                </div>
-                            </t>
+                            <t t-call="fitness_portal.mv_news_card_body"/>
                         </a>
                     </t>
                     <t t-if="not posts">
@@ -2613,12 +2895,12 @@
                     <li t-out="lbl_ios_step3"/>
                 </ol>
                 <!-- Any other browser that did not offer us a prompt: Firefox,
-                     or Chrome before it has decided the site qualifies. Naming
-                     Safari's Share button there would be wrong. -->
-                <ol class="mv-ios-steps" data-steps="other" hidden="hidden">
-                    <li t-out="lbl_gen_step1"/>
-                    <li t-out="lbl_gen_step2"/>
-                </ol>
+                     or Chrome before it has decided the site qualifies. One
+                     sentence, not a step list: numbered instructions are for
+                     iOS, which is the only case with no install API at all,
+                     and naming Safari's Share button here would be wrong. -->
+                <p class="mv-ios-note" data-steps="other" hidden="hidden"
+                   t-out="lbl_gen_note"/>
                 <p class="mv-ios-foot" t-out="lbl_ios_foot"/>
             </div>
         </div>
@@ -2650,6 +2932,27 @@
                         <p class="mv-greeting-name" t-out="title"/>
                         <p class="mv-greeting-sub" t-out="subtitle"/>
                     </div>
+                    <!-- Last in the row, so it sits at the top right. It was
+                         inside the title block above, which put it under the
+                         subtitle on the left on every screen. -->
+                    <button type="button" id="mv-cal-toggle" class="mv-cal-toggle"
+                            t-att-aria-label="lbl_cal_open" t-att-title="lbl_cal_open"
+                            aria-pressed="false">
+                        <svg class="mv-cal-ico-cal" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="16" rx="2"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <line x1="8" y1="3" x2="8" y2="7"/>
+                            <line x1="16" y1="3" x2="16" y2="7"/>
+                        </svg>
+                        <svg class="mv-cal-ico-list" viewBox="0 0 24 24" aria-hidden="true">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <circle cx="4" cy="6" r="1"/>
+                            <circle cx="4" cy="12" r="1"/>
+                            <circle cx="4" cy="18" r="1"/>
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="mv-segmented mv-discipline-toggle" role="tablist"
@@ -2668,6 +2971,7 @@
                     <p class="mv-timetable-hint" t-out="lbl_buy_hint"/>
                 </t>
 
+                <div id="mv-list-view">
                 <t t-foreach="['reformer', 'barre']" t-as="disc">
                     <div class="mv-tt-pane" t-att-data-discipline="disc"
                          t-att-hidden="None if disc == active_discipline else 'hidden'">
@@ -2695,6 +2999,10 @@
                     </div>
                 </t>
 
+                </div>
+
+                <t t-call="fitness_portal.mv_calendar"/>
+
                 <div class="mv-spacer-16"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
@@ -2704,17 +3012,19 @@
     <!-- One row of the timetable. Split out so the linked and unlinked forms
          cannot drift apart. -->
     <template id="mv_tt_row_body" name="CoreLab Timetable Row">
-        <span class="mv-tt-time" t-out="slot['time']"/>
+        <!-- The time carries the class type's shade: blue for reformer,
+             brown for barre, darker the harder the class. The one class sets
+             background and text colour together - they were measured as a
+             pair and must not be combined independently. -->
+        <span t-attf-class="mv-tt-time #{slot.get('shade') or ''}" t-out="slot['time']"/>
+        <!-- The class name, and nothing else. The description and the
+             instructor/room line used to sit here too, which gave every row a
+             different height and turned a timetable into a wall of small grey
+             text - and the description repeated in full on the page the row
+             already links to. Everything removed here is on that page:
+             description, duration, instructor and room. -->
         <span class="mv-tt-body">
             <span class="mv-tt-name" t-out="slot['name']"/>
-            <t t-if="slot['desc']">
-                <span class="mv-tt-desc" t-out="slot['desc']"/>
-            </t>
-            <span class="mv-tt-meta">
-                <t t-if="slot['teacher']"><t t-out="slot['teacher']"/></t>
-                <t t-if="slot['teacher'] and slot['room']"> · </t>
-                <t t-if="slot['room']"><t t-out="slot['room']"/></t>
-            </span>
         </span>
         <!-- status only, never a blocker: whichever of these shows, the row
              is still a link to the class's own page -->

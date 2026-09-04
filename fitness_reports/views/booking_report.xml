@@ -15,17 +15,17 @@
                   decoration-success="state == 'attended'"
                   decoration-danger="state == 'no_show'"
                   decoration-muted="state == 'cancelled'">
-                <field name="class_start" string="Fecha clase"/>
-                <field name="student_id"  string="Alumno"/>
-                <field name="class_type_id" string="Tipo"/>
-                <field name="classroom_id"  string="Sala"/>
+                <field name="class_start" string="Class Date"/>
+                <field name="student_id"  string="Student"/>
+                <field name="class_type_id" string="Type"/>
+                <field name="classroom_id"  string="Room"/>
                 <field name="teacher_user_id" string="Instructor"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'attended'"
                        decoration-warning="state == 'no_show'"
                        decoration-danger="state == 'cancelled'"
                        decoration-info="state == 'booked'"/>
-                <field name="booking_date" string="Reservado el" optional="hide"/>
+                <field name="booking_date" string="Booked On" optional="hide"/>
             </list>
         </field>
     </record>
@@ -35,7 +35,7 @@
         <field name="name">fitness.booking.report.pivot</field>
         <field name="model">fitness.booking</field>
         <field name="arch" type="xml">
-            <pivot string="Reservas">
+            <pivot string="Bookings">
                 <field name="class_start"   type="row" interval="month"/>
                 <field name="class_type_id" type="row"/>
                 <field name="state"         type="col"/>
@@ -48,7 +48,7 @@
         <field name="name">fitness.booking.report.graph</field>
         <field name="model">fitness.booking</field>
         <field name="arch" type="xml">
-            <graph string="Reservas por mes" type="bar">
+            <graph string="Bookings by Month" type="bar">
                 <field name="class_start" type="row" interval="month"/>
                 <field name="state"       type="col"/>
             </graph>
@@ -60,7 +60,7 @@
         <field name="name">fitness.booking.report.search</field>
         <field name="model">fitness.booking</field>
         <field name="arch" type="xml">
-            <search string="Buscar reservas">
+            <search string="Search Bookings">
                 <field name="student_id"/>
                 <field name="class_type_id"/>
                 <field name="teacher_user_id"/>
@@ -68,41 +68,41 @@
                 <separator/>
                 <!-- B5: date range chips -->
                 <filter name="filter_this_month"
-                        string="Este mes"
+                        string="This Month"
                         domain="[('class_start','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
                                  ('class_start','&lt;',  (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <filter name="filter_last_month"
-                        string="Mes anterior"
+                        string="Last Month"
                         domain="[('class_start','&gt;=', (context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')),
                                  ('class_start','&lt;',  (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
-                <filter name="filter_attended"  string="Asistido"
+                <filter name="filter_attended"  string="Attended"
                         domain="[('state','=','attended')]"/>
-                <filter name="filter_booked"    string="Reservado"
+                <filter name="filter_booked"    string="Booked"
                         domain="[('state','=','booked')]"/>
-                <filter name="filter_no_show"   string="No presentado"
+                <filter name="filter_no_show"   string="No-show"
                         domain="[('state','=','no_show')]"/>
-                <filter name="filter_cancelled" string="Cancelado"
+                <filter name="filter_cancelled" string="Cancelled"
                         domain="[('state','=','cancelled')]"/>
                 <separator/>
                 <group>
                     <filter name="group_month"
-                            string="Mes"
+                            string="Month"
                             context="{'group_by':'class_start:month'}"/>
                     <filter name="group_state"
-                            string="Estado"
+                            string="Status"
                             context="{'group_by':'state'}"/>
                     <filter name="group_class_type"
-                            string="Tipo de clase"
+                            string="Class Type"
                             context="{'group_by':'class_type_id'}"/>
                     <filter name="group_teacher"
                             string="Instructor"
                             context="{'group_by':'teacher_user_id'}"/>
                     <filter name="group_student"
-                            string="Alumno"
+                            string="Student"
                             context="{'group_by':'student_id'}"/>
                     <filter name="group_classroom"
-                            string="Sala"
+                            string="Room"
                             context="{'group_by':'classroom_id'}"/>
                 </group>
             </search>

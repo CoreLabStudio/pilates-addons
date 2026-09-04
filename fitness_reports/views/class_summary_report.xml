@@ -12,19 +12,19 @@
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
             <list create="false" edit="false" default_order="class_date desc">
-                <field name="class_date"          string="Fecha"/>
-                <field name="event_id"            string="Clase"/>
-                <field name="class_type_id"       string="Tipo"/>
+                <field name="class_date"          string="Date"/>
+                <field name="event_id"            string="Class"/>
+                <field name="class_type_id"       string="Type"/>
                 <field name="teacher_user_id"     string="Instructor"/>
-                <field name="capacity"            string="Aforo" sum="Total aforo"/>
-                <field name="booked_count"        string="Reservas" sum="Total"/>
-                <field name="attended_count"      string="Asistidos" sum="Total"/>
-                <field name="no_show_count"       string="No presentados" sum="Total"/>
-                <field name="cancelled_count"     string="Cancelados" sum="Total"/>
-                <field name="occupancy_pct"       string="Ocupación %"/>
+                <field name="capacity"            string="Capacity" sum="Total aforo"/>
+                <field name="booked_count"        string="Bookings" sum="Total"/>
+                <field name="attended_count"      string="Attended" sum="Total"/>
+                <field name="no_show_count"       string="No-shows" sum="Total"/>
+                <field name="cancelled_count"     string="Cancelled" sum="Total"/>
+                <field name="occupancy_pct"       string="Occupancy %"/>
                 <field name="attributed_revenue"
-                       string="Ingresos atribuidos (aprox., puede solapar)"
-                       sum="Total (aprox.)"/>
+                       string="Attributed Revenue (approx., may overlap)"
+                       sum="Total (approx.)"/>
             </list>
         </field>
     </record>
@@ -34,7 +34,7 @@
         <field name="name">fitness.report.class.pivot</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <pivot string="Resumen de clases">
+            <pivot string="Class Summary">
                 <field name="class_date"         type="row" interval="month"/>
                 <field name="teacher_user_id"    type="row"/>
                 <field name="class_type_id"      type="col"/>
@@ -51,7 +51,7 @@
         <field name="name">fitness.report.class.graph</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <graph string="Ocupación por instructor" type="bar">
+            <graph string="Occupancy by Instructor" type="bar">
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_type_id"   type="col"/>
                 <field name="booked_count"    type="measure"/>
@@ -64,20 +64,20 @@
         <field name="name">fitness.report.class.search</field>
         <field name="model">fitness.report.class</field>
         <field name="arch" type="xml">
-            <search string="Buscar clases">
-                <field name="event_id"        string="Clase"/>
+            <search string="Search Classes">
+                <field name="event_id"        string="Class"/>
                 <field name="teacher_user_id" string="Instructor"/>
-                <field name="class_type_id"   string="Tipo de clase"/>
+                <field name="class_type_id"   string="Class Type"/>
                 <separator/>
                 <group>
                     <filter name="group_instructor"
                             string="Instructor"
                             context="{'group_by':'teacher_user_id'}"/>
                     <filter name="group_class_type"
-                            string="Tipo de clase"
+                            string="Class Type"
                             context="{'group_by':'class_type_id'}"/>
                     <filter name="group_month"
-                            string="Mes"
+                            string="Month"
                             context="{'group_by':'class_date:month'}"/>
                 </group>
             </search>

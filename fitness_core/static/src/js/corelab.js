@@ -285,6 +285,33 @@
     links.forEach(function(link) {
       link.setAttribute('href', target);
     });
+
+    // Go back, rather than forward to the same address.
+    //
+    // Setting the href alone means every tap of the arrow pushes another
+    // entry: three taps into a page and the browser's own back button has to
+    // be pressed four times to unwind what looked like one step each. When
+    // the referrer really is the page we resolved - same origin, inside /my -
+    // history.back() is the same destination, restores the scroll position,
+    // and leaves the history stack the length the user thinks it is.
+    var refIsTarget = false;
+    try {
+      var u = new URL(document.referrer || '', window.location.href);
+      refIsTarget = document.referrer &&
+        u.origin === window.location.origin &&
+        (u.pathname + u.search) === target &&
+        window.history.length > 1;
+    } catch (_) {}
+    if (!refIsTarget) return;
+
+    links.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        // let a modified click open a real tab from the href above
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        window.history.back();
+      });
+    });
   }
 
   /* ── 9. Packages tab — collapsing search + discipline chips ──
@@ -325,19 +352,24 @@
     applyCombinedFilter();
   }
 
-  function applyCombinedFilter() {
-    const typeWrap = $('#mv-type-filters');
-    const dateSel  = $('#mv-date-select');
-    if (!typeWrap && !dateSel) return;
+  // Only these two are rooms a student picks between. A class type that is
+  // neither belongs to no tab, so it stays visible under whichever tab is
+  // showing rather than disappearing somewhere unreachable.
+  const ROOMS = ['reformer', 'barre'];
 
-    const typeChip  = typeWrap ? $('.mv-type-pill.mv-active', typeWrap) : null;
-    const activeType = typeChip ? (typeChip.dataset.filter || '') : '';
+  function applyCombinedFilter() {
+    const discWrap = $('#mv-studio-discipline');
+    const dateSel  = $('#mv-date-select');
+    if (!discWrap && !dateSel) return;
+
+    const active = discWrap ? $('.mv-segment.mv-active', discWrap) : null;
+    const activeType = active ? (active.dataset.discipline || '') : '';
     const activeDate = dateSel ? (dateSel.value || 'all') : 'all';
 
     $$('.mv-class-card, .mv-upcoming-card').forEach((card) => {
       const ct      = card.dataset.ct   || '';
       const dateStr = card.dataset.date || '';
-      const typeOk  = !activeType || ct === activeType;
+      const typeOk  = !activeType || ct === activeType || ROOMS.indexOf(ct) === -1;
       const dateOk  = activeDate === 'all' || dateStr === activeDate;
       card.style.display = typeOk && dateOk ? '' : 'none';
     });
@@ -348,6 +380,295 @@
       );
       group.style.display = any ? '' : 'none';
     });
+  }
+
+  function setupStudioDisciplineToggle() {
+    const wrap = $('#mv-studio-discipline');
+    if (!wrap) return;
+    wrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-discipline]');
+      if (!btn || btn.classList.contains('mv-active')) return;
+      $$('[data-discipline]', wrap).forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('mv-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      applyCombinedFilter();
+      // the calendar listens for this, so one toggle drives both views
+      document.dispatchEvent(new CustomEvent('mv:discipline-changed'));
+    });
+    // apply the default tab on load, so the list matches the highlighted pill
+    applyCombinedFilter();
+  }
+
+  /* ── 13. Calendar view ─────────────────────────────────────────
+     One implementation, three pages. The cells are already in the
+     page; day, week and month are decisions about which of them to
+     show, so switching view costs no round trip and keeps the
+     discipline filter and the scroll position intact. */
+  function setupCalendar() {
+    const cal = $('#mv-cal');
+    const btn = $('#mv-cal-toggle');
+    const list = $('#mv-list-view');
+    if (!cal || !btn || !list) return;
+
+    const grid = $('#mv-cal-grid', cal);
+    const timedWrap = $('#mv-cal-timed', cal);
+    const period = $('#mv-cal-period', cal);
+    const emptyMsg = $('#mv-cal-empty', cal);
+    const cells = $$('.mv-cal-cell', cal);
+    // The icon stays visible even with nothing to show. Hiding it made the
+    // control vanish on exactly the two pages that were empty, which reads as
+    // a missing feature rather than an empty week - and the brief asked for it
+    // to be available to every user. With no classes the calendar opens on its
+    // own empty-state line instead.
+    if (!cells.length) {
+      btn.addEventListener('click', () => {
+        const open = cal.hidden;
+        cal.hidden = !open;
+        list.hidden = open;
+        btn.setAttribute('aria-pressed', open ? 'true' : 'false');
+        const empty = $('#mv-cal-empty', cal);
+        if (empty) empty.hidden = false;
+        const g = $('#mv-cal-grid', cal);
+        if (g) g.hidden = true;
+        const per = $('#mv-cal-period', cal);
+        if (per) per.textContent = '';
+      });
+      return;
+    }
+
+    const isoOf = (c) => c.dataset.iso;
+    const all = cells.map(isoOf).sort();
+    const parse = (iso) => {
+      const p = iso.split('-');
+      return new Date(+p[0], +p[1] - 1, +p[2]);
+    };
+    const fmt = (d) => d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+
+    // Start on today when the data covers it, otherwise the first day there
+    // is - landing on an empty month because today happens to be outside the
+    // range is a worse first impression than starting where the classes are.
+    const todayCell = $('.mv-cal-today', cal);
+    let cursor = parse(todayCell ? isoOf(todayCell) : all[0]);
+    let mode = cal.dataset.mode || 'month';
+
+    // from the server: <html lang> is empty on portal pages, so relying on it
+    // formatted every language's dates in the fallback locale
+    const lang = cal.dataset.lang || document.documentElement.lang || 'es-ES';
+    const monday = (d) => {
+      const x = new Date(d);
+      x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+      return x;
+    };
+
+    function label() {
+      if (mode === 'day') {
+        return cursor.toLocaleDateString(lang, {
+          weekday: 'long', day: 'numeric', month: 'long' });
+      }
+      if (mode === 'week') {
+        const a = monday(cursor);
+        const b = new Date(a);
+        b.setDate(b.getDate() + 6);
+        const opt = { day: 'numeric', month: 'short' };
+        return a.toLocaleDateString(lang, opt) + ' – ' + b.toLocaleDateString(lang, opt);
+      }
+      return cursor.toLocaleDateString(lang, { month: 'long', year: 'numeric' });
+    }
+
+    function inView(iso) {
+      const d = parse(iso);
+      if (mode === 'day') return iso === fmt(cursor);
+      if (mode === 'week') {
+        const a = monday(cursor);
+        const b = new Date(a);
+        b.setDate(b.getDate() + 6);
+        return d >= a && d <= b;
+      }
+      return d.getFullYear() === cursor.getFullYear() &&
+             d.getMonth() === cursor.getMonth();
+    }
+
+    /* Time grid.
+       Day, and week on a screen wide enough for seven real columns, draw the
+       hours down the side and place each class by when it starts and how long
+       it runs. Month keeps its compact bars - thirty days of positioned blocks
+       is unreadable at any width, which is why Google Calendar and Odoo both
+       stop at week - and week on a phone keeps the stacked list, because seven
+       timed columns across 390px is the same 48px column that made names
+       unreadable in the first place. */
+    const wide = window.matchMedia('(min-width: 600px)');
+    const hourStart = parseInt(cal.dataset.hourStart, 10) || 0;
+    const timed = () => mode === 'day' || (mode === 'week' && wide.matches);
+
+    function hourPx() {
+      const v = parseFloat(getComputedStyle(cal).getPropertyValue('--mv-cal-hour-h'));
+      return v > 0 ? v : 44;
+    }
+
+    // Two rooms run the same hours, so without this the 07:00 Reformer class
+    // and the 07:00 Barre class are drawn on top of each other. Split each
+    // run of overlapping classes into side-by-side lanes.
+    //
+    // Computed over the items actually on screen, not over everything the
+    // server sent: when the discipline toggle leaves one room showing, its
+    // classes go back to full width instead of holding an empty lane open
+    // beside them. That is why this lives here and not in the Python.
+    function laneOut(boxes) {
+      let cluster = [];
+      let clusterEnd = -1;
+      const flush = () => {
+        if (!cluster.length) return;
+        const ends = [];
+        cluster.forEach((b) => {
+          let i = 0;
+          while (i < ends.length && ends[i] > b.start) i++;
+          if (i === ends.length) ends.push(0);
+          ends[i] = b.start + b.dur;
+          b.lane = i;
+        });
+        cluster.forEach((b) => { b.lanes = ends.length; });
+        cluster = [];
+      };
+      boxes.forEach((b) => {
+        if (b.start >= clusterEnd) { flush(); clusterEnd = b.start + b.dur; }
+        else clusterEnd = Math.max(clusterEnd, b.start + b.dur);
+        cluster.push(b);
+      });
+      flush();
+    }
+
+    function layout(items, on) {
+      if (!on) {
+        items.forEach((it) => {
+          it.style.top = '';
+          it.style.height = '';
+          it.style.left = '';
+          it.style.width = '';
+        });
+        return;
+      }
+      const h = hourPx();
+      const boxes = items
+        .filter((it) => it.style.display !== 'none')
+        .map((it) => ({
+          el: it,
+          start: parseInt(it.dataset.start, 10) || 0,
+          dur: parseInt(it.dataset.dur, 10) || 50,
+        }))
+        .sort((a, b) => (a.start - b.start) || (a.dur - b.dur));
+      laneOut(boxes);
+      boxes.forEach((b) => {
+        const w = 100 / (b.lanes || 1);
+        b.el.style.top = ((b.start - hourStart * 60) / 60 * h) + 'px';
+        // a 50-minute class is short; never let one collapse below a readable
+        // line just because the arithmetic says so
+        b.el.style.height = Math.max((b.dur / 60 * h) - 2, 18) + 'px';
+        b.el.style.left = (b.lane * w) + '%';
+        // 2px short of its lane, so two rooms at the same hour read as two
+        // blocks rather than one two-tone one
+        b.el.style.width = 'calc(' + w + '% - 2px)';
+      });
+    }
+
+    function render() {
+      cal.dataset.mode = mode;
+      const isTimed = timed();
+      cal.classList.toggle('mv-cal-timegrid', isTimed);
+      let shown = 0;
+      let withClasses = 0;
+      cells.forEach((c) => {
+        const on = inView(isoOf(c));
+        c.hidden = !on;
+        if (!on) return;
+        shown++;
+        // the discipline toggle filters the calendar too, not just the list
+        const items = $$('.mv-cal-item', c);
+        let visible = 0;
+        items.forEach((it) => {
+          const keep = disciplineAllows(it.dataset.ct || '');
+          it.style.display = keep ? '' : 'none';
+          if (keep) visible++;
+        });
+        if (visible) withClasses++;
+        // after the filter, so the lanes count only what is on screen
+        layout(items, isTimed);
+      });
+      period.textContent = label();
+      if (emptyMsg) emptyMsg.hidden = withClasses > 0;
+      if (grid) grid.hidden = shown === 0;
+      if (timedWrap) timedWrap.hidden = shown === 0;
+    }
+
+    // A desktop week dragged narrow has to fall back to the stacked list, and
+    // back again - the breakpoint decides which of the two week views this is.
+    wide.addEventListener('change', () => { if (!cal.hidden) render(); });
+
+    function step(dir) {
+      if (mode === 'day') cursor.setDate(cursor.getDate() + dir);
+      else if (mode === 'week') cursor.setDate(cursor.getDate() + 7 * dir);
+      else cursor.setMonth(cursor.getMonth() + dir);
+      render();
+    }
+
+    btn.addEventListener('click', () => {
+      const open = cal.hidden;
+      cal.hidden = !open;
+      list.hidden = open;
+      btn.setAttribute('aria-pressed', open ? 'true' : 'false');
+      if (open) render();
+    });
+
+    $$('[data-cal-mode]', cal).forEach((b) => {
+      b.addEventListener('click', () => {
+        mode = b.dataset.calMode;
+        $$('[data-cal-mode]', cal).forEach((x) =>
+          x.classList.toggle('mv-active', x === b));
+        render();
+      });
+    });
+
+    $$('[data-cal-nav]', cal).forEach((b) => {
+      b.addEventListener('click', () => step(parseInt(b.dataset.calNav, 10)));
+    });
+
+    // Phone month view: the cells are 48px wide, so names are unreadable and
+    // the items are rendered as colour bars instead. Tapping a day opens that
+    // day, where the names are full size - the drill-down a month grid on a
+    // phone is for. On wider screens the names fit, so this stays out of the
+    // way and the class links work directly.
+    grid.addEventListener('click', (e) => {
+      if (mode !== 'month' || !window.matchMedia('(max-width: 599px)').matches) return;
+      const cell = e.target.closest('.mv-cal-cell');
+      if (!cell || !cell.querySelector('.mv-cal-item')) return;
+      e.preventDefault();
+      const p = cell.dataset.iso.split('-');
+      cursor = new Date(+p[0], +p[1] - 1, +p[2]);
+      mode = 'day';
+      $$('[data-cal-mode]', cal).forEach((x) =>
+        x.classList.toggle('mv-active', x.dataset.calMode === 'day'));
+      render();
+    });
+
+    // Re-render when the discipline toggle moves, so the calendar and the
+    // list never disagree about what is being shown.
+    document.addEventListener('mv:discipline-changed', () => {
+      if (!cal.hidden) render();
+    });
+  }
+
+  /* Which rooms the discipline toggle is currently letting through. Shared by
+     the list filter and the calendar so one control drives both. */
+  function disciplineAllows(ct) {
+    const wrap = $('#mv-studio-discipline') || $('#mv-tt-toggle');
+    if (!wrap) return true;
+    const active = $('.mv-segment.mv-active, [aria-selected="true"]', wrap);
+    const want = active ? (active.dataset.discipline || '') : '';
+    if (!want) return true;
+    return ct === want || ROOMS.indexOf(ct) === -1;
   }
 
   function setupPackageControls() {
@@ -374,19 +695,12 @@
 
     $$('.mv-pkg-pill-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const isType = !!btn.closest('#mv-type-filters');
-        const isTf   = !!btn.closest('#mv-timeframe-filters');
+        const isTf = !!btn.closest('#mv-timeframe-filters');
 
-        if (isType) {
-          const wasActive = btn.classList.contains('mv-active');
-          $$('.mv-type-pill').forEach((b) => b.classList.remove('mv-active'));
-          if (!wasActive) btn.classList.add('mv-active');
-          applyCombinedFilter();
-
-        } else if (!isTf) {
+        if (!isTf) {
           // Package-page pills (not type, not timeframe)
           $$('.mv-pkg-pill-btn').forEach((b) => {
-            if (!b.closest('#mv-type-filters')) b.classList.remove('mv-active');
+            b.classList.remove('mv-active');
           });
           btn.classList.add('mv-active');
           applyPackageFilter();
@@ -409,15 +723,19 @@
         if (d && !seen[d]) { seen[d] = true; dates.push(d); }
       });
       if (!dates.length) return;
-      const lang = (document.documentElement.lang || 'es_ES').replace('_', '-');
+      // From the server, not from <html lang>: that attribute is empty on
+      // portal pages, so the fallback won every time and the whole dropdown
+      // came out in Spanish however the site was set - dates and all.
+      const lang = (sel.dataset.lang || document.documentElement.lang || 'es-ES')
+        .replace('_', '-');
       function fmtDate(dStr) {
         const p = dStr.split('-');
         const dt = new Date(+p[0], +p[1] - 1, +p[2]);
         return dt.toLocaleDateString(lang, { day: 'numeric', month: 'long' });
       }
-      const allLabel = lang.startsWith('ca') ? 'Totes les dates'
-                     : lang.startsWith('es') ? 'Todas las fechas'
-                     : 'All dates';
+      // Translated server-side. A three-language table here is one more place
+      // to forget when a fourth is added.
+      const allLabel = sel.dataset.allLabel || 'All dates';
       const allOpt = document.createElement('option');
       allOpt.value = 'all';
       allOpt.textContent = allLabel;
@@ -432,7 +750,7 @@
       wrap.style.display = '';
     }());
 
-    if ($('#mv-type-filters') || $('#mv-date-select')) applyCombinedFilter();
+    if ($('#mv-studio-discipline') || $('#mv-date-select')) applyCombinedFilter();
   }
 
   /* ── 12. Timetable — Reformer/Barre toggle ───────────────────
@@ -482,6 +800,7 @@
       const y = host.scrollTop;
       panes.forEach((p) => { p.hidden = p.dataset.discipline !== want; });
       if (host.scrollTop !== y) host.scrollTop = y;
+      document.dispatchEvent(new CustomEvent('mv:discipline-changed'));
 
       try {
         const u = new URL(window.location.href);
@@ -744,6 +1063,8 @@
     setupCheckoutGate();
     setupSignaturePad();
     setupTimetableToggle();
+    setupStudioDisciplineToggle();
+    setupCalendar();
     registerServiceWorker();
     setupInstallApp();
   }
