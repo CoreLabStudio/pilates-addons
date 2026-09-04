@@ -31,11 +31,23 @@ MID = 'mid'
 DEEP = 'deep'
 DEFAULT_TIER = MID
 
-#: The studio's own intensity scale, folded onto three tiers.
+#: The studio's own six-point intensity scale, folded onto three tiers.
+#:
+#: The split is where the live timetable's values actually fall, not an even
+#: 2-2-2 fold of the scale. The six class types running Monday to Friday carry
+#: only three distinct intensities - moderate (FlowLab, Harmony), moderate_high
+#: (Sculpt) and very_high (Extreme) - so folding moderate in with moderate_high,
+#: as this did, left the whole timetable using two tiers out of three: a day of
+#: one blue with a single darker block in it. Cutting between moderate and
+#: moderate_high instead gives each of the three a tier of its own, which is the
+#: distinction the three-shade scale exists to draw.
+#:
+#: The fold stays monotonic - harder never lands on a lighter tier - so the
+#: types off the weekday timetable keep sensible shades too.
 INTENSITY_TIER = {
     'low': LIGHT,
     'low_moderate': LIGHT,
-    'moderate': MID,
+    'moderate': LIGHT,
     'moderate_high': MID,
     'high': DEEP,
     'very_high': DEEP,

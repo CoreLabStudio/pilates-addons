@@ -97,6 +97,30 @@ class TestClassColorMapping(HttpCase):
         self.assertEqual(
             class_colors.css_class("reformer", tier), "mv-shade-reformer-mid")
 
+    def test_the_weekday_timetable_spans_all_three_tiers(self):
+        """The fold has to cut where the studio's own classes actually sit.
+
+        The Monday-to-Friday timetable carries exactly three distinct
+        intensities - moderate (FlowLab, Harmony), moderate_high (Sculpt) and
+        very_high (Extreme) - and nothing else. An even 2-2-2 fold of the
+        six-point scale puts the first two together, which is how the whole
+        live timetable came to render in two shades: a day of one blue with a
+        single darker block in it.
+
+        Stated as intensities rather than as records, so it holds on a fresh
+        database that has none of those class types yet.
+        """
+        on_the_timetable = ('moderate', 'moderate_high', 'very_high')
+        tiers = [class_colors.INTENSITY_TIER[i] for i in on_the_timetable]
+        self.assertEqual(
+            len(set(tiers)), 3,
+            "the timetable's %s all fold onto %s - two of the three shades "
+            "never reach a student" % (list(on_the_timetable), sorted(set(tiers))))
+        # and in the right order: harder must never read lighter
+        order = {class_colors.LIGHT: 0, class_colors.MID: 1, class_colors.DEEP: 2}
+        self.assertEqual([order[t] for t in tiers], [0, 1, 2],
+                         "the tiers are out of order against intensity")
+
     def test_solid_class_is_one_colour_per_discipline(self):
         """What the timetable actually renders."""
         self.assertEqual(class_colors.solid_class("reformer"), "mv-solid-reformer")
@@ -167,18 +191,22 @@ class TestTimetableShadesRender(HttpCase):
         # applied" from "one shade is applied to everything"
         cls.ct_easy = class_type("Shade Reformer Easy", "reformer", "low")
         cls.ct_hard = class_type("Shade Reformer Hard", "reformer", "very_high")
-        cls.ct_barre = class_type("Shade Barre Mid", "barre", "moderate")
+        # moderate_high, not moderate: moderate is the light tier, so a
+        # moderate class here would sit on the same tier as the "easy" one and
+        # this fixture would quietly stop covering all three.
+        cls.ct_barre = class_type("Shade Barre Mid", "barre", "moderate_high")
 
-        closed = set(cls.env["fitness.closure.day"].sudo().search(
-            [("state", "=", "applied")]).mapped("date"))
-
-        def pick(min_offset):
-            d = date.today() + timedelta(days=min_offset)
-            while d in closed:
-                d += timedelta(days=1)
-            return d
-
-        cls.when = pick(2)
+        # The classes have to land where the page will show them. Walking
+        # forward past applied closures did that until the studio closed every
+        # day up to its opening; the walk then leaves the range entirely. Fix
+        # the day and lift any closure on it - the transaction rolls back, so
+        # the studio's real closure calendar is untouched.
+        cls.when = date.today() + timedelta(days=2)
+        cls.env["fitness.closure.day"].sudo().search([
+            ("state", "=", "applied"),
+            ("date", ">=", date.today()),
+            ("date", "<=", date.today() + timedelta(days=90)),
+        ]).unlink()
 
         def schedule(ct, hour):
             s = cls.env["fitness.class.schedule"].create({
@@ -221,15 +249,44 @@ class TestTimetableShadesRender(HttpCase):
         html = self._page()
         self.assertIn('class="mv-tt-time mv-solid-reformer"', html)
 
+    def _split_list_and_calendar(self, html):
+        """The two halves of the page, so each can be checked on its own terms.
+
+        Both are in the same document - the calendar is not a separate page,
+        it is the same classes rendered a second way and shown instead of the
+        list. So "does the list use tiers" has to be asked of the list only.
+        """
+        at = html.find('id="mv-cal"')
+        self.assertNotEqual(at, -1, "no calendar on the page")
+        return html[:at], html[at:]
+
     def test_the_three_shade_system_stays_off_the_list(self):
-        """The tiers are for the calendar, not for a column of times.
+        """Down a single column three blues read as noise, so the list is flat.
 
         The fixtures span low, moderate and very_high on purpose, so if the
-        list ever went back to per-class-type shading this would catch it
-        rather than it shipping unnoticed.
+        list ever went back to per-class-type shading this catches it.
         """
-        html = self._page()
-        self.assertNotIn("mv-shade-", html)
+        list_html, _cal = self._split_list_and_calendar(self._page())
+        self.assertNotIn("mv-shade-", list_html)
+
+    def test_the_calendar_does_use_the_three_shade_tiers(self):
+        """And the calendar is what the tiers were built for.
+
+        Side by side in one row the shade is the only thing separating two
+        class types, which is exactly the case the scale was mapped for. The
+        fixtures span low, moderate_high and very_high - one per tier - so all
+        three must reach the markup. Asserting only that two appear is what let
+        the live timetable run on two tiers unnoticed.
+        """
+        _list, cal_html = self._split_list_and_calendar(self._page())
+        self.assertIn("mv-shade-", cal_html)
+        tiers = {t for t in ('light', 'mid', 'deep')
+                 if ('mv-shade-reformer-%s' % t) in cal_html
+                 or ('mv-shade-barre-%s' % t) in cal_html}
+        self.assertEqual(
+            tiers, {'light', 'mid', 'deep'},
+            "the calendar rendered %s - a fixture per tier went in, so a "
+            "missing one means the scale has collapsed" % sorted(tiers))
 
     def test_no_row_is_left_unshaded(self):
         """An unshaded row reads as a rendering bug, not as a neutral class."""
