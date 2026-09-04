@@ -5,7 +5,7 @@ import logging
 from datetime import timedelta, datetime as _dt_cls, date as _date_cls
 from dateutil.relativedelta import relativedelta as _relativedelta
 from itertools import groupby as _groupby
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 
 # The studio, the site and the portal are Spanish-first, so anything with
@@ -26,6 +26,7 @@ except Exception:
     _BABEL_OK = False
 
 from odoo import http, fields
+from odoo.tools import float_is_zero
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
@@ -46,7 +47,12 @@ TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
 # The Available list defaults to a week; 14 stays reachable from the chips.
 DEFAULT_LOOK_AHEAD_DAYS = 7
-RANGE_CHOICES = (1, 7, 14)
+# Today / this week / this month. "This month" is a rolling 30 days rather
+# than to the end of the calendar month: the window is expressed in days
+# everywhere below, and a calendar month would give a student on the 29th a
+# two-day "month". A link still holding the old days=14 falls back to the
+# default week rather than 404ing.
+RANGE_CHOICES = (1, 7, 30)
 SCHEDULE_LOOK_AHEAD_DAYS = 28
 
 # Mirror of constants in fitness_subscriptions.models.sale_order
@@ -182,8 +188,13 @@ class FitnessStudentPortal(http.Controller):
             'lbl_ios_step1':       _('Tap the Share button at the bottom of Safari.'),
             'lbl_ios_step2':       _('Scroll down and tap "Add to Home Screen".'),
             'lbl_ios_step3':       _('Tap "Add" in the top right corner.'),
-            'lbl_gen_step1':       _('Open your browser menu.'),
-            'lbl_gen_step2':       _('Choose "Install app" or "Add to Home screen".'),
+            # Not a step list. Only iOS gets numbered instructions, because
+            # only iOS has no way to install from the page at all. Any other
+            # browser that did not offer a prompt gets one sentence pointing
+            # at its own menu - there is no button we could give it that
+            # would work.
+            'lbl_gen_note':        _('Your browser installs apps from its own menu: '
+                                     'look for "Install app" or "Add to Home screen".'),
             'lbl_ios_foot':        _('CoreLab will then open like any other app, without the browser bars.'),
             'lbl_timetable_desc': _('Every class we run, week by week'),
             'lbl_timetable_cta':  _('View timetable'),
@@ -226,6 +237,45 @@ class FitnessStudentPortal(http.Controller):
             values.update(self._available_values(partner, days))
 
         return request.render('fitness_portal.portal_student_studio', values)
+
+    def _calendar_labels(self, _):
+        """Strings the shared calendar needs, in one place for all three pages."""
+        dow = [d[:3] for d in self._weekday_labels()]
+        return {
+            'cal_dow': dow,
+            # The calendar formats its own period heading in the browser, and
+            # <html lang> is empty on these pages - without this it silently
+            # formatted every language's dates in Spanish.
+            'cal_lang': (request.env.lang or DEFAULT_LANG).replace('_', '-'),
+            'lbl_cal_day': _('Day'),
+            'lbl_cal_week': _('Week'),
+            'lbl_cal_month': _('Month'),
+            'lbl_cal_none': _('No classes in this period.'),
+            # The date dropdown formats itself in the browser; this is the one
+            # string in it that is not a date.
+            'lbl_all_dates': _('All dates'),
+            'lbl_cal_open': _('Calendar view'),
+            'lbl_cal_list': _('List view'),
+        }
+
+    @staticmethod
+    def _discipline_tabs(types, _):
+        """The two-room toggle, or nothing.
+
+        Only Reformer and Barre are rooms a student picks between - 'any' and
+        blank are class types that belong to neither, and they stay visible
+        under whichever tab is showing rather than being filtered away into
+        somewhere with no tab.
+
+        Returned empty unless BOTH rooms are actually present: a toggle whose
+        other side is always empty is worse than no toggle, and the studio runs
+        weeks where only one room has classes a given student can book.
+        """
+        rooms = [t for t in ('reformer', 'barre') if t in types]
+        if len(rooms) < 2:
+            return []
+        labels = {'reformer': _('Reformer'), 'barre': _('Barre')}
+        return [{'key': t, 'label': labels[t]} for t in rooms]
 
     def _available_values(self, partner, days=None):
         """Day-grouped list of bookable classes (the 'Available' view).
@@ -334,15 +384,15 @@ class FitnessStudentPortal(http.Controller):
         else:
             subtitle = _('Ready to book a class?')
 
-        # Studio discipline filter chips — only shown when >1 type is present
+        # The two-room toggle replaces the old All/Reformer/Barre chip row:
+        # one control per question, and it matches the toggle the timetable and
+        # the shop already use.
         ct_types = {(ev.class_type_id.classroom_type or '') for ev in events if ev.class_type_id}
-        if len(ct_types) > 1:
-            stable = [t for t in ('barre', 'reformer', 'any', '') if t in ct_types]
-            studio_chips = [{'key': 'all', 'label': _('All')}] + [
-                {'key': t, 'label': self._discipline_label(t)} for t in stable
-            ]
-        else:
-            studio_chips = []
+        discipline_tabs = self._discipline_tabs(ct_types, _)
+
+        cal_days, cal_meta = request.env['fitness.calendar.grid'].build(
+            events, user_tz, today_local,
+            dow_labels=[d[:3] for d in self._weekday_labels()])
 
         return {
             'events':          events,
@@ -353,14 +403,19 @@ class FitnessStudentPortal(http.Controller):
             'range_chips':     [
                 {'days': 1,  'label': _('Today')},
                 {'days': 7,  'label': _('This week')},
-                {'days': 14, 'label': _('Next 14 days')},
+                {'days': 30, 'label': _('This month')},
             ],
             'today_local':     today_local,
             'subtitle':        subtitle,
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
             'no_sources_msg':  _('Time to move! Pick a membership, package, or class and reserve your spot.'),
             'no_sources_cta':  _('See options'),
-            'studio_chips':    studio_chips,
+            'discipline_tabs': discipline_tabs,
+            # Same grid the timetable and My Schedule use, given this page's
+            # own set of classes: what this student may actually book.
+            'calendar_days': cal_days,
+            'calendar_meta': cal_meta,
+            **self._calendar_labels(_),
         }
 
     def _schedule_values(self, partner):
@@ -408,15 +463,15 @@ class FitnessStudentPortal(http.Controller):
         if current_date is not None:
             grouped.append((current_date, _day_label(current_date, today_local, tomorrow_local, _, lang), current_group))
 
-        # Studio discipline filter chips — only shown when >1 type is present
         bk_types = {(b.class_type_id.classroom_type or '') for b in bookings if b.class_type_id}
-        if len(bk_types) > 1:
-            stable = [t for t in ('barre', 'reformer', 'any', '') if t in bk_types]
-            sched_studio_chips = [{'key': 'all', 'label': _('All')}] + [
-                {'key': t, 'label': self._discipline_label(t)} for t in stable
-            ]
-        else:
-            sched_studio_chips = []
+        discipline_tabs = self._discipline_tabs(bk_types, _)
+
+        # Only this student's own classes, and every one of them is booked by
+        # definition, so the grid marks them all as such.
+        own_events = bookings.mapped('calendar_event_id')
+        cal_days, cal_meta = request.env['fitness.calendar.grid'].build(
+            own_events, user_tz, today_local, booked_event_ids=set(own_events.ids),
+            dow_labels=[d[:3] for d in self._weekday_labels()])
 
         return {
             'grouped_bookings':  grouped,
@@ -426,7 +481,10 @@ class FitnessStudentPortal(http.Controller):
             'look_ahead_days':   look_ahead,
             'subtitle':          _('Next %d days') % look_ahead,
             'schedule_empty':    _('No upcoming classes in the next %d days.') % look_ahead,
-            'studio_chips':      sched_studio_chips,
+            'discipline_tabs':   discipline_tabs,
+            'calendar_days':     cal_days,
+            'calendar_meta':     cal_meta,
+            **self._calendar_labels(_),
         }
 
     # Legacy routes — kept so old bookmarks, emails and browser history
@@ -573,6 +631,9 @@ class FitnessStudentPortal(http.Controller):
                 if book_state == 'not_open' else None
             ),
             'already_booked':      bool(existing),
+            # The id, not just the boolean: the detail page can now cancel,
+            # and /my/classes/<id>/cancel is keyed on the booking.
+            'existing_booking':    existing,
             'seats_left':          seats_left,
             'seats_status_label':  seats_status_label,
             'duration_label':      duration_label,
@@ -1068,6 +1129,14 @@ class FitnessStudentPortal(http.Controller):
         )
         contact_only_ids = frozenset(p.id for p in products if not p.sale_ok)
 
+        # Which cards get a one-tap Book button, and which have already been
+        # used. Worked out here in two passes over the products rather than
+        # asked per card in the template, which would be a query a card.
+        free_ids = frozenset(p.id for p in products if p.fitness_price_is_free())
+        claimed_ids = frozenset(
+            p.id for p in products
+            if p.id in free_ids and self._free_already_claimed(partner, p))
+
         pkg_meta = {}
         for p in products:
             parts = []
@@ -1148,6 +1217,13 @@ class FitnessStudentPortal(http.Controller):
             'pkg_meta':                 pkg_meta,
             'active_product_tmpl_ids':  active_product_tmpl_ids,
             'contact_only_ids':         contact_only_ids,
+            'free_ids':                 free_ids,
+            'claimed_free_ids':         claimed_ids,
+            'booked':                   bool(kw.get('booked')),
+            'error_msg':                kw.get('error') or '',
+            'lbl_book_free':            _('Book'),
+            'lbl_free_used':            _('Already used'),
+            'lbl_free_terms':           _('Free — booking accepts the Terms'),
             'primary_credit':           credit,
             'credit_line':              credit_line,
             'student_name':             student_name,
@@ -1244,6 +1320,14 @@ class FitnessStudentPortal(http.Controller):
                                    product.fitness_is_package and product.fitness_class_count and product.fitness_class_count <= 1
                                ) else '/my/packages'),
             'ct':              product.fitness_class_type or 'any',
+            # The detail page gets the same one-tap Book button as the card.
+            'is_free':         self._is_free_product(product),
+            'free_claimed':    (self._is_free_product(product)
+                                and self._free_already_claimed(partner, product)),
+            'lbl_book_free':   _('Book'),
+            'lbl_free_used':   _('Already used'),
+            'lbl_free_terms':  _('Free — booking accepts the Terms'),
+            'error_msg':       kw.get('error') or '',
             'student_name':    full_name.split()[0] if full_name else '',
             'primary_credit':  self._primary_credit(partner.id),
             'active_info':     active_info,
@@ -1262,6 +1346,68 @@ class FitnessStudentPortal(http.Controller):
                 website=True, sitemap=False, methods=['POST'])
     def packages_buy(self, product_id, **kw):
         return request.redirect(f'/my/packages/{product_id}/checkout')
+
+    @http.route('/my/packages/<int:product_id>/book-free', type='http', auth='user',
+                website=True, sitemap=False, methods=['POST'])
+    def packages_book_free(self, product_id, **kw):
+        """Book a free item in one tap, with no page in between.
+
+        A checkout page exists to collect a payment method and a signature.
+        A free trial has neither to collect, so the page was a screen whose
+        only content was a button - the student tapped Buy to reach it and
+        tapped again to leave. This is that second tap, moved onto the first.
+
+        Every check the checkout route made still runs here, on the server:
+        the price is read from the product rather than taken from the request,
+        and the once-per-student rule is applied before anything is created.
+        Losing the page must not mean losing the guards.
+        """
+        _ = request.env._
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        partner = request.env.user.partner_id
+        product = request.env['product.template'].sudo().browse(product_id)
+        back = kw.get('back') or '/my/packages'
+        if not back.startswith('/my/'):
+            back = '/my/packages'          # never bounce off-site on our say-so
+
+        def fail(msg):
+            return request.redirect('%s%serror=%s' % (
+                back, '&' if '?' in back else '?', quote(msg)))
+
+        if not product.exists() or not product.active or not product.sale_ok                 or not self._is_buyable(product):
+            return request.redirect('/my/packages')
+
+        # Free is decided here, never by the form. A posted product id for
+        # something that costs money goes to the paid flow.
+        if not self._is_free_product(product):
+            return request.redirect(f'/my/packages/{product.id}/checkout')
+
+        if self._free_already_claimed(partner, product):
+            return fail(_('You have already used this free trial. '
+                          'It is available once per student.'))
+
+        order = self._create_order(partner, product, 'free')
+        if not order:
+            return request.redirect('/my/packages')
+        if not self._order_is_free(order):
+            # the product said free and the order disagrees; trust the order
+            _logger.warning(
+                '[CHECKOUT] Direct free booking for order %s totals %s; '
+                'sending it to the paid flow instead.', order.name, order.amount_total)
+            return request.redirect(f'/my/packages/pay/{order.id}')
+
+        order.sudo().write({
+            'signed_by': request.env.user.partner_id.name,
+            'signed_on': fields.Datetime.now(),
+            'fitness_terms_accepted_on': fields.Datetime.now(),
+        })
+        order.sudo().action_confirm()
+        _logger.info('[CHECKOUT] Free order %s booked in one tap for partner %s '
+                     '(product %s).', order.name, partner.id, product.id)
+        self._notify_admins_of_purchase(order)
+        return request.redirect('/my/packages?booked=1')
 
     # ══════════════════════════════════════════════════════════
     #  PURCHASE FLOW — step 2 "Payment", step 3 "Sign"
@@ -1291,9 +1437,15 @@ class FitnessStudentPortal(http.Controller):
         ])
         use_online = bool(online_providers)
 
+        # A free item has no checkout step at all any more, so the page is not
+        # merely unlinked - reaching it by URL sends you back to the product,
+        # where the Book button is. Leaving it renderable would have left two
+        # ways to book the same thing, one of them the screen this removed.
+        if self._is_free_product(product):
+            return request.redirect('/my/packages/%d' % product.id)
+
         error_msg = None
         method = kw.get('payment_method')
-
         if request.httprequest.method == 'POST':
             if use_online:
                 # Online (Stripe) path: only terms acceptance needed.
@@ -1319,6 +1471,7 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
             'product':            product,
+            **self._checkout_totals(product, partner),
             'is_subscription':    bool(product.fitness_is_subscription_plan),
             'step':               'payment',
             'selected_method':    method if method in PAYMENT_METHODS else None,
@@ -1328,6 +1481,10 @@ class FitnessStudentPortal(http.Controller):
             'student_name':       full_name.split()[0] if full_name else '',
             'terms_label':        _('I agree to the'),
             'terms_link_label':   _('Terms and Conditions'),
+            # No free-item values here any more: a zero-price product never
+            # reaches this template, it is redirected to its own page where
+            # Book completes the booking. Passing them would only invite a
+            # second checkout path to grow back.
             'use_online_payment': use_online,
         })
 
@@ -1405,7 +1562,26 @@ class FitnessStudentPortal(http.Controller):
         # a student who opened the pay page could simply visit the signature step
         # instead. Verified: order S00195 confirmed with 10 credits and zero
         # payment transactions before this check existed.
-        if order.fitness_payment_method not in PAYMENT_METHODS:
+        # An order that costs nothing has nothing to pay, so requiring a
+        # successful transaction would make a free trial unconfirmable. The
+        # test is the order's own total, computed server-side, not the method
+        # recorded on it - a student cannot talk their way past it by asking
+        # for method=free on something that costs money.
+        #
+        # It does have to carry the once-per-student rule too. A draft
+        # abandoned before the first free trial was claimed is still reachable
+        # at the signature step afterwards, and confirming it there would hand
+        # out a second one.
+        if self._order_is_free(order):
+            line = order.order_line[:1]
+            product = line.product_id.product_tmpl_id if line else None
+            if product and self._free_already_claimed(order.partner_id, product):
+                qs = urlencode({'error': _(
+                    'You have already used this free trial. '
+                    'It is available once per student.'
+                )})
+                return request.redirect(f'/my/packages?{qs}')
+        elif order.fitness_payment_method not in PAYMENT_METHODS:
             paid_tx = order.sudo().transaction_ids.filtered(
                 lambda t: t.state == 'done'
             )
@@ -1811,6 +1987,89 @@ class FitnessStudentPortal(http.Controller):
         return bool(product.fitness_is_package or product.fitness_is_subscription_plan)
 
     @staticmethod
+    def _checkout_totals(product, partner):
+        """The four numbers on the order summary, computed once.
+
+        The template used to multiply by 1.21 itself. That was invisible at
+        full price - 25.00 x 1.21 is exactly 30.25 - and wrong the moment a
+        discount produced a half-cent: the page said 27.22 and Stripe asked
+        for 27.23, because Odoo rounds the tax the way the order does and a
+        printf in the template does not.
+
+        So the tax comes from the product's own taxes through compute_all,
+        which is the same call the sale order line makes. The page and the
+        charge are then the same arithmetic rather than two that agree by
+        luck.
+        """
+        price = product.fitness_effective_price()
+        taxes = product.taxes_id.filtered(
+            lambda t: t.company_id == request.env.company)
+        if taxes:
+            res = taxes.compute_all(
+                price, currency=product.currency_id, quantity=1.0,
+                product=product.product_variant_ids[:1], partner=partner)
+            subtotal, total = res['total_excluded'], res['total_included']
+        else:
+            subtotal = total = price
+        return {
+            'co_full':     product.list_price or 0.0,
+            'co_discount': product.fitness_promo_saving,
+            'co_subtotal': subtotal,
+            'co_tax':      total - subtotal,
+            'co_total':    total,
+            'co_currency': product.currency_id.symbol or '€',
+        }
+
+    @staticmethod
+    def _is_free_product(product):
+        """Does this cost nothing today?
+
+        Asks the product for its effective price rather than reading
+        list_price, so a promotion - Free, or 100% off - is what decides,
+        exactly as it does on the page the student was just looking at. The
+        list price is the full price and is never what is charged directly.
+        """
+        return product.fitness_price_is_free()
+
+    @staticmethod
+    def _order_is_free(order):
+        rounding = (order.currency_id.rounding
+                    or request.env.company.currency_id.rounding or 0.01)
+        return float_is_zero(order.amount_total or 0.0, precision_rounding=rounding)
+
+    @staticmethod
+    def _free_already_claimed(partner, product):
+        """Has this student already taken this free item once?
+
+        The rule the studio asked for is one free trial per student, and it is
+        enforced on what actually happened rather than on a flag somebody has
+        to remember to set: any *confirmed* order of this product that cost
+        nothing counts, however it was created - portal, back office or import.
+
+        Confirmed, not merely existing. A draft is an abandoned attempt: the
+        checkout reuses drafts, so counting them would let one abandoned
+        checkout block that student's first free trial for ever. The order
+        being confirmed right now is still draft when this is asked, which is
+        also what keeps it from refusing itself.
+
+        Scoped to this product, which is how the rule was specified ("a free
+        priced booking of that trial type"). If the studio ever runs two free
+        trials at once and means one free trial in total, this is the single
+        place that changes.
+        """
+        variant_ids = product.product_variant_ids.ids
+        if not variant_ids:
+            return False
+        rounding = request.env.company.currency_id.rounding or 0.01
+        lines = request.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', variant_ids),
+        ])
+        return any(float_is_zero(l.price_total or 0.0, precision_rounding=rounding)
+                   for l in lines)
+
+    @staticmethod
     def _disciplines_in(products):
         """Disciplines actually present in the data, in a stable display order."""
         present = {(p.fitness_class_type or 'any') for p in products}
@@ -1878,6 +2137,16 @@ class FitnessStudentPortal(http.Controller):
                     'fitness_payment_method': method,
                     'fitness_terms_accepted_on': fields.Datetime.now(),
                 })
+                # Re-price it. A draft can be days old, and a promotion can
+                # have started or expired since: reusing the line as it stands
+                # would charge yesterday's price for today's checkout, in
+                # either direction.
+                price_now = product.fitness_effective_price()
+                if lines.price_unit != price_now:
+                    _logger.info(
+                        '[CHECKOUT] Re-pricing reused draft %s: %s -> %s',
+                        candidate.name, lines.price_unit, price_now)
+                    lines.write({'price_unit': price_now})
                 _logger.info(
                     '[CHECKOUT] Reusing draft order %s for partner %s / product %s',
                     candidate.name, partner.id, variant.id,
@@ -1889,7 +2158,10 @@ class FitnessStudentPortal(http.Controller):
             'order_line': [(0, 0, {
                 'product_id': variant.id,
                 'product_uom_qty': 1,
-                'price_unit': product.list_price,
+                # The promotion price, not the list price. This is the number
+                # the student was shown and the number Stripe is asked for; a
+                # second calculation here is how those two come apart.
+                'price_unit': product.fitness_effective_price(),
             })],
             'fitness_payment_method': method,
             'fitness_terms_accepted_on': fields.Datetime.now(),
@@ -2107,8 +2379,21 @@ class FitnessStudentPortal(http.Controller):
                     days.append({'label': day_names[idx], 'slots': slots})
             disciplines[disc] = days
 
+        # The list on this page is the weekly pattern - one row per schedule,
+        # showing its next occurrence. The calendar wants the opposite: every
+        # occurrence on the date it actually falls on. 'upcoming' is already
+        # that set, batched above, so no second query.
+        cal_days, cal_meta = request.env['fitness.calendar.grid'].build(
+            upcoming, tz, now.astimezone(tz).date() if now.tzinfo
+            else pytz.UTC.localize(now).astimezone(tz).date(),
+            booked_event_ids=booked_event_ids,
+            dow_labels=[d[:3] for d in self._weekday_labels()])
+
         return request.render('fitness_portal.portal_timetable', {
             'page_name': 'timetable',
+            'calendar_days': cal_days,
+            'calendar_meta': cal_meta,
+            **self._calendar_labels(request.env._),
             'disciplines': disciplines,
             'active_discipline': active,
             'has_credit': bool(eligible_types),

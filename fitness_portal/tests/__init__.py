@@ -4,3 +4,7 @@ from . import test_timetable
 from . import test_legal_details
 from . import test_install_app
 from . import test_class_colors
+from . import test_studio_controls
+from . import test_calendar_grid
+from . import test_free_checkout
+from . import test_promo_pricing
