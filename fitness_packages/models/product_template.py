@@ -1,6 +1,7 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import float_compare, float_is_zero, float_round
+from odoo.tools.misc import format_date
 
 
 class ProductTemplate(models.Model):
@@ -133,15 +134,31 @@ class ProductTemplate(models.Model):
             product.fitness_promo_is_live = live
             product.fitness_price_now = price
             product.fitness_promo_saving = (product.list_price or 0.0) - price
+            # Whole phrases, not a fragment glued onto another string.
+            # This used to build the badge as _("%s%% off") + _(" until %s"),
+            # and a translatable string that begins with a space and has to
+            # follow two different openings is one no translator can place -
+            # word order is not the same in every language, and it left
+            # "off until" in English on a Spanish page.
+            #
+            # The date goes through format_date so a Spanish reader gets
+            # 24/09/2026 rather than the ISO form.
             if not live:
                 product.fitness_promo_summary = _("Full price")
             elif product.fitness_promo_mode == 'free':
-                product.fitness_promo_summary = _("Free")
+                if product.fitness_promo_end:
+                    product.fitness_promo_summary = _("Free until %(date)s") % {
+                        'date': format_date(product.env, product.fitness_promo_end)}
+                else:
+                    product.fitness_promo_summary = _("Free")
             else:
-                product.fitness_promo_summary = _("%s%% off") % (
-                    '%g' % (product.fitness_promo_percent or 0.0))
-            if live and product.fitness_promo_end:
-                product.fitness_promo_summary += _(" until %s") % product.fitness_promo_end
+                pct = '%g' % (product.fitness_promo_percent or 0.0)
+                if product.fitness_promo_end:
+                    product.fitness_promo_summary = _("%(pct)s%% off until %(date)s") % {
+                        'pct': pct,
+                        'date': format_date(product.env, product.fitness_promo_end)}
+                else:
+                    product.fitness_promo_summary = _("%(pct)s%% off") % {'pct': pct}
 
     # ── keep the admin from saving something incoherent ──────────────────
     @api.constrains('fitness_promo_mode', 'fitness_promo_percent',
