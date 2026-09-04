@@ -4286,3 +4286,11 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   text-align: center;
 }
 .mv-free-terms-note a { color: var(--mv-ink-text); }
+
+/* The tax note sits with the number it applies to, never with a free item. */
+.mv-price-tax {
+  font-size: 0.65rem;
+  color: var(--mv-muted);
+  font-weight: 400;
+  margin-left: 3px;
+}
