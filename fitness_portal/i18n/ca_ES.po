@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
+msgid "Company details"
+msgstr "Dades de l'empresa"
+
+#. module: fitness_portal
 #. odoo-python
 # ── Code translations (Python controllers)
 # ───────────────────────────────────
@@ -1142,14 +1147,15 @@ msgstr "1. Introducció"
 msgid ""
 "These Terms and Conditions (\"Terms\") govern your use of the CoreLab "
 "Pilates studio services, including class bookings, memberships, credit "
-"packages, and the online portal provided by Yoleyva Studio (\"we\", \"us\", "
-"\"the Studio\"). By booking a class or activating a package you agree to "
-"these Terms in full."
+"packages, and the online portal provided by Core Lab Studio, S.L. (\"we\", "
+"\"us\", \"the Studio\"). By booking a class or activating a package you "
+"agree to these Terms in full."
 msgstr ""
 "Aquests Termes i Condicions (\"Termes\") regulen l'ús dels serveis de "
 "l'estudi CoreLab Pilates, incloent-hi les reserves de classes, "
-"subscripcions, bons de crèdits i el portal en línia proporcionat per Yoleyva"
-" Studio (\"nosaltres\", \"nos\", \"l'Estudi\"). En reservar una classe o "
+"subscripcions, bons de crèdits i el portal en línia proporcionat per Core "
+"Lab Studio, S.L. (\"nosaltres\", \"nos\", \"l'Estudi\"). En reservar una "
+"classe o "
 "activar un bo, acceptes aquests Termes en la seva totalitat."
 
 #. module: fitness_portal
@@ -1433,9 +1439,8 @@ msgstr ""
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
-msgid "Last updated: August 2026 — DRAFT, pending legal review."
-msgstr ""
-"Última actualització: agost de 2026 — ESBORRANY, pendent de revisió legal."
+msgid "Last updated: August 2026"
+msgstr "Última actualització: agost de 2026"
 
 #. module: fitness_portal
 # ── Active orders — portal_active_orders
