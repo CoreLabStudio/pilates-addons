@@ -784,6 +784,13 @@
             <div class="mv-app">
                 <t t-set="ct" t-value="event.class_type_id"/>
 
+                <!-- One discipline scope for the whole page. It has to wrap the
+                     body too, not just the hero: "Reserve My Spot" lives down
+                     there and was taking the default heather on a Barre class,
+                     the same mismatch the shop's Buy button had. -->
+                <div class="mv-detail-scope"
+                     t-att-data-ct="ct.classroom_type if ct and ct.classroom_type else ''">
+
                 <!-- Hero image: 1) occurrence  2) class type  3) category  4) SVG fallback -->
                 <div class="mv-detail-img">
                     <t t-if="event._fields.get('image_512') and event.image_512">
@@ -937,6 +944,7 @@
                     <!-- Cancellation policy note (Task 3) -->
                     <p class="mv-cancel-policy">Cancel up to 2 hours before class to keep your credit.</p>
 
+                </div>
                 </div>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
@@ -1470,7 +1478,8 @@
                 <t t-set="_back_label">Packages</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
-                <div style="padding: 12px 16px 100px;">
+                <div class="mv-detail-scope" t-att-data-ct="ct"
+                     style="padding: 12px 16px 100px;">
                     <!-- Image or fallback -->
                     <t t-if="product.image_512">
                         <img t-att-src="'/web/image/product.template/' + str(product.id) + '/image_512'"

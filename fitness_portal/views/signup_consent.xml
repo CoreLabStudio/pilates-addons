@@ -359,4 +359,29 @@
         </t>
     </template>
 
+    <!--
+        The signup address field ships as type="text", so the browser never
+        checks it and "priyajyothsna10" sailed through to a "check your email"
+        page for a message that could never arrive.
+
+        type="email" makes the browser refuse it before the form is submitted,
+        and the wording comes from the portal's own translated validation
+        messages rather than the browser's interface language. The server
+        checks it again in web_auth_signup - this is the courtesy, not the
+        guard, since any POST can skip it.
+
+        Only signup. The login field stays type="text" on purpose: an
+        administrator's login is not necessarily an email address, and making
+        that field refuse one would lock them out.
+    -->
+    <template id="mv_signup_email_type" name="Signup — Email Field Type"
+              inherit_id="auth_signup.signup">
+        <xpath expr="//input[@name='login']" position="attributes">
+            <attribute name="type">email</attribute>
+            <attribute name="autocomplete">email</attribute>
+            <attribute name="inputmode">email</attribute>
+            <attribute name="spellcheck">false</attribute>
+        </xpath>
+    </template>
+
 </odoo>

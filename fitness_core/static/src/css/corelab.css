@@ -368,6 +368,23 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-card-tag  { left: 10px; }
 .mv-card-time { right: 10px; }
 
+/* The discipline badge takes the colour of the room it names. It used to be
+   the same near-white pill on every card, so the one element whose entire job
+   is to say WHICH room said it in a colour that belonged to neither.
+   The Buy button on these cards has followed the discipline since the button
+   token rework; the badge simply never joined it.
+   Only .mv-card-tag, not the .mv-card-time chip it shares a base rule with -
+   a time is not a discipline, and colouring both would leave the card with two
+   competing fills and nothing neutral.
+   The fallbacks keep the neutral pill wherever no discipline is in scope,
+   which is what an "Any" package should still get.
+   Text is near-black on both fills, the pair already measured for the buttons:
+   #18110C on #A9C2D0 10.06:1, on #92786C 4.56:1. */
+.mv-card-tag {
+  background: var(--mv-tag-bg, rgba(250,249,246,0.84));
+  color: var(--mv-tag-fg, var(--mv-paco));
+}
+
 /* ── 8c. Card body ──────────────────────────────────────────── */
 .mv-card-body {
   padding: 12px 14px 13px;
@@ -1734,17 +1751,23 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
    with a blue Reserve button is the same inconsistency the shop had. */
 .mv-class-card[data-ct="reformer"],
 .mv-upcoming-card[data-ct="reformer"],
-.mv-pkg-card[data-ct="reformer"] {
+.mv-pkg-card[data-ct="reformer"],
+.mv-detail-scope[data-ct="reformer"] {
   --mv-btn-bg: var(--mv-discipline-reformer);
   --mv-btn-fg: var(--mv-on-discipline);
   --mv-clay-dark: #B6CCD8;
+  --mv-tag-bg: var(--mv-discipline-reformer);
+  --mv-tag-fg: var(--mv-on-discipline);
 }
 .mv-class-card[data-ct="barre"],
 .mv-upcoming-card[data-ct="barre"],
-.mv-pkg-card[data-ct="barre"] {
+.mv-pkg-card[data-ct="barre"],
+.mv-detail-scope[data-ct="barre"] {
   --mv-btn-bg: var(--mv-discipline-barre);
   --mv-btn-fg: var(--mv-on-discipline);
   --mv-clay-dark: #9E877C;
+  --mv-tag-bg: var(--mv-discipline-barre);
+  --mv-tag-fg: var(--mv-on-discipline);
 }
 .mv-pkg-pill-btn.mv-active[data-filter="reformer"] {
   background: var(--mv-discipline-reformer);
