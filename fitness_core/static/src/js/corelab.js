@@ -417,26 +417,15 @@
     const period = $('#mv-cal-period', cal);
     const emptyMsg = $('#mv-cal-empty', cal);
     const cells = $$('.mv-cal-cell', cal);
-    // The icon stays visible even with nothing to show. Hiding it made the
-    // control vanish on exactly the two pages that were empty, which reads as
-    // a missing feature rather than an empty week - and the brief asked for it
-    // to be available to every user. With no classes the calendar opens on its
-    // own empty-state line instead.
-    if (!cells.length) {
-      btn.addEventListener('click', () => {
-        const open = cal.hidden;
-        cal.hidden = !open;
-        list.hidden = open;
-        btn.setAttribute('aria-pressed', open ? 'true' : 'false');
-        const empty = $('#mv-cal-empty', cal);
-        if (empty) empty.hidden = false;
-        const g = $('#mv-cal-grid', cal);
-        if (g) g.hidden = true;
-        const per = $('#mv-cal-period', cal);
-        if (per) per.textContent = '';
-      });
-      return;
-    }
+    // No early return when there is nothing to show. An earlier version
+    // installed a stub click handler here and returned, which kept the icon
+    // visible but never reached the code below that binds the mode buttons,
+    // the arrows and the period label - so on an empty week the whole bar was
+    // inert and the month name was blank. render() already copes with an
+    // empty cell list on its own: it counts nothing, so it hides the grid and
+    // shows the empty line while still writing the period label. The controls
+    // describe which period you are looking at, and that is worth saying
+    // whether or not anything is scheduled in it.
 
     const isoOf = (c) => c.dataset.iso;
     const all = cells.map(isoOf).sort();
@@ -452,7 +441,13 @@
     // is - landing on an empty month because today happens to be outside the
     // range is a worse first impression than starting where the classes are.
     const todayCell = $('.mv-cal-today', cal);
-    let cursor = parse(todayCell ? isoOf(todayCell) : all[0]);
+    // Falling back to today matters when there are no cells at all: all[0] is
+    // undefined then, and parse() would hand back an Invalid Date whose
+    // toLocaleDateString is the blank period label this used to show.
+    const now = new Date();
+    let cursor = todayCell ? parse(isoOf(todayCell))
+      : all.length ? parse(all[0])
+      : new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let mode = cal.dataset.mode || 'month';
 
     // from the server: <html lang> is empty on portal pages, so relying on it
@@ -1048,6 +1043,7 @@
     }
     sync();
   }
+
 
   /* ── Init ────────────────────────────────────────────────── */
   function init() {
