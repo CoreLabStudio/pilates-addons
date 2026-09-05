@@ -31,3 +31,7 @@ class IrHttp(models.AbstractModel):
             request.lang = lang_data
             request.update_context(lang=lang_data.code)
             request.future_response.set_cookie('frontend_lang', lang_data.code)
+            # Read by ir_qweb to put a matching lang on <html>. Kept as a
+            # request attribute rather than re-deriving the cookie there, so
+            # exactly the pages that adopted the portal language declare it.
+            request.mv_portal_lang = lang_data.code

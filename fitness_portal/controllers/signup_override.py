@@ -10,6 +10,7 @@ from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.models.res_users import SKIP_CAPTCHA_LOGIN
 from odoo.exceptions import UserError
 from odoo.http import request
+from odoo.tools.mail import email_normalize, email_re
 
 _logger = logging.getLogger(__name__)
 
@@ -42,6 +43,34 @@ class FitnessSignup(AuthSignupHome):
     # Login redirect: students always land on /my/home
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _mv_is_valid_email(raw):
+        """Is this something a verification link could actually reach?
+
+        Signup is verification-gated: the address typed here is the only way
+        the account is ever activated, so an address with a typo does not
+        merely look wrong, it strands the student on a "check your email"
+        page for a message that was never deliverable. That is what happened
+        with "priyajyothsna10" - no @ at all, accepted, and the confirmation
+        page cheerfully reported it as sent.
+
+        Stricter than email_normalize alone on two counts, both deliberate:
+
+          * normalize() salvages an address out of surrounding text, so
+            "a b@c.com" comes back as "b@c.com" - a silent correction to an
+            address the student never typed. Requiring the normalized form to
+            equal the input means we reject it and ask, instead of guessing.
+          * normalize() accepts "a@b", with no dotted TLD. email_re requires
+            one, and no real mailbox is reachable without it.
+        """
+        raw = (raw or '').strip()
+        if not raw or len(raw) > 254:
+            return False
+        norm = email_normalize(raw)
+        if not norm or norm != raw.lower():
+            return False
+        return bool(email_re.fullmatch(norm))
+
     def _login_redirect(self, uid, redirect=None):
         user = request.env['res.users'].sudo().browse(uid)
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
@@ -63,6 +92,7 @@ class FitnessSignup(AuthSignupHome):
             if lang_data:
                 request.lang = lang_data
                 request.update_context(lang=lang_data.code)
+                request.mv_portal_lang = lang_data.code
         except Exception:  # noqa: BLE001 - never block the login page
             _logger.warning('CoreLab: could not apply portal language to /web/login',
                             exc_info=True)
@@ -166,6 +196,14 @@ class FitnessSignup(AuthSignupHome):
 
             try:
                 if not qcontext.get('token'):
+                    # Check the address before anything else on the form: it is
+                    # the field the rest of the flow depends on, and the
+                    # client-side type="email" can be bypassed by any POST.
+                    if not self._mv_is_valid_email(qcontext.get('login')):
+                        raise UserError(_(
+                            "Enter a valid email address, for example "
+                            "name@example.com."))
+
                     # Block signup if terms consent is missing (server-side guard)
                     if not request.httprequest.form.get('consent_terms'):
                         raise UserError(_("Debes aceptar los Términos y Condiciones para continuar."))

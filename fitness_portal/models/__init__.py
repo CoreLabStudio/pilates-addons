@@ -1,4 +1,5 @@
 from . import ir_http
+from . import ir_qweb
 from . import res_partner
 from . import res_users
 from . import sale_order
