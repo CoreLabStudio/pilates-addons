@@ -634,4 +634,23 @@
         </xpath>
     </template>
 
+    <!--
+        Put the portal language on <html>.
+
+        web.layout renders <html t-att="html_data or {}"> and html_data is
+        rebuilt by web.frontend_layout, so the attribute cannot be contributed
+        from Python under that name. A t-att-lang of its own sits alongside the
+        dict without fighting it - nothing stock puts a 'lang' key in html_data.
+
+        mv_html_lang is None on back-office renders, and t-att-lang drops the
+        attribute entirely when the value is falsy, so this changes nothing
+        outside the portal and the auth pages.
+    -->
+    <template id="mv_html_lang_attr" name="CoreLab &lt;html lang&gt;"
+              inherit_id="web.layout">
+        <xpath expr="//html" position="attributes">
+            <attribute name="t-att-lang">mv_html_lang</attribute>
+        </xpath>
+    </template>
+
 </odoo>

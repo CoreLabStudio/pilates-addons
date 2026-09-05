@@ -63,6 +63,7 @@ class FitnessSignup(AuthSignupHome):
             if lang_data:
                 request.lang = lang_data
                 request.update_context(lang=lang_data.code)
+                request.mv_portal_lang = lang_data.code
         except Exception:  # noqa: BLE001 - never block the login page
             _logger.warning('CoreLab: could not apply portal language to /web/login',
                             exc_info=True)

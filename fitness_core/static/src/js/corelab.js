@@ -1045,8 +1045,130 @@
   }
 
 
+  /* ── Form validation messages ─────────────────────────────
+     The browser writes these itself, in ITS interface language, not the
+     page's. A Spanish student on an English-language Chrome was told
+     "Please fill out this field." on a form that was Spanish throughout.
+     <html lang> does not affect it - that was measured both ways round -
+     so the only way to say it in the reader's language is to say it
+     ourselves.
+
+     English is left alone deliberately: the browser's own wording is what
+     an English speaker expects, and it stays correct as browsers change it.
+
+     'invalid' does not bubble, hence the capture-phase listener on the
+     document; and a custom message keeps a field invalid until it is
+     cleared, hence resetting it as soon as the value changes. */
+  var VALIDATION_TEXT = {
+    en: {
+      url:      'Please enter a valid URL.',
+      range:    'That value is outside the allowed range.',
+      required: 'Please fill out this field.',
+      checkbox: 'Please tick this box if you want to continue.',
+      email:    'Please enter a valid email address.',
+      select:   'Please select an option from the list.',
+      short:    'Please write a little more to complete this field.',
+      pattern:  'That format is not valid.'
+    },
+    es: {
+      url:      'Introduce una dirección web válida.',
+      range:    'El valor está fuera del intervalo permitido.',
+      required: 'Completa este campo.',
+      checkbox: 'Marca esta casilla si quieres continuar.',
+      email:    'Introduce una dirección de correo electrónico válida.',
+      select:   'Selecciona una opción de la lista.',
+      short:    'Escribe un poco más para completar este campo.',
+      pattern:  'El formato no es válido.'
+    },
+    ca: {
+      url:      'Introdueix una adreça web vàlida.',
+      range:    'El valor és fora de l\'interval permès.',
+      required: 'Omple aquest camp.',
+      checkbox: 'Marca aquesta casella si vols continuar.',
+      email:    'Introdueix una adreça electrònica vàlida.',
+      select:   'Selecciona una opció de la llista.',
+      short:    'Escriu una mica més per completar aquest camp.',
+      pattern:  'El format no és vàlid.'
+    }
+  };
+
+  function setupValidationMessages() {
+    var code = (document.documentElement.getAttribute('lang') || '')
+      .slice(0, 2).toLowerCase();
+    var t = VALIDATION_TEXT[code];
+    // English is listed too, on purpose. Without it, an English page opened
+    // in a Spanish-language browser answered in Spanish - the page is what
+    // the reader chose, so the page decides, in all three languages.
+    if (!t) return;  // a language we have no wording for: leave the browser to it
+
+    function messageFor(el) {
+      var v = el.validity;
+      if (!v || v.valid) return '';
+      if (v.valueMissing) {
+        if (el.type === 'checkbox' || el.type === 'radio') return t.checkbox;
+        if (el.tagName === 'SELECT') return t.select;
+        return t.required;
+      }
+      // An email field rejects a malformed address as typeMismatch. Chrome
+      // words that one per-input - "Please include an '@' in the email
+      // address. 'test123' is missing an '@'." - so it has to be replaced
+      // like any other, not left because it looks specific and helpful.
+      if (v.typeMismatch) {
+        if (el.type === 'email') return t.email;
+        if (el.type === 'url') return t.url;
+        return t.pattern;
+      }
+      if (v.tooShort || v.tooLong) return t.short;
+      if (v.patternMismatch) return t.pattern;
+      if (v.rangeUnderflow || v.rangeOverflow || v.stepMismatch) return t.range;
+      if (v.badInput) return t.pattern;
+      return '';
+    }
+
+    // Keep the message current rather than writing it when the browser asks.
+    // Clearing first is what makes the field's real validity readable: a
+    // custom message is itself a validity error, so without the reset every
+    // field would keep reporting whatever was wrong the first time.
+    function refresh(el) {
+      if (!el || typeof el.setCustomValidity !== 'function' || !el.willValidate) return;
+      el.setCustomValidity('');
+      var msg = messageFor(el);
+      if (msg) el.setCustomValidity(msg);
+    }
+
+    function refreshAll(root) {
+      var els = (root || document).querySelectorAll('input, select, textarea');
+      Array.prototype.forEach.call(els, refresh);
+    }
+
+    // Once now, so a field the student never touches - the empty required one
+    // they go straight past - already carries our wording when they submit.
+    refreshAll();
+
+    // And again on every change, so the message tracks what is in the field:
+    // "test123" is a malformed address, and clearing it makes it an empty
+    // required one, which is a different sentence.
+    document.addEventListener('input', function (e) { refresh(e.target); }, true);
+    document.addEventListener('change', function (e) { refresh(e.target); }, true);
+
+    // Fields added after load (a wizard step, a dynamically revealed block)
+    // would otherwise keep the browser's wording.
+    if (window.MutationObserver) {
+      new MutationObserver(function (records) {
+        records.forEach(function (r) {
+          Array.prototype.forEach.call(r.addedNodes, function (n) {
+            if (n.nodeType !== 1) return;
+            refresh(n);
+            refreshAll(n);
+          });
+        });
+      }).observe(document.documentElement, { childList: true, subtree: true });
+    }
+  }
+
   /* ── Init ────────────────────────────────────────────────── */
   function init() {
+    setupValidationMessages();
     trackNavHistory();      // must run before setupBackLinks reads the stack
     activateBottomNav();
     setupCardTaps();
