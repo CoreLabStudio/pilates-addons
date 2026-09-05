@@ -653,4 +653,31 @@
         </xpath>
     </template>
 
+    <!--
+        Hide "Manage Databases | Powered by Odoo" from the auth card.
+
+        web.login_layout renders that row whenever list_db is on - auth_signup
+        derives disable_database_manager from tools.config['list_db'] - and it
+        appears on the pages a student actually sees: login, signup, reset
+        password and the "check your email" page. Offering a database manager
+        to someone booking a Pilates class is at best confusing and at worst an
+        invitation.
+
+        Targets the row itself. The anchor is wrapped in its own t-if, so an
+        xpath through the link reaches that wrapper and hides only half the
+        row. Passing disable_footer in as a render value was tried first and
+        does not reach this template at all.
+
+        list_db itself is deliberately left alone: it is a server-wide switch,
+        and /web/database/manager stays reachable for an administrator who
+        types the URL. odoo.sh manages databases through its own interface, so
+        nothing an admin needs is lost.
+    -->
+    <template id="mv_hide_auth_footer" name="CoreLab — Hide Database Footer"
+              inherit_id="web.login_layout">
+        <xpath expr="//div[@t-if='not disable_footer']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+    </template>
+
 </odoo>
