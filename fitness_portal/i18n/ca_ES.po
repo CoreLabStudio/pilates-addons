@@ -440,8 +440,8 @@ msgstr "Bizum"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
-msgid "Bank Transfer"
-msgstr "Transferència bancària"
+msgid "<span class=\"mv-paymethod-name\">Bank Transfer</span>"
+msgstr "<span class=\"mv-paymethod-name\">Transferència bancària</span>"
 
 #. module: fitness_portal
 #. odoo-python
@@ -688,8 +688,8 @@ msgstr "Cercar una classe"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Browse classes"
-msgstr "Explorar classes"
+msgid "<span style=\"font-size:11px;text-transform:uppercase;letter-spacing:0.12em;\">Browse classes</span>"
+msgstr "<span style=\"font-size:11px;text-transform:uppercase;letter-spacing:0.12em;\">Explorar classes</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
@@ -1042,13 +1042,13 @@ msgstr "Comanda"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Private"
-msgstr "Privat"
+msgid "<span class=\"mv-card-tag mv-card-tag-private\">Private</span>"
+msgstr "<span class=\"mv-card-tag mv-card-tag-private\">Privat</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Price on request"
-msgstr "Preu a consultar"
+msgid "<span class=\"mv-pkg-price-inline\" style=\"color:var(--mv-muted);font-style:italic;font-size:0.78rem;\">Price on request</span>"
+msgstr "<span class=\"mv-pkg-price-inline\" style=\"color:var(--mv-muted);font-style:italic;font-size:0.78rem;\">Preu a consultar</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
@@ -1058,8 +1058,8 @@ msgstr "Contactar"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
-msgid "Active"
-msgstr "Actiu"
+msgid "<span class=\"mv-card-tag mv-card-tag-active\">Active</span>"
+msgstr "<span class=\"mv-card-tag mv-card-tag-active\">Actiu</span>"
 
 #. module: fitness_portal
 # ── Checkout payment step — portal_checkout_payment
@@ -1743,8 +1743,8 @@ msgstr "Crèdits totals"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
-msgid "No credit activity in the selected month."
-msgstr "Sense activitat de crèdit al mes seleccionat."
+msgid "No credit activity in the selected month.\n                            <br/>"
+msgstr "Sense activitat de crèdit al mes seleccionat.\n                            <br/>"
 
 #. module: fitness_portal
 # ── Order detail
@@ -2463,12 +2463,12 @@ msgstr ""
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
-msgid "You don’t have credit for this class yet."
-msgstr "Encara no tens crèdit per a aquesta classe."
+msgid "<span class=\"mv-class-soon-sub\">You don’t have credit for this class yet.</span>"
+msgstr "<span class=\"mv-class-soon-sub\">Encara no tens crèdit per a aquesta classe.</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
-msgid "Explore memberships, packages & classes"
+msgid "Explore memberships, packages &amp; classes"
 msgstr "Explora membresies, paquets i classes"
 
 #. module: fitness_portal
