@@ -15,6 +15,78 @@ msgstr ""
 
 #. module: fitness_portal
 #. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d barre credit available"
+msgstr "%d crèdit de barre disponible"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d barre credits available"
+msgstr "%d crèdits de barre disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d barre slot left this week"
+msgstr "Et queda %d classe de barre aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d barre slots left this week"
+msgstr "Et queden %d classes de barre aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d class credit available"
+msgstr "%d crèdit de classe disponible"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d class credits available"
+msgstr "%d crèdits de classe disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d class slot left this week"
+msgstr "Et queda %d classe aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d class slots left this week"
+msgstr "Et queden %d classes aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d reformer credit available"
+msgstr "%d crèdit de reformer disponible"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d reformer credits available"
+msgstr "%d crèdits de reformer disponibles"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d reformer slot left this week"
+msgstr "Et queda %d classe de reformer aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/res_partner.py:0
+msgid "%d reformer slots left this week"
+msgstr "Et queden %d classes de reformer aquesta setmana"
+
+#. module: fitness_portal
+#. odoo-python
 #: code:addons/fitness_portal/controllers/signup_override.py:0
 msgid "Enter a valid email address, for example name@example.com."
 msgstr "Introdueix una adreça electrònica vàlida, per exemple nom@exemple.com."
@@ -651,8 +723,8 @@ msgstr "Horari"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
-msgid "Credits"
-msgstr "Crèdits"
+msgid "<span class=\"o_stat_text\">Credits</span>"
+msgstr "<span class=\"o_stat_text\">Crèdits</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
@@ -2455,11 +2527,8 @@ msgstr "Les reserves obren el"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
-msgid ""
-"Classes open for booking a week ahead. Come back then to reserve your spot."
-msgstr ""
-"Les classes s'obren per reservar una setmana abans. Torna llavors per "
-"reservar el teu lloc."
+msgid "<span class=\"mv-class-soon-sub\">Classes open for booking a week ahead. Come back then to reserve your spot.</span>"
+msgstr "<span class=\"mv-class-soon-sub\">Les classes s'obren per reservar una setmana abans. Torna llavors per reservar el teu lloc.</span>"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
