@@ -1097,9 +1097,12 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
+        # Classes is the first tab, so it is also what the bare URL shows.
+        # 'packages' has to be matched explicitly now that it is no longer the
+        # fallback - ?tab=packages was already a live link before this change.
         active_tab = ('subscriptions' if tab == 'subscriptions'
-                      else 'classes' if tab == 'classes'
-                      else 'packages')
+                      else 'packages' if tab == 'packages'
+                      else 'classes')
         # Pre-select a discipline chip so a link can land on Reformer only.
         # The chips already filter client-side and corelab.js applies whichever
         # one carries mv-active on load, so marking it server-side is the whole
@@ -1319,7 +1322,7 @@ class FitnessStudentPortal(http.Controller):
             'back_url':        ('/my/packages?tab=subscriptions' if is_sub
                                else '/my/packages?tab=classes' if (
                                    product.fitness_is_package and product.fitness_class_count and product.fitness_class_count <= 1
-                               ) else '/my/packages'),
+                               ) else '/my/packages?tab=packages'),
             'ct':              product.fitness_class_type or 'any',
             # The detail page gets the same one-tap Book button as the card.
             'is_free':         self._is_free_product(product),
