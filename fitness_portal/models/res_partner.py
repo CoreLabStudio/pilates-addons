@@ -124,7 +124,21 @@ class ResPartner(models.Model):
                 'total': weekly_cap,
                 'display': ('%s / %s' % (remaining_week, weekly_cap)) if weekly_cap else str(remaining_week),
                 'label': _('%s slots this week') % type_label,
-                'credits_available_text': _('%d %s slot(s) left this week') % (remaining_week, type_label),
+                # Whole sentences per case, not a count spliced into a phrase.
+                # "%d %s slot(s) left" forces every language to accept English's
+                # bracketed-s, and no language agrees the way English does:
+                # Spanish needs the noun AND its adjective to follow the number.
+                'credits_available_text': (
+                    {
+                        'barre': _('%d barre slot left this week'),
+                        'reformer': _('%d reformer slot left this week'),
+                    }.get(ct, _('%d class slot left this week'))
+                    if remaining_week == 1 else
+                    {
+                        'barre': _('%d barre slots left this week'),
+                        'reformer': _('%d reformer slots left this week'),
+                    }.get(ct, _('%d class slots left this week'))
+                ) % remaining_week,
             })
 
         lines = self._fitness_active_package_lines().sorted(
@@ -143,7 +157,22 @@ class ResPartner(models.Model):
                 'total': total,
                 'display': ('%s / %s' % (remaining, int(total))) if total else str(remaining),
                 'label': label,
-                'credits_available_text': _('%d %s available') % (remaining, label),
+                # Same reason as above, and worse here: the old form spliced in
+                # `label`, which is itself always plural ("reformer credits"),
+                # so one credit read "1 reformer credits available" in English
+                # and "1 creditos reformer disponibles" in Spanish - the noun
+                # and the adjective both disagreeing with the number.
+                'credits_available_text': (
+                    {
+                        'barre': _('%d barre credit available'),
+                        'reformer': _('%d reformer credit available'),
+                    }.get(ct, _('%d class credit available'))
+                    if remaining == 1 else
+                    {
+                        'barre': _('%d barre credits available'),
+                        'reformer': _('%d reformer credits available'),
+                    }.get(ct, _('%d class credits available'))
+                ) % remaining,
             })
 
         return pools
