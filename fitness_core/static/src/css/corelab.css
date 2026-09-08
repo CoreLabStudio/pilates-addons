@@ -2050,6 +2050,12 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   background: var(--mv-card-bg);
   color: var(--mv-active-fill);
   box-shadow: 0 1px 3px rgba(80,66,61,0.10);
+  /* The selected tab links to the page you are already on, so tapping it
+     reloaded to the same state and read as a dead control. Refusing the
+     pointer says "already selected" instead. Keyboard users keep the link:
+     aria-selected carries the state for them, and following it is harmless. */
+  pointer-events: none;
+  cursor: default;
 }
 
 /* Discipline toggle (Reformer / Barre) on the timetable page.
