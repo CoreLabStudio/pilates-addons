@@ -2314,7 +2314,7 @@ msgstr "Reserva tu clase"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Class packages"
-msgstr "Paquetes"
+msgstr "Bonos"
 
 #. module: fitness_portal
 #. odoo-python
@@ -2325,8 +2325,8 @@ msgstr "Descubre nuestros paquetes"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Packages, Memberships &amp; Classes"
-msgstr "Paquetes, Membresías y Clases"
+msgid "Classes, Memberships &amp; Packages"
+msgstr "Clases, Membresías y Bonos"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
