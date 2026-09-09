@@ -4463,3 +4463,27 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-weight: 400;
   margin-left: 3px;
 }
+
+/* The one-trial-only line, above the two trial cards on the Classes tab.
+   Stated rather than implied: a student who takes the wrong one has spent
+   the only trial they get. */
+.mv-trial-note {
+  margin: 0 16px 14px;
+  padding: 12px 14px;
+  border-radius: var(--mv-r-sm);
+  background: rgba(154, 186, 205, 0.14);
+  border: 1px solid var(--mv-border);
+  color: var(--mv-ink-text);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+/* A trial that has been used: no longer an offer, so it does not look like
+   one. The ordinary single class sits beside it at its ordinary price. */
+.mv-trial-spent {
+  color: var(--mv-muted);
+  font-style: italic;
+  font-size: 0.78rem;
+}
+.mv-trial-ready {
+  margin: 0 16px 14px;
+}
