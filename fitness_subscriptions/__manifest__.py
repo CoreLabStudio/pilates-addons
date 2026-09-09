@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Subscriptions – Yoleyva Studio',
-    'version': '19.0.1.1.5',
+    'version': '19.0.1.4.1',
     'category': 'Services',
     'summary': 'Monthly recurring subscriptions (Reformer Mensual, Barre Ilimitado) on sale_subscription',
     'author': 'Yoleyva Studio',
@@ -17,7 +17,9 @@
         'views/sale_order_views.xml',
         'views/fitness_booking_views.xml',
         'views/menu.xml',
+        'data/subscription_plans.xml',
         'data/products.xml',
+        'data/combo_memberships.xml',
     ],
     'installable': True,
     'application': False,

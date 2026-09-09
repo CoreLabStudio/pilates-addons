@@ -49,8 +49,13 @@ class FitnessBookingSubscription(models.Model):
         _logger.info(
             "[SUBSCRIPTION] ✓ %s valid — weekly_used=%d eff=%d floating_credits=%d",
             order.name,
-            order.fitness_weekly_used_count(event.start),
-            order.fitness_effective_weekly_allowance(),
+            order.fitness_weekly_used_count(
+                event.start,
+                discipline=(event.class_type_id.classroom_type
+                            or event.classroom_id.classroom_type)),
+            order.fitness_effective_weekly_allowance(
+                discipline=(event.class_type_id.classroom_type
+                            or event.classroom_id.classroom_type)),
             order.fitness_floating_credits,
         )
 
@@ -91,8 +96,10 @@ class FitnessBookingSubscription(models.Model):
                 vals['fitness_used_floating_credit'] = False
                 continue
             ev = self.env['calendar.event'].browse(vals['calendar_event_id'])
-            weekly_used = sub.fitness_weekly_used_count(ev.start)
-            eff = sub.fitness_effective_weekly_allowance()
+            _disc = (ev.class_type_id.classroom_type
+                     or ev.classroom_id.classroom_type)
+            weekly_used = sub.fitness_weekly_used_count(ev.start, discipline=_disc)
+            eff = sub.fitness_effective_weekly_allowance(discipline=_disc)
             # True = weekly cap already met → charge floating credit instead.
             vals['fitness_used_floating_credit'] = (weekly_used >= eff)
 
@@ -230,13 +237,23 @@ class FitnessBookingSubscription(models.Model):
         ])
         for sub in subscriptions:
             product = sub.fitness_subscription_product_id
-            if product.fitness_class_type not in ('any', event_studio):
+            # A combined membership covers two disciplines, so either matches.
+            # Matching on the primary alone left a "1 Barre + 1 Reformer"
+            # member unable to book Reformer at all: the plan was skipped here
+            # and they were told nothing covered that class type, even though
+            # validate_subscription_for_booking would have allowed it.
+            sub_types = {product.fitness_class_type}
+            if product.fitness_secondary_class_type:
+                sub_types.add(product.fitness_secondary_class_type)
+            if 'any' not in sub_types and event_studio not in sub_types:
                 continue
             if product.fitness_session_type != event_session:
                 continue
             if not product.is_unlimited:
-                weekly_used = sub.fitness_weekly_used_count(calendar_event.start)
-                eff = sub.fitness_effective_weekly_allowance()
+                weekly_used = sub.fitness_weekly_used_count(
+                    calendar_event.start, discipline=event_studio)
+                eff = sub.fitness_effective_weekly_allowance(
+                    discipline=event_studio)
                 if weekly_used >= eff and sub.fitness_floating_credits <= 0:
                     capped_subs.append({
                         'product_name': product.name,
@@ -258,7 +275,12 @@ class FitnessBookingSubscription(models.Model):
             if line.fitness_is_expired:
                 continue
             product = line.product_id
-            if product.fitness_class_type not in ('any', event_studio):
+            # The line's own discipline, not the product's. A combined package
+            # is two lines against one product - one Barre pool, one Reformer
+            # pool - and asking the product would match both pools for either
+            # class, letting a Reformer booking spend the Barre credits.
+            pool_type = line.fitness_class_type or product.fitness_class_type
+            if pool_type not in ('any', event_studio):
                 continue
             if product.fitness_session_type != event_session:
                 continue

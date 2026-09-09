@@ -27,10 +27,18 @@ class SaleOrder(models.Model):
             for line in order.order_line:
                 if not line.product_id.fitness_is_package:
                     continue
-                validity_days = line.product_id.fitness_validity_days or 15
-                class_count = int(
-                    line.product_id.fitness_class_count * line.product_uom_qty
-                )
+                product = line.product_id
+                validity_days = product.fitness_validity_days or 15
+                # How many credits this line grants depends on which pool it
+                # is. A combined package writes two lines against one product:
+                # the one carrying the secondary discipline is granted the
+                # secondary count, not the main one. Compared on the line's
+                # own class type, which is what distinguishes the two.
+                if line.fitness_is_secondary_pool:
+                    per_unit = product.fitness_secondary_class_count
+                else:
+                    per_unit = product.fitness_class_count
+                class_count = int(per_unit * line.product_uom_qty)
                 line.write({
                     'fitness_original_class_count': class_count,
                     'fitness_remaining_classes': class_count,

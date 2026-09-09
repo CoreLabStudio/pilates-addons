@@ -205,6 +205,17 @@
     });
   }
 
+  /* Odoo serves the portal under a language prefix - /es/my/..., /ca_ES/my/...
+     - and only the default language is unprefixed. Every "is this the portal"
+     test below has to look past that prefix: without it the referrer and the
+     nav stack are silently rejected for every student not on the default
+     language, and their back arrow falls through to the page's static href on
+     every sub-page - the fixed destination this whole section exists to
+     avoid.                                                                 */
+  var LANG_PREFIX = /^\/[a-z]{2}(_[A-Za-z0-9]{2,3})?(?=\/my(\/|$))/;
+  function stripLang(p) { return (p || '').replace(LANG_PREFIX, ''); }
+  function isPortalPath(p) { return /^\/my(\/|$)/.test(stripLang(p)); }
+
   /* ── 8a. Session-history tracker (PWA back-nav) ─────────────
      In PWA / standalone mode document.referrer is always empty, so
      8b would fall back to the static server href on every page. We
@@ -217,8 +228,9 @@
     const key = 'cl_nav_stack';
     try {
       const cur = window.location.pathname + window.location.search;
-      if (!/^\/my(\/|$)/.test(cur)) return;
-      if (UTILITY.some(function(u) { return cur === u || cur.startsWith(u + '?'); })) return;
+      if (!isPortalPath(cur)) return;
+      const bare = stripLang(cur);
+      if (UTILITY.some(function(u) { return bare === u || bare.startsWith(u + '?'); })) return;
       const stack = JSON.parse(sessionStorage.getItem(key) || '[]');
       if (stack[stack.length - 1] === cur) return; // no duplicate on reload
       stack.push(cur);
@@ -243,20 +255,32 @@
 
     const UTILITY = ['/my/language', '/my/security', '/my/set_lang', '/my/addresses'];
     function isUtility(p) {
-      return UTILITY.some(function(u) { return p === u || p.startsWith(u + '?') || p.startsWith(u + '/'); });
+      const bare = stripLang(p);
+      return UTILITY.some(function(u) { return bare === u || bare.startsWith(u + '?') || bare.startsWith(u + '/'); });
     }
 
     const cur = window.location.pathname + window.location.search;
     let target = null;
 
+    // 0. An explicit ?back= from the page that linked here. A news post is
+    //    reachable from Home and from the News list, and the linking page is
+    //    the only thing that knows which: the referrer is missing on a
+    //    notification tap, a shared link or a fresh PWA launch, and the nav
+    //    stack below can only offer the last page visited, which is not the
+    //    same question. Same /my/ check the server does before rendering it.
+    try {
+      const b = new URLSearchParams(window.location.search).get('back');
+      if (b && isPortalPath(b) && !isUtility(b)) target = b;
+    } catch (_) {}
+
     // 1. Try document.referrer (normal browser navigation)
-    const ref = document.referrer;
+    const ref = target ? '' : document.referrer;
     if (ref) {
       try {
         const url = new URL(ref, window.location.href);
         if (
           url.origin === window.location.origin &&
-          /^\/my(\/|$)/.test(url.pathname) &&
+          isPortalPath(url.pathname) &&
           url.pathname !== window.location.pathname &&
           !isUtility(url.pathname)
         ) {
@@ -272,7 +296,7 @@
         const stack = JSON.parse(sessionStorage.getItem(key) || '[]');
         for (let i = stack.length - 1; i >= 0; i--) {
           const entry = stack[i];
-          if (entry !== cur && /^\/my(\/|$)/.test(entry) && !isUtility(entry)) {
+          if (entry !== cur && isPortalPath(entry) && !isUtility(entry)) {
             target = entry;
             break;
           }

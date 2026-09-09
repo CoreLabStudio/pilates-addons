@@ -37,6 +37,34 @@ class ProductTemplate(models.Model):
         help="Restricts which session type the credits can be used for.",
     )
 
+    # ── Combined products (one price, two disciplines) ───────────────────
+    #
+    # A combo sells Barre *and* Reformer together - "2 Barre + 2 Reformer".
+    # The two are deliberately NOT one shared pool: the studio sells a fixed
+    # number of each, and a shared pool would let a member spend the lot on
+    # one discipline. So a combo purchase creates one order line per
+    # discipline, each with its own credit count, and each line carries the
+    # discipline it is for. fitness_class_type stays the primary one, which
+    # is what every existing single-discipline product already means.
+    fitness_secondary_class_type = fields.Selection([
+        ('barre',    'Barre'),
+        ('reformer', 'Reformer Pilates'),
+    ], string="Second Class Type",
+        help="Set only on combined products. The second discipline sold "
+             "alongside the main one, with its own separate pool of credits.",
+    )
+    fitness_secondary_class_count = fields.Integer(
+        "Second Class Count", default=0,
+        help="Credits granted for the second discipline. Its own pool: these "
+             "can only be spent on the second discipline, and the main count "
+             "only on the main one.",
+    )
+
+    def fitness_is_combo(self):
+        """True for a product that sells two disciplines under one price."""
+        self.ensure_one()
+        return bool(self.fitness_secondary_class_type)
+
     # ── Promotional pricing ──────────────────────────────────────────────
     #
     # The studio ran its free trial by typing 0 into the sales price and typing

@@ -22,6 +22,17 @@ class FitnessNewsPost(models.Model):
         default=fields.Date.today,
     )
     sequence = fields.Integer("Sequence", default=10)
+    cta_url = fields.Char(
+        "Call-to-action link",
+        help="Optional. When set, the post's detail page shows a button "
+             "linking here - e.g. /my/studio to send readers to the class "
+             "timetable. Leave empty for a post that is just an announcement.",
+    )
+    cta_label = fields.Char(
+        "Call-to-action label",
+        translate=True,
+        help="Text on that button. Falls back to a generic label when empty.",
+    )
     body_excerpt = fields.Char(compute='_compute_body_excerpt')
 
     @api.depends('body')

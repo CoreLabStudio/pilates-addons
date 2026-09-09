@@ -400,7 +400,11 @@ body:has(.mv-app) #wrapwrap > main {
   margin: 0;
   text-decoration: none !important;
   display: block;
-  text-transform: capitalize;
+  /* No capitalize here. Product names are already cased the way the studio
+     wants them, and title-casing every word broke the Spanish ones a word at
+     a time: "Reformer Trial (Clase de prueba)" rendered as "Clase De Prueba",
+     and the opening-promo label as "(Promo De Apertura)". Spanish capitalises
+     the first word of a phrase, not every word in it. */
 }
 .mv-class-meta {
   font-size: 0.77rem;
@@ -2738,6 +2742,76 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   white-space: nowrap;
 }
 
+/* Billing-plan selector on the membership checkout. Styled as cards rather
+   than a plain radio list because each option carries a different total and a
+   different answer on the registration fee - the choice is the information,
+   so it needs room to state itself. */
+.mv-plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mv-plan-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  transition: border-color var(--mv-t-fast), background var(--mv-t-fast);
+}
+.mv-plan-opt:has(input:checked) {
+  border-color: var(--mv-accent);
+  background: rgba(154, 186, 205, 0.12);
+}
+.mv-plan-opt:focus-within {
+  outline: 2px solid var(--mv-accent);
+  outline-offset: 2px;
+}
+.mv-plan-opt input {
+  margin-top: 4px;
+  flex: none;
+}
+.mv-plan-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mv-plan-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.mv-plan-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--mv-ink-text);
+}
+.mv-plan-total {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--mv-ink-text);
+  white-space: nowrap;
+}
+.mv-plan-meta {
+  font-size: 0.78rem;
+  color: var(--mv-muted);
+}
+.mv-plan-waiver {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(154, 186, 205, 0.22);
+  color: var(--mv-ink-text);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .mv-paymethod {
   border: 1.5px solid var(--mv-border);
   border-radius: var(--mv-r-sm);
@@ -3509,7 +3583,73 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 .mv-news-body p { margin: 0 0 6px; }
 .mv-news-body p:last-child { margin-bottom: 0; }
 .mv-news-detail { padding: 0 0 20px; }
-.mv-news-detail-img { height: 220px; }
+/* A news image is nearly always a poster, and the whole poster IS the message -
+   dates, address, the lot. A fixed height with object-fit:cover reduced it to a
+   letterboxed strip of the middle, which is unreadable. On the detail page the
+   image is shown whole: natural aspect, capped so a tall portrait still leaves
+   the headline visible without scrolling. The list thumbnails keep cropping,
+   which is right for a teaser. */
+/* Text left, poster right. The poster is portrait and the whole of it is the
+   message - dates, address, the lot - so it is never cropped: it keeps its own
+   aspect and the column sizes around it. */
+.mv-news-detail--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 24px;
+  align-items: start;
+  padding: 0 20px 20px;
+}
+.mv-news-detail-img {
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--mv-surface-2, #f2eee8);
+}
+.mv-news-detail-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.mv-news-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: var(--mv-active-fill, #8a7268);
+  color: var(--mv-btn-fg, #fff);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mv-news-cta:hover { text-decoration: none; opacity: 0.92; color: var(--mv-btn-fg, #fff); }
+
+/* Secondary hero action. Same shape as the primary CTA but outlined, so the
+   two read as a choice rather than one button repeated. */
+.mv-home-cta--ghost {
+  background: transparent;
+  color: var(--mv-active-fill, #8a7268);
+  border: 1px solid var(--mv-active-fill, #8a7268);
+  margin-top: 10px;
+}
+.mv-home-cta--ghost:hover {
+  background: var(--mv-active-fill, #8a7268);
+  color: var(--mv-btn-fg, #fff);
+}
+.mv-news-cta-chev { font-size: 1.05rem; line-height: 1; }
+
+/* On a phone the poster leads: it is what the reader came for, and a tall
+   image below a wall of text would be missed entirely. */
+@media (max-width: 780px) {
+  .mv-news-detail--split {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px 20px;
+  }
+  .mv-news-detail--split .mv-news-detail-img { order: -1; }
+  .mv-news-detail--split .mv-news-detail-body { padding: 0; }
+}
 .mv-news-detail-body { padding: 14px 20px 0; }
 .mv-news-title {
   font-family: 'Cormorant Garamond', Georgia, serif;

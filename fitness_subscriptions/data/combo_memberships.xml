@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate, like every other priced record: a module update must
+         never put a price back after the studio has changed it. -->
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  COMBINED MEMBERSHIPS — a weekly allowance in each discipline   -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--
+             weekly_class_allowance is the Barre cap and
+             fitness_secondary_weekly_allowance the Reformer cap. They are
+             enforced separately in both directions: Barre bookings never
+             consume the Reformer allowance, and a member who has used up
+             Barre for the week can still book Reformer.
+
+             fitness_is_clase_fija stays off - these are not fixed-slot plans,
+             the member books whichever class they like within each cap.
+        -->
+        <record id="product_combo_week_1_1" model="product.template">
+            <field name="name">Barre + Reformer 1 + 1 por semana</field>
+            <field name="type">service</field>
+            <field name="list_price">145.00</field>
+            <field name="recurring_invoice">1</field>
+            <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
+            <field name="weekly_class_allowance">1</field>
+            <field name="fitness_secondary_weekly_allowance">1</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+            <field name="is_unlimited">0</field>
+            <field name="fitness_promo_first_cycle_bonus">0</field>
+            <field name="description_sale">One Barre class and one Reformer class every week. Both disciplines, every week, on a monthly plan.</field>
+        </record>
+
+        <record id="product_combo_week_2_1" model="product.template">
+            <field name="name">Barre + Reformer 2 + 1 por semana</field>
+            <field name="type">service</field>
+            <field name="list_price">195.00</field>
+            <field name="recurring_invoice">1</field>
+            <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
+            <field name="weekly_class_allowance">2</field>
+            <field name="fitness_secondary_weekly_allowance">1</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+            <field name="is_unlimited">0</field>
+            <field name="fitness_promo_first_cycle_bonus">0</field>
+            <field name="description_sale">Two Barre classes and one Reformer class every week. For when Barre leads and the Reformer keeps you honest.</field>
+        </record>
+
+        <record id="product_combo_week_1_2" model="product.template">
+            <field name="name">Barre + Reformer 1 + 2 por semana</field>
+            <field name="type">service</field>
+            <field name="list_price">205.00</field>
+            <field name="recurring_invoice">1</field>
+            <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
+            <field name="weekly_class_allowance">1</field>
+            <field name="fitness_secondary_weekly_allowance">2</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_session_type">group</field>
+            <field name="is_unlimited">0</field>
+            <field name="fitness_promo_first_cycle_bonus">0</field>
+            <field name="description_sale">One Barre class and two Reformer classes every week. For when the Reformer leads and Barre keeps you moving.</field>
+        </record>
+
+    </data>
+</odoo>
