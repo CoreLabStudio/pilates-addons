@@ -40,6 +40,14 @@ class TestTimetablePage(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # These tests are about having nothing to book with: no credit, or a
+        # class outside the seven-day window. An unclaimed free trial is
+        # itself something to book with - it makes both disciplines bookable
+        # and waives the window - so it would quietly answer the question
+        # these tests are asking. Closing the offer keeps each test about the
+        # one thing it names.
+        cls.env['ir.config_parameter'].sudo().set_param(
+            'fitness.trial_offer_end', '2000-01-01')
         cls.password = "timetable-test-pw-1"
         cls.user = cls.env["res.users"].create({
             "name": "Timetable Test Student",
