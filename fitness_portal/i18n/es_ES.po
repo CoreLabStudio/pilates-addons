@@ -16,6 +16,12 @@ msgstr ""
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your free trial class is waiting - pick any class below and book it. Booking opens a week before each class."
+msgstr "Tu clase de prueba gratuita te está esperando: elige cualquier clase de abajo y resérvala. La reserva se abre una semana antes de cada clase."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Book your trial class"
 msgstr "Reserva tu clase de prueba"
 
