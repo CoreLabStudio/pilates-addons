@@ -19,7 +19,7 @@
                decoration-info="class_interest == 'barre'"/>
         <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
         <field name="status" widget="badge"/>
-        <field name="occurrence_id" string="Slot" optional="show"/>
+        <field name="occurrence_id" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
         <field name="confirmation_email_sent" string="Email Sent" optional="show"/>
         <field name="lang" optional="hide"/>
@@ -33,6 +33,14 @@
     <field name="arch" type="xml">
       <form string="Trial Class Request">
         <header>
+          <!-- Approving is what actually books the student. It needs a slot,
+               which is why the button is hidden until one is chosen rather
+               than failing with an error after the click. -->
+          <button name="action_approve_and_book"
+                  string="Approve &amp; Book"
+                  type="object"
+                  class="btn-primary"
+                  invisible="status in ('scheduled', 'declined') or not occurrence_id"/>
           <button name="action_send_confirmation_email"
                   string="Send Confirmation Email"
                   type="object"
@@ -63,8 +71,23 @@
           <group string="Scheduling">
             <group>
               <field name="status" string="Status"/>
-              <field name="occurrence_id" string="Barre Class Slot"
-                     invisible="class_interest != 'barre'"/>
+              <field name="partner_id" options="{'no_create': True}"/>
+              <!-- The slot is what approval books into, so it has to be
+                   settable for every discipline. It was hidden unless the
+                   request was for Barre, which meant a Reformer request could
+                   never be given a slot - and the Approve button, which needs
+                   one, could never appear. -->
+              <!-- Scoped to classes that can actually be booked for THIS
+                   request: the right discipline, still to come, not cancelled.
+                   Unscoped, the list offered a Barre class for a Reformer
+                   request, and the approval then failed on the booking's
+                   discipline check with a message about subscriptions that
+                   said nothing about the real mistake. -->
+              <field name="occurrence_id" options="{'no_create': True}"
+                     domain="[('is_fitness_class', '=', True),
+                              ('class_state', '!=', 'cancelled'),
+                              ('start', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                              ('class_type_id.classroom_type', '=', class_interest)]"/>
               <field name="scheduled_datetime" string="Scheduled Date/Time"/>
               <field name="confirmation_email_sent" string="Confirmation Email Sent" readonly="1"/>
               <field name="confirmation_email_sent_date" string="Confirmation Sent On"

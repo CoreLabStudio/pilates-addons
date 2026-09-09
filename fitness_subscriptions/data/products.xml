@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  MATRICULA (one-off registration fee)                           -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <!-- Charged once, on a student's first membership, and waived when
+             they commit to three months or more. sale_ok is False: it is never
+             something a student picks off the shop, only a line the membership
+             checkout adds for them. recurring_invoice stays off so it is
+             billed once rather than every period. -->
+        <record id="product_matricula" model="product.template">
+            <field name="name">Registration (Matrícula)</field>
+            <field name="type">service</field>
+            <field name="list_price">39.00</field>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="fitness_is_matricula">1</field>
+            <field name="description_sale">One-off registration fee, charged with your first membership.</field>
+        </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
         <!--  REFORMER MENSUAL (metered monthly bucket)                      -->
@@ -11,11 +30,12 @@
              Barre Clase Fija. fitness_promo_first_cycle_bonus stays 0 so the
              action_confirm() date gate does not block year-round sales. -->
         <record id="product_reformer_mensual_1" model="product.template">
-            <field name="name">Reformer Mensual 1</field>
+            <field name="name">Reformer Mensual 1 (Promo de apertura)</field>
             <field name="type">service</field>
-            <field name="list_price">80.00</field>
+            <field name="list_price">70.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -23,14 +43,16 @@
             <field name="is_unlimited">0</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">One Reformer class every week, on your own recurring day and time. A steady rhythm without the commitment of more.</field>
         </record>
 
         <record id="product_reformer_mensual_2" model="product.template">
-            <field name="name">Reformer Mensual 2</field>
+            <field name="name">Reformer Mensual 2 (Promo de apertura)</field>
             <field name="type">service</field>
-            <field name="list_price">150.00</field>
+            <field name="list_price">130.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">2</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -38,14 +60,16 @@
             <field name="is_unlimited">0</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Two Reformer classes every week, on your own recurring days and times. Build real strength with consistent practice.</field>
         </record>
 
         <record id="product_reformer_mensual_3" model="product.template">
-            <field name="name">Reformer Mensual 3</field>
+            <field name="name">Reformer Mensual 3 (Promo de apertura)</field>
             <field name="type">service</field>
-            <field name="list_price">210.00</field>
+            <field name="list_price">190.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_reformer_mensual">1</field>
             <field name="weekly_class_allowance">3</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -53,6 +77,7 @@
             <field name="is_unlimited">0</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Three Reformer classes every week, on your own recurring days and times. For those ready to make Reformer a core part of their routine.</field>
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -70,6 +95,7 @@
             <field name="list_price">80.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">1</field>
             <field name="monthly_class_allowance">4</field><!-- legacy value; reporting-only -->
@@ -86,6 +112,7 @@
             <field name="list_price">150.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="weekly_class_allowance">2</field>
             <field name="fitness_promo_first_cycle_bonus">1</field>
             <field name="monthly_class_allowance">8</field><!-- legacy value; reporting-only -->
@@ -102,6 +129,7 @@
             <field name="list_price">210.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="weekly_class_allowance">3</field>
             <field name="fitness_promo_first_cycle_bonus">1</field>
             <field name="monthly_class_allowance">12</field><!-- legacy value; reporting-only -->
@@ -119,11 +147,12 @@
              promo window (Sept–Nov 2026). fitness_promo_first_cycle_bonus stays
              at 0 so the action_confirm() gate does not block year-round sales. -->
         <record id="product_barre_clase_fija_1" model="product.template">
-            <field name="name">Barre Clase Fija 1</field>
+            <field name="name">Barre Clase Fija 1 (Promo de apertura)</field>
             <field name="type">service</field>
-            <field name="list_price">75.00</field>
+            <field name="list_price">65.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -131,6 +160,7 @@
             <field name="is_unlimited">0</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">One fixed weekly Barre slot, reserved just for you every week. The easiest way to build a lasting habit.</field>
         </record>
 
         <!-- Deprecated: merged into product_barre_clase_fija_1. Archived in DB. -->
@@ -142,6 +172,7 @@
             <field name="list_price">75.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">1</field>
@@ -153,11 +184,12 @@
 
         <!-- Consolidated: no separate promo variant. Same bonus logic as CF1. -->
         <record id="product_barre_clase_fija_2" model="product.template">
-            <field name="name">Barre Clase Fija 2</field>
+            <field name="name">Barre Clase Fija 2 (Promo de apertura)</field>
             <field name="type">service</field>
-            <field name="list_price">140.00</field>
+            <field name="list_price">120.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">2</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -165,6 +197,7 @@
             <field name="is_unlimited">0</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Two fixed weekly Barre slots, reserved just for you every week. Twice the rhythm, twice the progress.</field>
         </record>
 
         <!-- Deprecated: merged into product_barre_clase_fija_2. Archived in DB. -->
@@ -176,6 +209,7 @@
             <field name="list_price">140.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">2</field>
             <field name="fitness_promo_first_cycle_bonus">1</field>
@@ -199,6 +233,7 @@
             <field name="list_price">0.00</field><!-- set per-client when creating subscription -->
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -215,6 +250,7 @@
             <field name="list_price">0.00</field><!-- set per-client when creating subscription -->
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="fitness_is_clase_fija">1</field>
             <field name="weekly_class_allowance">1</field>
             <field name="fitness_promo_first_cycle_bonus">0</field>
@@ -235,12 +271,14 @@
             <field name="list_price">170.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="weekly_class_allowance">0</field><!-- unlimited; cap not enforced -->
             <field name="fitness_promo_first_cycle_bonus">0</field>
             <field name="monthly_class_allowance">0</field><!-- legacy; reporting-only -->
             <field name="is_unlimited">1</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Unlimited Barre classes every month at our introductory price. The best way to build the habit before committing long-term.</field>
         </record>
 
         <record id="product_barre_ilimitado" model="product.template">
@@ -249,12 +287,14 @@
             <field name="list_price">200.00</field>
             <field name="recurring_invoice">1</field>
             <field name="fitness_is_subscription_plan">1</field>
+            <field name="fitness_subscription_plan_id" ref="sale_subscription.subscription_plan_month"/>
             <field name="weekly_class_allowance">0</field><!-- unlimited; cap not enforced -->
             <field name="fitness_promo_first_cycle_bonus">0</field>
             <field name="monthly_class_allowance">0</field><!-- legacy; reporting-only -->
             <field name="is_unlimited">1</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Unlimited Barre classes every month. Come as often as you like — no caps, no counting credits.</field>
         </record>
 
     </data>

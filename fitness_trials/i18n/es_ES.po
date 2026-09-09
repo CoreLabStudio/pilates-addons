@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__partner_id
+msgid "Student"
+msgstr "Alumna"
+
+#. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness.trial.request,class_interest
 #: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__class_interest
 msgid "Class Interest"
@@ -167,8 +172,8 @@ msgstr "Teléfono"
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__occurrence_id
-msgid "Barre Class Slot"
-msgstr "Franja de clase de Barre"
+msgid "Class Slot"
+msgstr "Franja de clase"
 
 #. module: fitness_trials
 #: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__lang

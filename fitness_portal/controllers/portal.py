@@ -53,11 +53,8 @@ DEFAULT_LOOK_AHEAD_DAYS = 7
 # two-day "month". A link still holding the old days=14 falls back to the
 # default week rather than 404ing.
 RANGE_CHOICES = (1, 7, 30)
-SCHEDULE_LOOK_AHEAD_DAYS = 28
 
 # Mirror of constants in fitness_subscriptions.models.sale_order
-_PROMO_WINDOW_START = _date_cls(2026, 9, 1)
-_PROMO_WINDOW_END   = _date_cls(2026, 11, 30)
 
 # Placeholder payment details. The studio replaces these from
 # Settings → Technical → System Parameters without touching code.
@@ -136,6 +133,17 @@ class FitnessStudentPortal(http.Controller):
             [], order='sequence asc, publish_date desc, id desc', limit=3
         )
 
+        # The hero's trial button points at the news post carrying a call to
+        # action - the trial announcement. These posts are created as data and
+        # have no xmlid, so there is nothing stable to ref(); "the post with a
+        # CTA" is the marker. None found means no button, rather than a button
+        # that goes somewhere arbitrary.
+        _trial_post = request.env['fitness.news.post'].search(
+            [('cta_url', '!=', False)], order='sequence asc, id asc', limit=1
+        )
+        trial_post_url = (('/my/news/%d?back=/my/home' % _trial_post.id)
+                          if _trial_post else False)
+
         credit_pools = self._credit_pools(partner.id)
 
         # Prompts for shop categories the student owns nothing in. Independent
@@ -178,6 +186,8 @@ class FitnessStudentPortal(http.Controller):
             'lbl_choose_plan':  _('Start by choosing your plan.'),
             'lbl_explore_shop': _('Explore packages, memberships & classes'),
             'news_posts':       news_posts,
+            'trial_post_url':   trial_post_url,
+            'lbl_book_trial':   _('Book a Free Trial'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
             'lbl_install_title':   _('Install CoreLab'),
@@ -431,17 +441,17 @@ class FitnessStudentPortal(http.Controller):
         lang = request.env.lang or DEFAULT_LANG
         now = fields.Datetime.now()
 
-        ICP = request.env['ir.config_parameter'].sudo()
-        look_ahead = int(ICP.get_param(
-            'fitness_portal.schedule_look_ahead_days', SCHEDULE_LOOK_AHEAD_DAYS
-        ))
-        window_end = now + timedelta(days=look_ahead)
-
+        # No look-ahead cap. This used to stop at 28 days, which meant a class
+        # the studio had confirmed could sit outside the student's own view of
+        # their schedule - approving a trial into a slot five weeks out left
+        # the student with a booking they could not see anywhere. Any number
+        # chosen here would have the same failure the first time somebody books
+        # further ahead than it, so the window is gone rather than widened:
+        # every confirmed future booking is listed.
         bookings = request.env['fitness.booking'].search([
             ('student_id', '=', partner.id),
             ('state', '=', 'booked'),
             ('class_start', '>', now),
-            ('class_start', '<', window_end),
         ], order='class_start asc')
 
         user_tz = self._user_tz()
@@ -478,9 +488,8 @@ class FitnessStudentPortal(http.Controller):
             'has_sources':       has_sources,
             'no_sources_msg':    _('Time to move! Pick a membership, package, or class and reserve your spot.'),
             'no_sources_cta':    _('See options'),
-            'look_ahead_days':   look_ahead,
-            'subtitle':          _('Next %d days') % look_ahead,
-            'schedule_empty':    _('No upcoming classes in the next %d days.') % look_ahead,
+            'subtitle':          _('Upcoming classes'),
+            'schedule_empty':    _('No upcoming classes.'),
             'discipline_tabs':   discipline_tabs,
             'calendar_days':     cal_days,
             'calendar_meta':     cal_meta,
@@ -986,13 +995,10 @@ class FitnessStudentPortal(http.Controller):
         for sub in subs:
             product = sub.fitness_subscription_product_id
             bonus = product.fitness_promo_first_cycle_bonus or 0
-            sub_date = sub.date_order.date() if sub.date_order else None
-            is_cf = bool(getattr(product, 'fitness_is_clase_fija', False))
-            is_rm = bool(getattr(product, 'fitness_is_reformer_mensual', False))
-            in_promo = sub_date is not None and _PROMO_WINDOW_START <= sub_date <= _PROMO_WINDOW_END
-            cf_promo = is_cf and in_promo
-            rm_promo = is_rm and in_promo
-            effective_bonus = 1 if (cf_promo or rm_promo) else bonus
+            # The opening offer is now a discount on the five base plans rather
+            # than a free extra class, so there is no window-based bonus to
+            # synthesise here any more - only what the product itself grants.
+            effective_bonus = bonus
 
             # Subscription started (always neutral, no delta)
             events.append({
@@ -1352,6 +1358,18 @@ class FitnessStudentPortal(http.Controller):
     def packages_buy(self, product_id, **kw):
         return request.redirect(f'/my/packages/{product_id}/checkout')
 
+    def _is_reformer_trial(self, product):
+        """True for the one product that must be reviewed before booking.
+
+        Resolved by xmlid rather than by price or discipline: the rule is about
+        this specific product, and it must not lapse if the trial stops being
+        free. Falls back to False when the xmlid is missing so a database
+        without the seed record simply behaves as before.
+        """
+        ref = request.env.ref('fitness_packages.product_reformer_trial',
+                              raise_if_not_found=False)
+        return bool(ref) and product.id == ref.id
+
     @http.route('/my/packages/<int:product_id>/book-free', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
     def packages_book_free(self, product_id, **kw):
@@ -1383,6 +1401,12 @@ class FitnessStudentPortal(http.Controller):
 
         if not product.exists() or not product.active or not product.sale_ok                 or not self._is_buyable(product):
             return request.redirect('/my/packages')
+
+        # The Reformer trial is reviewed before it is booked - the studio wants
+        # to see the student's experience first and pick the slot themselves.
+        # Send them to the intake form instead of creating a booking.
+        if self._is_reformer_trial(product):
+            return request.redirect('/trial?class_interest=reformer')
 
         # Free is decided here, never by the form. A posted product id for
         # something that costs money goes to the paid flow.
@@ -1430,6 +1454,11 @@ class FitnessStudentPortal(http.Controller):
         _ = request.env._
         partner = request.env.user.partner_id
         product = request.env['product.template'].sudo().browse(product_id)
+
+        # Same rule as book-free. This URL is linkable and typeable, so a guard
+        # on the one-tap path alone would simply be walked around.
+        if self._is_reformer_trial(product):
+            return request.redirect('/trial?class_interest=reformer')
         if not product.exists() or not product.active or not self._is_buyable(product):
             return request.redirect('/my/packages')
         if not product.sale_ok:
@@ -1449,6 +1478,11 @@ class FitnessStudentPortal(http.Controller):
         if self._is_free_product(product):
             return request.redirect('/my/packages/%d' % product.id)
 
+        # The plan the student picked, validated against what was offered. It
+        # is read on GET as well as POST so choosing one can re-render the
+        # page with that plan's totals before anything is committed.
+        selected_plan = self._selected_plan(product, kw.get('plan_id'))
+
         error_msg = None
         method = kw.get('payment_method')
         if request.httprequest.method == 'POST':
@@ -1457,7 +1491,8 @@ class FitnessStudentPortal(http.Controller):
                 if not kw.get('terms_accepted'):
                     error_msg = _('Please accept the Terms and Conditions to continue.')
                 else:
-                    order = self._create_order(partner, product, 'stripe')
+                    order = self._create_order(partner, product, 'stripe',
+                                               plan=selected_plan)
                     if not order:
                         return request.redirect('/my/packages')
                     return request.redirect(f'/my/packages/pay/{order.id}')
@@ -1468,16 +1503,24 @@ class FitnessStudentPortal(http.Controller):
                 elif not kw.get('terms_accepted'):
                     error_msg = _('Please accept the Terms and Conditions to continue.')
                 else:
-                    order = self._create_order(partner, product, method)
+                    order = self._create_order(partner, product, method,
+                                               plan=selected_plan)
                     if not order:
                         return request.redirect('/my/packages')
                     return request.redirect(f'/my/checkout/{order.id}/sign')
 
+        is_subscription = bool(product.fitness_is_subscription_plan)
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
             'product':            product,
-            **self._checkout_totals(product, partner),
-            'is_subscription':    bool(product.fitness_is_subscription_plan),
+            **self._checkout_totals(product, partner, selected_plan),
+            'is_subscription':    is_subscription,
+            'plan_options':       self._plan_options(
+                product, partner, selected_plan) if is_subscription else [],
+            'selected_plan_id':   selected_plan.id if selected_plan else False,
+            'lbl_plan_heading':   _('Choose how you pay'),
+            'lbl_plan_waiver':    _('Registration fee waived'),
+            'lbl_matricula':      _('Registration (one-off)'),
             'step':               'payment',
             'selected_method':    method if method in PAYMENT_METHODS else None,
             'payment_details':    self._payment_details(),
@@ -1673,13 +1716,21 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/news/<int:post_id>', type='http', auth='user',
                 website=True, sitemap=False)
-    def news_detail(self, post_id, **kw):
+    def news_detail(self, post_id, back=None, **kw):
+        # A post is reachable from Home and from the News list, so a fixed
+        # back link always sent half its readers to the wrong page. The page
+        # that linked here says where it linked from; anything unexpected
+        # falls back to Home, and never off-site on our say-so.
         post = request.env['fitness.news.post'].sudo().search([
             ('id', '=', post_id), ('active', '=', True),
         ], limit=1)
         if not post:
             return request.not_found()
-        return request.render('fitness_portal.portal_news_detail', {'post': post})
+        back_url = back if (back or '').startswith('/my/') else '/my/home'
+        return request.render('fitness_portal.portal_news_detail', {
+            'post':     post,
+            'back_url': back_url,
+        })
 
     # ══════════════════════════════════════════════════════════
     #  TERMS AND CONDITIONS
@@ -1991,9 +2042,8 @@ class FitnessStudentPortal(http.Controller):
     def _is_buyable(product):
         return bool(product.fitness_is_package or product.fitness_is_subscription_plan)
 
-    @staticmethod
-    def _checkout_totals(product, partner):
-        """The four numbers on the order summary, computed once.
+    def _checkout_totals(self, product, partner, plan=None):
+        """The numbers on the order summary, computed once.
 
         The template used to multiply by 1.21 itself. That was invisible at
         full price - 25.00 x 1.21 is exactly 30.25 - and wrong the moment a
@@ -2005,25 +2055,222 @@ class FitnessStudentPortal(http.Controller):
         which is the same call the sale order line makes. The page and the
         charge are then the same arithmetic rather than two that agree by
         luck.
+
+        The same reasoning now covers the billing period and the registration
+        fee: a quarterly membership is three months charged at once, and the
+        fee is a second line. Both are folded in here, so the summary and the
+        order are built from one calculation instead of the page adding up one
+        set of numbers while _create_order writes another.
         """
-        price = product.fitness_effective_price()
-        taxes = product.taxes_id.filtered(
-            lambda t: t.company_id == request.env.company)
-        if taxes:
+        def _taxed(prod, price):
+            taxes = prod.taxes_id.filtered(
+                lambda t: t.company_id == request.env.company)
+            if not taxes:
+                return price, price
             res = taxes.compute_all(
-                price, currency=product.currency_id, quantity=1.0,
-                product=product.product_variant_ids[:1], partner=partner)
-            subtotal, total = res['total_excluded'], res['total_included']
-        else:
-            subtotal = total = price
+                price, currency=prod.currency_id, quantity=1.0,
+                product=prod.product_variant_ids[:1], partner=partner)
+            return res['total_excluded'], res['total_included']
+
+        months = self._plan_months(plan) if plan else 1
+        price = product.fitness_effective_price() * months
+        subtotal, total = _taxed(product, price)
+
+        matricula = self._matricula_due(partner, product, plan) if plan else \
+            request.env['product.template'].browse()
+        mat_subtotal = mat_total = 0.0
+        if matricula:
+            mat_subtotal, mat_total = _taxed(
+                matricula, matricula.fitness_effective_price())
+
         return {
-            'co_full':     product.list_price or 0.0,
-            'co_discount': product.fitness_promo_saving,
-            'co_subtotal': subtotal,
-            'co_tax':      total - subtotal,
-            'co_total':    total,
+            'co_full':     (product.list_price or 0.0) * months,
+            'co_discount': product.fitness_promo_saving * months,
+            'co_subtotal': subtotal + mat_subtotal,
+            'co_tax':      (total - subtotal) + (mat_total - mat_subtotal),
+            'co_total':    total + mat_total,
             'co_currency': product.currency_id.symbol or '€',
+            'co_months':   months,
+            'co_matricula':       matricula or None,
+            # Shown ex-tax, like the membership line above it, so the rows on
+            # the summary actually add up to the total underneath them. The
+            # tax-inclusive figure is the one the plan selector quotes, which
+            # is what the student pays; mixing the two in one column made the
+            # column wrong even while the total was right.
+            'co_matricula_net':   mat_subtotal,
+            'co_matricula_total': mat_total,
         }
+
+    # ── Membership billing plans and the registration fee ────────────────
+    #
+    # A membership is sold on a billing plan, and the plan decides two things
+    # the student needs to see before they commit: what they pay now, and
+    # whether the registration fee applies. Both are worked out here so the
+    # page, the order and the charge come from one calculation.
+
+    # Yearly is deliberately not offered. It exists in the database, but the
+    # studio has never priced a year - 12x the monthly price is an assumption,
+    # not a decision, and it would be a real charge. Add it here once there is
+    # a price for it.
+    MEMBERSHIP_PLAN_XMLIDS = (
+        'sale_subscription.subscription_plan_month',
+        'fitness_subscriptions.subscription_plan_quarter',
+    )
+    MATRICULA_WAIVED_FROM_MONTHS = 3
+
+    @staticmethod
+    def _plan_months(plan):
+        """How many months one billing period covers.
+
+        Weeks and days are rounded down deliberately: they are not commitment
+        periods the studio sells, and a plan that does not reach a month must
+        not accidentally clear the three-month waiver.
+        """
+        if not plan:
+            return 1
+        value = plan.billing_period_value or 1
+        unit = plan.billing_period_unit
+        if unit == 'year':
+            return value * 12
+        if unit == 'month':
+            return value
+        if unit == 'week':
+            return (value * 7) // 30
+        if unit == 'day':
+            return value // 30
+        return 1
+
+    def _matricula_product(self):
+        product = request.env.ref('fitness_subscriptions.product_matricula',
+                                  raise_if_not_found=False)
+        return product.sudo() if product else product
+
+    @staticmethod
+    def _has_paid_membership_before(partner):
+        """Has this student ever held a membership?
+
+        Read from what actually happened rather than a flag somebody has to
+        remember to set: any confirmed order carrying a subscription plan
+        counts, whether it was made in the portal, the back office or an
+        import. Drafts do not - the checkout reuses them, so an abandoned
+        attempt must not make a first membership look like a second and skip
+        the fee. The order being built right now is still draft when this is
+        asked, which is what stops it excluding itself.
+        """
+        lines = request.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id.product_tmpl_id.fitness_is_subscription_plan', '=', True),
+        ], limit=1)
+        return bool(lines)
+
+    def _matricula_due(self, partner, product, plan):
+        """The registration fee product when it should be charged, else empty.
+
+        Two conditions, both the studio's: it is a student's first membership,
+        and the commitment is shorter than three months. Committing to three
+        months or more waives it.
+        """
+        empty = request.env['product.template'].browse()
+        if not product.fitness_is_subscription_plan:
+            return empty
+        matricula = self._matricula_product()
+        if not matricula or not matricula.active:
+            return empty
+        if self._plan_months(plan) >= self.MATRICULA_WAIVED_FROM_MONTHS:
+            return empty
+        if self._has_paid_membership_before(partner):
+            return empty
+        return matricula
+
+    def _membership_plans(self, product):
+        """The billing plans a student may choose for this membership.
+
+        The product's own plan is always included even if it is not one of the
+        offered set, so a membership configured for something unusual in the
+        back office still checks out on the plan it was configured with.
+
+        Read as sudo throughout: sale.subscription.plan is a Sales model that
+        portal users have no access to, and the student is being shown the
+        studio's price list, not their own records.
+        """
+        plans = request.env['sale.subscription.plan'].sudo().browse()
+        for xmlid in self.MEMBERSHIP_PLAN_XMLIDS:
+            plan = request.env.ref(xmlid, raise_if_not_found=False)
+            if plan:
+                plan = plan.sudo()
+                if plan.active:
+                    plans |= plan
+        own = product.sudo().fitness_subscription_plan_id
+        if own and own.sudo().active:
+            plans |= own.sudo()
+        return plans.sorted(lambda p: (p.sequence, p.id))
+
+    def _plan_options(self, product, partner, selected_plan):
+        """What the plan selector renders, priced.
+
+        Each option carries its own total, because the whole point of showing
+        the choice is that the student can see what three months up front
+        actually costs and what it saves them. The numbers come from the same
+        helper the order summary uses, so the option they pick and the total
+        they are then charged cannot disagree.
+        """
+        _ = request.env._
+        options = []
+        for plan in self._membership_plans(product):
+            months = self._plan_months(plan)
+            totals = self._checkout_totals(product, partner, plan)
+            matricula = self._matricula_due(partner, product, plan)
+            waived = (not matricula
+                      and months >= self.MATRICULA_WAIVED_FROM_MONTHS
+                      and not self._has_paid_membership_before(partner))
+            if months == 1:
+                cadence = _('Billed monthly')
+            elif months % 12 == 0 and months >= 12:
+                cadence = _('Billed yearly')
+            else:
+                cadence = _('Billed every %s months') % months
+            options.append({
+                'id':        plan.id,
+                'name':      plan.name,
+                'months':    months,
+                'cadence':   cadence,
+                'per_month': _('%(price)s per month') % {
+                    'price': self._format_price(
+                        product.fitness_effective_price(), product.currency_id)},
+                'total':     totals['co_total'],
+                'total_str': self._format_price(totals['co_total'],
+                                                product.currency_id),
+                'waives_matricula': waived,
+                'selected':  plan.id == selected_plan.id if selected_plan else False,
+            })
+        return options
+
+    def _selected_plan(self, product, plan_id):
+        """The plan this checkout is for, never taken on trust from the form.
+
+        A posted id is only honoured when it is one of the plans actually
+        offered for this membership. Anything else - a stale form, a typed id,
+        a plan that was withdrawn - falls back to the product's own plan
+        rather than billing the student on something nobody offered them.
+        """
+        if not product.fitness_is_subscription_plan:
+            return request.env['sale.subscription.plan'].sudo().browse()
+        offered = self._membership_plans(product)
+        try:
+            wanted = int(plan_id or 0)
+        except (TypeError, ValueError):
+            wanted = 0
+        if wanted:
+            match = offered.filtered(lambda p: p.id == wanted)
+            if match:
+                return match[:1]
+            _logger.info('[CHECKOUT] Plan %s is not offered for %s; using the '
+                         'product default.', wanted, product.display_name)
+        default = product.sudo().fitness_subscription_plan_id
+        if default and default.sudo() in offered:
+            return default.sudo()
+        return offered[:1]
 
     @staticmethod
     def _is_free_product(product):
@@ -2113,7 +2360,58 @@ class FitnessStudentPortal(http.Controller):
         symbol = currency.symbol if currency else '€'
         return f'{amount:.2f} {symbol}'
 
-    def _create_order(self, partner, product, method):
+    def _order_lines_for(self, partner, product, plan):
+        """The lines this purchase should carry, priced.
+
+        One place builds them, and the summary is priced from the same
+        helpers, so what the student was shown and what the order charges
+        cannot drift apart.
+        """
+        variant = product.product_variant_ids[:1]
+        if not variant:
+            return []
+        months = self._plan_months(plan) if plan else 1
+        lines = [{
+            'product_id': variant.id,
+            'product_uom_qty': 1,
+            # The promotion price, not the list price, times the number of
+            # months the period covers - a quarterly membership is three
+            # months charged at once. This is the number the student was shown
+            # and the number Stripe is asked for; a second calculation here is
+            # how those two come apart.
+            'price_unit': product.fitness_effective_price() * months,
+            'fitness_class_type': product.fitness_class_type,
+        }]
+        # A combined package is sold at one price but grants two separate
+        # pools, so it is written as two lines: the second carries the other
+        # discipline and no price. Charging the whole amount on the first line
+        # keeps the order total equal to the advertised price, while giving
+        # the second pool a line of its own to count credits against - which
+        # is what stops one discipline being spent on the other.
+        if product.fitness_secondary_class_type:
+            lines.append({
+                'product_id': variant.id,
+                'product_uom_qty': 1,
+                # No price is written here at all. This line is flagged as a
+                # pool rather than a sale, and sale.order.line computes both
+                # price_unit and discount to zero for it - so a later
+                # recompute produces the same answer instead of restoring the
+                # full price and charging the membership twice.
+                'fitness_is_secondary_pool': True,
+                'fitness_class_type': product.fitness_secondary_class_type,
+            })
+        matricula = self._matricula_due(partner, product, plan)
+        if matricula:
+            mat_variant = matricula.product_variant_ids[:1]
+            if mat_variant:
+                lines.append({
+                    'product_id': mat_variant.id,
+                    'product_uom_qty': 1,
+                    'price_unit': matricula.fitness_effective_price(),
+                })
+        return lines
+
+    def _create_order(self, partner, product, method, plan=None):
         """Return the draft sale order for this purchase, reusing an abandoned
         one where possible.
 
@@ -2129,45 +2427,51 @@ class FitnessStudentPortal(http.Controller):
         if not variant:
             return None
 
+        if product.fitness_is_subscription_plan and plan is None:
+            plan = self._selected_plan(product, None)
+
+        line_vals = self._order_lines_for(partner, product, plan)
+        if not line_vals:
+            return None
+
         existing = request.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
             ('state', '=', 'draft'),
         ], order='id desc')
         for candidate in existing:
             lines = candidate.order_line
-            # This flow only ever builds single-line orders; anything else was
-            # created elsewhere and is not ours to touch.
-            if len(lines) == 1 and lines.product_id.id == variant.id:
-                candidate.write({
-                    'fitness_payment_method': method,
-                    'fitness_terms_accepted_on': fields.Datetime.now(),
-                })
-                # Re-price it. A draft can be days old, and a promotion can
-                # have started or expired since: reusing the line as it stands
-                # would charge yesterday's price for today's checkout, in
-                # either direction.
-                price_now = product.fitness_effective_price()
-                if lines.price_unit != price_now:
-                    _logger.info(
-                        '[CHECKOUT] Re-pricing reused draft %s: %s -> %s',
-                        candidate.name, lines.price_unit, price_now)
-                    lines.write({'price_unit': price_now})
-                _logger.info(
-                    '[CHECKOUT] Reusing draft order %s for partner %s / product %s',
-                    candidate.name, partner.id, variant.id,
-                )
-                return candidate
+            # Ours to reuse only if it is for the same membership or pack. The
+            # line count is not the test any more: a first membership carries a
+            # registration line too, and switching plan can add or remove it,
+            # so the draft is rebuilt from line_vals rather than patched.
+            if not lines or lines[0].product_id.id != variant.id:
+                continue
+            if any(l.product_id.product_tmpl_id.id not in (
+                    product.id, (self._matricula_product() or product).id)
+                    for l in lines):
+                continue        # something else was added to it; leave it be
+            vals = {
+                'fitness_payment_method': method,
+                'fitness_terms_accepted_on': fields.Datetime.now(),
+                # Rebuilt, not re-priced. A draft can be days old: a promotion
+                # can have started or expired, and the student can have come
+                # back on a different plan, which changes both the amount and
+                # whether the registration fee belongs on it at all.
+                'order_line': [(5, 0, 0)] + [(0, 0, v) for v in line_vals],
+            }
+            if plan and 'plan_id' in request.env['sale.order']._fields:
+                vals['plan_id'] = plan.id
+            candidate.write(vals)
+            _logger.info(
+                '[CHECKOUT] Reusing draft order %s for partner %s / product %s '
+                '(plan=%s, %d line(s))',
+                candidate.name, partner.id, variant.id,
+                plan.name if plan else '-', len(line_vals))
+            return candidate
 
         vals = {
             'partner_id': partner.id,
-            'order_line': [(0, 0, {
-                'product_id': variant.id,
-                'product_uom_qty': 1,
-                # The promotion price, not the list price. This is the number
-                # the student was shown and the number Stripe is asked for; a
-                # second calculation here is how those two come apart.
-                'price_unit': product.fitness_effective_price(),
-            })],
+            'order_line': [(0, 0, v) for v in line_vals],
             'fitness_payment_method': method,
             'fitness_terms_accepted_on': fields.Datetime.now(),
         }
@@ -2175,8 +2479,24 @@ class FitnessStudentPortal(http.Controller):
         # Subscription plans need a recurrence plan for Odoo to treat the order
         # as a subscription. Guarded so a database without the subscription app
         # simply creates a normal order.
+        #
+        # The plan is the student's choice, validated against what was actually
+        # offered, falling back to the product's own. This used to be
+        # search([], limit=1), which is not a choice but an accident of
+        # ordering: it always returned Monthly, so Yearly could not be bought
+        # from the portal at all and every membership was signed up monthly
+        # whatever it had been sold as.
         if product.fitness_is_subscription_plan and 'plan_id' in request.env['sale.order']._fields:
-            plan = request.env['sale.subscription.plan'].sudo().search([], limit=1)
+            if not plan:
+                # Named explicitly rather than taken off the top of the table,
+                # so an unset product keeps today's behaviour instead of
+                # changing the moment somebody adds a plan.
+                plan = request.env.ref('sale_subscription.subscription_plan_month',
+                                       raise_if_not_found=False)
+                plan = plan.sudo() if plan else plan
+                _logger.info(
+                    "[CHECKOUT] %s has no billing plan set; falling back to "
+                    "Monthly for order creation.", product.display_name)
             if plan:
                 vals['plan_id'] = plan.id
 
@@ -2217,7 +2537,11 @@ class FitnessStudentPortal(http.Controller):
             ('fitness_subscription_product_id', '!=', False),
         ])
         for sub in subs:
-            self._collect_type(eligible, sub.fitness_subscription_product_id.fitness_class_type)
+            product = sub.fitness_subscription_product_id
+            self._collect_type(eligible, product.fitness_class_type)
+            # A combined membership entitles them to both disciplines, and the
+            # second one is only named on the product.
+            self._collect_type(eligible, product.fitness_secondary_class_type)
 
         lines = request.env['sale.order.line'].sudo().search([
             ('order_partner_id', '=', partner_id),
@@ -2225,7 +2549,11 @@ class FitnessStudentPortal(http.Controller):
             ('fitness_remaining_classes', '>', 0),
         ])
         for line in lines.filtered(lambda l: not l.fitness_is_expired):
-            self._collect_type(eligible, line.product_id.fitness_class_type)
+            # The line's own pool discipline: a combo's two lines report one
+            # each, so a member whose Barre pool is spent but whose Reformer
+            # pool is not is offered Reformer only.
+            self._collect_type(
+                eligible, line.fitness_class_type or line.product_id.fitness_class_type)
 
         return eligible
 

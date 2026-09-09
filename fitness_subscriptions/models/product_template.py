@@ -10,6 +10,20 @@ class ProductTemplate(models.Model):
         help="Enable for recurring fitness plans. Activates weekly-allowance "
              "tracking on the subscription (sale.order).",
     )
+    fitness_subscription_plan_id = fields.Many2one(
+        'sale.subscription.plan',
+        string="Billing Plan",
+        help="How often this plan bills. The portal reads it when it creates "
+             "the order, so it decides what the student is actually signed up "
+             "to. Leave it empty and the order falls back to Monthly.",
+    )
+    fitness_is_matricula = fields.Boolean(
+        "Is Registration Fee",
+        default=False,
+        help="The one-off registration fee. It is added to a membership "
+             "checkout automatically for a student's first membership, and "
+             "never sold on its own, so it is kept out of the shop listing.",
+    )
     fitness_is_clase_fija = fields.Boolean(
         "Is Clase Fija Plan",
         default=False,
@@ -34,6 +48,14 @@ class ProductTemplate(models.Model):
         help="Maximum allowance-paid bookings a member may make in one ISO week "
              "(Mon 00:00 – Sun 23:59). Admin-editable; changes take effect "
              "immediately for all new bookings. Ignored for unlimited plans.",
+    )
+    fitness_secondary_weekly_allowance = fields.Integer(
+        "Second Weekly Class Allowance",
+        default=0,
+        help="On a combined plan, the weekly cap for the second discipline "
+             "(fitness_secondary_class_type). Enforced as its own cap: the "
+             "two are never pooled, so allowance left on one discipline "
+             "cannot be spent on the other.",
     )
     fitness_promo_first_cycle_bonus = fields.Integer(
         "Promo First-Cycle Bonus (Floating Credits)",

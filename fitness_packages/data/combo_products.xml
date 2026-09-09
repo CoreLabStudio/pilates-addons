@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate, like every other priced record: a module update must never
+         put a price back after the studio has changed it. -->
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  COMBINED PACKS — a fixed number of each discipline, per month  -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--
+             Two pools, never one. fitness_class_count is the Barre pool and
+             fitness_secondary_class_count the Reformer pool; the checkout
+             writes one order line per pool so credits cannot cross. A single
+             shared pool would let a member spend "2 Barre + 2 Reformer"
+             entirely on Reformer, which is not what is being sold.
+
+             30 days' validity: these are sold per month.
+        -->
+        <record id="product_combo_2_2" model="product.template">
+            <field name="name">Barre + Reformer 2 + 2</field>
+            <field name="type">service</field>
+            <field name="list_price">95.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">2</field>
+            <field name="fitness_validity_days">30</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_secondary_class_count">2</field>
+            <field name="fitness_session_type">group</field>
+            <field name="description_sale">Two Barre classes and two Reformer classes each month. Each discipline keeps its own credits, so you always have both waiting for you.</field>
+        </record>
+
+        <record id="product_combo_4_4" model="product.template">
+            <field name="name">Barre + Reformer 4 + 4</field>
+            <field name="type">service</field>
+            <field name="list_price">175.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">4</field>
+            <field name="fitness_validity_days">30</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_secondary_class_count">4</field>
+            <field name="fitness_session_type">group</field>
+            <field name="description_sale">Four Barre classes and four Reformer classes each month. Enough of both to build real strength and real technique side by side.</field>
+        </record>
+
+        <record id="product_combo_6_6" model="product.template">
+            <field name="name">Barre + Reformer 6 + 6</field>
+            <field name="type">service</field>
+            <field name="list_price">245.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">6</field>
+            <field name="fitness_validity_days">30</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_secondary_class_type">reformer</field>
+            <field name="fitness_secondary_class_count">6</field>
+            <field name="fitness_session_type">group</field>
+            <field name="description_sale">Six Barre classes and six Reformer classes each month. Training in both disciplines as a routine, at our best combined rate.</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
         <!--  BARRE PACKAGES                                                  -->
@@ -17,6 +17,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Perfect introduction to Barre. One class to feel the technique, the music, and the burn. No experience needed.</field>
         </record>
 
         <record id="product_barre_single" model="product.template">
@@ -28,6 +29,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Drop in to any Barre group class. One credit, full class, full energy.</field>
         </record>
 
         <record id="product_barre_5pack" model="product.template">
@@ -39,6 +41,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Five Barre group classes to build the habit. Enough to find your rhythm and feel the change. Valid for any Barre class on the timetable — you choose which, and when.</field>
         </record>
 
         <record id="product_barre_10pack" model="product.template">
@@ -50,6 +53,7 @@
             <field name="fitness_validity_days">60</field>
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Ten Barre group classes for when you're ready to commit. The point where technique starts to feel like yours. Valid for any Barre class on the timetable — you choose which, and when.</field>
         </record>
 
         <!-- Privadas: private 1-on-1 Barre class — sold directly by admin, not portal-purchasable -->
@@ -63,6 +67,7 @@
             <field name="fitness_class_type">barre</field>
             <field name="fitness_session_type">private</field>
             <field name="sale_ok">0</field>
+            <field name="description_sale">Private one-on-one Barre session with your instructor. Personalised technique and full attention.</field>
         </record>
 
         <!-- Discontinued Barre packs (replaced by 5-pack / 10-pack above) -->
@@ -103,6 +108,7 @@
             <field name="fitness_validity_days">15</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Your first Reformer session at a special price. Find out what the machine is all about.</field>
         </record>
 
         <record id="product_reformer_single" model="product.template">
@@ -114,6 +120,7 @@
             <field name="fitness_validity_days">15</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">One Reformer group class. Jump in, glide, burn, repeat.</field>
         </record>
 
         <record id="product_reformer_intro3" model="product.template">
@@ -125,6 +132,7 @@
             <field name="fitness_validity_days">15</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Three Reformer classes to get properly acquainted with the machine. Long enough to stop thinking about it and start moving.</field>
         </record>
 
         <record id="product_reformer_5pack" model="product.template">
@@ -136,6 +144,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Five Reformer group classes at your own pace. A solid first block to learn the machine and see where it takes you. Valid for any Reformer class on the timetable — you choose which, and when.</field>
         </record>
 
         <record id="product_reformer_10pack" model="product.template">
@@ -147,6 +156,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Ten Reformer group classes, our most popular choice. Enough room to build real strength without watching the clock. Valid for any Reformer class on the timetable — you choose which, and when.</field>
         </record>
 
         <record id="product_reformer_15pack" model="product.template">
@@ -158,6 +168,7 @@
             <field name="fitness_validity_days">90</field>
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">group</field>
+            <field name="description_sale">Fifteen Reformer group classes for training that becomes routine. The best value we offer, and the fastest progress. Valid for any Reformer class on the timetable — you choose which, and when.</field>
         </record>
 
         <!-- Discontinued: removed entirely from the new catalog -->
@@ -187,6 +198,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
             <field name="sale_ok">0</field>
+            <field name="description_sale">Private Reformer session. Full instructor attention, personalised progressions.</field>
         </record>
 
         <record id="product_private_5pack" model="product.template">
@@ -199,6 +211,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
             <field name="sale_ok">1</field>
+            <field name="description_sale">Five private Reformer sessions, fully personalised to your goals. Book at times that suit you, one-on-one with your instructor.</field>
         </record>
 
         <record id="product_private_10pack" model="product.template">
@@ -211,6 +224,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">private</field>
             <field name="sale_ok">1</field>
+            <field name="description_sale">Ten private Reformer sessions, fully personalised to your goals. Our best-value way to train one-on-one.</field>
         </record>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -227,6 +241,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
             <field name="sale_ok">1</field>
+            <field name="description_sale">Share a private Reformer session with one other person. All the attention, split the cost.</field>
         </record>
 
         <record id="product_duo_5pack" model="product.template">
@@ -239,6 +254,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
             <field name="sale_ok">1</field>
+            <field name="description_sale">Five Duo Reformer sessions, shared with someone you choose. Private attention, split between you.</field>
         </record>
 
         <record id="product_duo_10pack" model="product.template">
@@ -251,6 +267,7 @@
             <field name="fitness_class_type">reformer</field>
             <field name="fitness_session_type">duo</field>
             <field name="sale_ok">1</field>
+            <field name="description_sale">Ten Duo Reformer sessions to train alongside someone else. All the personal attention, at a shared price.</field>
         </record>
 
     </data>

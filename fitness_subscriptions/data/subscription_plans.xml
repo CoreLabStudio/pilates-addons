@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate: a billing plan is configuration the studio may adjust, and a
+         module update must not quietly put it back. Same reasoning as the
+         prices in products.xml. -->
+    <data noupdate="1">
+
+        <!-- Odoo ships Monthly and Yearly only. A quarter is the commitment
+             the studio actually talks about ("free registration with a
+             3-month membership"), and until now it had no representation at
+             all, so nothing could be sold on it.
+
+             sequence follows the convention of the two built-in plans, which
+             number themselves by weeks in the period: Monthly 4, Yearly 52.
+             13 puts the quarter between them wherever plans are listed. -->
+        <record id="subscription_plan_quarter" model="sale.subscription.plan">
+            <field name="name">Quarterly</field>
+            <field name="billing_period_value">3</field>
+            <field name="billing_period_unit">month</field>
+            <field name="sequence">13</field>
+            <field name="auto_close_limit">15</field>
+        </record>
+
+    </data>
+</odoo>
