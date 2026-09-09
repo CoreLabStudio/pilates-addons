@@ -246,9 +246,11 @@ class FitnessStudentPortal(http.Controller):
             'active_discipline': (discipline
                                   if discipline in ('barre', 'reformer')
                                   else False),
-            'just_took_trial':  bool(trial),
+            # Shown while the credit is unspent, however they got here.
+            'just_took_trial':  bool(self._unused_trial_credit(partner)),
             'lbl_trial_next':   request.env._(
-                'Your trial class is ready - book it below.'),
+                'Your free trial class is waiting - pick any class below and '
+                'book it. Booking opens a week before each class.'),
             'booked':          bool(booked),
             'cancelled':       bool(cancelled),
             'credit_returned': bool(credit_returned),
@@ -569,15 +571,14 @@ class FitnessStudentPortal(http.Controller):
         # the error in the query string, which threw the student off the page
         # they were reading. Checking first means the page can simply say when
         # booking opens, and never offer a button that cannot work.
+        # Seven days before the class, and nothing else. Taking the later of
+        # this and the studio's opening date looked sensible and was not: a
+        # class on the 17th then advertised "booking opens 17 Sep", the same
+        # day it runs. The opening date decides which classes may be booked at
+        # all, not when booking opens for the ones that qualify - a class on or
+        # after opening follows the ordinary rule, so the 17th opens on the
+        # 10th exactly as every other class does.
         opens_at = event.start - timedelta(days=BOOKING_WINDOW_DAYS)
-        # Booking cannot open before the studio does. Whichever comes later
-        # is the real answer, so a class on the opening weekend does not
-        # advertise a booking date that precedes opening.
-        _open_from = fitness_opening_date(request.env)
-        if _open_from:
-            _studio_opens = fields.Datetime.to_datetime(_open_from)
-            if _studio_opens > opens_at:
-                opens_at = _studio_opens
         in_window = opens_at <= now
 
         can_book = (
@@ -2398,6 +2399,28 @@ class FitnessStudentPortal(http.Controller):
         ])
         return any(float_is_zero(l.price_total or 0.0, precision_rounding=rounding)
                    for l in lines)
+
+    def _unused_trial_credit(self, partner):
+        """An unspent trial credit, if the student is holding one.
+
+        Read from the credit itself rather than from how the student arrived.
+        The prompt used to ride on a ?trial=1 in the URL, so it vanished the
+        moment they navigated or reopened the app - which is exactly when
+        somebody who has just taken a trial needs telling what to do with it.
+        """
+        trials = self._trial_products()
+        if not trials or not partner:
+            return request.env['sale.order.line'].sudo().browse()
+        today = fields.Date.context_today(request.env.user)
+        lines = request.env['sale.order.line'].sudo().search([
+            ('order_partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', trials.mapped('product_variant_ids').ids),
+            ('fitness_remaining_classes', '>', 0),
+        ])
+        return lines.filtered(
+            lambda l: not l.fitness_validity_end_date
+            or l.fitness_validity_end_date >= today)[:1]
 
     def _trial_fallback_product(self, product):
         """The ordinary single class to offer instead of a spent trial."""
