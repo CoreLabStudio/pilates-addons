@@ -1370,10 +1370,15 @@ class FitnessStudentPortal(http.Controller):
             'trial_offered':            bool(set(student_price) & free_ids),
             # Said once, above the two trial cards, because a student who takes
             # the wrong one has spent the only one they get.
+            # Names the two products rather than the two disciplines. This
+            # note sits above a page that also sells Barre Single, Reformer
+            # Single and privates, where "choose Barre or Reformer" reads as
+            # though any class in either room were free.
             'lbl_trial_pick_one':       _('Your first class is free - choose '
-                                          'Barre or Reformer. One trial per '
-                                          'student, so pick the one you want '
-                                          'to try.'),
+                                          'Barre Trial Class or Reformer Trial '
+                                          'Class. One trial per student, so '
+                                          'pick the one you want to try.'),
+
             'booked':                   bool(kw.get('booked')),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
