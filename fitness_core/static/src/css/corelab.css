@@ -3637,6 +3637,19 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   background: var(--mv-active-fill, #8a7268);
   color: var(--mv-btn-fg, #fff);
 }
+/* The trial prompt takes the same soft fill as the My Schedule / Reserve
+   toggle. It sits directly under the news link, and two outlined buttons in a
+   row read as one control repeated rather than two different offers. */
+.mv-home-cta--soft {
+  background: var(--mv-border);
+  color: var(--mv-paco);
+  border: none;
+}
+.mv-home-cta--soft:hover {
+  background: var(--mv-border);
+  color: var(--mv-paco);
+  filter: brightness(0.96);
+}
 .mv-news-cta-chev { font-size: 1.05rem; line-height: 1; }
 
 /* On a phone the poster leads: it is what the reader came for, and a tall

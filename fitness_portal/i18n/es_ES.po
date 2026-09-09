@@ -2585,8 +2585,8 @@ msgstr "Descubre nuestros paquetes"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Classes, Memberships &amp; Packages"
-msgstr "Clases, Membresías y Bonos"
+msgid "Class Types, Memberships &amp; Packages"
+msgstr "Tipos de clase, Membresías y Bonos"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
