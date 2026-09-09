@@ -16,18 +16,25 @@ BOOKING_WINDOW_DAYS = 7
 # day of them, and nothing stopped a student booking one. The rule had been
 # agreed but was never actually written down anywhere in the code.
 #
-# The 16th is the opening event rather than a normal class day, so the first
-# bookable day is the 17th. Held in a system parameter so the studio can move
-# it without a deploy; the constant below is only the fallback, and clearing
-# the parameter switches the rule off once opening is behind them.
+# The 16th is the opening event rather than a normal class day, so the studio
+# wanted the 17th to be the first bookable day.
+#
+# The date lives in a system parameter and there is deliberately no default in
+# code. A hard-coded 2026-09-17 here refused every booking made before that
+# date in every database that ran this module - which broke the test suite the
+# moment it landed, because tests create a class a few days out and book it.
+# A rule that silently blocks bookings should be switched on by somebody, in
+# the environment that wants it, not inherited by every new database.
+#
+# Set fitness.opening_date to a date to switch it on; clear it to retire the
+# rule once opening has passed.
 OPENING_DATE_PARAM = 'fitness.opening_date'
-OPENING_DATE_DEFAULT = '2026-09-17'
 
 
 def fitness_opening_date(env):
     """First date the studio accepts bookings for, or None when unset."""
     raw = (env['ir.config_parameter'].sudo()
-           .get_param(OPENING_DATE_PARAM, OPENING_DATE_DEFAULT) or '').strip()
+           .get_param(OPENING_DATE_PARAM) or '').strip()
     if not raw:
         return None
     try:

@@ -46,8 +46,15 @@ except Exception:
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
-# The Available list defaults to a week; 14 stays reachable from the chips.
-DEFAULT_LOOK_AHEAD_DAYS = 7
+# The Available list opens on the month.
+#
+# It used to default to a week, and a week is often empty: the studio does not
+# run classes every day, and around opening there were none at all in the next
+# seven. A student landing on a blank page concludes the studio has no classes
+# rather than that this particular week is quiet, and nothing on the page
+# corrects them. A month is nearly always populated, and Today and This week
+# are one tap away for anyone who wants them.
+DEFAULT_LOOK_AHEAD_DAYS = 30
 # Today / this week / this month. "This month" is a rolling 30 days rather
 # than to the end of the calendar month: the window is expressed in days
 # everywhere below, and a calendar month would give a student on the 29th a
@@ -317,20 +324,18 @@ class FitnessStudentPortal(http.Controller):
             ]).mapped('calendar_event_id.id')
         )
 
-        # Nothing before the studio opens. The classes exist - the timetable
-        # is generated months ahead - but they are not for sale yet, and
-        # showing them here only leads to a refusal at the booking step.
-        _open_from = fitness_opening_date(request.env)
-        _domain = [
+        # Classes before the studio opens stay listed. Filtering them out
+        # emptied this page: the default window is seven days, and on 9 Sept
+        # every class inside it fell before opening, so the student saw a
+        # blank page and concluded there were no classes at all. They are
+        # shown as not-yet-bookable instead, which is what the page already
+        # does for the seven-day booking window.
+        all_events = request.env['calendar.event'].sudo().search([
             ('is_fitness_class', '=', True),
             ('class_state', '!=', 'cancelled'),
             ('start', '>', now),
             ('start', '<', window_end),
-        ]
-        if _open_from:
-            _domain.append(('start', '>=', fields.Datetime.to_datetime(_open_from)))
-        all_events = request.env['calendar.event'].sudo().search(
-            _domain, order='start asc')
+        ], order='start asc')
 
         events = all_events.filtered(
             lambda e: (
@@ -550,6 +555,14 @@ class FitnessStudentPortal(http.Controller):
         # they were reading. Checking first means the page can simply say when
         # booking opens, and never offer a button that cannot work.
         opens_at = event.start - timedelta(days=BOOKING_WINDOW_DAYS)
+        # Booking cannot open before the studio does. Whichever comes later
+        # is the real answer, so a class on the opening weekend does not
+        # advertise a booking date that precedes opening.
+        _open_from = fitness_opening_date(request.env)
+        if _open_from:
+            _studio_opens = fields.Datetime.to_datetime(_open_from)
+            if _studio_opens > opens_at:
+                opens_at = _studio_opens
         in_window = opens_at <= now
 
         can_book = (
