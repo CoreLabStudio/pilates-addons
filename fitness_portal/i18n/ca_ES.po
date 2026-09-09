@@ -16,6 +16,12 @@ msgstr ""
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Look at both if you like - nothing is used up by browsing. You get one free trial, and the class you book is the one it pays for."
+msgstr "Mira-les totes dues si vols: navegar no gasta res. Tens una classe de prova gratuïta, i la classe que reservis és la que la fa servir."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 msgid "Class Types"
 msgstr "Tipus de classe"
