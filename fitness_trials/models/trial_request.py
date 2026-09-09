@@ -183,6 +183,7 @@ class FitnessTrialRequest(models.Model):
             )
             for rec in newly_scheduled:
                 rec._send_scheduled_email()
+                rec._notify_scheduled_in_app()
             if newly_scheduled:
                 # Written with SQL for the same reason the reset above is:
                 # recording the send from inside write() would recurse.
@@ -378,6 +379,66 @@ class FitnessTrialRequest(models.Model):
             template.sudo().send_mail(self.id, force_send=True, raise_exception=False)
         except Exception:
             _logger.exception("Trial pending email failed for record %s", self.id)
+
+    def _notify_scheduled_in_app(self):
+        """Ring the student's bell when their trial is scheduled.
+
+        The email and the in-app notification had drifted apart. The email
+        fires on this status change; the notification only ever came from
+        fitness.booking.create(), so scheduling a request without using
+        Approve & Book - which is what setting the status by hand does - sent
+        the email and rang nothing. Every scheduled request in the database
+        had zero bookings behind it, so nobody had ever been notified in-app.
+
+        Skipped when a booking already exists for this slot and student: that
+        path notifies on its own, and two bells for one class is worse than
+        the one that was missing.
+        """
+        self.ensure_one()
+        # fitness_notifications is not a dependency of this module - the bell
+        # is an optional part of the suite - so this asks rather than assumes,
+        # the same way the portal checks for the subscription app before
+        # setting a plan. Without it the email still goes out.
+        if 'fitness.notification' not in self.env:
+            return
+        partner = self._resolve_partner()
+        if not partner:
+            return
+        user = self.env['res.users'].sudo().search(
+            [('partner_id', '=', partner.id)], limit=1)
+        if not user:
+            return          # a request from someone with no portal account
+
+        if self.occurrence_id:
+            already = self.env['fitness.booking'].sudo().search_count([
+                ('student_id', '=', partner.id),
+                ('calendar_event_id', '=', self.occurrence_id.id),
+            ])
+            if already:
+                return      # the booking notified them already
+
+        when = self.scheduled_datetime or (
+            self.occurrence_id.start if self.occurrence_id else False)
+        cls = self.occurrence_id.name if self.occurrence_id else ''
+        if cls and when:
+            body = _("%(cls)s on %(when)s.", cls=cls,
+                     when=fields.Datetime.context_timestamp(self, when)
+                     .strftime('%d %b %H:%M'))
+        elif cls:
+            body = _("Your trial class: %(cls)s.", cls=cls)
+        else:
+            body = _("The studio will confirm the details with you shortly.")
+
+        self.env['fitness.notification'].sudo()._create_for_user(
+            user.id,
+            'booking_confirmed',
+            _("Your trial class is confirmed"),
+            body=body,
+            action_url='/my/classes',
+        )
+        _logger.info(
+            "[TRIAL] In-app notification sent to user %s for request %s",
+            user.id, self.id)
 
     def _send_scheduled_email(self):
         template = self.env.ref(
