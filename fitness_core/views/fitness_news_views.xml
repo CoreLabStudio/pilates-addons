@@ -50,6 +50,24 @@
                             <field name="publish_date"/>
                             <field name="sequence"/>
                         </group>
+                        <!-- The optional button at the foot of the post.
+                             These decide two things at once: the button on the
+                             post itself, and the "Book a Free Trial" button on
+                             the portal home, which points at whichever post has
+                             a link set. Leave the link empty and neither
+                             appears - that is how a post with nothing to click
+                             stays a plain announcement.
+
+                             They were on the model and read by the portal but
+                             missing from this form, so the only way to set them
+                             was a script. That left the studio unable to put a
+                             button on its own announcements. -->
+                        <group string="Button (optional)">
+                            <field name="cta_url"
+                                   placeholder="e.g. /my/studio or /trial"/>
+                            <field name="cta_label"
+                                   placeholder="e.g. See the timetable"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Description" name="description">
