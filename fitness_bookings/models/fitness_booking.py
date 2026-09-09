@@ -9,6 +9,35 @@ _logger = logging.getLogger(__name__)
 # through and bounce off the ValidationError below.
 BOOKING_WINDOW_DAYS = 7
 
+# The studio does not take bookings for classes before it opens.
+#
+# The timetable is generated well ahead of opening, so classes exist on dates
+# the studio is not running yet - the 10th and the 16th each carried a full
+# day of them, and nothing stopped a student booking one. The rule had been
+# agreed but was never actually written down anywhere in the code.
+#
+# The 16th is the opening event rather than a normal class day, so the first
+# bookable day is the 17th. Held in a system parameter so the studio can move
+# it without a deploy; the constant below is only the fallback, and clearing
+# the parameter switches the rule off once opening is behind them.
+OPENING_DATE_PARAM = 'fitness.opening_date'
+OPENING_DATE_DEFAULT = '2026-09-17'
+
+
+def fitness_opening_date(env):
+    """First date the studio accepts bookings for, or None when unset."""
+    raw = (env['ir.config_parameter'].sudo()
+           .get_param(OPENING_DATE_PARAM, OPENING_DATE_DEFAULT) or '').strip()
+    if not raw:
+        return None
+    try:
+        return fields.Date.to_date(raw)
+    except (ValueError, TypeError):
+        _logger.warning(
+            "[BOOKING] %s is %r, which is not a date; opening rule skipped.",
+            OPENING_DATE_PARAM, raw)
+        return None
+
 
 class FitnessBooking(models.Model):
     _name = 'fitness.booking'
@@ -171,6 +200,23 @@ class FitnessBooking(models.Model):
             raise ValidationError(
                 f"Cannot book a class that has already started or passed "
                 f"({class_start.strftime('%Y-%m-%d %H:%M')} UTC)."
+            )
+
+        # ── 1b. Not before the studio opens ──────────────────────────────────
+        # Checked before the 7-day window so a class on the opening day gets
+        # the reason that is actually true, rather than being told to come
+        # back later when coming back later would not help.
+        #
+        # No manager override: this is not a restriction on the student, it is
+        # the studio not running classes yet, and it applies to the back office
+        # for the same reason. Moving the date moves it for everyone.
+        opening = fitness_opening_date(self.env)
+        if opening and class_start.date() < opening:
+            raise ValidationError(
+                f"The studio opens on {opening.strftime('%d %b %Y')}. "
+                f"Classes before then are on the timetable but are not open "
+                f"for booking - this one is on "
+                f"{class_start.strftime('%d %b %Y')}."
             )
 
         # ── 2. Cannot book more than 7 days in advance ───────────────────────

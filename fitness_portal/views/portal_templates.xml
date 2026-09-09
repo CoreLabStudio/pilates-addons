@@ -1460,6 +1460,11 @@
                                                                   style="text-decoration:none;pointer-events:none;opacity:0.5;"
                                                                   t-out="lbl_free_used"/>
                                                         </t>
+                                                        <t t-elif="product.id in pending_trial_ids">
+                                                            <span class="mv-btn-book mv-btn-disabled"
+                                                                  style="text-decoration:none;pointer-events:none;opacity:0.5;"
+                                                                  t-out="lbl_trial_pending"/>
+                                                        </t>
                                                         <t t-elif="product.id in free_ids">
                                                             <!-- Nothing to pay and nothing to choose, so there is
                                                                  nothing for a checkout page to ask. This books it. -->
@@ -1586,6 +1591,11 @@
                                 <span class="mv-pkg-buy-btn mv-btn-disabled"
                                       style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
                                       t-out="lbl_free_used"/>
+                            </t>
+                            <t t-elif="trial_pending">
+                                <span class="mv-pkg-buy-btn mv-btn-disabled"
+                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
+                                      t-out="lbl_trial_pending"/>
                             </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment
@@ -2759,6 +2769,99 @@
     </template>
 
     <!-- ── News Post Detail (/my/news/<id>) ─────────────────────────────── -->
+    <!-- ── Reformer trial intake (/my/trial/reformer) ─────────────────────
+         Portal chrome, not web.login_layout. The student is signed in and
+         stays signed in: no login link, no bounce out of the portal, and the
+         confirmation appears here rather than on a public page with no way
+         back. Only the two intake questions are reused from the public form. -->
+    <template id="portal_trial_reformer" name="Reformer Trial Request">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+                <t t-set="_back_url" t-value="back_url"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-checkout">
+                    <p class="mv-news-title mv-news-title-lg" t-out="page_title"/>
+
+                    <t t-if="error_msg">
+                        <div class="mv-flash mv-flash-err" style="margin-bottom:16px;">
+                            <t t-out="error_msg"/>
+                        </div>
+                    </t>
+
+                    <!-- Already sent: say so plainly and offer nothing to
+                         press. This is the state that used to keep showing an
+                         active Book button as though nothing had happened. -->
+                    <t t-if="pending">
+                        <div class="mv-panel">
+                            <p class="mv-panel-label" t-out="lbl_pending"/>
+                            <p style="margin:0;color:var(--mv-ink-text);line-height:1.6;"
+                               t-out="lbl_pending_b"/>
+                        </div>
+                        <a href="/my/packages" class="mv-btn-primary-lg"
+                           style="display:block;text-align:center;text-decoration:none;margin-top:16px;"
+                           t-out="lbl_back_shop"/>
+                    </t>
+
+                    <t t-elif="submitted">
+                        <div class="mv-panel">
+                            <p class="mv-panel-label" t-out="lbl_done"/>
+                            <p style="margin:0;color:var(--mv-ink-text);line-height:1.6;"
+                               t-out="lbl_done_body"/>
+                        </div>
+                        <a href="/my/packages" class="mv-btn-primary-lg"
+                           style="display:block;text-align:center;text-decoration:none;margin-top:16px;"
+                           t-out="lbl_back_shop"/>
+                    </t>
+
+                    <t t-else="">
+                        <p style="color:var(--mv-muted);line-height:1.6;margin:0 0 20px;"
+                           t-out="lbl_intro"/>
+                        <form method="post" action="/my/trial/reformer/submit">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+
+                            <div class="mv-panel">
+                                <p class="mv-panel-label" t-out="lbl_first_q"/>
+                                <label class="mv-terms-row" style="align-items:center;">
+                                    <input type="radio" name="reformer_is_first_time"
+                                           value="yes" id="mv-first-yes"/>
+                                    <span t-out="lbl_yes"/>
+                                </label>
+                                <label class="mv-terms-row" style="align-items:center;">
+                                    <input type="radio" name="reformer_is_first_time"
+                                           value="no" id="mv-first-no"/>
+                                    <span t-out="lbl_no"/>
+                                </label>
+                            </div>
+
+                            <div class="mv-panel" style="margin-top:12px;">
+                                <p class="mv-panel-label" t-out="lbl_years_q"/>
+                                <input type="text" name="reformer_years_experience"
+                                       class="mv-input" style="width:100%;"
+                                       placeholder="e.g. 2 years, on and off"/>
+                            </div>
+
+                            <div class="mv-panel" style="margin-top:12px;">
+                                <p class="mv-panel-label" t-out="lbl_notes_q"/>
+                                <textarea name="notes" rows="3" class="mv-input"
+                                          style="width:100%;"
+                                          placeholder="Mornings, weekends, ..."/>
+                            </div>
+
+                            <button type="submit" class="mv-btn-primary-lg"
+                                    style="margin-top:16px;" t-out="lbl_submit"/>
+                        </form>
+                    </t>
+                </div>
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_news_detail" name="News Post Detail">
         <t t-call="portal.frontend_layout">
             <t t-set="no_header" t-value="True"/>

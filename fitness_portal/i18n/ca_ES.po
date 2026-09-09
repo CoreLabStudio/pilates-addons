@@ -14,6 +14,108 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Request a Reformer trial"
+msgstr "Demana una classe de prova de Reformer"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "The studio reviews Reformer trials before booking them, so they can pick a class that suits your experience. Two questions and they will be in touch."
+msgstr "L'estudi revisa les classes de prova de Reformer abans de reservar-les, per triar una classe adequada a la teva experiència. Dues preguntes i et contactem."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Is this your first time on a Reformer?"
+msgstr "És el teu primer cop en un Reformer?"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Yes, my first time"
+msgstr "Sí, és el meu primer cop"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No, I have used one before"
+msgstr "No, ja n'he fet servir un abans"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Roughly how long have you been practising?"
+msgstr "Quant de temps fa que practiques, més o menys?"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Any days or times that suit you best? (optional)"
+msgstr "Quins dies o horaris et van millor? (opcional)"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Send request"
+msgstr "Envia la sol·licitud"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your request is with the studio"
+msgstr "La teva sol·licitud és a l'estudi"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "They will confirm your class shortly. You will get an email and a notification here as soon as it is booked."
+msgstr "Confirmaran la teva classe ben aviat. Rebràs un correu i una notificació aquí tan bon punt estigui reservada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Request sent"
+msgstr "Sol·licitud enviada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "The studio has your request and will be in touch to confirm your class."
+msgstr "L'estudi té la teva sol·licitud i et contactarà per confirmar la classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Back to the shop"
+msgstr "Torna a la botiga"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Please tell us whether this is your first time on a Reformer."
+msgstr "Digues-nos si és el teu primer cop en un Reformer."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Something went wrong. Please try again."
+msgstr "Alguna cosa ha fallat. Torna-ho a provar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your trial class is confirmed"
+msgstr "La teva classe de prova està confirmada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "The studio will confirm the details with you shortly."
+msgstr "L'estudi et confirmarà els detalls ben aviat."
+
+#. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
 msgid "Update"
 msgstr "Actualitzar"
