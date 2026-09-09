@@ -16,6 +16,18 @@ msgstr ""
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your first class is free - choose Barre Trial Class or Reformer Trial Class. One trial per student, so pick the one you want to try."
+msgstr "Tu primera clase es gratis: elige Barre Trial Class o Reformer Trial Class. Una clase de prueba por alumna, así que elige la que quieras probar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Look at both if you like - nothing is used up by browsing. You get one free trial, and the class you book is the one it pays for."
+msgstr "Mira las dos si quieres: navegar no gasta nada. Tienes una clase de prueba gratis, y la clase que reserves es la que la usa."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 msgid "Class Types"
 msgstr "Tipos de clase"

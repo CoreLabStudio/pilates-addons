@@ -189,6 +189,17 @@ class FitnessBooking(models.Model):
             booking._refresh_booked_seats()
         return bookings
 
+    def _skip_booking_window(self, vals, student, event):
+        """May this one booking ignore the seven-day window?
+
+        False here, and overridden by the module that has a reason. The
+        manager override above is a different thing: it is a field the caller
+        sends and is re-checked against the group. This one is never supplied
+        by the caller at all - it is worked out from the booking itself, so
+        nothing a student can post will earn the exemption.
+        """
+        return False
+
     def _validate_new_booking(self, vals):
         event = self.env['calendar.event'].browse(vals['calendar_event_id'])
         student = self.env['res.partner'].browse(vals['student_id'])
@@ -237,7 +248,9 @@ class FitnessBooking(models.Model):
                 or self.env.user.has_group('base.group_system')
             )
         )
-        if not _tw_override and time_until.total_seconds() > BOOKING_WINDOW_DAYS * 86400:
+        if (not _tw_override
+                and not self._skip_booking_window(vals, student, event)
+                and time_until.total_seconds() > BOOKING_WINDOW_DAYS * 86400):
             raise ValidationError(
                 f"Booking opens 7 days before the class. "
                 f"This class starts in {time_until.days}d "

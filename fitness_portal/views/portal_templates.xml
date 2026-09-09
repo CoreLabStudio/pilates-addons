@@ -1488,9 +1488,21 @@
                                                                   style="text-decoration:none;pointer-events:none;opacity:0.5;"
                                                                   t-out="lbl_trial_pending"/>
                                                         </t>
+                                                        <t t-elif="product.id in trial_ids">
+                                                            <!-- The trial is claimed by booking a class, never by
+                                                                 taking the product. This card opened a form that
+                                                                 claimed it on the spot, which is a second way to
+                                                                 spend a one-per-student entitlement - and the one
+                                                                 that spends it without choosing a class. -->
+                                                            <a t-att-href="trial_href.get(product.id)"
+                                                               class="mv-btn-book" style="text-decoration:none;"
+                                                               t-out="lbl_view"/>
+                                                        </t>
                                                         <t t-elif="product.id in free_ids">
                                                             <!-- Nothing to pay and nothing to choose, so there is
-                                                                 nothing for a checkout page to ask. This books it. -->
+                                                                 nothing for a checkout page to ask. This books it.
+                                                                 Trials are handled above; this remains for any
+                                                                 other free item the studio puts on the shop. -->
                                                             <form method="post" class="mv-book-free-form"
                                                                   t-attf-action="/my/packages/#{product.id}/book-free">
                                                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
@@ -1551,17 +1563,17 @@
 
                 <div class="mv-trial-choice">
                     <t t-foreach="trials" t-as="tr">
-                        <form method="post" class="mv-trial-pick"
-                              t-attf-action="/my/packages/#{tr['id']}/book-free">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <input type="hidden" name="back" value="/my/trial"/>
-                            <button type="submit" class="mv-trial-card" t-att-data-ct="tr['ct']">
-                                <span class="mv-trial-card-disc" t-out="tr['discipline']"/>
-                                <span class="mv-trial-card-name" t-out="tr['name']"/>
-                                <span class="mv-trial-card-meta" t-out="tr['meta']"/>
-                                <span class="mv-trial-card-cta" t-out="lbl_book_free"/>
-                            </button>
-                        </form>
+                        <!-- A link, not a form. Nothing is claimed by looking:
+                             the card opens that discipline's timetable and the
+                             class the student books there is what spends the
+                             trial. Browsing both before deciding is the point. -->
+                        <a t-att-href="tr['href']" class="mv-trial-card"
+                           t-att-data-ct="tr['ct']" style="text-decoration:none;">
+                            <span class="mv-trial-card-disc" t-out="tr['discipline']"/>
+                            <span class="mv-trial-card-name" t-out="tr['name']"/>
+                            <span class="mv-trial-card-meta" t-out="tr['meta']"/>
+                            <span class="mv-trial-card-cta" t-out="lbl_view"/>
+                        </a>
                     </t>
                 </div>
 
@@ -1670,9 +1682,17 @@
                                       style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
                                       t-out="lbl_trial_pending"/>
                             </t>
+                            <t t-elif="is_trial">
+                                <!-- Same as the card: the class is what claims
+                                     the trial, so this sends them to pick one. -->
+                                <a t-att-href="trial_href"
+                                   class="mv-pkg-buy-btn"
+                                   style="display:block;text-align:center;text-decoration:none;line-height:1.4;"
+                                   t-out="lbl_view"/>
+                            </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment
-                                     method and a signature; a free trial has
+                                     method and a signature; a free item has
                                      neither, so the page was a screen whose only
                                      content was a second button. -->
                                 <form method="post"
