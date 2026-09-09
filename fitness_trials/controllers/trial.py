@@ -196,9 +196,23 @@ class TrialRequestController(http.Controller):
     def trial_form(self, **kw):
         """Render the trial class request form."""
         slots = self._get_barre_slots()
+
+        # A logged-in student should not retype what we already know. Their
+        # name and email are pre-filled, and class_interest can be preselected
+        # by query string so the portal's Reformer guard lands on the right
+        # branch of the form rather than a blank choice.
+        prefill = {}
+        if not request.env.user._is_public():
+            partner = request.env.user.partner_id
+            prefill = {'name': partner.name or '', 'email': partner.email or '',
+                       'phone': partner.phone or ''}
+        wanted = (kw.get('class_interest') or '').strip()
+        if wanted in ('barre', 'reformer'):
+            prefill['class_interest'] = wanted
+
         return request.render('fitness_trials.trial_request_form', {
             'error': kw.get('error'),
-            'form_values': {},
+            'form_values': prefill,
             'barre_slots': slots,
             'date_filters': self._get_date_filters(slots),
         })
@@ -271,6 +285,12 @@ class TrialRequestController(http.Controller):
             'class_interest': class_interest,
             'lang': lang,
         }
+
+        # A logged-in student gets their partner attached, so approval can book
+        # against a real record instead of matching on an email string. Public
+        # submissions leave it empty and are resolved by email at approval time.
+        if not request.env.user._is_public():
+            vals['partner_id'] = request.env.user.partner_id.id
 
         submitted_slot = None
         if class_interest == 'barre' and occurrence:

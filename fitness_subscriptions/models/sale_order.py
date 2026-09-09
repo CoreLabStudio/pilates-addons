@@ -172,7 +172,7 @@ class SaleOrder(models.Model):
         week_end = week_start + datetime.timedelta(days=7)
         return week_start, week_end
 
-    def fitness_effective_weekly_allowance(self):
+    def fitness_effective_weekly_allowance(self, discipline=None):
         """Return the weekly class cap that applies to this subscription.
 
         Returns the per-member override (fitness_weekly_allowance_override)
@@ -180,14 +180,28 @@ class SaleOrder(models.Model):
         Callers MUST check fitness_is_unlimited BEFORE using this value —
         for unlimited plans this returns 0, which must not be treated as
         a zero cap.
+
+        discipline: on a combined plan ("2 Barre + 1 Reformer per week") each
+        discipline has its own cap, and passing one asks for that cap rather
+        than the plan's main one. The two are never added together and never
+        traded off: a member with Barre left cannot spend it on Reformer.
+        Omitted, or on a single-discipline plan, the behaviour is unchanged.
+
+        The per-member override deliberately applies to the primary discipline
+        only. It is a single number, so honouring it for both would silently
+        double a manual adjustment on a combined plan.
         """
         self.ensure_one()
+        product = self.fitness_subscription_product_id
+        if (discipline and product and product.fitness_secondary_class_type
+                and discipline == product.fitness_secondary_class_type
+                and discipline != product.fitness_class_type):
+            return product.fitness_secondary_weekly_allowance
         if self.fitness_weekly_allowance_override > 0:
             return self.fitness_weekly_allowance_override
-        product = self.fitness_subscription_product_id
         return product.weekly_class_allowance if product else 0
 
-    def fitness_weekly_used_count(self, ref_date):
+    def fitness_weekly_used_count(self, ref_date, discipline=None):
         """Return the number of weekly-allowance slots consumed by this
         subscription in the ISO week that contains ref_date.
 
@@ -195,6 +209,14 @@ class SaleOrder(models.Model):
         in the week, INCLUDING cancelled ones — a cancelled allowance booking
         permanently consumes its weekly slot (anti-gaming rule; the member
         receives a floating credit instead of a refund, see Stage 5).
+
+        discipline: on a combined plan, counts only that discipline's bookings,
+        so each pool is measured against its own cap. The anti-gaming rule is
+        preserved *per pool* rather than globally: a cancelled Barre booking
+        still burns a Barre slot for the week, and burns nothing on the
+        Reformer side — which is the point of the pools being separate. Adding
+        the two together would let a cancelled Barre class eat the member's
+        Reformer allowance.
 
         ref_date: datetime.date or datetime.datetime; time part is ignored.
         """
@@ -205,12 +227,16 @@ class SaleOrder(models.Model):
         # Convert date bounds to datetime (midnight) for the Datetime field.
         week_start_dt = datetime.datetime.combine(week_start, datetime.time.min)
         week_end_dt = datetime.datetime.combine(week_end, datetime.time.min)
-        return self.env['fitness.booking'].search_count([
+        domain = [
             ('subscription_id', '=', self.id),
             ('fitness_used_floating_credit', '=', False),
             ('class_start', '>=', fields.Datetime.to_string(week_start_dt)),
             ('class_start', '<', fields.Datetime.to_string(week_end_dt)),
-        ])
+        ]
+        if discipline:
+            domain.append(
+                ('class_type_id.classroom_type', '=', discipline))
+        return self.env['fitness.booking'].search_count(domain)
 
     # ─── Promo date gate: block confirmation outside the promo window ────────────
 
@@ -240,7 +266,6 @@ class SaleOrder(models.Model):
 
     def _confirm_subscription(self):
         super()._confirm_subscription()
-        gate_date = datetime.date.today()
         for sub in self:
             product = sub.fitness_subscription_product_id
             if not product:
@@ -250,23 +275,14 @@ class SaleOrder(models.Model):
 
             product_bonus = product.fitness_promo_first_cycle_bonus or 0
 
-            # Clase Fija and Reformer Mensual plans: +1 floating credit if confirmed
-            # within the studio-wide promo window (Sept–Nov 2026).
-            # Both keep fitness_promo_first_cycle_bonus=0 so the action_confirm()
-            # date gate does not block year-round sales.
-            in_promo_window = PROMO_WINDOW_START <= gate_date <= PROMO_WINDOW_END
-            cf_promo = product.fitness_is_clase_fija and in_promo_window
-            rm_promo = product.fitness_is_reformer_mensual and in_promo_window
-
-            if cf_promo or rm_promo:
-                sub.fitness_floating_credits = 1
-                plan_kind = 'CF' if cf_promo else 'RM'
-                _logger.info(
-                    "[SUBSCRIPTION] %s confirmed (%s opening promo): plan=%s "
-                    "period_start=%s → 1 floating credit seeded",
-                    sub.name, plan_kind, product.name, sub.start_date,
-                )
-            elif product_bonus:
+            # The opening offer used to be a free extra class on the Clase Fija
+            # and Reformer Mensual plans, seeded here for anyone confirming
+            # inside the Sept-Nov 2026 window. The studio replaced it with a
+            # straight discount on those same five plans, so the grant is gone:
+            # running both would have given the opening price *and* the free
+            # class. Only the per-product bonus remains, which the live plans
+            # set to 0 and which stays available if a future promo wants it.
+            if product_bonus:
                 sub.fitness_floating_credits = product_bonus
                 _logger.info(
                     "[SUBSCRIPTION] %s confirmed (promo): plan=%s period_start=%s "
@@ -495,10 +511,16 @@ class SaleOrder(models.Model):
         event_studio = calendar_event.class_type_id.classroom_type or calendar_event.classroom_id.classroom_type
         event_session = calendar_event.session_type
 
-        if product.fitness_class_type != 'any' and product.fitness_class_type != event_studio:
+        # A combined plan covers two disciplines, so either is a match. The
+        # two still have separate weekly caps, enforced below - what is shared
+        # here is only the right to book at all, never the allowance.
+        allowed_types = {product.fitness_class_type}
+        if product.fitness_secondary_class_type:
+            allowed_types.add(product.fitness_secondary_class_type)
+        if 'any' not in allowed_types and event_studio not in allowed_types:
             raise ValidationError(
-                f"This subscription ({product.fitness_class_type or 'unset'} discipline) cannot be used "
-                f"for a {event_studio or 'unset'} class."
+                f"This subscription ({' + '.join(sorted(t for t in allowed_types if t)) or 'unset'} "
+                f"discipline) cannot be used for a {event_studio or 'unset'} class."
             )
         if product.fitness_session_type != event_session:
             raise ValidationError(
@@ -507,11 +529,17 @@ class SaleOrder(models.Model):
             )
 
         if not product.is_unlimited:
-            weekly_used = self.fitness_weekly_used_count(calendar_event.start)
-            eff = self.fitness_effective_weekly_allowance()
+            # Measured against this discipline's own cap. On a combined plan
+            # the caps are separate in both directions: Barre bookings never
+            # consume the Reformer allowance, and a member who has used up
+            # Barre can still book Reformer.
+            weekly_used = self.fitness_weekly_used_count(
+                calendar_event.start, discipline=event_studio)
+            eff = self.fitness_effective_weekly_allowance(discipline=event_studio)
             if weekly_used >= eff and self.fitness_floating_credits <= 0:
+                _label = (' %s' % event_studio) if product.fitness_secondary_class_type else ''
                 raise ValidationError(
-                    f"Weekly limit reached on {self.name}: "
+                    f"Weekly{_label} limit reached on {self.name}: "
                     f"{weekly_used}/{eff} allowance classes already booked this week "
                     f"and no floating credits remaining."
                 )

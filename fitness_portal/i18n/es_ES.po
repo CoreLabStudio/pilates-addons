@@ -14,6 +14,121 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+msgid "Update"
+msgstr "Actualizar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Choose how you pay"
+msgstr "Elige cómo pagar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Registration fee waived"
+msgstr "Matrícula gratis"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Registration (one-off)"
+msgstr "Matrícula (pago único)"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Billed monthly"
+msgstr "Cobro mensual"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Billed yearly"
+msgstr "Cobro anual"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Billed every %s months"
+msgstr "Cobro cada %s meses"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(price)s per month"
+msgstr "%(price)s al mes"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Upcoming classes"
+msgstr "Próximas clases"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No upcoming classes."
+msgstr "No tienes clases próximas."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Book a Free Trial"
+msgstr "Reserva tu clase de prueba"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_news_detail
+msgid "See the timetable"
+msgstr "Ver el horario"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Access to events"
+msgstr "Acceso a eventos"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Bring a friend once a month"
+msgstr "Invitación de una amiga al mes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Make up missed classes"
+msgstr "Posibilidad de recuperar clases"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "More flexible cancellation"
+msgstr "Cancelación más flexible"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Reformer discounts"
+msgstr "Descuentos en Reformer"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Registration 39 EUR - free with a 3-month membership or longer"
+msgstr "Matrícula 39 € - GRATIS al elegir una membresía de 3 meses o más"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Special rates on workshops"
+msgstr "Condiciones especiales en workshops"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "What your registration includes"
+msgstr "Qué incluye tu matrícula"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Schedule a Class"
+msgstr "Programar una clase"
+
+#. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/models/res_partner.py:0
 msgid "%d barre credit available"
@@ -780,6 +895,7 @@ msgstr "Recarga tus créditos o empieza un plan"
 # ───────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 msgid "My Schedule"
 msgstr "Mi horario"
 

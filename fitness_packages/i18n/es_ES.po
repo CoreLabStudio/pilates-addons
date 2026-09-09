@@ -14,6 +14,91 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_barre_10pack
+msgid "Ten Barre group classes for when you're ready to commit. The point where technique starts to feel like yours. Valid for any Barre class on the timetable — you choose which, and when."
+msgstr "Diez clases grupales de Barre para cuando quieras comprometerte. El punto en el que la técnica empieza a ser tuya. Válidas para cualquier clase de Barre del horario: tú eliges cuál y cuándo."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_barre_5pack
+msgid "Five Barre group classes to build the habit. Enough to find your rhythm and feel the change. Valid for any Barre class on the timetable — you choose which, and when."
+msgstr "Cinco clases grupales de Barre para crear el hábito. Las justas para encontrar tu ritmo y notar el cambio. Válidas para cualquier clase de Barre del horario: tú eliges cuál y cuándo."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_barre_privada_single
+msgid "Private one-on-one Barre session with your instructor. Personalised technique and full attention."
+msgstr "Sesión privada de Barre, solo tú y tu instructora. Técnica personalizada y atención completa."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_barre_single
+msgid "Drop in to any Barre group class. One credit, full class, full energy."
+msgstr "Accede a cualquier clase grupal de Barre. Un crédito, clase completa, energía total."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_barre_trial
+msgid "Perfect introduction to Barre. One class to feel the technique, the music, and the burn. No experience needed."
+msgstr "Introducción perfecta al Barre. Una clase para sentir la técnica, la música y el esfuerzo. Sin experiencia previa necesaria."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_duo_10pack
+msgid "Ten Duo Reformer sessions to train alongside someone else. All the personal attention, at a shared price."
+msgstr "Diez sesiones de Reformer Dúo para entrenar en compañía. Toda la atención personalizada, a un precio compartido."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_duo_5pack
+msgid "Five Duo Reformer sessions, shared with someone you choose. Private attention, split between you."
+msgstr "Cinco sesiones de Reformer Dúo para compartir con otra persona. Atención privada, coste repartido."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_duo_single
+msgid "Share a private Reformer session with one other person. All the attention, split the cost."
+msgstr "Comparte una sesión privada de Reformer con otra persona. Toda la atención, el coste compartido."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_private_10pack
+msgid "Ten private Reformer sessions, fully personalised to your goals. Our best-value way to train one-on-one."
+msgstr "Diez sesiones privadas de Reformer, totalmente personalizadas según tus objetivos. La forma más rentable de entrenar en sesiones individuales."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_private_5pack
+msgid "Five private Reformer sessions, fully personalised to your goals. Book at times that suit you, one-on-one with your instructor."
+msgstr "Cinco sesiones privadas de Reformer, totalmente personalizadas según tus objetivos. Reserva cuando mejor te venga, en sesiones individuales con tu instructora."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_private_single
+msgid "Private Reformer session. Full instructor attention, personalised progressions."
+msgstr "Sesión privada de Reformer. Toda la atención de tu instructora y progresiones adaptadas a ti."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_10pack
+msgid "Ten Reformer group classes, our most popular choice. Enough room to build real strength without watching the clock. Valid for any Reformer class on the timetable — you choose which, and when."
+msgstr "Diez clases grupales de Reformer, nuestra opción más elegida. Espacio suficiente para ganar fuerza de verdad sin mirar el reloj. Válidas para cualquier clase de Reformer del horario: tú eliges cuál y cuándo."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_15pack
+msgid "Fifteen Reformer group classes for training that becomes routine. The best value we offer, and the fastest progress. Valid for any Reformer class on the timetable — you choose which, and when."
+msgstr "Quince clases grupales de Reformer para que entrenar sea rutina. La mejor relación calidad-precio y el progreso más rápido. Válidas para cualquier clase de Reformer del horario: tú eliges cuál y cuándo."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_5pack
+msgid "Five Reformer group classes at your own pace. A solid first block to learn the machine and see where it takes you. Valid for any Reformer class on the timetable — you choose which, and when."
+msgstr "Cinco clases grupales de Reformer a tu ritmo. Un primer bloque sólido para aprender la máquina y ver hasta dónde te lleva. Válidas para cualquier clase de Reformer del horario: tú eliges cuál y cuándo."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_intro3
+msgid "Three Reformer classes to get properly acquainted with the machine. Long enough to stop thinking about it and start moving."
+msgstr "Tres clases de Reformer para conocer la máquina de verdad. Las suficientes para dejar de pensarla y empezar a moverte."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_single
+msgid "One Reformer group class. Jump in, glide, burn, repeat."
+msgstr "Una clase grupal de Reformer. Entra, deslízate, quema y repite."
+
+#. module: fitness_packages
+#: model:product.template,description_sale:fitness_packages.product_reformer_trial
+msgid "Your first Reformer session at a special price. Find out what the machine is all about."
+msgstr "Tu primera sesión en el Reformer a un precio especial. Descubre de qué trata la máquina."
+
+#. module: fitness_packages
 #. odoo-python
 #: code:addons/fitness_packages/models/product_template.py:0
 msgid "Full price"

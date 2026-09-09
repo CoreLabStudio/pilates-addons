@@ -47,6 +47,14 @@
                     <group>
                         <group string="Plan Settings">
                             <field name="fitness_is_subscription_plan"/>
+                            <!-- What the student is actually signed up to. The
+                                 portal reads it when it creates the order, so
+                                 it belongs where the plan is configured rather
+                                 than only on the resulting sale order. -->
+                            <field name="fitness_subscription_plan_id"
+                                   options="{'no_create': True}"
+                                   invisible="not fitness_is_subscription_plan"
+                                   placeholder="Monthly (default)"/>
                             <field name="fitness_is_clase_fija"
                                    invisible="not fitness_is_subscription_plan"/>
                             <field name="is_unlimited"

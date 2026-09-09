@@ -173,7 +173,7 @@
                     <line x1="11" y1="17" x2="11" y2="17.01"/>
                     <line x1="15" y1="17" x2="15" y2="17.01"/>
                 </svg>
-                <div>Classes</div>
+                <div>My Schedule</div>
             </a>
             <!-- Packages & Subscriptions — ticket / ledger -->
             <a href="/my/packages" class="mv-nav-tab">
@@ -252,7 +252,15 @@
                     <a href="/my/packages" class="mv-home-cta" t-out="lbl_explore_shop"/>
                 </t>
                 <t t-else="">
-                    <a href="/my/studio" class="mv-home-cta">Book a Class</a>
+                    <a href="/my/studio" class="mv-home-cta">Schedule a Class</a>
+                </t>
+                <!-- Second, quieter CTA. Shown in both branches: someone who
+                     owns nothing is the likeliest trial candidate, and someone
+                     who already has credits may still not have tried the other
+                     discipline. Hidden entirely when no trial post exists. -->
+                <t t-if="trial_post_url">
+                    <a t-att-href="trial_post_url" class="mv-home-cta mv-home-cta--ghost"
+                       t-out="lbl_book_trial"/>
                 </t>
 
                 <t t-if="has_any_bookings">
@@ -421,7 +429,7 @@
                     </div>
                     <div class="mv-news-cards">
                         <t t-foreach="news_posts" t-as="post">
-                            <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
+                            <a t-att-href="'/my/news/%d?back=/my/home' % post.id" class="mv-news-card">
                             <t t-call="fitness_portal.mv_news_card_body"/>
                         </a>
                         </t>
@@ -1353,6 +1361,25 @@
                     </div>
                 </t>
 
+                <!-- What the matricula buys. Memberships tab only: the fee
+                     applies to memberships, and the sheet is explicit that
+                     bonos carry none. Static copy - there is no matricula
+                     field on any model, by decision. -->
+                <t t-if="active_tab == 'subscriptions'">
+                    <div style="margin:0 16px 16px;padding:14px 16px;background:var(--mv-card-bg);border:1px solid var(--mv-border);border-radius:14px;">
+                        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mv-muted);margin:0 0 6px;">What your registration includes</div>
+                        <p style="font-size:0.86rem;font-weight:600;color:var(--mv-ink-text);margin:0 0 8px;">Registration 39 EUR - free with a 3-month membership or longer</p>
+                        <ul style="margin:0;padding-left:18px;font-size:0.8rem;line-height:1.65;color:var(--mv-muted);">
+                            <li>More flexible cancellation</li>
+                            <li>Make up missed classes</li>
+                            <li>Access to events</li>
+                            <li>Reformer discounts</li>
+                            <li>Bring a friend once a month</li>
+                            <li>Special rates on workshops</li>
+                        </ul>
+                    </div>
+                </t>
+
                 <t t-if="not products">
                     <div class="mv-empty" t-out="empty_msg"/>
                 </t>
@@ -1616,6 +1643,49 @@
                         </div>
                     </t>
 
+                    <!-- Billing plan. Shown before the summary because it is
+                         what the summary is a consequence of: the student
+                         picks the commitment, then sees what it costs. Each
+                         option carries its own total and says outright when it
+                         waives the registration fee, so the saving is visible
+                         at the moment of deciding rather than being something
+                         they had to know about already. Submitting re-renders
+                         this page with that plan's numbers; nothing is
+                         committed until Next. -->
+                    <t t-if="is_subscription and len(plan_options) &gt; 1">
+                        <div class="mv-panel mv-plan-panel">
+                            <p class="mv-panel-label" t-out="lbl_plan_heading"/>
+                            <!-- Selecting replaces the current history entry
+                                 rather than adding one, so Back still means
+                                 "back to the membership" however many plans
+                                 the student compared on the way. -->
+                            <form method="get" class="mv-plan-form"
+                                  t-attf-action="/my/packages/#{product.id}/checkout">
+                                <t t-foreach="plan_options" t-as="opt">
+                                    <label t-attf-class="mv-plan-opt#{' mv-plan-opt--on' if opt['selected'] else ''}">
+                                        <input type="radio" name="plan_id"
+                                               t-att-value="opt['id']"
+                                               t-att-checked="'checked' if opt['selected'] else None"
+                                               onchange="window.location.replace(this.form.getAttribute('action') + '?plan_id=' + encodeURIComponent(this.value))"/>
+                                        <span class="mv-plan-body">
+                                            <span class="mv-plan-top">
+                                                <span class="mv-plan-name" t-out="opt['name']"/>
+                                                <span class="mv-plan-total" t-out="opt['total_str']"/>
+                                            </span>
+                                            <span class="mv-plan-meta" t-out="opt['cadence']"/>
+                                            <t t-if="opt['waives_matricula']">
+                                                <span class="mv-plan-waiver" t-out="lbl_plan_waiver"/>
+                                            </t>
+                                        </span>
+                                    </label>
+                                </t>
+                                <noscript>
+                                    <button type="submit" class="mv-btn-book">Update</button>
+                                </noscript>
+                            </form>
+                        </div>
+                    </t>
+
                     <!-- Order summary -->
                     <div class="mv-panel">
                         <p class="mv-panel-label">Order summary</p>
@@ -1643,6 +1713,18 @@
                                 <p class="mv-summary-name">Subtotal</p>
                                 <span class="mv-summary-total">
                                     <t t-out="'%.2f' % co_subtotal"/> <t t-out="co_currency"/>
+                                </span>
+                            </div>
+                        </t>
+                        <!-- The registration fee is a real second line on the
+                             order, so it is a real second line here. It only
+                             appears when it is actually charged; the plans
+                             that waive it say so in the selector above. -->
+                        <t t-if="co_matricula">
+                            <div class="mv-summary-row">
+                                <p class="mv-summary-name" t-out="lbl_matricula"/>
+                                <span class="mv-summary-total">
+                                    <t t-out="'%.2f' % co_matricula_net"/> <t t-out="co_currency"/>
                                 </span>
                             </div>
                         </t>
@@ -1674,6 +1756,9 @@
                         <form method="post" id="mv-payment-form"
                               t-attf-action="/my/packages/#{product.id}/checkout">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <t t-if="selected_plan_id">
+                                <input type="hidden" name="plan_id" t-att-value="selected_plan_id"/>
+                            </t>
 
                             <div class="mv-spacer-8"/>
 
@@ -1699,6 +1784,9 @@
                         <form method="post" id="mv-payment-form"
                               t-attf-action="/my/packages/#{product.id}/checkout">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <t t-if="selected_plan_id">
+                                <input type="hidden" name="plan_id" t-att-value="selected_plan_id"/>
+                            </t>
 
                             <p class="mv-panel-label" style="padding:0 2px;">Choose payment method</p>
 
@@ -2677,17 +2765,9 @@
             <t t-set="no_footer" t-value="True"/>
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_page_header"/>
-                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-set="_back_url" t-value="back_url"/>
                 <t t-call="fitness_portal.mv_subpage_back"/>
-                <div class="mv-news-detail">
-                    <t t-if="post.image">
-                        <div class="mv-news-card-img mv-news-detail-img">
-                            <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
-                                 t-att-alt="post.title"
-                                 class="mv-news-card-photo"
-                                 loading="lazy"/>
-                        </div>
-                    </t>
+                <div t-attf-class="mv-news-detail#{' mv-news-detail--split' if post.image else ''}">
                     <div class="mv-news-detail-body">
                         <p class="mv-news-title mv-news-title-lg" t-field="post.title"/>
                         <p class="mv-news-date">
@@ -2695,7 +2775,22 @@
                                   t-options='{"widget": "date", "format": "d MMM yyyy"}'/>
                         </p>
                         <div class="mv-news-body" t-field="post.body"/>
+                        <t t-if="post.cta_url">
+                            <a t-att-href="post.cta_url" class="mv-news-cta">
+                                <t t-if="post.cta_label"><t t-out="post.cta_label"/></t>
+                                <t t-else="">See the timetable</t>
+                                <span class="mv-news-cta-chev">&#8250;</span>
+                            </a>
+                        </t>
                     </div>
+                    <t t-if="post.image">
+                        <div class="mv-news-detail-img">
+                            <img t-att-src="'/web/image/fitness.news.post/%d/image' % post.id"
+                                 t-att-alt="post.title"
+                                 class="mv-news-detail-photo"
+                                 loading="lazy"/>
+                        </div>
+                    </t>
                 </div>
             </div>
         </t>
@@ -2857,7 +2952,7 @@
                 <t t-call="fitness_portal.mv_subpage_back"/>
                 <div class="mv-news-cards mv-news-cards--page">
                     <t t-foreach="posts" t-as="post">
-                        <a t-att-href="'/my/news/%d' % post.id" class="mv-news-card">
+                        <a t-att-href="'/my/news/%d?back=/my/news' % post.id" class="mv-news-card">
                             <t t-call="fitness_portal.mv_news_card_body"/>
                         </a>
                     </t>

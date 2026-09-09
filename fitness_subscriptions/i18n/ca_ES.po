@@ -13,6 +13,46 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_subscriptions
+#: model:sale.subscription.plan,name:fitness_subscriptions.subscription_plan_quarter
+msgid "Quarterly"
+msgstr "Trimestral"
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_barre_clase_fija_1
+msgid "One fixed weekly Barre slot, reserved just for you every week. The easiest way to build a lasting habit."
+msgstr "Un horari fix setmanal de Barre, reservat només per a tu cada setmana. La manera més senzilla de crear un hàbit durador."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_barre_clase_fija_2
+msgid "Two fixed weekly Barre slots, reserved just for you every week. Twice the rhythm, twice the progress."
+msgstr "Dos horaris fixos setmanals de Barre, reservats només per a tu cada setmana. El doble de ritme, el doble de progrés."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_barre_ilimitado
+msgid "Unlimited Barre classes every month. Come as often as you like — no caps, no counting credits."
+msgstr "Classes de Barre il·limitades cada mes. Vine tan sovint com vulguis — sense límits, sense comptar crèdits."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_barre_ilimitado_promo
+msgid "Unlimited Barre classes every month at our introductory price. The best way to build the habit before committing long-term."
+msgstr "Classes de Barre il·limitades cada mes al nostre preu introductori. La millor manera de crear l’hàbit abans de comprometre’t a llarg termini."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_reformer_mensual_1
+msgid "One Reformer class every week, on your own recurring day and time. A steady rhythm without the commitment of more."
+msgstr "Una classe de Reformer cada setmana, en el teu propi dia i horari recurrent. Un ritme constant sense el compromiís de més."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_reformer_mensual_2
+msgid "Two Reformer classes every week, on your own recurring days and times. Build real strength with consistent practice."
+msgstr "Dues classes de Reformer cada setmana, en els teus propis dies i horaris recurrents. Desenvolupa força real amb una pràctica constant."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_reformer_mensual_3
+msgid "Three Reformer classes every week, on your own recurring days and times. For those ready to make Reformer a core part of their routine."
+msgstr "Tres classes de Reformer cada setmana, en els teus propis dies i horaris recurrents. Per a les que estan llestes per fer del Reformer una part essencial de la seva rutina."
+
+#. module: fitness_subscriptions
 #: model:ir.ui.menu,name:fitness_subscriptions.menu_fitness_membership_balances
 msgid "Membership Balances"
 msgstr "Saldos de membresia"
