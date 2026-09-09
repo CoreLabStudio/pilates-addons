@@ -1346,7 +1346,7 @@
                 <div class="mv-segmented" role="tablist">
                     <a href="/my/packages"
                        t-att-class="'mv-segment' + (' mv-active' if active_tab == 'classes' else '')"
-                       t-att-aria-selected="'true' if active_tab == 'classes' else 'false'">Classes</a>
+                       t-att-aria-selected="'true' if active_tab == 'classes' else 'false'">Class Types</a>
                     <a href="/my/packages?tab=subscriptions"
                        t-att-class="'mv-segment' + (' mv-active' if active_tab == 'subscriptions' else '')"
                        t-att-aria-selected="'true' if active_tab == 'subscriptions' else 'false'">Memberships</a>
@@ -1398,7 +1398,7 @@
                 <!-- Said plainly, above the cards. A student who takes the
                      wrong trial has spent the only one they get, so this is
                      not left to be inferred from the two prices. -->
-                <t t-if="active_tab == 'classes' and free_ids and not trial_used_ids">
+                <t t-if="active_tab == 'classes' and trial_offered">
                     <div class="mv-trial-note" t-out="lbl_trial_pick_one"/>
                 </t>
 
@@ -1472,23 +1472,16 @@
                                                     </t>
                                                     <t t-else="">
                                                         <span class="mv-pkg-price-inline">
+                                                            <t t-set="price_override" t-value="student_price.get(product.id)"/>
                                                             <t t-call="fitness_portal.mv_price_tag"/>
                                                         </span>
                                                         <t t-if="_is_active">
-                                                            <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;">Active</span>
+                                                            <span class="mv-btn-book mv-btn-disabled" style="text-decoration:none;pointer-events:none;opacity:0.5;" t-out="lbl_active"/>
                                                         </t>
                                                         <t t-elif="product.id in claimed_free_ids">
                                                             <span class="mv-btn-book mv-btn-disabled"
                                                                   style="text-decoration:none;pointer-events:none;opacity:0.5;"
                                                                   t-out="lbl_free_used"/>
-                                                        </t>
-                                                        <t t-elif="product.id in trial_used_ids">
-                                                            <span class="mv-pkg-price-inline mv-trial-spent" t-out="lbl_trial_used"/>
-                                                            <t t-if="trial_alt.get(product.id)">
-                                                                <a t-att-href="trial_alt[product.id]['href']"
-                                                                   class="mv-btn-book" style="text-decoration:none;"
-                                                                   t-out="trial_alt[product.id]['price']"/>
-                                                            </t>
                                                         </t>
                                                         <t t-elif="product.id in pending_trial_ids">
                                                             <span class="mv-btn-book mv-btn-disabled"
@@ -1522,6 +1515,56 @@
                 </t>
 
                 <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Trial choice (/my/trial) ────────────────────────────
+         Not a filtered view of the shop. The trial is one decision with two
+         answers, and a shop page puts nine other things next to it - every
+         one of them a way to get the decision wrong. Tapping a card books
+         it outright and lands on the schedule, where the credit is spent. -->
+    <template id="portal_trial_choice" name="CoreLab Trial Choice">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="'/my/home'"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-title-row">
+                    <div>
+                        <p class="mv-greeting-name" t-out="lbl_title"/>
+                        <p class="mv-greeting-sub" t-out="lbl_pick_one"/>
+                    </div>
+                </div>
+
+                <t t-if="error_msg">
+                    <div class="mv-flashes">
+                        <div class="mv-flash mv-flash-err"><strong>Oops:</strong><span style="margin-left:5px;" t-out="error_msg"/></div>
+                    </div>
+                </t>
+
+                <div class="mv-trial-choice">
+                    <t t-foreach="trials" t-as="tr">
+                        <form method="post" class="mv-trial-pick"
+                              t-attf-action="/my/packages/#{tr['id']}/book-free">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="back" value="/my/trial"/>
+                            <button type="submit" class="mv-trial-card" t-att-data-ct="tr['ct']">
+                                <span class="mv-trial-card-disc" t-out="tr['discipline']"/>
+                                <span class="mv-trial-card-name" t-out="tr['name']"/>
+                                <span class="mv-trial-card-meta" t-out="tr['meta']"/>
+                                <span class="mv-trial-card-cta" t-out="lbl_book_free"/>
+                            </button>
+                        </form>
+                    </t>
+                </div>
+
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
         </t>
@@ -1626,24 +1669,6 @@
                                 <span class="mv-pkg-buy-btn mv-btn-disabled"
                                       style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
                                       t-out="lbl_trial_pending"/>
-                            </t>
-                            <!-- Checked before is_free. The trial is still a
-                                 free product, so without this the page fell
-                                 through to the Book form and offered a second
-                                 free trial that the route would then refuse -
-                                 the card said "Trial used" and the page it
-                                 opened disagreed. -->
-                            <t t-elif="trial_used">
-                                <span class="mv-pkg-buy-btn mv-btn-disabled"
-                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
-                                      t-out="lbl_trial_used"/>
-                                <t t-if="trial_alt_one">
-                                    <a t-att-href="'/my/packages/%d' % trial_alt_one.id"
-                                       class="mv-pkg-buy-btn"
-                                       style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:10px;">
-                                        <t t-out="lbl_trial_instead"/>
-                                    </a>
-                                </t>
                             </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment
@@ -2221,8 +2246,15 @@
          `product` is a product.template; the number comes from the product's
          own effective price, so the page and the charge cannot disagree. -->
     <template id="mv_price_tag" name="CoreLab Price Tag">
-        <t t-set="_now" t-value="product.fitness_price_now"/>
-        <t t-set="_live" t-value="product.fitness_promo_is_live"/>
+<!-- price_override is the caller's answer for this student, used in
+             place of the product's own price where one was supplied. Only the
+             trial needs it: it is free once per student and full price after,
+             which the product alone cannot know. A promotion is not shown
+             struck through in that case - there is no promotion left to
+             strike. -->
+        <t t-set="_ovr" t-value="price_override"/>
+        <t t-set="_now" t-value="product.fitness_price_now if _ovr is None else _ovr"/>
+        <t t-set="_live" t-value="product.fitness_promo_is_live and _ovr is None"/>
         <!-- Free is a price of zero, however it got there. Keying this off
              the promotion meant a product whose own list price is 0.00 - no
              promotion involved - rendered "0.00 EUR + IVA" instead of FREE. -->

@@ -170,8 +170,8 @@ class FitnessStudentPortal(http.Controller):
              'label': _('Class packages'), 'status': _('Discover our packages'),
              'cta': _('Buy'), 'href': '/my/packages?tab=packages'},
             {'key': 'class', 'show': missing['class'],
-             'label': _('Classes'), 'status': _('No active class'),
-             'cta': _('View classes'), 'href': '/my/packages?tab=classes'},
+             'label': _('Class Types'), 'status': _('No active class'),
+             'cta': _('View class types'), 'href': '/my/packages?tab=classes'},
         ) if p['show']]
         # Membership and packages sit side by side; the class tile spans
         # the row underneath. Split here rather than in QWeb so the
@@ -192,16 +192,16 @@ class FitnessStudentPortal(http.Controller):
             'has_any_bookings': has_any_bookings,
             'has_no_purchases': has_no_purchases,
             'lbl_choose_plan':  _('Start by choosing your plan.'),
-            'lbl_explore_shop': _('Explore packages, memberships & classes'),
+            'lbl_explore_shop': _('Explore packages, memberships & class types'),
             'news_posts':       news_posts,
             'trial_post_url':   trial_post_url,
             'lbl_book_trial':   _('Book a Free Trial'),
             # Offered only while there is one to take. Once it is spent the
             # prompt would be an invitation to something they cannot have.
-            'trial_offer_url':  ('/my/packages?tab=classes'
+            'trial_offer_url':  ('/my/trial'
                                  if not self._trial_entitlement_used(partner)
                                  else False),
-            'lbl_trial_offer':  _('Book your trial class'),
+            'lbl_trial_offer':  _('Book your free trial class'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
             'lbl_install_title':   _('Install CoreLab'),
@@ -1179,35 +1179,25 @@ class FitnessStudentPortal(http.Controller):
         # Which cards get a one-tap Book button, and which have already been
         # used. Worked out here in two passes over the products rather than
         # asked per card in the template, which would be a query a card.
-        free_ids = frozenset(p.id for p in products if p.fitness_price_is_free())
+        free_ids = frozenset(p.id for p in products
+                             if self._is_free_for(partner, p))
         claimed_ids = frozenset(
             p.id for p in products
             if p.id in free_ids and self._free_already_claimed(partner, p))
 
-        # A spent trial stops being a free thing to take and becomes a pointer
-        # to the ordinary single class for that discipline, at its ordinary
-        # price. Both trials go at once: the entitlement is one, not one each.
-        trial_used = self._trial_entitlement_used(partner)
-        # Stage two: once the ordinary class has been bought too, the trials
-        # have nothing left to offer and are dropped from the list rather than
-        # left as permanent "used" markers.
-        if self._trial_stage_two(partner):
-            _spent = self._trial_products()
-            products = products.filtered(lambda p: p.id not in _spent.ids)
-        trial_used_ids = frozenset(
-            p.id for p in products
-            if trial_used and self._is_trial_product(p))
-        trial_alt = {}
+        # A spent trial carries no special state of its own any more. It is
+        # simply a product this student is not entitled to for free, which
+        # _is_free_for has already decided - so it falls through to the same
+        # price-and-Buy card as any other class and needs nothing here, and
+        # stays on the page afterwards exactly as every other product does.
+
+        # Only the trial is priced per student, and the price tag renders
+        # from the product, which cannot know whose trial is spent. Hand it
+        # the answer rather than teaching the product about students.
+        student_price = {}
         for p in products:
-            if p.id in trial_used_ids:
-                alt = self._trial_fallback_product(p)
-                if alt:
-                    trial_alt[p.id] = {
-                        'name': alt.name,
-                        'href': '/my/packages/%d' % alt.id,
-                        'price': self._format_price(
-                            alt.fitness_effective_price(), alt.currency_id),
-                    }
+            if self._is_trial_product(p):
+                student_price[p.id] = self._student_price(partner, p)
 
         # The Reformer trial is requested, not booked, so "already claimed"
         # does not describe it while the studio is still deciding: a pending
@@ -1305,10 +1295,15 @@ class FitnessStudentPortal(http.Controller):
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
             'lbl_trial_pending':        _('Request sent'),
-            'trial_used_ids':           trial_used_ids,
-            'trial_alt':                trial_alt,
-            'lbl_trial_used':           _('Trial used'),
-            'lbl_trial_instead':        _('Book a single class instead'),
+            'student_price':            student_price,
+            # Was a literal in the template, so it stayed English in Spanish
+            # and Catalan. Harmless while only a bought package showed it;
+            # Part D puts it on the trial card, where every student sees it.
+            'lbl_active':               _('Active'),
+            # A free trial is actually on offer to this student: one of the
+            # trial products is priced at zero for them. The note above the
+            # cards is about that offer, so it is what the note hangs on.
+            'trial_offered':            bool(set(student_price) & free_ids),
             # Said once, above the two trial cards, because a student who takes
             # the wrong one has spent the only one they get.
             'lbl_trial_pick_one':       _('Your first class is free - choose '
@@ -1418,25 +1413,18 @@ class FitnessStudentPortal(http.Controller):
                                ) else '/my/packages?tab=packages'),
             'ct':              product.fitness_class_type or 'any',
             # The detail page gets the same one-tap Book button as the card.
-            'is_free':         self._is_free_product(product),
+            'is_free':         self._is_free_for(partner, product),
+            # The price tag renders from the product, which cannot know whose
+            # trial is already spent. See _student_price.
+            'price_override':  (self._student_price(partner, product)
+                                if self._is_trial_product(product) else None),
             # Same rule as the shop grid: while the studio still has an
             # open Reformer request from this student, the product page
             # says so rather than offering to take another one.
             'trial_pending':   bool(self._is_reformer_trial(product)
                                     and self._pending_reformer_request(partner)),
             'lbl_trial_pending': _('Request sent'),
-            # The grid already refuses a spent trial; this page did not, so
-            # tapping the card title reached a Book button the route would
-            # then refuse. The card and the page it opens have to agree.
-            'trial_used':      bool(self._is_trial_product(product)
-                                    and self._trial_entitlement_used(partner)),
-            'trial_alt_one':   (self._trial_fallback_product(product)
-                                if self._is_trial_product(product)
-                                and self._trial_entitlement_used(partner)
-                                else False),
-            'lbl_trial_used':  _('Trial used'),
-            'lbl_trial_instead': _('Book a single class instead'),
-            'free_claimed':    (self._is_free_product(product)
+            'free_claimed':    (self._is_free_for(partner, product)
                                 and self._free_already_claimed(partner, product)),
             'lbl_book_free':   _('Book'),
             'lbl_price_free':  _('Free'),
@@ -1473,6 +1461,57 @@ class FitnessStudentPortal(http.Controller):
         ref = request.env.ref('fitness_packages.product_reformer_trial',
                               raise_if_not_found=False)
         return bool(ref) and product.id == ref.id
+
+    @http.route('/my/trial', type='http', auth='user', website=True,
+                sitemap=False)
+    def portal_trial_choice(self, **kw):
+        """The trial, on a page with nothing else on it.
+
+        The home button used to open the shop with the classes tab selected,
+        which showed the two trials among every other class, package and
+        membership. One free choice presented as eleven paid ones is how
+        students ended up on a checkout page they did not want.
+        """
+        _ = request.env._
+        partner = request.env.user.partner_id
+        # Spent entitlement, nothing left to choose. The shop still lists both
+        # trials - as ordinary paid classes - so that is where this belongs.
+        if self._trial_entitlement_used(partner):
+            return request.redirect('/my/packages?tab=classes')
+
+        trials = []
+        for xmlid in self.TRIAL_XMLIDS:
+            product = request.env.ref(xmlid, raise_if_not_found=False)
+            if not product or not product.sudo().active:
+                continue
+            product = product.sudo()
+            bits = []
+            if product.fitness_class_count:
+                bits.append(_('%d class') % product.fitness_class_count
+                            if product.fitness_class_count == 1
+                            else _('%d classes') % product.fitness_class_count)
+            if product.fitness_validity_days:
+                bits.append(_('%d day') % product.fitness_validity_days
+                            if product.fitness_validity_days == 1
+                            else _('%d days') % product.fitness_validity_days)
+            trials.append({
+                'id':         product.id,
+                'ct':         product.fitness_class_type or 'any',
+                'discipline': self._discipline_label(
+                    product.fitness_class_type or 'any'),
+                'name':       product.name,
+                'meta':       ' \u00b7 '.join(bits),
+            })
+
+        return request.render('fitness_portal.portal_trial_choice', {
+            'trials':      trials,
+            'lbl_title':   _('Book your free trial class'),
+            'lbl_pick_one': _('Choose only one - Barre or Reformer. Every '
+                              'student gets one free trial, so pick the one '
+                              'you want to try.'),
+            'lbl_book_free': _('Book this trial'),
+            'error_msg':   kw.get('error') or '',
+        })
 
     @http.route('/my/packages/<int:product_id>/book-free', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
@@ -1513,7 +1552,7 @@ class FitnessStudentPortal(http.Controller):
 
         # Free is decided here, never by the form. A posted product id for
         # something that costs money goes to the paid flow.
-        if not self._is_free_product(product):
+        if not self._is_free_for(partner, product):
             return request.redirect(f'/my/packages/{product.id}/checkout')
 
         # One free trial per student, whichever discipline they picked. Checked
@@ -1591,7 +1630,7 @@ class FitnessStudentPortal(http.Controller):
         # merely unlinked - reaching it by URL sends you back to the product,
         # where the Book button is. Leaving it renderable would have left two
         # ways to book the same thing, one of them the screen this removed.
-        if self._is_free_product(product):
+        if self._is_free_for(partner, product):
             return request.redirect('/my/packages/%d' % product.id)
 
         # The plan the student picked, validated against what was offered. It
@@ -2301,7 +2340,7 @@ class FitnessStudentPortal(http.Controller):
             return res['total_excluded'], res['total_included']
 
         months = self._plan_months(plan) if plan else 1
-        price = product.fitness_effective_price() * months
+        price = self._student_price(partner, product) * months
         subtotal, total = _taxed(product, price)
 
         matricula = self._matricula_due(partner, product, plan) if plan else \
@@ -2376,13 +2415,6 @@ class FitnessStudentPortal(http.Controller):
 
     TRIAL_XMLIDS = ('fitness_packages.product_barre_trial',
                     'fitness_packages.product_reformer_trial')
-    # Where a student goes once the trial is spent: the ordinary single class
-    # for that discipline, at its ordinary price.
-    TRIAL_FALLBACK = {
-        'barre': 'fitness_packages.product_barre_single',
-        'reformer': 'fitness_packages.product_reformer_single',
-    }
-
     def _trial_products(self):
         out = request.env['product.template'].sudo().browse()
         for xmlid in self.TRIAL_XMLIDS:
@@ -2438,43 +2470,6 @@ class FitnessStudentPortal(http.Controller):
         return lines.filtered(
             lambda l: not l.fitness_validity_end_date
             or l.fitness_validity_end_date >= today)[:1]
-
-    def _trial_stage_two(self, partner):
-        """Has the student finished with trials altogether?
-
-        Stage one is spending the free trial: the other one stops being free
-        and points at the ordinary single class, but stays on the page so the
-        student can see what it now costs.
-
-        Stage two is buying that ordinary class as well. At that point both
-        trial listings have nothing left to say - one is spent, the other has
-        been superseded by the thing it was pointing at - so they come off the
-        page entirely rather than sitting there as two permanent tombstones.
-
-        A student who never buys the second one stays in stage one for good.
-        """
-        if not self._trial_entitlement_used(partner):
-            return False
-        alts = request.env['product.template'].sudo().browse()
-        for xmlid in self.TRIAL_FALLBACK.values():
-            alt = request.env.ref(xmlid, raise_if_not_found=False)
-            if alt:
-                alts |= alt.sudo()
-        if not alts:
-            return False
-        return bool(request.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('product_id', 'in', alts.mapped('product_variant_ids').ids),
-        ], limit=1))
-
-    def _trial_fallback_product(self, product):
-        """The ordinary single class to offer instead of a spent trial."""
-        xmlid = self.TRIAL_FALLBACK.get(product.fitness_class_type or '')
-        if not xmlid:
-            return request.env['product.template'].browse()
-        alt = request.env.ref(xmlid, raise_if_not_found=False)
-        return alt.sudo() if alt else request.env['product.template'].browse()
 
     def _matricula_product(self):
         product = request.env.ref('fitness_subscriptions.product_matricula',
@@ -2608,16 +2603,33 @@ class FitnessStudentPortal(http.Controller):
             return default.sudo()
         return offered[:1]
 
-    @staticmethod
-    def _is_free_product(product):
-        """Does this cost nothing today?
+    def _student_price(self, partner, product):
+        """What this student pays for this product today.
 
-        Asks the product for its effective price rather than reading
-        list_price, so a promotion - Free, or 100% off - is what decides,
-        exactly as it does on the page the student was just looking at. The
-        list price is the full price and is never what is charged directly.
+        Every other price on the shop is a property of the product alone.
+        The trial is the exception: it is free once per student and an
+        ordinary paid class afterwards, so this one price has to know who is
+        asking. Asking the product would answer "free" forever, which is how
+        a spent trial kept offering itself.
         """
-        return product.fitness_price_is_free()
+        if (partner and self._is_trial_product(product)
+                and self._trial_entitlement_used(partner)):
+            return product.list_price or 0.0
+        return product.fitness_effective_price()
+
+    def _is_free_for(self, partner, product):
+        """Does this cost this student nothing today?
+
+        Asks the product for its effective price, then lets the student
+        override it - a promotion, Free or 100% off, is what decides for
+        everyone else. The card, the booking route and the checkout all read
+        this one answer, so a spent trial is refused by the route for the
+        same reason the card stopped offering it.
+        """
+        rounding = (product.currency_id.rounding
+                    or request.env.company.currency_id.rounding or 0.01)
+        return float_is_zero(self._student_price(partner, product),
+                             precision_rounding=rounding)
 
     @staticmethod
     def _order_is_free(order):
@@ -2715,7 +2727,7 @@ class FitnessStudentPortal(http.Controller):
             # months charged at once. This is the number the student was shown
             # and the number Stripe is asked for; a second calculation here is
             # how those two come apart.
-            'price_unit': product.fitness_effective_price() * months,
+            'price_unit': self._student_price(partner, product) * months,
             'fitness_class_type': product.fitness_class_type,
         }]
         # A combined package is sold at one price but grants two separate
