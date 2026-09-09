@@ -196,6 +196,12 @@ class FitnessStudentPortal(http.Controller):
             'news_posts':       news_posts,
             'trial_post_url':   trial_post_url,
             'lbl_book_trial':   _('Book a Free Trial'),
+            # Offered only while there is one to take. Once it is spent the
+            # prompt would be an invitation to something they cannot have.
+            'trial_offer_url':  ('/my/packages?tab=classes'
+                                 if not self._trial_entitlement_used(partner)
+                                 else False),
+            'lbl_trial_offer':  _('Book your trial class'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
             'lbl_install_title':   _('Install CoreLab'),
@@ -224,7 +230,7 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/studio', type='http', auth='user', website=True, sitemap=False)
     def studio(self, view=None, booked=None, cancelled=None, credit_returned=None,
-               error=None, days=None, **kw):
+               error=None, days=None, discipline=None, trial=None, **kw):
         if not request.env.user.has_group(STUDENT_GROUP):
             return request.redirect('/my')
 
@@ -234,6 +240,15 @@ class FitnessStudentPortal(http.Controller):
 
         values = {
             'active_view':     active_view,
+            # Which room's tab opens. Set when a student has just taken a
+            # trial, so they land on the discipline they chose rather than
+            # having to find it among both.
+            'active_discipline': (discipline
+                                  if discipline in ('barre', 'reformer')
+                                  else False),
+            'just_took_trial':  bool(trial),
+            'lbl_trial_next':   request.env._(
+                'Your trial class is ready - book it below.'),
             'booked':          bool(booked),
             'cancelled':       bool(cancelled),
             'credit_returned': bool(credit_returned),
@@ -1168,6 +1183,25 @@ class FitnessStudentPortal(http.Controller):
             p.id for p in products
             if p.id in free_ids and self._free_already_claimed(partner, p))
 
+        # A spent trial stops being a free thing to take and becomes a pointer
+        # to the ordinary single class for that discipline, at its ordinary
+        # price. Both trials go at once: the entitlement is one, not one each.
+        trial_used = self._trial_entitlement_used(partner)
+        trial_used_ids = frozenset(
+            p.id for p in products
+            if trial_used and self._is_trial_product(p))
+        trial_alt = {}
+        for p in products:
+            if p.id in trial_used_ids:
+                alt = self._trial_fallback_product(p)
+                if alt:
+                    trial_alt[p.id] = {
+                        'name': alt.name,
+                        'href': '/my/packages/%d' % alt.id,
+                        'price': self._format_price(
+                            alt.fitness_effective_price(), alt.currency_id),
+                    }
+
         # The Reformer trial is requested, not booked, so "already claimed"
         # does not describe it while the studio is still deciding: a pending
         # request creates no order, so nothing here suppressed the button and
@@ -1264,6 +1298,16 @@ class FitnessStudentPortal(http.Controller):
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
             'lbl_trial_pending':        _('Request sent'),
+            'trial_used_ids':           trial_used_ids,
+            'trial_alt':                trial_alt,
+            'lbl_trial_used':           _('Trial used'),
+            'lbl_trial_instead':        _('Book a single class instead'),
+            # Said once, above the two trial cards, because a student who takes
+            # the wrong one has spent the only one they get.
+            'lbl_trial_pick_one':       _('Your first class is free - choose '
+                                          'Barre or Reformer. One trial per '
+                                          'student, so pick the one you want '
+                                          'to try.'),
             'booked':                   bool(kw.get('booked')),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
@@ -1444,21 +1488,24 @@ class FitnessStudentPortal(http.Controller):
         if not product.exists() or not product.active or not product.sale_ok                 or not self._is_buyable(product):
             return request.redirect('/my/packages')
 
-        # The Reformer trial is reviewed before it is booked - the studio wants
-        # to see the student's experience first and pick the slot themselves.
-        # Send them to the portal's own intake form instead of creating a
-        # booking. Deliberately not the public /trial page: that one is built
-        # for anonymous visitors, renders the login layout, and offers a
-        # "log in" link to somebody who is already logged in.
-        if self._is_reformer_trial(product):
-            return request.redirect('/my/trial/reformer')
+        # Both trials are self-service now. A logged-in student has an account,
+        # so there is nothing for the studio to review before it can book: the
+        # old Pending/Contacted/Scheduled round trip existed for people with no
+        # account, and it still serves them from the public site.
 
         # Free is decided here, never by the form. A posted product id for
         # something that costs money goes to the paid flow.
         if not self._is_free_product(product):
             return request.redirect(f'/my/packages/{product.id}/checkout')
 
-        if self._free_already_claimed(partner, product):
+        # One free trial per student, whichever discipline they picked. Checked
+        # across both products, so taking the Barre trial spends the Reformer
+        # one too - they are a single entitlement, not one of each.
+        if self._is_trial_product(product):
+            if self._trial_entitlement_used(partner):
+                return fail(_('You have already used your free trial. '
+                              'It is one per student, Barre or Reformer.'))
+        elif self._free_already_claimed(partner, product):
             return fail(_('You have already used this free trial. '
                           'It is available once per student.'))
 
@@ -1481,6 +1528,15 @@ class FitnessStudentPortal(http.Controller):
         _logger.info('[CHECKOUT] Free order %s booked in one tap for partner %s '
                      '(product %s).', order.name, partner.id, product.id)
         self._notify_admins_of_purchase(order)
+
+        # A trial is only worth having once it is on the timetable, so the
+        # student is taken straight to the classes they can now book, in the
+        # discipline they just chose, rather than back to the shop to work out
+        # what to do next.
+        if self._is_trial_product(product):
+            disc = product.fitness_class_type or ''
+            return request.redirect(
+                '/my/studio?trial=1&discipline=%s' % quote(disc))
         return request.redirect('/my/packages?booked=1')
 
     # ══════════════════════════════════════════════════════════
@@ -1500,10 +1556,7 @@ class FitnessStudentPortal(http.Controller):
         partner = request.env.user.partner_id
         product = request.env['product.template'].sudo().browse(product_id)
 
-        # Same rule as book-free. This URL is linkable and typeable, so a guard
-        # on the one-tap path alone would simply be walked around.
-        if self._is_reformer_trial(product):
-            return request.redirect('/my/trial/reformer')
+
         if not product.exists() or not product.active or not self._is_buyable(product):
             return request.redirect('/my/packages')
         if not product.sale_ok:
@@ -2296,6 +2349,63 @@ class FitnessStudentPortal(http.Controller):
         if unit == 'day':
             return value // 30
         return 1
+
+    # ── The free trial: one per student, either discipline ───────────────
+    #
+    # The studio gives a student one free trial, not one of each. The old rule
+    # was per product, so somebody could take the Barre trial free and then the
+    # Reformer trial free as well. These two products are one entitlement.
+
+    TRIAL_XMLIDS = ('fitness_packages.product_barre_trial',
+                    'fitness_packages.product_reformer_trial')
+    # Where a student goes once the trial is spent: the ordinary single class
+    # for that discipline, at its ordinary price.
+    TRIAL_FALLBACK = {
+        'barre': 'fitness_packages.product_barre_single',
+        'reformer': 'fitness_packages.product_reformer_single',
+    }
+
+    def _trial_products(self):
+        out = request.env['product.template'].sudo().browse()
+        for xmlid in self.TRIAL_XMLIDS:
+            p = request.env.ref(xmlid, raise_if_not_found=False)
+            if p:
+                out |= p.sudo()
+        return out
+
+    def _is_trial_product(self, product):
+        return product.id in self._trial_products().ids
+
+    def _trial_entitlement_used(self, partner):
+        """Has this student already had their one free trial?
+
+        Read from what happened rather than a flag: any confirmed order of
+        either trial product that cost nothing. Drafts do not count - an
+        abandoned checkout must not burn the entitlement - which is the same
+        rule _free_already_claimed applies, widened from one product to both.
+        """
+        trials = self._trial_products()
+        if not trials or not partner:
+            return False
+        variants = trials.mapped('product_variant_ids').ids
+        if not variants:
+            return False
+        rounding = request.env.company.currency_id.rounding or 0.01
+        lines = request.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', variants),
+        ])
+        return any(float_is_zero(l.price_total or 0.0, precision_rounding=rounding)
+                   for l in lines)
+
+    def _trial_fallback_product(self, product):
+        """The ordinary single class to offer instead of a spent trial."""
+        xmlid = self.TRIAL_FALLBACK.get(product.fitness_class_type or '')
+        if not xmlid:
+            return request.env['product.template'].browse()
+        alt = request.env.ref(xmlid, raise_if_not_found=False)
+        return alt.sudo() if alt else request.env['product.template'].browse()
 
     def _matricula_product(self):
         product = request.env.ref('fitness_subscriptions.product_matricula',

@@ -16,6 +16,42 @@ msgstr ""
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Book your trial class"
+msgstr "Reserva tu clase de prueba"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your first class is free - choose Barre or Reformer. One trial per student, so pick the one you want to try."
+msgstr "Tu primera clase es gratis: elige Barre o Reformer. Una clase de prueba por alumna, así que elige la que quieras probar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Trial used"
+msgstr "Prueba utilizada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Book a single class instead"
+msgstr "Reserva una clase suelta"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your trial class is ready - book it below."
+msgstr "Tu clase de prueba está lista: resérvala abajo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have already used your free trial. It is one per student, Barre or Reformer."
+msgstr "Ya has usado tu clase de prueba. Es una por alumna, de Barre o de Reformer."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Request a Reformer trial"
 msgstr "Solicita una clase de prueba de Reformer"
 

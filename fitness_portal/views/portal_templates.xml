@@ -263,6 +263,13 @@
                        t-out="lbl_book_trial"/>
                 </t>
 
+                <!-- The trial itself, offered directly rather than through a
+                     news post - and only while the student still has one. -->
+                <t t-if="trial_offer_url">
+                    <a t-att-href="trial_offer_url" class="mv-home-cta mv-home-cta--ghost"
+                       t-out="lbl_trial_offer"/>
+                </t>
+
                 <t t-if="has_any_bookings">
                 <!-- Two quick stats. Both are tappable. -->
                 <div class="mv-stat-row">
@@ -536,14 +543,22 @@
                      the page and a round trip would lose the scroll position.
                      Rendered only when both rooms have classes - see
                      _discipline_tabs. -->
+                <t t-if="just_took_trial">
+                    <div class="mv-flash mv-flash-ok mv-trial-ready" t-out="lbl_trial_next"/>
+                </t>
+
                 <t t-if="discipline_tabs">
                     <div class="mv-segmented mv-discipline-toggle" role="tablist"
                          id="mv-studio-discipline">
                         <t t-foreach="discipline_tabs" t-as="tab">
+                            <!-- The first tab opens by default, unless the
+                                 student arrived from a trial booking, in which
+                                 case the room they just chose opens instead. -->
+                            <t t-set="_on" t-value="(tab['key'] == active_discipline) if active_discipline else (tab_index == 0)"/>
                             <button type="button" role="tab"
                                     t-att-data-discipline="tab['key']"
-                                    t-att-aria-selected="'true' if tab_index == 0 else 'false'"
-                                    t-attf-class="mv-segment#{' mv-active' if tab_index == 0 else ''}"
+                                    t-att-aria-selected="'true' if _on else 'false'"
+                                    t-attf-class="mv-segment#{' mv-active' if _on else ''}"
                                     t-out="tab['label']"/>
                         </t>
                     </div>
@@ -1380,6 +1395,13 @@
                     </div>
                 </t>
 
+                <!-- Said plainly, above the cards. A student who takes the
+                     wrong trial has spent the only one they get, so this is
+                     not left to be inferred from the two prices. -->
+                <t t-if="active_tab == 'classes' and free_ids and not trial_used_ids">
+                    <div class="mv-trial-note" t-out="lbl_trial_pick_one"/>
+                </t>
+
                 <t t-if="not products">
                     <div class="mv-empty" t-out="empty_msg"/>
                 </t>
@@ -1459,6 +1481,14 @@
                                                             <span class="mv-btn-book mv-btn-disabled"
                                                                   style="text-decoration:none;pointer-events:none;opacity:0.5;"
                                                                   t-out="lbl_free_used"/>
+                                                        </t>
+                                                        <t t-elif="product.id in trial_used_ids">
+                                                            <span class="mv-pkg-price-inline mv-trial-spent" t-out="lbl_trial_used"/>
+                                                            <t t-if="trial_alt.get(product.id)">
+                                                                <a t-att-href="trial_alt[product.id]['href']"
+                                                                   class="mv-btn-book" style="text-decoration:none;"
+                                                                   t-out="trial_alt[product.id]['price']"/>
+                                                            </t>
                                                         </t>
                                                         <t t-elif="product.id in pending_trial_ids">
                                                             <span class="mv-btn-book mv-btn-disabled"
