@@ -1756,6 +1756,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-class-card[data-ct="reformer"],
 .mv-upcoming-card[data-ct="reformer"],
 .mv-pkg-card[data-ct="reformer"],
+.mv-trial-card[data-ct="reformer"],
 .mv-detail-scope[data-ct="reformer"] {
   --mv-btn-bg: var(--mv-discipline-reformer);
   --mv-btn-fg: var(--mv-on-discipline);
@@ -1766,6 +1767,7 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
 .mv-class-card[data-ct="barre"],
 .mv-upcoming-card[data-ct="barre"],
 .mv-pkg-card[data-ct="barre"],
+.mv-trial-card[data-ct="barre"],
 .mv-detail-scope[data-ct="barre"] {
   --mv-btn-bg: var(--mv-discipline-barre);
   --mv-btn-fg: var(--mv-on-discipline);
@@ -4490,13 +4492,74 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-size: 0.86rem;
   line-height: 1.5;
 }
-/* A trial that has been used: no longer an offer, so it does not look like
-   one. The ordinary single class sits beside it at its ordinary price. */
-.mv-trial-spent {
-  color: var(--mv-muted);
-  font-style: italic;
-  font-size: 0.78rem;
-}
 .mv-trial-ready {
   margin: 0 16px 14px;
+}
+
+/* ── The dedicated trial page (/my/trial) ──────────────────────────────
+   Two cards and nothing else. They are buttons, not links to a detail
+   page: the whole point of the page is that one tap books the class, so
+   the card has to look like the thing that does it. Each takes its room's
+   colour from the data-ct rule above. */
+.mv-trial-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 16px 24px;
+}
+.mv-trial-pick {
+  margin: 0;
+}
+.mv-trial-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r);
+  background: var(--mv-surface, #FFFFFF);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s;
+}
+.mv-trial-card:hover {
+  border-color: var(--mv-btn-bg);
+}
+.mv-trial-card:active {
+  transform: scale(0.995);
+}
+.mv-trial-card-disc {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--mv-tag-bg, var(--mv-sand));
+  color: var(--mv-tag-fg, var(--mv-paco));
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mv-trial-card-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  color: var(--mv-ink);
+}
+.mv-trial-card-meta {
+  color: var(--mv-muted);
+  font-size: 0.8rem;
+}
+.mv-trial-card-cta {
+  margin-top: 8px;
+  align-self: stretch;
+  padding: 11px 16px;
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-btn-bg);
+  color: var(--mv-btn-fg);
+  text-align: center;
+  font-size: 0.9rem;
+}
+.mv-trial-card:hover .mv-trial-card-cta {
+  background: var(--mv-clay-dark);
 }

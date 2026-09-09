@@ -16,6 +16,48 @@ msgstr ""
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Class Types"
+msgstr "Tipus de classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "View class types"
+msgstr "Veure tipus de classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Explore packages, memberships & class types"
+msgstr "Explorar paquets, membresies i tipus de classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Book your free trial class"
+msgstr "Reserva la teva classe de prova gratuïta"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Choose only one - Barre or Reformer. Every student gets one free trial, so pick the one you want to try."
+msgstr "Tria'n només una: Barre o Reformer. Cada alumna té una classe de prova gratuïta, així que tria la que vulguis provar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "Book this trial"
+msgstr "Reservar aquesta prova"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your free trial class is waiting - pick any class below and book it. Booking opens a week before each class."
 msgstr "La teva classe de prova gratuïta t'espera: tria qualsevol classe de sota i reserva-la. La reserva s’obre una setmana abans de cada classe."
 
