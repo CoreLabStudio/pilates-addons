@@ -2586,8 +2586,8 @@ msgstr "Descobreix els nostres paquets"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Classes, Memberships &amp; Packages"
-msgstr "Classes, Membresies i Bons"
+msgid "Class Types, Memberships &amp; Packages"
+msgstr "Tipus de classe, Membresies i Bons"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav

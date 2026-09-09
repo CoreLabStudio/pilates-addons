@@ -266,7 +266,7 @@
                 <!-- The trial itself, offered directly rather than through a
                      news post - and only while the student still has one. -->
                 <t t-if="trial_offer_url">
-                    <a t-att-href="trial_offer_url" class="mv-home-cta mv-home-cta--ghost"
+                    <a t-att-href="trial_offer_url" class="mv-home-cta mv-home-cta--soft"
                        t-out="lbl_trial_offer"/>
                 </t>
 
@@ -1323,7 +1323,7 @@
                 <!-- Title + quiet credit line + circular search toggle -->
                 <div class="mv-title-row">
                     <div>
-                        <p class="mv-greeting-name">Classes, Memberships &amp; Packages</p>
+                        <p class="mv-greeting-name">Class Types, Memberships &amp; Packages</p>
                         <t t-if="credit_line">
                             <a href="/my/credits" class="mv-credit-line" t-out="credit_line"/>
                         </t>
@@ -1626,6 +1626,24 @@
                                 <span class="mv-pkg-buy-btn mv-btn-disabled"
                                       style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
                                       t-out="lbl_trial_pending"/>
+                            </t>
+                            <!-- Checked before is_free. The trial is still a
+                                 free product, so without this the page fell
+                                 through to the Book form and offered a second
+                                 free trial that the route would then refuse -
+                                 the card said "Trial used" and the page it
+                                 opened disagreed. -->
+                            <t t-elif="trial_used">
+                                <span class="mv-pkg-buy-btn mv-btn-disabled"
+                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
+                                      t-out="lbl_trial_used"/>
+                                <t t-if="trial_alt_one">
+                                    <a t-att-href="'/my/packages/%d' % trial_alt_one.id"
+                                       class="mv-pkg-buy-btn"
+                                       style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:10px;">
+                                        <t t-out="lbl_trial_instead"/>
+                                    </a>
+                                </t>
                             </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment

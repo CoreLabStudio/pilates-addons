@@ -1188,6 +1188,12 @@ class FitnessStudentPortal(http.Controller):
         # to the ordinary single class for that discipline, at its ordinary
         # price. Both trials go at once: the entitlement is one, not one each.
         trial_used = self._trial_entitlement_used(partner)
+        # Stage two: once the ordinary class has been bought too, the trials
+        # have nothing left to offer and are dropped from the list rather than
+        # left as permanent "used" markers.
+        if self._trial_stage_two(partner):
+            _spent = self._trial_products()
+            products = products.filtered(lambda p: p.id not in _spent.ids)
         trial_used_ids = frozenset(
             p.id for p in products
             if trial_used and self._is_trial_product(p))
@@ -1419,6 +1425,17 @@ class FitnessStudentPortal(http.Controller):
             'trial_pending':   bool(self._is_reformer_trial(product)
                                     and self._pending_reformer_request(partner)),
             'lbl_trial_pending': _('Request sent'),
+            # The grid already refuses a spent trial; this page did not, so
+            # tapping the card title reached a Book button the route would
+            # then refuse. The card and the page it opens have to agree.
+            'trial_used':      bool(self._is_trial_product(product)
+                                    and self._trial_entitlement_used(partner)),
+            'trial_alt_one':   (self._trial_fallback_product(product)
+                                if self._is_trial_product(product)
+                                and self._trial_entitlement_used(partner)
+                                else False),
+            'lbl_trial_used':  _('Trial used'),
+            'lbl_trial_instead': _('Book a single class instead'),
             'free_claimed':    (self._is_free_product(product)
                                 and self._free_already_claimed(partner, product)),
             'lbl_book_free':   _('Book'),
@@ -2421,6 +2438,35 @@ class FitnessStudentPortal(http.Controller):
         return lines.filtered(
             lambda l: not l.fitness_validity_end_date
             or l.fitness_validity_end_date >= today)[:1]
+
+    def _trial_stage_two(self, partner):
+        """Has the student finished with trials altogether?
+
+        Stage one is spending the free trial: the other one stops being free
+        and points at the ordinary single class, but stays on the page so the
+        student can see what it now costs.
+
+        Stage two is buying that ordinary class as well. At that point both
+        trial listings have nothing left to say - one is spent, the other has
+        been superseded by the thing it was pointing at - so they come off the
+        page entirely rather than sitting there as two permanent tombstones.
+
+        A student who never buys the second one stays in stage one for good.
+        """
+        if not self._trial_entitlement_used(partner):
+            return False
+        alts = request.env['product.template'].sudo().browse()
+        for xmlid in self.TRIAL_FALLBACK.values():
+            alt = request.env.ref(xmlid, raise_if_not_found=False)
+            if alt:
+                alts |= alt.sudo()
+        if not alts:
+            return False
+        return bool(request.env['sale.order.line'].sudo().search([
+            ('order_partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', alts.mapped('product_variant_ids').ids),
+        ], limit=1))
 
     def _trial_fallback_product(self, product):
         """The ordinary single class to offer instead of a spent trial."""
