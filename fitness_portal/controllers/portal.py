@@ -1304,8 +1304,21 @@ class FitnessStudentPortal(http.Controller):
         pkg_meta = {}
         for p in products:
             parts = []
+            # A combined pack is two pools, and the second one was missing
+            # from this line entirely: "1 + 2 per week" announced itself as
+            # "1 class per week", which is the Barre half of a plan that
+            # gives three classes. Say both rooms by name, so the number a
+            # student reads is the number they get.
+            combo = bool(p.fitness_secondary_class_type)
             if active_tab in ('packages', 'classes'):
-                if p.fitness_class_count:
+                if combo and p.fitness_secondary_class_count:
+                    parts.append(_('%(a)d %(x)s + %(b)d %(y)s') % {
+                        'a': p.fitness_class_count,
+                        'x': self._discipline_label(p.fitness_class_type or 'any'),
+                        'b': p.fitness_secondary_class_count,
+                        'y': self._discipline_label(p.fitness_secondary_class_type),
+                    })
+                elif p.fitness_class_count:
                     parts.append((_('%d class') % p.fitness_class_count) if p.fitness_class_count == 1
                                  else (_('%d classes') % p.fitness_class_count))
                 if p.fitness_validity_days:
@@ -1314,6 +1327,13 @@ class FitnessStudentPortal(http.Controller):
             else:
                 if p.is_unlimited:
                     parts.append(_('Unlimited classes'))
+                elif combo and p.fitness_secondary_weekly_allowance:
+                    parts.append(_('%(a)d %(x)s + %(b)d %(y)s per week') % {
+                        'a': p.weekly_class_allowance,
+                        'x': self._discipline_label(p.fitness_class_type or 'any'),
+                        'b': p.fitness_secondary_weekly_allowance,
+                        'y': self._discipline_label(p.fitness_secondary_class_type),
+                    })
                 elif p.weekly_class_allowance:
                     parts.append((_('%d class per week') % p.weekly_class_allowance)
                                  if p.weekly_class_allowance == 1

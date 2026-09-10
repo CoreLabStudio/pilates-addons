@@ -14,6 +14,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(a)d %(x)s + %(b)d %(y)s per week"
+msgstr "%(a)d %(x)s + %(b)d %(y)s per setmana"
+
+#. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "What is CoreLab?"
 msgstr "Què és CoreLab?"
