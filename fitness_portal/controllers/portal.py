@@ -917,6 +917,7 @@ class FitnessStudentPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_portal.portal_student_history', {
+            'lbl_filter_period': _('Filter period'),
             'month_groups':      month_groups,
             'subscriptions':     subscriptions,
             'packs':             packs,
@@ -1016,6 +1017,7 @@ class FitnessStudentPortal(http.Controller):
         student_name = full_name.split()[0] if full_name else full_name
 
         return request.render('fitness_portal.portal_credit_history', {
+            'lbl_filter_period': _('Filter period'),
             'entries':            filtered,
             'month_groups':       month_groups,
             'available_months':   available_months,
@@ -1210,6 +1212,16 @@ class FitnessStudentPortal(http.Controller):
         else:
             domain = [('fitness_is_package', '=', True), ('fitness_class_count', '>', 1)]
 
+        # Smallest first, then up. Ordering by price alone shuffled the pack
+        # sizes together - Barre came out 5, 2, 10, 4, 6 - so a student
+        # comparing options had to read every card to find the next size up.
+        # Price stays as the tiebreak, which keeps the plain pack ahead of the
+        # Privado and Duo versions of the same size.
+        #
+        # The sort key is what the student ends up with, which is not what any
+        # single column holds. A combined pack stores its count once and grants
+        # it twice, once per pool, so "2 + 2" is four classes and belongs
+        # between the 3 and the 5 - not at the front as a "2".
         if active_tab == 'classes':
             # Include sale_ok=False (Privadas/Duo) — they show as contact-only
             products = request.env['product.template'].sudo().search(
@@ -1221,6 +1233,26 @@ class FitnessStudentPortal(http.Controller):
                 domain + [('active', '=', True), ('sale_ok', '=', True)],
                 order='fitness_class_type, list_price',
             )
+
+        def _pools(product):
+            return 2 if product.fitness_secondary_class_type else 1
+
+        def _sort_key(product):
+            if active_tab == 'subscriptions':
+                # Unlimited plans carry an allowance of zero, so sorting on the
+                # allowance alone would file them as the smallest thing on
+                # offer. They are the largest, and go last in their discipline.
+                return (product.fitness_class_type or '',
+                        1 if product.is_unlimited else 0,
+                        (product.weekly_class_allowance or 0) * _pools(product),
+                        product.list_price or 0.0)
+            return (product.fitness_class_type or '',
+                    (product.fitness_class_count or 0) * _pools(product),
+                    product.list_price or 0.0)
+
+        # Display order only. Nothing here touches what a purchase stores or
+        # grants - that is fitness_class_count per pool, exactly as before.
+        products = products.sorted(key=_sort_key)
         products = products.filtered(
             lambda p: 'discontinued' not in (p.name or '').lower()
         )
@@ -1360,6 +1392,10 @@ class FitnessStudentPortal(http.Controller):
             'trial_ids':                trial_ids,
             'trial_href':               trial_href,
             'lbl_view':                 _('View classes'),
+            # The tax term is a word, not punctuation: English says VAT where
+            # Spanish and Catalan say IVA. It was written into the markup, so
+            # every language got the Spanish one.
+            'lbl_plus_tax':             _('+ VAT'),
             # Was a literal in the template, so it stayed English in Spanish
             # and Catalan. Harmless while only a bought package showed it;
             # Part D puts it on the trial card, where every student sees it.
@@ -1489,6 +1525,7 @@ class FitnessStudentPortal(http.Controller):
             'trial_href':      '/my/studio?%s' % urlencode(
                 {'discipline': product.fitness_class_type or 'reformer'}),
             'lbl_view':        _('View classes'),
+            'lbl_plus_tax':    _('+ VAT'),
             # The price tag renders from the product, which cannot know whose
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)

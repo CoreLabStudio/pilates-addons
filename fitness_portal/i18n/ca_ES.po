@@ -14,6 +14,34 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "What is CoreLab?"
+msgstr "Què és CoreLab?"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "About the studio, our philosophy and pillars"
+msgstr "L'estudi, la nostra filosofia i els nostres pilars"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your browser installs apps from its own menu: look for \"Install app\" or \"Add to Home screen\"."
+msgstr "El teu navegador instal·la les aplicacions des del seu propi menú: busca \"Instal·lar aplicació\" o \"Afegeix a la pantalla d'inici\"."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Filter period"
+msgstr "Filtrar per període"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "+ VAT"
+msgstr "+ IVA"
+
+#. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your first class is free - choose Barre Trial Class or Reformer Trial Class. One trial per student, so pick the one you want to try."
