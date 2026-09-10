@@ -201,6 +201,22 @@
             <field name="description_sale">Private Reformer session. Full instructor attention, personalised progressions.</field>
         </record>
 
+        <!-- Barre intro pack, from the studio's price sheet: three classes,
+             45 EUR, a fortnight to use them. Mirrors the Reformer intro
+             pack, which is the same idea for the other room. -->
+        <record id="product_barre_intro3" model="product.template">
+            <field name="name">Barre Intro Pack (3 classes)</field>
+            <field name="type">service</field>
+            <field name="list_price">45.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">3</field>
+            <field name="fitness_validity_days">14</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">group</field>
+            <field name="sale_ok">1</field>
+            <field name="description_sale">Three Barre classes to find your feet. Long enough to learn the technique and feel the difference.</field>
+        </record>
+
         <!-- Barre private pack. Priced and dated from the studio's own
              sheet: 165 EUR, valid three months. Mirrors the Reformer
              private pack, which is the closest thing that already exists. -->
