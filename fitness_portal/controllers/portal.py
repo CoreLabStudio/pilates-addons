@@ -917,6 +917,7 @@ class FitnessStudentPortal(http.Controller):
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
         return request.render('fitness_portal.portal_student_history', {
+            'lbl_filter_period': _('Filter period'),
             'month_groups':      month_groups,
             'subscriptions':     subscriptions,
             'packs':             packs,
@@ -1016,6 +1017,7 @@ class FitnessStudentPortal(http.Controller):
         student_name = full_name.split()[0] if full_name else full_name
 
         return request.render('fitness_portal.portal_credit_history', {
+            'lbl_filter_period': _('Filter period'),
             'entries':            filtered,
             'month_groups':       month_groups,
             'available_months':   available_months,
@@ -1360,6 +1362,10 @@ class FitnessStudentPortal(http.Controller):
             'trial_ids':                trial_ids,
             'trial_href':               trial_href,
             'lbl_view':                 _('View classes'),
+            # The tax term is a word, not punctuation: English says VAT where
+            # Spanish and Catalan say IVA. It was written into the markup, so
+            # every language got the Spanish one.
+            'lbl_plus_tax':             _('+ VAT'),
             # Was a literal in the template, so it stayed English in Spanish
             # and Catalan. Harmless while only a bought package showed it;
             # Part D puts it on the trial card, where every student sees it.
@@ -1489,6 +1495,7 @@ class FitnessStudentPortal(http.Controller):
             'trial_href':      '/my/studio?%s' % urlencode(
                 {'discipline': product.fitness_class_type or 'reformer'}),
             'lbl_view':        _('View classes'),
+            'lbl_plus_tax':    _('+ VAT'),
             # The price tag renders from the product, which cannot know whose
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)

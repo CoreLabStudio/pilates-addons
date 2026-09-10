@@ -1005,7 +1005,7 @@
                 <div style="text-align:right;margin-bottom:8px;">
                     <select class="mv-period-select"
                             onchange="location.href=this.value"
-                            aria-label="Filter period">
+                            t-att-aria-label="lbl_filter_period">
                         <option t-att-value="'/my/history'"
                                 t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
                         <t t-foreach="available_months" t-as="m">
@@ -1198,7 +1198,7 @@
                     <div style="text-align:right;margin:0 16px 12px;">
                         <select class="mv-period-select"
                                 onchange="location.href=this.value"
-                                aria-label="Filter period">
+                                t-att-aria-label="lbl_filter_period">
                             <option t-att-value="'/my/credits'"
                                     t-att-selected="'selected' if filter_period == 'all' else None">All time</option>
                             <t t-foreach="available_months" t-as="m">
@@ -1667,7 +1667,7 @@
                         <!-- Price + buy -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/><t t-if="not is_free"> <span style="font-size:0.72rem;">+ IVA</span></t></span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/><t t-if="not is_free"> <span style="font-size:0.72rem;" t-out="lbl_plus_tax"/></t></span>
                                 <span class="mv-price-lg" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-call="fitness_portal.mv_price_tag"/>
                                 </span>
@@ -2293,7 +2293,7 @@
             </span>
             <!-- Only where tax is actually added to a real price. "Free + IVA"
                  reads as though something is still owed on top of nothing. -->
-            <span class="mv-price-tax">+ IVA</span>
+            <span class="mv-price-tax" t-out="lbl_plus_tax"/>
         </t>
         <!-- The badge names the offer. On a free item with no end date it
              would just repeat the word already standing next to it, so the
