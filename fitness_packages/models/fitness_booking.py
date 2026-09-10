@@ -129,6 +129,27 @@ class FitnessBookingPackage(models.Model):
         if len(order.order_line) != 1 or (order.amount_total or 0.0) > 0.0:
             # not a trial order of its own - leave it alone
             return
+
+        # A handful of students were given two free trials before the
+        # one-per-student rule existed. Each sits on its own single-line
+        # zero-priced order, so each looks releasable on its own - and
+        # releasing one would quietly take a free class off them. Releasing
+        # is only right when it hands back an entitlement they no longer
+        # hold; while another trial credit is still in their name, the
+        # restored credit is what they should keep.
+        others = self.env['sale.order.line'].sudo().search_count([
+            ('id', '!=', line.id),
+            ('order_partner_id', '=', line.order_partner_id.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', self._trial_variant_ids()),
+            ('fitness_remaining_classes', '>', 0),
+        ])
+        if others:
+            _logger.info(
+                "[TRIAL] Student %s still holds %d other trial credit(s); "
+                "keeping the restored credit rather than releasing the claim",
+                line.order_partner_id.id, others)
+            return
         line.fitness_remaining_classes = 0
         if order.state in ('sale', 'done'):
             order.sudo().action_cancel()
@@ -136,6 +157,14 @@ class FitnessBookingPackage(models.Model):
             "[TRIAL] Cancelled booking released the trial claim: order %s "
             "cancelled, credit cleared - the entitlement is open again",
             order.name)
+
+    def _trial_variant_ids(self):
+        variants = self.env['product.product'].browse()
+        for xmlid in self.TRIAL_XMLIDS:
+            product = self.env.ref(xmlid, raise_if_not_found=False)
+            if product:
+                variants |= product.sudo().product_variant_ids
+        return variants.ids
 
     def _is_trial_line(self, line):
         trials = self.env['product.template'].browse()
