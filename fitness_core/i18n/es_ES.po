@@ -339,8 +339,24 @@ msgstr "Horarios recurrentes"
 
 #. module: fitness_core
 #: model:ir.ui.menu,name:fitness_core.menu_fitness_news_posts
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_news_post
 msgid "News & Promotions"
 msgstr "Noticias y promociones"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_news_post_form
+msgid "Button (optional)"
+msgstr "Botón (opcional)"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__cta_label
+msgid "Call-to-action label"
+msgstr "Texto del botón"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__cta_url
+msgid "Call-to-action link"
+msgstr "Enlace del botón"
 
 #. module: fitness_core
 #: model:ir.ui.menu,name:fitness_core.menu_fitness_class_categories
@@ -512,6 +528,8 @@ msgstr "Equipamiento / material"
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__description
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__description
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__description
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_news_post_form
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_news_post_list
 msgid "Description"
 msgstr "Descripción"
 
