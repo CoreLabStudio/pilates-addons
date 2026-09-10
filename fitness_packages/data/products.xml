@@ -201,6 +201,21 @@
             <field name="description_sale">Private Reformer session. Full instructor attention, personalised progressions.</field>
         </record>
 
+        <!-- Barre private pack. Priced and dated from the studio's own
+             sheet: 165 EUR, valid three months. Mirrors the Reformer
+             private pack, which is the closest thing that already exists. -->
+        <record id="product_barre_privada_5pack" model="product.template">
+            <field name="name">Barre Private Pack 5</field>
+            <field name="type">service</field>
+            <field name="list_price">165.00</field>
+            <field name="fitness_is_package">1</field>
+            <field name="fitness_class_count">5</field>
+            <field name="fitness_validity_days">90</field>
+            <field name="fitness_class_type">barre</field>
+            <field name="fitness_session_type">private</field>
+            <field name="sale_ok">1</field>
+            <field name="description_sale">Five private Barre sessions, fully personalised to your goals. Book at times that suit you, one-on-one with your instructor.</field>
+        </record>
         <record id="product_private_5pack" model="product.template">
             <field name="name">Reformer Privado Pack 5</field>
             <field name="type">service</field>
