@@ -63,22 +63,22 @@ msgstr "Mira-les totes dues si vols: navegar no gasta res. Tens una classe de pr
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Class Types"
-msgstr "Tipus de classe"
+msgid "Initiation Class"
+msgstr "Classe d'iniciació"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "View class types"
-msgstr "Veure tipus de classe"
+msgid "View initiation class"
+msgstr "Veure classe d'iniciació"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Explore packages, memberships & class types"
-msgstr "Explorar paquets, membresies i tipus de classe"
+msgid "Explore packages, memberships & initiation classes"
+msgstr "Explorar paquets, membresies i classes d'iniciació"
 
 #. module: fitness_portal
 #. odoo-python
@@ -2674,8 +2674,8 @@ msgstr "Descobreix els nostres paquets"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Class Types, Memberships &amp; Packages"
-msgstr "Tipus de classe, Membresies i Bons"
+msgid "Initiation Class, Memberships &amp; Packages"
+msgstr "Classe d'iniciació, Membresies i Bons"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav

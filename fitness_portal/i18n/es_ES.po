@@ -63,22 +63,22 @@ msgstr "Mira las dos si quieres: navegar no gasta nada. Tienes una clase de prue
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Class Types"
-msgstr "Tipos de clase"
+msgid "Initiation Class"
+msgstr "Clase de iniciación"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "View class types"
-msgstr "Ver tipos de clase"
+msgid "View initiation class"
+msgstr "Ver clase de iniciación"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Explore packages, memberships & class types"
-msgstr "Explorar paquetes, membresías y tipos de clase"
+msgid "Explore packages, memberships & initiation classes"
+msgstr "Explorar paquetes, membresías y clases de iniciación"
 
 #. module: fitness_portal
 #. odoo-python
@@ -2673,8 +2673,8 @@ msgstr "Descubre nuestros paquetes"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
-msgid "Class Types, Memberships &amp; Packages"
-msgstr "Tipos de clase, Membresías y Bonos"
+msgid "Initiation Class, Memberships &amp; Packages"
+msgstr "Clase de iniciación, Membresías y Bonos"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
