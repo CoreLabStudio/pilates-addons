@@ -119,6 +119,29 @@ class TestTrialCancelReleasesClaim(TransactionCase):
 
     # ── what the fix must not touch ──────────────────────────────────────
 
+    def test_a_grandfathered_second_trial_is_not_taken_away(self):
+        """A few students were given two free trials before the one-per-student
+        rule existed. Each sits on its own single-line zero-priced order, so
+        each looks releasable on its own. Releasing one would quietly cost
+        them a free class, so while another trial credit is still theirs the
+        restored credit is what they keep."""
+        first = self._confirmed_order(
+            self.env.ref("fitness_packages.product_reformer_trial"), 0.0)
+        second = self._confirmed_order(
+            self.env.ref("fitness_packages.product_barre_trial"), 0.0)
+
+        self._book_and_cancel(first, self._event("reformer", "One of two"))
+
+        self.assertEqual(
+            first.order_line[:1].fitness_remaining_classes, 1,
+            "the cancelled trial was released even though the student still "
+            "held a second one - that is a free class taken off them")
+        self.assertEqual(first.state, "sale",
+                         "the order was cancelled while a second trial stood")
+        self.assertEqual(
+            second.order_line[:1].fitness_remaining_classes, 1,
+            "the untouched second trial lost its credit")
+
     def test_a_paid_pack_keeps_its_restored_credit(self):
         """The release is only ever for a free trial. A pack somebody paid
         for gets its credit back and keeps its order, as it always did."""
