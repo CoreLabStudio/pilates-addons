@@ -170,8 +170,8 @@ class FitnessStudentPortal(http.Controller):
              'label': _('Class packages'), 'status': _('Discover our packages'),
              'cta': _('Buy'), 'href': '/my/packages?tab=packages'},
             {'key': 'class', 'show': missing['class'],
-             'label': _('Class Types'), 'status': _('No active class'),
-             'cta': _('View class types'), 'href': '/my/packages?tab=classes'},
+             'label': _('Initiation Class'), 'status': _('No active class'),
+             'cta': _('View initiation class'), 'href': '/my/packages?tab=classes'},
         ) if p['show']]
         # Membership and packages sit side by side; the class tile spans
         # the row underneath. Split here rather than in QWeb so the
@@ -192,7 +192,7 @@ class FitnessStudentPortal(http.Controller):
             'has_any_bookings': has_any_bookings,
             'has_no_purchases': has_no_purchases,
             'lbl_choose_plan':  _('Start by choosing your plan.'),
-            'lbl_explore_shop': _('Explore packages, memberships & class types'),
+            'lbl_explore_shop': _('Explore packages, memberships & initiation classes'),
             'news_posts':       news_posts,
             'trial_post_url':   trial_post_url,
             'lbl_book_trial':   _('Book a Free Trial'),
