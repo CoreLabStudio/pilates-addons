@@ -90,7 +90,7 @@
                     <div class="mv-profile-hero">
                         <t t-if="_tp_partner.image_1920">
                             <div class="mv-avatar-lg mv-avatar-lg--photo" t-att-title="_tp_name or 'Profile'">
-                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _tp_partner.id"
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920?unique=%s' % (_tp_partner.id, _tp_partner.write_date.strftime('%Y%m%d%H%M%S') if _tp_partner.write_date else '0')"
                                      t-att-alt="_tp_name or ''"/>
                             </div>
                         </t>
@@ -267,7 +267,7 @@
                     <div class="mv-profile-hero">
                         <t t-if="_ph_partner.image_1920">
                             <div class="mv-avatar-lg mv-avatar-lg--photo" t-att-title="_ph_name or 'Profile'">
-                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _ph_partner.id"
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920?unique=%s' % (_ph_partner.id, _ph_partner.write_date.strftime('%Y%m%d%H%M%S') if _ph_partner.write_date else '0')"
                                      t-att-alt="_ph_name or ''"/>
                             </div>
                         </t>
