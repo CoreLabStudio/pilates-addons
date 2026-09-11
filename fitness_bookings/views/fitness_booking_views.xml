@@ -41,6 +41,14 @@
                             type="object"
                             class="btn-danger"
                             invisible="state != 'booked'"/>
+                    <!-- The list had "Cancel or move" and the form did not, so
+                         opening the record was the one place the desk could
+                         cancel but not move. -->
+                    <button name="action_open_reassign_wizard"
+                            string="Cancel or Move"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'booked'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="booked,attended,no_show,cancelled"/>
                 </header>

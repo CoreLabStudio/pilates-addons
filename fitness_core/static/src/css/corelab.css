@@ -4637,13 +4637,19 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     margin-top: 8px;
 }
 .mv-field-input {
-    font-size: 0.9rem;
-    padding: 9px 11px;
+    /* 16px, not 0.9rem. Mobile Safari zooms the whole page when a text input
+       under 16px takes focus, and the student then has to pinch back out to
+       reach Save. This is the one number on the page that is a compatibility
+       fix rather than a taste decision. */
+    font-size: 16px;
+    /* ~44px tall, the smallest comfortable touch target. */
+    padding: 11px 12px;
     border: 1px solid var(--mv-border);
     border-radius: 10px;
     background: var(--mv-bg);
     color: var(--mv-ink);
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 .mv-field-input:focus {
@@ -4732,12 +4738,17 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     text-decoration: underline;
     cursor: pointer;
 }
+/* Name and email are shown, not editable. They used to be drawn as a filled
+   sand box with the same border and radius as a real input, which made the
+   two fields a student CANNOT change the loudest things on the page - and
+   invited a tap that does nothing. They read as text now, so the editable
+   fields are the ones that look editable. */
 .mv-field-static {
-    font-size: 0.9rem;
-    color: var(--mv-ink);
-    padding: 9px 11px;
+    font-size: 0.95rem;
+    color: var(--mv-muted);
+    padding: 2px 2px 6px;
     margin: 0;
-    border: 1px solid var(--mv-border);
-    border-radius: 10px;
-    background: var(--mv-sand);
+    border: none;
+    background: none;
+    word-break: break-word;
 }

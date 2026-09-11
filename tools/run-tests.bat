@@ -51,7 +51,7 @@ REM "1002 error(s) of 1381 tests", which looks like a catastrophic regression in
 REM our code and is nothing of the kind. Default to this project's modules.
 set ARGS=%*
 if "%~1"=="" (
-  set ARGS=-u fitness_core,fitness_packages,fitness_portal --test-tags /fitness_core,/fitness_packages,/fitness_portal
+  set ARGS=-u fitness_core,fitness_packages,fitness_bookings,fitness_portal --test-tags /fitness_core,/fitness_packages,/fitness_bookings,/fitness_portal
   echo   No arguments given - testing this project's modules only.
 )
 
