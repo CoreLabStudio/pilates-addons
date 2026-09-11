@@ -316,6 +316,15 @@ class FitnessBooking(models.Model):
 
         _logger.info("[BOOKING] ✓ No time overlap")
 
+    def _notify_moved(self, origin_event):
+        """Hook: the studio moved this booking to another class.
+
+        A no-op here. fitness_notifications overrides it to tell the student -
+        being moved is something that happens *to* them, so silence would mean
+        turning up to a class they are no longer booked into.
+        """
+        return
+
     def _refresh_booked_seats(self):
         """Re-count active bookings and write back to the calendar event."""
         count = self.search_count([

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── VIP filters on the three activity lists ─────────────────────────── -->
+    <!--                                                                        -->
+    <!-- The studio can already filter Students by VIP. These put the same      -->
+    <!-- filter on Bookings, Packages and Memberships, so a VIP's activity can  -->
+    <!-- be pulled up from the list you are already looking at rather than only -->
+    <!-- from their profile.                                                    -->
+    <!--                                                                        -->
+    <!-- They live in fitness_portal and not in the modules that own those      -->
+    <!-- lists, because fitness_is_vip is a res.users field defined here.       -->
+    <!-- fitness_bookings, fitness_packages and fitness_subscriptions all sit   -->
+    <!-- BELOW this module and do not depend on it: a filter referencing the    -->
+    <!-- field from there fails to load outright, which is exactly what it did. -->
+    <!--                                                                        -->
+    <!-- VIP is on the user, not the partner, so every domain goes through      -->
+    <!-- user_ids. A partner with no user simply never matches, which is right: -->
+    <!-- a contact who cannot log in is not a VIP student.                      -->
+
+    <!-- Bookings: the search view already exists, so extend it. -->
+    <record id="view_fitness_booking_search_vip" model="ir.ui.view">
+        <field name="name">fitness.booking.search.vip</field>
+        <field name="model">fitness.booking</field>
+        <field name="inherit_id" ref="fitness_bookings.view_fitness_booking_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='filter_cancelled']" position="after">
+                <separator/>
+                <filter name="filter_vip" string="VIP"
+                        domain="[('student_id.user_ids.fitness_is_vip', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Packages and Memberships have no search view of their own. These are
+         pinned to their actions explicitly and carry a high priority, so they
+         cannot become the default search view for sale.order.line or
+         sale.order across the rest of Odoo - the Sales app uses those models
+         too, and quietly replacing its search would be a poor trade for one
+         filter. -->
+
+    <record id="view_fitness_package_balance_search" model="ir.ui.view">
+        <field name="name">sale.order.line.search.fitness.packages</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <search string="Search Packages">
+                <field name="order_partner_id" string="Student"/>
+                <field name="product_id"/>
+                <filter name="filter_vip" string="VIP"
+                        domain="[('order_partner_id.user_ids.fitness_is_vip', '=', True)]"/>
+                <separator/>
+                <filter name="group_student" string="Student"
+                        context="{'group_by': 'order_partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="fitness_packages.action_fitness_package_balances" model="ir.actions.act_window">
+        <field name="search_view_id" ref="view_fitness_package_balance_search"/>
+    </record>
+
+    <record id="view_fitness_membership_balance_search" model="ir.ui.view">
+        <field name="name">sale.order.search.fitness.memberships</field>
+        <field name="model">sale.order</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <search string="Search Memberships">
+                <field name="partner_id" string="Student"/>
+                <filter name="filter_vip" string="VIP"
+                        domain="[('partner_id.user_ids.fitness_is_vip', '=', True)]"/>
+                <separator/>
+                <filter name="group_student" string="Student"
+                        context="{'group_by': 'partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="fitness_subscriptions.action_fitness_membership_balances" model="ir.actions.act_window">
+        <field name="search_view_id" ref="view_fitness_membership_balance_search"/>
+    </record>
+
+</odoo>

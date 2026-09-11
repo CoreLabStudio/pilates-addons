@@ -4625,13 +4625,18 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+/* 20px each side, the same gutter every other page in the portal uses. The
+   2px it had was right while this was a sheet - the panel around it supplied
+   the margin - and wrong the moment it became a page, which left the labels
+   and inputs running into the edge of the phone. */
 .mv-profile-form {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 4px 2px 8px;
+    gap: 4px;
+    padding: 4px 20px 8px;
 }
 .mv-field-label {
+    margin-top: 10px;
     font-size: 0.78rem;
     color: var(--mv-muted);
     margin-top: 8px;
