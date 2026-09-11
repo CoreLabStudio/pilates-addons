@@ -3312,22 +3312,35 @@
                             two things about yourself. -->
                     <div class="mv-photo-row">
                         <t t-if="_pe_partner.image_1920">
-                            <div class="mv-avatar-sm mv-avatar-sm--photo">
+                            <div class="mv-avatar-sm mv-avatar-sm--photo" id="mv-photo-preview">
                                 <img t-att-src="'/web/image/res.partner/%d/image_1920' % _pe_partner.id"
                                      t-att-alt="_pe_partner.name or ''"/>
                             </div>
                         </t>
                         <t t-else="">
-                            <div class="mv-avatar-sm"
+                            <div class="mv-avatar-sm" id="mv-photo-preview"
                                  t-out="(_pe_partner.name or 'Y')[:1].upper()"/>
                         </t>
-                        <label class="mv-photo-pick">
-                            <!-- block, not inline: Odoo folds an inline <span>
-                                 into the parent label's term, so a <span> here
-                                 silently never translates. -->
-                            <div class="mv-photo-pick-text">Change photo</div>
-                            <input type="file" name="photo" accept="image/*" style="display:none;"/>
-                        </label>
+                        <div class="mv-photo-pick-wrap">
+                            <label class="mv-photo-pick">
+                                <!-- block, not inline: Odoo folds an inline <span>
+                                     into the parent label's term, so a <span> here
+                                     silently never translates. -->
+                                <div class="mv-photo-pick-text">Change photo</div>
+                                <!-- Visually hidden rather than display:none. A
+                                     control that is not displayed is not reliably
+                                     activated by its label on every mobile browser,
+                                     and when that fails it fails silently: the
+                                     picker simply never opens. -->
+                                <input type="file" name="photo" accept="image/*"
+                                       id="mv-photo-input" class="mv-photo-input"/>
+                            </label>
+                            <!-- Picking a file used to change nothing on screen.
+                                 Nothing uploads until Save, by design - one Save
+                                 applies the lot - but with no feedback at all a
+                                 student reasonably concludes it is broken. -->
+                            <p class="mv-photo-chosen" id="mv-photo-chosen" hidden="hidden"/>
+                        </div>
                     </div>
 
                     <!-- 2 and 3. Shown because a student should see which
@@ -3376,6 +3389,25 @@
 
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
+            <script>
+            (function () {
+                var input = document.getElementById('mv-photo-input');
+                var preview = document.getElementById('mv-photo-preview');
+                var chosen = document.getElementById('mv-photo-chosen');
+                if (!input || !preview) return;
+                input.addEventListener('change', function () {
+                    var file = input.files &amp;&amp; input.files[0];
+                    if (!file) return;
+                    var img = document.createElement('img');
+                    img.alt = '';
+                    img.src = URL.createObjectURL(file);
+                    preview.textContent = '';
+                    preview.classList.add('mv-avatar-sm--photo');
+                    preview.appendChild(img);
+                    if (chosen) { chosen.textContent = file.name; chosen.hidden = false; }
+                });
+            })();
+            </script>
         </t>
     </template>
 
