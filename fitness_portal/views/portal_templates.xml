@@ -43,7 +43,7 @@
                 <t t-set="_mv_photo" t-value="request.env.user.partner_id.image_128"/>
                 <a href="/my" class="mv-avatar" t-att-title="_mv_sname or 'Profile'">
                     <t t-if="_mv_photo">
-                        <img t-att-src="'/web/image/res.partner/%d/image_128' % request.env.user.partner_id.id"
+                        <img t-att-src="'/web/image/res.partner/%d/image_128?unique=%s' % (request.env.user.partner_id.id, (request.env.user.partner_id.write_date or '').strftime('%Y%m%d%H%M%S') if request.env.user.partner_id.write_date else '0')"
                              t-att-alt="_mv_sname or ''"
                              style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/>
                     </t>
@@ -87,7 +87,7 @@
                 <t t-set="_mv_tphoto" t-value="request.env.user.partner_id.image_128"/>
                 <a href="/my" class="mv-avatar" t-att-title="_mv_tname or 'Profile'">
                     <t t-if="_mv_tphoto">
-                        <img t-att-src="'/web/image/res.partner/%d/image_128' % request.env.user.partner_id.id"
+                        <img t-att-src="'/web/image/res.partner/%d/image_128?unique=%s' % (request.env.user.partner_id.id, (request.env.user.partner_id.write_date or '').strftime('%Y%m%d%H%M%S') if request.env.user.partner_id.write_date else '0')"
                              t-att-alt="_mv_tname or ''"
                              style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/>
                     </t>
@@ -3313,7 +3313,7 @@
                     <div class="mv-photo-row">
                         <t t-if="_pe_partner.image_1920">
                             <div class="mv-avatar-sm mv-avatar-sm--photo" id="mv-photo-preview">
-                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _pe_partner.id"
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920?unique=%s' % (_pe_partner.id, _pe_partner.write_date.strftime('%Y%m%d%H%M%S') if _pe_partner.write_date else '0')"
                                      t-att-alt="_pe_partner.name or ''"/>
                             </div>
                         </t>
@@ -3335,11 +3335,6 @@
                                 <input type="file" name="photo" accept="image/*"
                                        id="mv-photo-input" class="mv-photo-input"/>
                             </label>
-                            <!-- Picking a file used to change nothing on screen.
-                                 Nothing uploads until Save, by design - one Save
-                                 applies the lot - but with no feedback at all a
-                                 student reasonably concludes it is broken. -->
-                            <p class="mv-photo-chosen" id="mv-photo-chosen" hidden="hidden"/>
                         </div>
                     </div>
 
@@ -3393,7 +3388,6 @@
             (function () {
                 var input = document.getElementById('mv-photo-input');
                 var preview = document.getElementById('mv-photo-preview');
-                var chosen = document.getElementById('mv-photo-chosen');
                 if (!input || !preview) return;
                 input.addEventListener('change', function () {
                     var file = input.files &amp;&amp; input.files[0];
@@ -3404,7 +3398,6 @@
                     preview.textContent = '';
                     preview.classList.add('mv-avatar-sm--photo');
                     preview.appendChild(img);
-                    if (chosen) { chosen.textContent = file.name; chosen.hidden = false; }
                 });
             })();
             </script>
