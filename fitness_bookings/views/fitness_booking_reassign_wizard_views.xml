@@ -12,7 +12,12 @@
                         <field name="from_event_id"/>
                         <field name="from_start"/>
                     </group>
-                    <group>
+                    <!-- Only a cancellation can return a credit. During a
+                         move nothing is returned or re-spent - the booking
+                         keeps the credit it already has - so offering the
+                         choice here only invited the question "if I'm moving
+                         them, why would I give the credit back?". -->
+                    <group invisible="target_event_id">
                         <field name="restore_credit"/>
                     </group>
                     <!-- Optional on purpose. A student who wants a refund and
@@ -27,9 +32,10 @@
                 </sheet>
                 <footer>
                     <button string="Cancel Only" type="object"
-                            name="action_cancel_only" class="btn-danger"/>
-                    <button string="Cancel and Move" type="object"
-                            name="action_cancel_and_assign" class="btn-primary"
+                            name="action_cancel_only" class="btn-danger"
+                            invisible="target_event_id"/>
+                    <button string="Move" type="object"
+                            name="action_move_student" class="btn-primary"
                             invisible="not target_event_id"/>
                     <button string="Close" special="cancel" class="btn-secondary"/>
                 </footer>
