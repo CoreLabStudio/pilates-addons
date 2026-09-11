@@ -129,7 +129,7 @@ msgstr "Devolver el crédito"
 #. module: fitness_bookings
 #: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__restore_credit
 msgid ""
-"Return the student's credit even though this cancellation is within 2 hours "
+"Return the student's credit even though this cancellation is within 6 hours "
 "of class."
 msgstr ""
 "Devuelve el crédito al estudiante aunque la cancelación sea dentro de las 2 "

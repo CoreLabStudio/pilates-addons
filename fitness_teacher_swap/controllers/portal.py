@@ -250,21 +250,33 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         past_events = request.env['calendar.event'].search(domain, order='start desc', limit=200)
 
+        # Two counts per class, read in two queries rather than two per row.
+        # This was a search_count pair inside the loop: a full 200-class page
+        # issued 400 queries to render a number beside each line.
+        attended_by_event = {}
+        total_by_event = {}
+        if past_events:
+            Booking = request.env['fitness.booking']
+            for event, count in Booking._read_group(
+                [('calendar_event_id', 'in', past_events.ids),
+                 ('state', '=', 'attended')],
+                groupby=['calendar_event_id'], aggregates=['__count'],
+            ):
+                attended_by_event[event.id] = count
+            for event, count in Booking._read_group(
+                [('calendar_event_id', 'in', past_events.ids),
+                 ('state', 'in', ('booked', 'attended', 'no_show'))],
+                groupby=['calendar_event_id'], aggregates=['__count'],
+            ):
+                total_by_event[event.id] = count
+
         events_ctx = []
         for ev in past_events:
-            attended = request.env['fitness.booking'].search_count([
-                ('calendar_event_id', '=', ev.id),
-                ('state', '=', 'attended'),
-            ])
-            total = request.env['fitness.booking'].search_count([
-                ('calendar_event_id', '=', ev.id),
-                ('state', 'in', ('booked', 'attended', 'no_show')),
-            ])
             events_ctx.append({
                 'event':       ev,
                 'local_start': _format_local(ev.start, user_tz),
-                'attended':    attended,
-                'total':       total,
+                'attended':    attended_by_event.get(ev.id, 0),
+                'total':       total_by_event.get(ev.id, 0),
             })
 
         month_groups = []

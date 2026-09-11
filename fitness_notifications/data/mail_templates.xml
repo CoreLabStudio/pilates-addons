@@ -111,10 +111,10 @@
       <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.credit_returned">
-      <p>Your credit has been returned (cancelled more than 2 hours before the class).</p>
+      <p>Your credit has been returned (cancelled more than 6 hours before the class).</p>
     </t>
     <t t-else="">
-      <p>No credit was returned (cancelled less than 2 hours before the class).</p>
+      <p>No credit was returned (cancelled less than 6 hours before the class).</p>
     </t>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
@@ -126,10 +126,10 @@
       <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
-      <p>El teu crèdit s'ha retornat (cancel·lat amb més de 2 hores d'antelació).</p>
+      <p>El teu crèdit s'ha retornat (cancel·lat amb més de 6 hores d'antelació).</p>
     </t>
     <t t-else="">
-      <p>No s'ha retornat el crèdit (cancel·lat amb menys de 2 hores d'antelació).</p>
+      <p>No s'ha retornat el crèdit (cancel·lat amb menys de 6 hores d'antelació).</p>
     </t>
   </t>
   <t t-else="">
@@ -141,10 +141,10 @@
       <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
-      <p>Tu crédito ha sido devuelto (cancelado con más de 2 horas de antelación).</p>
+      <p>Tu crédito ha sido devuelto (cancelado con más de 6 horas de antelación).</p>
     </t>
     <t t-else="">
-      <p>No se ha devuelto el crédito (cancelado con menos de 2 horas de antelación).</p>
+      <p>No se ha devuelto el crédito (cancelado con menos de 6 horas de antelación).</p>
     </t>
   </t>
 </div>
