@@ -74,6 +74,11 @@ msgid "View initiation class"
 msgstr "Veure classe d'iniciació"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Explore packages, memberships &amp; initiation classes"
+msgstr "Explorar paquets, membresies i classes d'iniciació"
+
+#. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
@@ -579,11 +584,11 @@ msgstr "Reserva no trobada o que no pertany al teu compte."
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid ""
-"This class starts in less than 2 hours and can no longer be cancelled "
-"online. Please contact the studio."
+"This class starts in less than %(hours)s hours and can no longer be "
+"cancelled online. Please contact the studio."
 msgstr ""
-"Aquesta classe comença en menys de 2 hores i ja no es pot cancel·lar en "
-"línia. Contacta amb l'estudi."
+"Aquesta classe comença en menys de %(hours)s hores i ja no es pot "
+"cancel·lar en línia. Contacta amb l'estudi."
 
 #. module: fitness_portal
 #. odoo-python
@@ -1664,19 +1669,19 @@ msgstr "4. Política de cancel·lació"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid ""
-"<strong>You must cancel at least 2 hours before the scheduled class start "
+"<strong>You must cancel at least 6 hours before the scheduled class start "
 "time</strong> to have your credit returned."
 msgstr ""
-"<strong>Has de cancel·lar almenys 2 hores abans de l'hora d'inici programada"
+"<strong>Has de cancel·lar almenys 6 hores abans de l'hora d'inici programada"
 " de la classe</strong> per rebre el teu crèdit de tornada."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid ""
-"Cancellations made within 2 hours of the class, or no-shows, will result in "
+"Cancellations made within 6 hours of the class, or no-shows, will result in "
 "the full credit deduction with no refund."
 msgstr ""
-"Les cancel·lacions fetes dins de les 2 hores anteriors a la classe, o les "
+"Les cancel·lacions fetes dins de les 6 hores anteriors a la classe, o les "
 "absències, comportaran la deducció del crèdit complet sense reemborsament."
 
 #. module: fitness_portal
@@ -2299,9 +2304,9 @@ msgstr "Aquesta setmana"
 # ── Task 3: Cancellation policy
 # ───────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
-msgid "Cancel up to 2 hours before class to keep your credit."
+msgid "Cancel up to 6 hours before class to keep your credit."
 msgstr ""
-"Pots cancel·lar fins a 2 hores abans de la classe per conservar el teu "
+"Pots cancel·lar fins a 6 hores abans de la classe per conservar el teu "
 "crèdit."
 
 #. module: fitness_portal

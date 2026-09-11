@@ -19,6 +19,13 @@ ICON_CANDIDATES = [
     ('fitness_core/static/src/img/corelab-icon.svg', 'image/svg+xml'),
     ('fitness_core/static/src/img/corelab-logo.png', 'image/png'),
 ]
+# The install icon, fetched once when someone adds the app to a home screen -
+# never on an ordinary page load. Kept separate so the icon every page asks for
+# stays small: corelab-logo.png is a 4500x4500 print master, and serving it as
+# a favicon cost 130 KB on every single request.
+ICON_512_CANDIDATES = [
+    ('fitness_core/static/src/img/corelab-icon-512.png', 'image/png'),
+] + ICON_CANDIDATES
 
 
 def _read_first(candidates):
@@ -49,6 +56,11 @@ class FitnessPortalBrand(http.Controller):
     def brand_icon(self, **kw):
         return self._serve(ICON_CANDIDATES)
 
+    @http.route('/corelab/icon-512', type='http', auth='public', methods=['GET'],
+                sitemap=False)
+    def brand_icon_512(self, **kw):
+        return self._serve(ICON_512_CANDIDATES)
+
     @staticmethod
     def _icon_entries():
         """Advertise the icon with the mimetype actually being served, so the
@@ -56,9 +68,12 @@ class FitnessPortalBrand(http.Controller):
         is in place."""
         _, mimetype = _read_first(ICON_CANDIDATES)
         if mimetype == 'image/png':
+            # Each entry points at a file that really is that size. Both used to
+            # name the same URL, so whichever file was behind it was advertised
+            # as 192 and 512 at once - true of neither.
             return [
                 {'src': '/corelab/icon', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
-                {'src': '/corelab/icon', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+                {'src': '/corelab/icon-512', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
             ]
         return [
             {'src': '/corelab/icon', 'sizes': 'any', 'type': 'image/svg+xml', 'purpose': 'any'},

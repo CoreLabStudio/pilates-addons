@@ -570,8 +570,7 @@
             <title t-esc="title or 'CoreLab'"/>
         </xpath>
         <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
-            <link rel="shortcut icon" type="image/png"
-                  href="/fitness_core/static/src/img/corelab-logo.png"/>
+            <link rel="shortcut icon" type="image/png" href="/corelab/icon"/>
         </xpath>
     </template>
 

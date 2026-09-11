@@ -28,6 +28,7 @@ except Exception:
 from odoo import http, fields
 from odoo.tools import float_is_zero
 from odoo.exceptions import UserError, ValidationError
+from odoo.addons.fitness_bookings.exceptions import LateCancellationError
 from odoo.http import request
 
 # The booking rule itself lives on the model; importing it keeps the
@@ -798,14 +799,20 @@ class FitnessStudentPortal(http.Controller):
 
         try:
             booking.action_cancel()
-        except (UserError, ValidationError) as exc:
-            msg = str(exc)
-            if 'less than 2 hours' in msg or 'within 2 hours' in msg:
-                msg = _(
-                    "This class starts in less than 2 hours and can no longer "
-                    "be cancelled online. Please contact the studio."
-                )
+        except LateCancellationError as exc:
+            # Caught by type. This used to search the model's English error text
+            # for "less than 2 hours", so changing either the wording or the
+            # number silently dropped the student back to a raw model message.
+            hours = exc.window_hours or booking._cancellation_window_hours()
+            msg = _(
+                "This class starts in less than %(hours)s hours and can no "
+                "longer be cancelled online. Please contact the studio.",
+                hours=booking._format_window(hours),
+            )
             qs = urlencode({'error': msg})
+            return request.redirect(f'{base}{qs}')
+        except (UserError, ValidationError) as exc:
+            qs = urlencode({'error': str(exc)})
             return request.redirect(f'{base}{qs}')
 
         if booking.credit_returned:
