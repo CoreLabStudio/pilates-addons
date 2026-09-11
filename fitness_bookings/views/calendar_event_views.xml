@@ -20,4 +20,39 @@
         </field>
     </record>
 
+    <!-- The roster, on the class itself. Cancelling one student was only
+         reachable from the student's side before, which is the wrong way round
+         when somebody rings the studio about a class: the desk is looking at
+         the class, not hunting for the person. Same wizard either way. -->
+    <record id="view_calendar_event_form_roster" model="ir.ui.view">
+        <field name="name">calendar.event.form.roster</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Roster" name="fitness_roster"
+                      groups="fitness_core.group_fitness_manager"
+                      invisible="not is_fitness_class">
+                    <field name="booking_ids" nolabel="1" readonly="1">
+                        <list create="false" delete="false"
+                              decoration-muted="state == 'cancelled'"
+                              decoration-success="state == 'attended'">
+                            <field name="student_id"/>
+                            <field name="booking_date"/>
+                            <field name="state" widget="badge"
+                                   decoration-info="state == 'booked'"
+                                   decoration-success="state == 'attended'"
+                                   decoration-danger="state == 'cancelled'"
+                                   decoration-warning="state == 'no_show'"/>
+                            <field name="credit_returned" optional="show"/>
+                            <button name="action_open_reassign_wizard" type="object"
+                                    string="Cancel / Move" icon="fa-exchange"
+                                    invisible="state != 'booked'"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

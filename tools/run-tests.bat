@@ -23,6 +23,38 @@ if "%TESTDB%"==""        set TESTDB=fresh_main
 if "%TESTPORT%"==""      set TESTPORT=8499
 if "%TEST_LOG%"==""      set TEST_LOG=C:\odoo-dev\logs\tests.log
 
+REM Refuse to run if something already owns the test port. The suite talks to
+REM its own HTTP server on TESTPORT; if a stranger is there - a forgotten
+REM background reproduction, another session's run - every request goes to it
+REM instead. That server is a live Odoo in a different test context, so it
+REM rejects them all with "400 ... does not contain the required cookie" and
+REM ~80 page tests fail identically every run. That reads as a catastrophic
+REM regression and is nothing of the kind; it cost an hour on 2026-09-11.
+netstat -ano | findstr /R /C:":%TESTPORT% .*LISTENING" >nul 2>&1
+if not errorlevel 1 (
+  echo.
+  echo   ABORTED: something is already listening on port %TESTPORT%.
+  echo.
+  echo   The suite would send its requests to that server instead of its own,
+  echo   and every page-rendering test would fail with a 400.
+  echo.
+  echo   Find it:  netstat -ano ^| findstr ":%TESTPORT%"
+  echo   Then stop it, or run with a free port:  set TESTPORT=8599
+  echo.
+  exit /b 1
+)
+
+REM A bare invocation means "--test-enable with no tags", which runs every test
+REM in every installed module - ~1381 of them, nearly all core Odoo, erroring
+REM wholesale on this machine's filestore paths. The summary line then reads
+REM "1002 error(s) of 1381 tests", which looks like a catastrophic regression in
+REM our code and is nothing of the kind. Default to this project's modules.
+set ARGS=%*
+if "%~1"=="" (
+  set ARGS=-u fitness_core,fitness_packages,fitness_portal --test-tags /fitness_core,/fitness_packages,/fitness_portal
+  echo   No arguments given - testing this project's modules only.
+)
+
 for %%D in ("%TEST_LOG%") do if not exist "%%~dpD" mkdir "%%~dpD"
 
 REM Clear the test session store before each run. Odoo's own HttpCase leaks one
@@ -41,4 +73,4 @@ if exist "%TEST_DATA_DIR%\sessions" rd /s /q "%TEST_DATA_DIR%\sessions"
   --test-enable ^
   --stop-after-init ^
   --logfile="%TEST_LOG%" ^
-  %*
+  %ARGS%

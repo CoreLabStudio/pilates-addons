@@ -276,14 +276,10 @@
                                 <t t-out="_ph_initial"/>
                             </div>
                         </t>
-                        <form action="/my/profile/upload-photo" method="post"
-                              enctype="multipart/form-data" style="margin:6px 0 4px;">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <label class="mv-photo-upload-btn"><div>Change photo</div>
-                                <input type="file" name="photo" accept="image/*"
-                                       style="display:none;" onchange="this.form.submit()"/>
-                            </label>
-                        </form>
+                        <!-- Under the photo, where Change photo used to sit.
+                             Editing yourself belongs next to the picture of
+                             you, not filed in a menu section of its own. -->
+                        <a href="/my/profile/edit?back=/my" class="mv-profile-edit-link">Edit profile</a>
                         <h1 class="mv-profile-name" t-out="_ph_name or 'My Profile'"/>
                         <p class="mv-profile-email" t-out="_ph_email"/>
                         <t t-if="_ph_credits">
@@ -295,18 +291,19 @@
                         </t>
                     </div>
 
-                    <t t-if="request.httprequest.args.get('photo_ok')">
-                        <div class="mv-flash mv-flash-ok" style="margin:0 16px 12px;">Profile photo updated.</div>
-                    </t>
-                    <t t-if="request.httprequest.args.get('photo_err')">
-                        <div class="mv-flash mv-flash-err" style="margin:0 16px 12px;">Photo upload failed — please try a smaller image.</div>
+                    <!-- Save returns here when the edit page was opened from
+                         this page, so the confirmation has to live here too -
+                         /my/home is no longer the only way back. The photo
+                         flashes this replaces could not fire any more: the
+                         student photo form is part of the edit page now, and
+                         only the teacher hub still posts to upload-photo. -->
+                    <t t-if="request.httprequest.args.get('profile_saved')">
+                        <div class="mv-flash mv-flash-ok" style="margin:0 16px 12px;">Saved. Thank you.</div>
                     </t>
 
                     <!-- Menu rows -->
                     <div class="mv-menu-list">
 
-                        <!-- SECTION 1 — the two Studio tab views. These link into
-                             the existing toggle, they are not separate pages. -->
                         <div class="mv-menu-section-label">My CoreLab Studio</div>
                         <a href="/my/studio" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">

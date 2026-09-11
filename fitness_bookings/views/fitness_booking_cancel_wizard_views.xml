@@ -7,10 +7,7 @@
         <field name="arch" type="xml">
             <form string="Cancel Booking (Late)">
                 <sheet>
-                    <div class="alert alert-warning mb-3" role="alert">
-                        This class starts in less than 6 hours.
-                        Late cancellations do not automatically return credits.
-                    </div>
+                    <div class="alert alert-warning mb-3" role="alert">This class starts in less than 6 hours. Late cancellations do not automatically return credits.</div>
                     <group>
                         <field name="student_name"/>
                         <field name="class_name"/>

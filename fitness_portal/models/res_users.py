@@ -86,6 +86,26 @@ class ResUsers(models.Model):
             'domain': [('id', 'in', lines.ids)],
         }
 
+    def action_view_student_details(self):
+        """What the student has told us about themselves, as they last saved it.
+
+        These live on res.partner and the student edits them from the portal,
+        so this opens that same record rather than a copy of it: whatever they
+        change in the portal is what the studio sees here. Read-only for the
+        same reason the rest of this form is - it is their answer, not ours.
+        """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'Details — {self.name}',
+            'res_model': 'res.users',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref(
+                'fitness_portal.view_student_profile_details').id, 'form')],
+            'target': 'new',
+        }
+
     def action_view_student_messages(self):
         self.ensure_one()
         return {
