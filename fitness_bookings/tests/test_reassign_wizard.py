@@ -239,6 +239,44 @@ class TestReassignWizard(TransactionCase):
         self._occupy(full, "b")
         self.assertNotIn(full, self._wizard().available_event_ids)
 
+    # ── the student has to hear about it ─────────────────────────────────────
+    def test_a_move_tells_the_student(self):
+        """Being moved happens *to* a student; silence means a wasted trip.
+
+        The bell and the mail both go out, and the bell names the class so the
+        notification is useful on its own rather than only as a prompt to go
+        and look.
+        """
+        Notif = self.env['fitness.notification']
+        user = self.student
+        before = Notif.search_count([('user_id', '=', user.id)])
+        mails_before = self.env['mail.mail'].search_count([])
+
+        self._wizard(target=self.target).action_move_student()
+
+        self.assertEqual(
+            Notif.search_count([('user_id', '=', user.id)]), before + 1,
+            "a move must ring the student's bell")
+        latest = Notif.search([('user_id', '=', user.id)], order='id desc', limit=1)
+        self.assertEqual(latest.notification_type, 'class_rescheduled')
+        self.assertIn(self.target.name, latest.body or '',
+                      "the notification should say which class they are in now")
+        self.assertTrue(latest.action_url, "it should open somewhere useful")
+        self.assertGreater(
+            self.env['mail.mail'].search_count([]), mails_before,
+            "a move must queue the email as well as the bell")
+
+    def test_the_move_email_has_a_recipient(self):
+        """An email with no recipient is not an email.
+
+        The template addresses the student with partner_to, which leaves
+        email_to empty and fills recipient_ids instead - so the check that
+        matters is the one on recipient_ids.
+        """
+        self._wizard(target=self.target).action_move_student()
+        mail = self.env['mail.mail'].search([], order='id desc', limit=1)
+        self.assertIn(self.partner, mail.recipient_ids)
+
     # ── what the button hands back to the web client ─────────────────────────
     #
     # These exist because the move passed every model-level test and still

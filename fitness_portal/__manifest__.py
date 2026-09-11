@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.24.64',
+    'version': '19.0.1.24.65',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Yoleyva Studio',
@@ -22,6 +22,7 @@
         'security/ir.rule.xml',
         'views/studio_message_views.xml',
         'views/student_profile_simple.xml',
+        'views/vip_filters.xml',
         'views/teacher_profile_simple.xml',
         'views/student_profile_views.xml',
         'views/portal_templates.xml',

@@ -161,6 +161,10 @@ class FitnessBookingReassignWizard(models.TransientModel):
         self._validate_move(target)
         booking.write({'calendar_event_id': target.id})
 
+        # The student has to hear about this: they did not ask to be moved,
+        # and the class they think they are attending is no longer theirs.
+        booking._notify_moved(origin)
+
         # Both rosters changed, so both seat counts are stale.
         booking._refresh_booked_seats()
         if origin:
