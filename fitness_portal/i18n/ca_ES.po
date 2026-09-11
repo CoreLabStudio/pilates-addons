@@ -1073,6 +1073,36 @@ msgid "Schedule"
 msgstr "Horari"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "<span class=\"o_stat_text\">Bookings</span>"
+msgstr "<span class=\"o_stat_text\">Reserves</span>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "<span class=\"o_stat_text\">Packages</span>"
+msgstr "<span class=\"o_stat_text\">Bons</span>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "<span class=\"o_stat_text\">Memberships</span>"
+msgstr "<span class=\"o_stat_text\">Subscripcions</span>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "<span class=\"o_stat_text\">Details</span>"
+msgstr "<span class=\"o_stat_text\">Detalls</span>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "<span class=\"o_stat_text\">Messages</span>"
+msgstr "<span class=\"o_stat_text\">Missatges</span>"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_details
+msgid "Contact details"
+msgstr "Dades de contacte"
+
+#. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
 msgid "<span class=\"o_stat_text\">Credits</span>"
@@ -1904,7 +1934,7 @@ msgstr "Idioma"
 # ── Profile Hub — mv_portal_my_home_hub
 # ──────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Change photo"
 msgstr "Canviar foto"
 
@@ -3213,68 +3243,101 @@ msgid "1 free trial available"
 msgstr "1 classe de prova disponible"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "About you"
 msgstr "Sobre tu"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Morning person or evening person?"
 msgstr "Ets de matins o de tardes?"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "No preference"
 msgstr "Sense preferència"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model:ir.model.fields.selection,name:fitness_portal.selection__res_partner__fitness_day_preference__morning
 msgid "Morning person"
 msgstr "De matins"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model:ir.model.fields.selection,name:fitness_portal.selection__res_partner__fitness_day_preference__evening
 msgid "Evening person"
 msgstr "De tardes"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Music you like"
 msgstr "Música que t'agrada"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "A genre, a singer, anything"
 msgstr "Un estil, una cantant, el que sigui"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_details
 msgid "Mobile number"
 msgstr "Número de mòbil"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_details
+msgid "Details"
+msgstr "Detalls"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_details
+msgid "About them"
+msgstr "Sobre l'alumna"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_day_preference
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_day_preference
+msgid "Preferred time of day"
+msgstr "Franja horària preferida"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_music_interest
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_music_interest
+msgid "Music they like"
+msgstr "Música que li agrada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_details
+msgid "The student fills these in from her profile. Blank means she has not answered yet."
+msgstr "L'alumna omple aquestes dades des del seu perfil. En blanc vol dir que encara no ha respost."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_emergency_contact
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_emergency_contact
 msgid "Emergency contact"
 msgstr "Contacte d'emergència"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Name and number"
 msgstr "Nom i telèfon"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "All optional. Only the studio sees this."
 msgstr "Tot és opcional. Només ho veu l'estudi."
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Saved. Thank you."
 msgstr "Desat. Gràcies."
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Edit your details"
 msgstr "Editar les teves dades"
@@ -3305,27 +3368,29 @@ msgid "Keep my booking"
 msgstr "Mantenir la meva reserva"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Name"
 msgstr "Nom"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Email"
 msgstr "Correu electrònic"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "A genre or a mood"
 msgstr "Un estil o un ambient"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__fitness_favourite_singer
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_favourite_singer
 msgid "Favourite singer"
 msgstr "Cantant preferida"
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "One artist you always want to hear"
 msgstr "Algú que sempre et ve de gust escoltar"
 
@@ -3336,5 +3401,11 @@ msgstr "Editar les meves dades"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+msgid "Edit profile"
+msgstr "Editar el perfil"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Photo, preferences, mobile and emergency contact"
 msgstr "Foto, preferències, mòbil i contacte d'emergència"

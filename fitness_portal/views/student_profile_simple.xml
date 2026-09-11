@@ -50,6 +50,17 @@
                                 <span class="o_stat_text">Memberships</span>
                             </div>
                         </button>
+                        <!-- What the student filled in about themselves on
+                             the portal. Same res.partner record they edit, so
+                             this always shows their latest answer. -->
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_student_details"
+                                icon="fa-id-card-o"
+                                groups="fitness_core.group_fitness_manager">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Details</span>
+                            </div>
+                        </button>
                         <button class="oe_stat_button" type="object"
                                 name="action_view_student_messages"
                                 icon="fa-comments"
@@ -74,6 +85,39 @@
                                groups="fitness_core.group_fitness_manager"/>
                     </group>
 
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── What the student told us about themselves ──────────────────────── -->
+    <!--                                                                        -->
+    <!-- Opened from the Details button on the student form. These are          -->
+    <!-- res.partner fields the student edits from the portal, shown here on    -->
+    <!-- the same record - not copied - so the studio sees the current answer.  -->
+    <!-- Read-only, like the rest of that form: it is the student's answer.     -->
+    <!-- priority=64 keeps it from ever being picked as a default res.users     -->
+    <!-- form; it is only ever reached through the button.                      -->
+
+    <record id="view_student_profile_details" model="ir.ui.view">
+        <field name="name">res.users.form.student.details</field>
+        <field name="model">res.users</field>
+        <field name="priority">64</field>
+        <field name="arch" type="xml">
+            <form string="Details" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group string="About them">
+                            <field name="fitness_day_preference" readonly="1"/>
+                            <field name="fitness_music_interest" readonly="1"/>
+                            <field name="fitness_favourite_singer" readonly="1"/>
+                        </group>
+                        <group string="Contact details">
+                            <field name="phone" string="Mobile number" readonly="1"/>
+                            <field name="fitness_emergency_contact" readonly="1"/>
+                        </group>
+                    </group>
+                    <p class="text-muted">The student fills these in from her profile. Blank means she has not answered yet.</p>
                 </sheet>
             </form>
         </field>

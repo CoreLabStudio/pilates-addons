@@ -4589,6 +4589,33 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     justify-content: center;
 }
 .mv-edit-pencil:hover { background: var(--mv-sand); }
+/* The pencil is a link now, not a button - it goes to a page. */
+.mv-edit-pencil { text-decoration: none; }
+
+/* The edit entry under the photo on the profile page. Shaped like the
+   Change photo pill that used to sit in exactly this spot, because that is
+   the control a student already knows how to find. */
+.mv-profile-edit-link {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mv-muted);
+    background: var(--mv-card-bg);
+    border: 1px solid var(--mv-border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    margin: 6px 0 4px;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
+}
+.mv-profile-edit-link:hover,
+.mv-profile-edit-link:active {
+    color: var(--mv-ink-text);
+    border-color: var(--mv-muted);
+    text-decoration: none;
+}
 .mv-edit-pencil svg {
     width: 15px;
     height: 15px;

@@ -2433,6 +2433,25 @@ class FitnessStudentPortal(http.Controller):
     #  Profile photo upload
     # ══════════════════════════════════════════════════════════
 
+    @http.route('/my/profile/edit', type='http', auth='user',
+                website=True, sitemap=False)
+    def profile_edit_page(self, back=None, **kw):
+        """The page a student edits themselves on.
+
+        This used to be a modal opened over whatever page you were on. On a
+        phone that gives you no way back except a close button, and nothing to
+        return to if you follow a link away and come back. A page has an
+        address, a back arrow and the browser's own back button.
+
+        Two entry points reach it - the pencil beside the greeting on the home
+        page and the link under the photo on the profile page - and each says
+        where it came from so Save and the back arrow both return there.
+        """
+        return request.render('fitness_portal.portal_profile_edit', {
+            '_pe_partner': request.env.user.partner_id,
+            '_pe_back': back if back in ('/my', '/my/home') else '/my',
+        })
+
     @http.route('/my/profile/save', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
     def save_profile_details(self, back=None, photo=None, **kw):

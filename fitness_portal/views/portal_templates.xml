@@ -234,13 +234,13 @@
                 <div class="mv-home-hero">
                     <div class="mv-home-title-row">
                         <h1 class="mv-home-title" t-out="welcome"/>
-                        <button type="button" class="mv-edit-pencil" data-mv-profile-open="1"
-                                aria-label="Edit your details" title="Edit your details">
+                        <a href="/my/profile/edit?back=/my/home" class="mv-edit-pencil"
+                           aria-label="Edit your details" title="Edit your details">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/>
                                 <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/>
                             </svg>
-                        </button>
+                        </a>
                     </div>
                     <t t-if="request.httprequest.args.get('profile_saved')">
                         <div class="mv-flash mv-flash-ok">Saved. Thank you.</div>
@@ -376,7 +376,6 @@
 
                 <t t-call="fitness_portal.mv_install_prompt"/>
                 <t t-call="fitness_portal.mv_install_ios_sheet"/>
-                <t t-call="fitness_portal.mv_profile_edit_sheet"/>
 
                 <!-- Full timetable. Shown to everyone, including a student who
                      owns nothing: knowing what the studio runs is exactly what
@@ -3273,26 +3272,33 @@
         </script>
     </template>
 
-    <!-- The few things a student tells us about themselves. One sheet, opened
-         from two places - the pencil beside the greeting on the home page and
-         the row on the profile page - so the two entry points cannot drift.
-         Reuses the install sheet's shell, which is already themed and already
-         behaves like a dialog, rather than inventing a second modal. -->
-    <template id="mv_profile_edit_sheet" name="CoreLab Profile Editor">
-        <t t-set="_pe_partner" t-value="request.env.user.partner_id"/>
-        <div class="mv-ios-sheet" id="mv-profile-sheet" hidden="hidden" role="dialog"
-             aria-modal="true" aria-label="About you">
-            <div class="mv-ios-panel">
-                <div class="mv-ios-head">
-                    <span class="mv-ios-title">About you</span>
-                    <button type="button" class="mv-ios-close" id="mv-profile-close"
-                            aria-label="Close">&#215;</button>
+    <!-- Edit profile. A page, not a modal. It is reached from the pencil
+         beside the greeting and from under the photo on the profile page, and
+         a page is what a student can back out of with the browser's own back
+         button - which is what they reach for on a phone. Both entry points
+         land here so the two cannot drift apart. -->
+    <template id="portal_profile_edit" name="Edit Profile (Student)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="_pe_back"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Edit profile</p>
+                        <p class="mv-greeting-sub">Photo, preferences, mobile and emergency contact</p>
+                    </div>
                 </div>
+
                 <form action="/my/profile/save" method="post" class="mv-profile-form"
                       enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <input type="hidden" name="back"
-                           t-att-value="request.httprequest.path if request.httprequest.path in ('/my', '/my/home') else '/my/home'"/>
+                    <input type="hidden" name="back" t-att-value="_pe_back"/>
 
                     <!-- 1. the photo, on the same form as everything else so one
                             Save applies the lot. It used to live on its own
@@ -3361,25 +3367,10 @@
                     <p class="mv-field-hint">All optional. Only the studio sees this.</p>
                     <button type="submit" class="mv-btn-book-lg">Save</button>
                 </form>
+
+                <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
-        </div>
-        <script>
-        (function () {
-            var sheet = document.getElementById('mv-profile-sheet');
-            if (!sheet) return;
-            function open(e) { if (e) e.preventDefault(); sheet.hidden = false; }
-            function close() { sheet.hidden = true; }
-            document.querySelectorAll('[data-mv-profile-open]').forEach(function (el) {
-                el.addEventListener('click', open);
-            });
-            var x = document.getElementById('mv-profile-close');
-            if (x) x.addEventListener('click', close);
-            sheet.addEventListener('click', function (ev) { if (ev.target === sheet) close(); });
-            document.addEventListener('keydown', function (ev) {
-                if (ev.key === 'Escape' &amp;&amp; !sheet.hidden) close();
-            });
-        })();
-        </script>
+        </t>
     </template>
 
     <!-- The iOS steps. Apple exposes no install API, so the only honest thing
