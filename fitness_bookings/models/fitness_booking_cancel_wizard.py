@@ -11,7 +11,7 @@ class FitnessBookingCancelWizard(models.TransientModel):
     class_start = fields.Datetime(related='booking_id.calendar_event_id.start', readonly=True, string='Start Time')
     restore_credit = fields.Boolean(
         'Restore Credit', default=False,
-        help='Return the student\'s credit even though this cancellation is within 2 hours of class.',
+        help='Return the student\'s credit even though this cancellation is within 6 hours of class.',
     )
 
     def action_confirm(self):

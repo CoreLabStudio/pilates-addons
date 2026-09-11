@@ -1,8 +1,20 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
 
+from odoo.addons.fitness_bookings.exceptions import LateCancellationError
+
 import logging
 _logger = logging.getLogger(__name__)
+
+#: How close to the start of a class a student may still cancel and keep
+#: their credit, in hours. The studio can override it without a deploy by
+#: setting the ``fitness.cancellation_window_hours`` system parameter.
+#:
+#: This was three separate hardcoded 2s, one of which decided whether the
+#: credit came back. Changing the rule meant finding all three and every
+#: sentence that quoted the number, and the sentences were what the portal
+#: matched on to recognise the error. One value now, read in one place.
+CANCELLATION_WINDOW_HOURS = 6.0
 
 # How far ahead a student may book. The portal timetable reads this so it can
 # say "booking opens on ..." in place instead of letting the student tap
@@ -322,14 +334,43 @@ class FitnessBooking(models.Model):
 
     # ─── CANCEL ───────────────────────────────────────────────────────────────
 
+    @staticmethod
+    def _format_window(hours):
+        """6.0 -> '6', 1.5 -> '1.5'. Students should not read a float."""
+        return str(int(hours)) if float(hours).is_integer() else str(hours)
+
+    @api.model
+    def _cancellation_window_hours(self):
+        """The studio's cancellation window, in hours.
+
+        Reads the ``fitness.cancellation_window_hours`` system parameter and
+        falls back to CANCELLATION_WINDOW_HOURS. Anything unparseable falls
+        back too rather than raising: a typo in a settings field must not stop
+        every cancellation in the studio.
+        """
+        raw = self.env['ir.config_parameter'].sudo().get_param(
+            'fitness.cancellation_window_hours')
+        if raw in (None, False, ''):
+            return CANCELLATION_WINDOW_HOURS
+        try:
+            return float(raw)
+        except (TypeError, ValueError):
+            _logger.warning(
+                "fitness.cancellation_window_hours is %r, which is not a number; "
+                "falling back to %s h", raw, CANCELLATION_WINDOW_HOURS)
+            return CANCELLATION_WINDOW_HOURS
+
     def action_cancel(self):
         """
-        Cancellation rules:
-          >2 h before start → credit_returned = True, student can trigger
-          ≤2 h before start → credit_returned = False, admin only
-          admin ≤2 h + not _admin_cancel_direct context → opens wizard with explicit
+        Cancellation rules, where W is the studio's cancellation window:
+          >W h before start → credit_returned = True, student can trigger
+          ≤W h before start → credit_returned = False, admin only
+          admin ≤W h + not _admin_cancel_direct context → opens wizard with explicit
             restore_credit checkbox; wizard re-calls with _admin_cancel_direct=True
+
+        W comes from _cancellation_window_hours(), never from a literal here.
         """
+        window = self._cancellation_window_hours()
         # Single-record admin late-cancel: show wizard unless wizard is already calling us.
         is_admin = (
             self.env.user.has_group('base.group_system')
@@ -343,7 +384,7 @@ class FitnessBooking(models.Model):
         ):
             now = fields.Datetime.now()
             hours_until = (self.calendar_event_id.start - now).total_seconds() / 3600
-            if hours_until <= 2:
+            if hours_until <= window:
                 wizard = self.env['fitness.booking.cancel.wizard'].create({'booking_id': self.id})
                 return {
                     'type': 'ir.actions.act_window',
@@ -369,17 +410,24 @@ class FitnessBooking(models.Model):
                 booking.student_id.name, booking.calendar_event_id.name, hours_until,
             )
 
-            if hours_until <= 2 and not (
+            if hours_until <= window and not (
                 self.env.user.has_group('base.group_system')
                 or self.env.user.has_group('fitness_core.group_fitness_manager')
             ):
-                raise UserError(
-                    "This class starts in less than 2 hours. "
-                    "Late cancellations within 2 hours can only be done by a studio admin/manager."
+                # A type, not a sentence: the portal catches this class rather
+                # than searching the wording for a number.
+                raise LateCancellationError(
+                    self.env._(
+                        "This class starts in less than %(hours)s hours. Late "
+                        "cancellations within %(hours)s hours can only be done "
+                        "by a studio admin/manager.",
+                        hours=self._format_window(window),
+                    ),
+                    window_hours=window,
                 )
 
-            # credit_returned: True when >2 h before start, or admin explicitly chose refund
-            if hours_until > 2 or self.env.context.get('admin_force_refund'):
+            # credit_returned: True when outside the window, or admin explicitly chose refund
+            if hours_until > window or self.env.context.get('admin_force_refund'):
                 booking.credit_returned = True
                 _logger.info(
                     "[CANCEL] credit returned (%.1f h until class, force_refund=%s)",
@@ -387,7 +435,7 @@ class FitnessBooking(models.Model):
                 )
             else:
                 booking.credit_returned = False
-                _logger.info("[CANCEL] ≤2 h – NO credit")
+                _logger.info("[CANCEL] within %s h window - NO credit", window)
 
             booking.write({
                 'state': 'cancelled',

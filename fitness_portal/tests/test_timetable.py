@@ -339,7 +339,7 @@ class TestTimetablePage(HttpCase):
         html = self._detail(self._next_event(self.sched_reformer))
         self.assertIn("Reserve My Spot", html, "no Reserve button for an eligible student")
         self.assertNotIn("Booking opens", html, "warned about a class that is bookable now")
-        self.assertNotIn("Explore memberships", html, "offered the shop to a student with credit")
+        self.assertNotIn("initiation classes", html, "offered the shop to a student with credit")
 
     def test_detail_state_2_outside_window_shows_the_date(self):
         """Credit, but too early - the fix for the Reserve button that could
@@ -362,7 +362,7 @@ class TestTimetablePage(HttpCase):
     def test_detail_state_3_no_credit_shows_the_shop(self):
         self.line.fitness_remaining_classes = 0
         html = self._detail(self._next_event(self.sched_reformer))
-        self.assertIn("Explore memberships", html, "no purchase prompt")
+        self.assertIn("initiation classes", html, "no purchase prompt")
         self.assertIn("/my/packages?tab=classes&amp;discipline=reformer", html,
                       "purchase prompt did not pre-filter the shop")
         self.assertNotIn("Reserve My Spot", html,

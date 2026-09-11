@@ -28,6 +28,7 @@ except Exception:
 from odoo import http, fields
 from odoo.tools import float_is_zero
 from odoo.exceptions import UserError, ValidationError
+from odoo.addons.fitness_bookings.exceptions import LateCancellationError
 from odoo.http import request
 
 # The booking rule itself lives on the model; importing it keeps the
@@ -152,7 +153,7 @@ class FitnessStudentPortal(http.Controller):
         trial_post_url = (('/my/news/%d?back=/my/home' % _trial_post.id)
                           if _trial_post else False)
 
-        credit_pools = self._credit_pools(partner.id)
+        credit_pools = self._trial_pool_appended(partner, self._credit_pools(partner.id))
 
         # Prompts for shop categories the student owns nothing in. Independent
         # of Next up, which is about booking with what you already have; this is
@@ -798,14 +799,20 @@ class FitnessStudentPortal(http.Controller):
 
         try:
             booking.action_cancel()
-        except (UserError, ValidationError) as exc:
-            msg = str(exc)
-            if 'less than 2 hours' in msg or 'within 2 hours' in msg:
-                msg = _(
-                    "This class starts in less than 2 hours and can no longer "
-                    "be cancelled online. Please contact the studio."
-                )
+        except LateCancellationError as exc:
+            # Caught by type. This used to search the model's English error text
+            # for "less than 2 hours", so changing either the wording or the
+            # number silently dropped the student back to a raw model message.
+            hours = exc.window_hours or booking._cancellation_window_hours()
+            msg = _(
+                "This class starts in less than %(hours)s hours and can no "
+                "longer be cancelled online. Please contact the studio.",
+                hours=booking._format_window(hours),
+            )
             qs = urlencode({'error': msg})
+            return request.redirect(f'{base}{qs}')
+        except (UserError, ValidationError) as exc:
+            qs = urlencode({'error': str(exc)})
             return request.redirect(f'{base}{qs}')
 
         if booking.credit_returned:
@@ -3043,6 +3050,47 @@ class FitnessStudentPortal(http.Controller):
         """
         partner = request.env['res.partner'].sudo().browse(partner_id)
         return partner._fitness_credit_pools() if partner.exists() else []
+
+    def _trial_pool_appended(self, partner, pools):
+        """Add the unclaimed trial to the home card's pools, named as itself.
+
+        The counter reads res.partner._fitness_credit_pools(), which builds
+        pools from subscriptions and package lines. An unclaimed trial is
+        neither - it owns no order and no credit until the booking that claims
+        it mints one - so the card showed nothing at all to a student who could
+        in fact book, and the page contradicted the rest of the app: the same
+        student's schedule offers them every class, because _eligible_class_types
+        already counts the trial as a source.
+
+        It is added here rather than on res.partner deliberately. Whether a
+        trial is still on offer depends on _trial_offer_open() and
+        _trial_entitlement_used(), which live in this controller with the rest
+        of the trial workflow; moving them down to the model to satisfy a
+        display would disturb the one part of this system least worth
+        disturbing. res.partner keeps answering the question it was asked -
+        what credit does this student own - and the answer stays correct: none.
+
+        Labelled as a trial, never as a credit. The admin backend reads the
+        same pools, and telling a manager a student holds "1 credit" when they
+        own nothing would misstate what the studio is owed.
+
+        Appended rather than prepended so primary_credit stays whatever the
+        student actually paid for: someone holding a real pack should still see
+        that pack's number first.
+        """
+        if not partner or not self._trial_offer_open():
+            return pools
+        if self._trial_entitlement_used(partner):
+            return pools
+        _ = request.env._
+        return list(pools) + [{
+            'remaining': 1,
+            'total': 0,
+            'display': '1',
+            'label': _('free trial available'),
+            'credits_available_text': _('1 free trial available'),
+            'is_trial': True,
+        }]
 
     def _primary_credit(self, partner_id):
         """Return the most relevant credit pool, or None. Used by pages that

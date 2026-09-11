@@ -930,7 +930,7 @@
                                        t-att-value="request.csrf_token()"/>
                                 <button type="submit" class="mv-cancel-btn mv-cancel-btn-lg">Cancel booking</button>
                             </form>
-                            <p class="mv-cancel-policy">Cancel up to 2 hours before class to keep your credit.</p>
+                            <p class="mv-cancel-policy">Cancel up to 6 hours before class to keep your credit.</p>
                         </t>
                     </t>
                     <t t-elif="can_book">
@@ -958,14 +958,14 @@
                         <div class="mv-class-soon">
                             <span class="mv-class-soon-sub">You don’t have credit for this class yet.</span>
                         </div>
-                        <a t-att-href="shop_href" class="mv-btn-book-lg">Explore memberships, packages &amp; classes</a>
+                        <a t-att-href="shop_href" class="mv-btn-book-lg">Explore packages, memberships &amp; initiation classes</a>
                     </t>
                     <t t-else="">
                         <div class="mv-class-full">Booking not available — contact the studio.</div>
                     </t>
 
                     <!-- Cancellation policy note (Task 3) -->
-                    <p class="mv-cancel-policy">Cancel up to 2 hours before class to keep your credit.</p>
+                    <p class="mv-cancel-policy">Cancel up to 6 hours before class to keep your credit.</p>
 
                 </div>
                 </div>
@@ -2382,8 +2382,8 @@
 
                     <h2>4. Cancellation Policy</h2>
                     <ul>
-                        <li><strong>You must cancel at least 2 hours before the scheduled class start time</strong> to have your credit returned.</li>
-                        <li>Cancellations made within 2 hours of the class, or no-shows, will result in the full credit deduction with no refund.</li>
+                        <li><strong>You must cancel at least 6 hours before the scheduled class start time</strong> to have your credit returned.</li>
+                        <li>Cancellations made within 6 hours of the class, or no-shows, will result in the full credit deduction with no refund.</li>
                         <li>To cancel, use the "Upcoming Classes" section in your portal before the cut-off time.</li>
                         <li>The Studio may waive the policy in exceptional circumstances (medical emergency, etc.) at its sole discretion. Contact us as soon as possible if this applies.</li>
                     </ul>
