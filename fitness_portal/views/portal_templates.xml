@@ -3231,7 +3231,13 @@
              aria-modal="true" aria-label="Cancel this class?">
             <div class="mv-ios-panel">
                 <div class="mv-ios-head">
-                    <span class="mv-ios-title">Cancel this class?</span>
+                    <!-- A block element, not a <span>. Odoo folds a lone inline
+                         span into its parent's term, so the extracted msgid
+                         carried the span markup and the bare "Cancel this
+                         class?" translation never matched - the title stayed
+                         English over a Spanish body. .mv-ios-head is flex, so
+                         a div is the same flex item a span was. -->
+                    <div class="mv-ios-title">Cancel this class?</div>
                 </div>
                 <p class="mv-confirm-body">Cancel up to 6 hours before class to keep your credit. Inside that window the credit is used.</p>
                 <div class="mv-confirm-actions">

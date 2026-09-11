@@ -89,8 +89,22 @@
     }
   }
 
-  /* ── 6. Cancel confirm for upcoming bookings ─────────────── */
-  function setupCancelConfirm() {
+  /* ── 6. Cancel confirm — handled by the themed sheet ──────
+     This used to be window.confirm('Cancel this booking?'). That is the
+     browser's own dialog: always in English however the portal is set, and
+     with no room to say that cancelling inside the window costs the credit.
+     fitness_portal.mv_cancel_confirm_sheet replaces it and is included on
+     both pages that carry a cancel form.
+
+     It is gone rather than left in place because both bind 'submit' on the
+     same form. confirm() blocks synchronously, so the English dialog always
+     won the race and the themed sheet was never seen. */
+  function setupCancelFallback() {
+    // Only if the themed sheet is genuinely absent. Without this, a page that
+    // grows a cancel form but forgets the sheet would submit with no
+    // confirmation at all - and a mis-tap inside the window costs the credit.
+    // An English dialog is a poor confirmation; no confirmation is worse.
+    if (document.getElementById('mv-cancel-sheet')) return;
     $$('.mv-cancel-form').forEach((form) => {
       form.addEventListener('submit', (e) => {
         if (!confirm('Cancel this booking?')) e.preventDefault();
@@ -1197,7 +1211,7 @@
     activateBottomNav();
     setupCardTaps();
     animateBookingSuccess();
-    setupCancelConfirm();
+    setupCancelFallback();
     setupReassignConfirm();
     setupNotificationBell();
     setupBackLinks();

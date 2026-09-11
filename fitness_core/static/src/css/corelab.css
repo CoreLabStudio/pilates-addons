@@ -4666,31 +4666,41 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     padding: 4px 2px 14px;
     margin: 0;
 }
+/* Two buttons on a row, the way the browser's own dialog put them, rather
+   than two stacked full-width bars. The confirming button used to be
+   --mv-warn-ink (#D40924): an alarm red that belongs to error text and is in
+   nobody's brand palette. Paco brown says the same thing in the studio's own
+   colours. */
 .mv-confirm-actions {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 8px;
-    padding-bottom: 8px;
+    padding-bottom: 4px;
 }
 .mv-confirm-yes,
 .mv-confirm-no {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    padding: 11px 16px;
+    padding: 9px 18px;
     border-radius: 999px;
     cursor: pointer;
-    width: 100%;
+    width: auto;
+    transition: background var(--mv-t-fast), border-color var(--mv-t-fast);
 }
 .mv-confirm-yes {
-    border: none;
-    background: var(--mv-warn-ink);
-    color: #FFFFFF;
+    border: 1px solid var(--mv-paco);
+    background: var(--mv-paco);
+    color: var(--mv-accent-fg);
 }
+.mv-confirm-yes:hover { background: #3f342f; border-color: #3f342f; }
 .mv-confirm-no {
     border: 1px solid var(--mv-border);
-    background: var(--mv-bg);
+    background: transparent;
     color: var(--mv-ink);
 }
+.mv-confirm-no:hover { border-color: var(--mv-muted); }
 
 /* ── Edit Details: photo row and read-only lines ──────────────────────────── */
 .mv-photo-row {
