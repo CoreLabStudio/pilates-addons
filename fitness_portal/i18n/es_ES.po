@@ -1904,6 +1904,7 @@ msgstr "Idioma"
 # ── Profile Hub — mv_portal_my_home_hub
 # ──────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
 msgid "Change photo"
 msgstr "Cambiar foto"
 
@@ -3300,3 +3301,38 @@ msgstr "Sí, cancelar"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_cancel_confirm_sheet
 msgid "Keep my booking"
 msgstr "Mantener mi reserva"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Name"
+msgstr "Nombre"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Email"
+msgstr "Correo electrónico"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "A genre or a mood"
+msgstr "Un estilo o un ambiente"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Favourite singer"
+msgstr "Cantante favorita"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "One artist you always want to hear"
+msgstr "Alguien que siempre te apetece escuchar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Edit Details"
+msgstr "Editar mis datos"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Photo, preferences, mobile and emergency contact"
+msgstr "Foto, preferencias, móvil y contacto de emergencia"

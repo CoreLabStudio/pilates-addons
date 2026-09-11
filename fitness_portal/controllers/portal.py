@@ -2435,7 +2435,7 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/profile/save', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
-    def save_profile_details(self, back=None, **kw):
+    def save_profile_details(self, back=None, photo=None, **kw):
         """Save the handful of things a student tells us about themselves.
 
         Reached from two places - the pencil beside the greeting on the home
@@ -2455,17 +2455,33 @@ class FitnessStudentPortal(http.Controller):
         }
         pref = (kw.get('fitness_day_preference') or '').strip()
 
-        vals = {
-            'fitness_day_preference': pref if pref in allowed_prefs else False,
-            'fitness_music_interest': (kw.get('fitness_music_interest') or '').strip(),
-            'fitness_emergency_contact': (kw.get('fitness_emergency_contact') or '').strip(),
-            # The mobile number is res.partner.phone; see the model for why
-            # there is no second number field.
-            'phone': (kw.get('phone') or '').strip(),
-        }
+        # Only fields the form actually posted are written. The sheet posts
+        # all of them every time, so clearing a box still clears the field -
+        # but a submit that omits a field leaves it alone instead of wiping
+        # something the student never saw.
+        vals = {}
+        if 'fitness_day_preference' in kw:
+            vals['fitness_day_preference'] = pref if pref in allowed_prefs else False
+        for field in ('fitness_music_interest', 'fitness_favourite_singer',
+                      'fitness_emergency_contact',
+                      # The mobile number is res.partner.phone; see the model
+                      # for why there is no second number field.
+                      'phone'):
+            if field in kw:
+                vals[field] = (kw.get(field) or '').strip()
+        # The photo arrives on the same form, so one Save applies everything a
+        # student changed rather than making them submit twice. An empty file
+        # input posts an empty part; that must leave the existing photo alone
+        # rather than clearing it.
+        if photo is not None and hasattr(photo, 'read'):
+            data = photo.read()
+            if data:
+                vals['image_1920'] = base64.b64encode(data).decode()
+
         # sudo: a portal user may not write to their own partner record, and
-        # this writes nothing but the four fields above on their own partner.
-        partner.sudo().write(vals)
+        # this writes nothing but the fields above on their own partner.
+        if vals:
+            partner.sudo().write(vals)
 
         target = back if back in ('/my', '/my/home') else '/my/home'
         return request.redirect('%s?profile_saved=1' % target)

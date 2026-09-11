@@ -44,6 +44,17 @@ if not errorlevel 1 (
   exit /b 1
 )
 
+REM A bare invocation means "--test-enable with no tags", which runs every test
+REM in every installed module - ~1381 of them, nearly all core Odoo, erroring
+REM wholesale on this machine's filestore paths. The summary line then reads
+REM "1002 error(s) of 1381 tests", which looks like a catastrophic regression in
+REM our code and is nothing of the kind. Default to this project's modules.
+set ARGS=%*
+if "%~1"=="" (
+  set ARGS=-u fitness_core,fitness_packages,fitness_portal --test-tags /fitness_core,/fitness_packages,/fitness_portal
+  echo   No arguments given - testing this project's modules only.
+)
+
 for %%D in ("%TEST_LOG%") do if not exist "%%~dpD" mkdir "%%~dpD"
 
 REM Clear the test session store before each run. Odoo's own HttpCase leaks one
@@ -62,4 +73,4 @@ if exist "%TEST_DATA_DIR%\sessions" rd /s /q "%TEST_DATA_DIR%\sessions"
   --test-enable ^
   --stop-after-init ^
   --logfile="%TEST_LOG%" ^
-  %*
+  %ARGS%

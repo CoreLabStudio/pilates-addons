@@ -29,8 +29,13 @@ class ResPartner(models.Model):
     )
     fitness_music_interest = fields.Char(
         string='Music they like',
-        help="A genre, an artist, anything. Instructors build playlists from "
-             "these.",
+        help="The kind of music they want in the room - a genre, a mood. Asked "
+             "separately from the artist, because 'something with a beat' and "
+             "'Rosalia' are different answers and a playlist needs both.",
+    )
+    fitness_favourite_singer = fields.Char(
+        string='Favourite singer',
+        help="One artist they would always be glad to hear.",
     )
     fitness_emergency_contact = fields.Char(
         string='Emergency contact',

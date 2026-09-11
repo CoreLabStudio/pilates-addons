@@ -276,14 +276,6 @@
                                 <t t-out="_ph_initial"/>
                             </div>
                         </t>
-                        <form action="/my/profile/upload-photo" method="post"
-                              enctype="multipart/form-data" style="margin:6px 0 4px;">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <label class="mv-photo-upload-btn"><div>Change photo</div>
-                                <input type="file" name="photo" accept="image/*"
-                                       style="display:none;" onchange="this.form.submit()"/>
-                            </label>
-                        </form>
                         <h1 class="mv-profile-name" t-out="_ph_name or 'My Profile'"/>
                         <p class="mv-profile-email" t-out="_ph_email"/>
                         <t t-if="_ph_credits">
@@ -314,8 +306,8 @@
                                 <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/>
                             </svg>
                             <div class="mv-menu-text">
-                                <div class="mv-menu-title">Edit your details</div>
-                                <div class="mv-menu-desc">Time of day, music, mobile, emergency contact</div>
+                                <div class="mv-menu-title">Edit Details</div>
+                                <div class="mv-menu-desc">Photo, preferences, mobile and emergency contact</div>
                             </div>
                         </a>
 
