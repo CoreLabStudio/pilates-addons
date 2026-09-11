@@ -65,6 +65,56 @@ class FitnessBookingNotifications(models.Model):
                 _logger.exception("[NOTIFICATIONS] Failed to queue %s for booking %s",
                                    template_xmlid, booking.id)
 
+    # ─── Moved to another class ─────────────────────────────────────────────
+
+    def _notify_moved(self, origin_event):
+        """Tell the student the studio moved them, by mail and by the bell.
+
+        Overrides the no-op hook in fitness_bookings. Deliberately its own
+        message rather than reusing the booking confirmation: a confirmation
+        for a class they never chose reads like a mistake, and says nothing
+        about the class they are no longer in.
+
+        Reuses the class_rescheduled bell type - from the student's side, "the
+        class you are going to has changed" is the same news whether the studio
+        moved the class or moved them.
+        """
+        for booking in self:
+            if self.env.context.get('skip_fitness_notification'):
+                continue
+            if self._notif_enabled('send_confirmation'):
+                booking._send_notification(
+                    'fitness_notifications.mail_template_booking_moved')
+
+            user = booking.student_id.user_ids[:1]
+            if not user:
+                continue
+            event = booking.calendar_event_id
+            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            when = ''
+            if event.start:
+                try:
+                    when = format_datetime(
+                        lang_env.env, event.start, tz=user.tz or STUDIO_TZ,
+                        dt_format='d MMM HH:mm',
+                        lang_code=user.lang or DEFAULT_LANG)
+                except Exception:
+                    when = event.start.strftime('%d %b %H:%M')
+            from_name = origin_event.name if origin_event else ''
+            if from_name and when:
+                body = lang_env.env._(
+                    'The studio moved you from %(old)s to %(new)s on %(when)s. '
+                    'Your credit is unchanged.',
+                    old=from_name, new=event.name or '', when=when)
+            else:
+                body = lang_env.env._(
+                    'The studio moved you to %(new)s. Your credit is unchanged.',
+                    new=event.name or '')
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id, 'class_rescheduled',
+                lang_env.env._('Your class has been changed'),
+                body, action_url='/my/schedule')
+
     # ─── Booking confirmed (create) ─────────────────────────────────────────────
 
     @api.model_create_multi

@@ -200,5 +200,54 @@
             </field>
         </record>
 
+        <!-- The studio moved a student into another class. Not a confirmation
+             and not a cancellation: they did not ask for this, so the mail has
+             to say plainly which class they have left and which they are now
+             in, or they turn up on the wrong evening. -->
+        <record id="mail_template_booking_moved" model="mail.template">
+            <field name="lang">{{ object.student_id.lang }}</field>
+            <field name="name">Fitness: Booking Moved</field>
+            <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
+            <field name="subject">{{ 'Your class has been changed' if object.student_id.lang == 'en_US' else ('Hem canviat la teva classe' if object.student_id.lang == 'ca_ES' else 'Hemos cambiado tu clase') }}</field>
+            <field name="partner_to">{{ object.student_id.id }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:13px;">
+  <t t-if="object.student_id.lang == 'en_US'">
+    <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
+    <p>We have moved your booking to another class. Your credit has not changed.</p>
+    <ul>
+      <li>Now booked: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
+    </ul>
+    <p>If this does not suit you, reply to this email or call the studio and we will find you another class.</p>
+  </t>
+  <t t-elif="object.student_id.lang == 'ca_ES'">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Hem mogut la teva reserva a una altra classe. El teu crèdit no ha canviat.</p>
+    <ul>
+      <li>Ara tens reserva a: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Data i hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+    </ul>
+    <p>Si no et va bé, respon aquest correu o truca a l'estudi i et buscarem una altra classe.</p>
+  </t>
+  <t t-else="">
+    <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
+    <p>Hemos movido tu reserva a otra clase. Tu crédito no ha cambiado.</p>
+    <ul>
+      <li>Ahora tienes reserva en: <strong t-out="object.calendar_event_id.name or ''"/></li>
+      <li>Fecha y hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+    </ul>
+    <p>Si no te viene bien, responde a este correo o llama al estudio y te buscamos otra clase.</p>
+  </t>
+</div>
+            </field>
+        </record>
+
     </data>
 </odoo>
