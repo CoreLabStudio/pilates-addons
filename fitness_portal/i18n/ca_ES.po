@@ -3198,3 +3198,15 @@ msgstr "Vista de calendari"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "List view"
 msgstr "Vista de llista"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "free trial available"
+msgstr "classe de prova disponible"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "1 free trial available"
+msgstr "1 classe de prova disponible"
