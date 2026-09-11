@@ -8,6 +8,37 @@ class ResPartner(models.Model):
     consent_marketing = fields.Boolean(string='Marketing Email Consent', default=False)
     consent_marketing_date = fields.Datetime(string='Marketing Consent On', readonly=True)
 
+    # ── What the student tells us about themselves ───────────────────────────
+    #
+    # Filled in by the student from the portal, never required. The studio uses
+    # them to place people in the right classes and to reach somebody if a
+    # student is hurt mid-class - so they are ordinary partner fields, visible
+    # in the back office alongside the rest of the contact record rather than
+    # hidden in a portal-only table.
+    #
+    # The mobile number is res.partner.phone, not a field of our own. Odoo 19
+    # dropped `mobile` from res.partner, and adding a second number beside
+    # `phone` would leave the studio with two and no rule for which to ring.
+    # Checked before deciding: no student had a phone set and signup never
+    # asked for one, so nothing is being overwritten.
+    fitness_day_preference = fields.Selection(
+        [('morning', 'Morning person'), ('evening', 'Evening person')],
+        string='Preferred time of day',
+        help="Whether this student would rather train early or late. Guides "
+             "which classes to suggest, nothing is enforced.",
+    )
+    fitness_music_interest = fields.Char(
+        string='Music they like',
+        help="A genre, an artist, anything. Instructors build playlists from "
+             "these.",
+    )
+    fitness_emergency_contact = fields.Char(
+        string='Emergency contact',
+        help="Who to call if something happens during a class. A name and a "
+             "number in one line - free text, because families do not fit a "
+             "fixed shape.",
+    )
+
     # ── Credits ──────────────────────────────────────────────────────────────
     #
     # There is no credit ledger table. A balance is derived, every time it is

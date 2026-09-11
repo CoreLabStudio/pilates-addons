@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_booking_reassign_wizard_form" model="ir.ui.view">
+        <field name="name">fitness.booking.reassign.wizard.form</field>
+        <field name="model">fitness.booking.reassign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cancel or move this student">
+                <sheet>
+                    <group>
+                        <field name="student_id"/>
+                        <field name="from_event_id"/>
+                        <field name="from_start"/>
+                    </group>
+                    <group>
+                        <field name="restore_credit"/>
+                    </group>
+                    <!-- Optional on purpose. A student who wants a refund and
+                         no replacement is cancelled with the left-hand button
+                         and never sees this field matter. -->
+                    <group string="Move them instead (optional)">
+                        <field name="available_event_ids" invisible="1"/>
+                        <field name="target_event_id"
+                               options="{'no_create': True, 'no_open': True}"
+                               placeholder="Leave empty to cancel without moving them"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Cancel Only" type="object"
+                            name="action_cancel_only" class="btn-danger"/>
+                    <button string="Cancel and Move" type="object"
+                            name="action_cancel_and_assign" class="btn-primary"
+                            invisible="not target_event_id"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_booking_reassign" model="ir.actions.act_window">
+        <field name="name">Cancel or move this student</field>
+        <field name="res_model">fitness.booking.reassign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_fitness_booking"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="context">{'default_booking_id': active_id}</field>
+    </record>
+
+</odoo>

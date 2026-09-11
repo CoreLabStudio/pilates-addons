@@ -3210,3 +3210,95 @@ msgstr "classe de prova disponible"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "1 free trial available"
 msgstr "1 classe de prova disponible"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "About you"
+msgstr "Sobre tu"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Morning person or evening person?"
+msgstr "Ets de matins o de tardes?"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "No preference"
+msgstr "Sense preferència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Morning person"
+msgstr "De matins"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Evening person"
+msgstr "De tardes"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Music you like"
+msgstr "Música que t'agrada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "A genre, a singer, anything"
+msgstr "Un estil, una cantant, el que sigui"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Mobile number"
+msgstr "Número de mòbil"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Emergency contact"
+msgstr "Contacte d'emergència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Name and number"
+msgstr "Nom i telèfon"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "All optional. Only the studio sees this."
+msgstr "Tot és opcional. Només ho veu l'estudi."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+msgid "Saved. Thank you."
+msgstr "Desat. Gràcies."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_profile_edit_sheet
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Edit your details"
+msgstr "Editar les teves dades"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Time of day, music, mobile, emergency contact"
+msgstr "Hora del dia, música, mòbil, contacte d'emergència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_cancel_confirm_sheet
+msgid "Cancel this class?"
+msgstr "Vols cancel·lar aquesta classe?"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_cancel_confirm_sheet
+msgid "Cancel up to 6 hours before class to keep your credit. Inside that window the credit is used."
+msgstr "Cancel·la amb més de 6 hores d'antelació per conservar el teu crèdit. Dins d'aquest marge, el crèdit es fa servir."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_cancel_confirm_sheet
+msgid "Yes, cancel it"
+msgstr "Sí, cancel·la-la"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_cancel_confirm_sheet
+msgid "Keep my booking"
+msgstr "Mantenir la meva reserva"

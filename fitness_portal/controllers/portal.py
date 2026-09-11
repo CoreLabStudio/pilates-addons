@@ -1392,7 +1392,13 @@ class FitnessStudentPortal(http.Controller):
         credit = self._primary_credit(partner.id)
         credit_line = None
         if credit:
-            if credit.get('total'):
+            if credit.get('is_trial'):
+                # The pool carries its own sentence. Formatting it as "%d
+                # credits" like the others called an unclaimed trial "1
+                # credits" - wrong twice over: it is not a credit, and it is
+                # not plural.
+                credit_line = credit.get('credits_available_text') or credit['label']
+            elif credit.get('total'):
                 credit_line = _('%(remaining)s / %(total)s credits') % {
                     'remaining': credit['remaining'], 'total': int(credit['total']),
                 }
@@ -2427,6 +2433,43 @@ class FitnessStudentPortal(http.Controller):
     #  Profile photo upload
     # ══════════════════════════════════════════════════════════
 
+    @http.route('/my/profile/save', type='http', auth='user',
+                website=True, sitemap=False, methods=['POST'])
+    def save_profile_details(self, back=None, **kw):
+        """Save the handful of things a student tells us about themselves.
+
+        Reached from two places - the pencil beside the greeting on the home
+        page and the row on the profile page - which post the same form and
+        say where to return to. One route rather than two so the two entry
+        points cannot drift apart.
+
+        Everything here is optional and free text. The only value checked is
+        the time-of-day preference, because that one is a selection and a
+        posted value outside it would raise on write; the rest is whatever the
+        student typed, stripped and stored.
+        """
+        partner = request.env.user.partner_id
+        allowed_prefs = {
+            key for key, _label
+            in request.env['res.partner']._fields['fitness_day_preference'].selection
+        }
+        pref = (kw.get('fitness_day_preference') or '').strip()
+
+        vals = {
+            'fitness_day_preference': pref if pref in allowed_prefs else False,
+            'fitness_music_interest': (kw.get('fitness_music_interest') or '').strip(),
+            'fitness_emergency_contact': (kw.get('fitness_emergency_contact') or '').strip(),
+            # The mobile number is res.partner.phone; see the model for why
+            # there is no second number field.
+            'phone': (kw.get('phone') or '').strip(),
+        }
+        # sudo: a portal user may not write to their own partner record, and
+        # this writes nothing but the four fields above on their own partner.
+        partner.sudo().write(vals)
+
+        target = back if back in ('/my', '/my/home') else '/my/home'
+        return request.redirect('%s?profile_saved=1' % target)
+
     @http.route('/my/profile/upload-photo', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
     def upload_profile_photo(self, photo=None, **kw):
@@ -3094,8 +3137,25 @@ class FitnessStudentPortal(http.Controller):
 
     def _primary_credit(self, partner_id):
         """Return the most relevant credit pool, or None. Used by pages that
-        show a single stat (not the paged home card)."""
-        pools = self._credit_pools(partner_id)
+        show a single stat (not the paged home card).
+
+        The unclaimed trial is considered here rather than at each call site.
+        Adding it to the home page alone made home say "1 free trial available"
+        while the Balance page it links to said 0, which is a contradiction a
+        student meets by tapping the number they were just shown. Seven pages
+        ask this question; asking it in one place is the only way they agree.
+
+        Appended, not prepended, so this only ever fills a gap: a student with
+        real credit still sees the number they paid for, and the trial surfaces
+        only when there is nothing else to show. The credit *total* is
+        untouched - a trial is an entitlement, not a balance, and the ledger
+        arithmetic is anchored on what the studio actually owes.
+        """
+        partner = request.env['res.partner'].sudo().browse(partner_id)
+        pools = self._trial_pool_appended(
+            partner if partner.exists() else None,
+            self._credit_pools(partner_id),
+        )
         return pools[0] if pools else None
 
     def _owned_class_types(self, partner_id):

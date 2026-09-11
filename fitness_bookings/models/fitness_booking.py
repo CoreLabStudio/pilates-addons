@@ -332,6 +332,26 @@ class FitnessBooking(models.Model):
             count, self.calendar_event_id.name,
         )
 
+    def action_open_reassign_wizard(self):
+        """Open the cancel-or-move wizard for this one booking.
+
+        Called from the student's booking under Students and from the class
+        roster under Classes. Both arrive here so the two entry points cannot
+        drift into behaving differently.
+        """
+        self.ensure_one()
+        wizard = self.env['fitness.booking.reassign.wizard'].create({
+            'booking_id': self.id,
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._('Cancel or move this student'),
+            'res_model': 'fitness.booking.reassign.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
     # ─── CANCEL ───────────────────────────────────────────────────────────────
 
     @staticmethod

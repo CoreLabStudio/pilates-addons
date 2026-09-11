@@ -232,7 +232,19 @@
                 <t t-call="fitness_portal.mv_page_header"/>
 
                 <div class="mv-home-hero">
-                    <h1 class="mv-home-title" t-out="welcome"/>
+                    <div class="mv-home-title-row">
+                        <h1 class="mv-home-title" t-out="welcome"/>
+                        <button type="button" class="mv-edit-pencil" data-mv-profile-open="1"
+                                aria-label="Edit your details" title="Edit your details">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/>
+                                <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <t t-if="request.httprequest.args.get('profile_saved')">
+                        <div class="mv-flash mv-flash-ok">Saved. Thank you.</div>
+                    </t>
                     <t t-if="has_any_bookings">
                         <p class="mv-home-sub">Ready for your next class?</p>
                     </t>
@@ -364,6 +376,7 @@
 
                 <t t-call="fitness_portal.mv_install_prompt"/>
                 <t t-call="fitness_portal.mv_install_ios_sheet"/>
+                <t t-call="fitness_portal.mv_profile_edit_sheet"/>
 
                 <!-- Full timetable. Shown to everyone, including a student who
                      owns nothing: knowing what the studio runs is exactly what
@@ -793,6 +806,7 @@
                 <t t-call="fitness_portal.mv_calendar"/>
 
                 <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_cancel_confirm_sheet"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
         </t>
@@ -969,6 +983,7 @@
 
                 </div>
                 </div>
+                <t t-call="fitness_portal.mv_cancel_confirm_sheet"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
         </t>
@@ -1180,6 +1195,18 @@
                         <span class="mv-credit-count" t-out="current_total"></span>
                         <div class="mv-credit-label">Total credits</div>
                     </div>
+                    <!-- An unclaimed trial is not a credit and must not be added
+                         into the total above - that number is what the studio
+                         owes. But saying only "0" here, to a student the home
+                         page has just told they have a free trial, is a
+                         contradiction they meet by tapping the number. Shown
+                         beside it, in the same words home uses. -->
+                    <t t-if="primary_credit and primary_credit.get('is_trial')">
+                        <div class="mv-credit-badge mv-credit-badge--trial">
+                            <span class="mv-credit-count" t-out="primary_credit['display']"/>
+                            <div class="mv-credit-label" t-out="primary_credit['label']"/>
+                        </div>
+                    </t>
                 </div>
 
                 <t t-if="not month_groups">
@@ -3191,6 +3218,127 @@
                         t-att-aria-label="lbl_install_dismiss" t-out="lbl_install_dismiss"/>
             </div>
         </div>
+    </template>
+
+    <!-- One tap used to cancel a booking outright. Inside the studio's
+         cancellation window that forfeits the credit, so a mis-tap cost a
+         student real money with nothing in between. This asks first.
+
+         Built on the same sheet shell as the rest of the portal rather than
+         window.confirm(), which would be the browser's dialog in the browser's
+         language - and would say nothing about the money. -->
+    <template id="mv_cancel_confirm_sheet" name="CoreLab Cancel Confirmation">
+        <div class="mv-ios-sheet" id="mv-cancel-sheet" hidden="hidden" role="dialog"
+             aria-modal="true" aria-label="Cancel this class?">
+            <div class="mv-ios-panel">
+                <div class="mv-ios-head">
+                    <span class="mv-ios-title">Cancel this class?</span>
+                </div>
+                <p class="mv-confirm-body">Cancel up to 6 hours before class to keep your credit. Inside that window the credit is used.</p>
+                <div class="mv-confirm-actions">
+                    <button type="button" class="mv-confirm-yes" id="mv-cancel-yes">Yes, cancel it</button>
+                    <button type="button" class="mv-confirm-no" id="mv-cancel-no">Keep my booking</button>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var sheet = document.getElementById('mv-cancel-sheet');
+            if (!sheet) return;
+            var pending = null;
+            function close() { sheet.hidden = true; pending = null; }
+            document.querySelectorAll('form.mv-cancel-form').forEach(function (f) {
+                f.addEventListener('submit', function (ev) {
+                    if (f.dataset.mvConfirmed === '1') return;
+                    ev.preventDefault();
+                    pending = f;
+                    sheet.hidden = false;
+                });
+            });
+            var yes = document.getElementById('mv-cancel-yes');
+            if (yes) yes.addEventListener('click', function () {
+                if (!pending) return close();
+                pending.dataset.mvConfirmed = '1';
+                var f = pending;
+                close();
+                f.submit();
+            });
+            var no = document.getElementById('mv-cancel-no');
+            if (no) no.addEventListener('click', close);
+            sheet.addEventListener('click', function (ev) { if (ev.target === sheet) close(); });
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Escape' &amp;&amp; !sheet.hidden) close();
+            });
+        })();
+        </script>
+    </template>
+
+    <!-- The few things a student tells us about themselves. One sheet, opened
+         from two places - the pencil beside the greeting on the home page and
+         the row on the profile page - so the two entry points cannot drift.
+         Reuses the install sheet's shell, which is already themed and already
+         behaves like a dialog, rather than inventing a second modal. -->
+    <template id="mv_profile_edit_sheet" name="CoreLab Profile Editor">
+        <t t-set="_pe_partner" t-value="request.env.user.partner_id"/>
+        <div class="mv-ios-sheet" id="mv-profile-sheet" hidden="hidden" role="dialog"
+             aria-modal="true" aria-label="About you">
+            <div class="mv-ios-panel">
+                <div class="mv-ios-head">
+                    <span class="mv-ios-title">About you</span>
+                    <button type="button" class="mv-ios-close" id="mv-profile-close"
+                            aria-label="Close">&#215;</button>
+                </div>
+                <form action="/my/profile/save" method="post" class="mv-profile-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="back"
+                           t-att-value="request.httprequest.path if request.httprequest.path in ('/my', '/my/home') else '/my/home'"/>
+
+                    <label class="mv-field-label" for="mv_pref">Morning person or evening person?</label>
+                    <select name="fitness_day_preference" id="mv_pref" class="mv-field-input">
+                        <option value="" t-att-selected="'selected' if not _pe_partner.fitness_day_preference else None">No preference</option>
+                        <option value="morning" t-att-selected="'selected' if _pe_partner.fitness_day_preference == 'morning' else None">Morning person</option>
+                        <option value="evening" t-att-selected="'selected' if _pe_partner.fitness_day_preference == 'evening' else None">Evening person</option>
+                    </select>
+
+                    <label class="mv-field-label" for="mv_music">Music you like</label>
+                    <input type="text" name="fitness_music_interest" id="mv_music"
+                           class="mv-field-input" maxlength="120"
+                           placeholder="A genre, a singer, anything"
+                           t-att-value="_pe_partner.fitness_music_interest or ''"/>
+
+                    <label class="mv-field-label" for="mv_phone">Mobile number</label>
+                    <input type="tel" name="phone" id="mv_phone"
+                           class="mv-field-input" maxlength="32"
+                           t-att-value="_pe_partner.phone or ''"/>
+
+                    <label class="mv-field-label" for="mv_emerg">Emergency contact</label>
+                    <input type="text" name="fitness_emergency_contact" id="mv_emerg"
+                           class="mv-field-input" maxlength="160"
+                           placeholder="Name and number"
+                           t-att-value="_pe_partner.fitness_emergency_contact or ''"/>
+
+                    <p class="mv-field-hint">All optional. Only the studio sees this.</p>
+                    <button type="submit" class="mv-btn-book-lg">Save</button>
+                </form>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var sheet = document.getElementById('mv-profile-sheet');
+            if (!sheet) return;
+            function open(e) { if (e) e.preventDefault(); sheet.hidden = false; }
+            function close() { sheet.hidden = true; }
+            document.querySelectorAll('[data-mv-profile-open]').forEach(function (el) {
+                el.addEventListener('click', open);
+            });
+            var x = document.getElementById('mv-profile-close');
+            if (x) x.addEventListener('click', close);
+            sheet.addEventListener('click', function (ev) { if (ev.target === sheet) close(); });
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Escape' &amp;&amp; !sheet.hidden) close();
+            });
+        })();
+        </script>
     </template>
 
     <!-- The iOS steps. Apple exposes no install API, so the only honest thing

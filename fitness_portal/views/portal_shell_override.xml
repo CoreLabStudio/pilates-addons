@@ -307,6 +307,18 @@
 
                         <!-- SECTION 1 — the two Studio tab views. These link into
                              the existing toggle, they are not separate pages. -->
+                        <div class="mv-menu-section-label">About you</div>
+                        <a href="#" class="mv-menu-row" data-mv-profile-open="1">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/>
+                                <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Edit your details</div>
+                                <div class="mv-menu-desc">Time of day, music, mobile, emergency contact</div>
+                            </div>
+                        </a>
+
                         <div class="mv-menu-section-label">My CoreLab Studio</div>
                         <a href="/my/studio" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -382,6 +394,7 @@
                         <t t-set="lbl_gen_step2">Choose "Install app" or "Add to Home screen".</t>
                         <t t-set="lbl_ios_foot">CoreLab will then open like any other app, without the browser bars.</t>
                         <t t-call="fitness_portal.mv_install_ios_sheet"/>
+                        <t t-call="fitness_portal.mv_profile_edit_sheet"/>
 
 
                         <!-- ── What is CoreLab link ─────────────────────────── -->
