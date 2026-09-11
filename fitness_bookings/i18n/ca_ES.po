@@ -392,3 +392,76 @@ msgstr "Nom mostrat"
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__message_ids
 msgid "Messages"
 msgstr "Missatges"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Cancel or move this student"
+msgstr "Cancel·lar o canviar de classe"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Move them instead (optional)"
+msgstr "O canvia-la de classe (opcional)"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Cancel Only"
+msgstr "Només cancel·lar"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Cancel and Move"
+msgstr "Cancel·lar i canviar"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_list
+msgid "Cancel / Move"
+msgstr "Cancel·lar / canviar"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+msgid "Roster"
+msgstr "Llista d'alumnes"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Leave empty to cancel without moving them"
+msgstr "Deixa-ho buit per cancel·lar sense canviar-la de classe"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Leaving"
+msgstr "Surt de"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Class date"
+msgstr "Data de la classe"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Move to"
+msgstr "Canviar a"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Return the credit"
+msgstr "Retornar el crèdit"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Choose a class to move %(name)s into, or use Cancel Only."
+msgstr "Tria una classe per a %(name)s, o fes servir Només cancel·lar."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "That booking is already cancelled."
+msgstr "Aquesta reserva ja està cancel·lada."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+msgid "This class starts in less than 6 hours. Late cancellations do not automatically return credits."
+msgstr "Aquesta classe comença en menys de 6 hores. Les cancel·lacions tardanes no retornen automàticament el crèdit."

@@ -9,3 +9,5 @@ access_product_product_fitness_student,product.product fitness student,product.m
 access_product_template_fitness_student,product.template fitness student,product.model_product_template,fitness_core.group_fitness_student,1,0,0,0
 access_fitness_booking_cancel_wizard_system,fitness.booking.cancel.wizard system,model_fitness_booking_cancel_wizard,base.group_system,1,1,1,1
 access_fitness_booking_cancel_wizard_manager,fitness.booking.cancel.wizard manager,model_fitness_booking_cancel_wizard,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_booking_reassign_wizard_system,fitness.booking.reassign.wizard system,model_fitness_booking_reassign_wizard,base.group_system,1,1,1,1
+access_fitness_booking_reassign_wizard_manager,fitness.booking.reassign.wizard manager,model_fitness_booking_reassign_wizard,fitness_core.group_fitness_manager,1,1,1,1

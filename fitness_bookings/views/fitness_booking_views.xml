@@ -21,6 +21,10 @@
                        decoration-info="state == 'booked'"/>
                 <field name="credit_returned" optional="show"/>
                 <field name="marked_by_id" optional="hide"/>
+                <button name="action_open_reassign_wizard" type="object"
+                        string="Cancel / Move" icon="fa-exchange"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="state != 'booked'"/>
             </list>
         </field>
     </record>

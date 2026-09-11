@@ -4563,3 +4563,181 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 .mv-trial-card:hover .mv-trial-card-cta {
   background: var(--mv-clay-dark);
 }
+
+/* ── "About you": the pencil by the greeting and the sheet it opens ────────
+   Built from the same tokens as everything else so the sheet is the studio's,
+   not the browser's. The sheet shell itself is .mv-ios-sheet, already themed. */
+.mv-home-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+.mv-edit-pencil {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--mv-border);
+    border-radius: 999px;
+    background: var(--mv-bg);
+    color: var(--mv-ink);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.mv-edit-pencil:hover { background: var(--mv-sand); }
+/* The pencil is a link now, not a button - it goes to a page. */
+.mv-edit-pencil { text-decoration: none; }
+
+/* The edit entry under the photo on the profile page. Shaped like the
+   Change photo pill that used to sit in exactly this spot, because that is
+   the control a student already knows how to find. */
+.mv-profile-edit-link {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mv-muted);
+    background: var(--mv-card-bg);
+    border: 1px solid var(--mv-border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    margin: 6px 0 4px;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--mv-t-fast), border-color var(--mv-t-fast);
+}
+.mv-profile-edit-link:hover,
+.mv-profile-edit-link:active {
+    color: var(--mv-ink-text);
+    border-color: var(--mv-muted);
+    text-decoration: none;
+}
+.mv-edit-pencil svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.mv-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 2px 8px;
+}
+.mv-field-label {
+    font-size: 0.78rem;
+    color: var(--mv-muted);
+    margin-top: 8px;
+}
+.mv-field-input {
+    font-size: 0.9rem;
+    padding: 9px 11px;
+    border: 1px solid var(--mv-border);
+    border-radius: 10px;
+    background: var(--mv-bg);
+    color: var(--mv-ink);
+    width: 100%;
+    box-sizing: border-box;
+}
+.mv-field-input:focus {
+    outline: 2px solid var(--mv-clay);
+    outline-offset: 1px;
+}
+.mv-field-hint {
+    font-size: 0.74rem;
+    color: var(--mv-muted);
+    margin: 10px 0 12px;
+}
+
+/* ── "Are you sure?" before a cancellation ────────────────────────────────
+   Same sheet shell as everything else; only the body and the two choices
+   need styling. The destructive option is the one that looks destructive. */
+.mv-confirm-body {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--mv-muted);
+    padding: 4px 2px 14px;
+    margin: 0;
+}
+/* Two buttons on a row, the way the browser's own dialog put them, rather
+   than two stacked full-width bars. The confirming button used to be
+   --mv-warn-ink (#D40924): an alarm red that belongs to error text and is in
+   nobody's brand palette. Paco brown says the same thing in the studio's own
+   colours. */
+.mv-confirm-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-bottom: 4px;
+}
+.mv-confirm-yes,
+.mv-confirm-no {
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    width: auto;
+    transition: background var(--mv-t-fast), border-color var(--mv-t-fast);
+}
+.mv-confirm-yes {
+    border: 1px solid var(--mv-paco);
+    background: var(--mv-paco);
+    color: var(--mv-accent-fg);
+}
+.mv-confirm-yes:hover { background: #3f342f; border-color: #3f342f; }
+.mv-confirm-no {
+    border: 1px solid var(--mv-border);
+    background: transparent;
+    color: var(--mv-ink);
+}
+.mv-confirm-no:hover { border-color: var(--mv-muted); }
+
+/* ── Edit Details: photo row and read-only lines ──────────────────────────── */
+.mv-photo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 2px 10px;
+}
+.mv-avatar-sm {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--mv-accent);
+    color: var(--mv-accent-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    overflow: hidden;
+}
+.mv-avatar-sm--photo { background: none; }
+.mv-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+.mv-photo-pick {
+    display: inline-flex;
+    font-size: 0.82rem;
+    color: var(--mv-clay-text);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.mv-field-static {
+    font-size: 0.9rem;
+    color: var(--mv-ink);
+    padding: 9px 11px;
+    margin: 0;
+    border: 1px solid var(--mv-border);
+    border-radius: 10px;
+    background: var(--mv-sand);
+}

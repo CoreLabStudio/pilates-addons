@@ -232,7 +232,19 @@
                 <t t-call="fitness_portal.mv_page_header"/>
 
                 <div class="mv-home-hero">
-                    <h1 class="mv-home-title" t-out="welcome"/>
+                    <div class="mv-home-title-row">
+                        <h1 class="mv-home-title" t-out="welcome"/>
+                        <a href="/my/profile/edit?back=/my/home" class="mv-edit-pencil"
+                           aria-label="Edit your details" title="Edit your details">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/>
+                                <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <t t-if="request.httprequest.args.get('profile_saved')">
+                        <div class="mv-flash mv-flash-ok">Saved. Thank you.</div>
+                    </t>
                     <t t-if="has_any_bookings">
                         <p class="mv-home-sub">Ready for your next class?</p>
                     </t>
@@ -793,6 +805,7 @@
                 <t t-call="fitness_portal.mv_calendar"/>
 
                 <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_cancel_confirm_sheet"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
         </t>
@@ -969,6 +982,7 @@
 
                 </div>
                 </div>
+                <t t-call="fitness_portal.mv_cancel_confirm_sheet"/>
                 <t t-call="fitness_portal.mv_bottom_nav"/>
             </div>
         </t>
@@ -1180,6 +1194,18 @@
                         <span class="mv-credit-count" t-out="current_total"></span>
                         <div class="mv-credit-label">Total credits</div>
                     </div>
+                    <!-- An unclaimed trial is not a credit and must not be added
+                         into the total above - that number is what the studio
+                         owes. But saying only "0" here, to a student the home
+                         page has just told they have a free trial, is a
+                         contradiction they meet by tapping the number. Shown
+                         beside it, in the same words home uses. -->
+                    <t t-if="primary_credit and primary_credit.get('is_trial')">
+                        <div class="mv-credit-badge mv-credit-badge--trial">
+                            <span class="mv-credit-count" t-out="primary_credit['display']"/>
+                            <div class="mv-credit-label" t-out="primary_credit['label']"/>
+                        </div>
+                    </t>
                 </div>
 
                 <t t-if="not month_groups">
@@ -3191,6 +3217,166 @@
                         t-att-aria-label="lbl_install_dismiss" t-out="lbl_install_dismiss"/>
             </div>
         </div>
+    </template>
+
+    <!-- One tap used to cancel a booking outright. Inside the studio's
+         cancellation window that forfeits the credit, so a mis-tap cost a
+         student real money with nothing in between. This asks first.
+
+         Built on the same sheet shell as the rest of the portal rather than
+         window.confirm(), which would be the browser's dialog in the browser's
+         language - and would say nothing about the money. -->
+    <template id="mv_cancel_confirm_sheet" name="CoreLab Cancel Confirmation">
+        <div class="mv-ios-sheet" id="mv-cancel-sheet" hidden="hidden" role="dialog"
+             aria-modal="true" aria-label="Cancel this class?">
+            <div class="mv-ios-panel">
+                <div class="mv-ios-head">
+                    <!-- A block element, not a <span>. Odoo folds a lone inline
+                         span into its parent's term, so the extracted msgid
+                         carried the span markup and the bare "Cancel this
+                         class?" translation never matched - the title stayed
+                         English over a Spanish body. .mv-ios-head is flex, so
+                         a div is the same flex item a span was. -->
+                    <div class="mv-ios-title">Cancel this class?</div>
+                </div>
+                <p class="mv-confirm-body">Cancel up to 6 hours before class to keep your credit. Inside that window the credit is used.</p>
+                <div class="mv-confirm-actions">
+                    <button type="button" class="mv-confirm-yes" id="mv-cancel-yes">Yes, cancel it</button>
+                    <button type="button" class="mv-confirm-no" id="mv-cancel-no">Keep my booking</button>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var sheet = document.getElementById('mv-cancel-sheet');
+            if (!sheet) return;
+            var pending = null;
+            function close() { sheet.hidden = true; pending = null; }
+            document.querySelectorAll('form.mv-cancel-form').forEach(function (f) {
+                f.addEventListener('submit', function (ev) {
+                    if (f.dataset.mvConfirmed === '1') return;
+                    ev.preventDefault();
+                    pending = f;
+                    sheet.hidden = false;
+                });
+            });
+            var yes = document.getElementById('mv-cancel-yes');
+            if (yes) yes.addEventListener('click', function () {
+                if (!pending) return close();
+                pending.dataset.mvConfirmed = '1';
+                var f = pending;
+                close();
+                f.submit();
+            });
+            var no = document.getElementById('mv-cancel-no');
+            if (no) no.addEventListener('click', close);
+            sheet.addEventListener('click', function (ev) { if (ev.target === sheet) close(); });
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Escape' &amp;&amp; !sheet.hidden) close();
+            });
+        })();
+        </script>
+    </template>
+
+    <!-- Edit profile. A page, not a modal. It is reached from the pencil
+         beside the greeting and from under the photo on the profile page, and
+         a page is what a student can back out of with the browser's own back
+         button - which is what they reach for on a phone. Both entry points
+         land here so the two cannot drift apart. -->
+    <template id="portal_profile_edit" name="Edit Profile (Student)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <t t-set="_back_url" t-value="_pe_back"/>
+                <t t-call="fitness_portal.mv_subpage_back"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name">Edit profile</p>
+                        <p class="mv-greeting-sub">Photo, preferences, mobile and emergency contact</p>
+                    </div>
+                </div>
+
+                <form action="/my/profile/save" method="post" class="mv-profile-form"
+                      enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="back" t-att-value="_pe_back"/>
+
+                    <!-- 1. the photo, on the same form as everything else so one
+                            Save applies the lot. It used to live on its own
+                            under the avatar, which meant two trips to change
+                            two things about yourself. -->
+                    <div class="mv-photo-row">
+                        <t t-if="_pe_partner.image_1920">
+                            <div class="mv-avatar-sm mv-avatar-sm--photo">
+                                <img t-att-src="'/web/image/res.partner/%d/image_1920' % _pe_partner.id"
+                                     t-att-alt="_pe_partner.name or ''"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="mv-avatar-sm"
+                                 t-out="(_pe_partner.name or 'Y')[:1].upper()"/>
+                        </t>
+                        <label class="mv-photo-pick">
+                            <!-- block, not inline: Odoo folds an inline <span>
+                                 into the parent label's term, so a <span> here
+                                 silently never translates. -->
+                            <div class="mv-photo-pick-text">Change photo</div>
+                            <input type="file" name="photo" accept="image/*" style="display:none;"/>
+                        </label>
+                    </div>
+
+                    <!-- 2 and 3. Shown because a student should see which
+                            account they are editing; not editable because the
+                            name on a booking and the address mail goes to are
+                            not ours to let anybody retype in a sheet. -->
+                    <p class="mv-field-label">Name</p>
+                    <p class="mv-field-static" t-out="_pe_partner.name or ''"/>
+
+                    <p class="mv-field-label">Email</p>
+                    <p class="mv-field-static" t-out="request.env.user.email or _pe_partner.email or ''"/>
+
+                    <label class="mv-field-label" for="mv_pref">Morning person or evening person?</label>
+                    <select name="fitness_day_preference" id="mv_pref" class="mv-field-input">
+                        <option value="" t-att-selected="'selected' if not _pe_partner.fitness_day_preference else None">No preference</option>
+                        <option value="morning" t-att-selected="'selected' if _pe_partner.fitness_day_preference == 'morning' else None">Morning person</option>
+                        <option value="evening" t-att-selected="'selected' if _pe_partner.fitness_day_preference == 'evening' else None">Evening person</option>
+                    </select>
+
+                    <label class="mv-field-label" for="mv_music">Music you like</label>
+                    <input type="text" name="fitness_music_interest" id="mv_music"
+                           class="mv-field-input" maxlength="120"
+                           placeholder="A genre or a mood"
+                           t-att-value="_pe_partner.fitness_music_interest or ''"/>
+
+                    <label class="mv-field-label" for="mv_singer">Favourite singer</label>
+                    <input type="text" name="fitness_favourite_singer" id="mv_singer"
+                           class="mv-field-input" maxlength="120"
+                           placeholder="One artist you always want to hear"
+                           t-att-value="_pe_partner.fitness_favourite_singer or ''"/>
+
+                    <label class="mv-field-label" for="mv_phone">Mobile number</label>
+                    <input type="tel" name="phone" id="mv_phone"
+                           class="mv-field-input" maxlength="32"
+                           t-att-value="_pe_partner.phone or ''"/>
+
+                    <label class="mv-field-label" for="mv_emerg">Emergency contact</label>
+                    <input type="text" name="fitness_emergency_contact" id="mv_emerg"
+                           class="mv-field-input" maxlength="160"
+                           placeholder="Name and number"
+                           t-att-value="_pe_partner.fitness_emergency_contact or ''"/>
+
+                    <p class="mv-field-hint">All optional. Only the studio sees this.</p>
+                    <button type="submit" class="mv-btn-book-lg">Save</button>
+                </form>
+
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
     </template>
 
     <!-- The iOS steps. Apple exposes no install API, so the only honest thing
