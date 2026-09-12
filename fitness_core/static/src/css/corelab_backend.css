@@ -15,6 +15,9 @@
   --cl-warm: #D89A62;
   --cl-shadow: 0 2px 10px rgba(80, 66, 61, 0.07);
   --cl-radius: 16px;
+  --cl-badge-fg: #FFFFFF;
+  --cl-table-bg: transparent;
+  --cl-table-ink: #50423D;
 }
 
 .o_fitness_dashboard .o_form_sheet,
@@ -204,7 +207,7 @@
 .o_fitness_dashboard .cl-badge {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 30px; height: 30px; padding: 0 9px; border: 0; border-radius: 999px;
-  font-size: 0.9rem; font-weight: 600; color: #FFF; line-height: 1;
+  font-size: 0.9rem; font-weight: 600; color: var(--cl-badge-fg); line-height: 1;
 }
 .o_fitness_dashboard .cl-badge .o_field_widget { color: #FFF; }
 .o_fitness_dashboard .cl-badge-warm { background: var(--cl-warm); }
@@ -262,4 +265,96 @@
 @media (max-width: 900px) {
   .o_fitness_dashboard .cl-top,
   .o_fitness_dashboard .cl-bottom { grid-template-columns: 1fr; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Phone layout
+   ═══════════════════════════════════════════════════════════════════════════
+   The card head is one flex row holding a serif title and a wide-tracked
+   "SEE ALL". On a phone that row has nowhere to go, so the title broke across
+   two lines and the link broke across two more. Below 560px the head stacks
+   and the link stops wrapping, which costs one line instead of three. */
+@media (max-width: 560px) {
+  .o_fitness_dashboard .o_form_sheet { padding: 14px 12px 28px; }
+  .o_fitness_dashboard .cl-card-head {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .o_fitness_dashboard .cl-card-title {
+    font-size: 1.28rem;
+    line-height: 1.2;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .o_fitness_dashboard .cl-seeall {
+    white-space: nowrap;
+    flex: 0 0 auto;
+    font-size: 0.68rem;
+    letter-spacing: 0.10em;
+    gap: 5px;
+  }
+  /* Tables inside the cards are the part that actually overflows a phone.
+     They scroll on their own rather than pushing the card wider. */
+  .o_fitness_dashboard .cl-card-body { overflow-x: auto; }
+  .o_fitness_dashboard .cl-card-body table { min-width: 100%; }
+  .o_fitness_dashboard .cl-card-body td,
+  .o_fitness_dashboard .cl-card-body th { white-space: nowrap; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════════════
+   The dashboard's cards were painted with explicit light colours while the
+   Bootstrap tables inside them were left to Odoo. With no dark theme declared,
+   a phone in dark mode darkened the tables and left the cards alone, which put
+   near-black text on a dark navy row inside a white card - unreadable, and the
+   reason this block exists.
+
+   Scoped to .o_fitness_dashboard like the rest of the file, so nothing here
+   reaches any other Odoo view.
+
+     ground  #211B18 + ink   #E7DDD4  = 12.3:1
+     card    #2A2320 + muted #A89A8E  =  6.4:1
+     heather #9ABACD + badge #17120F  = 11.2:1
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  .o_fitness_dashboard {
+    --cl-blue: #9ABACD;
+    --cl-blue-dark: #B0C9D8;
+    --cl-brown: #E7DDD4;        /* headings: light now, it is a text colour */
+    --cl-white: #2A2320;        /* "white" is the card surface, not the colour */
+    --cl-canvas: #211B18;
+    --cl-muted: #A89A8E;
+    --cl-line: rgba(255, 255, 255, 0.10);
+    --cl-warm: #D89A62;
+    --cl-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    --cl-badge-fg: #17120F;     /* dark text on the light heather badge */
+    --cl-table-ink: #E7DDD4;
+  }
+  /* The tables are Bootstrap's, not ours, and they read their own variables.
+     Setting them here is what stops the row from darkening independently of
+     the card it sits in - the exact failure this theme exists to fix. */
+  .o_fitness_dashboard .cl-card-body table,
+  .o_fitness_dashboard .cl-card-body .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--cl-table-ink);
+    --bs-table-border-color: var(--cl-line);
+    color: var(--cl-table-ink);
+    background-color: transparent;
+  }
+  .o_fitness_dashboard .cl-card-body th,
+  .o_fitness_dashboard .cl-card-body td {
+    background-color: transparent;
+    color: var(--cl-table-ink);
+    border-color: var(--cl-line);
+  }
+  /* On a light ground a card is separated by its shadow. On a dark ground a
+     black shadow against a dark page is invisible, so the card would float
+     with nothing marking its edge. A hairline does the job the shadow did. */
+  .o_fitness_dashboard .cl-card {
+    border: 1px solid var(--cl-line);
+  }
+  .o_fitness_dashboard .cl-rowlink { color: var(--cl-blue); }
+  .o_fitness_dashboard .text-muted { color: var(--cl-muted) !important; }
 }
