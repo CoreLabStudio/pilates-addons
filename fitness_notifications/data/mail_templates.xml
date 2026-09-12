@@ -16,25 +16,25 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Your booking is confirmed:</p>
     <ul>
-      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
-      <li>Instructor: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
+      <li style="color:#2E2724;">Class: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
+      <li style="color:#2E2724;">Instructor: <t t-out="object.teacher_user_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
-      <p>Credits remaining on your package: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+      <p>Credits remaining on your package: <strong style="color:#50423D;" t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
     </t>
     <t t-elif="object.subscription_id">
       <t t-if="object.subscription_id.fitness_is_unlimited">
         <p>Your subscription is unlimited.</p>
       </t>
       <t t-else="">
-        <p>Classes used this period: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+        <p>Classes used this period: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
     <p>See you soon!</p>
@@ -43,20 +43,20 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>La teva reserva està confirmada:</p>
     <ul>
-      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
-      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
+      <li style="color:#2E2724;">Classe: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+      <li style="color:#2E2724;">Instructor: <t t-out="object.teacher_user_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
-      <p>Crèdits restants del teu paquet: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+      <p>Crèdits restants del teu paquet: <strong style="color:#50423D;" t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
     </t>
     <t t-elif="object.subscription_id">
       <t t-if="object.subscription_id.fitness_is_unlimited">
         <p>La teva subscripció és il·limitada.</p>
       </t>
       <t t-else="">
-        <p>Classes utilitzades aquest període: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+        <p>Classes utilitzades aquest període: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
     <p>Ens veiem aviat!</p>
@@ -65,20 +65,20 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Tu reserva está confirmada:</p>
     <ul>
-      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
-      <li>Instructor: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
+      <li style="color:#2E2724;">Clase: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+      <li style="color:#2E2724;">Instructor: <t t-out="object.teacher_user_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.package_order_line_id">
-      <p>Créditos restantes en tu paquete: <strong t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
+      <p>Créditos restantes en tu paquete: <strong style="color:#50423D;" t-out="object.package_order_line_id.fitness_remaining_classes"/></p>
     </t>
     <t t-elif="object.subscription_id">
       <t t-if="object.subscription_id.fitness_is_unlimited">
         <p>Tu suscripción es ilimitada.</p>
       </t>
       <t t-else="">
-        <p>Clases usadas este periodo: <strong t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
+        <p>Clases usadas este periodo: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
     <p>¡Nos vemos pronto!</p>
@@ -101,14 +101,14 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Your booking has been cancelled:</p>
     <ul>
-      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
+      <li style="color:#2E2724;">Class: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>Your credit has been returned (cancelled more than 6 hours before the class).</p>
@@ -121,9 +121,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>La teva reserva ha estat cancel·lada:</p>
     <ul>
-      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+      <li style="color:#2E2724;">Classe: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>El teu crèdit s'ha retornat (cancel·lat amb més de 6 hores d'antelació).</p>
@@ -136,9 +136,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Tu reserva ha sido cancelada:</p>
     <ul>
-      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+      <li style="color:#2E2724;">Clase: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <t t-if="object.credit_returned">
       <p>Tu crédito ha sido devuelto (cancelado con más de 6 horas de antelación).</p>
@@ -165,14 +165,14 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Reminder — you have an upcoming class:</p>
     <ul>
-      <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
+      <li style="color:#2E2724;">Class: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <p>See you there!</p>
   </t>
@@ -180,9 +180,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Recordatori — tens una classe properament:</p>
     <ul>
-      <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+      <li style="color:#2E2724;">Classe: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <p>Ens veiem allà!</p>
   </t>
@@ -190,9 +190,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Recordatorio — tienes una clase próximamente:</p>
     <ul>
-      <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+      <li style="color:#2E2724;">Clase: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <p>¡Nos vemos allí!</p>
   </t>
@@ -214,14 +214,14 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>We have moved your booking to another class. Your credit has not changed.</p>
     <ul>
-      <li>Now booked: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
+      <li style="color:#2E2724;">Now booked: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
     <p>If this does not suit you, reply to this email or call the studio and we will find you another class.</p>
   </t>
@@ -229,9 +229,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Hem mogut la teva reserva a una altra classe. El teu crèdit no ha canviat.</p>
     <ul>
-      <li>Ara tens reserva a: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Data i hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
+      <li style="color:#2E2724;">Ara tens reserva a: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Data i hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
     <p>Si no et va bé, respon aquest correu o truca a l'estudi i et buscarem una altra classe.</p>
   </t>
@@ -239,9 +239,9 @@
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Hemos movido tu reserva a otra clase. Tu crédito no ha cambiado.</p>
     <ul>
-      <li>Ahora tienes reserva en: <strong t-out="object.calendar_event_id.name or ''"/></li>
-      <li>Fecha y hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
-      <li>Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
+      <li style="color:#2E2724;">Ahora tienes reserva en: <strong style="color:#50423D;" t-out="object.calendar_event_id.name or ''"/></li>
+      <li style="color:#2E2724;">Fecha y hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
+      <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
     <p>Si no te viene bien, responde a este correo o llama al estudio y te buscamos otra clase.</p>
   </t>
