@@ -35,6 +35,53 @@ class FitnessNewsPost(models.Model):
     )
     body_excerpt = fields.Char(compute='_compute_body_excerpt')
 
+    # ── the call-to-action link ──────────────────────────────────────────────
+    #
+    # Anyone writing a link types "corelabstudio.es". A browser reads that as a
+    # path, not a host, so the button landed on
+    # app.corelabstudio.es/my/news/<id>/corelabstudio.es - a 404 - while the
+    # admin form showed exactly what had been typed and said nothing was wrong.
+    #
+    # Normalised on the way in rather than on the way out, so the stored value
+    # is the one that works and the form shows the studio what the button will
+    # actually do.
+    _URL_SCHEMES = ('http://', 'https://', 'mailto:', 'tel:')
+
+    @api.model
+    def _normalise_cta_url(self, url):
+        if not url:
+            return url
+        url = url.strip()
+        if not url:
+            return False
+        low = url.lower()
+        # Already absolute, or deliberately internal - both already work.
+        if low.startswith(self._URL_SCHEMES) or url.startswith('/'):
+            return url
+        # Anything else is a bare host or host/path: make it absolute.
+        return 'https://' + url.lstrip('/')
+
+    @api.onchange('cta_url')
+    def _onchange_cta_url(self):
+        """Show the studio the corrected link while they are still editing."""
+        for rec in self:
+            rec.cta_url = rec._normalise_cta_url(rec.cta_url)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('cta_url'):
+                vals['cta_url'] = self._normalise_cta_url(vals['cta_url'])
+        return super().create(vals_list)
+
+    def write(self, vals):
+        # The onchange only fires in the form. Imports, the shell and any other
+        # write path reach here instead, and a link that 404s is no better for
+        # arriving by a different door.
+        if vals.get('cta_url'):
+            vals['cta_url'] = self._normalise_cta_url(vals['cta_url'])
+        return super().write(vals)
+
     @api.depends('body')
     def _compute_body_excerpt(self):
         _tag = re.compile(r'<[^>]+>')
