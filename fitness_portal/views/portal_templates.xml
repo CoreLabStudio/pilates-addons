@@ -402,7 +402,7 @@
                                     <p class="mv-upcoming-name" t-out="booking.calendar_event_id.name"/>
                                     <p class="mv-upcoming-meta">
                                         <span t-field="booking.class_start"
-                                              t-options='{"widget":"datetime","format":"EEE d MMM · HH:mm"}'/>
+                                              t-options='{"widget":"datetime","format":"EEE d MMM · HH:mm","tz_name":"Europe/Madrid"}'/>
                                         <t t-if="booking.classroom_id">
                                             · <t t-out="booking.classroom_id.name"/>
                                         </t>
@@ -756,7 +756,7 @@
                                                    t-out="booking.calendar_event_id.name"/>
                                                 <p class="mv-upcoming-meta">
                                                     <span t-field="booking.class_start"
-                                                          t-options='{"widget":"datetime","format":"HH:mm"}'/>
+                                                          t-options='{"widget":"datetime","format":"HH:mm","tz_name":"Europe/Madrid"}'/>
                                                     <t t-if="booking.classroom_id">
                                                         · <t t-out="booking.classroom_id.name"/>
                                                     </t>
@@ -1057,7 +1057,7 @@
                                                    t-out="booking.calendar_event_id.name"/>
                                                 <p class="mv-history-meta">
                                                     <span t-field="booking.class_start"
-                                                          t-options='{"widget":"datetime","format":"d MMM yyyy · HH:mm"}'/>
+                                                          t-options='{"widget":"datetime","format":"d MMM yyyy · HH:mm","tz_name":"Europe/Madrid"}'/>
                                                     <t t-if="booking.class_type_id">
                                                         · <t t-out="booking.class_type_id.name"/>
                                                     </t>
@@ -1117,7 +1117,7 @@
                                 </div>
                                 <div class="mv-pack-meta">
                                     <span><strong t-out="lbl_enrolled"/><span t-field="sub.date_order"
-                                              t-options='{"widget":"date"}'/></span>
+                                              t-options='{"widget":"datetime","date_only":true,"tz_name":"Europe/Madrid"}'/></span>
                                     <t t-if="sub.subscription_state == '3_progress' and sub.next_invoice_date">
                                         <span><strong t-out="lbl_next_billing"/><span t-field="sub.next_invoice_date"/></span>
                                     </t>
@@ -1151,7 +1151,7 @@
                                 </div>
                                 <div class="mv-pack-meta">
                                     <span><strong t-out="lbl_purchased"/><span t-field="pack_order.date_order"
-                                              t-options='{"widget":"date"}'/></span>
+                                              t-options='{"widget":"datetime","date_only":true,"tz_name":"Europe/Madrid"}'/></span>
                                     <span><strong t-out="lbl_remaining"/><t t-out="pack_line.fitness_remaining_classes"/>/<t t-out="pack_line.fitness_original_class_count"/></span>
                                     <t t-if="pack_line.fitness_validity_end_date">
                                         <span><strong t-out="lbl_valid_until"/><span t-field="pack_line.fitness_validity_end_date"/></span>
@@ -2500,7 +2500,7 @@
                                     <p class="mv-order-name" t-out="row['plan_name']"/>
                                     <p class="mv-order-meta">
                                         <span t-field="row['order'].date_order"
-                                              t-options='{"widget":"date"}'/>
+                                              t-options='{"widget":"datetime","date_only":true,"tz_name":"Europe/Madrid"}'/>
                                         · <span class="mv-order-ref" t-out="row['order'].name"/>
                                     </p>
                                 </div>
@@ -2704,7 +2704,7 @@
                         <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_date"/>
                         <span style="font-size:0.85rem;color:var(--mv-ink);"
                               t-field="sale_order.date_order"
-                              t-options='{"widget":"date"}'/>
+                              t-options='{"widget":"datetime","date_only":true,"tz_name":"Europe/Madrid"}'/>
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_status"/>
