@@ -929,6 +929,42 @@ body.mv-auth-body .oe_login_buttons .btn-primary:active { transform: scale(0.97)
 body.mv-auth-body a { color: var(--mv-clay-text) !important; }
 body.mv-auth-body a:hover { color: var(--mv-clay) !important; }
 
+/* The language chips under the logo, and the small print on the signup pages.
+   Both were inline styles with hard-coded greys - #ccc borders and #777/#888
+   text. A literal cannot follow a theme, so they stayed the same grey whatever
+   the page did around them, which on a dark ground is the pair that cannot be
+   read. They take tokens now, like everything else on these pages. */
+body.mv-auth-body .mv-auth-lang {
+  background: none;
+  border: 1px solid var(--mv-border);
+  border-radius: 20px;
+  padding: 3px 12px;
+  margin: 0 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  color: var(--mv-muted);
+}
+body.mv-auth-body .mv-auth-lang:hover { color: var(--mv-ink-text); border-color: var(--mv-muted); }
+body.mv-auth-body .mv-auth-fineprint {
+  font-size: 0.8rem;
+  color: var(--mv-muted);
+  margin-top: 1.5rem;
+}
+
+/* Odoo paints the auth card with Bootstrap's .bg-white, which is a literal and
+   therefore immune to the theme. Our own rule already wins on specificity, but
+   only while it stays more specific than a utility class - so the utility is
+   neutralised here rather than relied on to lose. */
+body.mv-auth-body .card.bg-white,
+body.mv-auth-body .card.bg-100 {
+  background: var(--mv-card-bg) !important;
+}
+/* The placeholder is the one piece of text in the form that was never given a
+   colour, so it fell back to the UA's - which on a dark input is dark. */
+body.mv-auth-body .form-control::placeholder { color: var(--mv-muted2); opacity: 1; }
+
 /* Signup pill button (login page) */
 .mv-signup-pill {
   display: block;
