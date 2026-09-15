@@ -325,3 +325,59 @@ msgstr "Origen"
 #: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_swaps
+msgid "Swap History"
+msgstr "Historial de canvis"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_swaps
+msgid "Every swap you have made, newest first"
+msgstr "Tots els teus canvis, del més recent al més antic"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_swaps
+msgid "No swaps yet."
+msgstr "Encara no hi ha canvis."
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_swaps
+msgid "Swapped on"
+msgstr "Canviat el"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Date not recorded"
+msgstr "Data no registrada"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Unknown"
+msgstr "Desconegut"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Handed over to"
+msgstr "Cedida a"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Taken on from"
+msgstr "Assumida de"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Completed"
+msgstr "Completada"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Scheduled"
+msgstr "Programada"

@@ -21,6 +21,20 @@ from odoo.http import request
 
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 
+# CoreLab teaches in one room in Madrid, so every screen in this app reads the
+# studio's clock. The student portal and the notification emails were pinned to
+# it; this module was not, and kept reading the account's own timezone - which
+# is blank on most accounts and wrong on several. An instructor opening her
+# roster from anywhere but Spain was shown the wrong hour for her own classes.
+STUDIO_TZ = 'Europe/Madrid'
+
+
+def _studio_tz():
+    try:
+        return pytz.timezone(STUDIO_TZ)
+    except pytz.UnknownTimeZoneError:
+        return pytz.UTC
+
 
 def _format_local(dt, user_tz):
     if not dt:
@@ -37,10 +51,7 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         now = fields.Datetime.now()
 
-        try:
-            user_tz = pytz.timezone(request.env.user.tz or 'UTC')
-        except pytz.UnknownTimeZoneError:
-            user_tz = pytz.UTC
+        user_tz = _studio_tz()
 
         # Timezone-aware day boundaries for today/week filters
         now_local = pytz.UTC.localize(now).astimezone(user_tz)
@@ -116,10 +127,7 @@ class FitnessTeacherSwapPortal(http.Controller):
         ], order='student_id asc').ids
         bookings = request.env['fitness.booking'].sudo().browse(booking_ids)
 
-        try:
-            user_tz = pytz.timezone(request.env.user.tz or 'UTC')
-        except pytz.UnknownTimeZoneError:
-            user_tz = pytz.UTC
+        user_tz = _studio_tz()
 
         return request.render('fitness_teacher_swap.portal_teacher_roster', {
             'event':         event,
@@ -214,10 +222,7 @@ class FitnessTeacherSwapPortal(http.Controller):
         else:
             period = 'all'
 
-        try:
-            user_tz = pytz.timezone(request.env.user.tz or 'UTC')
-        except pytz.UnknownTimeZoneError:
-            user_tz = pytz.UTC
+        user_tz = _studio_tz()
 
         domain = [
             ('user_id', '=', request.env.user.id),
@@ -298,10 +303,10 @@ class FitnessTeacherSwapPortal(http.Controller):
             'available_months': available_months,
         })
 
-    @http.route('/my/instructor/swaps', type='http', auth='user', website=True,
-                sitemap=False)
+    @http.route('/my/profile/swap-history', type='http', auth='user',
+                website=True, sitemap=False)
     def my_swap_history(self, **kw):
-        """An instructor's own swap history.
+        """An instructor's own swap history, reached from Profile.
 
         Every swap was already recorded - the admin reads them in Cambios de
         Instructor - but an instructor had no way to see their own. That is the
@@ -309,57 +314,76 @@ class FitnessTeacherSwapPortal(http.Controller):
         and which they picked up, so a disagreement about who was meant to be
         in the room is settled by a record rather than by memory.
 
-        A swap has two sides and the same record is both, so it is read once
-        and split by which side this user is on. "Given away" and "picked up"
-        are the two questions actually being asked, and a single merged list
-        answers neither at a glance.
+        One list, newest swap first, as asked. The page used to split the rows
+        into "handed over" and "taken on", which answers a different question -
+        where a class went - and cannot be read as a chronology. The direction
+        is now a column instead of a heading, so nothing is lost and the order
+        is the order things happened in.
+
+        Note on the columns: a swap record is one class changing hands between
+        two instructors. There is no second class, so there is no "swapped-to
+        class" to show; the counterpart of the class is the other instructor,
+        and that is what the direction column carries.
         """
         user = request.env.user
         if not user.has_group(TEACHER_GROUP):
             return request.redirect('/my')
 
-        try:
-            user_tz = pytz.timezone(user.tz or 'UTC')
-        except pytz.UnknownTimeZoneError:
-            user_tz = pytz.UTC
+        user_tz = _studio_tz()
 
         # sudo: a swap names two instructors, and the other one is the whole
         # point of the record. Read is scoped to rows this user is a party to
         # by the domain itself, so this widens nothing else.
+        # Newest first means newest *swap*, not newest class: the column the
+        # page is ordered by has to be the one it shows as "Swapped on", or the
+        # order looks arbitrary to anyone reading down it.
         swaps = request.env['fitness.teacher.swap'].sudo().search([
             '|',
             ('original_teacher_id', '=', user.id),
             ('new_teacher_id', '=', user.id),
-        ], order='class_start desc, create_date desc', limit=300)
+        ], order='create_date desc, id desc', limit=300)
 
         source_labels = dict(
             request.env['fitness.teacher.swap']._fields['initiated_by'].selection)
 
+        now = fields.Datetime.now()
+        _ = request.env._
+
         def row(sw):
             mine_was_given = sw.original_teacher_id.id == user.id
             other = sw.new_teacher_id if mine_was_given else sw.original_teacher_id
+            past = bool(sw.class_start and sw.class_start < now)
             return {
                 'id': sw.id,
                 'class_name': sw.class_name or (sw.class_type_id.name or ''),
-                'when': _format_local(sw.class_start, user_tz),
+                'when': (_format_local(sw.class_start, user_tz)
+                         or _('Date not recorded')),
                 'logged': _format_local(sw.create_date, user_tz),
-                'other': other.name or '',
+                'other': other.name or _('Unknown'),
+                'direction': 'given' if mine_was_given else 'taken',
+                'direction_label': _('Handed over to') if mine_was_given
+                                   else _('Taken on from'),
                 'reason': (sw.reason or '').strip(),
                 'source': source_labels.get(sw.initiated_by, sw.initiated_by or ''),
                 'event_id': sw.calendar_event_id.id if sw.calendar_event_id else 0,
                 # A swap of a class that has already happened is history; one
                 # still ahead is something the instructor may need to act on.
-                'past': bool(sw.class_start and sw.class_start < fields.Datetime.now()),
+                'past': past,
+                'status': _('Completed') if past else _('Scheduled'),
             }
 
-        given = [row(s) for s in swaps if s.original_teacher_id.id == user.id]
-        taken = [row(s) for s in swaps if s.new_teacher_id.id == user.id]
+        rows = [row(s) for s in swaps]
 
         return request.render('fitness_teacher_swap.portal_teacher_swaps', {
-            'given': given,
-            'taken': taken,
-            'total': len(given) + len(taken),
+            'rows': rows,
+            'total': len(rows),
         })
+
+    @http.route('/my/instructor/swaps', type='http', auth='user', website=True,
+                sitemap=False)
+    def _legacy_swaps(self, **kw):
+        """The page moved under Profile; this URL is in sent notifications."""
+        return request.redirect('/my/profile/swap-history', code=301)
 
     # ── Legacy redirects — keep old /my/teacher/ URLs working (notification emails) ──
     @http.route('/my/teacher/classes', type='http', auth='user', website=True, sitemap=False)

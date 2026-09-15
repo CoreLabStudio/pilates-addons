@@ -153,6 +153,26 @@
                             </svg>
                         </a>
 
+                        <!-- Next to Classes History, deliberately: the two are
+                             the same kind of thing - a record of what already
+                             happened - and Profile is the single place for
+                             both. Neither is on the classes page any more. -->
+                        <a href="/my/profile/swap-history" class="mv-menu-row">
+                            <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="17 2 21 6 17 10"/>
+                                <path d="M21 6H8a4 4 0 0 0-4 4"/>
+                                <polyline points="7 22 3 18 7 14"/>
+                                <path d="M3 18h13a4 4 0 0 0 4-4"/>
+                            </svg>
+                            <div class="mv-menu-text">
+                                <div class="mv-menu-title">Swap History</div>
+                                <div class="mv-menu-desc">Classes you handed over or took on</div>
+                            </div>
+                            <svg class="mv-menu-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+
                         <a href="/my/messages" class="mv-menu-row">
                             <svg class="mv-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
