@@ -44,6 +44,10 @@ except Exception:
     _OdooPaymentPortal = http.Controller
     _PAYMENT_OK = False
 
+# The studio is in Madrid and its classes happen there. Every class time
+# the portal prints is on this clock, whoever is reading it.
+STUDIO_TZ = 'Europe/Madrid'
+
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 LOOK_AHEAD_DAYS = 14
@@ -2526,8 +2530,27 @@ class FitnessStudentPortal(http.Controller):
 
     @staticmethod
     def _user_tz():
+        """The studio's clock. Always, for everybody.
+
+        This used to answer the student's own timezone, falling back to UTC.
+        Both halves were wrong for a studio whose classes happen in one room in
+        Madrid:
+
+          - 23 of 34 active accounts carry no timezone at all, so they fell
+            through to UTC and were shown every class two hours early. A 07:00
+            class read as 05:00.
+          - A handful carry a timezone set by whoever created the account
+            rather than by the student. One real instructor was on
+            Asia/Calcutta and saw every class three and a half hours late.
+
+        A class at 07:00 in Madrid is at 07:00 for the person attending it, and
+        a timetable that renders in the reader's timezone is only correct for
+        readers who happen to be in Spain. /my/timetable already defaulted to
+        the studio clock for exactly this reason; this brings the booking pages,
+        the schedule and the history in line with it.
+        """
         try:
-            return pytz.timezone(request.env.user.tz or 'UTC')
+            return pytz.timezone(STUDIO_TZ)
         except pytz.UnknownTimeZoneError:
             return pytz.UTC
 
@@ -3341,14 +3364,13 @@ class FitnessStudentPortal(http.Controller):
     # entire purpose is "what time is this class" that would silently show
     # every slot two hours out. A physical studio's timetable is far better
     # defaulted to the studio's clock than to UTC.
-    STUDIO_TZ = 'Europe/Madrid'
 
     def _timetable_tz(self):
-        student_tz = request.env.user.tz
+        """Same clock as everything else now - see _user_tz."""
         try:
-            return pytz.timezone(student_tz or self.STUDIO_TZ)
+            return pytz.timezone(STUDIO_TZ)
         except pytz.UnknownTimeZoneError:
-            return pytz.timezone(self.STUDIO_TZ)
+            return pytz.UTC
 
     @http.route('/my/timetable', type='http', auth='user', website=True, sitemap=False)
     def timetable(self, discipline=None, **kw):
