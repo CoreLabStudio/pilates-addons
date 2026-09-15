@@ -3409,3 +3409,13 @@ msgstr "Editar el perfil"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Photo, preferences, mobile and emergency contact"
 msgstr "Foto, preferències, mòbil i contacte d'emergència"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Swap History"
+msgstr "Historial de canvis"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Classes you handed over or took on"
+msgstr "Classes que has cedit o assumit"

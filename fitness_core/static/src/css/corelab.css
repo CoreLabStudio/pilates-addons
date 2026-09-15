@@ -32,6 +32,17 @@
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
   --mv-ink:         #92786C;   /* Hemp brown */
 
+  /* Chips that float on a photo - the time on a class card, the back button on
+     a class page. The pill and the text on it have to move together, and they
+     did not: the pill was a literal near-white and the text was --mv-paco, so
+     in dark mode the text flipped to cream and the pill stayed cream with it.
+     Measured at 1.22:1, on 167 elements. As a pair they flip cleanly. */
+  --mv-overlay-bg:        rgba(250,249,246,0.84);
+  --mv-overlay-bg-strong: rgba(250,249,246,0.88);
+  --mv-overlay-fg:        #50423D;
+  --mv-track-bg:          var(--mv-border);
+  --mv-check-mark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FAF9F6' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+
   /* Discipline colour coding. Reformer reads blue, Barre brown, and within
      each family three shades run light -> deep with the class type's
      intensity. Three tiers rather than one shade per class type: the studio
@@ -100,7 +111,7 @@
   --mv-muted:       #5E534A;   /* muted text */
   --mv-muted2:      #7A6D65;   /* lighter muted */
   --mv-ok-bg:       #E6EDEA;
-  --mv-ok-ink:      #5E8C7A;
+  --mv-ok-ink:      #3F6B58;
   --mv-sage:        #8FA394;   /* success / completed — unchanged */
   --mv-warn-bg:     #FDE8EA;   /* light red error bg */
   --mv-warn-ink:    #D40924;   /* deep red error ink */
@@ -363,11 +374,11 @@ body:has(.mv-app) #wrapwrap > main {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: rgba(250,249,246,0.84);
+  background: var(--mv-overlay-bg);
   /* The logo brown measures 3.89:1 on this near-white pill and misses AA at
      10px. Paco takes it to 9.12:1. The logo brown stays the brand's brown for
      fills; it is simply not dark enough to be read as text. */
-  color: var(--mv-paco);
+  color: var(--mv-overlay-fg);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -547,14 +558,14 @@ body:has(.mv-app) #wrapwrap > main {
   top: 16px; left: 16px;
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(250,249,246,0.88);
+  background: var(--mv-overlay-bg-strong);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: var(--mv-ink-text);
+  color: var(--mv-overlay-fg);
   font-size: 1rem;
   transition: transform var(--mv-t-fast);
   border: none;
@@ -687,7 +698,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-history-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size:0.93rem; font-weight:400;
-  color:var(--mv-ink); margin:0 0 2px;
+  color:var(--mv-ink-text); margin:0 0 2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .mv-history-meta { font-size:0.74rem; color:var(--mv-muted); margin:0; }
@@ -714,14 +725,14 @@ body:has(.mv-app) #wrapwrap > main {
 }
 .mv-pack-name {
   font-family:'Cormorant Garamond',Georgia,serif; font-size:0.95rem;
-  color:var(--mv-ink); margin:0 0 8px;
+  color:var(--mv-ink-text); margin:0 0 8px;
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
 .mv-pack-meta {
   font-size:0.75rem; color:var(--mv-muted);
   display:flex; flex-wrap:wrap; gap:12px;
 }
-.mv-pack-meta span strong { color:var(--mv-ink); font-weight:600; display:block; }
+.mv-pack-meta span strong { color:var(--mv-ink-text); font-weight:600; display:block; }
 
 /* ── 13. Bottom navigation ──────────────────────────────────── */
 .mv-bottom-nav {
@@ -806,7 +817,7 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-student-card:nth-child(4) { animation-delay:105ms; }
 .mv-student-card:nth-child(5) { animation-delay:140ms; }
 
-.mv-student-name { flex:1; font-size:0.92rem; color:var(--mv-ink); font-weight:500; margin:0; }
+.mv-student-name { flex:1; font-size:0.92rem; color:var(--mv-ink-text); font-weight:500; margin:0; }
 .mv-student-status-wrap {
   display:flex; align-items:center; gap:10px;
 }
@@ -838,7 +849,7 @@ body:has(.mv-app) #wrapwrap > main {
 
 .mv-class-row-name {
   font-family:'Cormorant Garamond',Georgia,serif; font-size:0.97rem;
-  color:var(--mv-ink); margin:0 0 3px;
+  color:var(--mv-ink-text); margin:0 0 3px;
 }
 .mv-class-row-sub { font-size:0.75rem; color:var(--mv-muted); margin:0; }
 .mv-class-row-right { text-align:right; flex-shrink:0; }
@@ -2075,7 +2086,9 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   gap: 4px;
   margin: 0 16px 16px;
   padding: 4px;
-  background: var(--mv-border);
+  /* Its own token, not --mv-border: in dark the border colour is a relatively
+     light surface, and the inactive label on it measured 4.15:1. */
+  background: var(--mv-track-bg);
   border-radius: 999px;
 }
 .mv-segment {
@@ -3028,7 +3041,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   flex-shrink: 0;
 }
 .mv-badge-pending { background: var(--mv-warn-bg); color: var(--mv-warn-ink); }
-.mv-badge-sage    { background: var(--mv-ok-bg);   color: var(--mv-sage); }
+.mv-badge-sage    { background: var(--mv-ok-bg);   color: var(--mv-ok-ink); }
 .mv-badge-success { background: var(--mv-ok-bg);   color: var(--mv-sage); }
 
 /* ── 33c. Active package badge on card image ──────────────────── */
@@ -3044,10 +3057,12 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 
 /* ── 33d. Private / contact-only card ─────────────────────────── */
 .mv-card-tag-private {
-  /* White measured 3.53:1 on this fill and missed AA. Near-black takes it to
-     5.29:1 and keeps the fill, rather than inventing another brown. */
+  /* Measured: near-black on this fill is 3.37:1, not the 5.29 once recorded
+     here - the fill moved after that note was written. --mv-accent-fg is the
+     token that flips with the fill: cream on hemp at 5.26:1 in light, and
+     near-black on the lifted hemp in dark. */
   background: var(--mv-active-fill);
-  color: var(--mv-on-discipline);
+  color: var(--mv-accent-fg);
 }
 .mv-pkg-card--contact {
   opacity: 0.92;
@@ -4324,42 +4339,15 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   stroke-linecap: round; stroke-linejoin: round;
 }
 
-.mv-swap-sections {
+/* One chronological list. This was two sections - handed over and taken on -
+   which answered "where did that class go" but could not be read as a history,
+   because the two halves each restarted at the newest row. The direction moved
+   into the card as a line of its own, so the page is one sequence. */
+.mv-swap-list {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 10px;
   padding: 0 16px;
-}
-.mv-swap-head {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-.mv-swap-title {
-  margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: var(--mv-paco);
-}
-.mv-swap-count {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--mv-sand);
-  color: var(--mv-ink-text);
-  font-variant-numeric: tabular-nums;
-}
-.mv-swap-sub {
-  margin: 2px 0 10px;
-  font-size: 0.76rem;
-  color: var(--mv-muted);
-}
-.mv-swap-none {
-  font-size: 0.8rem;
-  color: var(--mv-muted);
-  padding: 10px 0 2px;
 }
 .mv-swap-card {
   display: flex;
@@ -4427,6 +4415,32 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   color: var(--mv-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+/* "Swapped on" needs saying: the card carries two dates - when the class is,
+   and when the swap was agreed - and without a label the second one reads as a
+   second class time. */
+.mv-swap-logged-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mv-muted2);
+  white-space: nowrap;
+}
+.mv-swap-status {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--mv-info-bg);
+  color: var(--mv-ink-text);
+}
+/* Direction is the thing a reader scans for, so it carries the colour: a class
+   taken on is one this instructor has to turn up to. */
+.mv-swap-status--taken {
+  background: var(--mv-ok-bg);
+  color: var(--mv-ok-ink);
 }
 
 @media (max-width: 420px) {
@@ -4586,7 +4600,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.35rem;
   line-height: 1.25;
-  color: var(--mv-ink);
+  color: var(--mv-paco);
 }
 .mv-trial-card-meta {
   color: var(--mv-muted);
@@ -4624,7 +4638,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     border: 1px solid var(--mv-border);
     border-radius: 999px;
     background: var(--mv-bg);
-    color: var(--mv-ink);
+    color: var(--mv-ink-text);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -4694,7 +4708,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     border: 1px solid var(--mv-border);
     border-radius: 10px;
     background: var(--mv-bg);
-    color: var(--mv-ink);
+    color: var(--mv-paco);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -4751,7 +4765,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
 .mv-confirm-no {
     border: 1px solid var(--mv-border);
     background: transparent;
-    color: var(--mv-ink);
+    color: var(--mv-ink-text);
 }
 .mv-confirm-no:hover { border-color: var(--mv-muted); }
 
@@ -4870,7 +4884,16 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     --mv-active-fill: #C9B4A3;   /* pill fill, and the text alias below */
     --mv-ink-text:    #DCCFC4;   /* body text - 86 uses, the workhorse */
     --mv-muted:       #AA9C90;
-    --mv-muted2:      #8D8177;
+    --mv-muted2:      #948880;   /* 4.82:1 on the card; #8D8177 measured 4.38 */
+
+    /* The photo chips, flipped as a pair - see the light block. Cream text on
+       the dark scrim measures 9.31:1 even where the photo underneath is white. */
+    --mv-overlay-bg:        rgba(27,22,19,0.84);
+    --mv-overlay-bg-strong: rgba(27,22,19,0.88);
+    --mv-overlay-fg:        #F2EAE3;
+    --mv-track-bg:          #2C2420;   /* 5.70:1 for the inactive label */
+    /* --mv-accent is light here, so the tick on it has to be dark. */
+    --mv-check-mark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%231B1613' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
     --mv-ink:         #C4A895;   /* hemp, lifted to read on the dark ground */
 
     /* ── avatars, focus rings, form accents ──
@@ -4915,4 +4938,156 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     --mv-card-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 10px 22px -4px rgba(0,0,0,0.55);
     --mv-card-shadow-pressed: 0 1px 2px rgba(0,0,0,0.5);
   }
+}
+
+/* ── 30. Autofilled fields ─────────────────────────────────────────────────
+   A field the browser fills is painted by the browser, not by this stylesheet.
+   Chrome gives it a background of its own and takes that colour from the
+   browser's theme rather than the page's - so on a phone set to dark, an
+   autofilled name or password came out near-black inside our cream card while
+   the field beside it, typed by hand, stayed cream. Nothing above this point
+   could have prevented it: every rule here sets `background`, and autofill
+   overrides that specific property at a level author CSS cannot reach.
+
+   The inset box-shadow is the way through. Chrome does not override shadow, so
+   a 1000px inset one covers the field completely and reads as the background;
+   -webkit-text-fill-color does the same job for the text, which `color` alone
+   no longer controls once autofill has run. Both take tokens, so an autofilled
+   field now follows the page into either theme instead of following the
+   browser.
+
+   The absurd transition delay is the documented trick for Chrome's fade: the
+   background is animated in after paint, and a delay longer than any session
+   means the animation never starts. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--mv-bg) inset !important;
+    box-shadow: 0 0 0 1000px var(--mv-bg) inset !important;
+    -webkit-text-fill-color: var(--mv-paco) !important;
+    caret-color: var(--mv-paco);
+    border-color: var(--mv-border) !important;
+    transition: background-color 100000s ease-in-out 0s;
+}
+/* The auth card sits on the page background, and its fields use --mv-bg too,
+   so the same fill is right there - but the text on those is Paco, not ink. */
+body.mv-auth-body input:-webkit-autofill,
+body.mv-auth-body input:-webkit-autofill:hover,
+body.mv-auth-body input:-webkit-autofill:focus,
+body.mv-auth-body input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--mv-bg) inset !important;
+    box-shadow: 0 0 0 1000px var(--mv-bg) inset !important;
+    -webkit-text-fill-color: var(--mv-paco) !important;
+    caret-color: var(--mv-paco);
+}
+
+
+/* ── 31. Two things the measured pass turned up ────────────────────────────
+
+   The portal's own text inputs never styled their placeholder, so it fell back
+   to the user agent's #757575 - 4.38:1 on the cream ground, just under AA, and
+   on a dark ground not the colour this theme would have chosen at all. The
+   auth pages had this rule already; the portal form did not. */
+.mv-field-input::placeholder,
+.mv-input::placeholder,
+.mv-search-input::placeholder,
+textarea.mv-field-input::placeholder {
+    color: var(--mv-muted2);
+    opacity: 1;
+}
+
+/* Odoo paints .card-body with a near-opaque white of its own, inside the card
+   whose background this stylesheet had already set. The card went dark and the
+   body stayed white, so on the signup page every label sat at 2.19:1 and the
+   terms links at 1.49:1 - dark-theme text on a white panel. Clearing the body
+   lets the card's own background show through, which is what the rest of these
+   rules always assumed was happening. */
+body.mv-auth-body .card-body,
+body.mv-auth-body .card-body.bg-white,
+body.mv-auth-body .card > .bg-white,
+body.mv-auth-body .card .bg-100 {
+    background: transparent !important;
+}
+
+/* Clearing the white panel above uncovered the elements Odoo never coloured,
+   because on a white panel its default black was fine. On the card's real
+   background they measured 1.26:1. These are the pieces that page actually
+   renders: the consent labels, the "or" divider, and the passkey button, whose
+   own white background was showing through as well. */
+/* Odoo's own rule for this panel is
+
+       :where(.card:not([data-vxml])) .card-body:not(.card[data-vxml] ...)
+           { background-color: rgba(255,255,255,.9); color: rgba(0,0,0,.7) !important }
+
+   and the two halves of it have to be beaten in different ways. The background
+   is not !important, so any !important declaration takes it. The colour is,
+   and :not() donates its argument's specificity, which puts that selector above
+   a plain `body.mv-auth-body .card-body em` - so the colour rules below name
+   .card as well, purely to carry enough weight to win. Chrome's matched-rules
+   list is what settled this; it is not guesswork about the cascade. */
+body.mv-auth-body .card .card-body,
+body.mv-auth-body .card .card-body em,
+body.mv-auth-body .card .card-body small,
+body.mv-auth-body .card .card-body .text-muted,
+body.mv-auth-body .card .card-body .form-check-label,
+body.mv-auth-body .card .card-body label.col-form-label,
+body.mv-auth-body .card .card-body label.form-label {
+    color: var(--mv-ink-text) !important;
+}
+/* The passkey row is a .list-group-item, which brings its own white from
+   Bootstrap - a different source from the panel above, and missed the first
+   time because the rule named .btn and this is not one. */
+body.mv-auth-body .card .card-body .list-group-item,
+body.mv-auth-body .card .card-body .list-group-item-action,
+body.mv-auth-body .card .card-body .btn.border,
+body.mv-auth-body .card .card-body .btn-secondary,
+body.mv-auth-body .card .card-body .btn-light {
+    background-color: var(--mv-card-bg) !important;
+    border-color: var(--mv-border) !important;
+}
+body.mv-auth-body .card .card-body .btn.border,
+body.mv-auth-body .card .card-body .btn-secondary,
+body.mv-auth-body .card .card-body .btn-light {
+    color: var(--mv-ink-text) !important;
+}
+body.mv-auth-body .card .card-body .btn span,
+body.mv-auth-body .card .card-body .list-group-item span {
+    color: inherit !important;
+}
+
+/* The last two the measured pass would not let go of.
+
+   Odoo's muted-text rule on this panel reads
+
+       :where(.card:not([data-vxml])) .card-body:not(.card[data-vxml] .card-body) .text-muted
+
+   and :not() donates its argument's weight, so that selector scores 0-5-0 -
+   above anything built from the three classes available here. Repeating the
+   class is the honest way to outrank it without inventing a wrapper or
+   reaching for an id that is not in the markup. Chrome's matched-rule list
+   is the source for that number, not a reading of the spec. */
+body.mv-auth-body .card .card-body .text-muted.text-muted.text-muted,
+body.mv-auth-body .card .card-body em.text-muted.text-muted.text-muted {
+    color: var(--mv-ink-text) !important;
+}
+
+/* The consent checkboxes kept Bootstrap's white box and its tick, which is a
+   white glyph - fine on the light card it was designed for, and a white square
+   on the dark one. Box and tick move together here: --mv-accent already flips
+   near-black to cream, so the tick has to flip the other way with it. */
+body.mv-auth-body .card .card-body .form-check-input {
+    background-color: var(--mv-bg) !important;
+    border-color: var(--mv-border) !important;
+}
+body.mv-auth-body .card .card-body .form-check-input:checked {
+    background-color: var(--mv-accent) !important;
+    border-color: var(--mv-accent) !important;
+    background-image: var(--mv-check-mark) !important;
+}
+body.mv-auth-body .card .card-body .form-check-input:focus {
+    border-color: var(--mv-clay) !important;
+    box-shadow: 0 0 0 3px rgba(154,186,205,0.35) !important;
 }

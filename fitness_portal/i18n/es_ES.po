@@ -3407,3 +3407,13 @@ msgstr "Editar perfil"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 msgid "Photo, preferences, mobile and emergency contact"
 msgstr "Foto, preferencias, móvil y contacto de emergencia"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Swap History"
+msgstr "Historial de cambios"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+msgid "Classes you handed over or took on"
+msgstr "Clases que has cedido o asumido"

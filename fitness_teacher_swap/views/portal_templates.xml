@@ -31,27 +31,9 @@
                        t-att-style="'color:var(--mv-ink);border-color:var(--mv-ink);background:var(--mv-card-bg);' if _af == 'all' else None">Upcoming</a>
                 </div>
 
-                <!-- Both history pages, always. These used to be links inside
-                     the "no classes" message, so the only instructor who could
-                     find them was one with nothing to teach. -->
-                <div class="mv-teacher-links">
-                    <a href="/my/instructor/history" class="mv-teacher-link">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="12" cy="12" r="9"/>
-                            <polyline points="12 7 12 12 15.5 14"/>
-                        </svg>
-                        <span>Class history</span>
-                    </a>
-                    <a href="/my/instructor/swaps" class="mv-teacher-link">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <polyline points="17 2 21 6 17 10"/>
-                            <path d="M21 6H8a4 4 0 0 0-4 4"/>
-                            <polyline points="7 22 3 18 7 14"/>
-                            <path d="M3 18h13a4 4 0 0 0 4-4"/>
-                        </svg>
-                        <span>Swap history</span>
-                    </a>
-                </div>
+                <!-- Class history and Swap history used to sit here as well as
+                     in the Profile menu. Profile is the single place for both
+                     now, so this page is only the classes themselves. -->
 
                 <!-- Alerts -->
                 <t t-if="error or success">
@@ -71,7 +53,6 @@
                         <t t-if="_af == 'today'">No classes today.</t>
                         <t t-elif="_af == 'week'">No classes this week.</t>
                         <t t-else="">No upcoming classes.</t>
-                        <a href="/my/instructor/history">View class history →</a>
                     </div>
                 </t>
                 <t t-else="">
@@ -361,75 +342,54 @@
             <div class="mv-app">
                 <t t-call="fitness_portal.mv_teacher_page_header"/>
 
-                <t t-set="_back_url" t-value="'/my/instructor/classes'"/>
-                <t t-set="_back_label">My Classes</t>
+                <t t-set="_back_url" t-value="'/my'"/>
+                <t t-set="_back_label">Profile</t>
                 <t t-call="fitness_portal.mv_subpage_back"/>
 
                 <div class="mv-greeting-row">
                     <div>
                         <p class="mv-greeting-name">Swap History</p>
-                        <p class="mv-greeting-sub">Classes you handed over and classes you took on</p>
+                        <p class="mv-greeting-sub">Every swap you have made, newest first</p>
                     </div>
                 </div>
 
                 <t t-if="not total">
-                    <div class="mv-empty">No swaps recorded yet.</div>
+                    <div class="mv-empty">No swaps yet.</div>
                 </t>
                 <t t-else="">
-                    <t t-set="sections" t-value="[
-                        ('given', given, 'Handed over', 'Somebody else taught these for you'),
-                        ('taken', taken, 'Taken on', 'You taught these for somebody else')]"/>
-                    <div class="mv-swap-sections">
-                        <t t-foreach="sections" t-as="sec">
-                            <t t-set="rows" t-value="sec[1]"/>
-                            <section class="mv-swap-section">
-                                <div class="mv-swap-head">
-                                    <h2 class="mv-swap-title" t-out="sec[2]"/>
-                                    <span class="mv-swap-count" t-out="len(rows)"/>
-                                </div>
-                                <p class="mv-swap-sub" t-out="sec[3]"/>
-                                <t t-if="not rows">
-                                    <div class="mv-swap-none">Nothing here yet.</div>
-                                </t>
-                                <t t-else="">
-                                    <t t-foreach="rows" t-as="sw">
-                                        <!-- The class name links only while the
-                                             class still exists; a swap record
-                                             outlives the class it was about. -->
-                                        <div t-attf-class="mv-swap-card#{' mv-swap-past' if sw['past'] else ''}">
-                                            <div class="mv-swap-card-main">
-                                                <p class="mv-swap-class">
-                                                    <t t-if="sw['event_id']">
-                                                        <a t-attf-href="/my/instructor/classes/#{sw['event_id']}"
-                                                           t-out="sw['class_name']"/>
-                                                    </t>
-                                                    <t t-else="">
-                                                        <t t-out="sw['class_name']"/>
-                                                    </t>
-                                                </p>
-                                                <p class="mv-swap-meta">
-                                                    <t t-if="sw['when']">
-                                                        <t t-out="sw['when']"/>
-                                                    </t>
-                                                    <t t-else="">Date not recorded</t>
-                                                </p>
-                                                <p class="mv-swap-who">
-                                                    <t t-if="sec[0] == 'given'">To</t>
-                                                    <t t-else="">From</t>
-                                                    <strong t-out="sw['other'] or 'Unknown'"/>
-                                                </p>
-                                                <t t-if="sw['reason']">
-                                                    <p class="mv-swap-reason" t-out="sw['reason']"/>
-                                                </t>
-                                            </div>
-                                            <div class="mv-swap-card-side">
-                                                <span class="mv-swap-source" t-out="sw['source']"/>
-                                                <span class="mv-swap-logged" t-out="sw['logged']"/>
-                                            </div>
-                                        </div>
+                    <div class="mv-swap-list">
+                        <t t-foreach="rows" t-as="sw">
+                            <!-- The class name links only while the class still
+                                 exists; a swap record outlives the class it was
+                                 about. -->
+                            <div t-attf-class="mv-swap-card#{' mv-swap-past' if sw['past'] else ''}">
+                                <div class="mv-swap-card-main">
+                                    <p class="mv-swap-class">
+                                        <t t-if="sw['event_id']">
+                                            <a t-attf-href="/my/instructor/classes/#{sw['event_id']}"
+                                               t-out="sw['class_name']"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-out="sw['class_name']"/>
+                                        </t>
+                                    </p>
+                                    <p class="mv-swap-meta" t-out="sw['when']"/>
+                                    <p class="mv-swap-who">
+                                        <t t-out="sw['direction_label']"/>
+                                        <strong t-out="sw['other']"/>
+                                    </p>
+                                    <t t-if="sw['reason']">
+                                        <p class="mv-swap-reason" t-out="sw['reason']"/>
                                     </t>
-                                </t>
-                            </section>
+                                </div>
+                                <div class="mv-swap-card-side">
+                                    <span t-attf-class="mv-swap-status mv-swap-status--#{sw['direction']}"
+                                          t-out="sw['status']"/>
+                                    <div class="mv-swap-logged-label">Swapped on</div>
+                                    <span class="mv-swap-logged" t-out="sw['logged']"/>
+                                    <span class="mv-swap-source" t-out="sw['source']"/>
+                                </div>
+                            </div>
                         </t>
                     </div>
                 </t>
