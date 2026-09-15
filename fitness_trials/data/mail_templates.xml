@@ -11,7 +11,7 @@
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
   <t t-if="object.lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
@@ -63,7 +63,7 @@
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
   <t t-if="object.lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
@@ -127,7 +127,7 @@
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="reply_to">{{ object.email or user.company_id.email_formatted }}</field>
     <field name="body_html" type="html">
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
   <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Admin</p>
   <h1 style="margin:0 0 20px;font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">New Barre Trial Booking</h1>
   <div style="margin:0 0 24px;padding:20px 24px;background:#f0ece6;border-radius:10px;">
@@ -175,7 +175,7 @@
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
     <field name="body_html" type="html">
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background:#faf9f7;">
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
   <t t-if="object.lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>

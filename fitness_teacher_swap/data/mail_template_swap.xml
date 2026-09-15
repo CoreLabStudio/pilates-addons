@@ -12,7 +12,7 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>We wanted to let you know that the instructor for your upcoming class has been updated:</p>
@@ -21,7 +21,7 @@
       <li>New instructor: <strong t-out="object.calendar_event_id.user_id.name or 'TBA'"/></li>
     </ul>
     <p>Everything else remains the same. See you in class!</p>
-    <p>The m&#333;va team</p>
+    <p>The CoreLab team</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
@@ -31,7 +31,7 @@
       <li>Nou/nova instructor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Per confirmar'"/></li>
     </ul>
     <p>La resta es mant&#233; igual. Ens veiem a classe!</p>
-    <p>L'equip de m&#333;va</p>
+    <p>L&#39;equip de CoreLab</p>
   </t>
   <t t-else="">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
@@ -41,7 +41,7 @@
       <li>Nuevo/a instructor/a: <strong t-out="object.calendar_event_id.user_id.name or 'Por confirmar'"/></li>
     </ul>
     <p>Todo lo dem&#225;s sigue igual. &#161;Nos vemos en clase!</p>
-    <p>El equipo de m&#333;va</p>
+    <p>El equipo de CoreLab</p>
   </t>
 </div>
             </field>

@@ -12,21 +12,21 @@
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
-<div style="margin:0;padding:0;font-size:13px;">
+<div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
   <t t-if="object.student_id.lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>A reminder that you have credits on your pack that are expiring soon. Log in to book your remaining classes before they expire.</p>
-    <p>The m&#333;va team</p>
+    <p>The CoreLab team</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Et recordem que tens cr&#232;dits al teu paquet que caduca aviat. Inicia sessi&#243; per reservar les teves classes restants abans que vencin.</p>
-    <p>L'equip de m&#333;va</p>
+    <p>L&#39;equip de CoreLab</p>
   </t>
   <t t-else="">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Te recordamos que tienes cr&#233;ditos en tu paquete que caducan pronto. Inicia sesi&#243;n para reservar tus clases restantes antes de que venzan.</p>
-    <p>El equipo de m&#333;va</p>
+    <p>El equipo de CoreLab</p>
   </t>
 </div>
             </field>

@@ -12,12 +12,21 @@ DEFAULT_LANG = 'es_ES'
 _logger = logging.getLogger(__name__)
 
 
-def _fmt_event_dt(dt_utc, user):
-    """Return dt_utc formatted in the user's local timezone."""
+# The studio's clock, like every other surface. This used to format in the
+# reader's own account timezone, falling back to UTC when the account had none
+# - and most do not. The message it builds is the one whose entire job is to
+# say when the class now is, so a student with no timezone was told a time two
+# hours before the real one, while the portal page the message links to showed
+# the right one.
+STUDIO_TZ = 'Europe/Madrid'
+
+
+def _fmt_event_dt(dt_utc):
+    """Return dt_utc formatted on the studio's clock."""
     if not dt_utc:
         return ''
     try:
-        tz = _pytz.timezone(user.tz or 'UTC')
+        tz = _pytz.timezone(STUDIO_TZ)
     except Exception:
         tz = _pytz.UTC
     local = _pytz.UTC.localize(dt_utc).astimezone(tz)
@@ -128,7 +137,7 @@ class CalendarEvent(models.Model):
                     for booking in bookings:
                         student_user = booking.student_id.user_ids[:1]
                         if student_user:
-                            new_dt_str = _fmt_event_dt(new_start, student_user)
+                            new_dt_str = _fmt_event_dt(new_start)
                             senv = self.with_context(lang=student_user.lang or DEFAULT_LANG)
                             Notif._create_for_user(
                                 student_user.id,
@@ -139,7 +148,7 @@ class CalendarEvent(models.Model):
                             )
                             notified += 1
                     if teacher and teacher.id:
-                        new_dt_str = _fmt_event_dt(new_start, teacher)
+                        new_dt_str = _fmt_event_dt(new_start)
                         tenv = self.with_context(lang=teacher.lang or DEFAULT_LANG)
                         Notif._create_for_user(
                             teacher.id,

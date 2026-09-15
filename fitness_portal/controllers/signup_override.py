@@ -375,19 +375,37 @@ class FitnessSignup(AuthSignupHome):
             pwa_note = ('Una vez añadida, se abre como una app normal, sin barra del navegador. '
                         'Solo toca el icono.')
 
-        return Markup("""<div style="font-family:Georgia,serif;color:#18110C;max-width:520px;margin:0 auto;padding:40px 24px;">
-  <p style="font-size:22px;font-weight:600;margin:0 0 20px;">{greeting}</p>
+        # color-scheme and supported-color-schemes tell a dark-mode client to
+        # leave this message alone. Without them Gmail repaints it, and it does
+        # not repaint evenly: it recolours link text but leaves an inline
+        # background-color where it is, so the button below came out as its own
+        # dark text on its own dark background - the reported symptom. The
+        # wrapper needs an explicit background-color for the same reason; with
+        # only a text colour set, the client supplies the background and the
+        # two no longer belong to each other.
+        #
+        # The button is built the belt-and-braces way on purpose: bgcolor as
+        # well as background-color, because clients that drop CSS still honour
+        # the attribute, and the label colour repeated on an inner span with
+        # !important, because the rule Gmail applies to dark-mode links targets
+        # the anchor itself and a nested span keeps what it was given.
+        return Markup("""<div style="font-family:Georgia,serif;color:#18110C;background-color:#FAF9F6;color-scheme:light only;supported-color-schemes:light only;max-width:520px;margin:0 auto;padding:40px 24px;">
+  <p style="font-size:22px;font-weight:600;margin:0 0 20px;color:#18110C;">{greeting}</p>
   <p style="font-size:15px;line-height:1.7;color:#4a3728;margin:0 0 28px;">{body}</p>
-  <div style="margin:0 0 32px;">
-    <a href="{url}"
-       style="background-color:#18110C;color:#F5F0E8;text-decoration:none;
-              padding:14px 28px;border-radius:4px;font-size:14px;
-              letter-spacing:0.05em;display:inline-block;">
-      {cta}
-    </a>
-  </div>
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 32px;border-collapse:separate;">
+    <tr>
+      <td bgcolor="#18110C" style="background-color:#18110C;border-radius:4px;">
+        <a href="{url}"
+           style="background-color:#18110C;color:#F5F0E8 !important;text-decoration:none;
+                  padding:14px 28px;border-radius:4px;font-size:14px;
+                  letter-spacing:0.05em;display:inline-block;">
+          <span style="color:#F5F0E8 !important;text-decoration:none;">{cta}</span>
+        </a>
+      </td>
+    </tr>
+  </table>
   <p style="font-size:13px;color:#8a7060;line-height:1.6;margin:0 0 24px;">{footer}</p>
-  <div style="margin:0 0 28px;padding:18px 20px;background:#F7F3EF;border-radius:6px;border-left:3px solid #92786C;">
+  <div style="margin:0 0 28px;padding:18px 20px;background-color:#F7F3EF;border-radius:6px;border-left:3px solid #92786C;">
     <p style="font-size:11px;font-weight:700;color:#50423D;margin:0 0 10px;letter-spacing:0.06em;text-transform:uppercase;">{pwa_title}</p>
     <ol style="font-size:13px;color:#4a3728;line-height:1.7;margin:0 0 10px;padding-left:20px;">
       <li style="margin-bottom:5px;">{pwa_1}</li>
