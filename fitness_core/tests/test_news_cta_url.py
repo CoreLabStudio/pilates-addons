@@ -51,6 +51,35 @@ class TestNewsCtaUrl(TransactionCase):
         self.assertEqual(self._url("https://corelabstudio.es"),
                          "https://corelabstudio.es")
 
+    # ── a portal path typed without its leading slash ────────────────────────
+    #
+    # The likeliest link in a CoreLab post is to CoreLab. Writing "my/studio"
+    # used to save as "https://my/studio" - a link to a host called "my", which
+    # is a real top-level domain, so nothing downstream complained and the
+    # button simply went nowhere.
+
+    def test_a_portal_path_without_its_slash_becomes_internal(self):
+        self.assertEqual(self._url("my/studio"), "/my/studio")
+
+    def test_a_deeper_portal_path_without_its_slash(self):
+        self.assertEqual(self._url("my/packages/12"), "/my/packages/12")
+
+    def test_a_single_segment_becomes_internal(self):
+        self.assertEqual(self._url("my"), "/my")
+
+    def test_a_query_string_does_not_look_like_a_host(self):
+        self.assertEqual(self._url("my/studio?view=schedule"),
+                         "/my/studio?view=schedule")
+
+    def test_a_dotted_host_is_still_treated_as_a_host(self):
+        """The fix must not reach the case the rule was written for."""
+        self.assertEqual(self._url("corelabstudio.es/precios"),
+                         "https://corelabstudio.es/precios")
+
+    def test_a_host_with_a_port_is_still_a_host(self):
+        self.assertEqual(self._url("localhost:8069/my"),
+                         "https://localhost:8069/my")
+
     def test_an_internal_path_stays_relative(self):
         """/my/packages is deliberately internal - making it absolute would
         send a student to the wrong host."""
