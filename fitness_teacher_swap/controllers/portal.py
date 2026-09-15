@@ -64,6 +64,13 @@ class FitnessTeacherSwapPortal(http.Controller):
         domain = [
             ('user_id', '=', request.env.user.id),
             ('is_fitness_class', '=', True),
+            # A cancelled class is not on anybody's timetable. The student
+            # views have filtered this out all along; this one never did, so a
+            # closure day - the opening event on 16 September, for one - left
+            # sixteen cancelled classes sitting on two instructors' screens
+            # looking exactly like classes they were due to teach, reassign
+            # button and roster included.
+            ('class_state', '!=', 'cancelled'),
         ]
         if filter == 'today':
             domain += [
@@ -117,6 +124,15 @@ class FitnessTeacherSwapPortal(http.Controller):
         if not event.exists() or event.user_id.id != request.env.user.id:
             return request.redirect(
                 '/my/instructor/classes?error=' + quote(_('Class not found or not assigned to you.'))
+            )
+        # The list no longer offers cancelled classes, but the roster is a
+        # plain URL and survives in history, a bookmark or a notification sent
+        # before the cancellation. Marking attendance for a class that did not
+        # happen is the thing worth refusing. The student side has guarded its
+        # equivalent page all along.
+        if event.class_state == 'cancelled':
+            return request.redirect(
+                '/my/instructor/classes?error=' + quote(_('This class has been cancelled.'))
             )
 
         # Search without sudo — teacher ir.rule scopes to own classes.
@@ -227,6 +243,8 @@ class FitnessTeacherSwapPortal(http.Controller):
         domain = [
             ('user_id', '=', request.env.user.id),
             ('is_fitness_class', '=', True),
+            # "Past classes you have taught" - a cancelled one was not taught.
+            ('class_state', '!=', 'cancelled'),
             ('start', '<', now),
         ]
         if cutoff_start:
@@ -236,6 +254,7 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         # Build available months from all past events (no cutoff)
         all_events_for_months = request.env['calendar.event'].search([
+            ('class_state', '!=', 'cancelled'),
             ('user_id', '=', request.env.user.id),
             ('is_fitness_class', '=', True),
             ('start', '<', now),
