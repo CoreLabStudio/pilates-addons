@@ -58,7 +58,20 @@ class FitnessNewsPost(models.Model):
         # Already absolute, or deliberately internal - both already work.
         if low.startswith(self._URL_SCHEMES) or url.startswith('/'):
             return url
-        # Anything else is a bare host or host/path: make it absolute.
+        # What is left is either a bare host ("corelabstudio.es/precios") or a
+        # portal path written without its leading slash ("my/studio"). Telling
+        # them apart matters: treating the second as a host produced
+        # "https://my/studio", a link to a machine called "my" that does not
+        # exist - and "my" really is a top-level domain, so nothing downstream
+        # rejected it. The studio's own pages are the likeliest thing anyone
+        # links to from a post, and that was the one case the rule got wrong.
+        #
+        # A hostname carries a dot or a port; a path segment does not. That is
+        # the whole test, and it keeps "corelabstudio.es" absolute while
+        # "my/studio" becomes "/my/studio".
+        first = url.lstrip('/').split('/', 1)[0].split('?', 1)[0].split('#', 1)[0]
+        if '.' not in first and ':' not in first:
+            return '/' + url.lstrip('/')
         return 'https://' + url.lstrip('/')
 
     @api.onchange('cta_url')
