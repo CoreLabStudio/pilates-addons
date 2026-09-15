@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – Yoleyva Studio',
-    'version': '19.0.2.6.38',
+    'version': '19.0.2.6.40',
     'category': 'Services',
     'summary': 'Core models for Yoleyva Pilates & Barre Studio',
     'author': 'Yoleyva Studio',
@@ -37,6 +37,7 @@
     'assets': {
         'web.assets_backend': [
             'fitness_core/static/src/css/corelab_backend.css',
+            'fitness_core/static/src/js/backend_timezone.js',
         ],
         'web.assets_frontend': [
             'fitness_core/static/src/css/corelab.css',

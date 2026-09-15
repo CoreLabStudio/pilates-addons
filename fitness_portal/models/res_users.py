@@ -4,6 +4,29 @@ from odoo import models, fields, api
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    # Every account is on the studio's clock.
+    #
+    # Odoo takes the timezone from the browser at signup, so an account picked
+    # up whatever the person happened to be sitting in - and accounts created
+    # by the studio inherited whoever created them. That is how one instructor
+    # ended up on Asia/Calcutta.
+    #
+    # Class times in the portal and in the notification emails are printed on
+    # the studio clock regardless, so this does not affect what a student sees.
+    # What it does affect is the admin backend, which renders every datetime in
+    # the viewing user's timezone - the Bookings list, Booked At, the calendar.
+    # A studio in Madrid should read Madrid there too.
+    #
+    # Set on create only. An admin who deliberately changes it afterwards keeps
+    # their change; this is a starting point, not a lock.
+    STUDIO_TZ = 'Europe/Madrid'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals.setdefault('tz', self.STUDIO_TZ)
+        return super().create(vals_list)
+
     # Admin-only. Deliberately not exposed anywhere in the portal: a student
     # seeing "VIP" on their own profile is a different product decision from
     # the studio tagging someone internally, and only the latter was asked for.

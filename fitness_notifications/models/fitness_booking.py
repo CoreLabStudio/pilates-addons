@@ -13,6 +13,13 @@ _logger = logging.getLogger(__name__)
 
 # The studio's own timezone, used when a student has none set on their user.
 # Matches DEFAULT_TZ in fitness_core's schedule and closure-day models.
+# The studio's clock, and the only clock these messages use.
+#
+# This used to be `user.tz or STUDIO_TZ`, which meant a reminder was written in
+# whatever timezone happened to be on the account - set by the browser at
+# signup, or by whoever created it, rarely by the student. The portal now shows
+# every class on studio time, so a mail on a different clock would contradict
+# the page it links to. A class at 07:00 in Madrid is at 07:00 in the email too.
 STUDIO_TZ = 'Europe/Madrid'
 
 
@@ -95,7 +102,7 @@ class FitnessBookingNotifications(models.Model):
             if event.start:
                 try:
                     when = format_datetime(
-                        lang_env.env, event.start, tz=user.tz or STUDIO_TZ,
+                        lang_env.env, event.start, tz=STUDIO_TZ,
                         dt_format='d MMM HH:mm',
                         lang_code=user.lang or DEFAULT_LANG)
                 except Exception:
@@ -153,7 +160,7 @@ class FitnessBookingNotifications(models.Model):
         if event_start:
             try:
                 start_str = format_datetime(
-                    lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                    lang_env.env, event_start, tz=STUDIO_TZ,
                     dt_format='d MMM HH:mm', lang_code=user.lang or DEFAULT_LANG)
             except Exception:
                 start_str = event_start.strftime('%d %b %H:%M')
@@ -280,7 +287,7 @@ class FitnessBookingNotifications(models.Model):
             if event_start:
                 try:
                     start_str = format_datetime(
-                        lang_env.env, event_start, tz=user.tz or STUDIO_TZ,
+                        lang_env.env, event_start, tz=STUDIO_TZ,
                         dt_format='d MMM HH:mm', lang_code=user.lang or DEFAULT_LANG)
                 except Exception:
                     start_str = event_start.strftime('%d %b %H:%M')
