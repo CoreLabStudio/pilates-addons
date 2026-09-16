@@ -328,8 +328,23 @@ class TrialRequestController(http.Controller):
         # A logged-in student gets their partner attached, so approval can book
         # against a real record instead of matching on an email string. Public
         # submissions leave it empty and are resolved by email at approval time.
+        #
+        # Only when the address on the form is their own, though. The session
+        # belongs to whoever last used the browser, and the form asks for a
+        # name and an email precisely because that may be somebody else - an
+        # instructor filling it in for a walk-in on the studio's tablet, a
+        # friend borrowing a phone. Attaching the logged-in partner regardless
+        # attributes the trial to the wrong person, and approval then books
+        # that person into the class instead of the one who asked.
         if not request.env.user._is_public():
-            vals['partner_id'] = request.env.user.partner_id.id
+            own = (request.env.user.partner_id.email or '').strip().lower()
+            if own and own == email.strip().lower():
+                vals['partner_id'] = request.env.user.partner_id.id
+            else:
+                _logger.info(
+                    "Trial submitted for %s from a session belonging to %s; "
+                    "leaving it unattached to be matched by email",
+                    email, request.env.user.login)
 
         submitted_slot = None
         if occurrence:

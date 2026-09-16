@@ -136,6 +136,12 @@ class FitnessTrialRequest(models.Model):
                 # never sent, and no notification reaching the studio at all.
                 rec._send_scheduled_email()
                 rec._send_admin_notification()
+                # Record it, or the form shows "Confirmation Email Sent" as
+                # unticked and the studio sends a second one by hand.
+                rec.write({
+                    'confirmation_email_sent': True,
+                    'confirmation_email_sent_date': fields.Datetime.now(),
+                })
             else:
                 rec._send_pending_email()
         return records
@@ -485,6 +491,18 @@ class FitnessTrialRequest(models.Model):
             )
         except Exception:
             _logger.exception("Trial admin notification failed for record %s", self.id)
+
+    def _send_cancelled_email(self):
+        """The studio cancelled the class this trial was holding."""
+        template = self.env.ref(
+            'fitness_trials.mail_template_trial_cancelled', raise_if_not_found=False
+        )
+        if not template:
+            return
+        try:
+            template.sudo().send_mail(self.id, force_send=False, raise_exception=False)
+        except Exception:
+            _logger.exception("Trial cancelled email failed for record %s", self.id)
 
     def _send_declined_email(self):
         template = self.env.ref(
