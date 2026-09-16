@@ -125,11 +125,17 @@ class FitnessTrialRequest(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            if rec.class_interest == 'reformer':
-                pass  # held for admin review; no email at creation
-            elif rec.status == 'scheduled':
-                # Barre with a pre-selected slot: notify admin; student confirmation is sent manually
-                rec._send_barre_admin_notification()
+            if rec.status == 'scheduled':
+                # A slot was chosen on the form, so the class is booked: tell
+                # the student it is confirmed and tell the studio it happened.
+                #
+                # Reformer used to fall through here doing nothing, because it
+                # waited for the studio to review it by hand. It books directly
+                # now, and that branch would have meant a trial nobody was told
+                # about - the confirmation page promising an email that was
+                # never sent, and no notification reaching the studio at all.
+                rec._send_scheduled_email()
+                rec._send_admin_notification()
             else:
                 rec._send_pending_email()
         return records
@@ -451,8 +457,11 @@ class FitnessTrialRequest(models.Model):
         except Exception:
             _logger.exception("Trial scheduled email failed for record %s", self.id)
 
-    def _send_barre_admin_notification(self):
+    def _send_admin_notification(self):
+        """Tell the studio a trial was booked, whichever discipline it was."""
         template = self.env.ref(
+            'fitness_trials.mail_template_trial_admin', raise_if_not_found=False
+        ) or self.env.ref(
             'fitness_trials.mail_template_barre_trial_admin', raise_if_not_found=False
         )
         if not template:
@@ -469,7 +478,7 @@ class FitnessTrialRequest(models.Model):
                 email_values={'email_to': admin_email},
             )
         except Exception:
-            _logger.exception("Barre admin notification failed for record %s", self.id)
+            _logger.exception("Trial admin notification failed for record %s", self.id)
 
     def _send_declined_email(self):
         template = self.env.ref(
