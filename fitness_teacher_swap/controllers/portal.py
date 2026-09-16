@@ -21,6 +21,11 @@ from odoo.http import request
 
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 
+# How far the calendar looks ahead. Month view needs a whole month whatever the
+# chips say, and classes are only generated a few weeks out, so this just has
+# to sit comfortably past that horizon rather than be unbounded.
+CAL_WINDOW_DAYS = 120
+
 # CoreLab teaches in one room in Madrid, so every screen in this app reads the
 # studio's clock. The student portal and the notification emails were pinned to
 # it; this module was not, and kept reading the account's own timezone - which
@@ -61,7 +66,7 @@ class FitnessTeacherSwapPortal(http.Controller):
         if filter not in ('today', 'week', 'all'):
             filter = 'all'
 
-        domain = [
+        base_domain = [
             ('user_id', '=', request.env.user.id),
             ('is_fitness_class', '=', True),
             # A cancelled class is not on anybody's timetable. The student
@@ -72,6 +77,7 @@ class FitnessTeacherSwapPortal(http.Controller):
             # button and roster included.
             ('class_state', '!=', 'cancelled'),
         ]
+        domain = list(base_domain)
         if filter == 'today':
             domain += [
                 ('start', '>=', today_start_utc),
@@ -92,17 +98,40 @@ class FitnessTeacherSwapPortal(http.Controller):
             ('group_ids', 'in', [request.env.ref(TEACHER_GROUP).id]),
         ])
 
+        # The chips answer "what am I teaching next"; the calendar answers
+        # "what does my month look like", and it navigates itself - so it is
+        # built from her whole timetable rather than from whichever chip is
+        # active, or Month view under Today would show a single square.
+        cal_events = request.env['calendar.event'].search(
+            base_domain + [
+                ('start', '>=', today_start_utc),
+                ('start', '<',  today_start_utc + timedelta(days=CAL_WINDOW_DAYS)),
+            ], order='start asc')
+
+        # One query for the list and the calendar together. This was a
+        # search_count per class, which on the All chip meant a round trip per
+        # row; sharing it also means the two views of one class cannot
+        # disagree about how many people are coming.
+        counts = {}
+        for event, count in request.env['fitness.booking']._read_group(
+            [('calendar_event_id', 'in', (events | cal_events).ids),
+             ('state', 'in', ('booked', 'attended', 'no_show'))],
+            groupby=['calendar_event_id'], aggregates=['__count'],
+        ):
+            counts[event.id] = count
+
         events_ctx = []
         for ev in events:
-            booked_count = request.env['fitness.booking'].search_count([
-                ('calendar_event_id', '=', ev.id),
-                ('state', 'in', ('booked', 'attended', 'no_show')),
-            ])
             events_ctx.append({
                 'event':       ev,
                 'local_start': _format_local(ev.start, user_tz),
-                'booked':      booked_count,
+                'booked':      counts.get(ev.id, 0),
             })
+
+        cal_days, cal_meta = request.env['fitness.calendar.grid'].build(
+            cal_events, user_tz, now_local.date(),
+            href_pattern='/my/instructor/classes/%d',
+            counts=counts)
 
         return request.render('fitness_teacher_swap.portal_my_classes', {
             'events_ctx':     events_ctx,
@@ -110,6 +139,11 @@ class FitnessTeacherSwapPortal(http.Controller):
             'active_filter':  filter,
             'error':          kw.get('error'),
             'success':        kw.get('success'),
+            # The same calendar the students have, given her own classes and
+            # pointed at her roster instead of at the booking page.
+            'calendar_days':  cal_days,
+            'calendar_meta':  cal_meta,
+            **request.env['fitness.calendar.grid'].labels(request.env._),
         })
 
     @http.route('/my/instructor/classes/<int:event_id>', type='http', auth='user',

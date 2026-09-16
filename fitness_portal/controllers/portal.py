@@ -280,24 +280,9 @@ class FitnessStudentPortal(http.Controller):
         return request.render('fitness_portal.portal_student_studio', values)
 
     def _calendar_labels(self, _):
-        """Strings the shared calendar needs, in one place for all three pages."""
-        dow = [d[:3] for d in self._weekday_labels()]
-        return {
-            'cal_dow': dow,
-            # The calendar formats its own period heading in the browser, and
-            # <html lang> is empty on these pages - without this it silently
-            # formatted every language's dates in Spanish.
-            'cal_lang': (request.env.lang or DEFAULT_LANG).replace('_', '-'),
-            'lbl_cal_day': _('Day'),
-            'lbl_cal_week': _('Week'),
-            'lbl_cal_month': _('Month'),
-            'lbl_cal_none': _('No classes in this period.'),
-            # The date dropdown formats itself in the browser; this is the one
-            # string in it that is not a date.
-            'lbl_all_dates': _('All dates'),
-            'lbl_cal_open': _('Calendar view'),
-            'lbl_cal_list': _('List view'),
-        }
+        """Strings the shared calendar needs - defined once on the model."""
+        return request.env['fitness.calendar.grid'].labels(
+            _, [d[:3] for d in self._weekday_labels()], request.env.lang)
 
     @staticmethod
     def _discipline_tabs(types, _):

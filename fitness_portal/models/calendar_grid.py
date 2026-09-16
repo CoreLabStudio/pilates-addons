@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-"""One calendar grid, three pages.
+"""One calendar grid, four pages.
 
-The timetable, the booking list and a student's own schedule all show classes
-on dates. They differ only in which classes, so the grid is built once here and
-each page hands it a different set. Building it three times is how the three
-would drift apart.
+The timetable, the booking list, a student's own schedule and an instructor's
+My Classes all show classes on dates. They differ only in which classes - and,
+for the instructor, in carrying how many have registered - so the grid is built
+once here and each page hands it a different set. Building it four times is how
+the four would drift apart.
 
 The output is deliberately dumb: a flat list of day cells, Monday-aligned at
 both ends so a month renders as whole weeks. The browser decides which cells to
@@ -23,7 +24,7 @@ column three blues read as noise, whereas here class types sit side by side in
 one row and the shade is the only thing separating them. This is the view it
 was built for.
 """
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytz
 
@@ -31,12 +32,60 @@ from odoo import models
 from odoo.addons.fitness_core import class_colors
 
 
+# The studio, the site and the portal are Spanish-first, so anything with
+# no language set falls back to Spanish rather than to Odoo's English base.
+DEFAULT_LANG = 'es_ES'
+
+
 class FitnessCalendarGrid(models.AbstractModel):
     _name = 'fitness.calendar.grid'
-    _description = 'Shared calendar grid builder for the student portal'
+    _description = 'Shared calendar grid builder for the student and instructor portals'
+
+    @staticmethod
+    def _dow_labels(_, lang):
+        """Monday-first three-letter weekday names in the active language."""
+        try:
+            from babel.dates import format_date
+            # 2024-01-01 was a Monday, so +i walks Mon..Sun.
+            base = date(2024, 1, 1)
+            return [format_date(base + timedelta(days=i), format='EEEE',
+                                locale=lang).capitalize()[:3]
+                    for i in range(7)]
+        except Exception:
+            return [_('Mon'), _('Tue'), _('Wed'), _('Thu'),
+                    _('Fri'), _('Sat'), _('Sun')]
+
+    def labels(self, _, dow_labels=None, lang=None):
+        """Strings the shared calendar needs.
+
+        On the model rather than on a controller because two modules render
+        this calendar now, and the second one copying the strings would mean
+        two msgids for one button - and one of them untranslated.
+        """
+        lang = lang or self.env.lang or DEFAULT_LANG
+        return {
+            # Callers that already build Monday-first weekday names pass them;
+            # anyone else gets them from here rather than growing a second
+            # copy of the same babel dance.
+            'cal_dow': dow_labels or self._dow_labels(_, lang),
+            # The calendar formats its own period heading in the browser, and
+            # <html lang> is empty on these pages - without this it silently
+            # formatted every language's dates in Spanish.
+            'cal_lang': lang.replace('_', '-'),
+            'lbl_cal_day': _('Day'),
+            'lbl_cal_week': _('Week'),
+            'lbl_cal_month': _('Month'),
+            'lbl_cal_none': _('No classes in this period.'),
+            # The date dropdown formats itself in the browser; this is the one
+            # string in it that is not a date.
+            'lbl_all_dates': _('All dates'),
+            'lbl_cal_open': _('Calendar view'),
+            'lbl_cal_list': _('List view'),
+        }
 
     def build(self, events, tz, today_local, booked_event_ids=None,
-              href_pattern='/my/classes/%d', dow_labels=None):
+              href_pattern='/my/classes/%d', dow_labels=None,
+              counts=None):
         """Return (days, meta) for a set of calendar.event records.
 
         days -- Monday-aligned list of {date, iso, day, month, in_past,
@@ -76,6 +125,20 @@ class FitnessCalendarGrid(models.AbstractModel):
                 'shade': class_colors.css_class(room, tier),
                 'ct': room,
                 'booked': ev.id in booked_event_ids,
+                # Off unless the caller passes counts. A student browsing
+                # for a class to book is choosing, not counting, and the
+                # booking page tells them how many places are left; an
+                # instructor looking at her own day wants to know how many are
+                # coming. The caller supplies the number rather than this
+                # method reading event.booked_seats, because "registered" is
+                # not one definition: booked_seats counts booked + attended,
+                # because it governs whether a class is full, while the
+                # instructor's own list counts no-shows too - they registered,
+                # and she is looking at who was expected. Reading the event
+                # here would print one number in the calendar and a different
+                # one in the list directly beneath it.
+                **({'taken': counts.get(ev.id, 0),
+                    'capacity': ev.capacity or 0} if counts is not None else {}),
             })
 
         if not by_date:

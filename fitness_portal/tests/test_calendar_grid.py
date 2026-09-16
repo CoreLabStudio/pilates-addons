@@ -65,6 +65,55 @@ class TestCalendarGridTimes(TransactionCase):
             events, self.tz, date.today(),
             dow_labels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
 
+    def test_a_student_slot_carries_no_registration_count(self):
+        """The count is opt-in, and the booking pages must not grow one.
+
+        A student choosing a class is told how many places are left by the
+        booking page itself; putting a second, differently-worded number on
+        the calendar cell is how the two start disagreeing.
+        """
+        day = date.today() + timedelta(days=3)
+        ev = self._event(self.ct, datetime(day.year, day.month, day.day, 7, 0))
+        days, _meta = self._build(ev)
+        slot = [s for d in days for s in d["slots"]][0]
+        self.assertNotIn("capacity", slot)
+        self.assertNotIn("taken", slot)
+
+    def test_the_caller_supplies_the_count_not_the_event(self):
+        """Whoever builds the grid decides what "registered" means.
+
+        booked_seats counts booked and attended, because it governs whether a
+        class is full. The instructor's own list counts no-shows as well - they
+        registered, and she is looking at who was expected. Reading the event
+        here would print one number on the calendar and another in the list
+        directly beneath it, for the same class.
+        """
+        day = date.today() + timedelta(days=3)
+        ev = self._event(self.ct, datetime(day.year, day.month, day.day, 7, 0))
+        ev.capacity = 8
+        ev.booked_seats = 2
+        days, _meta = self.env["fitness.calendar.grid"].build(
+            ev, self.tz, date.today(),
+            dow_labels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            counts={ev.id: 3})
+        slot = [s for d in days for s in d["slots"]][0]
+        self.assertEqual(slot["taken"], 3,
+                         "the number given by the caller must win")
+        self.assertEqual(slot["capacity"], 8)
+
+    def test_a_class_nobody_booked_reads_zero(self):
+        """An empty class is missing from the grouped read, not present as 0."""
+        day = date.today() + timedelta(days=3)
+        ev = self._event(self.ct, datetime(day.year, day.month, day.day, 7, 0))
+        ev.capacity = 6
+        days, _meta = self.env["fitness.calendar.grid"].build(
+            ev, self.tz, date.today(),
+            dow_labels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            counts={})
+        slot = [s for d in days for s in d["slots"]][0]
+        self.assertEqual(slot["taken"], 0)
+        self.assertEqual(slot["capacity"], 6)
+
     def test_a_slot_knows_when_it_starts_and_how_long_it_runs(self):
         day = date.today() + timedelta(days=3)
         ev = self._event(self.ct, datetime(day.year, day.month, day.day, 7, 0))
