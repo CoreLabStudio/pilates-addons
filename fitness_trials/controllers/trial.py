@@ -328,8 +328,23 @@ class TrialRequestController(http.Controller):
         # A logged-in student gets their partner attached, so approval can book
         # against a real record instead of matching on an email string. Public
         # submissions leave it empty and are resolved by email at approval time.
+        #
+        # Only when the address on the form is their own, though. The session
+        # belongs to whoever last used the browser, and the form asks for a
+        # name and an email precisely because that may be somebody else - an
+        # instructor filling it in for a walk-in on the studio's tablet, a
+        # friend borrowing a phone. Attaching the logged-in partner regardless
+        # attributes the trial to the wrong person, and approval then books
+        # that person into the class instead of the one who asked.
         if not request.env.user._is_public():
-            vals['partner_id'] = request.env.user.partner_id.id
+            own = (request.env.user.partner_id.email or '').strip().lower()
+            if own and own == email.strip().lower():
+                vals['partner_id'] = request.env.user.partner_id.id
+            else:
+                _logger.info(
+                    "Trial submitted for %s from a session belonging to %s; "
+                    "leaving it unattached to be matched by email",
+                    email, request.env.user.login)
 
         submitted_slot = None
         if occurrence:
@@ -340,6 +355,31 @@ class TrialRequestController(http.Controller):
                 'status': 'scheduled',
                 'preferred_time_notes': False,
             })
+
+        # The same person submitting the same class again is not a second
+        # booking, it is the same one arriving twice - a double click, a
+        # refreshed confirmation, a browser retry. Sending it back to the same
+        # confirmation is what they meant, and it keeps the studio's list
+        # showing one row per booking rather than one row per click.
+        if occurrence:
+            twin = request.env['fitness.trial.request'].sudo().search([
+                ('email', '=ilike', email),
+                ('occurrence_id', '=', occurrence.id),
+            ], limit=1)
+            if twin:
+                _logger.info(
+                    "Duplicate trial submission for %s on event %s; "
+                    "returning the existing request %s", email, occurrence.id, twin.id)
+                return request.render('fitness_trials.trial_request_form', {
+                    'success': True,
+                    'submitted_interest': class_interest,
+                    'submitted_slot': submitted_slot,
+                    'form_values': {},
+                    'barre_slots': [],
+                    'reformer_slots': [],
+                    'date_filters': [],
+                    'reformer_date_filters': [],
+                })
 
         try:
             request.env['fitness.trial.request'].sudo().create(vals)

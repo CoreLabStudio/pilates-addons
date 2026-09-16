@@ -285,7 +285,8 @@
 
                     <!-- ── Submit ─────────────────────────────────────── -->
                     <div class="d-grid mt-2">
-                        <button type="submit" id="mv-trial-submit" class="btn btn-primary" disabled="disabled">
+                        <button type="submit" id="mv-trial-submit" class="btn btn-primary" disabled="disabled"
+                                t-att-data-sending="'Sending\u2026' if _lang == 'en_US' else ('Enviant\u2026' if _lang == 'ca_ES' else 'Enviando\u2026')">
                             <t t-if="_lang == 'en_US'">Submit request</t>
                             <t t-elif="_lang == 'ca_ES'">Envia la sol·licitud</t>
                             <t t-else="">Enviar solicitud</t>
@@ -466,6 +467,19 @@
 
                     buildDatePills(barreSection);
                     buildDatePills(rfSection);
+
+                    // A submit that takes a moment invites a second click, and
+                    // a second click used to mean a second booking. The button
+                    // goes dead and says so the instant the form is sent.
+                    var trialForm = document.querySelector('form[action="/trial/submit"]');
+                    if (trialForm) {
+                        trialForm.addEventListener('submit', function () {
+                            if (submitBtn) {
+                                submitBtn.disabled = true;
+                                submitBtn.textContent = submitBtn.dataset.sending || 'Enviando\u2026';
+                            }
+                        });
+                    }
                 })();
                 </script>
             </t>
