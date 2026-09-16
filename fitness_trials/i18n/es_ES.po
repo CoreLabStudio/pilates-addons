@@ -214,3 +214,99 @@ msgstr "Recibido el"
 #: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(cls)s is a %(slot)s class, but this is a %(want)s trial request. Pick a %(want)s class."
+msgstr "%(cls)s es una clase de %(slot)s, pero esta es una solicitud de prueba de %(want)s. Elige una clase de %(want)s."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(cls)s on %(when)s."
+msgstr "%(cls)s el %(when)s."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(name)s has already used their free trial, and has no credit left to book with. Sell them a class instead, or book it from the back office."
+msgstr "%(name)s ya ha usado su clase de prueba gratuita y no le queda crédito para reservar. Véndele una clase o resérvala desde la administración."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(name)s is booked into %(cls)s."
+msgstr "%(name)s está inscrito en %(cls)s."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Booked"
+msgstr "Reservada"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Choose a class slot first. Approval books the student into that class, so there has to be one."
+msgstr "Elige primero una clase. Al aprobar se inscribe al alumno en esa clase, así que tiene que haber una."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "No student record matches this request. It was submitted from the public site by %(email)s, and nobody with that address has an account yet."
+msgstr "Ningún alumno coincide con esta solicitud. Se envió desde la web pública con %(email)s, y todavía no hay ninguna cuenta con esa dirección."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please select a class."
+msgstr "Selecciona una clase."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "That class"
+msgstr "Esa clase"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "That class has been cancelled. Pick another slot."
+msgstr "Esa clase ha sido cancelada. Elige otro horario."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio will confirm the details with you shortly."
+msgstr "El estudio te confirmará los detalles en breve."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The trial product for this discipline is missing."
+msgstr "Falta el producto de clase de prueba para esta disciplina."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The trial product has no variant to sell."
+msgstr "El producto de clase de prueba no tiene ninguna variante que vender."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Your trial class is confirmed"
+msgstr "Tu clase de prueba está confirmada"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Your trial class: %(cls)s."
+msgstr "Tu clase de prueba: %(cls)s."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "the class"
+msgstr "la clase"

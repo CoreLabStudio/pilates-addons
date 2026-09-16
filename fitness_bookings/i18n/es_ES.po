@@ -454,12 +454,16 @@ msgid "Return the credit"
 msgstr "Devolver el crédito"
 
 #. module: fitness_bookings
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
 msgid "Choose a class to move %(name)s into, or use Cancel Only."
 msgstr "Elige una clase para %(name)s, o usa Solo cancelar."
 
 #. module: fitness_bookings
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
 msgid "That booking is already cancelled."
 msgstr "Esa reserva ya está cancelada."
 
@@ -467,3 +471,87 @@ msgstr "Esa reserva ya está cancelada."
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
 msgid "This class starts in less than 6 hours. Late cancellations do not automatically return credits."
 msgstr "Esta clase empieza en menos de 6 horas. Las cancelaciones tardías no devuelven automáticamente el crédito."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "%(student)s already has a booking that overlaps that time (%(clash)s)."
+msgstr "%(student)s ya tiene una reserva que se solapa con ese horario (%(clash)s)."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "%(student)s is already booked into '%(name)s'."
+msgstr "%(student)s ya está inscrito en '%(name)s'."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "'%(name)s' has already started."
+msgstr "'%(name)s' ya ha empezado."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "'%(name)s' is cancelled."
+msgstr "'%(name)s' está cancelada."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "'%(name)s' is full - %(booked)s/%(capacity)s seats taken."
+msgstr "'%(name)s' está completa - %(booked)s/%(capacity)s plazas ocupadas."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "The credit on this booking does not cover '%(name)s'. It was bought for a different kind of class, so moving them there would spend a credit they do not have."
+msgstr "El crédito de esta reserva no cubre '%(name)s'. Se compró para otro tipo de clase, así que moverla allí gastaría un crédito que no tiene."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "They are already in that class."
+msgstr "Ya está en esa clase."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This class starts in less than %(hours)s hours. Late cancellations within %(hours)s hours can only be done by a studio admin/manager."
+msgstr "Esta clase empieza en menos de %(hours)s horas. Las cancelaciones tardías dentro de %(hours)s horas solo las puede hacer un administrador o responsable del estudio."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "this student"
+msgstr "este alumno"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cannot cancel a class that has already been marked."
+msgstr "No se puede cancelar una clase que ya se ha pasado lista."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a 'Booked' entry can be marked as attended."
+msgstr "Solo se puede marcar como asistida una reserva en estado 'Reservada'."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a 'Booked' entry can be marked as no-show."
+msgstr "Solo se puede marcar como no asistida una reserva en estado 'Reservada'."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "Only studio managers can cancel an entire class."
+msgstr "Solo los responsables del estudio pueden cancelar una clase entera."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This booking is already cancelled."
+msgstr "Esta reserva ya está cancelada."

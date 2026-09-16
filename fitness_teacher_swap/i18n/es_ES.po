@@ -396,3 +396,51 @@ msgstr "Filtrar por periodo"
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
 msgid "Reason for reassignment (optional)"
 msgstr "Motivo de la reasignación (opcional)"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Class rescheduled: %s"
+msgstr "Clase reprogramada: %s"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "This class has been cancelled."
+msgstr "Esta clase ha sido cancelada."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "This class has been moved to %s."
+msgstr "Esta clase se ha movido a %s."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Your class has been moved to %s."
+msgstr "Tu clase se ha movido a %s."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Cannot reassign a class that has already started or passed."
+msgstr "No se puede reasignar una clase que ya ha empezado o ha pasado."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "The selected user is not a registered teacher."
+msgstr "El usuario seleccionado no es un instructor registrado."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "This is not a fitness class."
+msgstr "Esto no es una clase."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "You can only reassign your own classes."
+msgstr "Solo puedes reasignar tus propias clases."

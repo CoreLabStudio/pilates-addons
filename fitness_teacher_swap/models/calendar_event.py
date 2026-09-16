@@ -168,15 +168,15 @@ class CalendarEvent(models.Model):
         self.ensure_one()
 
         if not self.is_fitness_class:
-            raise UserError("This is not a fitness class.")
+            raise UserError(self.env._("This is not a fitness class."))
 
         # 1. Caller must be the CURRENT teacher of this class.
         if self.env.user.id != self.user_id.id:
-            raise UserError("You can only reassign your own classes.")
+            raise UserError(self.env._("You can only reassign your own classes."))
 
         # 2. Class must be in the future.
         if self.start <= fields.Datetime.now():
-            raise UserError("Cannot reassign a class that has already started or passed.")
+            raise UserError(self.env._("Cannot reassign a class that has already started or passed."))
 
         # 3. Target must be a valid, different teacher.
         new_teacher = self.env['res.users'].browse(new_teacher_id)
@@ -185,7 +185,7 @@ class CalendarEvent(models.Model):
         # and an instructor is a portal user, so the check raised AccessError
         # and every reassignment failed. Everything below already uses sudo().
         if not new_teacher.exists() or not new_teacher.sudo().has_group('fitness_core.group_fitness_teacher'):
-            raise UserError("The selected user is not a registered teacher.")
+            raise UserError(self.env._("The selected user is not a registered teacher."))
         if new_teacher.id == self.user_id.id:
             raise UserError(f"{new_teacher.name} is already the teacher for this class.")
 
