@@ -452,11 +452,13 @@ msgid "Return the credit"
 msgstr "Retornar el crèdit"
 
 #. module: fitness_bookings
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
 msgid "Choose a class to move %(name)s into, or use Cancel Only."
 msgstr "Tria una classe per a %(name)s, o fes servir Només cancel·lar."
 
 #. module: fitness_bookings
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
 msgid "That booking is already cancelled."
 msgstr "Aquesta reserva ja està cancel·lada."

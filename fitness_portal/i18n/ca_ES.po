@@ -1126,6 +1126,7 @@ msgid "Next up"
 msgstr "El següent"
 
 #. module: fitness_portal
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Booked"
@@ -3497,3 +3498,15 @@ msgstr "<strong>Reservada!</strong> La teva classe gratuïta està confirmada."
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "<strong>Sent!</strong> The studio will get back to you soon."
 msgstr "<strong>Enviat!</strong> L'estudi et respondrà aviat."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "No new notifications"
+msgstr "No tens notificacions noves"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "Could not load notifications"
+msgstr "No s’han pogut carregar les notificacions"

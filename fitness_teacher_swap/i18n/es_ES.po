@@ -192,6 +192,7 @@ msgid "Reassign"
 msgstr "Reasignar"
 
 #. module: fitness_teacher_swap
+#. odoo-python
 #: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "Select instructor…"
 msgstr "Seleccionar instructor…"

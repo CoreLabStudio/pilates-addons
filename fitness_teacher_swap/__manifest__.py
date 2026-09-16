@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Teacher Swap – Yoleyva Studio',
-    'version': '19.0.1.3.4',
+    'version': '19.0.1.3.5',
     'category': 'Services',
     'summary': 'Portal page letting a teacher reassign one of their own upcoming classes to another teacher',
     'author': 'Yoleyva Studio',

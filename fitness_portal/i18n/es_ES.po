@@ -3495,3 +3495,15 @@ msgstr "<strong>¡Reservada!</strong> Tu clase gratuita está confirmada."
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "<strong>Sent!</strong> The studio will get back to you soon."
 msgstr "<strong>¡Enviado!</strong> El estudio te responderá pronto."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "No new notifications"
+msgstr "No tienes notificaciones nuevas"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "Could not load notifications"
+msgstr "No se han podido cargar las notificaciones"
