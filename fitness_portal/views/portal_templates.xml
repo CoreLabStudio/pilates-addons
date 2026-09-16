@@ -3098,16 +3098,29 @@
                                  views place blocks onto. -->
                             <div class="mv-cal-body">
                                 <t t-foreach="cday['slots']" t-as="cs">
-                                    <!-- name only: the cell is too small for
-                                         anything else, and in a time grid the
-                                         position already says when it is -->
+                                    <!-- Name only for a student: the cell is
+                                         too small for anything else, and in a
+                                         time grid the position already says
+                                         when it is. An instructor asked for
+                                         the count as well, so when the caller
+                                         builds with counts the cell carries
+                                         the hour and how full the class is. -->
                                     <a t-att-href="cs['href']"
                                        t-att-data-ct="cs['ct']"
                                        t-att-data-start="cs['start_min']"
                                        t-att-data-dur="cs['dur_min']"
-                                       t-attf-class="mv-cal-item #{cs['shade']}#{' mv-cal-booked' if cs['booked'] else ''}"
-                                       t-att-title="cs['time'] + ' - ' + cs['name']"
-                                       t-out="cs['name']"/>
+                                       t-attf-class="mv-cal-item #{cs['shade']}#{' mv-cal-booked' if cs['booked'] else ''}#{' mv-cal-counted' if cs.get('capacity') is not None else ''}"
+                                       t-att-title="cs['time'] + ' - ' + cs['name'] + (' - ' + str(cs['taken']) + '/' + str(cs['capacity']) if cs.get('capacity') is not None else '')">
+                                        <t t-if="cs.get('capacity') is not None">
+                                            <span class="mv-cal-item-time" t-out="cs['time']"/>
+                                            <span class="mv-cal-item-name" t-out="cs['name']"/>
+                                            <span class="mv-cal-item-count"
+                                                  t-out="str(cs['taken']) + '/' + str(cs['capacity'])"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-out="cs['name']"/>
+                                        </t>
+                                    </a>
                                 </t>
                             </div>
                         </div>
