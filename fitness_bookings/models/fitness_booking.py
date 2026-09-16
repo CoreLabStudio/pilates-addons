@@ -426,9 +426,9 @@ class FitnessBooking(models.Model):
 
         for booking in self:
             if booking.state == 'cancelled':
-                raise UserError("This booking is already cancelled.")
+                raise UserError(self.env._("This booking is already cancelled."))
             if booking.state in ('attended', 'no_show'):
-                raise UserError("Cannot cancel a class that has already been marked.")
+                raise UserError(self.env._("Cannot cancel a class that has already been marked."))
 
             now = fields.Datetime.now()
             time_until = booking.calendar_event_id.start - now
@@ -488,7 +488,7 @@ class FitnessBooking(models.Model):
                     "attendance can be marked once it begins."
                 )
             if booking.state != 'booked':
-                raise UserError("Only a 'Booked' entry can be marked as attended.")
+                raise UserError(self.env._("Only a 'Booked' entry can be marked as attended."))
             booking.write({
                 'state': 'attended',
                 'marked_by_id': self.env.uid,
@@ -514,7 +514,7 @@ class FitnessBooking(models.Model):
                     "attendance can be marked once it begins."
                 )
             if booking.state != 'booked':
-                raise UserError("Only a 'Booked' entry can be marked as no-show.")
+                raise UserError(self.env._("Only a 'Booked' entry can be marked as no-show."))
             booking.write({
                 'state': 'no_show',
                 'marked_by_id': self.env.uid,

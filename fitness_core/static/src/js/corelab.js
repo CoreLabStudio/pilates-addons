@@ -164,7 +164,14 @@
       if (open) { panel.style.display = 'none'; return; }
       panel.style.display = 'block';
       if (badge) badge.style.display = 'none';
-      if (empty) { empty.textContent = 'Loading…'; empty.style.display = ''; }
+      // The three states come from the page, not from here: a string in a
+      // .js file is never extracted for translation, so hard-coding them left
+      // the panel in English on an otherwise translated screen.
+      const _s = (name, fallback) => {
+        const el = panel.querySelector('.mv-notif-i18n .mv-s-' + name);
+        return (el && el.textContent.trim()) || fallback;
+      };
+      if (empty) { empty.textContent = _s('loading', 'Loading…'); empty.style.display = ''; }
       if (list)  list.style.display = 'none';
 
       fetch('/my/notifications/data', {credentials: 'same-origin'})
@@ -172,7 +179,7 @@
         .then(data => {
           const notifs = data.notifications || [];
           if (!notifs.length) {
-            if (empty) empty.textContent = 'No new notifications';
+            if (empty) empty.textContent = _s('empty', 'No new notifications');
             return;
           }
           if (empty) empty.style.display = 'none';
@@ -206,11 +213,11 @@
               li.remove();
               if (!list.querySelector('li')) {
                 list.style.display = 'none';
-                if (empty) { empty.textContent = 'No new notifications'; empty.style.display = ''; }
+                if (empty) { empty.textContent = _s('empty', 'No new notifications'); empty.style.display = ''; }
               }
             });
           }
-        }).catch(() => { if (empty) empty.textContent = 'Could not load notifications'; });
+        }).catch(() => { if (empty) empty.textContent = _s('error', 'Could not load notifications'); });
     });
 
     // Close panel when clicking outside

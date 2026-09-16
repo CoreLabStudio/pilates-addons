@@ -3484,7 +3484,6 @@ msgstr "p. ej. 2 años, con pausas"
 msgid "Message too long (max 2,000 characters)."
 msgstr "Mensaje demasiado largo (máx. 2.000 caracteres)."
 
-
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 msgid "<strong>Booked!</strong> Your free class is confirmed."
@@ -3495,3 +3494,88 @@ msgstr "<strong>¡Reservada!</strong> Tu clase gratuita está confirmada."
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "<strong>Sent!</strong> The studio will get back to you soon."
 msgstr "<strong>¡Enviado!</strong> El estudio te responderá pronto."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "No new notifications"
+msgstr "No tienes notificaciones nuevas"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "Could not load notifications"
+msgstr "No se han podido cargar las notificaciones"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(a)d %(x)s + %(b)d %(y)s"
+msgstr "%(a)d %(x)s + %(b)d %(y)s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/payment_guard.py:0
+msgid "A payment for this order is already being processed. Please wait a moment before trying again - you have not been charged twice."
+msgstr "Ya se está procesando un pago de este pedido. Espera un momento antes de volver a intentarlo - no se te ha cobrado dos veces."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_portal.selection__sale_order__fitness_payment_method__transfer
+msgid "Bank Transfer"
+msgstr "Transferencia bancaria"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/signup_override.py:0
+msgid "Debes aceptar los Términos y Condiciones para continuar."
+msgstr "Debes aceptar los Términos y Condiciones para continuar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Fri"
+msgstr "Vie"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Mon"
+msgstr "Lun"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Sat"
+msgstr "Sáb"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Sun"
+msgstr "Dom"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Thu"
+msgstr "Jue"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Tue"
+msgstr "Mar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+msgid "Wed"
+msgstr "Mié"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have already used this free trial. It is available once per student."
+msgstr "Ya has usado esta clase de prueba gratuita. Solo está disponible una vez por alumno."

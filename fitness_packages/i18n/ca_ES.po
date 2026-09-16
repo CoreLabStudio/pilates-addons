@@ -214,3 +214,15 @@ msgstr "Conté un bo"
 #: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_is_package
 msgid "Is Fitness Package"
 msgstr "És bo de classes"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "The discount on %s must be greater than 0 and at most 100 percent."
+msgstr "El descompte de %s ha de ser més gran que 0 i com a màxim del 100 per cent."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "The promotion on %s ends before it starts."
+msgstr "La promoció de %s acaba abans de començar."
