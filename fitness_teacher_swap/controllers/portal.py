@@ -144,6 +144,12 @@ class FitnessTeacherSwapPortal(http.Controller):
             'calendar_days':  cal_days,
             'calendar_meta':  cal_meta,
             **request.env['fitness.calendar.grid'].labels(request.env._),
+            # Supplied from here rather than written in the template, because
+            # <option> and <select> are both on Odoo's inline list: their text
+            # is folded into the parent's term instead of becoming a term of
+            # its own, so the placeholder option was never extractable and sat
+            # in English on a Catalan page. A Python string always extracts.
+            'lbl_select_instructor': request.env._('Select instructor…'),
         })
 
     @http.route('/my/instructor/classes/<int:event_id>', type='http', auth='user',
