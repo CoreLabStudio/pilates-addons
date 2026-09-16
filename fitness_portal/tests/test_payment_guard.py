@@ -29,8 +29,16 @@ from odoo.tests import HttpCase, tagged
 
 from odoo.addons.payment.controllers.portal import PaymentPortal
 
-GUARD_IN_FLIGHT = "already being processed"
-GUARD_ALREADY_PAID = "already been paid"
+# The guard's two refusals, by their English source. The portal answers in the
+# visitor's language, so matching the English text alone made these tests pass
+# only for as long as the message stayed untranslated - they broke the moment
+# it was, while the guard itself was working correctly. _needles() turns a
+# source string into every language this database has.
+GUARD_IN_FLIGHT_SRC = ("A payment for this order is already being processed. "
+                       "Please wait a moment before trying again - you have "
+                       "not been charged twice.")
+GUARD_ALREADY_PAID_SRC = ("This order has already been paid. You have not been "
+                          "charged again.")
 
 
 @tagged("post_install", "-at_install")
@@ -128,10 +136,18 @@ class TestDuplicatePaymentGuard(HttpCase):
         )
         return body
 
+    def _needles(self, source):
+        """The message as the visitor could have been shown it, any language."""
+        out = {source.lower()}
+        for code in self.env["res.lang"].search([]).mapped("code"):
+            out.add(self.env(context={"lang": code})._(source).lower())
+        return out
+
     def _assert_blocked(self, order, msg):
         body = self._attempt_payment(order)
+        wanted = self._needles(GUARD_IN_FLIGHT_SRC) | self._needles(GUARD_ALREADY_PAID_SRC)
         self.assertTrue(
-            GUARD_IN_FLIGHT in body or GUARD_ALREADY_PAID in body,
+            any(n in body for n in wanted),
             "%s\nguard should have refused this payment. response was:\n%s" % (msg, body[:400]),
         )
 
@@ -162,8 +178,8 @@ class TestDuplicatePaymentGuard(HttpCase):
             PaymentPortal, "_create_transaction", return_value=stub_tx
         ) as created:
             body = self._attempt_payment(order)
-        self.assertNotIn(GUARD_IN_FLIGHT, body, msg)
-        self.assertNotIn(GUARD_ALREADY_PAID, body, msg)
+        for needle in self._needles(GUARD_IN_FLIGHT_SRC) | self._needles(GUARD_ALREADY_PAID_SRC):
+            self.assertNotIn(needle, body, msg)
         self.assertTrue(
             created.called,
             "%s the request never reached super(), so the guard blocked it" % msg,

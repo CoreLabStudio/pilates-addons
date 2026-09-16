@@ -22,7 +22,7 @@ class CalendarEvent(models.Model):
             self.env.user.has_group('base.group_system')
             or self.env.user.has_group('fitness_core.group_fitness_manager')
         ):
-            raise UserError("Only studio managers can cancel an entire class.")
+            raise UserError(self.env._("Only studio managers can cancel an entire class."))
 
         if self.class_state == 'cancelled':
             return {

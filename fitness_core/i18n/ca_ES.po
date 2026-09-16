@@ -829,3 +829,9 @@ msgstr "Missatges sense llegir"
 #: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "Occurrences — %s"
+msgstr "Sessions — %s"

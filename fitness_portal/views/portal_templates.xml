@@ -36,6 +36,16 @@
                     </button>
                     <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
                         <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
+                        <!-- The panel's three states are written by the browser
+                             once the fetch comes back, and a literal in a .js
+                             file is not a translatable term. Each sits alone in
+                             a block element so Odoo extracts it as its own term
+                             rather than folding it into a parent. -->
+                        <div class="mv-notif-i18n" hidden="hidden">
+                            <div class="mv-s-loading">Loading…</div>
+                            <div class="mv-s-empty">No new notifications</div>
+                            <div class="mv-s-error">Could not load notifications</div>
+                        </div>
                         <ul class="mv-notif-list" id="mv-notif-list" style="display:none;margin:0;padding:0;list-style:none;"/>
                         <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
                     </div>
@@ -80,6 +90,16 @@
                     </button>
                     <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
                         <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
+                        <!-- The panel's three states are written by the browser
+                             once the fetch comes back, and a literal in a .js
+                             file is not a translatable term. Each sits alone in
+                             a block element so Odoo extracts it as its own term
+                             rather than folding it into a parent. -->
+                        <div class="mv-notif-i18n" hidden="hidden">
+                            <div class="mv-s-loading">Loading…</div>
+                            <div class="mv-s-empty">No new notifications</div>
+                            <div class="mv-s-error">Could not load notifications</div>
+                        </div>
                         <ul class="mv-notif-list" id="mv-notif-list" style="display:none;margin:0;padding:0;list-style:none;"/>
                         <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
                     </div>

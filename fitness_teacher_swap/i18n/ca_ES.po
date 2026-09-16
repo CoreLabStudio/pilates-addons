@@ -191,6 +191,7 @@ msgid "Reassign"
 msgstr "Reassignar"
 
 #. module: fitness_teacher_swap
+#. odoo-python
 #: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "Select instructor…"
 msgstr "Selecciona instructor…"
@@ -394,3 +395,51 @@ msgstr "Filtrar per període"
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
 msgid "Reason for reassignment (optional)"
 msgstr "Motiu de la reassignació (opcional)"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Class rescheduled: %s"
+msgstr "Classe reprogramada: %s"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "This class has been cancelled."
+msgstr "Aquesta classe ha estat cancel·lada."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "This class has been moved to %s."
+msgstr "Aquesta classe s'ha mogut a %s."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Your class has been moved to %s."
+msgstr "La teva classe s'ha mogut a %s."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "Cannot reassign a class that has already started or passed."
+msgstr "No es pot reassignar una classe que ja ha començat o ja ha passat."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "The selected user is not a registered teacher."
+msgstr "L'usuari seleccionat no és un instructor registrat."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "This is not a fitness class."
+msgstr "Això no és una classe."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/models/calendar_event.py:0
+msgid "You can only reassign your own classes."
+msgstr "Només pots reassignar les teves pròpies classes."

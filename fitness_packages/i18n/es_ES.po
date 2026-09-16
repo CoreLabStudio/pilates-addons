@@ -214,3 +214,15 @@ msgstr "Contiene un pack"
 #: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_is_package
 msgid "Is Fitness Package"
 msgstr "Es pack de clases"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "The discount on %s must be greater than 0 and at most 100 percent."
+msgstr "El descuento de %s debe ser mayor que 0 y como máximo del 100 por cien."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/product_template.py:0
+msgid "The promotion on %s ends before it starts."
+msgstr "La promoción de %s termina antes de empezar."
