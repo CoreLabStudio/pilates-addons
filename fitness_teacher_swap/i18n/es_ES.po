@@ -67,6 +67,7 @@ msgstr "Reserva no encontrada."
 # ───────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_home_teacher_link
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
 msgid "My Classes"
 msgstr "Mis clases"
 
@@ -110,6 +111,7 @@ msgstr "Clases"
 
 #. module: fitness_teacher_swap
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_swaps
 msgid "Profile"
 msgstr "Perfil"
 
@@ -190,7 +192,7 @@ msgid "Reassign"
 msgstr "Reasignar"
 
 #. module: fitness_teacher_swap
-#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "Select instructor…"
 msgstr "Seleccionar instructor…"
 
@@ -268,6 +270,7 @@ msgstr "No hay clases próximas."
 
 #. module: fitness_teacher_swap
 # ── QA review fixes ──
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_roster
 msgid "Booked"
 msgstr "Reservadas"
@@ -382,3 +385,13 @@ msgstr "Completada"
 #: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "Scheduled"
 msgstr "Programada"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_teacher_history
+msgid "Filter period"
+msgstr "Filtrar por periodo"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+msgid "Reason for reassignment (optional)"
+msgstr "Motivo de la reasignación (opcional)"

@@ -105,7 +105,7 @@
                                                     <select name="new_teacher_id"
                                                             style="font-size:0.78rem;padding:4px 8px;border:1px solid var(--mv-border);border-radius:8px;background:var(--mv-bg);color:var(--mv-ink);flex:1;min-width:0;"
                                                             required="required">
-                                                        <option value="">Select instructor…</option>
+                                                        <option value="" t-out="lbl_select_instructor"/>
                                                         <t t-foreach="other_teachers" t-as="teacher">
                                                             <option t-att-value="teacher.id"
                                                                     t-out="teacher.name"/>
