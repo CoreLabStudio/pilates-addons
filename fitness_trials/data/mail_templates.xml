@@ -6,6 +6,12 @@
     <field name="name">Trial Request: Received (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
     <field name="subject">{{ 'Trial class request received · CoreLab' if object.lang == 'en_US' else ('Sol·licitud de classe de prova rebuda · CoreLab' if object.lang == 'ca_ES' else 'Solicitud de clase de prueba recibida · CoreLab') }}</field>
+    <!-- Odoo defaults use_default_to to True, which ignores email_to and
+         asks the record for its recipients instead. A trial submitted from
+         the public form has no partner, so that returned nobody: the mail
+         was created with no recipient, marked sent, and delivered to no
+         one. The address typed on the form is the only one there is. -->
+    <field name="use_default_to" eval="False"/>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
@@ -58,6 +64,12 @@
     <field name="name">Trial Request: Scheduled Confirmation (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
     <field name="subject">{{ 'Your CoreLab trial class is confirmed' if object.lang == 'en_US' else ('La teva classe de prova a CoreLab és confirmada' if object.lang == 'ca_ES' else 'Tu clase de prueba en CoreLab está confirmada') }}</field>
+    <!-- Odoo defaults use_default_to to True, which ignores email_to and
+         asks the record for its recipients instead. A trial submitted from
+         the public form has no partner, so that returned nobody: the mail
+         was created with no recipient, marked sent, and delivered to no
+         one. The address typed on the form is the only one there is. -->
+    <field name="use_default_to" eval="False"/>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
@@ -122,6 +134,12 @@
     <field name="name">Trial: Admin Notification</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
     <field name="subject">New {{ object.class_interest and object.class_interest.capitalize() or '' }} trial booked — {{ object.name }}</field>
+    <!-- Odoo defaults use_default_to to True, which ignores email_to and
+         asks the record for its recipients instead. A trial submitted from
+         the public form has no partner, so that returned nobody: the mail
+         was created with no recipient, marked sent, and delivered to no
+         one. The address typed on the form is the only one there is. -->
+    <field name="use_default_to" eval="False"/>
     <field name="email_to"></field>
     <field name="auto_delete" eval="False"/>
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
@@ -170,6 +188,12 @@
     <field name="name">Trial Request: Declined (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
     <field name="subject">{{ 'About your CoreLab trial class request' if object.lang == 'en_US' else ('Sobre la teva sol·licitud de classe de prova a CoreLab' if object.lang == 'ca_ES' else 'Sobre tu solicitud de clase de prueba en CoreLab') }}</field>
+    <!-- Odoo defaults use_default_to to True, which ignores email_to and
+         asks the record for its recipients instead. A trial submitted from
+         the public form has no partner, so that returned nobody: the mail
+         was created with no recipient, marked sent, and delivered to no
+         one. The address typed on the form is the only one there is. -->
+    <field name="use_default_to" eval="False"/>
     <field name="email_to">{{ object.email }}</field>
     <field name="auto_delete" eval="False"/>
     <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
@@ -199,6 +223,47 @@
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Thank you for your interest in CoreLab. Unfortunately we're not able to accommodate your trial class request at this time, but we hope to welcome you in the future.</p>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">If you have questions or would like to explore other options, please reply to this email and we'll be happy to help.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
+  </t>
+
+</div>
+    </field>
+  </record>
+
+
+  <record id="mail_template_trial_cancelled" model="mail.template">
+    <field name="name">Trial Request: Class Cancelled (EN/ES/CA)</field>
+    <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
+    <field name="subject">{{ 'Your CoreLab trial class has been cancelled' if object.lang == 'en_US' else ('La teva classe de prova a CoreLab s\'ha cancel\u00b7lat' if object.lang == 'ca_ES' else 'Tu clase de prueba en CoreLab se ha cancelado') }}</field>
+    <!-- Odoo defaults use_default_to to True, which ignores email_to and
+         asks the record for its recipients instead. A trial submitted from
+         the public form has no partner, so that returned nobody: the mail
+         was created with no recipient, marked sent, and delivered to no
+         one. The address typed on the form is the only one there is. -->
+    <field name="use_default_to" eval="False"/>
+    <field name="email_to">{{ object.email }}</field>
+    <field name="auto_delete" eval="False"/>
+    <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
+    <field name="body_html" type="html">
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
+
+  <t t-if="object.lang == 'ca_ES'">
+    <p style="font-size:18px;margin:0 0 18px;">Hola <t t-out="object.name or ''"/>,</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Ho sentim molt: hem hagut de cancel\u00b7lar la classe que havies reservat per a la teva classe de prova.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">La teva classe de prova segueix sent teva. Ens posarem en contacte amb tu ben aviat per trobar-te un altre horari, o pots respondre aquest correu i ho organitzem.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0;">Gr\u00e0cies per la teva paci\u00e8ncia.<br/>L'equip de CoreLab</p>
+  </t>
+  <t t-elif="object.lang == 'en_US'">
+    <p style="font-size:18px;margin:0 0 18px;">Hi <t t-out="object.name or ''"/>,</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">We are sorry - we have had to cancel the class you had booked for your trial.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Your trial class is still yours. We will be in touch shortly to find you another time, or you can reply to this email and we will arrange it.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0;">Thank you for your patience.<br/>The CoreLab team</p>
+  </t>
+  <t t-else="">
+    <p style="font-size:18px;margin:0 0 18px;">Hola <t t-out="object.name or ''"/>,</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Lo sentimos mucho: hemos tenido que cancelar la clase que hab\u00edas reservado para tu clase de prueba.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Tu clase de prueba sigue siendo tuya. Nos pondremos en contacto contigo muy pronto para buscarte otro horario, o puedes responder a este correo y lo organizamos.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0;">Gracias por tu paciencia.<br/>El equipo de CoreLab</p>
   </t>
 
 </div>

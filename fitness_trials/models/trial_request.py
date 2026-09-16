@@ -136,6 +136,12 @@ class FitnessTrialRequest(models.Model):
                 # never sent, and no notification reaching the studio at all.
                 rec._send_scheduled_email()
                 rec._send_admin_notification()
+                # Record it, or the form shows "Confirmation Email Sent" as
+                # unticked and the studio sends a second one by hand.
+                rec.write({
+                    'confirmation_email_sent': True,
+                    'confirmation_email_sent_date': fields.Datetime.now(),
+                })
             else:
                 rec._send_pending_email()
         return records
@@ -375,6 +381,12 @@ class FitnessTrialRequest(models.Model):
             'confirmation_email_sent_date': fields.Datetime.now(),
         })
 
+    # Queued, not sent inline. These used to go out with force_send=True,
+    # which delivers over SMTP inside the request: a visitor submitting the
+    # public trial form waited 8 seconds staring at a spinner while two
+    # messages were handed to the mail server one after the other. The cron
+    # picks them up within the minute, and the rest of the app already queues
+    # its mail this way.
     def _send_pending_email(self):
         template = self.env.ref(
             'fitness_trials.mail_template_trial_pending', raise_if_not_found=False
@@ -382,7 +394,7 @@ class FitnessTrialRequest(models.Model):
         if not template:
             return
         try:
-            template.sudo().send_mail(self.id, force_send=True, raise_exception=False)
+            template.sudo().send_mail(self.id, force_send=False, raise_exception=False)
         except Exception:
             _logger.exception("Trial pending email failed for record %s", self.id)
 
@@ -453,7 +465,7 @@ class FitnessTrialRequest(models.Model):
         if not template:
             return
         try:
-            template.sudo().send_mail(self.id, force_send=True, raise_exception=False)
+            template.sudo().send_mail(self.id, force_send=False, raise_exception=False)
         except Exception:
             _logger.exception("Trial scheduled email failed for record %s", self.id)
 
@@ -473,12 +485,24 @@ class FitnessTrialRequest(models.Model):
         try:
             template.sudo().send_mail(
                 self.id,
-                force_send=True,
+                force_send=False,
                 raise_exception=False,
                 email_values={'email_to': admin_email},
             )
         except Exception:
             _logger.exception("Trial admin notification failed for record %s", self.id)
+
+    def _send_cancelled_email(self):
+        """The studio cancelled the class this trial was holding."""
+        template = self.env.ref(
+            'fitness_trials.mail_template_trial_cancelled', raise_if_not_found=False
+        )
+        if not template:
+            return
+        try:
+            template.sudo().send_mail(self.id, force_send=False, raise_exception=False)
+        except Exception:
+            _logger.exception("Trial cancelled email failed for record %s", self.id)
 
     def _send_declined_email(self):
         template = self.env.ref(
@@ -487,6 +511,6 @@ class FitnessTrialRequest(models.Model):
         if not template:
             return
         try:
-            template.sudo().send_mail(self.id, force_send=True, raise_exception=False)
+            template.sudo().send_mail(self.id, force_send=False, raise_exception=False)
         except Exception:
             _logger.exception("Trial declined email failed for record %s", self.id)
