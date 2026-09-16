@@ -943,6 +943,7 @@ msgstr "Termes acceptats el"
 # ─────────────────────────────────────────────
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
 msgid "Notifications"
 msgstr "Notificacions"
@@ -960,6 +961,7 @@ msgstr "Marcar-ho tot com a llegit"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
 msgid "View all notifications"
 msgstr "Veure totes les notificacions"
 
@@ -989,6 +991,7 @@ msgstr ""
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
 msgid "Loading…"
 msgstr "Carregant…"
 
@@ -1002,7 +1005,9 @@ msgstr "Navegació principal"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_active_orders
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_credit_history
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 msgid "Home"
 msgstr "Inici"
 
@@ -1025,9 +1030,11 @@ msgstr "Bons"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
 msgid "Profile"
 msgstr "Perfil"
 
@@ -1187,9 +1194,11 @@ msgid "<strong>Booking cancelled.</strong>"
 msgstr "<strong>Reserva cancel·lada.</strong>"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_trial_choice
 msgid "<strong>Oops:</strong>"
 msgstr "<strong>Error:</strong>"
 
@@ -1522,6 +1531,7 @@ msgstr "<span class=\"mv-card-tag mv-card-tag-active\">Actiu</span>"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_subpage_back
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_sign
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages_pay
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_terms
 msgid "Back"
@@ -1560,7 +1570,9 @@ msgid "Terms and Conditions"
 msgstr "Termes i condicions"
 
 #. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_calendar
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_checkout_payment
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Next"
 msgstr "Següent"
 
@@ -2059,8 +2071,9 @@ msgstr "Veure plans →"
 
 #. module: fitness_portal
 #. odoo-python
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_subscription
 msgid "Classes"
 msgstr "Classes"
 
@@ -2372,6 +2385,7 @@ msgstr "Enviat! L'estudi et contactarà aviat."
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
 msgid "Please write a message before sending."
 msgstr "Escriu un missatge abans d'enviar."
 
@@ -3337,8 +3351,9 @@ msgid "Saved. Thank you."
 msgstr "Desat. Gràcies."
 
 #. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
 msgid "Edit your details"
 msgstr "Editar les teves dades"
 
@@ -3419,3 +3434,66 @@ msgstr "Historial de canvis"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_portal_my_home_hub
 msgid "Classes you handed over or took on"
 msgstr "Classes que has cedit o assumit"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_class_detail
+msgid "Cancel booking"
+msgstr "Cancel·lar reserva"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_calendar
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Previous"
+msgstr "Anterior"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_install_ios_sheet
+msgid "Close"
+msgstr "Tancar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_profile_edit
+msgid "Save"
+msgstr "Desar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_home
+msgid "Credits"
+msgstr "Crèdits"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+msgid "Back to Profile"
+msgstr "Tornar al perfil"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_news_list
+msgid "No news yet."
+msgstr "Encara no hi ha notícies."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_trial_reformer
+msgid "Mornings, weekends, ..."
+msgstr "Matins, caps de setmana, ..."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_trial_reformer
+msgid "e.g. 2 years, on and off"
+msgstr "p. ex. 2 anys, amb pauses"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "Message too long (max 2,000 characters)."
+msgstr "Missatge massa llarg (màx. 2.000 caràcters)."
+
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
+msgid "<strong>Booked!</strong> Your free class is confirmed."
+msgstr "<strong>Reservada!</strong> La teva classe gratuïta està confirmada."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_message_studio
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_messages
+msgid "<strong>Sent!</strong> The studio will get back to you soon."
+msgstr "<strong>Enviat!</strong> L'estudi et respondrà aviat."
