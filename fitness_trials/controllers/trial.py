@@ -4,7 +4,7 @@ import pytz
 import re
 import threading
 import time
-from datetime import date as _date, timedelta
+from datetime import date as _date, datetime, time as _time, timedelta
 
 from odoo import fields as _odoo_fields, http, _
 from odoo.http import request
@@ -134,17 +134,62 @@ def _format_event(ev, lang: str = 'es_ES') -> dict:
 
 class TrialRequestController(http.Controller):
 
-    def _get_barre_slots(self) -> list:
-        """Return formatted Barre class occurrences available in the next 14 days."""
+    def _get_slots(self, discipline) -> list:
+        """Formatted class occurrences for a discipline, next 14 days.
+
+        Reformer was deliberately absent here: the studio reviewed those
+        requests by hand so a first-timer could be matched to a suitable
+        class, and the form asked about experience instead of offering a
+        slot. Both disciplines are booked the same way now - pick a class -
+        so the only thing that differs is the classroom_type asked for.
+        """
         lang = request.context.get('lang', 'es_ES')
         now = _odoo_fields.Datetime.now()
+        horizon = now + timedelta(days=14)
+
+        # Never offer a class the trial cannot be claimed on. Fourteen days and
+        # the end of the offer happen to be the same date today, which is why
+        # the lists look right; a week from now the rolling window would run
+        # past the offer and show classes nobody could take.
+        offer_end = request.env['ir.config_parameter'].sudo().get_param(
+            'fitness.trial_offer_end')
+        if offer_end:
+            try:
+                end_dt = datetime.combine(
+                    _date.fromisoformat(offer_end), _time.max)
+                horizon = min(horizon, end_dt)
+            except (ValueError, TypeError):
+                pass
+
+        if horizon <= now:
+            return []
+
         events = request.env['calendar.event'].sudo().search([
             ('is_fitness_class', '=', True),
-            ('class_type_id.classroom_type', '=', 'barre'),
+            ('class_type_id.classroom_type', '=', discipline),
+            ('class_state', '!=', 'cancelled'),
             ('start', '>', now),
-            ('start', '<', now + timedelta(days=14)),
+            ('start', '<', horizon),
         ], order='start asc')
         return [_format_event(ev, lang) for ev in events]
+
+    def _get_barre_slots(self) -> list:
+        """Kept for the JSON API below, which only ever offered Barre."""
+        return self._get_slots('barre')
+
+    def _form_ctx(self, **extra):
+        """Everything the form needs to render, however it got here."""
+        barre = self._get_slots('barre')
+        reformer = self._get_slots('reformer')
+        ctx = {
+            'barre_slots': barre,
+            'reformer_slots': reformer,
+            'date_filters': self._get_date_filters(barre),
+            'reformer_date_filters': self._get_date_filters(reformer),
+            'form_values': {},
+        }
+        ctx.update(extra)
+        return ctx
 
     def _get_date_filters(self, slots: list) -> list:
         """Return [{key, label}] for each unique slot date — used by date-filter pills."""
@@ -195,8 +240,6 @@ class TrialRequestController(http.Controller):
     @http.route('/trial', type='http', auth='public', website=True, sitemap=True, multilang=False)
     def trial_form(self, **kw):
         """Render the trial class request form."""
-        slots = self._get_barre_slots()
-
         # A logged-in student should not retype what we already know. Their
         # name and email are pre-filled, and class_interest can be preselected
         # by query string so the portal's Reformer guard lands on the right
@@ -210,12 +253,9 @@ class TrialRequestController(http.Controller):
         if wanted in ('barre', 'reformer'):
             prefill['class_interest'] = wanted
 
-        return request.render('fitness_trials.trial_request_form', {
-            'error': kw.get('error'),
-            'form_values': prefill,
-            'barre_slots': slots,
-            'date_filters': self._get_date_filters(slots),
-        })
+        return request.render(
+            'fitness_trials.trial_request_form',
+            self._form_ctx(error=kw.get('error'), form_values=prefill))
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
                 methods=['POST'], sitemap=False, multilang=False)
@@ -249,11 +289,13 @@ class TrialRequestController(http.Controller):
         if class_interest not in _VALID_CLASS_INTERESTS:
             errors.append(_('Please select a class type (Barre or Reformer).'))
 
-        # Barre: validate that a real, available slot was selected
+        # Either discipline: check a real slot was picked, and that it
+        # belongs to the discipline actually chosen - so a stale Barre id
+        # cannot be submitted against a Reformer request.
         occurrence = None
-        if class_interest == 'barre':
+        if class_interest in _VALID_CLASS_INTERESTS:
             if not occurrence_raw:
-                errors.append(_('Please select a Barre class slot.'))
+                errors.append(_('Please select a class.'))
             else:
                 try:
                     occ_id = int(occurrence_raw)
@@ -261,7 +303,8 @@ class TrialRequestController(http.Controller):
                     if (
                         occ.exists()
                         and occ.is_fitness_class
-                        and occ.class_type_id.classroom_type == 'barre'
+                        and occ.class_state != 'cancelled'
+                        and occ.class_type_id.classroom_type == class_interest
                     ):
                         occurrence = occ
                     else:
@@ -270,13 +313,9 @@ class TrialRequestController(http.Controller):
                     errors.append(_('Invalid class slot selected.'))
 
         if errors:
-            slots = self._get_barre_slots()
-            return request.render('fitness_trials.trial_request_form', {
-                'error': ' '.join(errors),
-                'form_values': form_values,
-                'barre_slots': slots,
-                'date_filters': self._get_date_filters(slots),
-            })
+            return request.render(
+                'fitness_trials.trial_request_form',
+                self._form_ctx(error=' '.join(errors), form_values=form_values))
 
         vals = {
             'name': name,
@@ -293,7 +332,7 @@ class TrialRequestController(http.Controller):
             vals['partner_id'] = request.env.user.partner_id.id
 
         submitted_slot = None
-        if class_interest == 'barre' and occurrence:
+        if occurrence:
             submitted_slot = _format_event(occurrence, lang)
             vals.update({
                 'occurrence_id': occurrence.id,
@@ -301,24 +340,15 @@ class TrialRequestController(http.Controller):
                 'status': 'scheduled',
                 'preferred_time_notes': False,
             })
-        elif class_interest == 'reformer':
-            vals['preferred_time_notes'] = notes or False
-            if reformer_first in ('yes', 'no'):
-                vals['reformer_is_first_time'] = reformer_first
-            if reformer_years and reformer_first == 'no':
-                vals['reformer_years_experience'] = reformer_years
 
         try:
             request.env['fitness.trial.request'].sudo().create(vals)
         except Exception:
             _logger.exception("Portal trial submission error")
-            slots = self._get_barre_slots()
-            return request.render('fitness_trials.trial_request_form', {
-                'error': _('Something went wrong. Please try again.'),
-                'form_values': form_values,
-                'barre_slots': slots,
-                'date_filters': self._get_date_filters(slots),
-            })
+            return request.render(
+                'fitness_trials.trial_request_form',
+                self._form_ctx(error=_('Something went wrong. Please try again.'),
+                               form_values=form_values))
 
         return request.render('fitness_trials.trial_request_form', {
             'success': True,
@@ -326,7 +356,9 @@ class TrialRequestController(http.Controller):
             'submitted_slot': submitted_slot,
             'form_values': {},
             'barre_slots': [],
+            'reformer_slots': [],
             'date_filters': [],
+            'reformer_date_filters': [],
         })
 
     # ──────────────────────────────────────────────────────────────
