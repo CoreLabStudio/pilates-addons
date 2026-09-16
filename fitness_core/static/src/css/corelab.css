@@ -83,6 +83,15 @@
   --mv-barre-deep:     #573F30;
   --mv-on-shade-light: #50423D;
   --mv-on-shade-deep:  #FAF9F6;
+  /* The instructor's registration badge. Its own pair, and deliberately
+     outside the themed tokens: it sits on a class shade, and the shades
+     keep one colour in both themes, so a badge that followed the theme
+     would be wrong half the time. Opaque rather than translucent so it
+     reads the same on the palest and the deepest shade - over the deep
+     ones a translucent white composited down to mid-grey and the number
+     all but vanished. */
+  --mv-cal-count-bg: #FAF9F6;
+  --mv-cal-count-fg: #50423D;
   --mv-paco:        #50423D;   /* Paco brown — dark, for headings and strong text */
   --mv-active-fill: #7A6458;   /* darkened hemp for active pill/segment — 5.26:1 on #FAF9F6 */
   /* Brown TEXT. The logo brown #92786C is the brand's brown for fills, but as
@@ -4068,6 +4077,46 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
   margin-bottom: 2px;
 }
 .mv-cal[data-mode="week"] .mv-cal-item { font-size: 0.6rem; }
+
+/* Instructor cells carry the hour and how many are registered as well as the
+   name. There is only room for all three in Day view, so Month shows the name
+   alone, Week adds the count, and Day shows the lot - the information gets
+   dropped by the cell that cannot hold it, not by the server. */
+.mv-cal-counted .mv-cal-item-time,
+.mv-cal-counted .mv-cal-item-count { display: none; }
+.mv-cal-counted .mv-cal-item-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+.mv-cal[data-mode="week"] .mv-cal-counted,
+.mv-cal[data-mode="day"] .mv-cal-counted {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mv-cal[data-mode="week"] .mv-cal-counted .mv-cal-item-name,
+.mv-cal[data-mode="day"] .mv-cal-counted .mv-cal-item-name { flex: 1; }
+
+.mv-cal[data-mode="week"] .mv-cal-counted .mv-cal-item-count,
+.mv-cal[data-mode="day"] .mv-cal-counted .mv-cal-item-count {
+  display: inline-block;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  /* Reads as a badge against the class colour without introducing a colour of
+     its own - the shade already says which room this is. Its colours are fixed
+     rather than inherited or themed: inheriting gave the deep shades white
+     text on a white badge, and theming it made a near-black blob on a cream
+     chip in dark mode. See --mv-cal-count-bg. */
+  background: var(--mv-cal-count-bg);
+  color: var(--mv-cal-count-fg);
+  border-radius: 999px;
+  padding: 0 5px;
+}
+.mv-cal[data-mode="day"] .mv-cal-counted .mv-cal-item-time {
+  display: inline-block;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
 
 .mv-cal-empty-msg {
   padding: 28px 8px;
