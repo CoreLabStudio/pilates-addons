@@ -341,6 +341,31 @@ class TrialRequestController(http.Controller):
                 'preferred_time_notes': False,
             })
 
+        # The same person submitting the same class again is not a second
+        # booking, it is the same one arriving twice - a double click, a
+        # refreshed confirmation, a browser retry. Sending it back to the same
+        # confirmation is what they meant, and it keeps the studio's list
+        # showing one row per booking rather than one row per click.
+        if occurrence:
+            twin = request.env['fitness.trial.request'].sudo().search([
+                ('email', '=ilike', email),
+                ('occurrence_id', '=', occurrence.id),
+            ], limit=1)
+            if twin:
+                _logger.info(
+                    "Duplicate trial submission for %s on event %s; "
+                    "returning the existing request %s", email, occurrence.id, twin.id)
+                return request.render('fitness_trials.trial_request_form', {
+                    'success': True,
+                    'submitted_interest': class_interest,
+                    'submitted_slot': submitted_slot,
+                    'form_values': {},
+                    'barre_slots': [],
+                    'reformer_slots': [],
+                    'date_filters': [],
+                    'reformer_date_filters': [],
+                })
+
         try:
             request.env['fitness.trial.request'].sudo().create(vals)
         except Exception:
