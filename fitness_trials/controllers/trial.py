@@ -177,16 +177,38 @@ class TrialRequestController(http.Controller):
         """Kept for the JSON API below, which only ever offered Barre."""
         return self._get_slots('barre')
 
+    def _class_types(self):
+        """The classes the studio actually runs, per discipline.
+
+        Read from the class types rather than from generated occurrences: the
+        form asks what somebody would like to do, not which slot they want, so
+        a discipline with nothing on the calendar this week still has classes
+        to offer.
+        """
+        types = request.env['fitness.class.type'].sudo().search(
+            [('classroom_type', 'in', ('barre', 'reformer'))], order='name')
+        out = {'barre': [], 'reformer': []}
+        for ct in types:
+            out.setdefault(ct.classroom_type, []).append({
+                'id': ct.id,
+                'name': ct.name or '',
+                'duration': ct.duration or 0,
+            })
+        return out
+
     def _form_ctx(self, **extra):
         """Everything the form needs to render, however it got here."""
-        barre = self._get_slots('barre')
-        reformer = self._get_slots('reformer')
+        types = self._class_types()
         ctx = {
-            'barre_slots': barre,
-            'reformer_slots': reformer,
-            'date_filters': self._get_date_filters(barre),
-            'reformer_date_filters': self._get_date_filters(reformer),
+            'barre_types': types['barre'],
+            'reformer_types': types['reformer'],
+            'period_choices': [
+                ('morning', _('Morning')),
+                ('evening', _('Evening')),
+            ],
+            'today_iso': _date.today().isoformat(),
             'form_values': {},
+            'source': 'website',
         }
         ctx.update(extra)
         return ctx
@@ -237,8 +259,19 @@ class TrialRequestController(http.Controller):
     # Portal form  GET /trial  /  POST /trial/submit
     # ──────────────────────────────────────────────────────────────
 
+    @http.route('/my/trial', type='http', auth='user', website=True,
+                sitemap=False, multilang=False)
+    def trial_form_app(self, **kw):
+        """The same form, reached from inside the app.
+
+        One handler and one template; the only thing that differs is the label
+        the request is stamped with, so an admin can tell where somebody was
+        standing when they asked.
+        """
+        return self.trial_form(_source='app', **kw)
+
     @http.route('/trial', type='http', auth='public', website=True, sitemap=True, multilang=False)
-    def trial_form(self, **kw):
+    def trial_form(self, _source='website', **kw):
         """Render the trial class request form."""
         # A logged-in student should not retype what we already know. Their
         # name and email are pre-filled, and class_interest can be preselected
@@ -255,7 +288,8 @@ class TrialRequestController(http.Controller):
 
         return request.render(
             'fitness_trials.trial_request_form',
-            self._form_ctx(error=kw.get('error'), form_values=prefill))
+            self._form_ctx(error=kw.get('error'), form_values=prefill,
+                           source=_source))
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
                 methods=['POST'], sitemap=False, multilang=False)
@@ -268,7 +302,12 @@ class TrialRequestController(http.Controller):
         notes           = (kw.get('notes')  or '').strip()[:1000]
         reformer_first  = (kw.get('reformer_is_first_time') or '').strip()
         reformer_years  = (kw.get('reformer_years_experience') or '').strip()[:40]
-        occurrence_raw  = (kw.get('occurrence_id') or '').strip()
+        class_type_raw  = (kw.get('class_type_id') or '').strip()
+        preferred_date  = (kw.get('preferred_date') or '').strip()[:10]
+        preferred_period = (kw.get('preferred_period') or '').strip()
+        # Stamped by the form itself rather than guessed from the session: a
+        # student can be signed in and still be reading the public site.
+        source = 'app' if (kw.get('source') or '').strip() == 'app' else 'website'
         lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
         if lang not in _VALID_LANGS:
             lang = 'es_ES'
@@ -278,7 +317,9 @@ class TrialRequestController(http.Controller):
             'class_interest': class_interest, 'notes': notes,
             'reformer_is_first_time': reformer_first,
             'reformer_years_experience': reformer_years,
-            'occurrence_id': occurrence_raw,
+            'class_type_id': class_type_raw,
+            'preferred_date': preferred_date,
+            'preferred_period': preferred_period,
         }
 
         errors = []
@@ -289,39 +330,48 @@ class TrialRequestController(http.Controller):
         if class_interest not in _VALID_CLASS_INTERESTS:
             errors.append(_('Please select a class type (Barre or Reformer).'))
 
-        # Either discipline: check a real slot was picked, and that it
-        # belongs to the discipline actually chosen - so a stale Barre id
-        # cannot be submitted against a Reformer request.
-        occurrence = None
+        # The class they asked for has to exist and belong to the discipline
+        # they chose, so a stale Barre id cannot arrive on a Reformer request.
+        class_type = None
         if class_interest in _VALID_CLASS_INTERESTS:
-            if not occurrence_raw:
-                errors.append(_('Please select a class.'))
+            if not class_type_raw:
+                errors.append(_('Please choose a class.'))
             else:
                 try:
-                    occ_id = int(occurrence_raw)
-                    occ = request.env['calendar.event'].sudo().browse(occ_id)
-                    if (
-                        occ.exists()
-                        and occ.is_fitness_class
-                        and occ.class_state != 'cancelled'
-                        and occ.class_type_id.classroom_type == class_interest
-                    ):
-                        occurrence = occ
+                    ct = request.env['fitness.class.type'].sudo().browse(int(class_type_raw))
+                    if ct.exists() and ct.classroom_type == class_interest:
+                        class_type = ct
                     else:
-                        errors.append(_('Invalid class slot selected.'))
+                        errors.append(_('That class does not belong to the discipline you chose.'))
                 except (ValueError, TypeError):
-                    errors.append(_('Invalid class slot selected.'))
+                    errors.append(_('Please choose a class.'))
+        if not preferred_date:
+            errors.append(_('Please choose a preferred date.'))
+        else:
+            try:
+                chosen = _date.fromisoformat(preferred_date)
+                if chosen < _date.today():
+                    errors.append(_('Please choose a date that has not already passed.'))
+            except ValueError:
+                errors.append(_('Please choose a preferred date.'))
+        if preferred_period not in ('morning', 'evening'):
+            errors.append(_('Please say whether you prefer the morning or the evening.'))
 
         if errors:
             return request.render(
                 'fitness_trials.trial_request_form',
-                self._form_ctx(error=' '.join(errors), form_values=form_values))
+                self._form_ctx(error=' '.join(errors), form_values=form_values,
+                               source=source))
 
         vals = {
             'name': name,
             'email': email,
             'phone': phone or False,
             'class_interest': class_interest,
+            'class_type_id': class_type.id if class_type else False,
+            'preferred_date': preferred_date or False,
+            'preferred_period': preferred_period or False,
+            'source': source,
             'lang': lang,
         }
 
@@ -346,40 +396,32 @@ class TrialRequestController(http.Controller):
                     "leaving it unattached to be matched by email",
                     email, request.env.user.login)
 
-        submitted_slot = None
-        if occurrence:
-            submitted_slot = _format_event(occurrence, lang)
-            vals.update({
-                'occurrence_id': occurrence.id,
-                'scheduled_datetime': occurrence.start,
-                'status': 'scheduled',
-                'preferred_time_notes': False,
-            })
-
-        # The same person submitting the same class again is not a second
-        # booking, it is the same one arriving twice - a double click, a
-        # refreshed confirmation, a browser retry. Sending it back to the same
-        # confirmation is what they meant, and it keeps the studio's list
-        # showing one row per booking rather than one row per click.
-        if occurrence:
-            twin = request.env['fitness.trial.request'].sudo().search([
-                ('email', '=ilike', email),
-                ('occurrence_id', '=', occurrence.id),
-            ], limit=1)
-            if twin:
-                _logger.info(
-                    "Duplicate trial submission for %s on event %s; "
-                    "returning the existing request %s", email, occurrence.id, twin.id)
-                return request.render('fitness_trials.trial_request_form', {
-                    'success': True,
-                    'submitted_interest': class_interest,
-                    'submitted_slot': submitted_slot,
-                    'form_values': {},
-                    'barre_slots': [],
-                    'reformer_slots': [],
-                    'date_filters': [],
-                    'reformer_date_filters': [],
-                })
+        # No slot is chosen here any more, so nothing books itself: every
+        # request lands as pending and the studio places it. With a
+        # three-student minimum an instant booking could not have known
+        # whether the class would actually run.
+        # The same person asking for the same class on the same day again is
+        # not a second request, it is the same one arriving twice - a double
+        # click, a refreshed confirmation, a browser retry. Sending them back
+        # to the same confirmation is what they meant, and it keeps the
+        # studio's list showing one row per person rather than one per click.
+        # Still open only: once it has been declined or already scheduled,
+        # asking again is a real second ask.
+        twin = request.env['fitness.trial.request'].sudo().search([
+            ('email', '=ilike', email),
+            ('class_type_id', '=', class_type.id if class_type else False),
+            ('preferred_date', '=', preferred_date or False),
+            ('status', 'in', ('pending', 'contacted')),
+        ], limit=1)
+        if twin:
+            _logger.info(
+                "Duplicate trial submission for %s (%s on %s); returning the "
+                "existing request %s", email,
+                class_type.name if class_type else '-', preferred_date, twin.id)
+            return request.render(
+                'fitness_trials.trial_request_form',
+                self._form_ctx(success=True, submitted_interest=class_interest,
+                               source=source))
 
         try:
             request.env['fitness.trial.request'].sudo().create(vals)
@@ -388,18 +430,12 @@ class TrialRequestController(http.Controller):
             return request.render(
                 'fitness_trials.trial_request_form',
                 self._form_ctx(error=_('Something went wrong. Please try again.'),
-                               form_values=form_values))
+                               form_values=form_values, source=source))
 
-        return request.render('fitness_trials.trial_request_form', {
-            'success': True,
-            'submitted_interest': class_interest,
-            'submitted_slot': submitted_slot,
-            'form_values': {},
-            'barre_slots': [],
-            'reformer_slots': [],
-            'date_filters': [],
-            'reformer_date_filters': [],
-        })
+        return request.render(
+            'fitness_trials.trial_request_form',
+            self._form_ctx(success=True, submitted_interest=class_interest,
+                           source=source))
 
     # ──────────────────────────────────────────────────────────────
     # External JSON API  POST /trial/request  (marketing site)
