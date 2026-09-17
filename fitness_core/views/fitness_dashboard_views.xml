@@ -89,10 +89,33 @@
 
                             <div class="cl-card cl-card-main">
                                 <div class="cl-card-head">
-                                    <h3 class="cl-card-title">Today's Classes</h3>
+                                    <h3 class="cl-card-title">Classes</h3>
+                                    <!-- Today or the week ahead. The studio
+                                         plans in weeks, and answering "is
+                                         Thursday worth running" used to mean
+                                         leaving this page. -->
+                                    <field name="classes_range" invisible="1"/>
+                                    <div class="cl-range-toggle">
+                                        <button name="action_show_today" type="object"
+                                                string="Today" title="Show today only"
+                                                class="cl-rangebtn"
+                                                invisible="classes_range == 'today'"/>
+                                        <button name="action_show_today" type="object"
+                                                string="Today" title="Showing today"
+                                                class="cl-rangebtn cl-rangebtn-on"
+                                                invisible="classes_range != 'today'"/>
+                                        <button name="action_show_week" type="object"
+                                                string="This week" title="Show the next seven days"
+                                                class="cl-rangebtn"
+                                                invisible="classes_range == 'week'"/>
+                                        <button name="action_show_week" type="object"
+                                                string="This week" title="Showing the next seven days"
+                                                class="cl-rangebtn cl-rangebtn-on"
+                                                invisible="classes_range != 'week'"/>
+                                    </div>
                                     <button name="action_view_today_classes" type="object"
                                             class="cl-seeall" string="See all classes"
-                                            title="View today's classes">See all <span class="cl-arrow">→</span></button>
+                                            title="View these classes">See all <span class="cl-arrow">→</span></button>
                                 </div>
                                 <div class="cl-card-body">
                                     <field name="preview_classes_html"

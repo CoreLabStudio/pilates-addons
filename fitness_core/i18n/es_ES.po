@@ -839,3 +839,69 @@ msgstr "Nombre mostrado"
 #: code:addons/fitness_core/models/fitness_class_schedule.py:0
 msgid "Occurrences — %s"
 msgstr "Sesiones — %s"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "Slots closed"
+msgstr "Franjas cerradas"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "Slots opened"
+msgstr "Franjas abiertas"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "%(slots)s slot(s) closed. %(hidden)s upcoming class(es) hidden."
+msgstr "%(slots)s franja(s) cerrada(s). %(hidden)s clase(s) próxima(s) ocultada(s)."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "%(slots)s slot(s) opened. %(shown)s upcoming class(es) back on the booking list."
+msgstr "%(slots)s franja(s) abierta(s). %(shown)s clase(s) próxima(s) de nuevo en la lista de reservas."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_class_schedule.py:0
+msgid "%(kept)s class(es) were left alone because students are booked into them - handle those from Bulk Cancel Classes."
+msgstr "%(kept)s clase(s) se han dejado como estaban porque hay alumnas reservadas: gestiónalas desde Cancelar Clases."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "%(students)s students booked across %(classes)s classes on %(day)s"
+msgstr "%(students)s alumnas reservadas en %(classes)s clases el %(day)s"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "%(students)s students booked across %(classes)s classes in the next %(days)s days"
+msgstr "%(students)s alumnas reservadas en %(classes)s clases en los próximos %(days)s días"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "%(shown)s of %(total)s shown - See all for the rest."
+msgstr "%(shown)s de %(total)s mostradas. Usa Ver todo para el resto."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No classes scheduled this week."
+msgstr "No hay clases programadas esta semana."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No classes scheduled for today."
+msgstr "No hay clases programadas para hoy."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Classes this week"
+msgstr "Clases de esta semana"
