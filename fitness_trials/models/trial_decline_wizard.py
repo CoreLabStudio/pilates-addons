@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Ask why, before cancelling a trial request.
+"""Offer to say why, before cancelling a trial request.
 
-A dialog rather than a status anybody can pick off the statusbar. Declining
-sends the student an email and an app notification, and both read better -
-and are far more use to the person reading them - when they say something
-about why. Requiring it here is also a small brake on the click: cancelling
-somebody's free class is worth a sentence.
+A dialog rather than a status anybody can pick off a dropdown. Cancelling
+sends the student an email and an app notification, and both read better - and
+are far more use to the person reading them - when they say something about
+why.
+
+Offered, not demanded. Sometimes there is nothing useful to say, and a box
+that insists on a sentence just collects full stops. Both messages already
+read properly without one.
 """
 import logging
 
@@ -24,17 +27,15 @@ class FitnessTrialDeclineWizard(models.TransientModel):
         ondelete='cascade')
     student_name = fields.Char(related='request_id.name', readonly=True)
     reason = fields.Text(
-        string='Reason', required=True,
-        help="Goes to the student, in the email and in the app. Write it as "
-             "you would say it to them.")
+        string='Reason',
+        help="Optional. Goes to the student, in the email and in the app. "
+             "Write it as you would say it to them.")
 
     def action_confirm(self):
         self.ensure_one()
+        # A box holding only spaces is the same as an empty one, and a
+        # notification whose body is a space helps nobody.
         reason = (self.reason or '').strip()
-        # required=True already stops an empty box, but not one holding a
-        # space, and a notification whose body is a space helps nobody.
-        if not reason:
-            raise UserError(_("Please say why, so the student is told something."))
         if self.request_id.status == 'scheduled':
             raise UserError(_(
                 "This request is already scheduled and the class is booked. "
