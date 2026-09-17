@@ -182,6 +182,14 @@
                         domain="[('class_state', '=', 'scheduled')]"/>
                 <filter string="Cancelled" name="cancelled"
                         domain="[('class_state', '=', 'cancelled')]"/>
+                <!-- Archived is a different thing from cancelled: it hides a
+                     row without telling anybody, and is what closing a
+                     recurring slot does to the classes it had generated.
+                     Stock calendar.event offered this filter and giving the
+                     Schedule its own search view dropped it, which left no
+                     way to find an archived class at all. -->
+                <filter string="Archived" name="inactive"
+                        domain="[('active', '=', False)]"/>
 
                 <separator/>
                 <!-- How full. "Nobody booked" is the one that matters most:

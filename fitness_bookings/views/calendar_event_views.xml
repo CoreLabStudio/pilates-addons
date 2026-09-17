@@ -55,4 +55,29 @@
         </field>
     </record>
 
+    <!-- ── Cancel / restore from the Schedule list ──────────────────────────
+         Tick the rows, Actions, choose one. Deliberately alongside Odoo's
+         Archive rather than instead of it: Archive hides a row and tells
+         nobody, which is what closing a recurring slot does to the classes it
+         generated. Cancelling calls the class off - bookings cancelled,
+         credits returned, students told. Naming both plainly is the only way
+         the two stop being confused. -->
+    <record id="action_calendar_event_cancel_classes" model="ir.actions.server">
+        <field name="name">Cancel classes</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_cancel_classes_bulk()</field>
+    </record>
+
+    <record id="action_calendar_event_restore_classes" model="ir.actions.server">
+        <field name="name">Put classes back</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_restore_classes()</field>
+    </record>
+
 </odoo>
