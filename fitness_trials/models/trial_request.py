@@ -238,6 +238,10 @@ class FitnessTrialRequest(models.Model):
     confirmation_email_sent_date = fields.Datetime(
         string='Confirmation Sent On', readonly=True, copy=False
     )
+    booking_id = fields.Many2one(
+        'fitness.booking', string='Booking', readonly=True, copy=False,
+        help="The place this request was approved into. Cancelling either "
+             "one cancels the other.")
     decline_reason = fields.Text(
         string='Reason', copy=False,
         help="Why the studio could not take this request. Sent to the student "
@@ -532,6 +536,65 @@ class FitnessTrialRequest(models.Model):
                     "student gets one trial, so only one of these should be "
                     "booked.", n=len(others))
 
+    def _find_booking(self):
+        """The booking behind this request.
+
+        Stored since the link was added; resolved by student and class for
+        anything approved before that, so a request scheduled last week still
+        finds its place without a migration to backfill it.
+        """
+        self.ensure_one()
+        if self.booking_id:
+            return self.booking_id
+        if not self.partner_id or not self.occurrence_id:
+            return self.env['fitness.booking'].browse()
+        return self.env['fitness.booking'].sudo().search([
+            ('student_id', '=', self.partner_id.id),
+            ('calendar_event_id', '=', self.occurrence_id.id),
+            ('state', 'in', ('booked', 'no_show')),
+        ], limit=1)
+
+    @api.model
+    def _scheduled_behind(self, bookings):
+        """Scheduled requests whose class place is one of these bookings."""
+        if not bookings:
+            return self.browse()
+        found = self.sudo().search([
+            ('status', '=', 'scheduled'),
+            ('booking_id', 'in', bookings.ids),
+        ])
+        # Approved before the link existed: match on the student and the class
+        # instead, which is what the booking is.
+        legacy = self.sudo().search([
+            ('status', '=', 'scheduled'),
+            ('booking_id', '=', False),
+            ('partner_id', 'in', bookings.mapped('student_id').ids),
+            ('occurrence_id', 'in', bookings.mapped('calendar_event_id').ids),
+        ])
+        pairs = {(b.student_id.id, b.calendar_event_id.id) for b in bookings}
+        legacy = legacy.filtered(
+            lambda r: (r.partner_id.id, r.occurrence_id.id) in pairs)
+        return found | legacy
+
+    def _cancelled_with_booking(self):
+        """The booking went, so the request is not scheduled any more.
+
+        Deliberately silent. Cancelling the booking has already told the
+        student their class is off, with whatever reason the studio gave;
+        a trial notice on top would be two messages about one thing.
+        """
+        for rec in self:
+            if rec.status != 'scheduled':
+                continue
+            rec.with_context(**{rec._DECLINE_KEY: True}).write({
+                'status': 'declined',
+                'decline_reason': rec.decline_reason or _(
+                    'The class booking was cancelled.'),
+            })
+            _logger.info(
+                "[TRIAL] Request %s marked cancelled because its booking was "
+                "cancelled", rec.id)
+
     def action_decline(self):
         """Open the dialog that asks why before cancelling."""
         self.ensure_one()
@@ -553,6 +616,17 @@ class FitnessTrialRequest(models.Model):
         them rather than leaving them to discover it.
         """
         self.ensure_one()
+        # One booking, one truth. This used to refuse a scheduled request and
+        # tell the studio to go and cancel the booking first, which is the
+        # same two-step it is meant to save them.
+        booking = self._find_booking()
+        if booking.filtered(lambda b: b.state == 'booked'):
+            booking.with_context(
+                _trial_request_declining=True,
+                _admin_cancel_direct=True,
+                admin_force_refund=True,
+                cancel_reason=reason or False,
+            ).action_cancel()
         self.with_context(**{self._DECLINE_KEY: True}).write({
             'status': 'declined', 'decline_reason': reason or False})
         self._notify_declined(reason)
@@ -811,7 +885,7 @@ class FitnessTrialRequest(models.Model):
             "[TRIAL] Request %s approved: booking %s created for partner %s "
             "on event %s", self.id, booking.id, partner.id, self.occurrence_id.id)
 
-        vals = {'status': 'scheduled'}
+        vals = {'status': 'scheduled', 'booking_id': booking.id}
         # Normally already set the moment the slot was chosen. Kept as a
         # backstop for a request approved straight from a slot set by an
         # import or an older row.
