@@ -11,6 +11,9 @@
             decoration-success="status == 'scheduled'"
             decoration-danger="status == 'declined'">
         <field name="create_date" string="Received" optional="show"/>
+        <field name="source" widget="badge"
+               decoration-info="source == 'website'"
+               decoration-success="source == 'app'"/>
         <field name="name" string="Name"/>
         <field name="email"/>
         <field name="phone" optional="show"/>
@@ -19,6 +22,7 @@
                decoration-info="class_interest == 'barre'"/>
         <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
         <field name="status" widget="badge"/>
+        <field name="partner_id" string="Student" optional="show"/>
         <field name="occurrence_id" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
         <field name="confirmation_email_sent" string="Email Sent" optional="show"/>
@@ -41,6 +45,9 @@
                   type="object"
                   class="btn-primary"
                   invisible="status in ('scheduled', 'declined') or not occurrence_id"/>
+          <button name="action_view_candidate_slots" type="object"
+                  string="See slots and capacity"
+                  invisible="status in ('scheduled', 'declined')"/>
           <button name="action_send_confirmation_email"
                   string="Send Confirmation Email"
                   type="object"
@@ -66,11 +73,21 @@
             </group>
             <group string="Class Interest">
               <field name="class_interest" widget="radio"/>
+              <field name="class_type_id" string="Class Requested"
+                     options="{'no_create': True}"
+                     domain="[('classroom_type', '=', class_interest)]"/>
+              <field name="preferred_date" string="Preferred Date"/>
+              <field name="preferred_period" string="Morning / Evening"/>
             </group>
           </group>
           <group string="Scheduling">
             <group>
               <field name="status" string="Status"/>
+              <field name="source" string="Came from" readonly="1"/>
+              <!-- Filled in from the request's own email on submit, and created
+                   from its name/email/phone at approval if the person is new.
+                   It was blank on every website request, and the studio was
+                   retyping details the form had already collected. -->
               <field name="partner_id" options="{'no_create': True}"/>
               <!-- The slot is what approval books into, so it has to be
                    settable for every discipline. It was hidden unless the
@@ -88,6 +105,11 @@
                               ('class_state', '!=', 'cancelled'),
                               ('start', '&gt;=', context_today().strftime('%Y-%m-%d')),
                               ('class_type_id.classroom_type', '=', class_interest)]"/>
+              <!-- How full the chosen slot is, so placing somebody is an
+                   informed decision rather than a guess followed by a
+                   capacity error on save. -->
+              <field name="occurrence_fill" string="How full" readonly="1"
+                     invisible="not occurrence_id"/>
               <field name="scheduled_datetime" string="Scheduled Date/Time"/>
               <field name="confirmation_email_sent" string="Confirmation Email Sent" readonly="1"/>
               <field name="confirmation_email_sent_date" string="Confirmation Sent On"

@@ -98,12 +98,54 @@
     </record>
 
     <!-- Action: Schedule (fitness classes only) -->
+    <!-- The Schedule used to fall back to Odoo's stock calendar.event calendar,
+         which carries js_class="attendee_calendar": the personal-meetings view.
+         It shows only events the logged-in user is an *attendee* of, and its
+         sidebar filters by attendee through calendar.contacts. A fitness class
+         has an instructor in user_id and no attendees at all, so the calendar
+         came up empty while the list beside it showed hundreds of classes -
+         and ticking a second instructor narrowed the attendee filter instead
+         of widening it, which is why picking more of them showed fewer
+         classes. This view drops that js_class and filters on the instructor
+         the studio actually sets. -->
+    <record id="view_fitness_schedule_calendar" model="ir.ui.view">
+        <field name="name">calendar.event.fitness.schedule.calendar</field>
+        <field name="model">calendar.event</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <calendar string="Class Schedule"
+                      date_start="start" date_stop="stop"
+                      color="user_id" mode="week"
+                      quick_create="0" event_open_popup="true">
+                <field name="name"/>
+                <!-- filter="1" puts instructors in the sidebar. Several ticked
+                     there OR together, which is the behaviour the studio
+                     expected and did not get. -->
+                <field name="user_id" filters="1" avatar_field="avatar_128"/>
+                <field name="classroom_id" filters="1"/>
+                <field name="class_type_id"/>
+                <field name="capacity"/>
+                <field name="booked_seats"/>
+                <field name="class_state" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
     <record id="action_fitness_schedule" model="ir.actions.act_window">
         <field name="name">Schedule</field>
         <field name="res_model">calendar.event</field>
         <field name="view_mode">list,calendar,form</field>
         <field name="domain">[('is_fitness_class', '=', True)]</field>
         <field name="context">{'default_is_fitness_class': True}</field>
+        <!-- Pin each mode to the studio's own view. Without this the calendar
+             mode resolves to whichever calendar.event calendar has the highest
+             priority, which is Odoo's attendee one. -->
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 10, 'view_mode': 'list',
+                    'view_id': ref('view_fitness_schedule_list')}),
+            (0, 0, {'sequence': 20, 'view_mode': 'calendar',
+                    'view_id': ref('view_fitness_schedule_calendar')}),
+            (0, 0, {'sequence': 30, 'view_mode': 'form'})]"/>
     </record>
 
 </odoo>

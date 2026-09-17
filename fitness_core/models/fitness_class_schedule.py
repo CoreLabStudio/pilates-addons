@@ -255,6 +255,88 @@ class FitnessClassSchedule(models.Model):
                 _logger.exception("Could not extend schedule %s", schedule.id)
         return True
 
+    # ── opening and closing a slot ─────────────────────────────────────────
+
+    def _future_occurrences(self):
+        """Occurrences from today onward, for every schedule in self."""
+        recurrences = self.mapped('recurrence_id')
+        if not recurrences:
+            return self.env['calendar.event']
+        return self.env['calendar.event'].with_context(active_test=False).search([
+            ('recurrence_id', 'in', recurrences.ids),
+            ('start', '>=', fields.Datetime.now()),
+        ])
+
+    @staticmethod
+    def _booked_event_ids(events):
+        """Which of these classes somebody is actually booked into."""
+        if not events:
+            return set()
+        Booking = events.env['fitness.booking'].sudo()
+        return {
+            event.id
+            for event, _count in Booking._read_group(
+                [('calendar_event_id', 'in', events.ids),
+                 ('state', 'in', ('booked', 'attended', 'no_show'))],
+                groupby=['calendar_event_id'], aggregates=['__count'])
+        }
+
+    def action_close_for_booking(self):
+        """Take these slots off the timetable and out of the booking list.
+
+        Archives rather than cancels: cancelling is a studio decision about a
+        class that was going to run, and it emails students and returns
+        credits. This is the studio deciding the slot is not offered any more,
+        which should be silent and reversible.
+
+        A class somebody is already booked into is left exactly as it is. It
+        would be trivial to archive it too, and it would strand the student:
+        their booking would point at a class that no longer appears anywhere.
+        Those are reported back so an admin can deal with them deliberately.
+        """
+        events = self._future_occurrences()
+        booked = self._booked_event_ids(events)
+        closeable = events.filtered(lambda e: e.id not in booked and e.active)
+        closeable.write({'active': False})
+        self.write({'active': False})
+
+        msg = _("%(slots)s slot(s) closed. %(hidden)s upcoming class(es) hidden.",
+                slots=len(self), hidden=len(closeable))
+        if booked:
+            msg += " " + _(
+                "%(kept)s class(es) were left alone because students are booked "
+                "into them - handle those from Bulk Cancel Classes.", kept=len(booked))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Slots closed"),
+                'message': msg,
+                'type': 'warning' if booked else 'success',
+                'sticky': bool(booked),
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
+    def action_open_for_booking(self):
+        """Put these slots back. The exact inverse of closing them."""
+        events = self.with_context(active_test=False)._future_occurrences()
+        hidden = events.filtered(lambda e: not e.active)
+        hidden.write({'active': True})
+        self.write({'active': True})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Slots opened"),
+                'message': _("%(slots)s slot(s) opened. %(shown)s upcoming class(es) "
+                             "back on the booking list.",
+                             slots=len(self), shown=len(hidden)),
+                'type': 'success',
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
     def action_view_occurrences(self):
         self.ensure_one()
         return {
