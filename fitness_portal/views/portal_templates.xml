@@ -546,7 +546,8 @@
                         <p class="mv-greeting-sub" t-out="subtitle"/>
                     </div>
                     <t t-if="primary_credit">
-                        <a href="/my/credits" class="mv-credit-badge" style="text-decoration:none;">
+                        <a t-att-href="primary_credit.get('href') or '/my/credits'"
+                           class="mv-credit-badge" style="text-decoration:none;">
                             <span class="mv-credit-count" t-out="primary_credit['display']"/>
                             <div class="mv-credit-label" t-out="primary_credit['label']"/>
                         </a>
@@ -670,7 +671,7 @@
                     <t t-if="not has_sources">
                         <div class="mv-callout">
                             <div t-out="no_sources_msg"/>
-                            <a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
+                            <a t-att-href="no_sources_href" class="mv-empty-cta" t-out="no_sources_cta"/>
                         </div>
                     </t>
                     <t t-elif="not grouped_events">
@@ -768,7 +769,7 @@
                         <div class="mv-empty">
                             <t t-if="not has_sources">
                                 <t t-out="no_sources_msg"/>
-                                <br/><a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
+                                <br/><a t-att-href="no_sources_href" class="mv-empty-cta" t-out="no_sources_cta"/>
                             </t>
                             <t t-else="">
                                 <t t-out="schedule_empty"/>
@@ -827,7 +828,7 @@
                                  else, so offering to browse more is a dead end. -->
                             <t t-if="not has_sources">
                                 <t t-out="no_sources_msg"/>
-                                <br/><a href="/my/packages" class="mv-empty-cta" t-out="no_sources_cta"/>
+                                <br/><a t-att-href="no_sources_href" class="mv-empty-cta" t-out="no_sources_cta"/>
                             </t>
                             <t t-else="">
                                 <a href="/my/studio">Browse &amp; book more classes</a>
@@ -960,7 +961,8 @@
 
                     <!-- Credits indicator -->
                     <t t-if="primary_credit">
-                        <a href="/my/credits" class="mv-detail-meta"
+                        <a t-att-href="primary_credit.get('href') or '/my/credits'"
+                           class="mv-detail-meta"
                            style="text-decoration:underline;color:var(--mv-muted);"
                            t-out="primary_credit['credits_available_text']"/>
                     </t>
@@ -1000,6 +1002,16 @@
                             <span class="mv-class-soon-title">Booking opens <t t-out="opens_on"/></span>
                             <span class="mv-class-soon-sub">Classes open for booking a week ahead. Come back then to reserve your spot.</span>
                         </div>
+                    </t>
+                    <!-- Nothing to book it with, but their free class has not
+                         been asked for yet. The same offer, in the same words
+                         and to the same form, as Home and the shop. -->
+                    <t t-elif="book_state == 'trial_request'">
+                        <div class="mv-class-soon">
+                            <span class="mv-class-soon-sub" t-out="no_sources_msg"/>
+                        </div>
+                        <a t-att-href="no_sources_href" class="mv-btn-book-lg"
+                           t-out="no_sources_cta"/>
                     </t>
                     <!-- Nothing to book it with. Same purchase prompt the rest
                          of the app uses rather than a dead end. -->
@@ -1044,7 +1056,8 @@
                         <p class="mv-greeting-sub">Past classes and purchases</p>
                     </div>
                     <t t-if="primary_credit">
-                        <a href="/my/credits" class="mv-credit-badge" style="text-decoration:none;">
+                        <a t-att-href="primary_credit.get('href') or '/my/credits'"
+                           class="mv-credit-badge" style="text-decoration:none;">
                             <span class="mv-credit-count" t-out="primary_credit['display']"/>
                             <div class="mv-credit-label" t-out="primary_credit['label']"/>
                         </a>
@@ -1551,14 +1564,14 @@
                                                                   t-out="lbl_trial_pending"/>
                                                         </t>
                                                         <t t-elif="product.id in trial_ids">
-                                                            <!-- The trial is claimed by booking a class, never by
-                                                                 taking the product. This card opened a form that
-                                                                 claimed it on the spot, which is a second way to
-                                                                 spend a one-per-student entitlement - and the one
-                                                                 that spends it without choosing a class. -->
+                                                            <!-- A trial is asked for, never taken. This card used to
+                                                                 open the schedule, where tapping a class spent the
+                                                                 one-per-student entitlement with nobody at the studio
+                                                                 in the loop. It opens the request form instead, for
+                                                                 Barre exactly as for Reformer. -->
                                                             <a t-att-href="trial_href.get(product.id)"
                                                                class="mv-btn-book" style="text-decoration:none;"
-                                                               t-out="lbl_view"/>
+                                                               t-out="lbl_request_trial"/>
                                                         </t>
                                                         <t t-elif="product.id in free_ids">
                                                             <!-- Nothing to pay and nothing to choose, so there is
@@ -1700,12 +1713,12 @@
                                       t-out="lbl_trial_pending"/>
                             </t>
                             <t t-elif="is_trial">
-                                <!-- Same as the card: the class is what claims
-                                     the trial, so this sends them to pick one. -->
+                                <!-- Same as the card: the studio places a trial,
+                                     so this asks rather than books. -->
                                 <a t-att-href="trial_href"
                                    class="mv-pkg-buy-btn"
                                    style="display:block;text-align:center;text-decoration:none;line-height:1.4;"
-                                   t-out="lbl_view"/>
+                                   t-out="lbl_request_trial"/>
                             </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment

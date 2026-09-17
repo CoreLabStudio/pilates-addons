@@ -6,6 +6,7 @@ whatever the database happens to hold, and the labels are asserted per
 language - because the portal answers in the reader's language, and a label
 that silently falls back to English is the failure this studio keeps hitting.
 """
+import io
 import pytz
 from datetime import datetime, timedelta
 
@@ -17,17 +18,31 @@ class TestInstructorDashboardLabels(TransactionCase):
 
     longMessage = False
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        # A build database ships with English only. Asking for a language it
-        # does not have raises "Invalid language code" before any assertion
-        # runs, so these tests passed here and errored on odoo.sh for a reason
-        # that had nothing to do with the translations. _activate_and_install_lang
-        # also loads the .po files - merely flipping the active flag would leave
-        # every lookup falling back to English and fail for the wrong reason.
-        for code in ("es_ES", "ca_ES"):
-            cls.env["res.lang"]._activate_and_install_lang(code)
+    # Read straight from the module's .po files. Deliberately not by
+    # activating es_ES and ca_ES and asking the ORM: activating a language
+    # reloads translations for every installed module, a TransactionCase rolls
+    # that back, and every class that does it pays again - 2.2 minutes of
+    # build time on main for an assertion about whether a catalogue holds a
+    # word. fitness_notifications still does it the end-to-end way, once,
+    # where the thing under test really is what Odoo serves a given student.
+    @staticmethod
+    def _catalogue(lang_file):
+        import os
+        import re
+        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(here, 'i18n', lang_file)
+        if not os.path.exists(path):
+            return {}
+        with io.open(path, encoding='utf-8') as fh:
+            text = fh.read()
+        out = {}
+        for block in text.split('\n\n'):
+            m = re.search(r'^msgid ((?:"[^"]*"\s*)+)msgstr ((?:"[^"]*"\s*)+)', block, re.M)
+            if not m:
+                continue
+            join = lambda s: ''.join(re.findall(r'"([^"]*)"', s))
+            out[join(m.group(1))] = join(m.group(2))
+        return out
 
     def test_every_dashboard_label_is_translated(self):
         """Each string the dashboard shows must exist in both languages.
@@ -46,9 +61,12 @@ class TestInstructorDashboardLabels(TransactionCase):
             "Good morning":       ("Buenos días", "Bon dia"),
             "No classes today.":  ("No hay clases", "No hi ha classes"),
         }
+        es_cat = self._catalogue('es_ES.po')
+        ca_cat = self._catalogue('ca_ES.po')
+        self.assertTrue(es_cat and ca_cat, "the module ships no catalogues to read")
         for source, (es_part, ca_part) in expected.items():
-            es = self.env(context={"lang": "es_ES"})._(source)
-            ca = self.env(context={"lang": "ca_ES"})._(source)
+            es = es_cat.get(source) or source
+            ca = ca_cat.get(source) or source
             self.assertNotEqual(
                 es, source,
                 "'%s' fell back to English in Spanish - no catalogue entry is "
@@ -66,9 +84,11 @@ class TestInstructorDashboardLabels(TransactionCase):
         This is the failure that looks fine on screen: every label filled in,
         all of them in the wrong language.
         """
+        es_cat = self._catalogue('es_ES.po')
+        ca_cat = self._catalogue('ca_ES.po')
         for source in ("Classes today", "Students expected", "Good morning"):
-            es = self.env(context={"lang": "es_ES"})._(source)
-            ca = self.env(context={"lang": "ca_ES"})._(source)
+            es = es_cat.get(source) or source
+            ca = ca_cat.get(source) or source
             self.assertNotEqual(
                 es, ca,
                 "'%s' is identical in Spanish and Catalan (%r) - one of them "

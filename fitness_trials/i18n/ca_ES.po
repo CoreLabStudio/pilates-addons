@@ -310,3 +310,75 @@ msgstr "La teva classe de prova: %(cls)s."
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "the class"
 msgstr "la classe"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a class."
+msgstr "Tria una classe."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "That class does not belong to the discipline you chose."
+msgstr "Aquesta classe no pertany a la disciplina que has triat."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a preferred date."
+msgstr "Tria una data preferida."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a date that has not already passed."
+msgstr "Tria una data que no hagi passat."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please say whether you prefer the morning or the evening."
+msgstr "Indica si prefereixes el matí o la tarda."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please tell us whether you have used a Reformer before."
+msgstr "Digues-nos si has fet servir un Reformer abans."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s booked"
+msgstr "%(taken)s reservades"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s/%(capacity)s - FULL"
+msgstr "%(taken)s/%(capacity)s - PLENA"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s/%(capacity)s - %(free)s free"
+msgstr "%(taken)s/%(capacity)s - %(free)s lliures"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Slots for %(who)s"
+msgstr "Horaris per a %(who)s"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "this request"
+msgstr "aquesta sol·licitud"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "This request has no email address, so there is nobody to book. Add one and try again."
+msgstr "Aquesta sol·licitud no té adreça de correu, així que no hi ha ningú a qui reservar. Afegeix-ne una i torna-ho a provar."

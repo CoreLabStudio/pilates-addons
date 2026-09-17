@@ -1363,6 +1363,25 @@
       Array.prototype.forEach.call(els, refresh);
     }
 
+    // A radio group is one answer spread over several elements: choosing any
+    // member makes every member valid. Refreshing only the one that changed
+    // leaves the others holding the message written while the group was
+    // empty, and a custom message is an error in its own right - so the form
+    // stayed invalid, and the browser pointed at the option the student had
+    // not chosen.
+    function refreshGroup(el) {
+      refresh(el);
+      if (!el || el.type !== 'radio' || !el.name) return;
+      // Matched in JS rather than built into a selector: a name is author
+      // data and a quote in one would break the selector, and CSS.escape is
+      // not somewhere to rely on for this.
+      var scope = el.form || document;
+      var peers = scope.querySelectorAll('input[type="radio"]');
+      Array.prototype.forEach.call(peers, function (p) {
+        if (p.name === el.name) refresh(p);
+      });
+    }
+
     // Once now, so a field the student never touches - the empty required one
     // they go straight past - already carries our wording when they submit.
     refreshAll();
@@ -1370,8 +1389,8 @@
     // And again on every change, so the message tracks what is in the field:
     // "test123" is a malformed address, and clearing it makes it an empty
     // required one, which is a different sentence.
-    document.addEventListener('input', function (e) { refresh(e.target); }, true);
-    document.addEventListener('change', function (e) { refresh(e.target); }, true);
+    document.addEventListener('input', function (e) { refreshGroup(e.target); }, true);
+    document.addEventListener('change', function (e) { refreshGroup(e.target); }, true);
 
     // Fields added after load (a wizard step, a dynamically revealed block)
     // would otherwise keep the browser's wording.
