@@ -210,6 +210,21 @@ class FitnessStudentPortal(http.Controller):
             'lbl_trial_offer':  _('Book your free trial class'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
+            # The notification card. Permission can only ever be granted by
+            # the person on their own device - no server, and no admin, can
+            # turn this on for somebody else - so asking well is the whole of
+            # the feature from here.
+            'lbl_notif_title':   _('Turn on notifications'),
+            'lbl_notif_sub':     _('Get told when a class is cancelled, moved, '
+                                   'or your booking is confirmed.'),
+            'lbl_notif_cta':     _('Turn on'),
+            'lbl_notif_dismiss': _('Not now'),
+            'lbl_push_on':       _('Notifications are on for this device.'),
+            'lbl_push_blocked':  _('Your phone is blocking notifications for this app. '
+                                   'Turn them on in your phone settings for CoreLab, '
+                                   'then reload this page.'),
+            'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
+            'lbl_push_failed':   _('Could not register this device for notifications.'),
             'lbl_install_title':   _('Install CoreLab'),
             'lbl_install_sub':     _('Add it to your home screen for one-tap booking.'),
             'lbl_install_cta':     _('Install'),
@@ -2368,7 +2383,7 @@ class FitnessStudentPortal(http.Controller):
             # in the script because a string in a .js file is never extracted,
             # and these are the sentences that tell somebody why their phone is
             # silent.
-            'lbl_push_on':        _('Phone notifications are on for this device.'),
+            'lbl_push_on':        _('Notifications are on for this device.'),
             'lbl_push_blocked':   _('Your phone is blocking notifications for this app. '
                                     'Turn them on in your phone settings for CoreLab, '
                                     'then reload this page.'),
