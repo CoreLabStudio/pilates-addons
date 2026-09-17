@@ -27,6 +27,7 @@ class FitnessNotification(models.Model):
         ('message_reply', 'New Message Reply'),
         ('billing_reminder', 'Subscription Renewal Reminder'),
         ('class_reminder', 'Class Reminder'),
+        ('trial_declined', 'Trial Request Declined'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")

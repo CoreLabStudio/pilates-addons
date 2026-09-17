@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_fitness_trial_request_manager,fitness.trial.request manager,model_fitness_trial_request,fitness_core.group_fitness_manager,1,1,1,1
 access_fitness_trial_request_system,fitness.trial.request system,model_fitness_trial_request,base.group_system,1,1,1,1
+access_fitness_trial_decline_wizard_manager,fitness.trial.decline.wizard manager,model_fitness_trial_decline_wizard,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_trial_decline_wizard_system,fitness.trial.decline.wizard system,model_fitness_trial_decline_wizard,base.group_system,1,1,1,1
