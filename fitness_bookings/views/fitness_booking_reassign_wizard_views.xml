@@ -42,6 +42,13 @@
                                options="{'no_create': True, 'no_open': True}"
                                placeholder="Leave empty to cancel without moving them"/>
                     </group>
+                    <!-- Optional, and it applies to both outcomes: the
+                         student is told either way, and a sentence from the
+                         studio reads better than a bare notification. -->
+                    <group string="Reason (optional)">
+                        <field name="reason" nolabel="1" colspan="2"
+                               placeholder="e.g. Moving you to the later class so the group can run."/>
+                    </group>
                 </sheet>
                 <footer>
                     <button string="Cancel Only" type="object"

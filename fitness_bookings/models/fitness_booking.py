@@ -154,6 +154,12 @@ class FitnessBooking(models.Model):
     # ─── Cancellation ─────────────────────────────────────────────────────────
 
     cancellation_date = fields.Datetime("Cancelled At", readonly=True)
+    # Why, when somebody said. Optional: the studio should be able to cancel
+    # quickly, and an empty reason is honest where an invented one is not.
+    cancellation_reason = fields.Text(
+        "Cancelled Because", readonly=True, copy=False,
+        help="What the studio said when cancelling. Shown to the student and "
+             "kept on the booking.")
     credit_returned = fields.Boolean(
         "Credit Returned",
         default=False,
@@ -466,10 +472,17 @@ class FitnessBooking(models.Model):
                 booking.credit_returned = False
                 _logger.info("[CANCEL] within %s h window - NO credit", window)
 
-            booking.write({
+            vals = {
                 'state': 'cancelled',
                 'cancellation_date': fields.Datetime.now(),
-            })
+            }
+            # Whoever cancelled may have said why. Read from the context so
+            # the reason lands in the same write as the cancellation: written
+            # afterwards it would survive a cancellation that was refused.
+            reason = (self.env.context.get('cancel_reason') or '').strip()
+            if reason:
+                vals['cancellation_reason'] = reason
+            booking.write(vals)
             booking._refresh_booked_seats()
         return True
 

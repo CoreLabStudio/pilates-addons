@@ -72,6 +72,10 @@
                     </group>
                     <group string="Cancellation" invisible="state != 'cancelled'">
                         <field name="cancellation_date"/>
+                        <!-- What the studio said when it cancelled, when it
+                             said anything. Only shown once there is one. -->
+                        <field name="cancellation_reason"
+                               invisible="not cancellation_reason"/>
                         <field name="credit_returned"/>
                     </group>
                     <group string="Attendance"
