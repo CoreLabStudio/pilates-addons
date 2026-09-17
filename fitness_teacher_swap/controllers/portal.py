@@ -47,7 +47,94 @@ def _format_local(dt, user_tz):
     return pytz.UTC.localize(dt).astimezone(user_tz).strftime('%d/%m/%Y %H:%M')
 
 
+def _format_day(dt_local, lang):
+    """Thursday, 17 September - in the reader's language, not the server's."""
+    code = (lang or DEFAULT_LANG)
+    if _BABEL_OK:
+        try:
+            return _babel_format_date(dt_local.date(), format='EEEE, d MMMM',
+                                      locale=code).capitalize()
+        except Exception:
+            pass
+    return dt_local.strftime('%A, %d %B')
+
+
 class FitnessTeacherSwapPortal(http.Controller):
+
+    @http.route('/my/instructor', type='http', auth='user', website=True, sitemap=False)
+    def instructor_dashboard(self, **kw):
+        """Today, in one screen.
+
+        The calendar answers "what does my month look like" and the list
+        answers "what am I teaching next". Neither answers the question an
+        instructor actually arrives with at 7am, which is what is happening
+        today and how many people are coming - so this does, without making
+        her navigate into a view first.
+        """
+        if not request.env.user.has_group(TEACHER_GROUP):
+            return request.redirect('/my')
+
+        _ = request.env._
+        tz = _studio_tz()
+        now = fields.Datetime.now()
+        now_local = pytz.UTC.localize(now).astimezone(tz)
+        day_start = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_utc = day_start.astimezone(pytz.UTC).replace(tzinfo=None)
+        end_utc = (day_start + timedelta(days=1)).astimezone(pytz.UTC).replace(tzinfo=None)
+
+        events = request.env['calendar.event'].search([
+            ('user_id', '=', request.env.user.id),
+            ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
+            ('start', '>=', start_utc),
+            ('start', '<', end_utc),
+        ], order='start asc')
+
+        # The same definition of "registered" the list and the calendar use -
+        # booked, attended and no-shows, because they all signed up. One query
+        # for the whole day.
+        counts = {}
+        for event, count in request.env['fitness.booking']._read_group(
+            [('calendar_event_id', 'in', events.ids),
+             ('state', 'in', ('booked', 'attended', 'no_show'))],
+            groupby=['calendar_event_id'], aggregates=['__count'],
+        ):
+            counts[event.id] = count
+
+        rows = []
+        for ev in events:
+            local = pytz.UTC.localize(ev.start).astimezone(tz)
+            rows.append({
+                'event': ev,
+                'time': local.strftime('%H:%M'),
+                'room': ev.classroom_id.name if ev.classroom_id else '',
+                'taken': counts.get(ev.id, 0),
+                'capacity': ev.capacity or 0,
+                'is_next': False,
+                'done': local < now_local,
+            })
+        # One class is highlighted: the next one still to come. After the last
+        # class of the day nothing is, which is the honest answer.
+        for row in rows:
+            if not row['done']:
+                row['is_next'] = True
+                break
+
+        return request.render('fitness_teacher_swap.portal_instructor_dashboard', {
+            'rows': rows,
+            'class_count': len(rows),
+            'student_count': sum(r['taken'] for r in rows),
+            'today_label': _format_day(now_local, request.env.lang),
+            'greeting': _('Good morning') if now_local.hour < 12
+                        else (_('Good afternoon') if now_local.hour < 19 else _('Good evening')),
+            'empty_msg': _('No classes today.'),
+            'lbl_classes_today': _('Classes today'),
+            'lbl_students_today': _('Students expected'),
+            'lbl_next': _('Next'),
+            'lbl_done': _('Finished'),
+            'lbl_roster': _('Roster'),
+            'lbl_all_classes': _('See all my classes'),
+        })
 
     @http.route('/my/instructor/classes', type='http', auth='user', website=True, sitemap=False)
     def my_classes(self, filter='all', **kw):

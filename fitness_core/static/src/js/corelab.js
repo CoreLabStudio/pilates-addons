@@ -890,7 +890,84 @@
     if (!('serviceWorker' in navigator)) return;
     // scope /my/ matches where the worker is served from
     navigator.serviceWorker.register('/my/sw.js', { scope: '/my/' })
+      .then((reg) => setupPush(reg))
       .catch(() => { /* installability is a bonus; never break the page */ });
+  }
+
+  // ── Push ────────────────────────────────────────────────────────────────
+  // The subscription belongs to the browser, so it survives the tab closing -
+  // that is what lets a notification arrive when the app is shut.
+
+  function _rpc(url, params) {
+    return fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: params || {} }),
+    }).then((r) => r.json()).then((d) => (d && d.result) || null);
+  }
+
+  function _urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    return Uint8Array.from(raw, (ch) => ch.charCodeAt(0));
+  }
+
+  async function subscribeToPush(reg) {
+    const keyRes = await _rpc('/my/push/key');
+    const key = keyRes && keyRes.key;
+    if (!key) return false;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        // Chrome refuses a silent subscription outright, and this app has no
+        // use for one: every push it sends is something the person asked to
+        // be told about.
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8Array(key),
+      });
+    }
+    const res = await _rpc('/my/push/subscribe', { subscription: sub.toJSON() });
+    return !!(res && res.ok);
+  }
+
+  async function setupPush(reg) {
+    if (!reg || !('PushManager' in window) || !('Notification' in window)) return;
+    const btn = $('#mv-push-enable');
+
+    // Already granted: re-register quietly. The endpoint can change under us
+    // (reinstall, browser data cleared), and the server keys on the endpoint,
+    // so doing this every load is what keeps a device reachable.
+    if (Notification.permission === 'granted') {
+      try { await subscribeToPush(reg); } catch (e) { /* never break the page */ }
+      if (btn) btn.hidden = true;
+      return;
+    }
+    // Denied is the user's decision and asking again is not possible from
+    // script - the browser will not show the prompt twice.
+    if (Notification.permission === 'denied') {
+      if (btn) btn.hidden = true;
+      return;
+    }
+    // Otherwise offer it, and only ask when they press the button. A prompt
+    // fired on page load is the fastest way to get permission denied
+    // permanently, and on iOS it is ignored entirely unless it follows a
+    // real gesture.
+    if (!btn) return;
+    btn.hidden = false;
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          await subscribeToPush(reg);
+          btn.hidden = true;
+        }
+      } catch (e) { /* ignore */ } finally {
+        btn.disabled = false;
+      }
+    });
   }
 
   function setupInstallApp() {

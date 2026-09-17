@@ -18,8 +18,12 @@ class SaleOrderNotifications(models.Model):
                     continue
                 count = int(line.fitness_remaining_classes or 0)
                 pkg_name = line.product_id.name or 'your package'
-                title = order.env._('%s confirmed', pkg_name)
-                body = order.env._(
+                # order.env is whoever confirmed the sale - often a manager.
+                # The person being told is the customer.
+                tr = order.env(context=dict(order.env.context,
+                                            lang=user.lang or 'es_ES'))._
+                title = tr('%s confirmed', pkg_name)
+                body = tr(
                     'You have %d class credit(s) ready to book.', count
                 ) if count else None
                 self.env['fitness.notification'].sudo()._create_for_user(
