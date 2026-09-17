@@ -3633,3 +3633,15 @@ msgstr "Activar"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Turn on notifications"
 msgstr "Activar las notificaciones"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Request your free trial class"
+msgstr "Solicita tu clase de prueba gratuita"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your first class is free. The studio arranges trial classes, so tell us what you would like and when."
+msgstr "Tu primera clase es gratis. El estudio organiza las clases de prueba, así que dinos qué te gustaría y cuándo."

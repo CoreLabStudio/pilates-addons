@@ -461,8 +461,7 @@ class FitnessStudentPortal(http.Controller):
             'today_local':     today_local,
             'subtitle':        subtitle,
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
-            'no_sources_msg':  _('Time to move! Pick a membership, package, or class and reserve your spot.'),
-            'no_sources_cta':  _('See options'),
+            **self._no_sources_prompt(partner),
             'discipline_tabs': discipline_tabs,
             # Same grid the timetable and My Schedule use, given this page's
             # own set of classes: what this student may actually book.
@@ -529,8 +528,7 @@ class FitnessStudentPortal(http.Controller):
         return {
             'grouped_bookings':  grouped,
             'has_sources':       has_sources,
-            'no_sources_msg':    _('Time to move! Pick a membership, package, or class and reserve your spot.'),
-            'no_sources_cta':    _('See options'),
+            **self._no_sources_prompt(partner),
             'subtitle':          _('Upcoming classes'),
             'schedule_empty':    _('No upcoming classes.'),
             'discipline_tabs':   discipline_tabs,
@@ -618,6 +616,11 @@ class FitnessStudentPortal(http.Controller):
             book_state = 'past'
         elif seats_left == 0:
             book_state = 'full'
+        elif not eligible_types and self._trial_request_open(partner):
+            # Nothing to book with, but their free class is still theirs to
+            # ask for. Deep links and back buttons reach this page directly,
+            # so it answers for itself rather than relying on the list.
+            book_state = 'trial_request'
         elif not (eligible_types and discipline_ok):
             book_state = 'buy'
         elif not in_window:
@@ -691,6 +694,7 @@ class FitnessStudentPortal(http.Controller):
             'can_book':            can_book,
             'book_state':          book_state,
             'shop_href':           shop_href,
+            **self._no_sources_prompt(partner),
             'opens_on': (
                 self._short_date(pytz.UTC.localize(opens_at).astimezone(user_tz))
                 if book_state == 'not_open' else None
@@ -735,17 +739,22 @@ class FitnessStudentPortal(http.Controller):
                 'This class has been cancelled and can no longer be booked.')})
             return request.redirect(f'/my/studio?{qs}')
 
-        # The trial is claimed by booking, not by taking a product off a
-        # shelf. Nothing exists to pay with until this moment, so the order is
-        # written here - before the booking, because choosing a payment source
-        # is the first thing booking does and it would otherwise find nothing
-        # and refuse. If the booking then fails, the order is rolled back with
-        # it and the entitlement is not burnt.
-        trial_product = self._trial_claim_product(partner, event)
-        trial_line = False
-        if trial_product:
-            order = self._claim_trial_order(partner, trial_product)
-            trial_line = order.order_line[:1].id if order else False
+        # A trial is never claimed here. This route used to mint a confirmed
+        # zero-priced order the moment somebody pressed Book, which is how the
+        # entitlement got spent without the studio seeing a request. The page
+        # no longer offers the button, and this is the same answer for a stale
+        # tab or a hand-made POST: the form, not a booking.
+        if self._trial_request_open(partner):
+            return request.redirect('/my/trial')
+
+        # A trial credit the student is already holding still goes first.
+        # Nothing is claimed here any more, so this only ever names a credit
+        # that exists - minted by approval, or bought from the shop back when
+        # it sold them that way - and only for a class the credit covers.
+        trial_credit = self._unused_trial_credit(partner)
+        trial_line = (trial_credit.id
+                      if trial_credit and self._trial_booking_exempt(partner, event)
+                      else False)
 
         try:
             vals = {
@@ -764,30 +773,6 @@ class FitnessStudentPortal(http.Controller):
             return request.redirect(f'/my/studio?{qs}')
 
         return request.redirect('/my/studio?booked=1')
-
-    def _claim_trial_order(self, partner, product):
-        """Write the confirmed, zero-priced order that is the trial.
-
-        Priced through fitness_effective_price rather than written as a bare
-        zero: the once-per-student rule recognises a claimed trial by its
-        total being nothing, and a price put there by hand is a price a later
-        recompute is free to replace with the list price - which is exactly
-        how a "free" trial once charged fifteen euros.
-        """
-        variant = product.product_variant_ids[:1]
-        if not variant:
-            return request.env['sale.order'].sudo().browse()
-        order = request.env['sale.order'].sudo().create({
-            'partner_id': partner.id,
-            'order_line': [(0, 0, {
-                'product_id': variant.id,
-                'product_uom_qty': 1,
-                'price_unit': product.fitness_effective_price(),
-                'fitness_class_type': product.fitness_class_type,
-            })],
-        })
-        order.action_confirm()
-        return order
 
     @http.route('/my/classes/<int:booking_id>/cancel', type='http',
                 auth='user', website=True, sitemap=False, methods=['POST'])
@@ -3047,10 +3032,9 @@ class FitnessStudentPortal(http.Controller):
         The counter reads res.partner._fitness_credit_pools(), which builds
         pools from subscriptions and package lines. An unclaimed trial is
         neither - it owns no order and no credit until the booking that claims
-        it mints one - so the card showed nothing at all to a student who could
-        in fact book, and the page contradicted the rest of the app: the same
-        student's schedule offers them every class, because _eligible_class_types
-        already counts the trial as a source.
+        it mints one - so the card showed nothing at all to a student who
+        does in fact still have their free class to come, and Home said nothing
+        about the one thing it should have been offering them.
 
         It is added here rather than on res.partner deliberately. Whether a
         trial is still on offer depends on _trial_offer_open() and
@@ -3080,6 +3064,11 @@ class FitnessStudentPortal(http.Controller):
             'label': _('free trial available'),
             'credits_available_text': _('1 free trial available'),
             'is_trial': True,
+            # Where tapping it goes. The balance page counts what the studio
+            # owes, which for an unclaimed trial is nothing, so the badge used
+            # to lead somewhere that flatly contradicted it. A trial is asked
+            # for; this is where you ask.
+            'href': '/my/trial',
         }]
 
     def _primary_credit(self, partner_id):
@@ -3150,45 +3139,79 @@ class FitnessStudentPortal(http.Controller):
         return eligible
 
     def _eligible_class_types(self, partner_id):
-        return self._owned_class_types(partner_id) | self._trial_eligible_types(
-            request.env['res.partner'].sudo().browse(partner_id))
+        """Disciplines this student can book right now.
 
-    def _trial_eligible_types(self, partner):
-        """Disciplines an unclaimed free trial opens up.
+        What they own, and nothing else. An unclaimed trial used to be added
+        here, which opened both timetables and put a Book button on every
+        class - and booking one claimed the entitlement outright. A trial is
+        asked for and placed by the studio now, so it is not something to book
+        with; _trial_request_open answers for it instead, and the page offers
+        the request form rather than a button that would spend it.
 
-        Both of them, deliberately: the choice of which trial to take is made
-        by booking a class, so both timetables have to be visible until one is
-        booked. Empty the moment the trial is spoken for.
+        An approved trial is not affected: approval mints a real order, the
+        trial products are packages, and the credit shows up here like any
+        other.
         """
-        # Deliberately says nothing about what the student has bought or
-        # booked before. The trial is one per student, not one per new
-        # student: somebody who bought a Barre pack in March and never got
-        # round to their free trial still has it.
+        return self._owned_class_types(partner_id)
+
+    def _trial_request_open(self, partner):
+        """This student's free trial is still theirs to ask for.
+
+        Asked by the schedule, which needs to tell two empty-handed students
+        apart: one who has nothing because they have not bought anything, and
+        one who has nothing yet because their free class has not been
+        requested. The first is sent to the shop, the second to the form.
+
+        False for anybody holding a credit - they are an ordinary student in
+        that discipline, whatever else they are entitled to, and must not be
+        interrupted with an offer while they are trying to book.
+        """
         if not partner or not self._trial_offer_open():
-            return set()
+            return False
         if self._trial_entitlement_used(partner):
-            return set()
-        types = set()
-        for product in self._trial_products():
-            self._collect_type(types, product.fitness_class_type)
-        return types
+            return False
+        return not self._owned_class_types(partner.id)
+
+    def _no_sources_prompt(self, partner):
+        """What to say to a student who cannot book anything yet.
+
+        One place, because the schedule says it in three - the available list,
+        an empty My Schedule, and the foot of a full one - and the class detail
+        page says it in a fourth. They used to be able to drift apart.
+        """
+        _ = request.env._
+        if self._trial_request_open(partner):
+            return {
+                'no_sources_msg': _('Your first class is free. The studio '
+                                    'arranges trial classes, so tell us what '
+                                    'you would like and when.'),
+                # The same words as Home and the shop, deliberately: one
+                # request, one name for it, wherever a student meets it.
+                'no_sources_cta': _('Request your free trial class'),
+                'no_sources_href': '/my/trial',
+            }
+        return {
+            'no_sources_msg': _('Time to move! Pick a membership, package, or '
+                                'class and reserve your spot.'),
+            'no_sources_cta': _('See options'),
+            'no_sources_href': '/my/packages',
+        }
 
     def _trial_booking_exempt(self, partner, event):
-        """Is this the first booking, paid for by the free trial?
+        """Is this booking being paid for by a trial credit?
 
-        Two ways to arrive at the same place. Normally nothing is claimed
-        until the class is booked, and _trial_claim_product answers. But the
-        shop still offers the trial as a product, and a student who takes it
-        there arrives holding a credit with the entitlement already spent - so
-        the first question answers no while the situation is identical. This
-        asks the real question instead, and matches what the model decides,
-        so the page never offers a button the booking would refuse or hides
-        one it would have accepted.
+        The seven-day window exists to stop students hoarding slots months
+        ahead on credits they renew monthly. A trial is neither: the studio
+        chooses the class and may well choose one further out than a week, and
+        the page must not then refuse to show the button for the class it just
+        confirmed.
+
+        Only a held credit counts. It used to also answer yes for a trial that
+        had not been claimed at all, back when pressing Book was what claimed
+        it; nothing claims a trial from this page any more.
         """
         if not partner:
             return False
-        if self._trial_claim_product(partner, event):
-            return True
         credit = self._unused_trial_credit(partner)
         if not credit:
             return False
@@ -3196,33 +3219,6 @@ class FitnessStudentPortal(http.Controller):
                 or (event.classroom_id.classroom_type if event.classroom_id else ''))
         return (credit.fitness_class_type
                 or credit.product_id.fitness_class_type or '') == disc
-
-    def _trial_claim_product(self, partner, event):
-        """The trial product this booking would claim, or an empty recordset.
-
-        Answers only for a student who has an unclaimed trial and has never
-        booked anything, and only for a class in a discipline a trial covers.
-        Everything downstream - the Book button on a class months away, the
-        seven-day exemption, the order that gets minted - hangs off this one
-        question, so it is asked in exactly one place.
-        """
-        empty = request.env['product.template'].sudo().browse()
-        if not partner or not self._trial_offer_open():
-            return empty
-        if self._trial_entitlement_used(partner):
-            return empty
-        disc = (event.class_type_id.classroom_type
-                or (event.classroom_id.classroom_type if event.classroom_id else ''))
-        if not disc:
-            return empty
-        # No check on what they already own. When a student holds both an
-        # unclaimed trial and paid credit the trial goes first, so owning a
-        # package is not a reason to skip it - it is the reason the ordering
-        # matters. The paid credit is left untouched for their next class.
-        for product in self._trial_products():
-            if (product.fitness_class_type or '') == disc:
-                return product
-        return empty
 
     @staticmethod
     def _collect_type(eligible_set, class_type):
