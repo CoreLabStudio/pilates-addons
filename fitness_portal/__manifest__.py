@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.24.83',
+    'version': '19.0.1.24.85',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Yoleyva Studio',
@@ -16,6 +16,9 @@
         'fitness_packages',
         'fitness_subscriptions',
         'fitness_notifications',
+        # The shop's trial cards link into this module's request form and
+        # read fitness.trial.request to know whether one is already open.
+        'fitness_trials',
     ],
     'data': [
         'security/ir.model.access.csv',

@@ -202,10 +202,6 @@ class TrialRequestController(http.Controller):
         ctx = {
             'barre_types': types['barre'],
             'reformer_types': types['reformer'],
-            'period_choices': [
-                ('morning', _('Morning')),
-                ('evening', _('Evening')),
-            ],
             'today_iso': _date.today().isoformat(),
             'form_values': {},
             'source': 'website',
@@ -356,6 +352,8 @@ class TrialRequestController(http.Controller):
                 errors.append(_('Please choose a preferred date.'))
         if preferred_period not in ('morning', 'evening'):
             errors.append(_('Please say whether you prefer the morning or the evening.'))
+        if class_interest == 'reformer' and reformer_first not in ('yes', 'no'):
+            errors.append(_('Please tell us whether you have used a Reformer before.'))
 
         if errors:
             return request.render(
@@ -374,6 +372,16 @@ class TrialRequestController(http.Controller):
             'source': source,
             'lang': lang,
         }
+        # The Reformer intake answers. The form has asked these for as long as
+        # it has existed and the submit handler read them into the re-render
+        # values and then dropped them on the floor - they were never written
+        # to the record, so the studio's Reformer Intake fields sat empty no
+        # matter what anybody answered. Only stored for Reformer: they mean
+        # nothing on a Barre request.
+        if class_interest == 'reformer':
+            vals['reformer_is_first_time'] = reformer_first or False
+            vals['reformer_years_experience'] = (
+                reformer_years if reformer_first == 'no' else False)
 
         # A logged-in student gets their partner attached, so approval can book
         # against a real record instead of matching on an email string. Public
