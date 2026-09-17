@@ -5,12 +5,25 @@
         <field name="name">fitness.booking.reassign.wizard.form</field>
         <field name="model">fitness.booking.reassign.wizard</field>
         <field name="arch" type="xml">
-            <form string="Cancel or move this student">
+            <form string="Cancel or move students">
                 <sheet>
-                    <group>
+                    <field name="booking_count" invisible="1"/>
+                    <!-- One student: read as before. Several: name them, because
+                         the whole failure this fixes was a desk believing it
+                         had acted on five when it had acted on one. -->
+                    <group invisible="booking_count > 1">
                         <field name="student_id"/>
                         <field name="from_event_id"/>
                         <field name="from_start"/>
+                    </group>
+                    <group invisible="booking_count &lt;= 1" string="Students selected">
+                        <field name="booking_ids" nolabel="1" colspan="2" readonly="1">
+                            <list>
+                                <field name="student_id"/>
+                                <field name="calendar_event_id" string="Leaving"/>
+                                <field name="state"/>
+                            </list>
+                        </field>
                     </group>
                     <!-- Only a cancellation can return a credit. During a
                          move nothing is returned or re-spent - the booking
@@ -44,13 +57,17 @@
     </record>
 
     <record id="action_fitness_booking_reassign" model="ir.actions.act_window">
-        <field name="name">Cancel or move this student</field>
+        <field name="name">Cancel or move students</field>
         <field name="res_model">fitness.booking.reassign.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="binding_model_id" ref="model_fitness_booking"/>
         <field name="binding_view_types">list,form</field>
-        <field name="context">{'default_booking_id': active_id}</field>
+        <!-- active_ids, not active_id. The singular form opened the wizard on
+             whichever booking happened to be first and silently dropped the
+             rest of the selection, so cancelling five students cancelled one
+             and the desk had no way to tell. -->
+        <field name="context">{'default_booking_ids': active_ids}</field>
     </record>
 
 </odoo>

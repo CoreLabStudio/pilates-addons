@@ -6,7 +6,11 @@
         <field name="model">fitness.class.schedule</field>
         <field name="arch" type="xml">
             <list string="Recurring Schedules">
-                <field name="weekday"/>
+                <!-- Closed slots are dimmed rather than hidden: an admin
+                     looking at the timetable needs to see that 07:00 exists
+                     and is off, not wonder where it went. -->
+                <field name="active" column_invisible="1"/>
+                <field name="weekday" decoration-muted="not active"/>
                 <field name="start_time" widget="float_time"/>
                 <field name="class_type_id"/>
                 <field name="teacher_user_id"/>
@@ -16,6 +20,7 @@
                 <field name="date_end"/>
                 <field name="generated_until"/>
                 <field name="occurrence_count" string="Occurrences"/>
+                <field name="active" string="Open for booking" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
@@ -97,6 +102,29 @@
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
         <field name="active">True</field>
+    </record>
+
+    <!-- Bulk open/close from the list: tick the rows, Actions, choose one.
+         Deliberately not left to Odoo's built-in Archive: archiving the
+         schedule row alone leaves every already-generated class bookable,
+         because the booking page reads calendar.event and never joins back
+         to the schedule. These do the whole job. -->
+    <record id="action_schedule_close_for_booking" model="ir.actions.server">
+        <field name="name">Close for booking</field>
+        <field name="model_id" ref="model_fitness_class_schedule"/>
+        <field name="binding_model_id" ref="model_fitness_class_schedule"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_close_for_booking()</field>
+    </record>
+
+    <record id="action_schedule_open_for_booking" model="ir.actions.server">
+        <field name="name">Open for booking</field>
+        <field name="model_id" ref="model_fitness_class_schedule"/>
+        <field name="binding_model_id" ref="model_fitness_class_schedule"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_open_for_booking()</field>
     </record>
 
 </odoo>
