@@ -5095,3 +5095,12 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
 }
 .mv-push-enable:hover { background: var(--mv-paco); border-color: var(--mv-paco); }
 .mv-push-enable[disabled] { opacity: 0.6; cursor: default; }
+
+/* What the permission button answered. */
+.mv-push-state {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--mv-muted);
+  max-width: 34em;
+}

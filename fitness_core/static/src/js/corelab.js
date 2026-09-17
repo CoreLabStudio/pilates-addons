@@ -888,10 +888,27 @@
 
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
-    // scope /my/ matches where the worker is served from
-    navigator.serviceWorker.register('/my/sw.js', { scope: '/my/' })
-      .then((reg) => setupPush(reg))
+    // Root scope, because the portal lives under a language prefix:
+    // /en/my/home, /ca_ES/my/home. A worker scoped to /my/ controls none of
+    // those, and an uncontrolled page can never subscribe to push. The script
+    // is still served from /my/sw.js; Service-Worker-Allowed widens it.
+    navigator.serviceWorker.register('/my/sw.js', { scope: '/' })
+      .then((reg) => { retireNarrowWorker(); return setupPush(reg); })
       .catch(() => { /* installability is a bonus; never break the page */ });
+  }
+
+  // Anyone who installed the app before the scope was widened still has a
+  // worker registered at /my/. Two registrations mean two push subscriptions,
+  // which means every notification arrives twice, so the old one goes.
+  function retireNarrowWorker() {
+    if (!navigator.serviceWorker.getRegistrations) return;
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => {
+        if (r.scope && /\/my\/$/.test(new URL(r.scope).pathname)) {
+          r.unregister().catch(() => {});
+        }
+      });
+    }).catch(() => {});
   }
 
   // ── Push ────────────────────────────────────────────────────────────────
@@ -940,8 +957,14 @@
     // (reinstall, browser data cleared), and the server keys on the endpoint,
     // so doing this every load is what keeps a device reachable.
     if (Notification.permission === 'granted') {
-      try { await subscribeToPush(reg); } catch (e) { /* never break the page */ }
+      let ok = false;
+      try { ok = await subscribeToPush(reg); } catch (e) { /* never break the page */ }
       if (btn) btn.hidden = true;
+      const note = $('#mv-push-state');
+      if (note && ok) {
+        note.textContent = btn ? (btn.dataset.msgOn || '') : '';
+        note.hidden = !note.textContent;
+      }
       return;
     }
     // Denied is the user's decision and asking again is not possible from
@@ -958,13 +981,39 @@
     btn.hidden = false;
     btn.addEventListener('click', async () => {
       btn.disabled = true;
+      const say = (msg, state) => {
+        const note = $('#mv-push-state');
+        if (note) { note.textContent = msg; note.hidden = false; }
+        btn.setAttribute('data-state', state || '');
+      };
       try {
         const perm = await Notification.requestPermission();
         if (perm === 'granted') {
-          await subscribeToPush(reg);
-          btn.hidden = true;
+          const ok = await subscribeToPush(reg);
+          if (ok) {
+            btn.hidden = true;
+            say(btn.dataset.msgOn || 'Notifications are on.', 'on');
+          } else {
+            // Permission is granted but the browser would not hand us a
+            // subscription - almost always no service worker controlling this
+            // page, which is what a wrong scope looks like from here.
+            say(btn.dataset.msgFailed || 'Could not register this device.', 'error');
+          }
+        } else if (perm === 'denied') {
+          // Android can answer without ever showing a prompt: the app-level
+          // notification permission is off, or Chrome is in quieter mode. The
+          // page cannot ask again, so say where to change it.
+          say(btn.dataset.msgBlocked ||
+              'Your phone is blocking notifications for this app. Turn them on in ' +
+              'your phone settings for CoreLab, then reload.', 'blocked');
+        } else {
+          say(btn.dataset.msgDismissed || 'No answer given yet - tap again and choose Allow.',
+              'dismissed');
         }
-      } catch (e) { /* ignore */ } finally {
+      } catch (e) {
+        say((btn.dataset.msgFailed || 'Could not register this device.') + ' (' +
+            (e && e.name ? e.name : 'error') + ')', 'error');
+      } finally {
         btn.disabled = false;
       }
     });

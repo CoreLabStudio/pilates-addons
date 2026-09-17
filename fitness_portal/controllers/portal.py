@@ -2364,6 +2364,16 @@ class FitnessStudentPortal(http.Controller):
             'back_url':     '/my' if (is_student or is_teacher) else '/odoo',
             'empty_msg':    _('No notifications yet.'),
             'student_name': full_name.split()[0] if full_name else '',
+            # What the permission button reports back. Written here rather than
+            # in the script because a string in a .js file is never extracted,
+            # and these are the sentences that tell somebody why their phone is
+            # silent.
+            'lbl_push_on':        _('Phone notifications are on for this device.'),
+            'lbl_push_blocked':   _('Your phone is blocking notifications for this app. '
+                                    'Turn them on in your phone settings for CoreLab, '
+                                    'then reload this page.'),
+            'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
+            'lbl_push_failed':    _('Could not register this device for notifications.'),
         })
 
     @http.route('/my/notifications/read-all', type='http', auth='user',

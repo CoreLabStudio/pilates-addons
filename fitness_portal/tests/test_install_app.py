@@ -11,6 +11,8 @@ Everything ships hidden on purpose - the server cannot know whether the
 student already installed the app, so revealing is the browser's job. That
 makes "is it hidden in the markup" the correct assertion here, not a bug.
 """
+import json
+
 from odoo.tests import HttpCase, tagged
 
 
@@ -76,10 +78,28 @@ class TestInstallApp(HttpCase):
         self.assertNotIn("caches.open", body, "the worker caches responses")
         self.assertNotIn("respondWith", body, "the worker intercepts responses")
 
-    def test_service_worker_scope_is_allowed(self):
-        res = self.url_open("/my/sw.js")
-        self.assertEqual(res.headers.get("Service-Worker-Allowed"), "/my/",
-                         "worker cannot claim the portal scope")
+    def test_service_worker_may_claim_the_language_prefixed_urls(self):
+        """The worker must cover /en/my/... and /ca_ES/my/..., not only /my/.
+
+        The portal redirects every request to a language prefix, so a worker
+        allowed only /my/ controls none of the pages anyone actually opens -
+        and an uncontrolled page cannot hold a push subscription. This was the
+        real bug: push could not work for one single person on production,
+        while every test in this file passed.
+        """
+        allowed = self.url_open("/my/sw.js").headers.get("Service-Worker-Allowed")
+        self.assertEqual(allowed, "/",
+                         "worker scope %r excludes the language-prefixed URLs "
+                         "the portal actually serves" % allowed)
+
+    def test_the_app_scope_covers_the_language_prefixed_urls(self):
+        """The same trap in the manifest: a scope of /my drops the installed
+        app out of standalone the moment it redirects to /en/my/home."""
+        manifest = json.loads(self.url_open("/my/manifest.webmanifest").text)
+        self.assertEqual(manifest.get("scope"), "/",
+                         "app scope %r excludes /en/my/... so the installed app "
+                         "opens in a browser window with an address bar"
+                         % manifest.get("scope"))
 
     # ── the markup the browser reveals ───────────────────────────────────
 

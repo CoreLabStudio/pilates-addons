@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 class FitnessPushController(http.Controller):
 
-    @http.route('/my/push/key', type='json', auth='user', methods=['POST'])
+    @http.route('/my/push/key', type='jsonrpc', auth='user', methods=['POST'])
     def push_key(self, **kw):
         """The studio's VAPID public key, which the browser subscribes against.
 
@@ -25,7 +25,7 @@ class FitnessPushController(http.Controller):
         Sub = request.env['fitness.push.subscription'].sudo()
         return {'key': Sub._public_key() or ''}
 
-    @http.route('/my/push/subscribe', type='json', auth='user', methods=['POST'])
+    @http.route('/my/push/subscribe', type='jsonrpc', auth='user', methods=['POST'])
     def push_subscribe(self, subscription=None, **kw):
         """Register this device for the logged-in user."""
         sub = subscription or {}
@@ -43,7 +43,7 @@ class FitnessPushController(http.Controller):
         _logger.info("[PUSH] device registered for user %s", request.env.user.login)
         return {'ok': True}
 
-    @http.route('/my/push/unsubscribe', type='json', auth='user', methods=['POST'])
+    @http.route('/my/push/unsubscribe', type='jsonrpc', auth='user', methods=['POST'])
     def push_unsubscribe(self, endpoint=None, **kw):
         """Stop pushing to this device.
 

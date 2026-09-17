@@ -3584,3 +3584,32 @@ msgstr "Dc"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You have already used this free trial. It is available once per student."
 msgstr "Ja has fet servir aquesta classe de prova gratuïta. Només està disponible un cop per alumne."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Could not register this device for notifications."
+msgstr "No s'ha pogut registrar aquest dispositiu per a les notificacions."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "No answer given yet - tap again and choose Allow."
+msgstr "Encara no has respost: torna a tocar i tria Permet."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Phone notifications are on for this device."
+msgstr "Les notificacions al mòbil estan activades per a aquest dispositiu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your phone is blocking notifications for this app. Turn them on in your phone settings for CoreLab, then reload this page."
+msgstr "El teu telèfon està bloquejant les notificacions d'aquesta app. Activa-les a la configuració del telèfon per a CoreLab i torna a carregar aquesta pàgina."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Turn on phone notifications"
+msgstr "Activar notificacions al mòbil"
