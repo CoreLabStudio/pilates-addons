@@ -181,7 +181,7 @@ class TestTrialWorkflow(TransactionCase):
         first = self._request()
         second = self._request()
         self.assertEqual(first.other_open_count, 1)
-        second.write({"status": "declined"})
+        self._decline(second)
         first.invalidate_recordset()
         self.assertEqual(
             first.other_open_count, 0,
@@ -201,14 +201,47 @@ class TestTrialWorkflow(TransactionCase):
         self.assertEqual(request.status, "declined")
         self.assertEqual(request.decline_reason, "No Reformer space that week.")
 
-    def test_cancelling_will_not_proceed_without_a_reason(self):
+    def test_the_reason_is_optional(self):
+        """Sometimes there is nothing useful to say.
+
+        A box that insists on a sentence just collects full stops, and both
+        the email and the notification read properly without one.
+        """
+        request = self._request()
+        self._decline(request, "   ")
+        self.assertEqual(request.status, "declined")
+        self.assertFalse(
+            request.decline_reason,
+            "whitespace is the same as nothing, and a notification whose body "
+            "is a space helps nobody",
+        )
+
+    def test_cancelling_from_the_status_field_is_refused(self):
+        """One way to cancel, and it is the one that tells the student.
+
+        The Status field was a second route to the same state that sent
+        nothing. Enforced on the model rather than by hiding the field: an
+        import or a plain RPC write reaches here too.
+        """
         request = self._request()
         with self.assertRaises(UserError):
-            self._decline(request, "   ")
+            request.write({"status": "declined"})
         self.assertEqual(
             request.status, "pending",
             "a refused cancellation must leave the request alone",
         )
+
+    def test_an_already_cancelled_request_can_still_be_written_to(self):
+        """The guard is about the transition, not about the state.
+
+        Editing something else on a request that is already cancelled - or a
+        write that happens to carry the status it already has - must not be
+        mistaken for a second cancellation.
+        """
+        request = self._request()
+        self._decline(request)
+        request.write({"status": "declined", "name": "Renamed afterwards"})
+        self.assertEqual(request.name, "Renamed afterwards")
 
     def test_cancelling_notifies_the_student_in_the_app(self):
         request = self._request(partner_id=self.partner.id)

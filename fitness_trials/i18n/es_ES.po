@@ -436,3 +436,9 @@ msgstr "Indica el motivo, para que la alumna reciba una explicación."
 #: code:addons/fitness_trials/models/trial_decline_wizard.py:0
 msgid "This request is already scheduled and the class is booked. Cancel the booking from the student's schedule first, so the seat is released and their credit comes back."
 msgstr "Esta solicitud ya está programada y la clase está reservada. Cancela primero la reserva desde el horario de la alumna, para que la plaza se libere y el crédito vuelva."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Use the Cancel request button. It tells the student, by email and in the app, and lets you say why."
+msgstr "Usa el botón Cancelar solicitud. Avisa a la alumna por correo y en la app, y te deja explicar el motivo."
