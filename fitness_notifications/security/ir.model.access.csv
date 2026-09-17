@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_fitness_notification_user,fitness.notification (employee),model_fitness_notification,base.group_user,1,1,1,1
+access_fitness_push_subscription_user,fitness.push.subscription (own device),model_fitness_push_subscription,base.group_user,1,1,1,1
+access_fitness_push_subscription_portal,fitness.push.subscription (portal),model_fitness_push_subscription,base.group_portal,1,1,1,0

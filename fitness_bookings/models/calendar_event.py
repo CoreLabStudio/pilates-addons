@@ -1,6 +1,9 @@
 from odoo import models, fields
 from odoo.exceptions import UserError
 
+# Spanish-first, like the rest of the studio's screens.
+DEFAULT_LANG = 'es_ES'
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -61,30 +64,45 @@ class CalendarEvent(models.Model):
             _class_cancelled=True,
         ).action_cancel()
 
-        # In-app bell notifications
+        # In-app bell notifications.
+        #
+        # Written in each recipient's own language, not in the language of
+        # whoever pressed cancel. These were f-strings: an admin working in
+        # Spanish told every student "Class cancelled" in English, and the
+        # same text is what the push notification now carries.
         Notif = self.env['fitness.notification']
-        class_name = self.name or 'the class'
+        class_name = self.name or self.env._('the class')
+
+        # The local is called _ on purpose: Odoo's extractor finds translatable
+        # strings by looking for calls literally named _(), so a helper under
+        # any other name means these never enter the catalogue at all.
+        def _for(user):
+            return self.env(context=dict(
+                self.env.context, lang=user.lang or DEFAULT_LANG))._
 
         notified = 0
         for booking in active_bookings:
             user = booking.student_id.user_ids[:1]
             if user:
+                _ = _for(user)
                 Notif._create_for_user(
                     user.id,
                     'booking_cancelled',
-                    f'Class cancelled: {class_name}',
-                    'The studio has cancelled this class. Your credit has been returned.',
+                    _('Class cancelled: %(name)s', name=class_name),
+                    _('The studio has cancelled this class. Your credit has '
+                      'been returned.'),
                 )
                 notified += 1
 
         teacher = self.user_id
         if teacher:
+            _ = _for(teacher)
             Notif._create_for_user(
                 teacher.id,
                 'booking_cancelled',
-                f'Class cancelled: {class_name}',
-                f'This class was cancelled by the studio. '
-                f'{n} booking(s) removed and credits returned.',
+                _('Class cancelled: %(name)s', name=class_name),
+                _('This class was cancelled by the studio. %(n)s booking(s) '
+                  'removed and credits returned.', n=n),
             )
 
         _logger.info(

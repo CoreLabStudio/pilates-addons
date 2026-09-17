@@ -2139,6 +2139,13 @@
                     <div>
                         <p class="mv-greeting-name">Notifications</p>
                         <p class="mv-greeting-sub">Everything the studio has sent you</p>
+                        <!-- Hidden until the script knows this browser can take
+                             push and has not been asked yet. The prompt only
+                             appears on a real tap: fired on page load it gets
+                             denied permanently, and iOS ignores it entirely
+                             unless it follows a gesture. -->
+                        <button type="button" id="mv-push-enable" class="mv-push-enable"
+                                hidden="hidden">Turn on phone notifications</button>
                     </div>
                     <t t-if="unread">
                         <form method="post" action="/my/notifications/read-all" style="margin:0;">

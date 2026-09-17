@@ -5079,3 +5079,19 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
   color: var(--mv-paco);
 }
 .mv-row-flag-muted { color: var(--mv-muted); font-weight: 600; }
+
+/* The push permission button. Offered, not pushed at you: it sits under the
+   page title and disappears for good once the browser has an answer. */
+.mv-push-enable {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--mv-active-fill);
+  background: var(--mv-active-fill);
+  color: var(--mv-accent-fg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mv-push-enable:hover { background: var(--mv-paco); border-color: var(--mv-paco); }
+.mv-push-enable[disabled] { opacity: 0.6; cursor: default; }
