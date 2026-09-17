@@ -43,26 +43,14 @@
                 <div class="text-center mb-4 mt-2">
                     <div style="font-size:2rem;margin-bottom:0.75rem;">✓</div>
                     <h5 class="fw-semibold mb-2">
-                        <t t-if="_lang == 'en_US'">Trial class confirmed!</t>
-                        <t t-elif="_lang == 'ca_ES'">Classe de prova confirmada!</t>
-                        <t t-else="">¡Clase de prueba confirmada!</t>
+                        <t t-if="_lang == 'en_US'">Request received</t>
+                        <t t-elif="_lang == 'ca_ES'">Sol·licitud rebuda</t>
+                        <t t-else="">Solicitud recibida</t>
                     </h5>
-                    <t t-if="submitted_slot">
-                        <p class="small fw-semibold mb-1" style="color:#4a4a4a;">
-                            <t t-esc="submitted_slot['name']"/>
-                            · <t t-esc="submitted_slot['day']"/>
-                            <t t-esc="submitted_slot['day_num']"/>
-                            <t t-esc="submitted_slot['month']"/>
-                            · <t t-esc="submitted_slot['time']"/>
-                            <t t-if="submitted_slot['duration']">
-                                · <t t-esc="submitted_slot['duration']"/> min
-                            </t>
-                        </p>
-                    </t>
                     <p class="text-muted small mb-0">
-                        <t t-if="_lang == 'en_US'">We have sent a confirmation email to your address.</t>
-                        <t t-elif="_lang == 'ca_ES'">Hem enviat un correu de confirmació a la teva adreça.</t>
-                        <t t-else="">Hemos enviado un email de confirmación a tu dirección.</t>
+                        <t t-if="_lang == 'en_US'">The studio will confirm your class shortly. We have emailed you a copy of your request.</t>
+                        <t t-elif="_lang == 'ca_ES'">L'estudi et confirmarà la classe ben aviat. T'hem enviat una còpia de la teva sol·licitud per correu.</t>
+                        <t t-else="">El estudio te confirmará la clase en breve. Te hemos enviado una copia de tu solicitud por correo.</t>
                     </p>
                 </div>
                 <!-- Not "submit another request": there is one trial per
@@ -106,6 +94,10 @@
 
                 <form method="post" action="/trial/submit" class="mv-trial-form">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <!-- Which entry point this was. Stamped here rather than
+                         inferred from the session: somebody can be signed in
+                         and still be reading the public site. -->
+                    <input type="hidden" name="source" t-att-value="source or 'website'"/>
 
                     <!-- ── Name ───────────────────────────────────────────── -->
                     <div class="mb-3">
@@ -173,115 +165,102 @@
                         </div>
                     </div>
 
-                    <!-- ── Barre section: live slot picker ────────────────── -->
-                    <div id="mv-barre-section" class="mv-trial-conditional d-none"
-                         t-att-data-lang="request.lang.code"
-                         t-att-data-today="'Today' if _lang == 'en_US' else ('Avui' if _lang == 'ca_ES' else 'Hoy')"
-                         t-att-data-tomorrow="'Tomorrow' if _lang == 'en_US' else ('Demà' if _lang == 'ca_ES' else 'Mañana')"
-                    >
-
-                        <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
-                            <t t-if="_lang == 'en_US'">Select your Barre class</t>
-                            <t t-elif="_lang == 'ca_ES'">Selecciona la teva classe de Barre</t>
-                            <t t-else="">Selecciona tu clase de Barre</t>
-                        </p>
-
-                        <t t-if="barre_slots">
-                            <t t-foreach="barre_slots" t-as="slot">
-                                <label class="mv-slot-card"
-                                       t-att-for="'slot_' + str(slot['id'])"
-                                       t-att-data-date="str(slot['start_utc'].date())">
-                                    <input type="radio" name="occurrence_id"
-                                           t-att-id="'slot_' + str(slot['id'])"
-                                           t-att-value="slot['id']"
-                                           t-att-checked="'checked' if str(form_values.get('occurrence_id', '')) == str(slot['id']) else None"/>
-                                    <div style="flex:1;min-width:0;">
-                                        <div class="fw-semibold small" style="color:#3a3330;">
-                                            <t t-esc="slot['day']"/>
-                                            <t t-esc="slot['day_num']"/>
-                                            <t t-esc="slot['month']"/>
-                                            · <t t-esc="slot['time']"/>
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            <t t-esc="slot['name']"/>
-                                            <t t-if="slot['duration']">
-                                                · <t t-esc="slot['duration']"/> min
-                                            </t>
-                                            <t t-if="slot['teacher']">
-                                                · <t t-esc="slot['teacher']"/>
-                                            </t>
-                                        </div>
-                                    </div>
-                                </label>
-                            </t>
+                    <!-- Which class, within the discipline chosen above. Both
+                         lists are rendered and the script shows the one that
+                         matches, so switching discipline needs no round trip. -->
+                    <div id="mv-barre-section" class="mv-trial-conditional d-none mb-3">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Which Barre class?</t>
+                            <t t-elif="_lang == 'ca_ES'">Quina classe de Barre?</t>
+                            <t t-else="">¿Qué clase de Barre?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <t t-foreach="barre_types" t-as="ct">
+                            <label class="mv-slot-card" t-att-for="'bct_' + str(ct['id'])">
+                                <input type="radio" name="class_type_id"
+                                       t-att-id="'bct_' + str(ct['id'])"
+                                       t-att-value="ct['id']"
+                                       t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
+                                <div style="flex:1;min-width:0;">
+                                    <div class="fw-semibold small" style="color:#3a3330;" t-esc="ct['name']"/>
+                                    <t t-if="ct['duration']">
+                                        <div class="small text-muted"><t t-esc="int(ct['duration'])"/> min</div>
+                                    </t>
+                                </div>
+                            </label>
                         </t>
-                        <t t-else="">
-                            <div class="alert alert-light small text-center mb-3">
-                                <t t-if="_lang == 'en_US'">No Barre classes available in the next 14 days. Contact us directly to find a suitable time.</t>
-                                <t t-elif="_lang == 'ca_ES'">No hi ha classes de Barre disponibles els pròxims 14 dies. Contacta'ns directament per trobar un horari.</t>
-                                <t t-else="">No hay clases de Barre disponibles en los próximos 14 días. Contáctanos directamente para encontrar un horario.</t>
-                            </div>
-                        </t>
-
                     </div>
 
-                    <!-- ── Reformer section: the same live slot picker ─────
-                         Reformer used to ask about experience here and wait for
-                         the studio to confirm. It books like Barre now: pick a
-                         class, done. The questions and the preferred-times box
-                         are gone with it - nothing reads them any more, and the
-                         fields stay on the model so past requests keep theirs.
-                    -->
-                    <div id="mv-reformer-section" class="mv-trial-conditional d-none"
-                         t-att-data-lang="request.lang.code"
-                         t-att-data-today="'Today' if _lang == 'en_US' else ('Avui' if _lang == 'ca_ES' else 'Hoy')"
-                         t-att-data-tomorrow="'Tomorrow' if _lang == 'en_US' else ('Dem\xe0' if _lang == 'ca_ES' else 'Ma\xf1ana')"
-                    >
-
-                        <p class="small fw-semibold mb-2" style="color:#7a6a5a;text-transform:uppercase;letter-spacing:0.05em;font-size:0.78rem;">
-                            <t t-if="_lang == 'en_US'">Select your Reformer class</t>
-                            <t t-elif="_lang == 'ca_ES'">Selecciona la teva classe de Reformer</t>
-                            <t t-else="">Selecciona tu clase de Reformer</t>
-                        </p>
-
-                        <t t-if="reformer_slots">
-                            <t t-foreach="reformer_slots" t-as="slot">
-                                <label class="mv-slot-card"
-                                       t-att-for="'rslot_' + str(slot['id'])"
-                                       t-att-data-date="str(slot['start_utc'].date())">
-                                    <input type="radio" name="occurrence_id"
-                                           t-att-id="'rslot_' + str(slot['id'])"
-                                           t-att-value="slot['id']"
-                                           t-att-checked="'checked' if str(form_values.get('occurrence_id', '')) == str(slot['id']) else None"/>
-                                    <div style="flex:1;min-width:0;">
-                                        <div class="fw-semibold small" style="color:#3a3330;">
-                                            <t t-esc="slot['day']"/>
-                                            <t t-esc="slot['day_num']"/>
-                                            <t t-esc="slot['month']"/>
-                                            · <t t-esc="slot['time']"/>
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            <t t-esc="slot['name']"/>
-                                            <t t-if="slot['duration']">
-                                                · <t t-esc="slot['duration']"/> min
-                                            </t>
-                                            <t t-if="slot['teacher']">
-                                                · <t t-esc="slot['teacher']"/>
-                                            </t>
-                                        </div>
-                                    </div>
-                                </label>
-                            </t>
+                    <div id="mv-reformer-section" class="mv-trial-conditional d-none mb-3">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Which Reformer class?</t>
+                            <t t-elif="_lang == 'ca_ES'">Quina classe de Reformer?</t>
+                            <t t-else="">¿Qué clase de Reformer?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <t t-foreach="reformer_types" t-as="ct">
+                            <label class="mv-slot-card" t-att-for="'rct_' + str(ct['id'])">
+                                <input type="radio" name="class_type_id"
+                                       t-att-id="'rct_' + str(ct['id'])"
+                                       t-att-value="ct['id']"
+                                       t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
+                                <div style="flex:1;min-width:0;">
+                                    <div class="fw-semibold small" style="color:#3a3330;" t-esc="ct['name']"/>
+                                    <t t-if="ct['duration']">
+                                        <div class="small text-muted"><t t-esc="int(ct['duration'])"/> min</div>
+                                    </t>
+                                </div>
+                            </label>
                         </t>
-                        <t t-else="">
-                            <div class="alert alert-light small text-center mb-3">
-                                <t t-if="_lang == 'en_US'">No Reformer classes available in the next 14 days. Contact us directly to find a suitable time.</t>
-                                <t t-elif="_lang == 'ca_ES'">No hi ha classes de Reformer disponibles els pr\xf2xims 14 dies. Contacta'ns directament per trobar un horari.</t>
-                                <t t-else="">No hay clases de Reformer disponibles en los pr\xf3ximos 14 d\xedas. Cont\xe1ctanos directamente para encontrar un horario.</t>
-                            </div>
-                        </t>
-
                     </div>
+
+                    <!-- When they would like to come. A preference, not a
+                         booking: the studio still chooses the actual class,
+                         which is the whole point of the three-student minimum. -->
+                    <div class="mb-3">
+                        <label class="form-label" for="trial_preferred_date">
+                            <t t-if="_lang == 'en_US'">Preferred date</t>
+                            <t t-elif="_lang == 'ca_ES'">Data preferida</t>
+                            <t t-else="">Fecha preferida</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" id="trial_preferred_date" name="preferred_date"
+                               class="form-control" required="required"
+                               t-att-min="today_iso"
+                               t-att-value="form_values.get('preferred_date', '')"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Morning or evening?</t>
+                            <t t-elif="_lang == 'ca_ES'">Matí o tarda?</t>
+                            <t t-else="">¿Mañana o tarde?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="preferred_period"
+                                       id="pp_morning" value="morning" required="required"
+                                       t-att-checked="'checked' if form_values.get('preferred_period') == 'morning' else None"/>
+                                <label class="form-check-label" for="pp_morning">
+                                    <t t-if="_lang == 'en_US'">Morning</t>
+                                    <t t-elif="_lang == 'ca_ES'">Matí</t>
+                                    <t t-else="">Mañana</t>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="preferred_period"
+                                       id="pp_evening" value="evening"
+                                       t-att-checked="'checked' if form_values.get('preferred_period') == 'evening' else None"/>
+                                <label class="form-check-label" for="pp_evening">
+                                    <t t-if="_lang == 'en_US'">Evening</t>
+                                    <t t-elif="_lang == 'ca_ES'">Tarda</t>
+                                    <t t-else="">Tarde</t>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- ── Submit ─────────────────────────────────────── -->
                     <div class="d-grid mt-2">
@@ -311,7 +290,9 @@
                         // Both disciplines need a chosen class now - Reformer used
                         // to enable on the questions alone.
                         var enabled = !!(ci &amp;&amp;
-                            document.querySelector('input[name="occurrence_id"]:checked'));
+                            document.querySelector('input[name="class_type_id"]:checked') &amp;&amp;
+                            (document.getElementById('trial_preferred_date') || {}).value &amp;&amp;
+                            document.querySelector('input[name="preferred_period"]:checked'));
                         if (enabled) {
                             submitBtn.removeAttribute('disabled');
                             submitBtn.disabled = false;
@@ -333,7 +314,7 @@
 
                     // Slot selection — update submit state + highlight card
                     function onSlotChange(e) {
-                        if (e.target &amp;&amp; e.target.name === 'occurrence_id') {
+                        if (e.target &amp;&amp; e.target.name === 'class_type_id') {
                             document.querySelectorAll('.mv-slot-card').forEach(function (c) {
                                 c.classList.remove('mv-slot-selected');
                             });
@@ -351,122 +332,11 @@
                     var checkedCi = document.querySelector('input[name="class_interest"]:checked');
                     if (checkedCi) { showSection(checkedCi.value); }
 
-                    var checkedSlot = document.querySelector('input[name="occurrence_id"]:checked');
-                    if (checkedSlot) {
-                        var card = checkedSlot.closest('.mv-slot-card');
+                    var checkedType = document.querySelector('input[name="class_type_id"]:checked');
+                    if (checkedType) {
+                        var card = checkedType.closest('.mv-slot-card');
                         if (card) { card.classList.add('mv-slot-selected'); }
                     }
-
-                    // ── Date filter pills (client-side) ──────────────────
-                    // Written for Barre alone; Reformer had no slot list to
-                    // filter. Both lists get pills now, so this takes the
-                    // section rather than closing over one.
-                    function buildDatePills(section) {
-                        if (!section) { return; }
-                        var allCards = section.querySelectorAll('.mv-slot-card[data-date]');
-                        if (!allCards.length) { return; }
-
-                        var _lblToday    = section.dataset.today    || 'Hoy';
-                        var _lblTomorrow = section.dataset.tomorrow || 'Mañana';
-                        var _lang        = section.dataset.lang     || 'es_ES';
-
-                        var nowD      = new Date();
-                        var todayStr  = nowD.getFullYear() + '-' +
-                                        String(nowD.getMonth() + 1).padStart(2, '0') + '-' +
-                                        String(nowD.getDate()).padStart(2, '0');
-                        var tD = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate() + 1);
-                        var tomorrowStr = tD.getFullYear() + '-' +
-                                          String(tD.getMonth() + 1).padStart(2, '0') + '-' +
-                                          String(tD.getDate()).padStart(2, '0');
-
-                        function labelDate(dStr) {
-                            if (dStr === todayStr)    { return _lblToday; }
-                            if (dStr === tomorrowStr) { return _lblTomorrow; }
-                            try {
-                                var p  = dStr.split('-');
-                                var d  = new Date(+p[0], +p[1] - 1, +p[2]);
-                                var lc = _lang.replace('_', '-');
-                                var wd = d.toLocaleDateString(lc, {weekday: 'short'})
-                                           .replace(/\./g, '').trim();
-                                return wd.charAt(0).toUpperCase() + wd.slice(1) + ' ' + (+p[2]);
-                            } catch (e) { return dStr; }
-                        }
-
-                        // Collect unique ordered dates from slot cards
-                        var seenSet = {}, seenDates = [];
-                        allCards.forEach(function (c) {
-                            var d = c.dataset.date;
-                            if (d) {
-                                if (!seenSet[d]) { seenSet[d] = true; seenDates.push(d); }
-                            }
-                        });
-                        if (!seenDates.length) { return; }
-
-                        // Build pills and insert before first slot card
-                        var pillsWrap = document.createElement('div');
-                        pillsWrap.className = 'mv-date-filters';
-                        pillsWrap.id = 'mv-date-pills-' + (section.id || 'x');
-                        var datePills = [];
-                        seenDates.forEach(function (dStr) {
-                            var btn = document.createElement('button');
-                            btn.type = 'button';
-                            btn.className = 'mv-date-pill';
-                            btn.dataset.date = dStr;
-                            btn.textContent = labelDate(dStr);
-                            pillsWrap.appendChild(btn);
-                            datePills.push(btn);
-                        });
-                        allCards[0].parentNode.insertBefore(pillsWrap, allCards[0]);
-
-                        function applyDateFilter(activeDate) {
-                            allCards.forEach(function (card) {
-                                card.style.display = (!activeDate || card.dataset.date === activeDate) ? '' : 'none';
-                            });
-                            var checked = document.querySelector('input[name="occurrence_id"]:checked');
-                            if (checked) {
-                                var pc = checked.closest('.mv-slot-card');
-                                if (pc) {
-                                    if (pc.style.display === 'none') {
-                                        checked.checked = false;
-                                        allCards.forEach(function (c) { c.classList.remove('mv-slot-selected'); });
-                                        updateSubmit();
-                                    }
-                                }
-                            }
-                        }
-
-                        datePills.forEach(function (pill) {
-                            pill.addEventListener('click', function () {
-                                datePills.forEach(function (p) { p.classList.remove('mv-active'); });
-                                this.classList.add('mv-active');
-                                applyDateFilter(this.dataset.date);
-                            });
-                        });
-
-                        // Auto-select: pre-checked slot's date (error re-render) or nearest future
-                        var defaultDate = null;
-                        var preChecked = document.querySelector('input[name="occurrence_id"]:checked');
-                        if (preChecked) {
-                            var preCard = preChecked.closest('.mv-slot-card');
-                            if (preCard) { defaultDate = preCard.dataset.date || null; }
-                        }
-                        if (!defaultDate) {
-                            seenDates.forEach(function (dStr) {
-                                if (!defaultDate) {
-                                    if (dStr >= todayStr) { defaultDate = dStr; }
-                                }
-                            });
-                        }
-                        if (defaultDate) {
-                            datePills.forEach(function (pill) {
-                                if (pill.dataset.date === defaultDate) { pill.classList.add('mv-active'); }
-                            });
-                            applyDateFilter(defaultDate);
-                        }
-                    }
-
-                    buildDatePills(barreSection);
-                    buildDatePills(rfSection);
 
                     // A submit that takes a moment invites a second click, and
                     // a second click used to mean a second booking. The button

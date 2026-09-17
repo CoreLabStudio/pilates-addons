@@ -50,6 +50,36 @@ class FitnessTrialRequest(models.Model):
              "logged-in portal user. Approval books against this partner; if "
              "it is empty the email address is looked up instead.",
     )
+    # ── where it came from ─────────────────────────────────────────────────
+    # Both entry points feed one pipeline, which is the point - but an admin
+    # answering a request still wants to know whether the person was standing
+    # on the public site or already signed in to the app, because it changes
+    # what she can assume they know.
+    source = fields.Selection(
+        [('website', 'Website'), ('app', 'App')],
+        string='Came from', default='website', required=True, index=True,
+    )
+
+    # ── what they asked for ────────────────────────────────────────────────
+    # The form asks for a specific class rather than only a discipline, so the
+    # studio knows whether somebody wants Reformer Sculpt or Reformer Extreme
+    # before deciding which slot to put them in. class_interest stays as the
+    # discipline: every existing query, product lookup and email uses it.
+    class_type_id = fields.Many2one(
+        'fitness.class.type', string='Class Requested', ondelete='restrict',
+        help="The specific class the person asked for. The discipline is still "
+             "class_interest; this narrows it.",
+    )
+    preferred_date = fields.Date(
+        string='Preferred Date',
+        help="The day they would like to come. Not a booking - the studio "
+             "still chooses the actual slot.",
+    )
+    preferred_period = fields.Selection(
+        [('morning', 'Morning'), ('evening', 'Evening')],
+        string='Morning or Evening',
+    )
+
     phone = fields.Char(string='Phone')
     preferred_time_notes = fields.Text(string='Preferred Day / Time')
     occurrence_id = fields.Many2one(
@@ -124,6 +154,9 @@ class FitnessTrialRequest(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        # Fill the Student in straight away, so an admin opening the request
+        # sees who it is rather than an empty field.
+        records._link_partner()
         for rec in records:
             if rec.status == 'scheduled':
                 # A slot was chosen on the form, so the class is booked: tell
@@ -159,6 +192,11 @@ class FitnessTrialRequest(models.Model):
             prev_status = {r.id: r.status for r in self}
 
         result = super().write(vals)
+
+        # A corrected email should find its student too, not leave the field
+        # showing whoever the old address matched.
+        if 'email' in vals:
+            self.filtered(lambda r: not r.partner_id)._link_partner()
 
         if prev_status:
             if vals.get('status') == 'declined':
@@ -218,20 +256,115 @@ class FitnessTrialRequest(models.Model):
         'reformer': 'fitness_packages.product_reformer_trial',
     }
 
-    def _resolve_partner(self):
-        """The student this request belongs to.
+    occurrence_fill = fields.Char(
+        string='How full', compute='_compute_occurrence_fill',
+        help="Places taken on the chosen slot, out of its capacity.")
 
-        partner_id is set when a logged-in student submits from the portal.
-        Public website submissions have no account, so fall back to matching
-        the email address - case-insensitively, and only on a customer record.
+    @api.depends('occurrence_id')
+    def _compute_occurrence_fill(self):
+        """"3/8" for the chosen slot, so placement is an informed decision."""
+        events = self.mapped('occurrence_id')
+        counts = {}
+        if events:
+            for event, count in self.env['fitness.booking'].sudo()._read_group(
+                [('calendar_event_id', 'in', events.ids),
+                 ('state', 'in', ('booked', 'attended', 'no_show'))],
+                groupby=['calendar_event_id'], aggregates=['__count'],
+            ):
+                counts[event.id] = count
+        for rec in self:
+            event = rec.occurrence_id
+            if not event:
+                rec.occurrence_fill = False
+                continue
+            taken = counts.get(event.id, 0)
+            capacity = event.capacity or 0
+            if not capacity:
+                rec.occurrence_fill = _("%(taken)s booked", taken=taken)
+            elif taken >= capacity:
+                rec.occurrence_fill = _("%(taken)s/%(capacity)s - FULL",
+                                        taken=taken, capacity=capacity)
+            else:
+                rec.occurrence_fill = _("%(taken)s/%(capacity)s - %(free)s free",
+                                        taken=taken, capacity=capacity,
+                                        free=capacity - taken)
+
+    def action_view_candidate_slots(self):
+        """Every slot this request could go into, with how full each one is.
+
+        Opens the ordinary class list rather than a bespoke screen, so the
+        capacity columns, filters and grouping the studio already knows all
+        work here too.
         """
         self.ensure_one()
-        if self.partner_id:
-            return self.partner_id
+        domain = [
+            ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
+            ('start', '>=', fields.Datetime.now()),
+        ]
+        if self.class_interest:
+            domain.append(('class_type_id.classroom_type', '=', self.class_interest))
+        if self.class_type_id:
+            domain.append(('class_type_id', '=', self.class_type_id.id))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Slots for %(who)s", who=self.name or _("this request")),
+            'res_model': 'calendar.event',
+            'view_mode': 'list,calendar,form',
+            'domain': domain,
+            'context': {'search_default_group_by_start': 1},
+        }
+
+    def _match_partner(self):
+        """An existing contact with this request's email, if there is one."""
+        self.ensure_one()
         if not self.email:
             return self.env['res.partner'].browse()
         return self.env['res.partner'].sudo().search(
             [('email', '=ilike', self.email.strip())], limit=1)
+
+    def _link_partner(self):
+        """Point the request at the contact it belongs to.
+
+        Called on create and whenever the email changes, so the Student field
+        is filled in before an admin ever opens the record rather than left
+        blank for her to retype.
+        """
+        for rec in self:
+            if rec.partner_id or not rec.email:
+                continue
+            match = rec._match_partner()
+            if match:
+                rec.partner_id = match
+
+    def _resolve_partner(self, create_if_missing=False):
+        """The student this request belongs to.
+
+        partner_id is set when a logged-in student submits, and filled in from
+        the email for everybody else. create_if_missing is used at approval:
+        somebody requesting their first class has no contact record yet, and
+        refusing to book them because of that put the work of retyping the
+        name, email and phone back on the studio.
+        """
+        self.ensure_one()
+        if self.partner_id:
+            return self.partner_id
+        match = self._match_partner()
+        if match:
+            self.partner_id = match
+            return match
+        if not (create_if_missing and self.email):
+            return self.env['res.partner'].browse()
+        partner = self.env['res.partner'].sudo().create({
+            'name': (self.name or self.email).strip(),
+            'email': self.email.strip(),
+            'phone': self.phone or False,
+            'lang': self.lang or 'es_ES',
+        })
+        self.partner_id = partner
+        _logger.info("[TRIAL] Created contact %s for request %s from its own "
+                     "submitted details", partner.id, self.id)
+        return partner
 
     def _trial_product(self):
         self.ensure_one()
@@ -291,12 +424,14 @@ class FitnessTrialRequest(models.Model):
                 slot=slot_discipline,
                 want=self.class_interest))
 
-        partner = self._resolve_partner()
+        # Somebody booking their first class has no contact record yet. That
+        # used to stop approval dead and hand the studio the job of retyping a
+        # name, email and phone the request was already carrying.
+        partner = self._resolve_partner(create_if_missing=True)
         if not partner:
             raise UserError(_(
-                "No student record matches this request. It was submitted from "
-                "the public site by %(email)s, and nobody with that address has "
-                "an account yet.", email=self.email or '-'))
+                "This request has no email address, so there is nobody to book. "
+                "Add one and try again."))
 
         product = self._trial_product()
         if not product:

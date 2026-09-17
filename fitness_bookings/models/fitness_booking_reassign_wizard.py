@@ -23,8 +23,28 @@ class FitnessBookingReassignWizard(models.TransientModel):
     _name = 'fitness.booking.reassign.wizard'
     _description = 'Cancel a booking, optionally moving the student'
 
+    # Every booking that was ticked. booking_id stays as the first of them so
+    # the related fields below - student, class, date - still describe
+    # something, and a single selection behaves exactly as it always did.
+    booking_ids = fields.Many2many('fitness.booking', string='Bookings')
+    # Writable, and it writes through to booking_ids. Anything that creates the
+    # wizard with a single booking - the form view, the tests, any caller that
+    # predates multi-select - keeps working unchanged.
     booking_id = fields.Many2one(
-        'fitness.booking', required=True, ondelete='cascade', readonly=True)
+        'fitness.booking', compute='_compute_booking_id',
+        inverse='_inverse_booking_id', store=False, readonly=False)
+    booking_count = fields.Integer(compute='_compute_booking_id')
+
+    @api.depends('booking_ids')
+    def _compute_booking_id(self):
+        for wiz in self:
+            wiz.booking_id = wiz.booking_ids[:1]
+            wiz.booking_count = len(wiz.booking_ids)
+
+    def _inverse_booking_id(self):
+        for wiz in self:
+            if wiz.booking_id and wiz.booking_id not in wiz.booking_ids:
+                wiz.booking_ids = [(4, wiz.booking_id.id)]
 
     student_id = fields.Many2one(related='booking_id.student_id', readonly=True,
                                  string='Student')
@@ -82,8 +102,8 @@ class FitnessBookingReassignWizard(models.TransientModel):
         the desk could act on.
         """
         for wiz in self:
-            booking = wiz.booking_id
-            event = booking.calendar_event_id
+            bookings = wiz.booking_ids or wiz.booking_id
+            event = wiz.booking_id.calendar_event_id
             if not event:
                 wiz.available_event_ids = False
                 continue
@@ -95,7 +115,15 @@ class FitnessBookingReassignWizard(models.TransientModel):
             ]
             candidates = self.env['calendar.event'].search(
                 domain, order='start', limit=200)
-            line = booking.package_order_line_id
+            # A class has to work for every student that was ticked, not just
+            # the first: five bookings can hold five different credits, and a
+            # target that suits one may not be covered for another.
+            for other in bookings:
+                other_line = other.package_order_line_id
+                if other_line:
+                    candidates = candidates.filtered(
+                        lambda e: wiz._line_covers(other_line, e))
+            line = wiz.booking_id.package_order_line_id
             if line:
                 candidates = candidates.filtered(
                     lambda e: wiz._line_covers(line, e))
@@ -107,15 +135,20 @@ class FitnessBookingReassignWizard(models.TransientModel):
                     lambda e: e.class_type_id == event.class_type_id)
             # Capacity is computed, so it is filtered here rather than in the
             # domain: a full class must not be offered as an option.
+            # Room for all of them, not room for one. Offering a class with two
+            # seats left to a selection of five is how a bulk move half
+            # succeeds and leaves the desk to work out which half.
+            needed = max(len(bookings), 1)
             free = candidates.filtered(
-                lambda e: not e.capacity or e.available_seats > 0)
+                lambda e: not e.capacity or e.available_seats >= needed)
             wiz.available_event_ids = [(6, 0, free.ids)]
 
     # ── outcomes ─────────────────────────────────────────────────────────────
     def action_cancel_only(self):
         """Cancel, and leave the student where they chose to be: nowhere."""
         self.ensure_one()
-        self._do_cancel()
+        for booking in (self.booking_ids or self.booking_id):
+            self._do_cancel(booking)
         return {'type': 'ir.actions.act_window_close'}
         # act_window_close, not act_window_closed. The second is not an
         # action type Odoo knows; call_button validates what a button
@@ -150,15 +183,26 @@ class FitnessBookingReassignWizard(models.TransientModel):
                 "Choose a class to move %(name)s into, or use Cancel Only.",
                 name=self.student_id.name or _('this student'),
             ))
-        booking = self.booking_id
         target = self.target_event_id
+        for booking in (self.booking_ids or self.booking_id):
+            self._move_one(booking, target)
+        return {'type': 'ir.actions.act_window_close'}
+
+    def _move_one(self, booking, target):
+        """One booking, checked on its own terms.
+
+        Deliberately per booking rather than once for the selection: five
+        students ticked together can hold five different credits and five
+        different cancellation windows, and a rule that passes for the first
+        says nothing about the fifth.
+        """
         origin = booking.calendar_event_id
         if booking.state == 'cancelled':
             raise UserError(_("That booking is already cancelled."))
         if target == origin:
             raise UserError(_("They are already in that class."))
 
-        self._validate_move(target)
+        self._validate_move(target, booking)
         booking.write({'calendar_event_id': target.id})
 
         # The student has to hear about this: they did not ask to be moved,
@@ -173,16 +217,15 @@ class FitnessBookingReassignWizard(models.TransientModel):
                 ('state', 'in', ('booked', 'attended')),
             ])
             origin.sudo().booked_seats = count
-        return {'type': 'ir.actions.act_window_close'}
 
-    def _validate_move(self, target):
+    def _validate_move(self, target, booking=None):
         """The booking rules that still apply when nobody is paying again.
 
         The payment-source check is deliberately absent - the credit is spent
         and stays spent. Coverage is checked instead, so the pool that paid for
         the old class is one that could have paid for the new one.
         """
-        booking = self.booking_id
+        booking = booking or self.booking_id
         student = booking.student_id
         now = fields.Datetime.now()
 
@@ -239,8 +282,8 @@ class FitnessBookingReassignWizard(models.TransientModel):
                 student=student.name,
                 clash=overlapping.calendar_event_id.name))
 
-    def _do_cancel(self):
-        booking = self.booking_id
+    def _do_cancel(self, booking=None):
+        booking = booking or self.booking_id
         if booking.state == 'cancelled':
             raise UserError(_("That booking is already cancelled."))
         booking.with_context(

@@ -203,11 +203,17 @@ class FitnessStudentPortal(http.Controller):
             'lbl_book_trial':   _('Book a Free Trial'),
             # Offered only while there is one to take. Once it is spent the
             # prompt would be an invitation to something they cannot have.
+            #
+            # /my/trial is the app's way in to the same request form the public
+            # site uses. It no longer books anything: the old page browsed
+            # classes and booked one outright, which cannot work alongside a
+            # three-student minimum, so the wording says request rather than
+            # book.
             'trial_offer_url':  ('/my/trial'
                                  if (self._trial_offer_open()
                                      and not self._trial_entitlement_used(partner))
                                  else False),
-            'lbl_trial_offer':  _('Book your free trial class'),
+            'lbl_trial_offer':  _('Request your free trial class'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
             # The notification card. Permission can only ever be granted by
@@ -1611,59 +1617,6 @@ class FitnessStudentPortal(http.Controller):
                               raise_if_not_found=False)
         return bool(ref) and product.id == ref.id
 
-    @http.route('/my/trial', type='http', auth='user', website=True,
-                sitemap=False)
-    def portal_trial_choice(self, **kw):
-        """The trial, on a page with nothing else on it.
-
-        The home button used to open the shop with the classes tab selected,
-        which showed the two trials among every other class, package and
-        membership. One free choice presented as eleven paid ones is how
-        students ended up on a checkout page they did not want.
-        """
-        _ = request.env._
-        partner = request.env.user.partner_id
-        # Spent entitlement, nothing left to choose. The shop still lists both
-        # trials - as ordinary paid classes - so that is where this belongs.
-        if self._trial_entitlement_used(partner) or not self._trial_offer_open():
-            return request.redirect('/my/packages?tab=classes')
-
-        trials = []
-        for xmlid in self.TRIAL_XMLIDS:
-            product = request.env.ref(xmlid, raise_if_not_found=False)
-            if not product or not product.sudo().active:
-                continue
-            product = product.sudo()
-            bits = []
-            if product.fitness_class_count:
-                bits.append(_('%d class') % product.fitness_class_count
-                            if product.fitness_class_count == 1
-                            else _('%d classes') % product.fitness_class_count)
-            if product.fitness_validity_days:
-                bits.append(_('%d day') % product.fitness_validity_days
-                            if product.fitness_validity_days == 1
-                            else _('%d days') % product.fitness_validity_days)
-            trials.append({
-                'id':         product.id,
-                'ct':         product.fitness_class_type or 'any',
-                'href':       '/my/studio?%s' % urlencode({
-                    'discipline': product.fitness_class_type or 'reformer'}),
-                'discipline': self._discipline_label(
-                    product.fitness_class_type or 'any'),
-                'name':       product.name,
-                'meta':       ' \u00b7 '.join(bits),
-            })
-
-        return request.render('fitness_portal.portal_trial_choice', {
-            'trials':      trials,
-            'lbl_title':   _('Book your free trial class'),
-            'lbl_pick_one': _('Look at both if you like - nothing is used up '
-                              'by browsing. You get one free trial, and the '
-                              'class you book is the one it pays for.'),
-            'lbl_view':    _('View classes'),
-            'error_msg':   kw.get('error') or '',
-        })
-
     @http.route('/my/packages/<int:product_id>/book-free', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
     def packages_book_free(self, product_id, **kw):
@@ -2051,93 +2004,6 @@ class FitnessStudentPortal(http.Controller):
             ('class_interest', '=', 'reformer'),
             ('status', 'in', list(self.TRIAL_OPEN_STATES)),
         ], order='id desc', limit=1)
-
-    @http.route('/my/trial/reformer', type='http', auth='user',
-                website=True, sitemap=False)
-    def portal_trial_reformer(self, **kw):
-        """The two intake questions, asked inside the portal."""
-        if not request.env.user.has_group(STUDENT_GROUP):
-            return request.redirect('/my')
-
-        _ = request.env._
-        partner = request.env.user.partner_id
-        pending = self._pending_reformer_request(partner)
-
-        return request.render('fitness_portal.portal_trial_reformer', {
-            'partner':       partner,
-            'pending':       pending,
-            'submitted':     bool(kw.get('submitted')),
-            'error_msg':     kw.get('error') or None,
-            'back_url':      '/my/packages',
-            'page_title':    _('Request a Reformer trial'),
-            'lbl_intro':     _('The studio reviews Reformer trials before booking '
-                               'them, so they can pick a class that suits your '
-                               'experience. Two questions and they will be in touch.'),
-            'lbl_first_q':   _('Is this your first time on a Reformer?'),
-            'lbl_yes':       _('Yes, my first time'),
-            'lbl_no':        _('No, I have used one before'),
-            'lbl_years_q':   _('Roughly how long have you been practising?'),
-            'lbl_notes_q':   _('Any days or times that suit you best? (optional)'),
-            'lbl_submit':    _('Send request'),
-            'lbl_pending':   _('Your request is with the studio'),
-            'lbl_pending_b': _('They will confirm your class shortly. You will get '
-                               'an email and a notification here as soon as it is '
-                               'booked.'),
-            'lbl_done':      _('Request sent'),
-            'lbl_done_body': _('The studio has your request and will be in touch to '
-                               'confirm your class.'),
-            'lbl_back_shop': _('Back to the shop'),
-        })
-
-    @http.route('/my/trial/reformer/submit', type='http', auth='user',
-                website=True, sitemap=False, methods=['POST'])
-    def portal_trial_reformer_submit(self, **kw):
-        """Create the request, then come back to this page with a confirmation.
-
-        Redirect rather than render, so a refresh cannot post it twice.
-        """
-        if not request.env.user.has_group(STUDENT_GROUP):
-            return request.redirect('/my')
-
-        _ = request.env._
-        partner = request.env.user.partner_id
-
-        # One open request at a time. The button is hidden while one is open,
-        # so reaching this means a stale tab or a typed URL.
-        if self._pending_reformer_request(partner):
-            return request.redirect('/my/trial/reformer')
-
-        first_time = (kw.get('reformer_is_first_time') or '').strip()
-        if first_time not in ('yes', 'no'):
-            return request.redirect('/my/trial/reformer?error=%s' % quote(
-                _('Please tell us whether this is your first time on a Reformer.')))
-
-        vals = {
-            'name':  partner.name or request.env.user.name,
-            'email': partner.email or request.env.user.login,
-            # res.partner carries no 'mobile' in this build; phone only.
-            'phone': partner.phone or False,
-            'class_interest': 'reformer',
-            'partner_id': partner.id,
-            'lang': request.env.user.lang or DEFAULT_LANG,
-            'reformer_is_first_time': first_time,
-            'preferred_time_notes': (kw.get('notes') or '').strip()[:1000] or False,
-        }
-        years = (kw.get('reformer_years_experience') or '').strip()[:40]
-        if years and first_time == 'no':
-            vals['reformer_years_experience'] = years
-
-        try:
-            req = request.env['fitness.trial.request'].sudo().create(vals)
-        except Exception:
-            _logger.exception('[TRIAL] Portal Reformer request failed for %s',
-                              partner.id)
-            return request.redirect('/my/trial/reformer?error=%s' % quote(
-                _('Something went wrong. Please try again.')))
-
-        _logger.info('[TRIAL] Portal Reformer request %s created for partner %s',
-                     req.id, partner.id)
-        return request.redirect('/my/trial/reformer?submitted=1')
 
     @http.route('/my/news/<int:post_id>', type='http', auth='user',
                 website=True, sitemap=False)
