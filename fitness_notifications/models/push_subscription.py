@@ -44,12 +44,13 @@ class FitnessPushSubscription(models.Model):
     last_sent = fields.Datetime()
     last_error = fields.Char()
 
-    _sql_constraints = [
-        # The push service hands out one endpoint per browser installation, so
-        # re-subscribing must update the row rather than grow a second one -
-        # otherwise every reinstall doubles the notifications.
-        ('endpoint_uniq', 'unique(endpoint)', 'This device is already registered.'),
-    ]
+    # The push service hands out one endpoint per browser installation, so
+    # re-subscribing must update the row rather than grow a second one -
+    # otherwise every reinstall doubles the notifications. Declared the Odoo 19
+    # way: _sql_constraints is ignored now, and silently, so the index simply
+    # never existed.
+    _endpoint_uniq = models.Constraint(
+        'UNIQUE (endpoint)', 'This device is already registered.')
 
     # ── keys ───────────────────────────────────────────────────────────────
 
