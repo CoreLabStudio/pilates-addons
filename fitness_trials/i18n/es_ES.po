@@ -310,3 +310,75 @@ msgstr "Tu clase de prueba: %(cls)s."
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "the class"
 msgstr "la clase"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a class."
+msgstr "Elige una clase."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "That class does not belong to the discipline you chose."
+msgstr "Esa clase no pertenece a la disciplina que has elegido."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a preferred date."
+msgstr "Elige una fecha preferida."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please choose a date that has not already passed."
+msgstr "Elige una fecha que no haya pasado ya."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please say whether you prefer the morning or the evening."
+msgstr "Indica si prefieres la mañana o la tarde."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "Please tell us whether you have used a Reformer before."
+msgstr "Dinos si has usado un Reformer antes."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s booked"
+msgstr "%(taken)s reservadas"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s/%(capacity)s - FULL"
+msgstr "%(taken)s/%(capacity)s - COMPLETA"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(taken)s/%(capacity)s - %(free)s free"
+msgstr "%(taken)s/%(capacity)s - %(free)s libres"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Slots for %(who)s"
+msgstr "Horarios para %(who)s"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "this request"
+msgstr "esta solicitud"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "This request has no email address, so there is nobody to book. Add one and try again."
+msgstr "Esta solicitud no tiene dirección de correo, así que no hay a quién reservar. Añade una e inténtalo de nuevo."

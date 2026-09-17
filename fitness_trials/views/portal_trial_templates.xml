@@ -8,21 +8,47 @@
             <t t-set="_lang" t-value="request.lang.code"/>
 
             <style>
+                /* The portal's tokens where they exist - inside the app - and
+                   a literal fallback for the public site, which does not load
+                   corelab.css. Hard-coded white here put white cards on a dark
+                   page on every phone in dark mode. */
                 .mv-slot-card {
                     cursor: pointer;
-                    border: 1px solid #dee2e6;
+                    border: 1px solid var(--mv-border, #dee2e6);
                     border-radius: 0.5rem;
                     padding: 0.75rem 1rem;
                     margin-bottom: 0.5rem;
                     display: flex;
                     align-items: flex-start;
                     gap: 0.75rem;
-                    background: #fff;
+                    background: var(--mv-card-bg, #fff);
+                    color: var(--mv-ink-text, #3a3330);
                     transition: border-color 0.15s, background 0.15s;
                     width: 100%;
                 }
-                .mv-slot-card:hover { border-color: #9ABACD; background: #f4f9fb; }
-                .mv-slot-card.mv-slot-selected { border-color: #9ABACD; background: #e8f3f8; }
+                .mv-slot-card .mv-slot-name { color: var(--mv-ink-text, #3a3330); }
+                .mv-slot-card .mv-slot-meta { color: var(--mv-muted, #6c757d); }
+                .mv-slot-card:hover { border-color: #9ABACD; }
+                .mv-slot-card.mv-slot-selected {
+                    border-color: #9ABACD;
+                    background: var(--mv-active-fill, #e8f3f8);
+                    color: var(--mv-accent-fg, #3a3330);
+                }
+                .mv-slot-card.mv-slot-selected .mv-slot-name,
+                .mv-slot-card.mv-slot-selected .mv-slot-meta {
+                    color: inherit;
+                }
+                /* The public form has no tokens to inherit, so dark mode is
+                   spelled out for it rather than left to a white default. */
+                @media (prefers-color-scheme: dark) {
+                    .mv-slot-card {
+                        background: var(--mv-card-bg, #241c18);
+                        color: var(--mv-ink-text, #F2EAE3);
+                        border-color: var(--mv-border, #3b302a);
+                    }
+                    .mv-slot-card .mv-slot-name { color: var(--mv-ink-text, #F2EAE3); }
+                    .mv-slot-card .mv-slot-meta { color: var(--mv-muted, #b3a49a); }
+                }
                 .mv-slot-card input[type="radio"] { margin-top: 0.2rem; flex-shrink: 0; }
                 .mv-date-filters {
                     display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
@@ -182,9 +208,9 @@
                                        t-att-value="ct['id']"
                                        t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
                                 <div style="flex:1;min-width:0;">
-                                    <div class="fw-semibold small" style="color:#3a3330;" t-esc="ct['name']"/>
+                                    <div class="fw-semibold small mv-slot-name" t-esc="ct['name']"/>
                                     <t t-if="ct['duration']">
-                                        <div class="small text-muted"><t t-esc="int(ct['duration'])"/> min</div>
+                                        <div class="small mv-slot-meta"><t t-esc="int(ct['duration'])"/> min</div>
                                     </t>
                                 </div>
                             </label>
@@ -205,13 +231,59 @@
                                        t-att-value="ct['id']"
                                        t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
                                 <div style="flex:1;min-width:0;">
-                                    <div class="fw-semibold small" style="color:#3a3330;" t-esc="ct['name']"/>
+                                    <div class="fw-semibold small mv-slot-name" t-esc="ct['name']"/>
                                     <t t-if="ct['duration']">
-                                        <div class="small text-muted"><t t-esc="int(ct['duration'])"/> min</div>
+                                        <div class="small mv-slot-meta"><t t-esc="int(ct['duration'])"/> min</div>
                                     </t>
                                 </div>
                             </label>
                         </t>
+                    </div>
+
+                    <!-- Reformer only. The studio needs to know whether
+                         somebody has used a Reformer before: a first-timer is
+                         placed and briefed differently. -->
+                    <div id="mv-reformer-intake" class="mv-trial-conditional d-none mb-3">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Have you done Reformer before?</t>
+                            <t t-elif="_lang == 'ca_ES'">Has fet Reformer abans?</t>
+                            <t t-else="">¿Has hecho Reformer antes?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
+                                       id="rf_first_yes" value="yes"
+                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'yes' else None"/>
+                                <label class="form-check-label" for="rf_first_yes">
+                                    <t t-if="_lang == 'en_US'">No, it would be my first time</t>
+                                    <t t-elif="_lang == 'ca_ES'">No, seria el meu primer cop</t>
+                                    <t t-else="">No, sería mi primera vez</t>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
+                                       id="rf_first_no" value="no"
+                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'no' else None"/>
+                                <label class="form-check-label" for="rf_first_no">
+                                    <t t-if="_lang == 'en_US'">Yes, I have</t>
+                                    <t t-elif="_lang == 'ca_ES'">Sí, ja n'he fet</t>
+                                    <t t-else="">Sí, ya he hecho</t>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Only worth asking of somebody who has done it before. -->
+                        <div id="mv-reformer-years" class="d-none">
+                            <label class="form-label" for="rf_years">
+                                <t t-if="_lang == 'en_US'">How much experience do you have?</t>
+                                <t t-elif="_lang == 'ca_ES'">Quanta experiència tens?</t>
+                                <t t-else="">¿Cuánta experiencia tienes?</t>
+                            </label>
+                            <input type="text" id="rf_years" name="reformer_years_experience"
+                                   class="form-control"
+                                   t-att-placeholder="'e.g. 2 years, on and off' if _lang == 'en_US' else ('p. ex. 2 anys, amb pauses' if _lang == 'ca_ES' else 'p. ej. 2 a\u00f1os, con pausas')"
+                                   t-att-value="form_values.get('reformer_years_experience', '')"/>
+                        </div>
                     </div>
 
                     <!-- When they would like to come. A preference, not a
@@ -250,7 +322,7 @@
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="preferred_period"
-                                       id="pp_evening" value="evening"
+                                       id="pp_evening" value="evening" required="required"
                                        t-att-checked="'checked' if form_values.get('preferred_period') == 'evening' else None"/>
                                 <label class="form-check-label" for="pp_evening">
                                     <t t-if="_lang == 'en_US'">Evening</t>
@@ -271,7 +343,10 @@
                             <t t-else="">Enviar solicitud</t>
                         </button>
                     </div>
-                    <p class="text-center small text-muted mt-3 mb-0">
+                    <!-- Only for a visitor who is not signed in. Somebody
+                         filling this in from inside the app already has an
+                         account and is using it. -->
+                    <p t-if="request.env.user._is_public()" class="text-center small text-muted mt-3 mb-0">
                         <t t-if="_lang == 'en_US'">Already have an account? <a href="/web/login" class="text-decoration-none">Log in</a></t>
                         <t t-elif="_lang == 'ca_ES'">Ja tens compte? <a href="/web/login" class="text-decoration-none">Inicia sessió</a></t>
                         <t t-else="">¿Ya tienes cuenta? <a href="/web/login" class="text-decoration-none">Inicia sesión</a></t>
@@ -293,6 +368,10 @@
                             document.querySelector('input[name="class_type_id"]:checked') &amp;&amp;
                             (document.getElementById('trial_preferred_date') || {}).value &amp;&amp;
                             document.querySelector('input[name="preferred_period"]:checked'));
+                        // Reformer also has to answer the experience question.
+                        if (enabled &amp;&amp; ci.value === 'reformer') {
+                            enabled = !!document.querySelector('input[name="reformer_is_first_time"]:checked');
+                        }
                         if (enabled) {
                             submitBtn.removeAttribute('disabled');
                             submitBtn.disabled = false;
@@ -301,11 +380,27 @@
                         }
                     }
 
+                    var rfIntake = document.getElementById('mv-reformer-intake');
+                    var rfYears  = document.getElementById('mv-reformer-years');
+
                     function showSection(val) {
                         barreSection.classList.toggle('d-none', val !== 'barre');
                         rfSection.classList.toggle('d-none', val !== 'reformer');
+                        if (rfIntake) { rfIntake.classList.toggle('d-none', val !== 'reformer'); }
                         updateSubmit();
                     }
+
+                    // The experience box only matters to somebody who has used
+                    // a Reformer before.
+                    function showYears() {
+                        var been = document.querySelector('input[name="reformer_is_first_time"]:checked');
+                        if (rfYears) {
+                            rfYears.classList.toggle('d-none', !(been &amp;&amp; been.value === 'no'));
+                        }
+                        updateSubmit();
+                    }
+                    document.querySelectorAll('input[name="reformer_is_first_time"]').forEach(
+                        function (r) { r.addEventListener('change', showYears); });
 
                     // Class interest change
                     ciRadios.forEach(function (r) {
@@ -328,10 +423,24 @@
                     barreSection.addEventListener('change', onSlotChange);
                     rfSection.addEventListener('change', onSlotChange);
 
+                    // The date and the period gate the button just as much as
+                    // the class does. Without these the button only woke up
+                    // when a class radio was touched, so anyone filling the
+                    // form top to bottom finished it and found Submit still
+                    // dead - and re-picking a class appeared to "fix" it.
+                    var dateInput = document.getElementById('trial_preferred_date');
+                    if (dateInput) {
+                        dateInput.addEventListener('change', updateSubmit);
+                        dateInput.addEventListener('input', updateSubmit);
+                    }
+                    document.querySelectorAll('input[name="preferred_period"]').forEach(
+                        function (r) { r.addEventListener('change', updateSubmit); });
+
                     // Initialise on page load (restores state after server-side re-render on error)
                     var checkedCi = document.querySelector('input[name="class_interest"]:checked');
                     if (checkedCi) { showSection(checkedCi.value); }
 
+                    showYears();
                     var checkedType = document.querySelector('input[name="class_type_id"]:checked');
                     if (checkedType) {
                         var card = checkedType.closest('.mv-slot-card');
