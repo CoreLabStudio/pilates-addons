@@ -27,6 +27,12 @@ class TestNotificationLanguage(TransactionCase):
         cls.tz = pytz.timezone("Europe/Madrid")
         cls.Notif = cls.env["fitness.notification"]
 
+        # A build database ships with English only. Skipping there would mean
+        # this never runs on the branch that builds from scratch - which is the
+        # one place the language bug could reappear unnoticed - so install the
+        # languages instead of stepping around them.
+        for code in ("es_ES", "ca_ES"):
+            cls.env["res.lang"]._activate_and_install_lang(code)
         langs = cls.env["res.lang"].with_context(active_test=False).search([])
         cls.have = {l.code for l in langs if l.active}
 
