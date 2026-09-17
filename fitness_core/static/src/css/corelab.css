@@ -5065,3 +5065,17 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
     border-color: var(--mv-clay) !important;
     box-shadow: 0 0 0 3px rgba(154,186,205,0.35) !important;
 }
+
+/* Instructor dashboard: the day reads top to bottom, so classes already taught
+   step back rather than disappearing - she still needs to reach their rosters
+   to mark attendance. */
+.mv-row-done { opacity: 0.62; }
+.mv-row-flag {
+  margin: 4px 0 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mv-paco);
+}
+.mv-row-flag-muted { color: var(--mv-muted); font-weight: 600; }

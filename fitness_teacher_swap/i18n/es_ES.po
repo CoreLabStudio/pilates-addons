@@ -255,7 +255,9 @@ msgid "Upcoming"
 msgstr "Próximas"
 
 #. module: fitness_teacher_swap
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.portal_my_classes
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "No classes today."
 msgstr "No hay clases hoy."
 
@@ -444,3 +446,57 @@ msgstr "Esto no es una clase."
 #: code:addons/fitness_teacher_swap/models/calendar_event.py:0
 msgid "You can only reassign your own classes."
 msgstr "Solo puedes reasignar tus propias clases."
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Classes today"
+msgstr "Clases hoy"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Finished"
+msgstr "Finalizada"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Good afternoon"
+msgstr "Buenas tardes"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Good evening"
+msgstr "Buenas noches"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Good morning"
+msgstr "Buenos días"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Next"
+msgstr "Próxima"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Roster"
+msgstr "Lista"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "See all my classes"
+msgstr "Ver todas mis clases"
+
+#. module: fitness_teacher_swap
+#. odoo-python
+#: code:addons/fitness_teacher_swap/controllers/portal.py:0
+msgid "Students expected"
+msgstr "Alumnos esperados"
