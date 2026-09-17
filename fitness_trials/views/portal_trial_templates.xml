@@ -83,17 +83,34 @@
                      person, so inviting a second one offered something that
                      would be refused. The page ends by looking forward to
                      the class and handing them back to the site. -->
-                <p class="text-center fw-semibold mt-3 mb-2" style="color:#7a6458;">
+                <!-- The token, not the literal. #7a6458 is the light theme's
+                     own text colour - it added nothing there and came out at
+                     3.00:1 on a dark phone, while every other line on this
+                     page read at 10.88:1. -->
+                <p class="text-center fw-semibold mt-3 mb-2" style="color:var(--mv-ink-text, #7a6458);">
                     <t t-if="_lang == 'en_US'">We can’t wait to meet you.</t>
                     <t t-elif="_lang == 'ca_ES'">Tenim moltes ganes de conèixer-te.</t>
                     <t t-else="">¡Estamos deseando conocerte!</t>
                 </p>
                 <div class="text-center mt-2">
-                    <a href="https://corelabstudio.es" class="btn btn-link btn-sm text-muted">
-                        <t t-if="_lang == 'en_US'">Back to corelabstudio.es</t>
-                        <t t-elif="_lang == 'ca_ES'">Tornar a corelabstudio.es</t>
-                        <t t-else="">Volver a corelabstudio.es</t>
-                    </a>
+                    <!-- Opened from inside the app: back means Home, not the
+                         marketing site. Sending a student there logs them out
+                         of the flow they were in and leaves them hunting for
+                         the app icon again. -->
+                    <t t-if="source == 'app'">
+                        <a href="/my/home" class="btn btn-link btn-sm text-muted">
+                            <t t-if="_lang == 'en_US'">Back to home</t>
+                            <t t-elif="_lang == 'ca_ES'">Tornar a l'inici</t>
+                            <t t-else="">Volver al inicio</t>
+                        </a>
+                    </t>
+                    <t t-else="">
+                        <a href="https://corelabstudio.es" class="btn btn-link btn-sm text-muted">
+                            <t t-if="_lang == 'en_US'">Back to corelabstudio.es</t>
+                            <t t-elif="_lang == 'ca_ES'">Tornar a corelabstudio.es</t>
+                            <t t-else="">Volver a corelabstudio.es</t>
+                        </a>
+                    </t>
                 </div>
             </t>
 

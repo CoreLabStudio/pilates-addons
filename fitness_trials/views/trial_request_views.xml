@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+  <!-- ── Cancelling a request ─────────────────────────────────────────
+       A dialog, not a status on the statusbar: the student is told what the
+       studio says here, by email and in the app, so there has to be somewhere
+       to say it. -->
+  <record id="view_fitness_trial_decline_wizard_form" model="ir.ui.view">
+    <field name="name">fitness.trial.decline.wizard.form</field>
+    <field name="model">fitness.trial.decline.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Cancel this request">
+        <field name="request_id" invisible="1"/>
+        <div class="alert alert-info" role="status">
+          This is sent to <field name="student_name" nolabel="1" readonly="1"
+                                 class="fw-bold d-inline"/> by email and in the
+          app. Their free class is not used up - they can ask again.
+        </div>
+        <group>
+          <field name="reason" nolabel="1" colspan="2"
+                 placeholder="e.g. We have no Reformer space that week - please ask again for the following one."/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Cancel the request"
+                  class="btn-primary"/>
+          <button string="Keep it" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_fitness_trial_request_list" model="ir.ui.view">
     <field name="name">fitness.trial.request.list</field>
     <field name="model">fitness.trial.request</field>
@@ -22,6 +50,12 @@
                decoration-info="class_interest == 'barre'"/>
         <field name="preferred_time_notes" string="Preferred Time" optional="show"/>
         <field name="status" widget="badge"/>
+        <!-- Two open asks from one person is a decision for the studio, not a
+             thing to merge quietly. Shown on the list so it is noticed before
+             one of them gets booked. -->
+        <field name="other_open_count" string="Dupes" optional="show"
+               widget="badge" decoration-danger="other_open_count > 0"
+               invisible="other_open_count == 0"/>
         <field name="partner_id" string="Student" optional="show"/>
         <field name="occurrence_id" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
@@ -48,6 +82,12 @@
           <button name="action_view_candidate_slots" type="object"
                   string="See slots and capacity"
                   invisible="status in ('scheduled', 'declined')"/>
+          <!-- Cancelling asks why first. Hidden once the request is finished
+               either way - a scheduled one is cancelled from the booking, so
+               the seat is released and the credit comes back. -->
+          <button name="action_decline" type="object"
+                  string="Cancel request"
+                  invisible="status in ('scheduled', 'declined')"/>
           <button name="action_send_confirmation_email"
                   string="Send Confirmation Email"
                   type="object"
@@ -61,6 +101,17 @@
                  statusbar_visible="pending,contacted,scheduled,declined"/>
         </header>
         <sheet>
+          <!-- Says it once, at the top, before any of the scheduling below is
+               acted on. -->
+          <div class="alert alert-warning d-flex align-items-center gap-2"
+               role="alert" invisible="other_open_count == 0">
+            <field name="duplicate_warning" nolabel="1" readonly="1"
+                   class="flex-grow-1 mb-0"/>
+            <button name="action_view_other_open" type="object"
+                    string="Show them" class="btn btn-sm btn-warning"/>
+          </div>
+          <field name="other_open_count" invisible="1"/>
+          <field name="other_open_ids" invisible="1"/>
           <div class="oe_title">
             <label for="name"/>
             <h1><field name="name" placeholder="Requester name"/></h1>
@@ -110,11 +161,19 @@
                    capacity error on save. -->
               <field name="occurrence_fill" string="How full" readonly="1"
                      invisible="not occurrence_id"/>
-              <field name="scheduled_datetime" string="Scheduled Date/Time"/>
+              <!-- Comes from the Class Slot above. Two places to say when
+                   the class is would eventually disagree, and the slot is the
+                   one that actually gets booked. -->
+              <field name="scheduled_datetime" string="Scheduled Date/Time"
+                     readonly="1"/>
               <field name="confirmation_email_sent" string="Confirmation Email Sent" readonly="1"/>
               <field name="confirmation_email_sent_date" string="Confirmation Sent On"
                      readonly="1" invisible="not confirmation_email_sent"/>
               <field name="create_date" string="Request Received" readonly="1"/>
+              <!-- Kept on the record so the next person to open it can see
+                   what was decided and why, not just that it was declined. -->
+              <field name="decline_reason" string="Cancelled because"
+                     readonly="1" invisible="not decline_reason"/>
             </group>
           </group>
           <!-- Reformer intake fields — only relevant when class_interest == 'reformer' -->

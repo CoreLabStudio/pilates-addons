@@ -382,3 +382,57 @@ msgstr "esta solicitud"
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "This request has no email address, so there is nobody to book. Add one and try again."
 msgstr "Esta solicitud no tiene dirección de correo, así que no hay a quién reservar. Añade una e inténtalo de nuevo."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "About your trial class request"
+msgstr "Sobre tu solicitud de clase de prueba"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one: %(why)s You are still welcome to ask for another - your free class has not been used."
+msgstr "El estudio no ha podido aceptar esta: %(why)s Puedes pedir otra cuando quieras: tu clase gratuita sigue disponible."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one. You are still welcome to ask for another - your free class has not been used."
+msgstr "El estudio no ha podido aceptar esta. Puedes pedir otra cuando quieras: tu clase gratuita sigue disponible."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Cancel this request"
+msgstr "Cancelar esta solicitud"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Open requests from %(who)s"
+msgstr "Solicitudes abiertas de %(who)s"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "This person has 1 other open trial request. A student gets one trial, so only one of these should be booked."
+msgstr "Esta persona tiene 1 solicitud de prueba abierta más. Cada alumna tiene una sola clase de prueba, así que solo una debería reservarse."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "This person has %(n)s other open trial requests. A student gets one trial, so only one of these should be booked."
+msgstr "Esta persona tiene %(n)s solicitudes de prueba abiertas más. Cada alumna tiene una sola clase de prueba, así que solo una debería reservarse."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_decline_wizard.py:0
+msgid "Please say why, so the student is told something."
+msgstr "Indica el motivo, para que la alumna reciba una explicación."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_decline_wizard.py:0
+msgid "This request is already scheduled and the class is booked. Cancel the booking from the student's schedule first, so the seat is released and their credit comes back."
+msgstr "Esta solicitud ya está programada y la clase está reservada. Cancela primero la reserva desde el horario de la alumna, para que la plaza se libere y el crédito vuelva."
