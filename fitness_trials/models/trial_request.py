@@ -32,6 +32,10 @@ _STUDIO_TZ = pytz.timezone('Europe/Madrid')
 class FitnessTrialRequest(models.Model):
     _name = 'fitness.trial.request'
     _description = 'Trial Class Request'
+
+    # Still the studio's to deal with. Scheduled and declined are finished,
+    # and somebody whose trial has been and gone may ask again.
+    OPEN_STATES = ('pending', 'contacted')
     _order = 'create_date desc'
     _rec_name = 'name'
 
@@ -120,7 +124,12 @@ class FitnessTrialRequest(models.Model):
         required=True,
         index=True,
     )
-    scheduled_datetime = fields.Datetime(string='Scheduled Date/Time')
+    # Filled from the Class Slot, and read-only on screen: the slot is what
+    # actually gets booked, so a second hand-typed time could only ever
+    # disagree with it. Kept a plain stored field rather than a compute - see
+    # _apply_slot_datetime.
+    scheduled_datetime = fields.Datetime(
+        string='Scheduled Date/Time', readonly=True)
     scheduled_datetime_display = fields.Char(
         string='Formatted Date/Time',
         compute='_compute_scheduled_datetime_display',
@@ -132,7 +141,21 @@ class FitnessTrialRequest(models.Model):
     confirmation_email_sent_date = fields.Datetime(
         string='Confirmation Sent On', readonly=True, copy=False
     )
+    decline_reason = fields.Text(
+        string='Reason', copy=False,
+        help="Why the studio could not take this request. Sent to the student "
+             "and kept on the record.")
     create_date = fields.Datetime(string='Received On', readonly=True)
+
+    # Other open requests from the same person. Not stored: it is a statement
+    # about the rest of the table, and a stored copy would go stale the moment
+    # one of the others was scheduled or declined.
+    other_open_ids = fields.Many2many(
+        'fitness.trial.request', compute='_compute_other_open',
+        string='Other Open Requests')
+    other_open_count = fields.Integer(
+        compute='_compute_other_open', string='Duplicates')
+    duplicate_warning = fields.Char(compute='_compute_other_open')
 
     @api.depends('scheduled_datetime', 'lang')
     def _compute_scheduled_datetime_display(self):
@@ -151,8 +174,26 @@ class FitnessTrialRequest(models.Model):
                 f"{dt_local.strftime('%H:%M')}"
             )
 
+    @staticmethod
+    def _apply_slot_datetime(vals, slot_start):
+        """Put the slot's own start time on the request.
+
+        Not a computed field on purpose. A stored compute recomputes over
+        every existing row, and a request scheduled before this screen had
+        slots carries a time that nothing else records; clearing those to keep
+        the model tidy would throw away the only copy the studio has. This
+        only ever writes a time, never blanks one.
+        """
+        if slot_start:
+            vals['scheduled_datetime'] = slot_start
+        return vals
+
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('occurrence_id') and not vals.get('scheduled_datetime'):
+                slot = self.env['calendar.event'].sudo().browse(vals['occurrence_id'])
+                self._apply_slot_datetime(vals, slot.start)
         records = super().create(vals_list)
         # Fill the Student in straight away, so an admin opening the request
         # sees who it is rather than an empty field.
@@ -180,11 +221,20 @@ class FitnessTrialRequest(models.Model):
         return records
 
     def write(self, vals):
-        # Auto-advance to 'scheduled' when a datetime is saved without an explicit status change
-        if vals.get('scheduled_datetime') and 'status' not in vals:
-            pre_schedule = self.filtered(lambda r: r.status in ('pending', 'contacted'))
-            if pre_schedule:
-                vals = dict(vals, status='scheduled')
+        # Choosing a slot is choosing the time. Done here as well as in the
+        # onchange so it holds for an import, a server action or anything else
+        # that does not go through a form.
+        #
+        # There used to be an auto-advance to 'scheduled' here whenever a
+        # datetime was saved without an explicit status. That was for a time
+        # typed by hand, which is no longer possible - and leaving it would
+        # have marked a request scheduled the moment somebody picked a
+        # candidate slot to consider, without anything being booked.
+        if 'occurrence_id' in vals and 'scheduled_datetime' not in vals:
+            slot = self.env['calendar.event'].sudo().browse(vals['occurrence_id']) \
+                if vals['occurrence_id'] else self.env['calendar.event']
+            if slot.start:
+                vals = self._apply_slot_datetime(dict(vals), slot.start)
 
         # Capture previous statuses for post-write side effects
         prev_status = {}
@@ -312,8 +362,140 @@ class FitnessTrialRequest(models.Model):
             'res_model': 'calendar.event',
             'view_mode': 'list,calendar,form',
             'domain': domain,
-            'context': {'search_default_group_by_start': 1},
+            # No default grouping, deliberately. calendar.event._read_group
+            # ANDs the personal-calendar privacy domain onto any grouped read
+            # whose fields are not all "public" - and __count never is, so
+            # grouping by anything applies it. That turned 53 candidate
+            # classes into one group of 1 and left the studio staring at an
+            # empty list. Grouping by hand from the UI has the same effect;
+            # this page simply stops asking for it.
+            'context': {},
         }
+
+    @api.depends('email', 'partner_id', 'status')
+    def _compute_other_open(self):
+        """Who else is still waiting under this person's name.
+
+        Reads the whole open set once rather than searching per record: open
+        requests are by definition the ones nobody has dealt with yet, so the
+        set is small, and matching in Python lets the email comparison ignore
+        case and stray spaces the way the rest of this model does.
+        """
+        open_all = self.search([('status', 'in', list(self.OPEN_STATES))])
+        by_email = {}
+        by_partner = {}
+        for rec in open_all:
+            key = (rec.email or '').strip().lower()
+            if key:
+                by_email[key] = by_email.get(key, self.browse()) | rec
+            if rec.partner_id:
+                by_partner[rec.partner_id.id] = \
+                    by_partner.get(rec.partner_id.id, self.browse()) | rec
+        for rec in self:
+            others = self.browse()
+            key = (rec.email or '').strip().lower()
+            if key:
+                others |= by_email.get(key, self.browse())
+            if rec.partner_id:
+                others |= by_partner.get(rec.partner_id.id, self.browse())
+            others -= rec
+            # Only meaningful while this request is itself open. On a
+            # scheduled or declined one the banner would be about somebody
+            # else's decision.
+            if rec.status not in self.OPEN_STATES:
+                others = self.browse()
+            rec.other_open_ids = others
+            rec.other_open_count = len(others)
+            if not others:
+                rec.duplicate_warning = False
+            elif len(others) == 1:
+                rec.duplicate_warning = _(
+                    "This person has 1 other open trial request. A student "
+                    "gets one trial, so only one of these should be booked.")
+            else:
+                rec.duplicate_warning = _(
+                    "This person has %(n)s other open trial requests. A "
+                    "student gets one trial, so only one of these should be "
+                    "booked.", n=len(others))
+
+    def action_decline(self):
+        """Open the dialog that asks why before cancelling."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Cancel this request"),
+            'res_model': 'fitness.trial.decline.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_request_id': self.id},
+        }
+
+    def _decline(self, reason):
+        """Cancel the request, tell the student, and leave the door open.
+
+        A declined request has never spent anything: approval is what mints
+        the order, so the trial is still theirs and the portal will offer it
+        again the moment this one stops being open. That is worth saying to
+        them rather than leaving them to discover it.
+        """
+        self.ensure_one()
+        self.write({'status': 'declined', 'decline_reason': reason})
+        self._notify_declined(reason)
+        return True
+
+    def _notify_declined(self, reason):
+        """In-app and push, in the student's own language.
+
+        Wrapped: a notification that fails must not undo the cancellation, the
+        reason, or the email. Silent when there is no portal user behind the
+        request - somebody who asked from the public site and never signed up
+        has no app to be notified in, and the declined email is their copy.
+        """
+        self.ensure_one()
+        user = self.partner_id.user_ids[:1] if self.partner_id else None
+        if not user:
+            return
+        try:
+            # Written through lang_env.env._ rather than an alias: Odoo's
+            # extractor only picks up calls literally named _(), so a helper
+            # bound to a shorter name puts nothing in the catalogue and the
+            # student is notified in English whatever they read the app in.
+            lang_env = self.with_context(lang=user.lang or self.lang or 'es_ES')
+            title = lang_env.env._("About your trial class request")
+            if reason:
+                body = lang_env.env._(
+                    "The studio could not take this one: %(why)s You are still "
+                    "welcome to ask for another - your free class has not been "
+                    "used.", why=reason.strip())
+            else:
+                body = lang_env.env._(
+                    "The studio could not take this one. You are still welcome "
+                    "to ask for another - your free class has not been used.")
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id, 'trial_declined', title, body, action_url='/my/trial')
+        except Exception:
+            _logger.exception(
+                "[TRIAL] Could not notify partner %s that request %s was declined",
+                self.partner_id.id, self.id)
+
+    def action_view_other_open(self):
+        """The other open requests from this person, so they can be compared."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Open requests from %(who)s", who=self.name or self.email or '-'),
+            'res_model': 'fitness.trial.request',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', (self.other_open_ids | self).ids)],
+            'context': {},
+        }
+
+    @api.onchange('occurrence_id')
+    def _onchange_occurrence_id(self):
+        """Show the slot's time as soon as it is chosen, not after saving."""
+        for rec in self:
+            if rec.occurrence_id and rec.occurrence_id.start:
+                rec.scheduled_datetime = rec.occurrence_id.start
 
     def _match_partner(self):
         """An existing contact with this request's email, if there is one."""
@@ -489,7 +671,10 @@ class FitnessTrialRequest(models.Model):
             "on event %s", self.id, booking.id, partner.id, self.occurrence_id.id)
 
         vals = {'status': 'scheduled'}
-        if not self.scheduled_datetime:
+        # Normally already set the moment the slot was chosen. Kept as a
+        # backstop for a request approved straight from a slot set by an
+        # import or an older row.
+        if not self.scheduled_datetime and self.occurrence_id.start:
             vals['scheduled_datetime'] = self.occurrence_id.start
         if not self.partner_id:
             vals['partner_id'] = partner.id
