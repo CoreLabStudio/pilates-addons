@@ -1551,14 +1551,14 @@
                                                                   t-out="lbl_trial_pending"/>
                                                         </t>
                                                         <t t-elif="product.id in trial_ids">
-                                                            <!-- The trial is claimed by booking a class, never by
-                                                                 taking the product. This card opened a form that
-                                                                 claimed it on the spot, which is a second way to
-                                                                 spend a one-per-student entitlement - and the one
-                                                                 that spends it without choosing a class. -->
+                                                            <!-- A trial is asked for, never taken. This card used to
+                                                                 open the schedule, where tapping a class spent the
+                                                                 one-per-student entitlement with nobody at the studio
+                                                                 in the loop. It opens the request form instead, for
+                                                                 Barre exactly as for Reformer. -->
                                                             <a t-att-href="trial_href.get(product.id)"
                                                                class="mv-btn-book" style="text-decoration:none;"
-                                                               t-out="lbl_view"/>
+                                                               t-out="lbl_request_trial"/>
                                                         </t>
                                                         <t t-elif="product.id in free_ids">
                                                             <!-- Nothing to pay and nothing to choose, so there is
@@ -1700,12 +1700,12 @@
                                       t-out="lbl_trial_pending"/>
                             </t>
                             <t t-elif="is_trial">
-                                <!-- Same as the card: the class is what claims
-                                     the trial, so this sends them to pick one. -->
+                                <!-- Same as the card: the studio places a trial,
+                                     so this asks rather than books. -->
                                 <a t-att-href="trial_href"
                                    class="mv-pkg-buy-btn"
                                    style="display:block;text-align:center;text-decoration:none;line-height:1.4;"
-                                   t-out="lbl_view"/>
+                                   t-out="lbl_request_trial"/>
                             </t>
                             <t t-elif="is_free">
                                 <!-- One tap. A checkout page collects a payment

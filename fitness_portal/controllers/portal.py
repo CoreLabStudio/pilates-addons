@@ -1300,23 +1300,37 @@ class FitnessStudentPortal(http.Controller):
         _claimable = self._trial_offer_open() and not self._trial_entitlement_used(partner)
         trial_ids = frozenset(
             p.id for p in products if _claimable and self._is_trial_product(p))
+        # Every trial is requested, never booked from the shop. The card used
+        # to open the schedule filtered to the discipline, and tapping a class
+        # there claimed the entitlement on the spot - so a Barre trial was
+        # spent without the studio ever seeing the request, and the student
+        # could land in a class nobody had placed them in. Both disciplines
+        # go to the same form now.
         trial_href = {
-            p.id: '/my/studio?%s' % urlencode(
-                {'discipline': p.fitness_class_type or 'reformer'})
+            p.id: '/my/trial?%s' % urlencode(
+                {'class_interest': p.fitness_class_type or 'reformer'})
             for p in products if p.id in trial_ids
         }
 
-        # The Reformer trial is requested, not booked, so "already claimed"
-        # does not describe it while the studio is still deciding: a pending
-        # request creates no order, so nothing here suppressed the button and
-        # the card invited a second request as though the first had not
-        # happened.
-        pending_trial_ids = frozenset()
-        if self._pending_reformer_request(partner):
-            _rt = request.env.ref('fitness_packages.product_reformer_trial',
-                                  raise_if_not_found=False)
-            if _rt:
-                pending_trial_ids = frozenset([_rt.id])
+        # The cards' own headings, so the note above them can use the same
+        # words. Falls back to the discipline, which is a proper noun in every
+        # language we serve - and if a product is missing its card is not on
+        # the page either, so the note is not shown at all.
+        trial_names = {'barre': 'Barre', 'reformer': 'Reformer'}
+        for p in self._trial_products():
+            if p.fitness_class_type in trial_names:
+                trial_names[p.fitness_class_type] = p.name or trial_names[p.fitness_class_type]
+
+        # A trial is requested, not booked, so "already claimed" does not
+        # describe it while the studio is still deciding: a pending request
+        # creates no order, so nothing here suppressed the button and the card
+        # invited a second request as though the first had not happened. Asked
+        # per discipline, because that is what a request is for - an open
+        # Barre request must not silence the Reformer card, or the reverse.
+        pending_trial_ids = frozenset(
+            p.id for p in products
+            if self._is_trial_product(p)
+            and self._pending_trial_request(partner, p.fitness_class_type))
 
         pkg_meta = {}
         for p in products:
@@ -1434,7 +1448,8 @@ class FitnessStudentPortal(http.Controller):
             # only the trial is claimed by booking a class.
             'trial_ids':                trial_ids,
             'trial_href':               trial_href,
-            'lbl_view':                 _('View classes'),
+            # Says what the button does, not what the next page contains.
+            'lbl_request_trial':        _('Book'),
             # The tax term is a word, not punctuation: English says VAT where
             # Spanish and Catalan say IVA. It was written into the markup, so
             # every language got the Spanish one.
@@ -1452,11 +1467,14 @@ class FitnessStudentPortal(http.Controller):
             # Names the two products rather than the two disciplines. This
             # note sits above a page that also sells Barre Single, Reformer
             # Single and privates, where "choose Barre or Reformer" reads as
-            # though any class in either room were free.
+            # though any class in either room were free. The names come from
+            # the products: spelled out in the sentence they went through the
+            # translator as English, so the note said "Barre Trial Class" over
+            # a card headed "Clase de prueba de Barre".
             'lbl_trial_pick_one':       _('Your first class is free - choose '
-                                          'Barre Trial Class or Reformer Trial '
-                                          'Class. One trial per student, so '
-                                          'pick the one you want to try.'),
+                                          '%(barre)s or %(reformer)s. One trial '
+                                          'per student, so pick the one you '
+                                          'want to try.') % trial_names,
 
             'booked':                   bool(kw.get('booked')),
             'error_msg':                kw.get('error') or '',
@@ -1565,19 +1583,20 @@ class FitnessStudentPortal(http.Controller):
             'is_trial':        bool(self._is_trial_product(product)
                                     and self._trial_offer_open()
                                     and not self._trial_entitlement_used(partner)),
-            'trial_href':      '/my/studio?%s' % urlencode(
-                {'discipline': product.fitness_class_type or 'reformer'}),
-            'lbl_view':        _('View classes'),
+            'trial_href':      '/my/trial?%s' % urlencode(
+                {'class_interest': product.fitness_class_type or 'reformer'}),
+            'lbl_request_trial': _('Book'),
             'lbl_plus_tax':    _('+ VAT'),
             # The price tag renders from the product, which cannot know whose
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)
                                 if self._is_trial_product(product) else None),
             # Same rule as the shop grid: while the studio still has an
-            # open Reformer request from this student, the product page
-            # says so rather than offering to take another one.
-            'trial_pending':   bool(self._is_reformer_trial(product)
-                                    and self._pending_reformer_request(partner)),
+            # open request from this student in this discipline, the product
+            # page says so rather than offering to take another one.
+            'trial_pending':   bool(self._is_trial_product(product)
+                                    and self._pending_trial_request(
+                                        partner, product.fitness_class_type)),
             'lbl_trial_pending': _('Request sent'),
             'free_claimed':    (self._is_free_for(partner, product)
                                 and self._free_already_claimed(partner, product)),
@@ -1604,18 +1623,6 @@ class FitnessStudentPortal(http.Controller):
                 website=True, sitemap=False, methods=['POST'])
     def packages_buy(self, product_id, **kw):
         return request.redirect(f'/my/packages/{product_id}/checkout')
-
-    def _is_reformer_trial(self, product):
-        """True for the one product that must be reviewed before booking.
-
-        Resolved by xmlid rather than by price or discipline: the rule is about
-        this specific product, and it must not lapse if the trial stops being
-        free. Falls back to False when the xmlid is missing so a database
-        without the seed record simply behaves as before.
-        """
-        ref = request.env.ref('fitness_packages.product_reformer_trial',
-                              raise_if_not_found=False)
-        return bool(ref) and product.id == ref.id
 
     @http.route('/my/packages/<int:product_id>/book-free', type='http', auth='user',
                 website=True, sitemap=False, methods=['POST'])
@@ -1991,19 +1998,25 @@ class FitnessStudentPortal(http.Controller):
 
     TRIAL_OPEN_STATES = ('pending', 'contacted')
 
-    def _pending_reformer_request(self, partner):
-        """This student's Reformer request that the studio has not closed yet.
+    def _pending_trial_request(self, partner, discipline=None):
+        """This student's trial request that the studio has not closed yet.
 
         Pending or contacted, not scheduled or declined: those are finished,
         and a student whose trial has been and gone may ask for another.
+        Narrowed to one discipline when asked, because the shop asks on
+        behalf of a particular card - a Barre request says nothing about
+        whether the Reformer card should still be offered.
         """
+        Trial = request.env['fitness.trial.request'].sudo()
         if not partner:
-            return request.env['fitness.trial.request'].sudo().browse()
-        return request.env['fitness.trial.request'].sudo().search([
+            return Trial.browse()
+        domain = [
             ('partner_id', '=', partner.id),
-            ('class_interest', '=', 'reformer'),
             ('status', 'in', list(self.TRIAL_OPEN_STATES)),
-        ], order='id desc', limit=1)
+        ]
+        if discipline:
+            domain.append(('class_interest', '=', discipline))
+        return Trial.search(domain, order='id desc', limit=1)
 
     @http.route('/my/news/<int:post_id>', type='http', auth='user',
                 website=True, sitemap=False)
