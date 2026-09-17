@@ -949,6 +949,54 @@
     return !!(res && res.ok);
   }
 
+  const NOTIF_DISMISSED = 'mv_notif_prompt_dismissed';
+
+  // The card on Home. Shown only to a browser that is not already subscribed,
+  // and only until it is either used or dismissed - a permission prompt that
+  // reappears on every visit is how a studio trains its students to ignore it.
+  async function setupNotifPrompt(reg, alreadyOn) {
+    const card = $('#mv-pushcard');
+    if (!card) return;
+    if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
+    let dismissed = false;
+    try { dismissed = localStorage.getItem(NOTIF_DISMISSED) === '1'; } catch (e) { /* private mode */ }
+    // Denied cannot be undone from script - the browser will not ask twice -
+    // so the card would be a button that does nothing.
+    if (dismissed || Notification.permission === 'denied') { card.hidden = true; return; }
+
+    const note = $('#mv-pushcard-state');
+    const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
+    card.hidden = false;
+
+    const enable = $('#mv-notif-enable');
+    if (enable) {
+      enable.addEventListener('click', async () => {
+        enable.disabled = true;
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            const ok = await subscribeToPush(reg);
+            if (ok) { card.hidden = true; }
+            else { say(card.dataset.msgFailed || ''); }
+          } else if (perm === 'denied') {
+            say(card.dataset.msgBlocked || '');
+          } else {
+            say(card.dataset.msgDismissed || '');
+          }
+        } catch (e) {
+          say((card.dataset.msgFailed || '') + ' (' + (e && e.name ? e.name : 'error') + ')');
+        } finally { enable.disabled = false; }
+      });
+    }
+    const dismiss = $('#mv-notif-dismiss');
+    if (dismiss) {
+      dismiss.addEventListener('click', () => {
+        card.hidden = true;
+        try { localStorage.setItem(NOTIF_DISMISSED, '1'); } catch (err) { /* private mode */ }
+      });
+    }
+  }
+
   async function setupPush(reg) {
     if (!reg || !('PushManager' in window) || !('Notification' in window)) return;
     const btn = $('#mv-push-enable');
@@ -965,18 +1013,21 @@
         note.textContent = btn ? (btn.dataset.msgOn || '') : '';
         note.hidden = !note.textContent;
       }
+      await setupNotifPrompt(reg, ok);
       return;
     }
     // Denied is the user's decision and asking again is not possible from
     // script - the browser will not show the prompt twice.
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
+      await setupNotifPrompt(reg, false);
       return;
     }
     // Otherwise offer it, and only ask when they press the button. A prompt
     // fired on page load is the fastest way to get permission denied
     // permanently, and on iOS it is ignored entirely unless it follows a
     // real gesture.
+    await setupNotifPrompt(reg, false);
     if (!btn) return;
     btn.hidden = false;
     btn.addEventListener('click', async () => {

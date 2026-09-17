@@ -310,6 +310,14 @@
                        t-out="lbl_trial_offer"/>
                 </t>
 
+                <!-- Asked here rather than beside the install prompt further
+                     down: this is a one-time ask, and below the stats, the
+                     membership card and the timetable is somewhere most
+                     students would never scroll to. Still after the booking
+                     CTAs, so it never gets in the way of what someone opened
+                     the app to do. -->
+                <t t-call="fitness_portal.mv_notif_prompt"/>
+
                 <t t-if="has_any_bookings">
                 <!-- Two quick stats. Both are tappable. -->
                 <div class="mv-stat-row">
@@ -3261,6 +3269,32 @@
     <!--     the instructions instead                                           -->
     <!-- Rendering server-side and hiding would flash a button at someone who    -->
     <!-- already installed, so the default state is hidden. -->
+    <!-- Same contract as the install prompt above: ships hidden, and only the
+         browser knows whether to reveal it. The server can see that an account
+         has no device registered, but not whether *this* browser is the one
+         missing - someone with a laptop registered and a phone that is not
+         would be told nothing on the phone, which is backwards. So the check
+         happens client-side, per browser. -->
+    <template id="mv_notif_prompt" name="CoreLab Notification Prompt">
+        <div class="mv-install-card mv-pushcard" id="mv-pushcard" hidden="hidden"
+             t-att-data-msg-on="lbl_push_on"
+             t-att-data-msg-blocked="lbl_push_blocked"
+             t-att-data-msg-dismissed="lbl_push_dismissed"
+             t-att-data-msg-failed="lbl_push_failed">
+            <div class="mv-install-text">
+                <span class="mv-install-title" t-out="lbl_notif_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_sub"/>
+            </div>
+            <div class="mv-install-actions">
+                <button type="button" class="mv-install-btn" id="mv-notif-enable"
+                        t-out="lbl_notif_cta"/>
+                <button type="button" class="mv-install-dismiss" id="mv-notif-dismiss"
+                        t-att-aria-label="lbl_notif_dismiss" t-out="lbl_notif_dismiss"/>
+            </div>
+            <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"/>
+        </div>
+    </template>
+
     <template id="mv_install_prompt" name="CoreLab Install App Prompt">
         <div class="mv-install-card" id="mv-install-card" hidden="hidden">
             <div class="mv-install-text">
