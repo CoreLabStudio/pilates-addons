@@ -36,10 +36,9 @@ class FitnessTrialDeclineWizard(models.TransientModel):
         # A box holding only spaces is the same as an empty one, and a
         # notification whose body is a space helps nobody.
         reason = (self.reason or '').strip()
-        if self.request_id.status == 'scheduled':
-            raise UserError(_(
-                "This request is already scheduled and the class is booked. "
-                "Cancel the booking from the student's schedule first, so the "
-                "seat is released and their credit comes back."))
+        # A scheduled request is no longer refused here. It used to send the
+        # studio away to cancel the booking first, which is exactly the second
+        # step this dialog exists to save; _decline cancels the place itself,
+        # releasing the seat and returning the credit.
         self.request_id._decline(reason)
         return {'type': 'ir.actions.act_window_close'}

@@ -613,3 +613,45 @@ msgstr "Classes cancel·lades"
 #: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
 msgid "%(classes)s classes cancelled. %(students)s student bookings were cancelled and their credits returned."
 msgstr "%(classes)s classes cancel·lades. S'han cancel·lat %(students)s reserves i s'han tornat els seus crèdits."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "Only studio managers can cancel a class."
+msgstr "Només les responsables de l’estudi poden cancel·lar una classe."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "Only studio managers can restore a class."
+msgstr "Només les responsables de l’estudi poden restaurar una classe."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "%(done)s class(es) cancelled, %(students)s student booking(s) cancelled and their credits returned."
+msgstr "%(done)s classe(s) cancel·lada(es), %(students)s reserva(es) cancel·lada(es) i els seus crèdits tornats."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "%(skipped)s were already cancelled and were left alone."
+msgstr "%(skipped)s ja estaven cancel·lades i s'han deixat com estaven."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "%(done)s class(es) back on the timetable. Students who were cancelled have not been re-booked - their credits are back and they need to book again."
+msgstr "%(done)s classe(s) de nou a l’horari. Les alumnes cancel·lades no s’han tornat a reservar: tenen els seus crèdits i han de reservar de nou."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "%(skipped)s were not cancelled and were left alone."
+msgstr "%(skipped)s no estaven cancel·lades i s'han deixat com estaven."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "Classes restored"
+msgstr "Classes restaurades"

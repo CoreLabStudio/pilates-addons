@@ -448,3 +448,9 @@ msgstr "Usa el botón Cancelar solicitud. Avisa a la alumna por correo y en la a
 #: code:addons/fitness_trials/controllers/trial.py:0
 msgid "The studio is closed that day. Please choose another: %(days)s."
 msgstr "El estudio está cerrado ese día. Elige otro: %(days)s."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The class booking was cancelled."
+msgstr "La reserva de la clase fue cancelada."

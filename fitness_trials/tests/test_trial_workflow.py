@@ -366,6 +366,69 @@ class TestTrialWorkflow(TransactionCase):
             "a declined request is somebody else's decision already made",
         )
 
+    # -- one booking, one truth ---------------------------------------------
+
+    def _approved(self):
+        """A request that has been approved, so a booking exists behind it."""
+        request = self._request(partner_id=self.partner.id)
+        request.occurrence_id = self._event()
+        request.action_approve_and_book()
+        return request
+
+    def test_approval_remembers_the_booking(self):
+        request = self._approved()
+        self.assertEqual(request.status, "scheduled")
+        self.assertTrue(
+            request.booking_id,
+            "without the link the request cannot follow its booking",
+        )
+
+    def test_cancelling_the_booking_cancels_the_request(self):
+        """The studio cancelled one student's place, and the trial list went
+        on saying the class was happening until somebody cancelled it a second
+        time."""
+        request = self._approved()
+        booking = request.booking_id
+        self.env["fitness.booking.cancel.wizard"].create({
+            "booking_id": booking.id, "reason": "She cannot make it.",
+        }).action_confirm()
+        self.assertEqual(booking.state, "cancelled")
+        self.assertEqual(
+            request.status, "declined",
+            "the request should follow its booking rather than needing a "
+            "second cancellation",
+        )
+
+    def test_cancelling_the_request_cancels_the_booking(self):
+        """And the other way round, which used to be refused outright."""
+        request = self._approved()
+        booking = request.booking_id
+        self._decline(request, "The studio is calling this one off.")
+        self.assertEqual(request.status, "declined")
+        self.assertEqual(booking.state, "cancelled")
+        self.assertTrue(
+            booking.credit_returned,
+            "cancelling from this side must release the seat and hand the "
+            "credit back, which is why it used to send the studio away",
+        )
+
+    def test_cancelling_the_whole_class_cancels_the_request(self):
+        request = self._approved()
+        request.occurrence_id.action_cancel_class()
+        self.assertEqual(request.status, "declined")
+
+    def test_a_request_scheduled_before_the_link_existed_still_follows(self):
+        """Rows approved before booking_id was added resolve by student and
+        class instead, so production history needs no migration."""
+        request = self._approved()
+        booking = request.booking_id
+        request.booking_id = False
+        self.assertEqual(request._find_booking(), booking)
+        self.env["fitness.booking.cancel.wizard"].create({
+            "booking_id": booking.id,
+        }).action_confirm()
+        self.assertEqual(request.status, "declined")
+
     # -- cancelling --------------------------------------------------------
 
     def _decline(self, request, reason="No space that week."):
@@ -471,14 +534,21 @@ class TestTrialWorkflow(TransactionCase):
             "nothing should be left blocking a fresh request",
         )
 
-    def test_a_scheduled_request_is_not_cancelled_from_here(self):
-        """The class is booked; the seat and the credit are the real subject.
+    def test_a_scheduled_request_with_no_booking_still_cancels(self):
+        """Replaces a test that asserted the old refusal.
 
-        Declining the request would leave the booking standing and the student
-        holding a class nobody meant them to have.
+        Cancelling a scheduled request used to be refused outright, on the
+        grounds that the booking was the real subject - which just made the
+        studio do it in two places. It cancels the booking itself now.
+
+        This is the odd case that survives: a request marked scheduled with
+        nothing behind it, because somebody set the status by hand or the
+        booking was deleted. There is nothing to cancel, and refusing to
+        cancel the request would strand it as Scheduled for ever.
         """
         request = self._request(partner_id=self.partner.id)
         request.occurrence_id = self._event()
         request.write({"status": "scheduled"})
-        with self.assertRaises(UserError):
-            self._decline(request)
+        self.assertFalse(request._find_booking())
+        self._decline(request, "Nothing behind this one.")
+        self.assertEqual(request.status, "declined")
