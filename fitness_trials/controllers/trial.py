@@ -177,32 +177,31 @@ class TrialRequestController(http.Controller):
         """Kept for the JSON API below, which only ever offered Barre."""
         return self._get_slots('barre')
 
-    def _class_types(self):
-        """The classes the studio actually runs, per discipline.
+    def _trials(self):
+        """The model, which owns the timetable questions."""
+        return request.env['fitness.trial.request'].sudo()
 
-        Read from the class types rather than from generated occurrences: the
-        form asks what somebody would like to do, not which slot they want, so
-        a discipline with nothing on the calendar this week still has classes
-        to offer.
-        """
-        types = request.env['fitness.class.type'].sudo().search(
-            [('classroom_type', 'in', ('barre', 'reformer'))], order='name')
-        out = {'barre': [], 'reformer': []}
-        for ct in types:
-            out.setdefault(ct.classroom_type, []).append({
-                'id': ct.id,
-                'name': ct.name or '',
-                'duration': ct.duration or 0,
-            })
-        return out
+    def _class_types(self):
+        return self._trials()._offered_class_types()
 
     def _form_ctx(self, **extra):
         """Everything the form needs to render, however it got here."""
-        types = self._class_types()
+        Trials = self._trials()
+        types = Trials._offered_class_types()
+        open_days = Trials._open_weekdays()
+        lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
+        if lang not in _VALID_LANGS:
+            lang = 'es_ES'
         ctx = {
             'barre_types': types['barre'],
             'reformer_types': types['reformer'],
             'today_iso': _date.today().isoformat(),
+            # Which days the studio is open, for the hint under the date box
+            # and for the check in the browser. Python's weekday numbers,
+            # because that is what a Date gives JavaScript once shifted.
+            'open_days': open_days,
+            'open_dows': [Trials.WEEKDAY_ORDER.index(d) for d in open_days],
+            'open_days_label': Trials._weekday_hint(open_days, lang),
             'form_values': {},
             'source': 'website',
         }
@@ -352,6 +351,20 @@ class TrialRequestController(http.Controller):
                 errors.append(_('Please choose a preferred date.'))
         if preferred_period not in ('morning', 'evening'):
             errors.append(_('Please say whether you prefer the morning or the evening.'))
+        # The studio is closed on days it runs nothing, so a request for one
+        # is a request somebody has to go back and renegotiate. Checked here
+        # as well as in the browser: the browser check is a courtesy, this is
+        # the one that holds.
+        if preferred_date and not errors:
+            _trials = self._trials()
+            try:
+                _day = _date.fromisoformat(preferred_date)
+            except ValueError:
+                _day = None
+            if _day is not None and not _trials._is_open_on(_day):
+                errors.append(_(
+                    'The studio is closed that day. Please choose another: %(days)s.',
+                    days=_trials._weekday_hint(_trials._open_weekdays(), lang)))
         if class_interest == 'reformer' and reformer_first not in ('yes', 'no'):
             errors.append(_('Please tell us whether you have used a Reformer before.'))
 

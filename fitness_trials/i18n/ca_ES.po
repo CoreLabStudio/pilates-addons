@@ -442,3 +442,9 @@ msgstr "Aquesta sol·licitud ja està programada i la classe està reservada. Ca
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "Use the Cancel request button. It tells the student, by email and in the app, and lets you say why."
 msgstr "Fes servir el botó Cancel·lar sol·licitud. Avisa l’alumna per correu i a l’app, i et deixa explicar el motiu."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "The studio is closed that day. Please choose another: %(days)s."
+msgstr "L'estudi està tancat aquell dia. Tria'n un altre: %(days)s."

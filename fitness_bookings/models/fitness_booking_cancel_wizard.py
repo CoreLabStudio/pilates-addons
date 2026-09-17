@@ -13,11 +13,21 @@ class FitnessBookingCancelWizard(models.TransientModel):
         'Restore Credit', default=False,
         help='Return the student\'s credit even though this cancellation is within 6 hours of class.',
     )
+    reason = fields.Text(
+        'Reason',
+        help="Optional. Shown to the student in the cancellation message and "
+             "kept on the booking, so next week somebody can still tell why "
+             "this class was cancelled.")
 
     def action_confirm(self):
         self.ensure_one()
         ctx = dict(self.env.context, _admin_cancel_direct=True)
         if self.restore_credit:
             ctx['admin_force_refund'] = True
+        # A box of spaces is an empty box; a message whose reason is a space
+        # helps nobody.
+        reason = (self.reason or '').strip()
+        if reason:
+            ctx['cancel_reason'] = reason
         self.booking_id.with_context(ctx).action_cancel()
         return {'type': 'ir.actions.act_window_close'}

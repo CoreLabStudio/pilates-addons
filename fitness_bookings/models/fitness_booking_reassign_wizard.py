@@ -64,6 +64,11 @@ class FitnessBookingReassignWizard(models.TransientModel):
         'Return the credit', default=True,
         help="Applies to a cancellation inside the studio's cancellation "
              "window, where credit would not normally come back.")
+    reason = fields.Text(
+        'Reason',
+        help="Optional. Goes to the student with the message they already "
+             "get, whether they are moved or cancelled, and is kept on the "
+             "booking when it is a cancellation.")
 
     # ── what a credit actually covers ────────────────────────────────────────
     @staticmethod
@@ -207,7 +212,8 @@ class FitnessBookingReassignWizard(models.TransientModel):
 
         # The student has to hear about this: they did not ask to be moved,
         # and the class they think they are attending is no longer theirs.
-        booking._notify_moved(origin)
+        booking.with_context(
+            move_reason=(self.reason or '').strip() or False)._notify_moved(origin)
 
         # Both rosters changed, so both seat counts are stale.
         booking._refresh_booked_seats()
@@ -286,7 +292,10 @@ class FitnessBookingReassignWizard(models.TransientModel):
         booking = booking or self.booking_id
         if booking.state == 'cancelled':
             raise UserError(_("That booking is already cancelled."))
+        # A box of spaces is an empty box.
+        reason = (self.reason or '').strip()
         booking.with_context(
             _admin_cancel_direct=True,
             admin_force_refund=bool(self.restore_credit),
+            cancel_reason=reason or False,
         ).action_cancel()

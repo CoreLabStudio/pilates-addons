@@ -220,3 +220,27 @@ msgstr "TÃ­tulo"
 #: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__user_id
 msgid "User"
 msgstr "Usuario"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "Reason: %(why)s"
+msgstr "Motivo: %(why)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "Your class has been changed"
+msgstr "Tu clase ha cambiado"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "The studio moved you from %(old)s to %(new)s on %(when)s. Your credit is unchanged."
+msgstr "El estudio te ha cambiado de %(old)s a %(new)s el %(when)s. Tu crédito no cambia."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "The studio moved you to %(new)s. Your credit is unchanged."
+msgstr "El estudio te ha cambiado a %(new)s. Tu crédito no cambia."

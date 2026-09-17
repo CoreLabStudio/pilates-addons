@@ -75,9 +75,12 @@
                 <field name="classroom_id" string="Studio"/>
                 <field name="class_type_id" string="Class Type"/>
                 <field name="session_type" string="Session"/>
-                <field name="capacity" string="Capacity"/>
-                <field name="booked_seats" string="Booked"/>
-                <field name="available_seats" string="Available"/>
+                <!-- Summed, so filtering to a day answers "how many
+                     students are coming" without anyone adding up a column
+                     by hand. Odoo totals these in the footer and per group. -->
+                <field name="capacity" string="Capacity" sum="Places"/>
+                <field name="booked_seats" string="Booked" sum="Students"/>
+                <field name="available_seats" string="Available" sum="Free"/>
             </list>
         </field>
     </record>
@@ -131,12 +134,105 @@
         </field>
     </record>
 
+    <!-- ── The Schedule's own search panel ──────────────────────────────
+         Pinned on the action below. Without it the page fell through to
+         Odoo's stock calendar.event search, which is built for personal
+         meetings: a relative date filter and nothing about rooms, classes or
+         how full anything is. -->
+    <record id="view_fitness_schedule_search" model="ir.ui.view">
+        <field name="name">calendar.event.fitness.schedule.search</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <search string="Classes">
+                <field name="name" string="Class"/>
+                <!-- Searchable, so the panel offers a real date box. This is
+                     what was missing: the stock filter only moved in whole
+                     months relative to today. -->
+                <field name="start" string="Date"/>
+                <field name="class_type_id"/>
+                <field name="classroom_id" string="Studio"/>
+                <field name="user_id" string="Instructor"/>
+
+                <separator/>
+                <!-- Ranges people actually ask for. None of them stop at the
+                     end of a month, and "Upcoming" is the one the desk wants
+                     nine times out of ten. -->
+                <filter string="Today" name="today"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)))]"/>
+                <filter string="Tomorrow" name="tomorrow"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0))),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=2), datetime.time(0,0,0)))]"/>
+                <filter string="Next 7 days" name="next_7"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=7), datetime.time(0,0,0)))]"/>
+                <filter string="Next 30 days" name="next_30"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=30), datetime.time(0,0,0)))]"/>
+                <filter string="Upcoming" name="upcoming"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter string="Past" name="past"
+                        domain="[('start', '&lt;', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <!-- And the open-ended one, so a date typed into the box above
+                     can be narrowed by month without the filter fighting it. -->
+                <filter string="Date" name="by_date" date="start"/>
+
+                <separator/>
+                <filter string="Scheduled" name="scheduled"
+                        domain="[('class_state', '=', 'scheduled')]"/>
+                <filter string="Cancelled" name="cancelled"
+                        domain="[('class_state', '=', 'cancelled')]"/>
+
+                <separator/>
+                <!-- How full. "Nobody booked" is the one that matters most:
+                     it is the list the studio scans before deciding what to
+                     cancel. -->
+                <filter string="Nobody booked" name="empty"
+                        domain="[('booked_seats', '=', 0)]"/>
+                <filter string="Has students" name="has_students"
+                        domain="[('booked_seats', '&gt;', 0)]"/>
+                <filter string="Has space" name="has_space"
+                        domain="[('available_seats', '&gt;', 0)]"/>
+                <filter string="Full" name="full"
+                        domain="[('available_seats', '&lt;=', 0), ('capacity', '&gt;', 0)]"/>
+
+                <!-- Odoo 19 rejects expand= on a search group, and a
+                     group-by filter wants an explicit empty domain - the same
+                     shape the stock calendar.event search uses. -->
+                <group>
+                    <filter string="Day" name="group_day" domain="[]"
+                            context="{'group_by': 'start:day'}"/>
+                    <filter string="Week" name="group_week" domain="[]"
+                            context="{'group_by': 'start:week'}"/>
+                    <filter string="Month" name="group_month" domain="[]"
+                            context="{'group_by': 'start:month'}"/>
+                    <separator/>
+                    <filter string="Class Type" name="group_class_type" domain="[]"
+                            context="{'group_by': 'class_type_id'}"/>
+                    <filter string="Studio" name="group_classroom" domain="[]"
+                            context="{'group_by': 'classroom_id'}"/>
+                    <filter string="Instructor" name="group_teacher" domain="[]"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Status" name="group_state" domain="[]"
+                            context="{'group_by': 'class_state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_fitness_schedule" model="ir.actions.act_window">
         <field name="name">Schedule</field>
         <field name="res_model">calendar.event</field>
         <field name="view_mode">list,calendar,form</field>
         <field name="domain">[('is_fitness_class', '=', True)]</field>
-        <field name="context">{'default_is_fitness_class': True}</field>
+        <!-- Opens on what is still to come. The page is used to run the week
+             ahead, and a list that opens on every class since the studio
+             opened buries that. Past is one click away. -->
+        <field name="context">{'default_is_fitness_class': True,
+                               'search_default_upcoming': 1}</field>
+        <!-- Pinned, like the list and calendar views below. Unpinned it fell
+             through to Odoo's personal-meetings search. -->
+        <field name="search_view_id" ref="view_fitness_schedule_search"/>
         <!-- Pin each mode to the studio's own view. Without this the calendar
              mode resolves to whichever calendar.event calendar has the highest
              priority, which is Odoo's attendee one. -->

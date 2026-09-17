@@ -16,6 +16,14 @@
                     <group>
                         <field name="restore_credit"/>
                     </group>
+                    <!-- Optional. The student is told the class is cancelled
+                         either way; a sentence here tells them why, and the
+                         booking keeps it so next week somebody can still
+                         say what happened. -->
+                    <group string="Reason (optional)">
+                        <field name="reason" nolabel="1" colspan="2"
+                               placeholder="e.g. The instructor is unwell - sorry for the short notice."/>
+                    </group>
                 </sheet>
                 <footer>
                     <button string="Cancel Booking" type="object"
