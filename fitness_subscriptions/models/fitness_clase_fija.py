@@ -1,7 +1,15 @@
+import pytz
+
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
 import logging
+
+# The studio is in Spain and calendar.event.start is stored in UTC. A slot
+# reserved for 18:00 in Matadepera is 16:00 UTC in summer, so the label has to
+# convert or it names an hour the class does not run at - and it is read at
+# exactly the moment somebody is checking the slot is the right one.
+STUDIO_TZ = 'Europe/Madrid'
 _logger = logging.getLogger(__name__)
 
 
@@ -31,7 +39,9 @@ class FitnessClaseFija(models.Model):
         for rec in self:
             ev = rec.calendar_event_id
             if ev and ev.start:
-                rec.name = f"{ev.name} ({ev.start.strftime('%a %H:%M')})"
+                tz = pytz.timezone(self.env.context.get('tz') or STUDIO_TZ)
+                local = pytz.utc.localize(ev.start).astimezone(tz)
+                rec.name = f"{ev.name} ({local.strftime('%a %H:%M')})"
             elif ev:
                 rec.name = ev.name or "Unset"
             else:
