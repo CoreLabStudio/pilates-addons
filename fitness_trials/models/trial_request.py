@@ -117,7 +117,10 @@ class FitnessTrialRequest(models.Model):
             ('pending', 'Pending'),
             ('contacted', 'Contacted'),
             ('scheduled', 'Scheduled'),
-            ('declined', 'Declined'),
+            # Called Cancelled because that is what the button says. The
+            # stored value stays 'declined': renaming it would be a data
+            # migration for a word.
+            ('declined', 'Cancelled'),
         ],
         string='Status',
         default='pending',
@@ -220,7 +223,24 @@ class FitnessTrialRequest(models.Model):
                 rec._send_pending_email()
         return records
 
+    # Set by _decline, and by nothing else. A context key rather than a
+    # check on the reason, because the reason is optional: what has to be
+    # true is that the cancellation went through the button, so the student
+    # was told about it.
+    _DECLINE_KEY = 'fitness_trial_declining'
+
     def write(self, vals):
+        # Cancelling is a thing the student is told about, so it goes through
+        # action_decline. Enforced here rather than by hiding the status on a
+        # form: the dropdown, an import and a plain RPC write all arrive at
+        # this method, and only this method sees all of them.
+        if vals.get('status') == 'declined' and not self.env.context.get(self._DECLINE_KEY):
+            changing = self.filtered(lambda r: r.status != 'declined')
+            if changing:
+                raise UserError(_(
+                    "Use the Cancel request button. It tells the student, by "
+                    "email and in the app, and lets you say why."))
+
         # Choosing a slot is choosing the time. Done here as well as in the
         # onchange so it holds for an import, a server action or anything else
         # that does not go through a form.
@@ -439,7 +459,8 @@ class FitnessTrialRequest(models.Model):
         them rather than leaving them to discover it.
         """
         self.ensure_one()
-        self.write({'status': 'declined', 'decline_reason': reason})
+        self.with_context(**{self._DECLINE_KEY: True}).write({
+            'status': 'declined', 'decline_reason': reason or False})
         self._notify_declined(reason)
         return True
 

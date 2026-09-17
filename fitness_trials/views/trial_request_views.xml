@@ -18,7 +18,7 @@
         </div>
         <group>
           <field name="reason" nolabel="1" colspan="2"
-                 placeholder="e.g. We have no Reformer space that week - please ask again for the following one."/>
+                 placeholder="Optional - e.g. We have no Reformer space that week, please ask again for the following one."/>
         </group>
         <footer>
           <button name="action_confirm" type="object" string="Cancel the request"
@@ -133,7 +133,10 @@
           </group>
           <group string="Scheduling">
             <group>
-              <field name="status" string="Status"/>
+              <!-- Read-only: the header statusbar already shows it, and an
+                   editable copy here was a second way to cancel that skipped
+                   the reason and the notification. -->
+              <field name="status" string="Status" readonly="1"/>
               <field name="source" string="Came from" readonly="1"/>
               <!-- Filled in from the request's own email on submit, and created
                    from its name/email/phone at approval if the person is new.
@@ -206,7 +209,7 @@
         <filter string="Pending"   name="pending"   domain="[('status','=','pending')]"/>
         <filter string="Contacted" name="contacted" domain="[('status','=','contacted')]"/>
         <filter string="Scheduled" name="scheduled" domain="[('status','=','scheduled')]"/>
-        <filter string="Declined"  name="declined"  domain="[('status','=','declined')]"/>
+        <filter string="Cancelled" name="declined"  domain="[('status','=','declined')]"/>
         <group>
           <filter string="Class Type" name="group_class"  context="{'group_by':'class_interest'}"/>
           <filter string="Status"     name="group_status" context="{'group_by':'status'}"/>
