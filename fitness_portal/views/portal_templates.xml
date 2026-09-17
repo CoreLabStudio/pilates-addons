@@ -2145,7 +2145,16 @@
                              denied permanently, and iOS ignores it entirely
                              unless it follows a gesture. -->
                         <button type="button" id="mv-push-enable" class="mv-push-enable"
-                                hidden="hidden">Turn on phone notifications</button>
+                                hidden="hidden"
+                                t-att-data-msg-on="lbl_push_on"
+                                t-att-data-msg-blocked="lbl_push_blocked"
+                                t-att-data-msg-dismissed="lbl_push_dismissed"
+                                t-att-data-msg-failed="lbl_push_failed">Turn on phone notifications</button>
+                        <!-- Whatever the browser answered, in words. Tapping a
+                             button that greys out and comes back with no prompt
+                             and no message leaves no way to tell a refusal from
+                             a bug. -->
+                        <p class="mv-push-state" id="mv-push-state" hidden="hidden"/>
                     </div>
                     <t t-if="unread">
                         <form method="post" action="/my/notifications/read-all" style="margin:0;">
