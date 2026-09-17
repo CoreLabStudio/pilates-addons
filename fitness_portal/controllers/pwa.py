@@ -182,7 +182,11 @@ self.addEventListener('pushsubscriptionchange', (event) => {
             # the worker itself must not be cached hard, or a future change to
             # it can take a week to reach an installed phone
             ('Cache-Control', 'no-cache'),
-            ('Service-Worker-Allowed', '/my/'),
+            # Same reason as the manifest scope: the worker has to control
+            # /en/my/... and /ca_ES/my/... or it controls nothing anybody
+            # visits, and without a controlling worker there is no push
+            # subscription to make.
+            ('Service-Worker-Allowed', '/'),
         ])
 
     @http.route('/my/manifest.webmanifest', type='http', auth='public',
@@ -195,7 +199,13 @@ self.addEventListener('pushsubscriptionchange', (event) => {
         manifest = {
             'name': app_name,
             'short_name': APP_NAME,
-            'scope': '/my',
+            # The whole origin, not /my. The portal redirects every request to
+            # a language prefix - /my/home becomes /en/my/home or /ca_ES/my/home
+            # - and a scope of /my excludes all of them, so the installed app
+            # dropped straight out of standalone into a browser window with an
+            # address bar. Scope is a plain prefix match, so covering every
+            # language means covering the root.
+            'scope': '/',
             'start_url': '/my/home',
             'display': 'standalone',
             'background_color': BRAND_BG,

@@ -17,6 +17,18 @@ class TestInstructorDashboardLabels(TransactionCase):
 
     longMessage = False
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # A build database ships with English only. Asking for a language it
+        # does not have raises "Invalid language code" before any assertion
+        # runs, so these tests passed here and errored on odoo.sh for a reason
+        # that had nothing to do with the translations. _activate_and_install_lang
+        # also loads the .po files - merely flipping the active flag would leave
+        # every lookup falling back to English and fail for the wrong reason.
+        for code in ("es_ES", "ca_ES"):
+            cls.env["res.lang"]._activate_and_install_lang(code)
+
     def test_every_dashboard_label_is_translated(self):
         """Each string the dashboard shows must exist in both languages.
 
