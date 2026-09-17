@@ -579,3 +579,39 @@ msgstr "El estudio ha cancelado esta clase. Tu crédito ha sido devuelto."
 #: code:addons/fitness_bookings/models/calendar_event.py:0
 msgid "This class was cancelled by the studio. %(n)s booking(s) removed and credits returned."
 msgstr "El estudio ha cancelado esta clase. %(n)s reserva(s) eliminada(s) y créditos devueltos."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Tick at least one class to cancel."
+msgstr "Marca al menos una clase para cancelar."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "No classes on %(day)s."
+msgstr "No hay clases el %(day)s."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "%(students)s students booked across %(classes)s classes on %(day)s"
+msgstr "%(students)s alumnas reservadas en %(classes)s clases el %(day)s"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Cancelling %(classes)s classes will cancel %(students)s student bookings and return their credits."
+msgstr "Cancelar %(classes)s clases cancelará %(students)s reservas y devolverá sus créditos."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Classes cancelled"
+msgstr "Clases canceladas"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "%(classes)s classes cancelled. %(students)s student bookings were cancelled and their credits returned."
+msgstr "%(classes)s clases canceladas. Se han cancelado %(students)s reservas y se han devuelto sus créditos."

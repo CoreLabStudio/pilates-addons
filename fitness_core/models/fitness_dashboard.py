@@ -23,6 +23,13 @@ class FitnessAdminDashboard(models.TransientModel):
 
     name = fields.Char(default='Admin Dashboard')
 
+    # Which span the classes card is showing. A stored field on a transient
+    # record: the dashboard is created fresh each time Home is opened, so this
+    # is per-visit state and needs no cleanup.
+    classes_range = fields.Selection(
+        [('today', 'Today'), ('week', 'This week')],
+        default='today', string='Showing')
+
     # ── Stat tile counters ────────────────────────────────────────────────────
 
     today_classes = fields.Integer(string='Classes Today', compute='_compute_stats')
@@ -117,6 +124,31 @@ class FitnessAdminDashboard(models.TransientModel):
         to_utc = lambda d: d.astimezone(pytz.utc).replace(tzinfo=None)
         return to_utc(start_local), to_utc(end_local)
 
+    def _range_bounds(self):
+        """Start, end and a label for the span the classes card is showing.
+
+        The week runs from today, not from Monday: the card answers "what is
+        coming", and half a week of history at the top of it is noise.
+        """
+        self.ensure_one()
+        tz = self._studio_tz()
+        today = self._studio_now().date()
+        days = 7 if self.classes_range == 'week' else 1
+        start_local = tz.localize(datetime.combine(today, time.min))
+        end_local = start_local + timedelta(days=days)
+        to_utc = lambda d: d.astimezone(pytz.utc).replace(tzinfo=None)
+        return to_utc(start_local), to_utc(end_local), days
+
+    def action_show_today(self):
+        self.ensure_one()
+        self.classes_range = 'today'
+        return False
+
+    def action_show_week(self):
+        self.ensure_one()
+        self.classes_range = 'week'
+        return False
+
     def _compute_stats(self):
         day_start, day_end = self._today_bounds()
         teacher_ids = self._teacher_user_ids()
@@ -139,6 +171,26 @@ class FitnessAdminDashboard(models.TransientModel):
                 domain.append(('id', 'not in', teacher_ids))
             rec.active_students = self.env['res.users'].sudo().search_count(domain)
 
+    def _range_summary(self, classes, span_days):
+        """"14 students booked across 5 classes on 17 Sept".
+
+        Cancelled classes are already out of `classes`: counting them would
+        overstate both numbers, and the studio reads this to decide whether a
+        day is worth running.
+        """
+        self.ensure_one()
+        students = sum(classes.mapped('booked_seats'))
+        when = self._studio_now().date()
+        if span_days > 1:
+            return _(
+                '%(students)s students booked across %(classes)s classes '
+                'in the next %(days)s days',
+                students=students, classes=len(classes), days=span_days)
+        return _(
+            '%(students)s students booked across %(classes)s classes on %(day)s',
+            students=students, classes=len(classes),
+            day=format_date(self.env, when, date_format='d MMM'))
+
     @staticmethod
     def _record_url(model, res_id):
         """Backend form-view URL for one record."""
@@ -146,47 +198,72 @@ class FitnessAdminDashboard(models.TransientModel):
 
     # ── Preview panel compute ─────────────────────────────────────────────────
 
+    @api.depends('classes_range')
     def _compute_previews(self):
-        day_start, day_end = self._today_bounds()
         studio_tz = self._studio_tz()
 
         for rec in self:
+            day_start, day_end, span_days = rec._range_bounds()
             # ── Today's classes ───────────────────────────────────────────────
             # 5 rows left the card short of the two stacked cards beside it.
             # The height is matched with real classes rather than padding;
             # anything past this is what the "See all" link is for.
-            classes = self.env['calendar.event'].search([
+            domain = [
                 ('is_fitness_class', '=', True),
                 ('start', '>=', day_start),
                 ('start', '<', day_end),
-            ], order='start asc', limit=PREVIEW_CLASSES_LIMIT)
+            ]
+            # Counted over the whole span, not over the rows that fit: the
+            # summary is the thing that stops anyone adding up a column, so
+            # it has to describe everything, not the first eight.
+            all_classes = self.env['calendar.event'].sudo().search(domain)
+            live = all_classes.filtered(lambda c: c.class_state != 'cancelled')
+            total_students = sum(live.mapped('booked_seats'))
+            limit = PREVIEW_CLASSES_LIMIT * 2 if span_days > 1 else PREVIEW_CLASSES_LIMIT
+            classes = self.env['calendar.event'].search(
+                domain, order='start asc', limit=limit)
 
             if classes:
+                # Once the range spans days, the time alone does not say
+                # which class is which.
+                show_day = span_days > 1
                 rows = ''
                 for cls in classes:
                     local = pytz.utc.localize(cls.start).astimezone(studio_tz)
                     time_str = local.strftime('%H:%M')
+                    day_cell = (f'<td>{_html.escape(local.strftime("%a %d"))}</td>'
+                                if show_day else '')
                     teacher = _html.escape(cls.user_id.name or '—')
                     name = _html.escape(cls.name or '—')
                     booked = cls.booked_seats or 0
                     cap = str(cls.capacity) if cls.capacity else '∞'
                     url = rec._record_url('calendar.event', cls.id)
                     rows += (
-                        f'<tr><td>{time_str}</td>'
+                        f'<tr>{day_cell}<td>{time_str}</td>'
                         f'<td><a class="cl-rowlink" href="{url}">{name}</a></td>'
                         f'<td>{teacher}</td><td>{booked}/{cap}</td>'
                         f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
                         f'title="Open this class">→</a></td></tr>'
                     )
+                day_head = '<th>Day</th>' if show_day else ''
+                more = ''
+                if len(all_classes) > len(classes):
+                    more = _html.escape(_(
+                        '%(shown)s of %(total)s shown - See all for the rest.',
+                        shown=len(classes), total=len(all_classes)))
+                    more = f'<p class="text-muted small mb-0 mt-1">{more}</p>'
                 rec.preview_classes_html = (
+                    f'<p class="mb-2"><strong>{_html.escape(rec._range_summary(live, span_days))}</strong></p>'
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Time</th><th>Class</th><th>Instructor</th><th>Seats</th><th></th></tr></thead>'
-                    f'<tbody>{rows}</tbody></table>'
+                    f'<thead><tr>{day_head}<th>Time</th><th>Class</th>'
+                    '<th>Instructor</th><th>Seats</th><th></th></tr></thead>'
+                    f'<tbody>{rows}</tbody></table>{more}'
                 )
             else:
-                rec.preview_classes_html = (
-                    '<p class="text-muted mb-0">No classes scheduled for today.</p>'
-                )
+                empty = _html.escape(
+                    _('No classes scheduled this week.') if span_days > 1
+                    else _('No classes scheduled for today.'))
+                rec.preview_classes_html = f'<p class="text-muted mb-0">{empty}</p>'
 
             # ── Pending trials ────────────────────────────────────────────────
             trials = rec._safe_search(
@@ -274,10 +351,13 @@ class FitnessAdminDashboard(models.TransientModel):
         return action.read()[0]
 
     def action_view_today_classes(self):
-        day_start, day_end = self._today_bounds()
+        # Follows whichever range the card is showing, so See all opens on the
+        # thing the card was describing rather than always on today.
+        self.ensure_one()
+        day_start, day_end, span_days = self._range_bounds()
         return {
             'type': 'ir.actions.act_window',
-            'name': "Today's Classes",
+            'name': _('Classes this week') if span_days > 1 else _("Today's Classes"),
             'res_model': 'calendar.event',
             'view_mode': 'list,form',
             'domain': [

@@ -203,6 +203,26 @@
 .o_fitness_dashboard .cl-arrow { font-size: 1rem; line-height: 1; transition: transform .15s ease; }
 .o_fitness_dashboard .cl-seeall:hover .cl-arrow { transform: translateX(3px); }
 
+/* Today / This week, on the classes card. Sits between the title and See
+   all, so the head needs the title to give up its share of the row. */
+.o_fitness_dashboard .cl-range-toggle {
+  display: inline-flex; gap: 4px; margin-left: auto; margin-right: 4px;
+  background: var(--cl-sand, #f1ece6); border-radius: 999px; padding: 3px;
+}
+.o_fitness_dashboard .cl-rangebtn {
+  background: transparent; border: 0; border-radius: 999px;
+  padding: 3px 12px; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--cl-brown); white-space: nowrap;
+}
+.o_fitness_dashboard .cl-rangebtn:hover { color: var(--cl-blue-dark); }
+/* The one you are looking at. A filled pill rather than a colour change:
+   colour alone is not a state anybody reads at a glance. */
+.o_fitness_dashboard .cl-rangebtn-on {
+  background: #fff; color: var(--cl-blue-dark);
+  box-shadow: 0 1px 2px rgba(0,0,0,.12);
+}
+
 /* Badges */
 .o_fitness_dashboard .cl-badge {
   display: inline-flex; align-items: center; justify-content: center;

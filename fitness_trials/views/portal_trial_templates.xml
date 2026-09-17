@@ -316,7 +316,22 @@
                         <input type="date" id="trial_preferred_date" name="preferred_date"
                                class="form-control" required="required"
                                t-att-min="today_iso"
+                               t-att-data-open-dows="','.join(str(d) for d in open_dows)"
                                t-att-value="form_values.get('preferred_date', '')"/>
+                        <!-- Named rather than left to be discovered: a date
+                             input cannot grey out weekends, so the only other
+                             way to learn the studio is shut on Sunday is to
+                             pick it and be told. -->
+                        <div class="form-text" t-if="open_days_label">
+                            <t t-if="_lang == 'en_US'">Classes run <t t-out="open_days_label"/>.</t>
+                            <t t-elif="_lang == 'ca_ES'">Fem classes de <t t-out="open_days_label"/>.</t>
+                            <t t-else="">Hay clases de <t t-out="open_days_label"/>.</t>
+                        </div>
+                        <div class="invalid-feedback d-block d-none" id="mv-date-closed">
+                            <t t-if="_lang == 'en_US'">The studio is closed that day.</t>
+                            <t t-elif="_lang == 'ca_ES'">L'estudi està tancat aquell dia.</t>
+                            <t t-else="">El estudio está cerrado ese día.</t>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -385,6 +400,10 @@
                             document.querySelector('input[name="class_type_id"]:checked') &amp;&amp;
                             (document.getElementById('trial_preferred_date') || {}).value &amp;&amp;
                             document.querySelector('input[name="preferred_period"]:checked'));
+                        // A day the studio is shut is not an answer.
+                        if (enabled &amp;&amp; typeof dateIsOpen === 'function') {
+                            enabled = dateIsOpen();
+                        }
                         // Reformer also has to answer the experience question.
                         if (enabled &amp;&amp; ci.value === 'reformer') {
                             enabled = !!document.querySelector('input[name="reformer_is_first_time"]:checked');
@@ -446,9 +465,42 @@
                     // form top to bottom finished it and found Submit still
                     // dead - and re-picking a class appeared to "fix" it.
                     var dateInput = document.getElementById('trial_preferred_date');
+
+                    // The studio is shut on days it runs nothing. A date input
+                    // cannot grey those out, so the next best thing is to say
+                    // so the moment one is picked instead of after sending.
+                    // The open days come from the timetable, not from a list
+                    // written here, so a new Saturday class needs no change.
+                    var openDows = (dateInput &amp;&amp; dateInput.dataset.openDows || '')
+                        .split(',').filter(function (s) { return s !== ''; })
+                        .map(Number);
+                    var closedMsg = document.getElementById('mv-date-closed');
+
+                    function dateIsOpen() {
+                        if (!dateInput || !dateInput.value || !openDows.length) { return true; }
+                        // Parsed as parts, not as a Date string: "2026-09-20"
+                        // is read as UTC midnight and shifts a day west of
+                        // Greenwich, which would call the wrong day closed.
+                        var p = dateInput.value.split('-');
+                        var dow = (new Date(+p[0], +p[1] - 1, +p[2])).getDay();
+                        // JS counts Sunday first; the timetable counts Monday.
+                        return openDows.indexOf((dow + 6) % 7) !== -1;
+                    }
+
+                    function checkDate() {
+                        var ok = dateIsOpen();
+                        if (closedMsg) { closedMsg.classList.toggle('d-none', ok); }
+                        if (dateInput) { dateInput.classList.toggle('is-invalid', !ok); }
+                        return ok;
+                    }
+
                     if (dateInput) {
-                        dateInput.addEventListener('change', updateSubmit);
-                        dateInput.addEventListener('input', updateSubmit);
+                        dateInput.addEventListener('change', function () {
+                            checkDate(); updateSubmit();
+                        });
+                        dateInput.addEventListener('input', function () {
+                            checkDate(); updateSubmit();
+                        });
                     }
                     document.querySelectorAll('input[name="preferred_period"]').forEach(
                         function (r) { r.addEventListener('change', updateSubmit); });

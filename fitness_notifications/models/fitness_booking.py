@@ -117,6 +117,12 @@ class FitnessBookingNotifications(models.Model):
                 body = lang_env.env._(
                     'The studio moved you to %(new)s. Your credit is unchanged.',
                     new=event.name or '')
+            # Whoever moved them may have said why. Appended rather than woven
+            # in: the sentence above is the news, and the studio's own words
+            # should arrive as the studio wrote them.
+            why = (self.env.context.get('move_reason') or '').strip()
+            if why:
+                body = '%s %s' % (body, lang_env.env._('Reason: %(why)s', why=why))
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id, 'class_rescheduled',
                 lang_env.env._('Your class has been changed'),
@@ -302,6 +308,11 @@ class FitnessBookingNotifications(models.Model):
                     ' Check your credit balance for any refunds.',
                     cls=class_name)
             )
+            # The studio's own words, when it gave any. Appended so the news
+            # comes first and the explanation reads as the studio wrote it.
+            why = (self.env.context.get('cancel_reason') or '').strip()
+            if why:
+                body = '%s %s' % (body, lang_env.env._('Reason: %(why)s', why=why))
             try:
                 self.env['fitness.notification'].sudo()._create_for_user(
                     user.id,

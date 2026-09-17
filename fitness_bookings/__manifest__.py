@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Bookings – Yoleyva Studio',
-    'version': '19.0.1.2.16',
+    'version': '19.0.1.2.17',
     'category': 'Services',
     'summary': 'Class booking with capacity control, cancellation rules, attendance tracking',
     'author': 'Yoleyva Studio',
@@ -17,6 +17,7 @@
         'views/fitness_booking_views.xml',
         'views/fitness_booking_cancel_wizard_views.xml',
         'views/fitness_booking_reassign_wizard_views.xml',
+        'views/fitness_bulk_cancel_wizard_views.xml',
         'views/calendar_event_views.xml',
         'views/menu.xml',
     ],
