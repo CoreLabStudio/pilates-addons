@@ -540,6 +540,7 @@ msgstr "No tienes clases en los próximos %d días."
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_bottom_nav
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_studio
 msgid "Today"
 msgstr "Hoy"

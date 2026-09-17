@@ -555,3 +555,27 @@ msgstr "Solo los responsables del estudio pueden cancelar una clase entera."
 #: code:addons/fitness_bookings/models/fitness_booking.py:0
 msgid "This booking is already cancelled."
 msgstr "Esta reserva ya está cancelada."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "the class"
+msgstr "la clase"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "Class cancelled: %(name)s"
+msgstr "Clase cancelada: %(name)s"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "The studio has cancelled this class. Your credit has been returned."
+msgstr "El estudio ha cancelado esta clase. Tu crédito ha sido devuelto."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/calendar_event.py:0
+msgid "This class was cancelled by the studio. %(n)s booking(s) removed and credits returned."
+msgstr "El estudio ha cancelado esta clase. %(n)s reserva(s) eliminada(s) y créditos devueltos."

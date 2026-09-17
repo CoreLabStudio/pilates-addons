@@ -147,6 +147,14 @@
     <!-- Teacher bottom nav — 2 tabs: My Classes + Profile -->
     <template id="mv_teacher_bottom_nav" name="CoreLab Instructor Bottom Nav">
         <nav class="mv-bottom-nav" aria-label="Main navigation">
+            <!-- Today first: it is the screen an instructor opens the app for. -->
+            <a href="/my/instructor" class="mv-nav-tab">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <polyline points="12 7 12 12 15 14"/>
+                </svg>
+                <div>Today</div>
+            </a>
             <a href="/my/instructor/classes" class="mv-nav-tab">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -2131,6 +2139,13 @@
                     <div>
                         <p class="mv-greeting-name">Notifications</p>
                         <p class="mv-greeting-sub">Everything the studio has sent you</p>
+                        <!-- Hidden until the script knows this browser can take
+                             push and has not been asked yet. The prompt only
+                             appears on a real tap: fired on page load it gets
+                             denied permanently, and iOS ignores it entirely
+                             unless it follows a gesture. -->
+                        <button type="button" id="mv-push-enable" class="mv-push-enable"
+                                hidden="hidden">Turn on phone notifications</button>
                     </div>
                     <t t-if="unread">
                         <form method="post" action="/my/notifications/read-all" style="margin:0;">

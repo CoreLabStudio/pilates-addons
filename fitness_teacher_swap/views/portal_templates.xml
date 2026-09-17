@@ -1,6 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- ── Instructor dashboard: today at a glance ──────────────────────── -->
+    <template id="portal_instructor_dashboard" name="Today (Instructor)">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_teacher_page_header"/>
+
+                <div class="mv-greeting-row">
+                    <div>
+                        <p class="mv-greeting-name" t-out="greeting"/>
+                        <p class="mv-greeting-sub" t-out="today_label"/>
+                    </div>
+                </div>
+
+                <!-- The two numbers she actually arrives wanting. Both link
+                     onward rather than being dead counters. -->
+                <div class="mv-stat-row">
+                    <a href="/my/instructor/classes?filter=today" class="mv-stat-card">
+                        <div class="mv-stat-label" t-out="lbl_classes_today"/>
+                        <span class="mv-stat-value" t-out="class_count"/>
+                    </a>
+                    <a href="/my/instructor/classes?filter=today" class="mv-stat-card">
+                        <div class="mv-stat-label" t-out="lbl_students_today"/>
+                        <span class="mv-stat-value" t-out="student_count"/>
+                    </a>
+                </div>
+
+                <t t-if="not rows">
+                    <div class="mv-empty" t-out="empty_msg"/>
+                </t>
+                <t t-else="">
+                    <div class="mv-class-list">
+                        <t t-foreach="rows" t-as="row">
+                            <div t-attf-class="mv-class-row#{' mv-row-done' if row['done'] else ''}">
+                                <div style="flex:1;min-width:0;">
+                                    <p class="mv-class-row-name">
+                                        <t t-out="row['time']"/> · <t t-out="row['event'].name"/>
+                                    </p>
+                                    <p class="mv-class-row-sub">
+                                        <t t-if="row['room']"><t t-out="row['room']"/> · </t>
+                                        <t t-out="row['taken']"/> / <t t-out="row['capacity'] or '&#8734;'"/>
+                                    </p>
+                                    <t t-if="row['is_next']">
+                                        <p class="mv-row-flag" t-out="lbl_next"/>
+                                    </t>
+                                    <t t-elif="row['done']">
+                                        <p class="mv-row-flag mv-row-flag-muted" t-out="lbl_done"/>
+                                    </t>
+                                </div>
+                                <div class="mv-class-row-right">
+                                    <a t-attf-href="/my/instructor/classes/#{row['event'].id}"
+                                       class="mv-roster-link" t-out="lbl_roster"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <div class="mv-section-header">
+                    <a href="/my/instructor/classes" class="mv-empty-cta" t-out="lbl_all_classes"/>
+                </div>
+
+                <div class="mv-spacer-16"/>
+                <t t-call="fitness_portal.mv_teacher_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
     <!-- ── Teacher class list ────────────────────────────────────────────── -->
     <template id="portal_my_classes" name="My Classes (Instructor)">
         <t t-call="portal.frontend_layout">

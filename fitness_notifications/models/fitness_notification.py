@@ -49,3 +49,23 @@ class FitnessNotification(models.Model):
                 "[NOTIFICATIONS] Failed to create in-app notification (type=%s, user=%s)",
                 notif_type, user_id,
             )
+            return
+
+        # The same text, pushed to whatever devices this person registered.
+        #
+        # Deliberately sent from here rather than from each caller: every
+        # notification in the suite already funnels through this method, so
+        # push arrives for all of them without twenty-one call sites changing.
+        # It also means push carries exactly what the bell stored - and every
+        # caller builds that text in the recipient's own language - so the
+        # phone cannot end up in a different language from the app.
+        #
+        # Wrapped, and after the create: a push failure must never cost the
+        # student the notification, or roll back the booking behind it.
+        try:
+            self.env['fitness.push.subscription'].sudo()._notify_user(
+                user_id, title, body=body, url=action_url, tag=notif_type)
+        except Exception:
+            _logger.exception(
+                "[PUSH] delivery failed for user %s (type=%s); the in-app "
+                "notification was still created", user_id, notif_type)

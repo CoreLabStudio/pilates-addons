@@ -106,6 +106,73 @@ class FitnessPortalBrand(http.Controller):
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', () => {});
+
+// ── Push ──────────────────────────────────────────────────────────────────
+// The push service wakes this worker whether or not the app is open, which is
+// the whole point: with no tab and the phone locked, this still runs. The text
+// arrives already written in the recipient's language - the server builds it
+// from their own account setting - so nothing here translates anything.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  const title = data.title || 'CoreLab';
+  const options = {
+    body: data.body || '',
+    icon: '/corelab/icon-512',
+    badge: '/corelab/icon',
+    // One notification per kind: a second cancellation replaces the first
+    // rather than stacking two identical rows on the lock screen.
+    tag: data.tag || 'corelab',
+    renotify: true,
+    data: { url: data.url || '/my/home' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Tapping it should land on the thing it is about, and should re-use a window
+// that is already open rather than opening a second copy of the app.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/my/home';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ('focus' in client) {
+          if ('navigate' in client) { client.navigate(target); }
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});
+
+// Chrome can retire a subscription on its own (key rotation, storage
+// pressure). Re-subscribing here keeps a device from going quietly silent.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const res = await fetch('/my/push/key', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} }),
+      });
+      const key = ((await res.json()).result || {}).key;
+      if (!key) return;
+      const sub = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: Uint8Array.from(
+          atob(key.replace(/-/g, '+').replace(/_/g, '/')), (ch) => ch.charCodeAt(0)),
+      });
+      await fetch('/my/push/subscribe', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call',
+                               params: { subscription: sub.toJSON() } }),
+      });
+    } catch (e) { /* a silent device is bad; a crashed worker is worse */ }
+  })());
+});
 """
 
     @http.route('/my/sw.js', type='http', auth='public', methods=['GET'], sitemap=False)

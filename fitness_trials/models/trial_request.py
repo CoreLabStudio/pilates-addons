@@ -438,6 +438,10 @@ class FitnessTrialRequest(models.Model):
         when = self.scheduled_datetime or (
             self.occurrence_id.start if self.occurrence_id else False)
         cls = self.occurrence_id.name if self.occurrence_id else ''
+        # The trial is approved by the studio, so the acting language is the
+        # studio's. The student is the one reading this.
+        _ = self.env(context=dict(self.env.context,
+                                  lang=user.lang or 'es_ES'))._
         if cls and when:
             body = _("%(cls)s on %(when)s.", cls=cls,
                      when=fields.Datetime.context_timestamp(self, when)
