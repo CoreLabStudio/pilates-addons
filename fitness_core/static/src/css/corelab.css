@@ -5104,3 +5104,10 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
   color: var(--mv-muted);
   max-width: 34em;
 }
+
+/* The permission card reuses the install card's shell so the two read as one
+   family. Deliberately NOT called mv-notif-card: that class is already the
+   notification list item on the Notifications page, and reusing the name would
+   have quietly inherited its styling. */
+.mv-pushcard { border-left: 3px solid var(--mv-paco); }
+.mv-pushcard .mv-push-state { margin: 6px 0 0; }

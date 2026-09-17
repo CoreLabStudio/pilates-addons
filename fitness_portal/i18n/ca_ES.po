@@ -3613,3 +3613,27 @@ msgstr "El teu telèfon està bloquejant les notificacions d'aquesta app. Activa
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
 msgid "Turn on phone notifications"
 msgstr "Activar notificacions al mòbil"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Get told when a class is cancelled, moved, or your booking is confirmed."
+msgstr "T'avisem si es cancel·la o es canvia una classe, o si es confirma la teva reserva."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Notifications are on for this device."
+msgstr "Les notificacions estan activades en aquest dispositiu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Turn on"
+msgstr "Activar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Turn on notifications"
+msgstr "Activar les notificacions"
