@@ -179,6 +179,49 @@ class TestCancelReasonAndBulk(TransactionCase):
         with self.assertRaises(UserError):
             wizard.action_cancel_selected()
 
+    # -- cancelling and restoring from the Schedule list --------------------
+
+    def test_bulk_cancel_from_the_list(self):
+        """The Schedule list offered only Odoo's Archive, which hides a row
+        and tells nobody. Cancelling calls the class off properly."""
+        first, second = self._event(48, "List one"), self._event(49, "List two")
+        booking = self._booking(first)
+        (first | second).action_cancel_classes_bulk()
+        self.assertEqual(first.class_state, "cancelled")
+        self.assertEqual(second.class_state, "cancelled")
+        self.assertEqual(booking.state, "cancelled")
+
+    def test_bulk_cancel_skips_what_is_already_off(self):
+        first, second = self._event(48, "List one"), self._event(49, "List two")
+        first.class_state = "cancelled"
+        (first | second).action_cancel_classes_bulk()
+        self.assertEqual(second.class_state, "cancelled")
+
+    def test_a_class_can_be_put_back(self):
+        """Called off by mistake, and there was no way to undo it."""
+        event = self._event()
+        event.action_cancel_classes_bulk()
+        self.assertEqual(event.class_state, "cancelled")
+        event.action_restore_classes()
+        self.assertEqual(event.class_state, "scheduled")
+
+    def test_putting_a_class_back_does_not_re_book_anybody(self):
+        """The one thing restoring cannot undo.
+
+        Their credits went back and they were told the class was off; some
+        will have booked something else. Silently re-booking them would take
+        a class off somebody twice.
+        """
+        event = self._event()
+        booking = self._booking(event)
+        event.action_cancel_classes_bulk()
+        event.action_restore_classes()
+        self.assertEqual(
+            booking.state, "cancelled",
+            "the booking stays cancelled - the message says so out loud",
+        )
+        self.assertEqual(event.booked_seats, 0)
+
     def test_a_class_cancelled_meanwhile_is_skipped_not_fatal(self):
         """Somebody else may act while this dialog is open.
 

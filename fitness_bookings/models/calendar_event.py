@@ -16,6 +16,96 @@ class CalendarEvent(models.Model):
         string="Bookings",
     )
 
+    def action_cancel_classes_bulk(self):
+        """Call off every class ticked, in one pass.
+
+        Loops action_cancel_class rather than reimplementing it, so a class
+        cancelled here ends up exactly where one cancelled from its own form
+        does: bookings cancelled, credits returned, students told.
+
+        A class already cancelled is skipped rather than failing the batch -
+        somebody may have got to it first, and the rest of the selection
+        still needs doing.
+        """
+        if not (
+            self.env.user.has_group('base.group_system')
+            or self.env.user.has_group('fitness_core.group_fitness_manager')
+        ):
+            raise UserError(self.env._("Only studio managers can cancel a class."))
+
+        done = skipped = students = 0
+        for event in self:
+            if event.class_state == 'cancelled':
+                skipped += 1
+                continue
+            students += event.booked_seats or 0
+            event.action_cancel_class()
+            done += 1
+
+        msg = self.env._(
+            "%(done)s class(es) cancelled, %(students)s student booking(s) "
+            "cancelled and their credits returned.",
+            done=done, students=students)
+        if skipped:
+            msg += " " + self.env._(
+                "%(skipped)s were already cancelled and were left alone.",
+                skipped=skipped)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': self.env._("Classes cancelled"),
+                'message': msg,
+                'type': 'success',
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
+    def action_restore_classes(self):
+        """Put a cancelled class back on the timetable.
+
+        Only the class. The bookings that were cancelled with it are NOT
+        restored, and the credits that went back to students stay with them -
+        undoing that would take a class off somebody who has already been
+        told theirs was cancelled, and may well have booked something else.
+        Said out loud in the message rather than left to be discovered.
+        """
+        if not (
+            self.env.user.has_group('base.group_system')
+            or self.env.user.has_group('fitness_core.group_fitness_manager')
+        ):
+            raise UserError(self.env._("Only studio managers can restore a class."))
+
+        cancelled = self.filtered(lambda e: e.class_state == 'cancelled')
+        cancelled.write({'class_state': 'scheduled'})
+        # booked_seats is deliberately left where it is. It is maintained by
+        # fitness.booking, the bookings stay cancelled, and the seats are
+        # genuinely free - putting the class back does not put anybody in it.
+        _logger.info(
+            "[RESTORE] %s class(es) put back on the timetable by %s",
+            len(cancelled), self.env.user.login)
+
+        msg = self.env._(
+            "%(done)s class(es) back on the timetable. Students who were "
+            "cancelled have not been re-booked - their credits are back and "
+            "they need to book again.", done=len(cancelled))
+        if len(self) - len(cancelled):
+            msg += " " + self.env._(
+                "%(skipped)s were not cancelled and were left alone.",
+                skipped=len(self) - len(cancelled))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': self.env._("Classes restored"),
+                'message': msg,
+                'type': 'success',
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
     def action_cancel_class(self):
         """Studio-initiated class cancellation: cancel ALL active bookings,
         always restore credits (no 2-hour restriction applies to studio),
