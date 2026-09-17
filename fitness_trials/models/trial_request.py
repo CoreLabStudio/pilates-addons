@@ -36,6 +36,100 @@ class FitnessTrialRequest(models.Model):
     # Still the studio's to deal with. Scheduled and declined are finished,
     # and somebody whose trial has been and gone may ask again.
     OPEN_STATES = ('pending', 'contacted')
+
+    # Monday first, the way the timetable reads.
+    WEEKDAY_ORDER = ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
+
+    @api.model
+    def _live_schedule(self):
+        """The studio's timetable: active, group slots.
+
+        Archived rows are slots the studio has closed -
+        action_close_for_booking archives the row and its future classes
+        together - so "active" is the right question here. Private sessions
+        are not something to offer as a first free class.
+        """
+        return self.env['fitness.class.schedule'].sudo().search([
+            ('active', '=', True),
+            ('session_type', '=', 'group'),
+        ])
+
+    @api.model
+    def _offered_class_types(self):
+        """The classes the trial form should offer, per discipline.
+
+        Read from the timetable, not from the class-type catalogue. The
+        catalogue holds everything the studio has ever defined, so a class
+        nobody has scheduled - or one that has been retired - was being
+        offered to somebody asking for their first visit.
+
+        Deliberately the schedule rather than the generated calendar: a slot
+        the studio closes is archived here, so closures are respected, and
+        this does not empty out when class generation falls behind.
+        """
+        scheduled = self._live_schedule().mapped('class_type_id')
+        # Both have to be live. mapped() browses by id, so an archived class
+        # type still comes back through an active schedule row - and a class
+        # the studio has retired must not be offered as somebody's first one.
+        types = scheduled.filtered(
+            lambda c: c.active and c.classroom_type in ('barre', 'reformer'))
+        if not types:
+            # Nothing on the timetable at all - a database that has not been
+            # seeded, or a studio between schedules. Falling back to the
+            # catalogue keeps the form usable instead of showing a discipline
+            # with no classes under it.
+            types = self.env['fitness.class.type'].sudo().search([
+                ('classroom_type', 'in', ('barre', 'reformer')),
+                ('session_type', '=', 'group'),
+            ])
+        out = {'barre': [], 'reformer': []}
+        for ct in types.sorted(lambda c: (c.name or '').lower()):
+            out.setdefault(ct.classroom_type, []).append({
+                'id': ct.id,
+                'name': ct.name or '',
+                'duration': ct.duration or 0,
+            })
+        return out
+
+    @api.model
+    def _open_weekdays(self):
+        """Weekday codes the studio runs something on, in timetable order."""
+        days = set(self._live_schedule().mapped('weekday'))
+        return [d for d in self.WEEKDAY_ORDER if d in days]
+
+    @api.model
+    def _weekday_hint(self, open_days, lang):
+        """"Monday to Friday", or a list when the open days have a gap."""
+        if not open_days or len(open_days) == 7:
+            return ''
+        code = lang if lang in ('en_US', 'ca_ES') else 'es_ES'
+        names = {
+            'en_US': {'mon': 'Monday', 'tue': 'Tuesday', 'wed': 'Wednesday',
+                      'thu': 'Thursday', 'fri': 'Friday', 'sat': 'Saturday',
+                      'sun': 'Sunday'},
+            'ca_ES': {'mon': 'dilluns', 'tue': 'dimarts', 'wed': 'dimecres',
+                      'thu': 'dijous', 'fri': 'divendres', 'sat': 'dissabte',
+                      'sun': 'diumenge'},
+            'es_ES': {'mon': 'lunes', 'tue': 'martes', 'wed': 'mi\u00e9rcoles',
+                      'thu': 'jueves', 'fri': 'viernes', 'sat': 's\u00e1bado',
+                      'sun': 'domingo'},
+        }[code]
+        joiner = {'en_US': ' to ', 'ca_ES': ' a ', 'es_ES': ' a '}[code]
+        first = self.WEEKDAY_ORDER.index(open_days[0])
+        last = self.WEEKDAY_ORDER.index(open_days[-1])
+        # Contiguous runs read as a range; anything else is listed, because
+        # "Monday to Saturday" would be a lie if Wednesday were closed.
+        if last - first + 1 == len(open_days) and len(open_days) > 2:
+            return names[open_days[0]] + joiner + names[open_days[-1]]
+        return ', '.join(names[d] for d in open_days)
+
+    @api.model
+    def _is_open_on(self, day):
+        """Does the studio run anything on this date?"""
+        open_days = self._open_weekdays()
+        if not open_days:
+            return True
+        return self.WEEKDAY_ORDER[day.weekday()] in open_days
     _order = 'create_date desc'
     _rec_name = 'name'
 
@@ -510,6 +604,32 @@ class FitnessTrialRequest(models.Model):
             'domain': [('id', 'in', (self.other_open_ids | self).ids)],
             'context': {},
         }
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        """Picking a student fills in who they are.
+
+        The link already worked the other way round - an email finds its
+        contact, see _link_partner - but an admin taking a request over the
+        phone picks the student first, and was then retyping a name, address
+        and number the contact record already holds.
+
+        Only ever writes something. A contact with no phone must not blank a
+        number somebody has just typed in, and the language comes across too
+        so the confirmation email goes out in the one they read.
+        """
+        for rec in self:
+            partner = rec.partner_id
+            if not partner:
+                continue
+            if partner.name:
+                rec.name = partner.name
+            if partner.email:
+                rec.email = partner.email
+            if partner.phone:
+                rec.phone = partner.phone
+            if partner.lang:
+                rec.lang = partner.lang
 
     @api.onchange('occurrence_id')
     def _onchange_occurrence_id(self):

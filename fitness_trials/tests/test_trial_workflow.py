@@ -120,6 +120,184 @@ class TestTrialWorkflow(TransactionCase):
             "grouping this action dropped could be revisited",
         )
 
+    # -- what the form offers ----------------------------------------------
+
+    def _schedule_row(self, class_type, weekday="mon"):
+        # teacher_user_id is required on a schedule row: a slot with nobody
+        # teaching it is not a slot.
+        if not getattr(self, "_teacher", None):
+            self._teacher = self.env["res.users"].create({
+                "name": "Workflow Teacher",
+                "login": "workflow.teacher@example.invalid",
+                "group_ids": [(6, 0, [
+                    self.env.ref("base.group_user").id,
+                    self.env.ref("fitness_core.group_fitness_teacher").id,
+                ])],
+            })
+        return self.env["fitness.class.schedule"].create({
+            "name": "%s %s" % (class_type.name, weekday),
+            "class_type_id": class_type.id,
+            "teacher_user_id": self._teacher.id,
+            "weekday": weekday,
+            "start_time": 10.0,
+            "session_type": "group",
+        })
+
+    def test_only_scheduled_classes_are_offered(self):
+        """The catalogue is not the timetable.
+
+        Every class type with a Barre or Reformer room used to be offered,
+        including ones the studio has never scheduled or has stopped running.
+        Somebody asking for their first visit was shown classes they could not
+        have, and the studio had to explain why.
+        """
+        unscheduled = self.env["fitness.class.type"].create({
+            "name": "Never Scheduled",
+            "classroom_type": "reformer",
+            "duration": 50,
+            "level": "all",
+            "session_type": "group",
+        })
+        self._schedule_row(self.class_type)
+        offered = self.env["fitness.trial.request"]._offered_class_types()
+        names = [c["name"] for c in offered["reformer"]]
+        self.assertIn(self.class_type.name, names)
+        self.assertNotIn(
+            unscheduled.name, names,
+            "a class nobody has put on the timetable must not be offered",
+        )
+
+    def test_a_retired_class_drops_off_the_form(self):
+        """Archiving is how the studio retires a class.
+
+        mapped() browses by id, so an archived class type still comes back
+        through its schedule row unless it is filtered out.
+        """
+        self._schedule_row(self.class_type)
+        trials = self.env["fitness.trial.request"]
+        self.assertIn(
+            self.class_type.name,
+            [c["name"] for c in trials._offered_class_types()["reformer"]])
+        self.class_type.active = False
+        self.env.flush_all()
+        self.assertNotIn(
+            self.class_type.name,
+            [c["name"] for c in trials._offered_class_types()["reformer"]],
+            "a retired class must not still be offered as somebody's first one",
+        )
+
+    def test_closed_slots_drop_off_the_form(self):
+        """Closing a slot archives its schedule row; the form follows.
+
+        A second slot for a different class is left standing on purpose. With
+        only one row on the whole timetable, archiving it empties the
+        timetable entirely and the deliberate fallback below takes over - so
+        without this the test would be measuring the fallback, not the
+        closure.
+        """
+        other = self.env["fitness.class.type"].create({
+            "name": "Still Running", "classroom_type": "reformer",
+            "duration": 50, "level": "all", "session_type": "group",
+        })
+        self._schedule_row(other)
+        row = self._schedule_row(self.class_type)
+        trials = self.env["fitness.trial.request"]
+        self.assertIn(
+            self.class_type.name,
+            [c["name"] for c in trials._offered_class_types()["reformer"]])
+        row.active = False
+        self.assertNotIn(
+            self.class_type.name,
+            [c["name"] for c in trials._offered_class_types()["reformer"]],
+            "closing a slot should take its class off the form",
+        )
+        self.assertIn(
+            other.name,
+            [c["name"] for c in trials._offered_class_types()["reformer"]],
+            "and leave the slots that are still running alone",
+        )
+
+    def test_an_empty_timetable_falls_back_to_the_catalogue(self):
+        """The one case where the catalogue is still used.
+
+        A database that has not been seeded, or a studio between schedules,
+        would otherwise show a discipline with no classes under it and a form
+        nobody can complete. Showing the catalogue is the lesser wrong, and it
+        is deliberate rather than an oversight - hence a test saying so.
+        """
+        self.env["fitness.class.schedule"].search([]).active = False
+        trials = self.env["fitness.trial.request"]
+        offered = trials._offered_class_types()
+        self.assertTrue(
+            offered["reformer"] or offered["barre"],
+            "with no timetable at all the form should still offer something",
+        )
+
+    def test_open_days_come_from_the_timetable(self):
+        """Not a hard-coded Monday-to-Friday.
+
+        If the studio opens a Saturday, the form should follow without anyone
+        editing it.
+        """
+        trials = self.env["fitness.trial.request"]
+        self._schedule_row(self.class_type, "mon")
+        self._schedule_row(self.class_type, "wed")
+        self.assertEqual(trials._open_weekdays(), ["mon", "wed"])
+        self._schedule_row(self.class_type, "sat")
+        self.assertEqual(trials._open_weekdays(), ["mon", "wed", "sat"])
+
+    def test_the_day_hint_reads_as_a_range_only_when_it_is_one(self):
+        """"Monday to Friday" would be a lie if Wednesday were closed."""
+        trials = self.env["fitness.trial.request"]
+        self.assertEqual(
+            trials._weekday_hint(["mon", "tue", "wed", "thu", "fri"], "en_US"),
+            "Monday to Friday")
+        self.assertEqual(
+            trials._weekday_hint(["mon", "tue", "thu"], "en_US"),
+            "Monday, Tuesday, Thursday")
+
+    # -- who the request is for ---------------------------------------------
+
+    def test_choosing_a_student_fills_their_details(self):
+        """The link already worked the other way; this is the desk's way round.
+
+        An admin taking a request over the phone picks the student first, and
+        was then retyping a name, address and number the contact already has.
+        """
+        self.partner.write({
+            "email": "laura.probe@example.invalid",
+            "phone": "+34 600 111 222",
+            "lang": "es_ES",
+        })
+        request = self.env["fitness.trial.request"].new({
+            "partner_id": self.partner.id,
+            "class_interest": "reformer",
+            "lang": "en_US",
+        })
+        request._onchange_partner_id()
+        self.assertEqual(request.email, "laura.probe@example.invalid")
+        self.assertEqual(request.phone, "+34 600 111 222")
+        self.assertEqual(request.name, self.partner.name)
+        self.assertEqual(
+            request.lang, "es_ES",
+            "the confirmation email should go out in the language the contact "
+            "reads, not whatever the form happened to default to",
+        )
+
+    def test_a_contact_without_a_phone_does_not_blank_one(self):
+        """Only ever writes something.
+
+        A contact with no number must not wipe one somebody has just typed in.
+        """
+        self.partner.write({"phone": False, "email": "nophone@example.invalid"})
+        request = self.env["fitness.trial.request"].new({
+            "partner_id": self.partner.id,
+            "class_interest": "reformer",
+            "phone": "+34 600 999 000",
+        })
+        request._onchange_partner_id()
+        self.assertEqual(request.phone, "+34 600 999 000")
+
     # -- the scheduled time ------------------------------------------------
 
     def test_scheduled_time_comes_from_the_slot(self):
