@@ -44,12 +44,6 @@ msgstr "Filtrar per període"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "+ VAT"
-msgstr "+ IVA"
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your first class is free - choose %(barre)s or %(reformer)s. One trial per student, so pick the one you want to try."
 msgstr "La teva primera classe és gratis: tria %(barre)s o %(reformer)s. Una classe de prova per alumna, així que tria la que vulguis provar."
 

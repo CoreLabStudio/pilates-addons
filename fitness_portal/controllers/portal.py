@@ -1435,10 +1435,6 @@ class FitnessStudentPortal(http.Controller):
             'trial_href':               trial_href,
             # Says what the button does, not what the next page contains.
             'lbl_request_trial':        _('Book'),
-            # The tax term is a word, not punctuation: English says VAT where
-            # Spanish and Catalan say IVA. It was written into the markup, so
-            # every language got the Spanish one.
-            'lbl_plus_tax':             _('+ VAT'),
             # Was a literal in the template, so it stayed English in Spanish
             # and Catalan. Harmless while only a bought package showed it;
             # Part D puts it on the trial card, where every student sees it.
@@ -1571,7 +1567,6 @@ class FitnessStudentPortal(http.Controller):
             'trial_href':      '/my/trial?%s' % urlencode(
                 {'class_interest': product.fitness_class_type or 'reformer'}),
             'lbl_request_trial': _('Book'),
-            'lbl_plus_tax':    _('+ VAT'),
             # The price tag renders from the product, which cannot know whose
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)
