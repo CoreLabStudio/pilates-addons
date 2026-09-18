@@ -1458,7 +1458,7 @@
                 <t t-if="active_tab == 'subscriptions'">
                     <div style="margin:0 16px 16px;padding:14px 16px;background:var(--mv-card-bg);border:1px solid var(--mv-border);border-radius:14px;">
                         <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mv-muted);margin:0 0 6px;">What your registration includes</div>
-                        <p style="font-size:0.86rem;font-weight:600;color:var(--mv-ink-text);margin:0 0 8px;">Registration 39 EUR - free with a 3-month membership or longer</p>
+                        <p style="font-size:0.86rem;font-weight:600;color:var(--mv-ink-text);margin:0 0 8px;">Registration €39 — free with a 3-month membership or longer</p>
                         <ul style="margin:0;padding-left:18px;font-size:0.8rem;line-height:1.65;color:var(--mv-muted);">
                             <li>More flexible cancellation</li>
                             <li>Make up missed classes</li>

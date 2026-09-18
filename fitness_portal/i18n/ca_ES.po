@@ -341,7 +341,7 @@ msgstr "Descomptes en Reformer"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Registration 39 EUR - free with a 3-month membership or longer"
+msgid "Registration €39 — free with a 3-month membership or longer"
 msgstr "Matrícula 39 € - GRATUÏTA amb una membresia de 3 mesos o més"
 
 #. module: fitness_portal
