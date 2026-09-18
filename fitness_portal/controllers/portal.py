@@ -2427,6 +2427,29 @@ class FitnessStudentPortal(http.Controller):
     def _is_buyable(product):
         return bool(product.fitness_is_package or product.fitness_is_subscription_plan)
 
+    def _taxed_price(self, prod, price, partner, price_includes_tax=False):
+        """Return the taxable base and final total for a displayed price."""
+        taxes = prod.taxes_id.filtered(
+            lambda t: t.company_id == request.env.company)
+        if not taxes:
+            return price, price
+
+        product = prod.product_variant_ids[:1]
+        if price_includes_tax and any(not tax.price_include for tax in taxes):
+            # Registration is advertised as a final, tax-included amount, but
+            # its inherited customer tax is configured as tax-exclusive.
+            # Reverse that tax before creating the sale line.
+            probe = taxes.compute_all(
+                price, currency=prod.currency_id, quantity=1.0,
+                product=product, partner=partner)
+            if probe['total_included']:
+                price = price * price / probe['total_included']
+
+        result = taxes.compute_all(
+            price, currency=prod.currency_id, quantity=1.0,
+            product=product, partner=partner)
+        return result['total_excluded'], result['total_included']
+
     def _checkout_totals(self, product, partner, plan=None):
         """The numbers on the order summary, computed once.
 
@@ -2447,26 +2470,17 @@ class FitnessStudentPortal(http.Controller):
         order are built from one calculation instead of the page adding up one
         set of numbers while _create_order writes another.
         """
-        def _taxed(prod, price):
-            taxes = prod.taxes_id.filtered(
-                lambda t: t.company_id == request.env.company)
-            if not taxes:
-                return price, price
-            res = taxes.compute_all(
-                price, currency=prod.currency_id, quantity=1.0,
-                product=prod.product_variant_ids[:1], partner=partner)
-            return res['total_excluded'], res['total_included']
-
         months = self._plan_months(plan) if plan else 1
         price = self._student_price(partner, product) * months
-        subtotal, total = _taxed(product, price)
+        subtotal, total = self._taxed_price(product, price, partner)
 
         matricula = self._matricula_due(partner, product, plan) if plan else \
             request.env['product.template'].browse()
         mat_subtotal = mat_total = 0.0
         if matricula:
-            mat_subtotal, mat_total = _taxed(
-                matricula, matricula.fitness_effective_price())
+            mat_subtotal, mat_total = self._taxed_price(
+                matricula, matricula.fitness_effective_price(), partner,
+                price_includes_tax=True)
 
         return {
             'co_full':     (product.list_price or 0.0) * months,
@@ -2477,12 +2491,7 @@ class FitnessStudentPortal(http.Controller):
             'co_currency': product.currency_id.symbol or '€',
             'co_months':   months,
             'co_matricula':       matricula or None,
-            # Shown ex-tax, like the membership line above it, so the rows on
-            # the summary actually add up to the total underneath them. The
-            # tax-inclusive figure is the one the plan selector quotes, which
-            # is what the student pays; mixing the two in one column made the
-            # column wrong even while the total was right.
-            'co_matricula_net':   mat_subtotal,
+            'co_matricula_net':   mat_total,
             'co_matricula_total': mat_total,
         }
 
@@ -2902,10 +2911,13 @@ class FitnessStudentPortal(http.Controller):
         if matricula:
             mat_variant = matricula.product_variant_ids[:1]
             if mat_variant:
+                mat_base, _mat_total = self._taxed_price(
+                    matricula, matricula.fitness_effective_price(), partner,
+                    price_includes_tax=True)
                 lines.append({
                     'product_id': mat_variant.id,
                     'product_uom_qty': 1,
-                    'price_unit': matricula.fitness_effective_price(),
+                    'price_unit': mat_base,
                 })
         return lines
 
