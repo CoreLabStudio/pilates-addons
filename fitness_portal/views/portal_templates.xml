@@ -1697,7 +1697,7 @@
                         <!-- Price + buy -->
                         <div style="background:var(--mv-bg);border:1px solid var(--mv-border);border-radius:var(--mv-r);padding:16px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/><t t-if="not is_free"> <span style="font-size:0.72rem;" t-out="lbl_plus_tax"/></t></span>
+                                <span style="font-size:0.8rem;color:var(--mv-muted);"><t t-out="lbl_price"/></span>
                                 <span class="mv-price-lg" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:400;color:var(--mv-ink);">
                                     <t t-call="fitness_portal.mv_price_tag"/>
                                 </span>
@@ -1861,14 +1861,15 @@
                                 </span>
                             </div>
                         </t>
-                        <t t-if="co_tax">
-                            <div class="mv-summary-row mv-summary-tax">
-                                <p class="mv-summary-name" style="color:var(--mv-muted);font-size:0.8rem;">IVA</p>
-                                <span class="mv-summary-total" style="color:var(--mv-muted);font-size:0.8rem;">
-                                    <t t-out="'%.2f' % co_tax"/> <t t-out="co_currency"/>
-                                </span>
-                            </div>
-                        </t>
+                        <!-- Prices are tax-included, so the total below is the
+                             real charge in full. There used to be a row here,
+                             between the matricula line and Total, showing the
+                             tax amount as if it were still to be added where
+                             an addend belongs -
+                             confusing once nothing is actually added on top of
+                             what the student already sees. co_tax is still
+                             computed, for anyone who needs the split later;
+                             this page just no longer prints it. -->
                         <div class="mv-summary-row" style="padding-top:6px;font-weight:600;">
                             <p class="mv-summary-name">Total</p>
                             <span class="mv-summary-total">
@@ -2323,7 +2324,7 @@
         <t t-set="_live" t-value="product.fitness_promo_is_live and _ovr is None"/>
         <!-- Free is a price of zero, however it got there. Keying this off
              the promotion meant a product whose own list price is 0.00 - no
-             promotion involved - rendered "0.00 EUR + IVA" instead of FREE. -->
+             promotion involved - rendered a tax suffix instead of FREE. -->
         <t t-set="_free" t-value="not _now"/>
         <t t-if="_live">
             <span class="mv-price-was">
@@ -2334,12 +2335,12 @@
             <span class="mv-price-now mv-price-free" t-out="lbl_price_free or 'Free'"/>
         </t>
         <t t-else="">
+            <!-- Prices are tax-included: this figure is the real, final one,
+                 so nothing is appended after it. A tax suffix here would tell
+                 the student more would be added at checkout, which is wrong. -->
             <span class="mv-price-now">
                 <t t-out="'%.2f' % _now"/> <t t-out="product.currency_id.symbol or '&#8364;'"/>
             </span>
-            <!-- Only where tax is actually added to a real price. "Free + IVA"
-                 reads as though something is still owed on top of nothing. -->
-            <span class="mv-price-tax" t-out="lbl_plus_tax"/>
         </t>
         <!-- The badge names the offer. On a free item with no end date it
              would just repeat the word already standing next to it, so the

@@ -188,6 +188,17 @@ class TestPromoCheckout(HttpCase):
         self.assertIn("25.00", html, "the full price is not shown struck through")
         self.assertIn("mv-price-was", html, "no strikethrough on the full price")
 
+    def test_shop_price_surfaces_do_not_append_tax_language(self):
+        """The listing, detail, and checkout all show the final price cleanly."""
+        for path in (
+            "/my/packages",
+            "/my/packages/%d" % self.product.id,
+            "/my/packages/%d/checkout" % self.product.id,
+        ):
+            html = self._page(path)
+            self.assertNotIn("IVA", html, "tax-added language leaked into %s" % path)
+            self.assertNotIn("VAT", html, "tax-added language leaked into %s" % path)
+
     def test_the_checkout_totals_use_the_discounted_price(self):
         self.product.write({
             "fitness_promo_mode": "percent", "fitness_promo_percent": 10.0,
