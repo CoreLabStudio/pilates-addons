@@ -324,22 +324,16 @@ class SaleOrder(models.Model):
 
     # ─── Clase Fija auto-placement (multi-slot) ──────────────────────────────
 
-    def _auto_place_clase_fija(self):
-        """Create fitness.booking records for every occurrence of EACH active
-        fitness.clase.fija slot within the current billing period.
+    def _fitness_billing_period(self):
+        """The (start, end) dates auto-placement books inside.
 
-        FIX 1 rule: any failure (no schedule found for a slot, class full,
-        unexpected error) is collected and raised as a visible ValidationError —
-        never swallowed silently.
-
-        Idempotent: already-booked occurrences are silently skipped, so calling
-        this on re-confirm or manual retry is safe.
+        Extracted so the portal's slot picker can ask the same question
+        placement answers. The picker has to know which occurrences a choice
+        would book in order to check they have room; working that out a second
+        time in the controller is how the page ends up offering a slot that
+        placement then refuses.
         """
         self.ensure_one()
-        active_slots = self.fitness_clase_fija_ids.filtered('active')
-        if not active_slots:
-            return 0  # no slots configured — no-op
-
         period_start = self.fitness_period_start_date or self.start_date
         period_end = self.next_invoice_date
         if not period_start or not period_end:
@@ -366,7 +360,25 @@ class SaleOrder(models.Model):
                 "derived period_end from plan billing_period as %s",
                 self.name, period_end,
             )
+        return period_start, period_end
 
+    def _auto_place_clase_fija(self):
+        """Create fitness.booking records for every occurrence of EACH active
+        fitness.clase.fija slot within the current billing period.
+
+        FIX 1 rule: any failure (no schedule found for a slot, class full,
+        unexpected error) is collected and raised as a visible ValidationError —
+        never swallowed silently.
+
+        Idempotent: already-booked occurrences are silently skipped, so calling
+        this on re-confirm or manual retry is safe.
+        """
+        self.ensure_one()
+        active_slots = self.fitness_clase_fija_ids.filtered('active')
+        if not active_slots:
+            return 0  # no slots configured — no-op
+
+        period_start, period_end = self._fitness_billing_period()
         period_start_dt = datetime.datetime.combine(period_start, datetime.time.min)
         period_end_dt = datetime.datetime.combine(period_end, datetime.time.min)
         partner = self.partner_id
