@@ -29,7 +29,14 @@
         <field name="model">calendar.event</field>
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="inside">
+            <!-- First page, not appended last. Opening a class from the
+                 Schedule is nearly always about who is in it - taking the
+                 register, checking a name, moving somebody - and Notes was
+                 landing first, so every visit started with a tab nobody
+                 wanted and a click to get past it. "inside" put this at the
+                 end of the notebook; "before" the first page makes it the
+                 one that opens. -->
+            <xpath expr="//notebook/page[1]" position="before">
                 <page string="Roster" name="fitness_roster"
                       groups="fitness_core.group_fitness_manager"
                       invisible="not is_fitness_class">
