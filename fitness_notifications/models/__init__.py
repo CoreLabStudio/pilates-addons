@@ -4,3 +4,4 @@ from . import account_move
 from . import sale_order
 from . import web_push
 from . import push_subscription
+from . import fitness_class_schedule

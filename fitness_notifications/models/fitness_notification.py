@@ -28,6 +28,10 @@ class FitnessNotification(models.Model):
         ('billing_reminder', 'Subscription Renewal Reminder'),
         ('class_reminder', 'Class Reminder'),
         ('trial_declined', 'Trial Request Declined'),
+        # Studio-facing, not student-facing: the timetable has stopped
+        # being generated, which breaks booking and every fixed-slot
+        # renewal at once if nobody notices.
+        ('generation_stalled', 'Class Generation Stalled'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")

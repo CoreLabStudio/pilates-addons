@@ -244,3 +244,27 @@ msgstr "El estudio te ha cambiado de %(old)s a %(new)s el %(when)s. Tu crédito 
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 msgid "The studio moved you to %(new)s. Your credit is unchanged."
 msgstr "El estudio te ha cambiado a %(new)s. Tu crédito no cambia."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_class_schedule.py:0
+msgid ""
+"Classes are no longer being scheduled"
+msgstr ""
+"Las clases han dejado de programarse"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_class_schedule.py:0
+msgid ""
+"%(reason)s\n"
+"\n"
+"%(detail)s\n"
+"\n"
+"Until this is fixed, students cannot book the weeks that were never created, and members with a fixed weekly class will have nothing booked when their membership renews."
+msgstr ""
+"%(reason)s\n"
+"\n"
+"%(detail)s\n"
+"\n"
+"Hasta que se solucione, las alumnas no podrán reservar las semanas que no se han creado, y las socias con una clase fija semanal no tendrán nada reservado cuando se renueve su membresía."
