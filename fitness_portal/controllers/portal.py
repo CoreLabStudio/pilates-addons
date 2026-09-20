@@ -3237,7 +3237,26 @@ class FitnessStudentPortal(http.Controller):
                     product.id, (self._matricula_product() or product).id)
                     for l in lines):
                 continue        # something else was added to it; leave it be
-            vals = {
+            # The plan is written first, on its own, and the lines follow in a
+            # second write. Sending both together silently threw the price
+            # away: plan_id is a dependency of the line's price_unit compute,
+            # so changing it in the same write re-triggers that compute after
+            # our own figure has landed and puts the product's one-month price
+            # back. The order kept its three-month plan and dropped to a third
+            # of the money - a quarterly membership at 585.00 became 195.00,
+            # billed every three months, for as long as it ran.
+            #
+            # Only a reused draft could reach it, which is why nothing caught
+            # it: a new order writes the plan and the lines at create, where
+            # an explicit price_unit is honoured. Reuse is the ordinary case -
+            # it is what "Next, back, Next" does - and a real member's order
+            # sat on production priced that way. See the double-submit test in
+            # tests/test_subscription_payment.py.
+            if (plan and 'plan_id' in request.env['sale.order']._fields
+                    and candidate.plan_id != plan):
+                candidate.write({'plan_id': plan.id})
+                candidate.flush_recordset()
+            candidate.write({
                 'fitness_payment_method': method,
                 'fitness_terms_accepted_on': fields.Datetime.now(),
                 # Rebuilt, not re-priced. A draft can be days old: a promotion
@@ -3245,10 +3264,7 @@ class FitnessStudentPortal(http.Controller):
                 # back on a different plan, which changes both the amount and
                 # whether the registration fee belongs on it at all.
                 'order_line': [(5, 0, 0)] + [(0, 0, v) for v in line_vals],
-            }
-            if plan and 'plan_id' in request.env['sale.order']._fields:
-                vals['plan_id'] = plan.id
-            candidate.write(vals)
+            })
             _logger.info(
                 '[CHECKOUT] Reusing draft order %s for partner %s / product %s '
                 '(plan=%s, %d line(s))',
