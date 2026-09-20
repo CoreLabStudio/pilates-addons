@@ -220,10 +220,14 @@ class TestFixedClassPicker(HttpCase):
                       "the full day vanished instead of explaining itself")
         self.assertIn("Wednesday", page, "the free day is not offered")
 
-        # Only Wednesday carries a submit button; Thursday is inert.
-        self.assertEqual(page.count('name="schedule_id"'), 1,
+        # Only Wednesday carries a submit button; Thursday is inert. Asserted
+        # per schedule rather than by counting the forms on the page: any
+        # other schedule in the database would join the list and turn a
+        # correct page into a failing count.
+        self.assertIn('value="%d"' % self.sched_wed.id, page,
+                      "the free day was not offered as a choice")
+        self.assertNotIn('value="%d"' % self.sched_thu.id, page,
                          "a slot that cannot be booked every week was still offered")
-        self.assertIn(str(self.sched_wed.id), page)
 
         # And the refusal holds even if the form is edited to post it anyway.
         self._choose(self.sched_thu)

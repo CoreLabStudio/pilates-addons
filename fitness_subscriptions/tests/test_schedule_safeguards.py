@@ -166,10 +166,14 @@ class TestScheduleSafeguards(TransactionCase):
     # ── PART 2: generation that has stopped is reported ─────────────────────
 
     def test_a_healthy_studio_raises_nothing(self):
-        self._schedule()
+        # Asks about this schedule, not about the whole database. Anything
+        # else already sitting there stale is a real finding, not this test's
+        # business, and asserting global cleanliness makes the result depend
+        # on whatever else the build happens to have installed.
+        sched = self._schedule()
         stale, reason = self.env["fitness.class.schedule"]._generation_health()
-        self.assertFalse(reason, "a freshly generated schedule was called stale")
-        self.assertFalse(stale)
+        self.assertNotIn(sched, stale,
+                         "a freshly generated schedule was called stale")
 
     def test_a_schedule_left_behind_is_caught(self):
         sched = self._schedule()

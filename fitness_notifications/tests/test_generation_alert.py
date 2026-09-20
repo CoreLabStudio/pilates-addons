@@ -10,6 +10,14 @@ from datetime import timedelta
 
 from odoo import fields
 from odoo.tests import TransactionCase, tagged
+from odoo.tools import mute_logger
+
+#: The health check logs at ERROR when generation has stalled, which is the
+#: right level for a studio whose timetable has stopped. These tests stall one
+#: on purpose, so that ERROR is expected output - and odoo.sh reads an ERROR
+#: line in a build log as a failed build. Muted here so a passing test cannot
+#: paint the branch red, without softening what a real stall reports.
+HEALTH_LOGGER = 'odoo.addons.fitness_core.models.fitness_class_schedule'
 
 
 @tagged("post_install", "-at_install")
@@ -62,6 +70,7 @@ class TestGenerationAlert(TransactionCase):
         self.assertEqual(len(self._alerts()), before,
                          "a working studio produced an alert")
 
+    @mute_logger(HEALTH_LOGGER)
     def test_a_stalled_studio_reaches_a_manager(self):
         before = len(self._alerts())
         self._stall()
@@ -78,6 +87,7 @@ class TestGenerationAlert(TransactionCase):
         self.assertIn("renew", alert.body.lower(),
                       "the alert does not say what it breaks")
 
+    @mute_logger(HEALTH_LOGGER)
     def test_many_stalled_schedules_are_one_alert_not_many(self):
         """Twelve rows going stale is one fault, and twelve alerts mute it."""
         others = self.Schedule.browse()
@@ -101,6 +111,7 @@ class TestGenerationAlert(TransactionCase):
         self.assertEqual(len(self._alerts()), before + 1,
                          "one stalled studio produced more than one alert")
 
+    @mute_logger(HEALTH_LOGGER)
     def test_the_alert_is_written_in_the_managers_language(self):
         es = self.env["res.lang"]._activate_lang("es_ES")
         if not es:
