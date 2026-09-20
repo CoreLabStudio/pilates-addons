@@ -9,6 +9,16 @@ import logging
 # reserved for 18:00 in Matadepera is 16:00 UTC in summer, so the label has to
 # convert or it names an hour the class does not run at - and it is read at
 # exactly the moment somebody is checking the slot is the right one.
+#
+# Always this clock, never the reader's. This used to fall back to the context
+# timezone first, which is the timezone of whoever happened to write the
+# record: a member picking her own slot in the portal stamped the label in
+# *her* account's timezone. Most accounts here carry no timezone at all and a
+# large minority carry Asia/Calcutta, set by whoever created them - so an
+# 18:00 class was being labelled "21:30", three and a half hours out, on a
+# stored field that then showed that hour to everybody who read it afterwards.
+# The portal's _user_tz() answers the studio clock for everybody for exactly
+# this reason; this is the same rule for the same reason.
 STUDIO_TZ = 'Europe/Madrid'
 _logger = logging.getLogger(__name__)
 
@@ -39,8 +49,8 @@ class FitnessClaseFija(models.Model):
         for rec in self:
             ev = rec.calendar_event_id
             if ev and ev.start:
-                tz = pytz.timezone(self.env.context.get('tz') or STUDIO_TZ)
-                local = pytz.utc.localize(ev.start).astimezone(tz)
+                local = pytz.utc.localize(ev.start).astimezone(
+                    pytz.timezone(STUDIO_TZ))
                 rec.name = f"{ev.name} ({local.strftime('%a %H:%M')})"
             elif ev:
                 rec.name = ev.name or "Unset"
