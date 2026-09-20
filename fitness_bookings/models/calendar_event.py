@@ -1,4 +1,6 @@
-from odoo import models, fields
+import pytz
+
+from odoo import models, fields, api
 from odoo.exceptions import UserError
 
 # Spanish-first, like the rest of the studio's screens.
@@ -212,3 +214,33 @@ class CalendarEvent(models.Model):
                 'sticky': False,
             },
         }
+
+
+    # ── naming a class so it can be told apart ───────────────────────────────
+
+    #: The studio is in Spain and `start` is stored in UTC, so a class has to
+    #: be converted before it is named or it announces an hour nobody runs.
+    STUDIO_TZ = 'Europe/Madrid'
+
+    @api.depends('name', 'start', 'is_fitness_class')
+    def _compute_display_name(self):
+        """Put the day and time on a class wherever it is picked from a list.
+
+        A fitness class is named after its class type, and the timetable runs
+        the same handful of names every weekday. In the "Move to" picker that
+        came out as sixteen consecutive rows reading "Barre Pump it", "Barre
+        Groove", "Barre Harmony", "Barre Pump it" - all different classes on
+        different days, indistinguishable on screen. On a phone, where the
+        list is all you get, there was no way to pick the right one except by
+        counting.
+
+        Only fitness classes are touched; an ordinary calendar meeting keeps
+        Odoo's own name.
+        """
+        fitness = self.filtered(lambda e: e.is_fitness_class and e.start)
+        for event in fitness:
+            local = pytz.utc.localize(event.start).astimezone(
+                pytz.timezone(self.STUDIO_TZ))
+            event.display_name = "%s - %s" % (
+                event.name or '', local.strftime('%a %d %b %H:%M'))
+        super(CalendarEvent, self - fitness)._compute_display_name()
