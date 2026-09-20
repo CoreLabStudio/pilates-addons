@@ -905,6 +905,13 @@ class FitnessTrialRequest(models.Model):
                              cls=self.occurrence_id.name or _("the class")),
                 'type': 'success',
                 'sticky': False,
+                # A notification on its own leaves the form showing the record
+                # it loaded before the click. The write above genuinely does
+                # set status to scheduled, but the status bar stayed on Pending
+                # and Approve & Book stayed on screen - so the studio was told
+                # the booking had worked while being shown that it had not, and
+                # the obvious response to that is to click the button again.
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
             },
         }
 
