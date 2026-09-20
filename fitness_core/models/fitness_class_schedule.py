@@ -89,6 +89,7 @@ class FitnessClassSchedule(models.Model):
     generated_until = fields.Date(readonly=True, copy=False)
     occurrence_count = fields.Integer(compute='_compute_occurrence_count')
 
+
     # ── display ──────────────────────────────────────────────────────────────
     @api.depends('class_type_id', 'weekday', 'start_time')
     def _compute_name(self):
@@ -113,6 +114,7 @@ class FitnessClassSchedule(models.Model):
         for rec in self:
             rec.occurrence_count = len(rec.recurrence_id.calendar_event_ids) \
                 if rec.recurrence_id else 0
+
 
     @api.onchange('class_type_id')
     def _onchange_class_type_id(self):
@@ -255,6 +257,93 @@ class FitnessClassSchedule(models.Model):
                 _logger.exception("Could not extend schedule %s", schedule.id)
         return True
 
+    # ── is generation actually keeping up? ───────────────────────────────────
+    #
+    # The cron above swallows a failing schedule on purpose, so one bad row
+    # cannot stop the rest. The cost is that it reports success while quietly
+    # generating nothing, and the studio only finds out weeks later when the
+    # timetable runs dry: bookings fail, and every Clase Fija renewal fails
+    # together with "no occurrences found". Nothing watches for that today.
+    #
+    # So the check is on the *outcome*, not the run. A schedule that has been
+    # extended is generated to roughly today + horizon_weeks; one that is
+    # materially behind is the symptom, whatever the cause - the cron
+    # disabled, the worker dead, or an exception hit every night on that row.
+
+    #: How far behind its horizon a schedule may fall before it is a problem.
+    #: The cron runs daily, so a day of slack is ordinary; this is deliberately
+    #: wider than that, to report a cron that has actually stopped rather than
+    #: one that ran late.
+    GENERATION_SLACK_DAYS = 3
+
+    @api.model
+    def _generation_health(self):
+        """(stale_schedules, reason) - what is wrong with generation, if anything.
+
+        Split from the cron so a test can ask the question without a cron, and
+        so the answer is one thing rather than a judgement made twice.
+        """
+        today = fields.Date.context_today(self)
+        cron = self.env.ref('fitness_core.ir_cron_extend_class_schedules',
+                            raise_if_not_found=False)
+        if cron and not cron.sudo().active:
+            return self.browse(), _("The class generation job is switched off.")
+
+        stale = self.browse()
+        for rec in self.search([('active', '=', True),
+                                ('recurrence_id', '!=', False)]):
+            # A schedule with an end date stops generating on purpose once it
+            # is reached; that is not a fault.
+            if rec.date_end and rec.date_end <= today:
+                continue
+            expected = rec._target_until()
+            if not rec.generated_until:
+                stale |= rec
+                continue
+            behind = (expected - rec.generated_until).days
+            if behind > self.GENERATION_SLACK_DAYS:
+                stale |= rec
+        if stale:
+            return stale, _(
+                "%(count)s schedule(s) have not been generated forward for more "
+                "than %(days)s days.", count=len(stale), days=self.GENERATION_SLACK_DAYS)
+        return self.browse(), ''
+
+    @api.model
+    def _cron_check_generation_health(self):
+        """Daily: shout if the timetable has stopped being generated.
+
+        Alerts rather than repairs. Extending here would paper over whatever
+        stopped the nightly job and leave the real fault running - and the
+        thing worth knowing is that it stopped, not that something caught up.
+        """
+        stale, reason = self._generation_health()
+        if not reason:
+            _logger.info("[SCHEDULE HEALTH] generation is up to date")
+            return True
+
+        detail = reason
+        if stale:
+            detail += "\n" + "\n".join(
+                "  - %s (generated to %s)" % (rec.name, rec.generated_until or _("never"))
+                for rec in stale[:10])
+            if len(stale) > 10:
+                detail += "\n  - " + _("...and %s more", len(stale) - 10)
+        _logger.error("[SCHEDULE HEALTH] %s", detail)
+        self._notify_generation_stalled(stale, reason, detail)
+        return True
+
+    @api.model
+    def _notify_generation_stalled(self, stale, reason, detail):
+        """Tell somebody. Overridden where a notification channel exists.
+
+        fitness_core cannot reach the in-app notification model, which lives
+        downstream of it, so this logs and leaves a seam. The point of keeping
+        it separate is that the detection above is testable without any
+        alerting being installed at all.
+        """
+        return False
+
     # ── opening and closing a slot ─────────────────────────────────────────
 
     def _future_occurrences(self):
@@ -281,6 +370,16 @@ class FitnessClassSchedule(models.Model):
                 groupby=['calendar_event_id'], aggregates=['__count'])
         }
 
+    def _fixed_slot_note(self):
+        """Anything worth saying about members whose fixed class is these rows.
+
+        Empty here deliberately. Clase Fija lives in fitness_subscriptions,
+        which depends on this module and not the other way round, so core
+        cannot ask the question - it only leaves somewhere for the answer to
+        go. On a database without that module there is nothing to say.
+        """
+        return ''
+
     def action_close_for_booking(self):
         """Take these slots off the timetable and out of the booking list.
 
@@ -294,6 +393,14 @@ class FitnessClassSchedule(models.Model):
         their booking would point at a class that no longer appears anywhere.
         Those are reported back so an admin can deal with them deliberately.
         """
+        # Members attached to this series are collected before anything is
+        # archived: once the row is inactive the slots still point at it, but
+        # an admin reading the notification afterwards has no way to find out
+        # who she just cut off. Named here so the consequence arrives with the
+        # action rather than as a support message three weeks later, when a
+        # renewal fails with "no occurrences found".
+        fixed_slot_note = self._fixed_slot_note()
+
         events = self._future_occurrences()
         booked = self._booked_event_ids(events)
         closeable = events.filtered(lambda e: e.id not in booked and e.active)
@@ -306,6 +413,8 @@ class FitnessClassSchedule(models.Model):
             msg += " " + _(
                 "%(kept)s class(es) were left alone because students are booked "
                 "into them - handle those from Bulk Cancel Classes.", kept=len(booked))
+        if fixed_slot_note:
+            msg += "\n\n" + fixed_slot_note
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

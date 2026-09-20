@@ -183,9 +183,22 @@ class FitnessStudentPortal(http.Controller):
         # template stays free of list comprehensions.
         prompt_pair = [p for p in purchase_prompts if p['key'] != 'class']
         prompt_wide = [p for p in purchase_prompts if p['key'] == 'class']
+        # A membership that reserves a weekly class books nothing until the
+        # day is chosen. She is asked at checkout, but an app closed before
+        # answering must not lose the question - so Home keeps it in front of
+        # her until it is answered, rather than leaving her paying for an
+        # empty schedule with nothing on screen explaining why.
+        needs_fixed_slot = bool(self._clase_fija_subs_needing_slots(partner))
+
         return request.render('fitness_portal.portal_student_home', {
             'welcome':          welcome,
             'student_name':     student_name,
+            'needs_fixed_slot': needs_fixed_slot,
+            'lbl_slot_title':   _('Choose your weekly class'),
+            'lbl_slot_body':    _(
+                'Your membership reserves the same class every week. Tell us '
+                'which one and we will book it for you from now on.'),
+            'lbl_slot_cta':     _('Choose my day'),
             'upcoming_count':   n,
             'next_booking':     upcoming[:1],
             'schedule_hint':    schedule_hint,
@@ -1910,6 +1923,13 @@ class FitnessStudentPortal(http.Controller):
             return request.redirect(f'/my/checkout/{order_id}/sign?{qs}')
 
         self._notify_admins_of_purchase(order)
+
+        # A Clase Fija membership books nothing until a day is chosen, so the
+        # purchase is not really finished here. Asking straight away is the
+        # one moment she is certain to be looking; Home keeps asking if she
+        # closes the app first.
+        if self._clase_fija_subs_needing_slots(order.partner_id):
+            return request.redirect('/my/fixed-class')
         return request.redirect('/my/packages?bought=1')
 
     @staticmethod
@@ -2113,6 +2133,263 @@ class FitnessStudentPortal(http.Controller):
             'lbl_status':      _('Status'),
             'lbl_order_total': _('Order total'),
         })
+
+    # ══════════════════════════════════════════════════════════
+    #  Fixed class slot picker (/my/fixed-class)
+    #
+    #  A Clase Fija membership reserves the same class every week, but
+    #  buying one does not say which. Until a slot is chosen the member has
+    #  paid for a membership that books her nothing, and nothing on the page
+    #  says so - which is why the prompt follows her from checkout to Home
+    #  until it is answered rather than being a page she has to find.
+    #
+    #  She picks a day and time, not a class. The timetable runs exactly one
+    #  class type per weekday and hour, so "Wednesday 18:00" already names
+    #  one class; offering the class as a second question would be asking
+    #  something with a single possible answer. Verified against production:
+    #  no weekday+time runs two class types, and no series mixes them.
+    # ══════════════════════════════════════════════════════════
+
+    def _clase_fija_subs_needing_slots(self, partner):
+        """Running Clase Fija subscriptions with fewer slots than they allow.
+
+        The count, not a flag: a plan selling two fixed classes a week is only
+        finished when both are chosen, and asking again for the second is the
+        same question as asking for the first.
+        """
+        subs = request.env['sale.order'].sudo().search([
+            ('partner_id', '=', partner.id),
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', '3_progress'),
+        ])
+        pending = request.env['sale.order'].sudo().browse()
+        for sub in subs:
+            if not sub.fitness_is_clase_fija or sub.fitness_is_unlimited:
+                continue
+            allowance = sub.fitness_effective_weekly_allowance()
+            if allowance <= 0:
+                continue
+            if len(sub.fitness_clase_fija_ids.filtered('active')) < allowance:
+                pending |= sub
+        return pending
+
+    @staticmethod
+    def _weekday_name(local_dt, lang_code):
+        """The weekday, spelled in the language the member is reading.
+
+        Babel carries the locale's own day names; strftime does not, and would
+        put "Wednesday" on an otherwise Spanish page. Falls back to the English
+        name rather than failing the page if babel is unavailable.
+        """
+        if _BABEL_OK:
+            try:
+                return _babel_format_date(local_dt.date(), format='EEEE',
+                                          locale=lang_code).capitalize()
+            except Exception:
+                pass
+        return local_dt.strftime('%A')
+
+    def _fixed_slot_options(self, sub):
+        """Every weekly slot this member could reserve, and whether she can.
+
+        Built from fitness.class.schedule rather than from the generated
+        classes: a slot the studio has closed is archived there, so closures
+        are respected, and the list does not empty out if class generation
+        falls behind. Same reasoning as the trial form's _live_schedule.
+
+        A slot is only offered when every occurrence left in this billing
+        period has room. Auto-placement books the whole period at once and
+        refuses the lot if any single class is full, so offering a slot that
+        is full on one week would hand the member an admin's error message
+        mid-signup. It would also not be a fixed class in any meaningful
+        sense: one she cannot actually have every week is not her slot.
+        """
+        product = sub.fitness_subscription_product_id
+        discipline = product.fitness_class_type
+        session = product.fitness_session_type or 'group'
+        domain = [
+            ('active', '=', True),
+            ('class_type_id.session_type', '=', session),
+        ]
+        # 'any' is a real plan value meaning both studios; it must not be
+        # written into the domain as a classroom_type nothing matches.
+        if discipline and discipline != 'any':
+            domain.append(('class_type_id.classroom_type', '=', discipline))
+        schedules = request.env['fitness.class.schedule'].sudo().search(domain)
+
+        period_start, period_end = sub._fitness_billing_period()
+        period_start_dt = _dt_cls.combine(period_start, _dt_cls.min.time())
+        period_end_dt = _dt_cls.combine(period_end, _dt_cls.min.time())
+        now = fields.Datetime.now()
+        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        taken = sub.fitness_clase_fija_ids.filtered('active').mapped(
+            'calendar_event_id.recurrence_id').ids
+        Event = request.env['calendar.event'].sudo()
+        tz = self._user_tz()
+        options = []
+
+        for sched in schedules:
+            recurrence = sched.recurrence_id
+            if not recurrence or recurrence.id in taken:
+                continue
+            # The anchor is any occurrence of the series; placement re-derives
+            # the rest from recurrence_id. The next upcoming one is used so a
+            # member choosing today is anchored to a class that still exists.
+            anchor = Event.search([
+                ('is_fitness_class', '=', True),
+                ('recurrence_id', '=', recurrence.id),
+                ('class_state', '!=', 'cancelled'),
+                ('start', '>=', fields.Datetime.to_string(now)),
+            ], order='start asc', limit=1)
+            if not anchor:
+                continue
+            occurrences = Event.search([
+                ('is_fitness_class', '=', True),
+                ('recurrence_id', '=', recurrence.id),
+                ('class_state', '!=', 'cancelled'),
+                ('start', '>=', fields.Datetime.to_string(period_start_dt)),
+                ('start', '<', fields.Datetime.to_string(period_end_dt)),
+            ], order='start asc')
+            full = occurrences.filtered(
+                lambda e: e.capacity and e.booked_seats >= e.capacity)
+            local = pytz.utc.localize(anchor.start).astimezone(tz)
+            options.append({
+                'schedule_id': sched.id,
+                'anchor_id':   anchor.id,
+                # strftime('%A') answers in the server's locale, which is
+                # English whatever the member is reading the page in. The whole
+                # choice is a weekday, so an untranslated one would leave the
+                # single most important word on the page in the wrong language.
+                'weekday':     self._weekday_name(local, lang_code),
+                'weekday_idx': local.weekday(),
+                'time':        local.strftime('%H:%M'),
+                'sort_key':    (local.weekday(), local.hour, local.minute),
+                'class_name':  anchor.name,
+                'available':   not full,
+                'full_dates': [
+                    pytz.utc.localize(e.start).astimezone(tz).strftime('%d %b')
+                    for e in full
+                ],
+                'weeks': len(occurrences),
+            })
+        options.sort(key=lambda o: o['sort_key'])
+        return options
+
+    @staticmethod
+    def _group_slots_by_day(options):
+        """The same slots, gathered under one heading per weekday.
+
+        Barre alone runs eight classes a day, five days a week: as a flat list
+        that is forty rows to scroll on a phone, all of them beginning with a
+        day she has already read. Grouped, she finds her day once and then
+        picks a time. Built here rather than in QWeb so the template stays
+        free of list handling, like the prompt splitting on Home.
+        """
+        days = []
+        for opt in options:
+            if not days or days[-1]['weekday'] != opt['weekday']:
+                days.append({'weekday': opt['weekday'], 'rows': []})
+            days[-1]['rows'].append(opt)
+        return days
+
+    @http.route('/my/fixed-class', type='http', auth='user',
+                website=True, sitemap=False, methods=['GET'])
+    def fixed_class_picker(self, **kw):
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        _ = request.env._
+        partner = request.env.user.partner_id
+        pending = self._clase_fija_subs_needing_slots(partner)
+        if not pending:
+            # Nothing to answer - either she never had a fixed-class plan or
+            # every slot it sells is already chosen.
+            return request.redirect('/my/subscription')
+
+        sub = pending[0]
+        product = sub.fitness_subscription_product_id
+        allowance = sub.fitness_effective_weekly_allowance()
+        chosen = len(sub.fitness_clase_fija_ids.filtered('active'))
+        options = self._fixed_slot_options(sub)
+
+        return request.render('fitness_portal.portal_fixed_class_picker', {
+            'sub':          sub,
+            'plan_name':    product.name,
+            'days':         self._group_slots_by_day(options),
+            'has_options':  any(o['available'] for o in options),
+            'chosen':       chosen,
+            'allowance':    allowance,
+            'remaining':    allowance - chosen,
+            'error_msg':    kw.get('error') or '',
+            'back_url':     '/my/subscription',
+            'lbl_heading':  _('Choose your weekly class'),
+            'lbl_intro':    _(
+                'Pick the day and time you want every week. We book it for '
+                'you automatically, so you never have to reserve it yourself.'),
+            'lbl_intro_more': _(
+                'To change it later, message the studio and we will move you.'),
+            'lbl_choose':   _('Choose this'),
+            'lbl_full':     _('Not available every week'),
+            'lbl_full_on':  _('Full on %s'),
+            'lbl_none':     _(
+                'There are no weekly slots open at the moment. Please message '
+                'the studio and we will set your class up for you.'),
+            'lbl_step':     _('Class %(n)s of %(total)s') % {
+                'n': chosen + 1, 'total': allowance},
+            'lbl_multi':    allowance > 1,
+        })
+
+    @http.route('/my/fixed-class/choose', type='http', auth='user',
+                website=True, sitemap=False, methods=['POST'])
+    def fixed_class_choose(self, **kw):
+        if not request.env.user.has_group(STUDENT_GROUP):
+            return request.redirect('/my')
+
+        _ = request.env._
+        partner = request.env.user.partner_id
+        pending = self._clase_fija_subs_needing_slots(partner)
+        if not pending:
+            return request.redirect('/my/subscription')
+        sub = pending[0]
+
+        # Never trust the posted id: it is only honoured when it is one of the
+        # slots actually offered to this member for this subscription, which
+        # re-applies the discipline, session type and capacity rules server
+        # side rather than taking the form's word for them.
+        try:
+            schedule_id = int(kw.get('schedule_id') or 0)
+        except (TypeError, ValueError):
+            schedule_id = 0
+        offered = {o['schedule_id']: o for o in self._fixed_slot_options(sub)}
+        option = offered.get(schedule_id)
+        if not option or not option['available']:
+            qs = urlencode({'error': _(
+                'That class is no longer available. Please choose another.')})
+            return request.redirect('/my/fixed-class?%s' % qs)
+
+        try:
+            request.env['fitness.clase.fija'].sudo().create({
+                'subscription_id': sub.id,
+                'calendar_event_id': option['anchor_id'],
+            })
+            sub.sudo()._auto_place_clase_fija()
+        except (UserError, ValidationError) as exc:
+            _logger.warning(
+                "[CLASE FIJA] portal pick failed for %s on schedule %s: %s",
+                sub.name, schedule_id, exc)
+            qs = urlencode({'error': str(exc)})
+            return request.redirect('/my/fixed-class?%s' % qs)
+
+        _logger.info(
+            "[CLASE FIJA] %s: %s chose %s %s from the portal",
+            sub.name, partner.name, option['weekday'], option['time'])
+
+        # A plan selling more than one fixed class sends her straight back for
+        # the next one; the picker itself decides when there is nothing left
+        # to ask.
+        if self._clase_fija_subs_needing_slots(partner):
+            return request.redirect('/my/fixed-class')
+        return request.redirect('/my/subscription?slot_set=1')
 
     # ══════════════════════════════════════════════════════════
     #  Subscription page (/my/subscription)

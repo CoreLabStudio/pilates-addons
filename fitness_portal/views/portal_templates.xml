@@ -284,6 +284,21 @@
                          when they have nothing to book with reads as a taunt. -->
                 </div>
 
+                <!-- A Clase Fija membership reserves the same class every week,
+                     but it books nothing until she says which one. She is asked
+                     at checkout; this is what stops the question being lost if
+                     she closes the app before answering. It sits directly under
+                     the greeting because a member in this state has an empty
+                     schedule, and every other card on this page would otherwise
+                     be explaining an emptiness whose cause is one tap away. -->
+                <t t-if="needs_fixed_slot">
+                    <a href="/my/fixed-class" class="mv-slot-prompt">
+                        <span class="mv-slot-prompt-title" t-out="lbl_slot_title"/>
+                        <span class="mv-slot-prompt-body" t-out="lbl_slot_body"/>
+                        <span class="mv-slot-prompt-cta" t-out="lbl_slot_cta"/>
+                    </a>
+                </t>
+
                 <!-- Someone who owns nothing cannot book anything, so sending
                      them to the calendar just shows an empty list. Point the
                      hero at the shop until they have something to book with. -->
@@ -2309,6 +2324,85 @@
          line came out with leading whitespace and the gaps between them were
          uneven. Building the list first and looping over it leaves nothing to
          align around. -->
+    <!-- ── Fixed class picker (/my/fixed-class) ─────────────────────────────
+         She chooses a day and a time, never a class: the timetable runs one
+         class type per weekday and hour, so the day and time already name it.
+         Showing the class name on the row is information, not a second choice.
+
+         Slots she cannot have every week are listed but not selectable, with
+         the date that is full spelled out. Hiding them would leave her hunting
+         for a day that silently is not there; offering them would hand her an
+         error after she had chosen. -->
+    <template id="portal_fixed_class_picker" name="Choose Your Weekly Class">
+        <t t-call="portal.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div class="mv-app">
+                <t t-call="fitness_portal.mv_page_header"/>
+
+                <div class="mv-slot-page">
+                    <a t-att-href="back_url" class="mv-back-link" aria-label="Back">&#8592;</a>
+
+                    <h1 class="mv-slot-heading" t-out="lbl_heading"/>
+                    <p class="mv-slot-plan" t-out="plan_name"/>
+
+                    <!-- Only said on a plan that sells more than one weekly
+                         class, where "choose your class" is genuinely being
+                         asked more than once and silence would read as a bug. -->
+                    <t t-if="lbl_multi">
+                        <p class="mv-slot-step" t-out="lbl_step"/>
+                    </t>
+
+                    <p class="mv-slot-intro" t-out="lbl_intro"/>
+                    <p class="mv-slot-intro mv-slot-intro-quiet" t-out="lbl_intro_more"/>
+
+                    <t t-if="error_msg">
+                        <div class="mv-flash mv-flash-err" t-out="error_msg"/>
+                    </t>
+
+                    <t t-if="not has_options">
+                        <div class="mv-slot-empty" t-out="lbl_none"/>
+                    </t>
+
+                    <t t-foreach="days" t-as="day">
+                      <p class="mv-slot-dayhead" t-out="day['weekday']"/>
+                      <div class="mv-slot-list">
+                        <t t-foreach="day['rows']" t-as="opt">
+                            <t t-if="opt['available']">
+                                <form method="post" action="/my/fixed-class/choose"
+                                      class="mv-slot-row">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="schedule_id"
+                                           t-att-value="opt['schedule_id']"/>
+                                    <span class="mv-slot-time" t-out="opt['time']"/>
+                                    <span class="mv-slot-class" t-out="opt['class_name']"/>
+                                    <button type="submit" class="mv-slot-pick"
+                                            t-out="lbl_choose"/>
+                                </form>
+                            </t>
+                            <t t-else="">
+                                <div class="mv-slot-row mv-slot-row-off">
+                                    <span class="mv-slot-time" t-out="opt['time']"/>
+                                    <span class="mv-slot-class" t-out="opt['class_name']"/>
+                                    <span class="mv-slot-off-note">
+                                        <t t-out="lbl_full"/>
+                                        <span class="mv-slot-off-dates"
+                                              t-out="lbl_full_on % ', '.join(opt['full_dates'])"/>
+                                    </span>
+                                </div>
+                            </t>
+                        </t>
+                      </div>
+                    </t>
+                </div>
+
+                <t t-call="fitness_portal.mv_bottom_nav"/>
+            </div>
+        </t>
+    </template>
+
     <!-- One price, shown the same way everywhere.
          `product` is a product.template; the number comes from the product's
          own effective price, so the page and the charge cannot disagree. -->

@@ -3639,3 +3639,69 @@ msgstr "Solicita tu clase de prueba gratuita"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your first class is free. The studio arranges trial classes, so tell us what you would like and when."
 msgstr "Tu primera clase es gratis. El estudio organiza las clases de prueba, así que dinos qué te gustaría y cuándo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Choose your weekly class"
+msgstr "Elige tu clase semanal"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Pick the day and time you want every week. We book it for you automatically, so you never have to reserve it yourself."
+msgstr "Elige el día y la hora que quieres cada semana. Te la reservamos automáticamente, así no tienes que reservarla tú."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "To change it later, message the studio and we will move you."
+msgstr "Para cambiarla más adelante, escríbenos y te la cambiamos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Choose this"
+msgstr "Elegir esta"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Not available every week"
+msgstr "No disponible todas las semanas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Full on %s"
+msgstr "Completa el %s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "There are no weekly slots open at the moment. Please message the studio and we will set your class up for you."
+msgstr "Ahora mismo no hay horarios semanales disponibles. Escríbenos y te configuramos la clase nosotras."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Class %(n)s of %(total)s"
+msgstr "Clase %(n)s de %(total)s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "That class is no longer available. Please choose another."
+msgstr "Esa clase ya no está disponible. Por favor, elige otra."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your membership reserves the same class every week. Tell us which one and we will book it for you from now on."
+msgstr "Tu membresía te reserva la misma clase cada semana. Dinos cuál y te la reservamos a partir de ahora."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Choose my day"
+msgstr "Elegir mi día"

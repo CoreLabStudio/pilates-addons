@@ -5111,3 +5111,127 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
    have quietly inherited its styling. */
 .mv-pushcard { border-left: 3px solid var(--mv-paco); }
 .mv-pushcard .mv-push-state { margin: 6px 0 0; }
+
+/* ── Fixed class picker (/my/fixed-class) ─────────────────────────────────
+   Every colour here is a token, so the dark block above re-points them and
+   this needs no second set of rules. The prompt is deliberately a link that
+   looks like a card rather than a banner: it is the one action the page is
+   asking for, and a member who lands on Home with an empty schedule should
+   be able to tap the explanation itself. */
+
+.mv-slot-prompt {
+  display:block;
+  margin:0 16px 18px;
+  padding:16px 18px;
+  background:var(--mv-info-bg);
+  border:1px solid var(--mv-border);
+  border-radius:var(--mv-r);
+  text-decoration:none;
+  transition:box-shadow var(--mv-t-fast);
+}
+.mv-slot-prompt:hover,
+.mv-slot-prompt:focus-visible { box-shadow:var(--mv-card-shadow-pressed); }
+.mv-slot-prompt-title {
+  display:block;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.18rem;
+  color:var(--mv-paco);
+  margin-bottom:4px;
+}
+.mv-slot-prompt-body {
+  display:block;
+  font-size:0.84rem;
+  line-height:1.5;
+  color:var(--mv-muted);
+  margin-bottom:10px;
+}
+.mv-slot-prompt-cta {
+  display:inline-block;
+  font-size:0.8rem;
+  font-weight:600;
+  letter-spacing:0.02em;
+  color:var(--mv-ink-text);
+  border-bottom:1px solid var(--mv-border);
+  padding-bottom:2px;
+}
+
+.mv-slot-page { padding:0 16px 96px; max-width:var(--mv-app-max); margin:0 auto; }
+.mv-slot-heading {
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.7rem; font-weight:400; color:var(--mv-paco);
+  margin:6px 0 2px;
+}
+.mv-slot-plan { font-size:0.86rem; color:var(--mv-muted); margin:0 0 2px; }
+.mv-slot-step {
+  font-size:0.74rem; text-transform:uppercase; letter-spacing:0.08em;
+  color:var(--mv-muted2); margin:8px 0 0;
+}
+.mv-slot-intro {
+  font-size:0.86rem; line-height:1.6; color:var(--mv-ink-text); margin:12px 0 0;
+}
+.mv-slot-intro-quiet { color:var(--mv-muted); font-size:0.8rem; margin-top:6px; }
+.mv-slot-empty {
+  margin:18px 0; padding:16px; border-radius:var(--mv-r);
+  background:var(--mv-info-bg); color:var(--mv-muted);
+  font-size:0.86rem; line-height:1.6;
+}
+
+/* One heading per weekday. Barre alone runs eight classes a day across five
+   days; without the grouping every one of those forty rows opens by repeating
+   a day she has already read. */
+.mv-slot-dayhead {
+  margin:20px 0 8px;
+  font-size:0.74rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.09em;
+  color:var(--mv-muted2);
+}
+.mv-slot-list { display:flex; flex-direction:column; gap:8px; }
+
+/* One row per weekly slot. The day and time lead because that is what she is
+   choosing; the class name follows as a statement of what runs then. */
+.mv-slot-row {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px;
+  background:var(--mv-card-bg);
+  border:1px solid var(--mv-border);
+  border-radius:var(--mv-r);
+  margin:0;
+}
+.mv-slot-time {
+  flex-shrink:0; min-width:52px;
+  font-size:0.95rem; font-weight:600; color:var(--mv-paco);
+  font-variant-numeric:tabular-nums;
+}
+.mv-slot-class { flex:1; font-size:0.84rem; color:var(--mv-ink-text); }
+.mv-slot-pick {
+  flex-shrink:0;
+  padding:9px 16px;
+  font-size:0.82rem; font-weight:600;
+  color:var(--mv-ink-text);
+  background:var(--mv-info-bg);
+  border:1px solid var(--mv-border);
+  border-radius:var(--mv-r-sm);
+  cursor:pointer;
+  transition:background var(--mv-t-fast);
+}
+.mv-slot-pick:hover, .mv-slot-pick:focus-visible { background:var(--mv-sand); }
+
+/* Listed but not selectable: she can see the day exists and why it is not on
+   offer, which is the question hiding it would leave her asking. */
+.mv-slot-row-off { opacity:0.62; }
+.mv-slot-off-note {
+  flex-shrink:0; text-align:right;
+  font-size:0.74rem; line-height:1.4; color:var(--mv-muted2);
+}
+.mv-slot-off-dates { display:block; font-variant-numeric:tabular-nums; }
+
+/* Narrow: the time and class name stay together on the first line and the
+   button drops below them full width. Letting the button sit between the two
+   split the one thing she is reading - "07:00 Barre Pump it" - across a
+   control. */
+@media (max-width:430px) {
+  .mv-slot-row { flex-wrap:wrap; row-gap:10px; }
+  .mv-slot-class { flex:1 1 auto; }
+  .mv-slot-pick { flex-basis:100%; }
+  .mv-slot-off-note { flex-basis:100%; text-align:left; }
+}
