@@ -104,6 +104,22 @@
         <field name="active">True</field>
     </record>
 
+    <!-- Watches the job above. It swallows a failing schedule so one bad row
+         cannot stop the rest, which means it reports success while generating
+         nothing at all. That surfaces weeks later, all at once: bookings find
+         no classes and every Clase Fija renewal fails together. This asks the
+         only question that catches it - is the timetable still generated far
+         enough ahead? -->
+    <record id="ir_cron_check_generation_health" model="ir.cron">
+        <field name="name">Fitness: check class generation is keeping up</field>
+        <field name="model_id" ref="fitness_core.model_fitness_class_schedule"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_generation_health()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
     <!-- Bulk open/close from the list: tick the rows, Actions, choose one.
          Deliberately not left to Odoo's built-in Archive: archiving the
          schedule row alone leaves every already-generated class bookable,

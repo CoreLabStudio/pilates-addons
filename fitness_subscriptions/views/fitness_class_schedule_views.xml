@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Who is standing on this slot, shown on the row itself.
+
+         The onchange warns at the moment of editing, but a warning only
+         fires once and only for the person who triggered it. This is the
+         standing answer: open the row and you can see, before touching
+         anything, that somebody's weekly class depends on it. -->
+    <record id="view_fitness_class_schedule_form_fixed_slots" model="ir.ui.view">
+        <field name="name">fitness.class.schedule.form.fixed.slots</field>
+        <field name="model">fitness.class.schedule</field>
+        <field name="inherit_id" ref="fitness_core.view_fitness_class_schedule_form"/>
+        <field name="arch" type="xml">
+            <!-- Anchored on the sheet, not on the Generation group: Odoo 19
+                 refuses 'string' as an inheritance selector, and that group
+                 carries no name to target. Appending puts this at the foot of
+                 the form, which is where it belongs anyway - it is context
+                 for the whole row, not part of one section. -->
+            <xpath expr="//sheet" position="inside">
+                <group string="Fixed Class Members" invisible="fixed_slot_count == 0">
+                    <div colspan="2" class="alert alert-warning" role="alert">
+                        <strong>
+                            <field name="fixed_slot_count" readonly="1" nolabel="1"
+                                   class="oe_inline"/>
+                            member(s) have this slot as their fixed weekly class.
+                        </strong>
+                        <br/>
+                        Changing the class, day or time moves the class they are
+                        booked into from now on. Closing this row leaves them with
+                        no fixed class until they are given another one. Classes
+                        they are already booked into are not affected either way.
+                    </div>
+                    <field name="fixed_slot_names" readonly="1" string="Members"/>
+                    <field name="fixed_slot_ids" nolabel="1" colspan="2" readonly="1">
+                        <list>
+                            <field name="subscription_id"/>
+                            <field name="name" string="Slot"/>
+                        </list>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
