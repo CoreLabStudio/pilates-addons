@@ -3594,17 +3594,31 @@ class FitnessPackagePayment(_OdooPaymentPortal):
         amount = order_sudo.amount_total
 
         availability_report = {}
+        # sale_order_id is not optional decoration: it is the only way Odoo
+        # learns this payment is for a subscription.
+        # sale_subscription._is_tokenization_required() keys off it, and
+        # without it a quarterly membership is priced and rendered as an
+        # ordinary one-off. The transaction is then created with
+        # tokenize=False, Stripe's intent carries no setup_future_usage, and
+        # the card element - which does know a recurring plan must save the
+        # card - confirms with off_session. Stripe refuses the mismatch:
+        #   "The provided setup_future_usage (off_session) does not match the
+        #    expected setup_future_usage (null)."
+        # A real member hit that three times on a Mastercard before it was
+        # found. Packs were never affected, because nothing needs saving.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company.id,
             partner.id,
             amount,
             currency_id=currency.id,
+            sale_order_id=order_sudo.id,
             report=availability_report,
         )
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids,
             partner.id,
             currency_id=currency.id,
+            sale_order_id=order_sudo.id,
             report=availability_report,
         )
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
@@ -3619,9 +3633,12 @@ class FitnessPackagePayment(_OdooPaymentPortal):
 
         # payment.method_form template requires this mapping of provider_id → bool
         # (whether to offer the "Save card" checkbox for each provider).
+        # Same reason as above: the mapping decides whether the card is saved,
+        # and on a subscription that is not the member's choice to make - the
+        # studio cannot charge next quarter without it.
         if _PAYMENT_OK and hasattr(self, '_compute_show_tokenize_input_mapping'):
             show_tokenize_input_mapping = self._compute_show_tokenize_input_mapping(
-                providers_sudo
+                providers_sudo, sale_order_id=order_sudo.id
             )
         else:
             show_tokenize_input_mapping = {

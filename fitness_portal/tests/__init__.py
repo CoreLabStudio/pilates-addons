@@ -10,3 +10,4 @@ from . import test_free_checkout
 from . import test_promo_pricing
 from . import test_signup_email
 from . import test_portal_timezone
+from . import test_subscription_payment
