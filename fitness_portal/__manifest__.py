@@ -1,9 +1,9 @@
 {
-    'name': 'CoreLab Student Portal – Yoleyva Studio',
-    'version': '19.0.1.24.91',
+    'name': 'CoreLab Student Portal',
+    'version': '19.0.1.24.92',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'web',

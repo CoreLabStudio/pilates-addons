@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Bookings – Yoleyva Studio',
+    'name': 'Fitness Bookings – CoreLab Studio',
     'version': '19.0.1.2.19',
     'category': 'Services',
     'summary': 'Class booking with capacity control, cancellation rules, attendance tracking',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'calendar',

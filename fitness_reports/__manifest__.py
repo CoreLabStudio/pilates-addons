@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Reports – Yoleyva',
+    'name': 'Fitness Reports – CoreLab Studio',
     'version': '19.0.2.3.0',
     'category': 'Fitness',
     'summary': 'Manager-only analytics: bookings, revenue, clients, class occupancy (pivot/graph/list)',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'fitness_core',
