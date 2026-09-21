@@ -14,6 +14,8 @@ Two problems that only show up on a real screen:
     nearly always about who is in it, so every visit began with a tab nobody
     wanted.
 """
+from datetime import timedelta
+
 import pytz
 
 from odoo import fields
@@ -120,3 +122,84 @@ class TestRosterTabOrder(TransactionCase):
         self.assertEqual(
             names[0], "fitness_roster",
             "Roster is not the first tab; the form opens on %r instead" % names[0])
+
+
+@tagged("post_install", "-at_install")
+class TestNoPhantomAttendees(TransactionCase):
+    """A fitness class has no calendar attendees. The roster is the list.
+
+    calendar.event.partner_ids defaults to the creating user's partner, so
+    every class the nightly cron generated carried OdooBot - and the form
+    header counts that field, not the roster. Yoleyva reported a class
+    showing "1 person" with nobody in it on 2026-09-21 and was right: 456
+    classes carried OdooBot, and one pattern's phantom was inherited by every
+    occurrence it generated, because occurrences are built from the base
+    event's copy_data().
+
+    The header was not merely counting the wrong thing - it was arithmetic
+    nonsense, reporting "-1 Awaiting" on the same class.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "Phantom room", "classroom_type": "barre", "capacity": 9})
+        cls.ctype = cls.env["fitness.class.type"].create({
+            "name": "Phantom Barre", "classroom_type": "barre", "duration": 45,
+            "level": "all", "session_type": "group",
+            "classroom_id": cls.room.id})
+
+    def test_a_fitness_class_is_created_with_no_attendees(self):
+        start = fields.Datetime.now() + timedelta(days=5)
+        event = self.env["calendar.event"].create({
+            "name": "Phantom probe", "start": start,
+            "stop": start + timedelta(minutes=45),
+            "class_type_id": self.ctype.id, "is_fitness_class": True})
+        self.assertFalse(
+            event.partner_ids,
+            "a fitness class was created carrying calendar attendees: %s"
+            % event.partner_ids.mapped("display_name"))
+        self.assertFalse(
+            event.attendee_ids,
+            "a fitness class was created with calendar.attendee rows, which "
+            "is what the form header counts as guests")
+
+    def test_an_ordinary_meeting_still_gets_its_attendee(self):
+        """Only classes are stripped. Odoo's own behaviour is untouched."""
+        start = fields.Datetime.now() + timedelta(days=5)
+        meeting = self.env["calendar.event"].create({
+            "name": "Ordinary meeting", "start": start,
+            "stop": start + timedelta(hours=1)})
+        self.assertTrue(
+            meeting.partner_ids or meeting.attendee_ids,
+            "an ordinary meeting lost its attendees - the fix was applied too "
+            "widely and has broken Odoo's calendar for everyone else")
+
+    def test_classes_generated_by_the_schedule_have_none(self):
+        """Through the real recurring path, which is what made the phantoms.
+
+        A manual create would prove nothing about the generator: the phantom
+        arrived on classes the schedule laid down, and spread through
+        copy_data() to every occurrence of the pattern.
+        """
+        teacher = self.env["res.users"].create({
+            "name": "Phantom teacher",
+            "login": "phantom.teacher@example.invalid",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+        schedule = self.env["fitness.class.schedule"].create({
+            "name": "Phantom schedule",
+            "class_type_id": self.ctype.id,
+            "weekday": "tue",
+            "start_time": 7.0,
+            "teacher_user_id": teacher.id})
+        schedule.action_generate()
+        events = schedule.recurrence_id.calendar_event_ids
+        self.assertTrue(events, "the schedule generated nothing to check")
+        carrying = events.filtered(lambda e: e.partner_ids or e.attendee_ids)
+        self.assertFalse(
+            carrying,
+            "%d of %d generated classes carry a phantom attendee"
+            % (len(carrying), len(events)))
