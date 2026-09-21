@@ -1,53 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ── Cancel several classes at once ───────────────────────────────────
-         The snow-day screen. Cancelling a day used to mean opening each class
-         in turn, with no idea how many students it added up to until it was
-         over. -->
+    <!-- ── Manage a day of classes ──────────────────────────────────────────
+         The snow-day screen, and the morning-after screen. Calling a day off
+         used to mean opening each class in turn, with no idea how many
+         students it added up to until it was over - and putting one back
+         meant finding it somewhere else entirely. Both directions live here
+         now, on the day, so changing your mind happens where the decision
+         was made. -->
     <record id="view_fitness_bulk_cancel_wizard_form" model="ir.ui.view">
         <field name="name">fitness.class.bulk.cancel.wizard.form</field>
         <field name="model">fitness.class.bulk.cancel.wizard</field>
         <field name="arch" type="xml">
-            <form string="Cancel classes">
+            <form string="Manage classes">
                 <sheet>
                     <group>
                         <field name="day"/>
                     </group>
-                    <!-- Said before anything is ticked, so the size of the day
+                    <!-- Said before anything is moved, so the size of the day
                          is known before the decision, not after it. -->
                     <div class="alert alert-info mb-2" role="status"
                          invisible="not day_summary">
                         <field name="day_summary" nolabel="1" readonly="1"/>
                     </div>
 
-                    <field name="selected_count" invisible="1"/>
-                    <group string="Which classes are off?">
-                        <!-- The day arrives already listed: only the tick box
-                             is editable, because every other column is read
-                             off the class and must not drift from it. -->
+                    <field name="change_count" invisible="1"/>
+                    <group string="Which classes are on?">
+                        <!-- The day arrives already listed, every class on it
+                             running or cancelled, each switch showing what the
+                             class is now. Only the switch is editable, because
+                             every other column is read off the class and must
+                             not drift from it. -->
                         <field name="line_ids" nolabel="1" colspan="2">
-                            <list editable="bottom" create="false" delete="false">
-                                <field name="selected" widget="boolean_toggle"/>
-                                <field name="start" string="Time" readonly="1"/>
-                                <field name="name" string="Class" readonly="1"/>
-                                <field name="classroom_id" string="Studio" readonly="1"/>
-                                <field name="teacher_id" string="Instructor" readonly="1"/>
-                                <field name="booked_seats" string="Booked"
+                            <list editable="bottom" create="false" delete="false"
+                                  decoration-muted="class_state == 'cancelled'">
+                                <!-- Carried, not shown, and force_save because
+                                     it is readonly. A wizard that has never
+                                     been stored saves its lines as creates,
+                                     and event_id is required on them - but
+                                     Odoo drops readonly fields from the save
+                                     payload unless they are forced. Without
+                                     this the dialog failed on every attempt
+                                     with "Missing required value for the
+                                     field 'Event'" and nothing could be
+                                     cancelled at all. Naming the field in the
+                                     view is not enough on its own; that was
+                                     tried and failed the same way. -->
+                                <field name="event_id" column_invisible="1"
+                                       force_save="1"/>
+                                <field name="is_on" widget="boolean_toggle"/>
+                                <field name="start" readonly="1"/>
+                                <field name="name" readonly="1"/>
+                                <!-- Stated as well as implied by the dimming:
+                                     the switch shows what you are asking for,
+                                     this shows what the class still is until
+                                     Apply. -->
+                                <field name="class_state"
+                                       widget="badge" readonly="1"
+                                       decoration-success="class_state == 'scheduled'"
+                                       decoration-danger="class_state == 'cancelled'"/>
+                                <field name="classroom_id" readonly="1"/>
+                                <field name="teacher_id" readonly="1"/>
+                                <field name="booked_seats"
                                        readonly="1" sum="Students"/>
-                                <field name="capacity" string="Capacity" readonly="1"/>
+                                <field name="capacity" readonly="1"/>
                             </list>
                         </field>
                     </group>
                     <div class="mb-2">
                         <button name="action_select_all" type="object"
-                                string="Select every class that day"
+                                string="Switch the whole day off"
                                 class="btn btn-link btn-sm"
                                 invisible="not line_ids"/>
                         <button name="action_select_none" type="object"
-                                string="Clear the selection"
+                                string="Put the whole day back on"
                                 class="btn btn-link btn-sm"
-                                invisible="selected_count == 0"/>
+                                invisible="not line_ids"/>
                     </div>
 
                     <!-- Optional, and it reaches the students: the same
@@ -66,10 +94,10 @@
                     </div>
                 </sheet>
                 <footer>
-                    <button name="action_cancel_selected" type="object"
-                            string="Cancel these classes" class="btn-danger"
-                            invisible="selected_count == 0"
-                            confirm="This cancels the classes and every booking on them, and tells the students. Go ahead?"/>
+                    <button name="action_apply" type="object"
+                            string="Apply changes" class="btn-primary"
+                            invisible="change_count == 0"
+                            confirm="This changes the classes you switched and tells the students. Go ahead?"/>
                     <button string="Close" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>
@@ -77,14 +105,14 @@
     </record>
 
     <record id="action_fitness_bulk_cancel" model="ir.actions.act_window">
-        <field name="name">Cancel Classes</field>
+        <field name="name">Manage Classes</field>
         <field name="res_model">fitness.class.bulk.cancel.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
 
     <menuitem id="menu_fitness_bulk_cancel"
-              name="Cancel Classes"
+              name="Manage Classes"
               parent="fitness_core.menu_fitness_classes_root"
               action="action_fitness_bulk_cancel"
               sequence="30"/>

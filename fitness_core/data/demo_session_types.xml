@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <!-- noupdate="1": seed once, never overwrite. Same reasoning as
+         demo_classrooms.xml, and the same exposure - name and description are
+         translate=True, and capacity_max on the group type is the same 14 the
+         studio moved to 7 on the classroom. Anything edited in the back office
+         here was being rewritten on every upgrade of this module. The file has
+         changed once since it was written, so freezing it costs nothing. -->
+    <data noupdate="1">
 
         <record id="session_type_group" model="fitness.session.type">
             <field name="name">Group Class</field>

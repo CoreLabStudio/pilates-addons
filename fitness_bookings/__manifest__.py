@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Bookings – CoreLab Studio',
-    'version': '19.0.1.2.19',
+    'version': '19.0.1.2.21',
     'category': 'Services',
     'summary': 'Class booking with capacity control, cancellation rules, attendance tracking',
     'author': 'Core Lab Studio, S.L.',
