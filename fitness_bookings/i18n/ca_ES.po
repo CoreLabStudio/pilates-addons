@@ -655,3 +655,172 @@ msgstr "%(skipped)s no estaven cancel·lades i s'han deixat com estaven."
 #: code:addons/fitness_bookings/models/calendar_event.py:0
 msgid "Classes restored"
 msgstr "Classes restaurades"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Switching off %(classes)s classes will cancel %(students)s student bookings and return their credits."
+msgstr "Apagar %(classes)s classes cancel·larà %(students)s reserves i tornarà els seus crèdits."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Switching on %(classes)s classes puts them back on the timetable. Students who were cancelled are not re-booked - they keep their credits and book again."
+msgstr "Encendre %(classes)s classes les torna a l'horari. Les alumnes cancel·lades no es tornen a reservar: conserven els seus crèdits i reserven de nou."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "(%(cancelled)s already cancelled)"
+msgstr "(%(cancelled)s ja cancel·lades)"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Nothing has changed. Move a switch first."
+msgstr "No has canviat res. Mou primer un interruptor."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Day updated"
+msgstr "Dia actualitzat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "%(classes)s classes are back on the timetable. Students who were cancelled have not been re-booked - their credits are back and they need to book again."
+msgstr "%(classes)s classes tornen a l'horari. Les alumnes cancel·lades no s'han tornat a reservar: els seus crèdits estan retornats i han de reservar de nou."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Nothing changed."
+msgstr "No ha canviat res."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Manage classes"
+msgstr "Gestionar classes"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Which classes are on?"
+msgstr "Quines classes estan actives?"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Switch the whole day off"
+msgstr "Apagar tot el dia"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Put the whole day back on"
+msgstr "Tornar a encendre tot el dia"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Apply changes"
+msgstr "Aplicar canvis"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "This changes the classes you switched and tells the students. Go ahead?"
+msgstr "Això canvia les classes que has mogut i avisa les alumnes. Continuem?"
+
+#. module: fitness_bookings
+#: model:ir.actions.act_window,name:fitness_bookings.action_fitness_bulk_cancel
+msgid "Manage Classes"
+msgstr "Gestionar classes"
+
+#. module: fitness_bookings
+#: model:ir.ui.menu,name:fitness_bookings.menu_fitness_bulk_cancel
+msgid "Manage Classes"
+msgstr "Gestionar classes"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__is_on
+msgid "On"
+msgstr "Activa"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__class_state
+msgid "Status"
+msgstr "Estat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Switching off this class will cancel %(students)s student bookings and return their credits."
+msgstr "Apagar aquesta classe cancel·larà %(students)s reserves i tornarà els seus crèdits."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_bulk_cancel_wizard.py:0
+msgid "Switching this class on puts it back on the timetable. Students who were cancelled are not re-booked - they keep their credits and book again."
+msgstr "Encendre aquesta classe la torna a l'horari. Les alumnes cancel·lades no es tornen a reservar: conserven els seus crèdits i reserven de nou."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__start
+msgid "Time"
+msgstr "Hora"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__name
+msgid "Class"
+msgstr "Classe"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__classroom_id
+msgid "Studio"
+msgstr "Sala"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__teacher_id
+msgid "Instructor"
+msgstr "Instructor"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__booked_seats
+msgid "Booked"
+msgstr "Reservades"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__capacity
+msgid "Capacity"
+msgstr "Places"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Reason (optional)"
+msgstr "Motiu (opcional)"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Students"
+msgstr "Alumnes"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "e.g. The studio is closed today because of the storm."
+msgstr "p. ex. L'estudi està tancat avui pel temporal."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+msgid "Close"
+msgstr "Tancar"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__day
+msgid "Day"
+msgstr "Dia"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__reason
+msgid "Reason"
+msgstr "Motiu"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__line_ids
+msgid "Classes"
+msgstr "Classes"
