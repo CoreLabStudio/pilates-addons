@@ -131,9 +131,22 @@ class TestCancelReasonAndBulk(TransactionCase):
         return wizard
 
     @staticmethod
-    def _tick(wizard, events):
+    def _switch_off(wizard, events):
+        """Move these classes' switches to off, leaving the rest as they are.
+
+        Only a switch that moves means anything now: every line arrives set to
+        what its class already is, so setting the others would be asking for
+        no change rather than asking to keep them.
+        """
         for line in wizard.line_ids:
-            line.selected = line.event_id in events
+            if line.event_id in events:
+                line.is_on = False
+
+    @staticmethod
+    def _switch_on(wizard, events):
+        for line in wizard.line_ids:
+            if line.event_id in events:
+                line.is_on = True
 
     def test_the_day_lists_its_own_classes(self):
         event = self._event()
@@ -156,28 +169,43 @@ class TestCancelReasonAndBulk(TransactionCase):
         first, second = self._event(48, "Bulk one"), self._event(49, "Bulk two")
         booking = self._booking(first)
         wizard = self._wizard_for(fields.Date.to_date(first.start))
-        self._tick(wizard, first | second)
+        self._switch_off(wizard, first | second)
         wizard.reason = "The studio is closed for the storm."
-        wizard.action_cancel_selected()
+        wizard.action_apply()
         self.assertEqual(first.class_state, "cancelled")
         self.assertEqual(second.class_state, "cancelled")
         self.assertEqual(booking.state, "cancelled")
         self.assertEqual(booking.cancellation_reason,
                          "The studio is closed for the storm.")
 
-    def test_a_cancelled_class_drops_off_the_list(self):
-        """So a second pass over the same day cannot double-cancel."""
+    def test_a_cancelled_class_stays_on_the_list_switched_off(self):
+        """The reverse of what this used to assert, and the point of the rework.
+
+        A cancelled class used to be filtered out, which made the dialog a
+        one-way door: once a day was called off it vanished from the only
+        screen that could have put it back. It stays now, showing cancelled,
+        with its switch off - which is what makes changing your mind possible
+        where the decision was made.
+        """
         event = self._event()
         wizard = self._wizard_for(fields.Date.to_date(event.start))
-        self._tick(wizard, event)
-        wizard.action_cancel_selected()
-        again = self._wizard_for(fields.Date.to_date(event.start))
-        self.assertNotIn(event, again.line_ids.mapped("event_id"))
+        self._switch_off(wizard, event)
+        wizard.action_apply()
+        self.assertEqual(event.class_state, "cancelled")
 
-    def test_cancelling_nothing_is_refused(self):
+        again = self._wizard_for(fields.Date.to_date(event.start))
+        line = again.line_ids.filtered(lambda l: l.event_id == event)
+        self.assertTrue(
+            line, "a cancelled class fell off the day and cannot be put back")
+        self.assertFalse(
+            line.is_on, "the switch should arrive off for a cancelled class")
+        self.assertEqual(line.class_state, "cancelled",
+                         "the row does not say the class is cancelled")
+
+    def test_applying_nothing_is_refused(self):
         wizard = self._wizard_for(fields.Date.context_today(self.env.user))
         with self.assertRaises(UserError):
-            wizard.action_cancel_selected()
+            wizard.action_apply()
 
     # -- cancelling and restoring from the Schedule list --------------------
 
@@ -230,8 +258,110 @@ class TestCancelReasonAndBulk(TransactionCase):
         """
         first, second = self._event(48, "Bulk one"), self._event(49, "Bulk two")
         wizard = self._wizard_for(fields.Date.to_date(first.start))
-        self._tick(wizard, first | second)
+        self._switch_off(wizard, first | second)
         first.class_state = "cancelled"
-        wizard.action_cancel_selected()
+        wizard.action_apply()
         self.assertEqual(second.class_state, "cancelled",
                          "the rest of the batch should still go through")
+
+
+@tagged("post_install", "-at_install")
+class TestBulkCancelSurvivesTheSave(TransactionCase):
+    """The dialog has to survive the client's save, not just the onchange.
+
+    Cancelling a day was completely broken on screen - every attempt ended in
+    "Missing required value for the field 'Event' (event_id)" and nothing was
+    ever cancelled - while the tests above passed. They passed because they
+    call _onchange_day() in Python, which fills the server-side cache with
+    event_id already on it. The browser never does that.
+
+    What the browser does is: open the dialog, receive lines from the
+    onchange, let somebody tick one, then SAVE - and a wizard record that has
+    never been stored saves its lines as creates. Each create has to carry
+    event_id, which is required. The client can only send a field if the view
+    names it AND it is allowed to send it: Odoo drops readonly fields from the
+    payload unless they are marked force_save. event_id is readonly on the
+    model, so naming it in the view was not enough on its own - that was tried
+    first and the dialog failed in exactly the same way.
+
+    These assert the round trip rather than the plumbing, so they keep their
+    meaning if the dialog is rebuilt around them.
+    """
+
+    longMessage = False
+
+    WIZARD = 'fitness.class.bulk.cancel.wizard'
+    LINE = 'fitness.class.bulk.cancel.line'
+
+    def _sub_list(self):
+        """The line sub-view exactly as the client is handed it."""
+        from lxml import etree
+        view = self.env.ref(
+            'fitness_bookings.view_fitness_bulk_cancel_wizard_form')
+        arch = self.env[self.WIZARD].get_view(view.id, 'form')['arch']
+        lists = etree.fromstring(arch).xpath('//field[@name="line_ids"]//list')
+        self.assertTrue(lists, "the wizard no longer embeds a list of lines")
+        return {f.get('name'): f for f in lists[0].xpath('./field')}
+
+    def test_the_view_hands_the_client_every_field_it_must_send_back(self):
+        """The root cause, stated as the rule it broke."""
+        given = self._sub_list()
+        Line = self.env[self.LINE]
+        for name, field in Line._fields.items():
+            if name == 'wizard_id':
+                continue            # the one2many itself supplies this
+            if not field.required or field.compute or field.related:
+                continue
+            self.assertIn(
+                name, given,
+                "%r is required on a wizard line but the view never gives it "
+                "to the client, so the client cannot send it back and the "
+                "save fails on a mandatory field" % name)
+            if field.readonly:
+                self.assertEqual(
+                    given[name].get('force_save'), '1',
+                    "%r is readonly, and Odoo drops readonly fields from the "
+                    "save payload - it needs force_save=\"1\" or naming it in "
+                    "the view achieves nothing" % name)
+
+    def test_a_save_carrying_only_what_the_client_sends_still_works(self):
+        """Save the wizard the way the browser does and cancel for real."""
+        given = self._sub_list()
+        Line = self.env[self.LINE]
+        start = fields.Datetime.now() + timedelta(hours=30)
+        ctype = self.env["fitness.class.type"].create({
+            "name": "Save cycle barre", "classroom_type": "barre",
+            "duration": 45, "level": "all", "session_type": "group"})
+        event = self.env["calendar.event"].create({
+            "name": "Save cycle class", "start": start,
+            "stop": start + timedelta(minutes=45),
+            "class_type_id": ctype.id, "is_fitness_class": True,
+            "capacity": 10})
+
+        day = fields.Date.to_date(start)
+        draft = self.env[self.WIZARD].new({'day': day})
+        draft._onchange_day()
+        line = draft.line_ids.filtered(lambda l: l.event_id == event)
+        self.assertTrue(line, "the day did not list the class under test")
+
+        # Only what the browser would put in the payload: a field the view
+        # names, and either writable or force_save'd. Everything else the
+        # client silently leaves out - which is the whole bug.
+        sendable = {}
+        for name, node in given.items():
+            field = Line._fields[name]
+            if field.readonly and node.get('force_save') != '1':
+                continue
+            value = line[name]
+            sendable[name] = value.id if field.type == 'many2one' else value
+        sendable['is_on'] = False          # the studio switches it off
+
+        wizard = self.env[self.WIZARD].create({
+            'day': day, 'line_ids': [(0, 0, sendable)]})
+        self.assertEqual(
+            wizard.line_ids.event_id, event,
+            "the saved line lost the class it stood for")
+        wizard.action_apply()
+        self.assertEqual(
+            event.class_state, "cancelled",
+            "the class was not cancelled by a save the browser would make")

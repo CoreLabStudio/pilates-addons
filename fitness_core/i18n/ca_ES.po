@@ -901,3 +901,13 @@ msgstr "No hi ha classes programades per avui."
 #: code:addons/fitness_core/models/fitness_dashboard.py:0
 msgid "Classes this week"
 msgstr "Classes d'aquesta setmana"
+
+#. module: fitness_core
+#: model:ir.model.fields.selection,name:fitness_core.selection__calendar_event__class_state__scheduled
+msgid "Scheduled"
+msgstr "Programada"
+
+#. module: fitness_core
+#: model:ir.model.fields.selection,name:fitness_core.selection__calendar_event__class_state__cancelled
+msgid "Cancelled"
+msgstr "Cancel·lada"
