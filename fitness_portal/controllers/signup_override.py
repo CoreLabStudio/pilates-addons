@@ -71,6 +71,36 @@ class FitnessSignup(AuthSignupHome):
             return False
         return bool(email_re.fullmatch(norm))
 
+    @staticmethod
+    def _mv_awaiting_verification(user):
+        """Has this account signed up and not got through verification yet?
+
+        Pulled out of web_login so it can be tested. The whole of web_login is
+        unreachable under test_enable - it hands straight back to base
+        auth_signup so core's own login tests behave - which is exactly why
+        the bug below survived: no test could reach the line.
+
+        It used to read:
+
+            partner.signup_type == 'signup' and partner.signup_valid
+
+        `signup_valid` does not exist in Odoo 19. auth_signup was rewritten and
+        validity now lives inside the signed token, not in a stored field.
+        Python short-circuits, so the missing attribute was only ever reached
+        when signup_type was 'signup' - which is precisely the state of
+        somebody who has signed up and not verified. The only people who could
+        hit it were the only people this branch exists to help, and what they
+        got was a 500 on login instead of the "please verify" page. Oriol
+        Ferran is in that state on production and his account reads "never
+        logged in"; this is the likeliest reason why.
+
+        The token's own expiry is not consulted here on purpose. This decides
+        where to send somebody who has just logged in, and "your link expired"
+        is still a person who needs the verification page - the page offers a
+        resend.
+        """
+        return user.partner_id.sudo().signup_type == 'signup'
+
     def _login_redirect(self, uid, redirect=None):
         user = request.env['res.users'].sudo().browse(uid)
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
@@ -144,9 +174,7 @@ class FitnessSignup(AuthSignupHome):
             if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
                 return request.redirect('/my/home')
             elif not user._is_internal():
-                # Only block new self-signups with an active verification token
-                partner = user.partner_id.sudo()
-                if partner.signup_type == 'signup' and partner.signup_valid:
+                if self._mv_awaiting_verification(user):
                     return request.redirect('/corelab/pending-verification')
 
         return response
@@ -304,8 +332,16 @@ class FitnessSignup(AuthSignupHome):
 
     def _send_fitness_verification_email(self, user_sudo):
         partner = user_sudo.partner_id.sudo()
+        # signup_type is still set, and still cleared on verification. It is
+        # what marks the account as mid-verification for the login redirect,
+        # and what signup_cancel() clears when a manager grants access by
+        # hand. Only the LINK has stopped being Odoo's.
         partner.signup_prepare(signup_type='signup')
-        token = partner._generate_signup_token()
+        # Our own token, because Odoo's embeds the account's latest login
+        # timestamp: logging in to check whether verification worked killed
+        # the very link the person was waiting on, and resending only reset
+        # the trap. Measured, not assumed - see fitness.email.verification.
+        token = request.env['fitness.email.verification'].sudo()._issue(user_sudo)
 
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         verify_url = '%s/corelab/verify-email?%s' % (base_url, url_encode({'token': token}))
@@ -443,14 +479,24 @@ class FitnessSignup(AuthSignupHome):
             _mv_lang = 'es_ES'
         request.update_context(lang=_mv_lang)
 
-        try:
-            partner = request.env['res.partner'].sudo()._signup_retrieve_partner(
-                token, check_validity=True, raise_exception=True,
-            )
-        except Exception:
-            return request.render('fitness_portal.verify_email_failed', {})
+        # Our own token first. It is spent by _redeem, so a link that is
+        # forwarded or left in an inbox cannot be used twice.
+        partner_user = request.env['fitness.email.verification'].sudo()._redeem(
+            token)
 
-        partner_user = partner.user_ids[:1]
+        if not partner_user:
+            # Odoo's signup token, for anyone whose email was sent before this
+            # changed hands. Worth keeping for a while: a person mid-signup at
+            # the moment of the deploy should not be stranded by it. It can be
+            # dropped once no outstanding link predates the change.
+            try:
+                partner = request.env['res.partner'].sudo()._signup_retrieve_partner(
+                    token, check_validity=True, raise_exception=True,
+                )
+            except Exception:
+                return request.render('fitness_portal.verify_email_failed', {})
+            partner_user = partner.user_ids[:1]
+
         if not partner_user:
             return request.redirect('/web/login')
 
@@ -465,8 +511,10 @@ class FitnessSignup(AuthSignupHome):
         fitness_group = request.env.ref(STUDENT_GROUP)
         partner_user.sudo().write({'group_ids': [(4, fitness_group.id)]})
 
-        # Invalidate signup token
-        partner.sudo().signup_cancel()
+        # Clear the signup. Read off the user rather than off a `partner`
+        # local, which now only exists on the legacy-token branch: our own
+        # token resolves straight to the account.
+        partner_user.partner_id.sudo().signup_cancel()
 
         return request.redirect('/web/login?%s' % url_encode({
             'login': partner_user.login,
