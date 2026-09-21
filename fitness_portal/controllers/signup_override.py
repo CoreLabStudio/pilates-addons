@@ -71,6 +71,36 @@ class FitnessSignup(AuthSignupHome):
             return False
         return bool(email_re.fullmatch(norm))
 
+    @staticmethod
+    def _mv_awaiting_verification(user):
+        """Has this account signed up and not got through verification yet?
+
+        Pulled out of web_login so it can be tested. The whole of web_login is
+        unreachable under test_enable - it hands straight back to base
+        auth_signup so core's own login tests behave - which is exactly why
+        the bug below survived: no test could reach the line.
+
+        It used to read:
+
+            partner.signup_type == 'signup' and partner.signup_valid
+
+        `signup_valid` does not exist in Odoo 19. auth_signup was rewritten and
+        validity now lives inside the signed token, not in a stored field.
+        Python short-circuits, so the missing attribute was only ever reached
+        when signup_type was 'signup' - which is precisely the state of
+        somebody who has signed up and not verified. The only people who could
+        hit it were the only people this branch exists to help, and what they
+        got was a 500 on login instead of the "please verify" page. Oriol
+        Ferran is in that state on production and his account reads "never
+        logged in"; this is the likeliest reason why.
+
+        The token's own expiry is not consulted here on purpose. This decides
+        where to send somebody who has just logged in, and "your link expired"
+        is still a person who needs the verification page - the page offers a
+        resend.
+        """
+        return user.partner_id.sudo().signup_type == 'signup'
+
     def _login_redirect(self, uid, redirect=None):
         user = request.env['res.users'].sudo().browse(uid)
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
@@ -144,9 +174,7 @@ class FitnessSignup(AuthSignupHome):
             if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
                 return request.redirect('/my/home')
             elif not user._is_internal():
-                # Only block new self-signups with an active verification token
-                partner = user.partner_id.sudo()
-                if partner.signup_type == 'signup' and partner.signup_valid:
+                if self._mv_awaiting_verification(user):
                     return request.redirect('/corelab/pending-verification')
 
         return response

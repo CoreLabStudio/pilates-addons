@@ -76,6 +76,28 @@
                     <div class="oe_title">
                         <field name="name" readonly="1"/>
                     </div>
+                    <!-- Stuck before verification: said here, where the
+                         studio is already looking at the person, rather than
+                         left to be worked out from an empty shop. The account
+                         exists and the password works; only the group that
+                         opens the shop is missing. -->
+                    <field name="fitness_is_verified_student" invisible="1"/>
+                    <field name="share" invisible="1"/>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="fitness_is_verified_student or not share"
+                         groups="fitness_core.group_fitness_manager">
+                        <strong>This student cannot open the shop yet.</strong>
+                        They signed up but never got through email
+                        verification, so they can log in and see nothing to
+                        book. Give them access here - they keep the password
+                        they already chose and no new email is sent.
+                        <div class="mt-2">
+                            <button name="action_fitness_verify_student"
+                                    type="object" class="btn btn-primary btn-sm"
+                                    string="Give shop access"/>
+                        </div>
+                    </div>
+
                     <group>
                         <field name="email" string="Email" readonly="1"/>
                         <field name="phone" string="Phone" readonly="1"/>
@@ -143,6 +165,12 @@
                 <field name="login" string="Login / Email"/>
                 <field name="phone" optional="show"/>
                 <field name="fitness_is_vip" string="VIP" optional="show"/>
+                <!-- Shown by default, and the row is dimmed: somebody stuck
+                     before verification has an account that looks entirely
+                     normal from here, which is why nobody spotted the four
+                     of them. -->
+                <field name="fitness_is_verified_student" string="Shop access"
+                       optional="show" widget="boolean_toggle" readonly="1"/>
                 <field name="active" optional="hide"/>
             </list>
         </field>
@@ -161,6 +189,10 @@
                 <field name="login" string="Login / Email"/>
                 <filter name="filter_vip" string="VIP"
                         domain="[('fitness_is_vip', '=', True)]"/>
+                <!-- The question the studio actually needs to ask after
+                     somebody says "I cannot book anything". -->
+                <filter name="filter_no_shop_access" string="Cannot open the shop"
+                        domain="[('fitness_is_verified_student', '=', False)]"/>
                 <separator/>
                 <filter name="group_vip" string="VIP"
                         context="{'group_by': 'fitness_is_vip'}"/>

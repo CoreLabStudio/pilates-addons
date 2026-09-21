@@ -12,3 +12,4 @@ from . import test_signup_email
 from . import test_portal_timezone
 from . import test_fixed_class_picker
 from . import test_subscription_payment
+from . import test_verify_student
