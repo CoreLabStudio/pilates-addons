@@ -974,6 +974,18 @@
                         </div>
                     </t>
 
+                    <!-- The same for every class, so it is stated rather than
+                         stored per class: a studio note is something the
+                         studio writes about one session, and burying a
+                         standing instruction in that field would mean typing
+                         it a thousand times and losing it the once somebody
+                         forgot. Sits below the studio note so a real message
+                         about this class is read first. -->
+                    <div class="mv-class-bring">
+                        <span class="mv-class-bring-label" t-out="lbl_what_to_bring"/>
+                        <span class="mv-class-bring-text" t-out="lbl_bring_items"/>
+                    </div>
+
                     <!-- Credits indicator -->
                     <t t-if="primary_credit">
                         <a t-att-href="primary_credit.get('href') or '/my/credits'"

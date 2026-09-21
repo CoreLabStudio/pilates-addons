@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Packages – Yoleyva Studio',
+    'name': 'Fitness Packages – CoreLab Studio',
     'version': '19.0.1.1.7',
     'category': 'Services',
     'summary': 'Class-pack products, credit balance tracking and validity management',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'sale',
