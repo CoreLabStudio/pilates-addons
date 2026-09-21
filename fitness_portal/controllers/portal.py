@@ -724,6 +724,12 @@ class FitnessStudentPortal(http.Controller):
             'lbl_instructor':      _('Instructor'),
             'lbl_room':            _('Room'),
             'lbl_studio_note':     _('Note from the studio'),
+            # Said on the class she is deciding to book rather than once at
+            # signup, because that is the only moment it is actionable. The
+            # studio was repeating it by message every time somebody turned
+            # up without socks.
+            'lbl_what_to_bring':   _('What to bring'),
+            'lbl_bring_items':     _('Bring a towel, grip socks and water.'),
             'local_start':         local_start,
             'local_stop':          local_stop,
             'local_date_label':    local_date_label,

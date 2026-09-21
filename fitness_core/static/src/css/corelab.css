@@ -5235,3 +5235,27 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
   .mv-slot-pick { flex-basis:100%; }
   .mv-slot-off-note { flex-basis:100%; text-align:left; }
 }
+
+/* ── What to bring (class detail) ─────────────────────────────────────────
+   Quieter than the studio note directly above it: that one is a message
+   somebody wrote about this class, this one is the same every time. Styled
+   as a standing reminder rather than news, so a real note still wins the
+   eye. Tokens only, so both themes follow. */
+.mv-class-bring {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  background: var(--mv-info-bg);
+  border-radius: var(--mv-r-sm);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.mv-class-bring-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--mv-ink-text);
+}
+.mv-class-bring-text { color: var(--mv-muted); }
