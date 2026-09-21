@@ -332,8 +332,16 @@ class FitnessSignup(AuthSignupHome):
 
     def _send_fitness_verification_email(self, user_sudo):
         partner = user_sudo.partner_id.sudo()
+        # signup_type is still set, and still cleared on verification. It is
+        # what marks the account as mid-verification for the login redirect,
+        # and what signup_cancel() clears when a manager grants access by
+        # hand. Only the LINK has stopped being Odoo's.
         partner.signup_prepare(signup_type='signup')
-        token = partner._generate_signup_token()
+        # Our own token, because Odoo's embeds the account's latest login
+        # timestamp: logging in to check whether verification worked killed
+        # the very link the person was waiting on, and resending only reset
+        # the trap. Measured, not assumed - see fitness.email.verification.
+        token = request.env['fitness.email.verification'].sudo()._issue(user_sudo)
 
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         verify_url = '%s/corelab/verify-email?%s' % (base_url, url_encode({'token': token}))
@@ -471,14 +479,24 @@ class FitnessSignup(AuthSignupHome):
             _mv_lang = 'es_ES'
         request.update_context(lang=_mv_lang)
 
-        try:
-            partner = request.env['res.partner'].sudo()._signup_retrieve_partner(
-                token, check_validity=True, raise_exception=True,
-            )
-        except Exception:
-            return request.render('fitness_portal.verify_email_failed', {})
+        # Our own token first. It is spent by _redeem, so a link that is
+        # forwarded or left in an inbox cannot be used twice.
+        partner_user = request.env['fitness.email.verification'].sudo()._redeem(
+            token)
 
-        partner_user = partner.user_ids[:1]
+        if not partner_user:
+            # Odoo's signup token, for anyone whose email was sent before this
+            # changed hands. Worth keeping for a while: a person mid-signup at
+            # the moment of the deploy should not be stranded by it. It can be
+            # dropped once no outstanding link predates the change.
+            try:
+                partner = request.env['res.partner'].sudo()._signup_retrieve_partner(
+                    token, check_validity=True, raise_exception=True,
+                )
+            except Exception:
+                return request.render('fitness_portal.verify_email_failed', {})
+            partner_user = partner.user_ids[:1]
+
         if not partner_user:
             return request.redirect('/web/login')
 
@@ -493,8 +511,10 @@ class FitnessSignup(AuthSignupHome):
         fitness_group = request.env.ref(STUDENT_GROUP)
         partner_user.sudo().write({'group_ids': [(4, fitness_group.id)]})
 
-        # Invalidate signup token
-        partner.sudo().signup_cancel()
+        # Clear the signup. Read off the user rather than off a `partner`
+        # local, which now only exists on the legacy-token branch: our own
+        # token resolves straight to the account.
+        partner_user.partner_id.sudo().signup_cancel()
 
         return request.redirect('/web/login?%s' % url_encode({
             'login': partner_user.login,
