@@ -1568,9 +1568,21 @@
                                                 </t>
                                                 <div class="mv-card-footer">
                                                     <t t-if="_contact_only">
-                                                        <span class="mv-pkg-price-inline" style="color:var(--mv-muted);font-style:italic;font-size:0.78rem;">Price on request</span>
+                                                        <!-- The price, not "Price on request". A private class has
+                                                             one - 35 for Barre, 50 for Reformer - and hiding it
+                                                             only made the student write in to ask something the
+                                                             shop could have answered. Contact-only is about how it
+                                                             is booked, not about the price being a secret: the
+                                                             same tag every other card uses renders here, and the
+                                                             Contact button is untouched, so there is still no way
+                                                             to buy one directly. -->
+                                                        <span class="mv-pkg-price-inline">
+                                                            <t t-set="price_override" t-value="student_price.get(product.id)"/>
+                                                            <t t-call="fitness_portal.mv_price_tag"/>
+                                                        </span>
                                                         <a t-att-href="'/my/messages?prefill=Re%3A+' + (product.name or '').replace(' ', '+')"
-                                                           class="mv-btn-book mv-btn-contact" style="text-decoration:none;">Contact</a>
+                                                           class="mv-btn-book mv-btn-contact" style="text-decoration:none;"
+                                                           t-out="lbl_contact"/>
                                                     </t>
                                                     <t t-else="">
                                                         <span class="mv-pkg-price-inline">
