@@ -3760,3 +3760,9 @@ msgstr "Qué traer"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Bring a towel, grip socks and water."
 msgstr "Trae toalla, calcetines antideslizantes y agua."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Contact"
+msgstr "Contactar"

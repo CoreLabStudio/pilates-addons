@@ -265,6 +265,39 @@ class TrialRequestController(http.Controller):
         """
         return self.trial_form(_source='app', **kw)
 
+    @http.route('/trial/classes', type='http', auth='public', website=True,
+                methods=['GET'], sitemap=False, multilang=False, csrf=False)
+    def trial_classes(self, **kw):
+        """The classes actually running on a date and period, as JSON.
+
+        The form asks for this the moment the date or the period changes, so
+        what a student chooses from is the timetable as it stands rather than
+        a catalogue of class types the studio might run on some other day.
+        That is the whole point of the reorder: a class the studio cancelled
+        for that day cannot be picked, because it is not in this answer.
+
+        Public on purpose - the trial form is the front door and most people
+        using it have no account. Nothing comes back that is not already on
+        the public timetable, and the rule about what may be offered lives on
+        the model, shared with the studio's own candidate-slot list, so the
+        two cannot end up saying different things.
+        """
+        raw = (kw.get('date') or '').strip()[:10]
+        try:
+            day = _date.fromisoformat(raw) if raw else None
+        except ValueError:
+            day = None
+        period = (kw.get('period') or '').strip()
+        if period not in ('morning', 'evening'):
+            period = None
+        slots = []
+        if day:
+            slots = request.env['fitness.trial.request'].sudo()._trial_slots(
+                day, period)
+        return request.make_response(
+            _json.dumps({'slots': slots}),
+            headers=[('Content-Type', 'application/json')])
+
     @http.route('/trial', type='http', auth='public', website=True, sitemap=True, multilang=False)
     def trial_form(self, _source='website', **kw):
         """Render the trial class request form."""
@@ -298,6 +331,7 @@ class TrialRequestController(http.Controller):
         reformer_first  = (kw.get('reformer_is_first_time') or '').strip()
         reformer_years  = (kw.get('reformer_years_experience') or '').strip()[:40]
         class_type_raw  = (kw.get('class_type_id') or '').strip()
+        occurrence_raw  = (kw.get('occurrence_id') or '').strip()
         preferred_date  = (kw.get('preferred_date') or '').strip()[:10]
         preferred_period = (kw.get('preferred_period') or '').strip()
         # Stamped by the form itself rather than guessed from the session: a
@@ -313,6 +347,7 @@ class TrialRequestController(http.Controller):
             'reformer_is_first_time': reformer_first,
             'reformer_years_experience': reformer_years,
             'class_type_id': class_type_raw,
+            'occurrence_id': occurrence_raw,
             'preferred_date': preferred_date,
             'preferred_period': preferred_period,
         }
@@ -368,6 +403,33 @@ class TrialRequestController(http.Controller):
         if class_interest == 'reformer' and reformer_first not in ('yes', 'no'):
             errors.append(_('Please tell us whether you have used a Reformer before.'))
 
+        # The actual class they picked, re-checked against the same rule the
+        # form was filled from. A posted id is never taken on trust: the page
+        # can have sat open while the studio cancelled that class, and the
+        # whole point of this rework is that a cancelled class cannot be
+        # booked. Re-asking the model is what makes that true at submit time
+        # and not merely at render time.
+        occurrence = None
+        if occurrence_raw and not errors:
+            try:
+                wanted = int(occurrence_raw)
+            except (ValueError, TypeError):
+                wanted = 0
+            if wanted:
+                _day2 = None
+                try:
+                    _day2 = _date.fromisoformat(preferred_date)
+                except ValueError:
+                    _day2 = None
+                allowed = {s['id'] for s in self._trials()._trial_slots(
+                    _day2, preferred_period)} if _day2 else set()
+                if wanted in allowed:
+                    occurrence = request.env['calendar.event'].sudo().browse(wanted)
+                else:
+                    errors.append(_(
+                        'That class is no longer available. Please choose '
+                        'another one.'))
+
         if errors:
             return request.render(
                 'fitness_trials.trial_request_form',
@@ -380,6 +442,7 @@ class TrialRequestController(http.Controller):
             'phone': phone or False,
             'class_interest': class_interest,
             'class_type_id': class_type.id if class_type else False,
+            'occurrence_id': occurrence.id if occurrence else False,
             'preferred_date': preferred_date or False,
             'preferred_period': preferred_period or False,
             'source': source,

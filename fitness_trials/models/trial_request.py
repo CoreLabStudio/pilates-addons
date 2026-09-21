@@ -1,5 +1,7 @@
 import logging
 import re
+from datetime import datetime as _dt, time as _time, timedelta
+
 import pytz
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -96,6 +98,112 @@ class FitnessTrialRequest(models.Model):
         """Weekday codes the studio runs something on, in timetable order."""
         days = set(self._live_schedule().mapped('weekday'))
         return [d for d in self.WEEKDAY_ORDER if d in days]
+
+    # Before this hour, in the studio's clock, a class counts as morning. One
+    # number, so the form, the stored preference and the studio's own list
+    # all cut the day in the same place.
+    MORNING_ENDS_AT = 14
+
+    @api.model
+    def _trial_slot_domain(self, day=None, period=None, discipline=None):
+        """Which real classes a trial may be offered, as a search domain.
+
+        The form and the studio's candidate-slot list both build on this, so
+        what a student is shown and where the studio can actually place them
+        cannot drift apart.
+
+        Every exclusion here is a class that must not be offered:
+
+          * cancelled - the studio called it off, and a student picking it off
+            a form is how somebody arrives at a locked door
+          * archived - search() hides these anyway; named so it stays true if
+            anyone ever passes active_test=False
+          * in the past - a trial cannot be booked into this morning
+          * private and duo - a first free class is a group class; a private
+            is sold, not given away
+
+        The day is cut in the studio's clock, not the reader's: somebody
+        asking for Tuesday from another timezone means Tuesday in Madrid.
+        """
+        domain = [
+            ('is_fitness_class', '=', True),
+            ('class_state', '!=', 'cancelled'),
+            ('active', '=', True),
+            # Asked of the class TYPE, not of the event's own copy. That copy
+            # is a plain field defaulting to 'group', filled from the type by
+            # an onchange - and an onchange does not fire on a programmatic
+            # create, which is how every generated class is made. So a
+            # private class generated from the timetable still reads
+            # session_type = 'group' on the event, and filtering on it would
+            # have offered private sessions as free trials. The type is the
+            # source of truth; the schedule reads it the same way.
+            ('class_type_id.session_type', '=', 'group'),
+            ('start', '>=', fields.Datetime.now()),
+        ]
+        if day:
+            tz = _STUDIO_TZ
+            midnight = tz.localize(_dt.combine(day, _time(0, 0)))
+            noonish = tz.localize(
+                _dt.combine(day, _time(self.MORNING_ENDS_AT, 0)))
+            start_local, end_local = midnight, midnight + timedelta(days=1)
+            if period == 'morning':
+                end_local = noonish
+            elif period == 'evening':
+                start_local = noonish
+            domain += [
+                ('start', '>=',
+                 start_local.astimezone(pytz.utc).replace(tzinfo=None)),
+                ('start', '<',
+                 end_local.astimezone(pytz.utc).replace(tzinfo=None)),
+            ]
+        if discipline in ('barre', 'reformer'):
+            domain.append(('class_type_id.classroom_type', '=', discipline))
+        return domain
+
+    @api.model
+    def _trial_slots(self, day, period=None, discipline=None):
+        """The classes to offer for a day and period, with room left on each.
+
+        Plain dicts rather than records, because a public route reads this and
+        somebody choosing their first class has no business being handed
+        calendar.event records they could not otherwise see.
+
+        A class with no seat left is left out. The studio can only place a
+        trial where there is room, so offering a full one asks a student to
+        choose something that cannot happen.
+        """
+        if not day:
+            return []
+        events = self.env['calendar.event'].sudo().search(
+            self._trial_slot_domain(day, period, discipline), order='start asc')
+        if not events:
+            return []
+        taken = {}
+        for event, count in self.env['fitness.booking'].sudo()._read_group(
+            [('calendar_event_id', 'in', events.ids),
+             ('state', 'in', ('booked', 'attended', 'no_show'))],
+            groupby=['calendar_event_id'], aggregates=['__count'],
+        ):
+            taken[event.id] = count
+        tz = _STUDIO_TZ
+        out = []
+        for event in events:
+            capacity = event.capacity or 0
+            free = (capacity - taken.get(event.id, 0)) if capacity else None
+            if capacity and free <= 0:
+                continue
+            local = pytz.utc.localize(event.start).astimezone(tz)
+            out.append({
+                'id': event.id,
+                'name': event.name or '',
+                'class_type_id': event.class_type_id.id or 0,
+                'discipline': event.class_type_id.classroom_type or '',
+                'time': local.strftime('%H:%M'),
+                'duration': event.class_type_id.duration or 0,
+                'room': event.classroom_id.name or '',
+                'free': free,
+            })
+        return out
 
     @api.model
     def _weekday_hint(self, open_days, lang):

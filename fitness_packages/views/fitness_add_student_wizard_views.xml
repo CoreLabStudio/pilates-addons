@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Add a student to this class ──────────────────────────────────────
+         The last step of a private booking, which until now had no home. The
+         studio agrees the class and the price in conversation; this records
+         that as a real paid line and books the student on the back of it, in
+         one action, from the class they are talking about. -->
+    <record id="view_fitness_add_student_wizard_form" model="ir.ui.view">
+        <field name="name">fitness.add.student.wizard.form</field>
+        <field name="model">fitness.add.student.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add a student">
+                <sheet>
+                    <group>
+                        <field name="event_id" readonly="1"/>
+                        <!-- How full it is, before a student is chosen rather
+                             than after being refused. -->
+                        <field name="seats_label" string="Room" readonly="1"/>
+                        <field name="is_private" invisible="1"/>
+                    </group>
+                    <group>
+                        <field name="student_id"
+                               options="{'no_quick_create': True}"
+                               placeholder="Search an existing contact"/>
+                        <field name="product_id" readonly="1"/>
+                        <!-- Defaulted from the product, meant to be changed:
+                             a private class is priced in the conversation. -->
+                        <field name="price"/>
+                    </group>
+                    <div class="alert alert-info mb-0" role="status">
+                        This creates a confirmed order line for the agreed
+                        price and books the student on this class. It does not
+                        email them a payment request.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_add" type="object"
+                            string="Add to class" class="btn-primary"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_add_student" model="ir.actions.act_window">
+        <field name="name">Add a student</field>
+        <field name="res_model">fitness.add.student.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+    <!-- The button lives on the Roster, which is where somebody stands when
+         they need it. The page itself is defined in fitness_bookings; this
+         module depends on that one, so inheriting its view is the right way
+         round and the button cannot exist without the wizard behind it. -->
+    <record id="view_calendar_event_form_add_student" model="ir.ui.view">
+        <field name="name">calendar.event.form.add_student</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="fitness_bookings.view_calendar_event_form_roster"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='fitness_roster']//field[@name='booking_ids']"
+                   position="before">
+                <div class="mb-2">
+                    <button name="%(action_fitness_add_student)d" type="action"
+                            string="Add a student"
+                            class="btn btn-secondary btn-sm"
+                            context="{'default_event_id': id}"
+                            invisible="class_state == 'cancelled'"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1460,6 +1460,10 @@ class FitnessStudentPortal(http.Controller):
             # and Catalan. Harmless while only a bought package showed it;
             # Part D puts it on the trial card, where every student sees it.
             'lbl_active':               _('Active'),
+            # The contact-only cards (the private classes) used to
+            # carry this word as a bare literal in the template, so it
+            # stayed English in a Spanish shop.
+            'lbl_contact':              _('Contact'),
             # A free trial is actually on offer to this student: one of the
             # trial products is priced at zero for them. The note above the
             # cards is about that offer, so it is what the note hangs on.
