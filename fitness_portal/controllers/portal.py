@@ -1373,7 +1373,9 @@ class FitnessStudentPortal(http.Controller):
                     parts.append((_('%d class per week') % p.weekly_class_allowance)
                                  if p.weekly_class_allowance == 1
                                  else (_('%d classes per week') % p.weekly_class_allowance))
-                parts.append(_('Monthly plan'))
+                cadence = self._plan_cadence_label(p)
+                if cadence:
+                    parts.append(cadence)
             pkg_meta[p.id] = ' · '.join(parts)
 
         # Group by the disciplines that actually exist in the data.
@@ -1512,7 +1514,9 @@ class FitnessStudentPortal(http.Controller):
                 parts.append((_('%d class per week') % product.weekly_class_allowance)
                              if product.weekly_class_allowance == 1
                              else (_('%d classes per week') % product.weekly_class_allowance))
-            parts.append(_('Monthly plan'))
+            cadence = self._plan_cadence_label(product)
+            if cadence:
+                parts.append(cadence)
         else:
             if product.fitness_class_count:
                 parts.append((_('%d class') % product.fitness_class_count) if product.fitness_class_count == 1
@@ -2974,6 +2978,57 @@ class FitnessStudentPortal(http.Controller):
         if own and own.sudo().active:
             plans |= own.sudo()
         return plans.sorted(lambda p: (p.sequence, p.id))
+
+    @staticmethod
+    def _cadence_noun(months):
+        """One word for how often a plan bills, for building a phrase with."""
+        _ = request.env._
+        if months == 1:
+            return _('monthly')
+        if months == 3:
+            return _('quarterly')
+        if months == 12:
+            return _('yearly')
+        return _('every %s months') % months
+
+    def _plan_cadence_label(self, product):
+        """How this membership can be paid for, in one short phrase.
+
+        The shop card and the product page both said "Monthly plan" for every
+        membership, hardcoded, and had done since before a second plan
+        existed. Quarterly has been sellable since the plan selector shipped,
+        but the selector lives on the checkout - two taps past the shop - so
+        a student browsing memberships was told in plain language that monthly
+        was the only way to pay, and a member who had been promised three
+        months up front could not find it. Read the plans actually on offer
+        instead, so the shop stops contradicting the checkout.
+
+        Whole phrases rather than a word joined to a translated "or" wherever
+        the case is one that really occurs: the conjunction and the order
+        differ by language, and a lone fragment gives a translator nothing to
+        work from. The generic branch is for plan sets the studio has not
+        priced yet, and is there so an unusual product degrades to something
+        readable rather than to "Monthly plan" again.
+        """
+        _ = request.env._
+        months = sorted({self._plan_months(p)
+                         for p in self._membership_plans(product)})
+        if not months:
+            return ''
+        if months == [1]:
+            return _('Monthly plan')
+        if months == [3]:
+            return _('Quarterly plan')
+        if months == [1, 3]:
+            return _('Monthly or quarterly')
+        nouns = [self._cadence_noun(m) for m in months]
+        phrase = _('%(options)s or %(last)s') % {
+            'options': ', '.join(nouns[:-1]),
+            'last': nouns[-1],
+        }
+        # Not str.capitalize(), which would lowercase everything after the
+        # first letter and flatten any word a language capitalises itself.
+        return phrase[:1].upper() + phrase[1:]
 
     def _plan_options(self, product, partner, selected_plan):
         """What the plan selector renders, priced.

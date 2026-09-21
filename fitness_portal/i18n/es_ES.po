@@ -711,8 +711,51 @@ msgstr "%d clases por semana"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Monthly or quarterly"
+msgstr "Mensual o trimestral"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Monthly plan"
 msgstr "Plan mensual"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Quarterly plan"
+msgstr "Plan trimestral"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(options)s or %(last)s"
+msgstr "%(options)s o %(last)s"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "every %s months"
+msgstr "cada %s meses"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "monthly"
+msgstr "mensual"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "quarterly"
+msgstr "trimestral"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "yearly"
+msgstr "anual"
 
 #. module: fitness_portal
 #. odoo-python
@@ -3705,3 +3748,15 @@ msgstr "Tu membresía te reserva la misma clase cada semana. Dinos cuál y te la
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Choose my day"
 msgstr "Elegir mi día"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "What to bring"
+msgstr "Qué traer"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Bring a towel, grip socks and water."
+msgstr "Trae toalla, calcetines antideslizantes y agua."
