@@ -203,3 +203,134 @@ class TestNoPhantomAttendees(TransactionCase):
             carrying,
             "%d of %d generated classes carry a phantom attendee"
             % (len(carrying), len(events)))
+
+
+@tagged("post_install", "-at_install")
+class TestDeletingABookingFreesTheSeat(TransactionCase):
+    """Deleting a booking has to give its seat back.
+
+    booked_seats is a plain integer the booking engine maintains on create and
+    on every state change. Deletion had no such hook, so a deleted booking
+    left its seat counted forever - the class read 1/6 with an empty roster
+    and that seat could not be taken by anyone.
+
+    38 classes on production were drifted this way, including the one Yoleyva
+    reported on 2026-09-21 as showing a person who was not there.
+
+    Cancelling is still the right way to empty a class - it returns the credit
+    and tells the student. This is about deletion not leaving a lie behind.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "Seat room", "classroom_type": "barre", "capacity": 8})
+        cls.ctype = cls.env["fitness.class.type"].create({
+            "name": "Seat Barre", "classroom_type": "barre", "duration": 45,
+            "level": "all", "session_type": "group",
+            "classroom_id": cls.room.id})
+        cls.student = cls.env["res.users"].create({
+            "name": "Seat Student",
+            "login": "seat.student@example.invalid",
+            "group_ids": [(6, 0, [
+                cls.env.ref("base.group_portal").id,
+                cls.env.ref("fitness_core.group_fitness_student").id])]})
+        pack = cls.env["product.template"].create({
+            "name": "Seat pack", "list_price": 100.0, "type": "service",
+            "fitness_is_package": True, "fitness_class_count": 20,
+            "fitness_validity_days": 90, "fitness_class_type": "barre",
+            "fitness_session_type": "group"})
+        order = cls.env["sale.order"].create(
+            {"partner_id": cls.student.partner_id.id})
+        cls.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": pack.product_variant_ids[:1].id,
+            "product_uom_qty": 1, "price_unit": pack.list_price,
+            "fitness_class_type": "barre"})
+        order.action_confirm()
+        cls.credit = order.order_line[:1]
+
+    def _event(self, days=4):
+        """Offset on purpose: one student cannot hold two overlapping slots,
+        and the booking engine is right to refuse that."""
+        start = fields.Datetime.now() + timedelta(days=days)
+        return self.env["calendar.event"].create({
+            "name": "Seat class D%d" % days, "start": start,
+            "stop": start + timedelta(minutes=45),
+            "class_type_id": self.ctype.id, "is_fitness_class": True})
+
+    def _booking(self, event, student=None):
+        return self.env["fitness.booking"].create({
+            "student_id": (student or self.student).partner_id.id,
+            "calendar_event_id": event.id,
+            "package_order_line_id": self.credit.id,
+            "manager_override_timewindow": True})
+
+    def test_deleting_a_booking_frees_the_seat(self):
+        event = self._event()
+        booking = self._booking(event)
+        event.invalidate_recordset()
+        self.assertEqual(event.booked_seats, 1, "the seat was never taken")
+
+        booking.unlink()
+        event.invalidate_recordset()
+        self.assertEqual(
+            event.booked_seats, 0,
+            "the seat is still counted after the booking was deleted - the "
+            "class shows somebody who is not there, and nobody else can take "
+            "that place")
+
+    def test_the_count_matches_the_roster_after_a_partial_delete(self):
+        """Two in, one deleted: the survivor must still be counted."""
+        event = self._event()
+        first = self._booking(event)
+        other = self.env["res.users"].create({
+            "name": "Seat Student Two",
+            "login": "seat.student2@example.invalid",
+            "group_ids": [(6, 0, [
+                self.env.ref("base.group_portal").id,
+                self.env.ref("fitness_core.group_fitness_student").id])]})
+        order = self.env["sale.order"].create(
+            {"partner_id": other.partner_id.id})
+        self.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": self.credit.product_id.id,
+            "product_uom_qty": 1, "price_unit": 100.0,
+            "fitness_class_type": "barre"})
+        order.action_confirm()
+        self.env["fitness.booking"].create({
+            "student_id": other.partner_id.id,
+            "calendar_event_id": event.id,
+            "package_order_line_id": order.order_line[:1].id,
+            "manager_override_timewindow": True})
+        event.invalidate_recordset()
+        self.assertEqual(event.booked_seats, 2)
+
+        first.unlink()
+        event.invalidate_recordset()
+        roster = self.env["fitness.booking"].search_count([
+            ("calendar_event_id", "=", event.id),
+            ("state", "in", ("booked", "attended"))])
+        self.assertEqual(event.booked_seats, roster,
+                         "the seat count and the roster disagree")
+        self.assertEqual(event.booked_seats, 1)
+
+    def test_deleting_several_at_once_recounts_each_class(self):
+        """unlink() takes a recordset; every class involved has to be fixed."""
+        one, two = self._event(4), self._event(6)
+        b1, b2 = self._booking(one), self._booking(two)
+        one.invalidate_recordset()
+        two.invalidate_recordset()
+        self.assertEqual((one.booked_seats, two.booked_seats), (1, 1))
+
+        (b1 | b2).unlink()
+        one.invalidate_recordset()
+        two.invalidate_recordset()
+        self.assertEqual(
+            (one.booked_seats, two.booked_seats), (0, 0),
+            "deleting several bookings at once left a seat counted on one of "
+            "their classes")

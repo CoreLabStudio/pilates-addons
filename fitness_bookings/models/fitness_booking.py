@@ -331,6 +331,44 @@ class FitnessBooking(models.Model):
         """
         return
 
+    def unlink(self):
+        """Give the seat back when a booking is deleted.
+
+        booked_seats is not computed - it is a plain integer this model
+        maintains, refreshed on create and on every state change. Deletion had
+        no such hook, so a deleted booking left its seat counted forever: the
+        class read 1/6 with an empty roster, and that seat could not be taken
+        by anybody.
+
+        Found on production on 2026-09-21 while looking at something else.
+        Yoleyva reported a class showing one person with nobody in it; the
+        phantom calendar attendee explained the header, but her class also had
+        booked_seats = 1 against an empty roster, which is this. 38 classes
+        were drifted.
+
+        Cancelling remains the right way to empty a class and still is - it
+        returns the credit and tells the student, where deleting silently does
+        neither. This only stops a deletion leaving the count wrong.
+
+        The events are read before the rows go, because afterwards there is
+        nothing left to ask, and re-counted after, because the count has to be
+        taken with the rows already gone.
+        """
+        events = self.mapped('calendar_event_id')
+        result = super().unlink()
+        for event in events:
+            if not event.exists():
+                continue
+            count = self.search_count([
+                ('calendar_event_id', '=', event.id),
+                ('state', 'in', ('booked', 'attended')),
+            ])
+            event.sudo().booked_seats = count
+            _logger.info(
+                "[BOOKING] booked_seats recounted to %d for event %s after a "
+                "deletion", count, event.name)
+        return result
+
     def _refresh_booked_seats(self):
         """Re-count active bookings and write back to the calendar event."""
         count = self.search_count([
