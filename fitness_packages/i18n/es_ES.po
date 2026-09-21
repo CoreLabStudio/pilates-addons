@@ -226,3 +226,117 @@ msgstr "El descuento de %s debe ser mayor que 0 y como máximo del 100 por cien.
 #: code:addons/fitness_packages/models/product_template.py:0
 msgid "The promotion on %s ends before it starts."
 msgstr "La promoción de %s termina antes de empezar."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "%(taken)s booked"
+msgstr "%(taken)s reservadas"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "%(taken)s of %(capacity)s booked, %(free)s free"
+msgstr "%(taken)s de %(capacity)s reservadas, %(free)s libres"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Only studio managers can add a student to a class."
+msgstr "Solo las responsables del estudio pueden añadir una alumna a una clase."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "That class is cancelled. Put it back on the timetable first."
+msgstr "Esa clase está cancelada. Vuelve a ponerla en el horario primero."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "'%(name)s' is full - %(taken)s/%(capacity)s seats taken."
+msgstr "'%(name)s' está llena: %(taken)s/%(capacity)s plazas ocupadas."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "There is no private class product for this discipline, so there is nothing to charge the booking against."
+msgstr "No hay producto de clase privada para esta disciplina, así que no hay nada a lo que cargar la reserva."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "%(name)s has no variant to sell."
+msgstr "%(name)s no tiene ninguna variante que vender."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Student added"
+msgstr "Alumna añadida"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "%(student)s is booked on %(name)s, charged %(price)s on %(order)s."
+msgstr "%(student)s está reservada en %(name)s, con %(price)s cargados en %(order)s."
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Add a student"
+msgstr "Añadir una alumna"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Add to class"
+msgstr "Añadir a la clase"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Room"
+msgstr "Plazas"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Search an existing contact"
+msgstr "Busca un contacto existente"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "This creates a confirmed order line for the agreed\n                        price and books the student on this class. It does not\n                        email them a payment request."
+msgstr "Esto crea una línea de pedido confirmada por el precio acordado y reserva a la alumna en esta clase. No le envía ninguna solicitud de pago por correo."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__event_id
+msgid "Class"
+msgstr "Clase"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__student_id
+msgid "Student"
+msgstr "Alumna"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__price
+msgid "Agreed price"
+msgstr "Precio acordado"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__product_id
+msgid "Charged as"
+msgstr "Se cobra como"
+
+#. module: fitness_packages
+#: model:ir.actions.act_window,name:fitness_packages.action_fitness_add_student
+msgid "Add a student"
+msgstr "Añadir una alumna"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_calendar_event_form_add_student
+msgid "Add a student"
+msgstr "Añadir una alumna"
