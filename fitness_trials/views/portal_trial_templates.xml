@@ -180,132 +180,15 @@
                                t-att-value="form_values.get('phone', '')"/>
                     </div>
 
-                    <!-- ── Class interest ──────────────────────────────────── -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            <t t-if="_lang == 'en_US'">Class type</t>
-                            <t t-elif="_lang == 'ca_ES'">Tipus de classe</t>
-                            <t t-else="">Tipo de clase</t>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="d-flex gap-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="class_interest"
-                                       id="ci_barre" value="barre"
-                                       t-att-checked="'checked' if form_values.get('class_interest') == 'barre' else None"/>
-                                <label class="form-check-label" for="ci_barre">
-                                    <strong>Barre</strong>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="class_interest"
-                                       id="ci_reformer" value="reformer"
-                                       t-att-checked="'checked' if form_values.get('class_interest') == 'reformer' else None"/>
-                                <label class="form-check-label" for="ci_reformer">
-                                    <strong>Reformer</strong>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Which class, within the discipline chosen above. Both
-                         lists are rendered and the script shows the one that
-                         matches, so switching discipline needs no round trip. -->
-                    <div id="mv-barre-section" class="mv-trial-conditional d-none mb-3">
-                        <label class="form-label">
-                            <t t-if="_lang == 'en_US'">Which Barre class?</t>
-                            <t t-elif="_lang == 'ca_ES'">Quina classe de Barre?</t>
-                            <t t-else="">¿Qué clase de Barre?</t>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <t t-foreach="barre_types" t-as="ct">
-                            <label class="mv-slot-card" t-att-for="'bct_' + str(ct['id'])">
-                                <input type="radio" name="class_type_id"
-                                       t-att-id="'bct_' + str(ct['id'])"
-                                       t-att-value="ct['id']"
-                                       t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
-                                <div style="flex:1;min-width:0;">
-                                    <div class="fw-semibold small mv-slot-name" t-esc="ct['name']"/>
-                                    <t t-if="ct['duration']">
-                                        <div class="small mv-slot-meta"><t t-esc="int(ct['duration'])"/> min</div>
-                                    </t>
-                                </div>
-                            </label>
-                        </t>
-                    </div>
-
-                    <div id="mv-reformer-section" class="mv-trial-conditional d-none mb-3">
-                        <label class="form-label">
-                            <t t-if="_lang == 'en_US'">Which Reformer class?</t>
-                            <t t-elif="_lang == 'ca_ES'">Quina classe de Reformer?</t>
-                            <t t-else="">¿Qué clase de Reformer?</t>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <t t-foreach="reformer_types" t-as="ct">
-                            <label class="mv-slot-card" t-att-for="'rct_' + str(ct['id'])">
-                                <input type="radio" name="class_type_id"
-                                       t-att-id="'rct_' + str(ct['id'])"
-                                       t-att-value="ct['id']"
-                                       t-att-checked="'checked' if str(form_values.get('class_type_id', '')) == str(ct['id']) else None"/>
-                                <div style="flex:1;min-width:0;">
-                                    <div class="fw-semibold small mv-slot-name" t-esc="ct['name']"/>
-                                    <t t-if="ct['duration']">
-                                        <div class="small mv-slot-meta"><t t-esc="int(ct['duration'])"/> min</div>
-                                    </t>
-                                </div>
-                            </label>
-                        </t>
-                    </div>
-
-                    <!-- Reformer only. The studio needs to know whether
-                         somebody has used a Reformer before: a first-timer is
-                         placed and briefed differently. -->
-                    <div id="mv-reformer-intake" class="mv-trial-conditional d-none mb-3">
-                        <label class="form-label">
-                            <t t-if="_lang == 'en_US'">Have you done Reformer before?</t>
-                            <t t-elif="_lang == 'ca_ES'">Has fet Reformer abans?</t>
-                            <t t-else="">¿Has hecho Reformer antes?</t>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="d-flex gap-3 mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
-                                       id="rf_first_yes" value="yes"
-                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'yes' else None"/>
-                                <label class="form-check-label" for="rf_first_yes">
-                                    <t t-if="_lang == 'en_US'">No, it would be my first time</t>
-                                    <t t-elif="_lang == 'ca_ES'">No, seria el meu primer cop</t>
-                                    <t t-else="">No, sería mi primera vez</t>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
-                                       id="rf_first_no" value="no"
-                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'no' else None"/>
-                                <label class="form-check-label" for="rf_first_no">
-                                    <t t-if="_lang == 'en_US'">Yes, I have</t>
-                                    <t t-elif="_lang == 'ca_ES'">Sí, ja n'he fet</t>
-                                    <t t-else="">Sí, ya he hecho</t>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- Only worth asking of somebody who has done it before. -->
-                        <div id="mv-reformer-years" class="d-none">
-                            <label class="form-label" for="rf_years">
-                                <t t-if="_lang == 'en_US'">How much experience do you have?</t>
-                                <t t-elif="_lang == 'ca_ES'">Quanta experiència tens?</t>
-                                <t t-else="">¿Cuánta experiencia tienes?</t>
-                            </label>
-                            <input type="text" id="rf_years" name="reformer_years_experience"
-                                   class="form-control"
-                                   t-att-placeholder="'e.g. 2 years, on and off' if _lang == 'en_US' else ('p. ex. 2 anys, amb pauses' if _lang == 'ca_ES' else 'p. ej. 2 a\u00f1os, con pausas')"
-                                   t-att-value="form_values.get('reformer_years_experience', '')"/>
-                        </div>
-                    </div>
-
-                    <!-- When they would like to come. A preference, not a
-                         booking: the studio still chooses the actual class,
-                         which is the whole point of the three-student minimum. -->
+                    <!-- ── When ───────────────────────────────────────────────
+                         Date and period come first now. They used to come
+                         last, after the student had already chosen a class
+                         from the catalogue of everything the studio runs -
+                         so the class they picked might not run on their day
+                         at all, and a class the studio had cancelled for
+                         that day was still offered. Asking when first means
+                         the next question can be answered from the
+                         timetable instead of the catalogue. -->
                     <div class="mb-3">
                         <label class="form-label" for="trial_preferred_date">
                             <t t-if="_lang == 'en_US'">Preferred date</t>
@@ -354,7 +237,7 @@
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="preferred_period"
-                                       id="pp_evening" value="evening" required="required"
+                                       id="pp_evening" value="evening"
                                        t-att-checked="'checked' if form_values.get('preferred_period') == 'evening' else None"/>
                                 <label class="form-check-label" for="pp_evening">
                                     <t t-if="_lang == 'en_US'">Evening</t>
@@ -365,7 +248,98 @@
                         </div>
                     </div>
 
+                    <!-- ── Which class ────────────────────────────────────────
+                         Filled from /trial/classes the moment the date or the
+                         period changes, so this is the timetable as it stands
+                         and not a catalogue: a class the studio cancelled for
+                         that day is simply not in the answer, and cannot be
+                         chosen. Empty until a date and a period are set,
+                         because until then there is no honest list to show. -->
+                    <div class="mb-3" id="mv-class-pick">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Which class?</t>
+                            <t t-elif="_lang == 'ca_ES'">Quina classe?</t>
+                            <t t-else="">¿Qué clase?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div id="mv-class-hint" class="form-text">
+                            <t t-if="_lang == 'en_US'">Pick a date and a time of day to see what runs.</t>
+                            <t t-elif="_lang == 'ca_ES'">Tria un dia i un moment del dia per veure què hi ha.</t>
+                            <t t-else="">Elige un día y un momento del día para ver qué hay.</t>
+                        </div>
+                        <div id="mv-class-loading" class="form-text d-none">
+                            <t t-if="_lang == 'en_US'">Looking at the timetable…</t>
+                            <t t-elif="_lang == 'ca_ES'">Consultant l'horari…</t>
+                            <t t-else="">Consultando el horario…</t>
+                        </div>
+                        <!-- Said plainly rather than left as an empty box: a
+                             day with nothing on it looks identical to a form
+                             that has not loaded. -->
+                        <div id="mv-class-empty" class="form-text text-danger d-none">
+                            <t t-if="_lang == 'en_US'">No classes that day at that time. Try another day or the other half of the day.</t>
+                            <t t-elif="_lang == 'ca_ES'">No hi ha classes aquell dia en aquell moment. Prova un altre dia o l'altra meitat del dia.</t>
+                            <t t-else="">No hay clases ese día a esa hora. Prueba otro día o la otra mitad del día.</t>
+                        </div>
+                        <div id="mv-class-list" class="mv-slot-grid"
+                             t-att-data-free-word="'places free' if _lang == 'en_US' else ('lliures' if _lang == 'ca_ES' else 'libres')"/>
+                    </div>
 
+                    <!-- Carried, not shown. The discipline and the class type
+                         used to be things the student picked; now they are
+                         read off whichever class they chose, so a Reformer
+                         request cannot arrive carrying a Barre class type. -->
+                    <input type="hidden" name="class_interest" id="mv-class-interest"
+                           t-att-value="form_values.get('class_interest', '')"/>
+                    <input type="hidden" name="class_type_id" id="mv-class-type"
+                           t-att-value="form_values.get('class_type_id', '')"/>
+                    <input type="hidden" name="occurrence_id" id="mv-occurrence"
+                           t-att-value="form_values.get('occurrence_id', '')"/>
+
+                    <!-- Asked only once the chosen class turns out to be a
+                         Reformer one. It used to hang off the discipline
+                         radio, which no longer exists. -->
+                    <div id="mv-reformer-intake" class="mv-trial-conditional d-none mb-3">
+                        <label class="form-label">
+                            <t t-if="_lang == 'en_US'">Have you done Reformer before?</t>
+                            <t t-elif="_lang == 'ca_ES'">Has fet Reformer abans?</t>
+                            <t t-else="">¿Has hecho Reformer antes?</t>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
+                                       id="rf_first_yes" value="yes"
+                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'yes' else None"/>
+                                <label class="form-check-label" for="rf_first_yes">
+                                    <t t-if="_lang == 'en_US'">No, it would be my first time</t>
+                                    <t t-elif="_lang == 'ca_ES'">No, seria el meu primer cop</t>
+                                    <t t-else="">No, sería mi primera vez</t>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reformer_is_first_time"
+                                       id="rf_first_no" value="no"
+                                       t-att-checked="'checked' if form_values.get('reformer_is_first_time') == 'no' else None"/>
+                                <label class="form-check-label" for="rf_first_no">
+                                    <t t-if="_lang == 'en_US'">Yes, I have</t>
+                                    <t t-elif="_lang == 'ca_ES'">Sí, ja n'he fet</t>
+                                    <t t-else="">Sí, ya he hecho</t>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Only worth asking of somebody who has done it before. -->
+                        <div id="mv-reformer-years" class="d-none">
+                            <label class="form-label" for="rf_years">
+                                <t t-if="_lang == 'en_US'">How much experience do you have?</t>
+                                <t t-elif="_lang == 'ca_ES'">Quanta experiència tens?</t>
+                                <t t-else="">¿Cuánta experiencia tienes?</t>
+                            </label>
+                            <input type="text" id="rf_years" name="reformer_years_experience"
+                                   class="form-control"
+                                   t-att-placeholder="'e.g. 2 years, on and off' if _lang == 'en_US' else ('p. ex. 2 anys, amb pauses' if _lang == 'ca_ES' else 'p. ej. 2 años, con pausas')"
+                                   t-att-value="form_values.get('reformer_years_experience', '')"/>
+                        </div>
+                    </div>
                     <!-- ── Submit ─────────────────────────────────────── -->
                     <div class="d-grid mt-2">
                         <button type="submit" id="mv-trial-submit" class="btn btn-primary" disabled="disabled"
@@ -387,146 +361,175 @@
 
                 <script>
                 (function () {
-                    var ciRadios     = document.querySelectorAll('input[name="class_interest"]');
-                    var barreSection = document.getElementById('mv-barre-section');
-                    var rfSection    = document.getElementById('mv-reformer-section');
-                    var submitBtn    = document.getElementById('mv-trial-submit');
+                    var dateInput  = document.getElementById('trial_preferred_date');
+                    var listBox    = document.getElementById('mv-class-list');
+                    var hintBox    = document.getElementById('mv-class-hint');
+                    var loadBox    = document.getElementById('mv-class-loading');
+                    var emptyBox   = document.getElementById('mv-class-empty');
+                    var fInterest  = document.getElementById('mv-class-interest');
+                    var fClassType = document.getElementById('mv-class-type');
+                    var fOccurrence= document.getElementById('mv-occurrence');
+                    var rfIntake   = document.getElementById('mv-reformer-intake');
+                    var rfYears    = document.getElementById('mv-reformer-years');
+                    var submitBtn  = document.getElementById('mv-trial-submit');
+                    var closedMsg  = document.getElementById('mv-date-closed');
+
+                    function show(el, on) { if (el) el.classList.toggle('d-none', !on); }
+
+                    // The studio is shut some days. A date input cannot grey
+                    // those out, so this is the only warning there is.
+                    function dateIsOpen() {
+                        if (!dateInput || !dateInput.value) return true;
+                        var raw = dateInput.getAttribute('data-open-dows') || '';
+                        if (!raw) return true;
+                        var allowed = raw.split(',').filter(function (s) { return s !== ''; });
+                        if (!allowed.length) return true;
+                        var parts = dateInput.value.split('-');
+                        var d = new Date(parts[0], parts[1] - 1, parts[2]);
+                        var dow = (d.getDay() + 6) % 7;   // Monday = 0, as Python counts
+                        return allowed.indexOf(String(dow)) !== -1;
+                    }
+
+                    function chosenPeriod() {
+                        var p = document.querySelector('input[name="preferred_period"]:checked');
+                        return p ? p.value : '';
+                    }
+
+                    function clearChoice() {
+                        if (fInterest)   fInterest.value = '';
+                        if (fClassType)  fClassType.value = '';
+                        if (fOccurrence) fOccurrence.value = '';
+                        show(rfIntake, false);
+                        show(rfYears, false);
+                        document.querySelectorAll('input[name="reformer_is_first_time"]').forEach(
+                            function (r) { r.checked = false; });
+                        updateSubmit();
+                    }
+
+                    // A Reformer class asks one more question; a Barre class
+                    // does not. Read off the class rather than off a
+                    // discipline the student picked, because they no longer
+                    // pick one.
+                    function onPick(slot) {
+                        if (fInterest)   fInterest.value = slot.discipline || '';
+                        if (fClassType)  fClassType.value = slot.class_type_id || '';
+                        if (fOccurrence) fOccurrence.value = slot.id || '';
+                        var isReformer = (slot.discipline === 'reformer');
+                        show(rfIntake, isReformer);
+                        if (!isReformer) {
+                            show(rfYears, false);
+                            document.querySelectorAll('input[name="reformer_is_first_time"]').forEach(
+                                function (r) { r.checked = false; });
+                        }
+                        updateSubmit();
+                    }
+
+                    function render(slots) {
+                        listBox.innerHTML = '';
+                        show(emptyBox, slots.length === 0);
+                        slots.forEach(function (slot) {
+                            var label = document.createElement('label');
+                            label.className = 'mv-slot-card';
+                            var radio = document.createElement('input');
+                            radio.type = 'radio';
+                            radio.name = 'mv_slot';
+                            radio.value = slot.id;
+                            radio.className = 'mv-slot-radio';
+                            radio.addEventListener('change', function () {
+                                document.querySelectorAll('#mv-class-list .mv-slot-card')
+                                    .forEach(function (c) { c.classList.remove('mv-slot-card--on'); });
+                                label.classList.add('mv-slot-card--on');
+                                onPick(slot);
+                            });
+                            var body = document.createElement('span');
+                            body.className = 'mv-slot-body';
+                            var title = document.createElement('span');
+                            title.className = 'mv-slot-title';
+                            title.textContent = slot.time + '  ' + slot.name;
+                            var meta = document.createElement('span');
+                            meta.className = 'small mv-slot-meta';
+                            var bits = [];
+                            if (slot.room) bits.push(slot.room);
+                            if (slot.duration) bits.push(slot.duration + ' min');
+                            if (slot.free !== null &amp;&amp; slot.free !== undefined) {
+                                bits.push(slot.free + ' ' + (listBox.dataset.freeWord || ''));
+                            }
+                            meta.textContent = bits.join(' · ');
+                            body.appendChild(title);
+                            body.appendChild(meta);
+                            label.appendChild(radio);
+                            label.appendChild(body);
+                            listBox.appendChild(label);
+                        });
+                    }
+
+                    var inFlight = null;
+                    function loadClasses() {
+                        clearChoice();
+                        listBox.innerHTML = '';
+                        show(emptyBox, false);
+                        var day = dateInput ? dateInput.value : '';
+                        var period = chosenPeriod();
+                        var open = dateIsOpen();
+                        show(closedMsg, !!day &amp;&amp; !open);
+                        if (!day || !period || !open) {
+                            show(hintBox, true);
+                            show(loadBox, false);
+                            return;
+                        }
+                        show(hintBox, false);
+                        show(loadBox, true);
+                        var token = {};
+                        inFlight = token;
+                        fetch('/trial/classes?date=' + encodeURIComponent(day)
+                              + '&amp;period=' + encodeURIComponent(period),
+                              { headers: { 'Accept': 'application/json' } })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                // A slower earlier answer must not overwrite a
+                                // newer one: the student can change the date
+                                // twice before the first reply lands.
+                                if (inFlight !== token) return;
+                                show(loadBox, false);
+                                render((data &amp;&amp; data.slots) || []);
+                            })
+                            .catch(function () {
+                                if (inFlight !== token) return;
+                                show(loadBox, false);
+                                show(emptyBox, true);
+                            });
+                    }
 
                     function updateSubmit() {
-                        var ci = document.querySelector('input[name="class_interest"]:checked');
-                        // Both disciplines need a chosen class now - Reformer used
-                        // to enable on the questions alone.
-                        var enabled = !!(ci &amp;&amp;
-                            document.querySelector('input[name="class_type_id"]:checked') &amp;&amp;
-                            (document.getElementById('trial_preferred_date') || {}).value &amp;&amp;
-                            document.querySelector('input[name="preferred_period"]:checked'));
-                        // A day the studio is shut is not an answer.
-                        if (enabled &amp;&amp; typeof dateIsOpen === 'function') {
-                            enabled = dateIsOpen();
+                        if (!submitBtn) return;
+                        var ok = !!(fOccurrence &amp;&amp; fOccurrence.value
+                                    &amp;&amp; dateInput &amp;&amp; dateInput.value
+                                    &amp;&amp; chosenPeriod() &amp;&amp; dateIsOpen());
+                        if (ok &amp;&amp; fInterest &amp;&amp; fInterest.value === 'reformer') {
+                            ok = !!document.querySelector('input[name="reformer_is_first_time"]:checked');
                         }
-                        // Reformer also has to answer the experience question.
-                        if (enabled &amp;&amp; ci.value === 'reformer') {
-                            enabled = !!document.querySelector('input[name="reformer_is_first_time"]:checked');
-                        }
-                        if (enabled) {
-                            submitBtn.removeAttribute('disabled');
-                            submitBtn.disabled = false;
-                        } else {
-                            submitBtn.disabled = true;
-                        }
+                        submitBtn.disabled = !ok;
                     }
 
-                    var rfIntake = document.getElementById('mv-reformer-intake');
-                    var rfYears  = document.getElementById('mv-reformer-years');
-
-                    function showSection(val) {
-                        barreSection.classList.toggle('d-none', val !== 'barre');
-                        rfSection.classList.toggle('d-none', val !== 'reformer');
-                        if (rfIntake) { rfIntake.classList.toggle('d-none', val !== 'reformer'); }
-                        updateSubmit();
-                    }
-
-                    // The experience box only matters to somebody who has used
-                    // a Reformer before.
                     function showYears() {
                         var been = document.querySelector('input[name="reformer_is_first_time"]:checked');
-                        if (rfYears) {
-                            rfYears.classList.toggle('d-none', !(been &amp;&amp; been.value === 'no'));
-                        }
+                        show(rfYears, !!been &amp;&amp; been.value === 'no');
                         updateSubmit();
                     }
+
+                    if (dateInput) dateInput.addEventListener('change', loadClasses);
+                    document.querySelectorAll('input[name="preferred_period"]').forEach(
+                        function (r) { r.addEventListener('change', loadClasses); });
                     document.querySelectorAll('input[name="reformer_is_first_time"]').forEach(
                         function (r) { r.addEventListener('change', showYears); });
 
-                    // Class interest change
-                    ciRadios.forEach(function (r) {
-                        r.addEventListener('change', function () { showSection(this.value); });
-                    });
-
-                    // Slot selection — update submit state + highlight card
-                    function onSlotChange(e) {
-                        if (e.target &amp;&amp; e.target.name === 'class_type_id') {
-                            document.querySelectorAll('.mv-slot-card').forEach(function (c) {
-                                c.classList.remove('mv-slot-selected');
-                            });
-                            if (e.target.checked) {
-                                var card = e.target.closest('.mv-slot-card');
-                                if (card) { card.classList.add('mv-slot-selected'); }
-                            }
-                            updateSubmit();
-                        }
-                    }
-                    barreSection.addEventListener('change', onSlotChange);
-                    rfSection.addEventListener('change', onSlotChange);
-
-                    // The date and the period gate the button just as much as
-                    // the class does. Without these the button only woke up
-                    // when a class radio was touched, so anyone filling the
-                    // form top to bottom finished it and found Submit still
-                    // dead - and re-picking a class appeared to "fix" it.
-                    var dateInput = document.getElementById('trial_preferred_date');
-
-                    // The studio is shut on days it runs nothing. A date input
-                    // cannot grey those out, so the next best thing is to say
-                    // so the moment one is picked instead of after sending.
-                    // The open days come from the timetable, not from a list
-                    // written here, so a new Saturday class needs no change.
-                    var openDows = (dateInput &amp;&amp; dateInput.dataset.openDows || '')
-                        .split(',').filter(function (s) { return s !== ''; })
-                        .map(Number);
-                    var closedMsg = document.getElementById('mv-date-closed');
-
-                    function dateIsOpen() {
-                        if (!dateInput || !dateInput.value || !openDows.length) { return true; }
-                        // Parsed as parts, not as a Date string: "2026-09-20"
-                        // is read as UTC midnight and shifts a day west of
-                        // Greenwich, which would call the wrong day closed.
-                        var p = dateInput.value.split('-');
-                        var dow = (new Date(+p[0], +p[1] - 1, +p[2])).getDay();
-                        // JS counts Sunday first; the timetable counts Monday.
-                        return openDows.indexOf((dow + 6) % 7) !== -1;
-                    }
-
-                    function checkDate() {
-                        var ok = dateIsOpen();
-                        if (closedMsg) { closedMsg.classList.toggle('d-none', ok); }
-                        if (dateInput) { dateInput.classList.toggle('is-invalid', !ok); }
-                        return ok;
-                    }
-
-                    if (dateInput) {
-                        dateInput.addEventListener('change', function () {
-                            checkDate(); updateSubmit();
-                        });
-                        dateInput.addEventListener('input', function () {
-                            checkDate(); updateSubmit();
-                        });
-                    }
-                    document.querySelectorAll('input[name="preferred_period"]').forEach(
-                        function (r) { r.addEventListener('change', updateSubmit); });
-
-                    // Initialise on page load (restores state after server-side re-render on error)
-                    var checkedCi = document.querySelector('input[name="class_interest"]:checked');
-                    if (checkedCi) { showSection(checkedCi.value); }
-
-                    showYears();
-                    var checkedType = document.querySelector('input[name="class_type_id"]:checked');
-                    if (checkedType) {
-                        var card = checkedType.closest('.mv-slot-card');
-                        if (card) { card.classList.add('mv-slot-selected'); }
-                    }
-
-                    // A submit that takes a moment invites a second click, and
-                    // a second click used to mean a second booking. The button
-                    // goes dead and says so the instant the form is sent.
-                    var trialForm = document.querySelector('form[action="/trial/submit"]');
-                    if (trialForm) {
-                        trialForm.addEventListener('submit', function () {
-                            if (submitBtn) {
-                                submitBtn.disabled = true;
-                                submitBtn.textContent = submitBtn.dataset.sending || 'Enviando\u2026';
-                            }
-                        });
+                    // Coming back from a validation error: the date and period
+                    // survive on the form, so reload the list rather than
+                    // leaving the student looking at an empty box.
+                    if (dateInput &amp;&amp; dateInput.value &amp;&amp; chosenPeriod()) {
+                        loadClasses();
+                    } else {
+                        updateSubmit();
                     }
                 })();
                 </script>
