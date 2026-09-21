@@ -34,6 +34,15 @@ _STUDIO_TZ = pytz.timezone('Europe/Madrid')
 class FitnessTrialRequest(models.Model):
     _name = 'fitness.trial.request'
     _description = 'Trial Class Request'
+    # Tracking is the point of the inherit, not the chatter. Four requests on
+    # production named a class the student was not booked into, and nothing on
+    # the record said which side had moved or when - the status, the slot and
+    # the booking link had all been written at some point by something, and the
+    # only way to tell them apart was to compare write_date against the
+    # booking's. Templates were already posting mail.message rows against this
+    # model, so the history was half there; this makes the field changes part
+    # of it.
+    _inherit = ['mail.thread']
 
     # Still the studio's to deal with. Scheduled and declined are finished,
     # and somebody whose trial has been and gone may ask again.
@@ -293,6 +302,7 @@ class FitnessTrialRequest(models.Model):
         string='Class Slot',
         ondelete='set null',
         index=True,
+        tracking=True,
     )
     lang = fields.Char(string='Language', default='es_ES')
     class_interest = fields.Selection(
@@ -328,6 +338,7 @@ class FitnessTrialRequest(models.Model):
         default='pending',
         required=True,
         index=True,
+        tracking=True,
     )
     # Filled from the Class Slot, and read-only on screen: the slot is what
     # actually gets booked, so a second hand-typed time could only ever
@@ -348,8 +359,9 @@ class FitnessTrialRequest(models.Model):
     )
     booking_id = fields.Many2one(
         'fitness.booking', string='Booking', readonly=True, copy=False,
+        tracking=True,
         help="The place this request was approved into. Cancelling either "
-             "one cancels the other.")
+             "one cancels the other, and moving it moves the slot above.")
     decline_reason = fields.Text(
         string='Reason', copy=False,
         help="Why the studio could not take this request. Sent to the student "
@@ -702,6 +714,41 @@ class FitnessTrialRequest(models.Model):
             _logger.info(
                 "[TRIAL] Request %s marked cancelled because its booking was "
                 "cancelled", rec.id)
+
+    def _moved_with_booking(self, target_event):
+        """The booking went to another class, so the request points there too.
+
+        Approval creates the booking *on* occurrence_id, so the two agree the
+        moment a trial is approved and can only ever disagree afterwards. They
+        did: four requests on production named one class while the student's
+        seat was in another, because moving a booking refreshed both rosters
+        and told the student, and left the request behind. The trial list then
+        showed the studio a class that was not happening, and the confirmation
+        email - which quotes occurrence_id - would have repeated it if anybody
+        had re-sent it.
+
+        Deliberately silent, like its cancellation sibling: the move has
+        already told the student, in a message written for exactly this news.
+        A trial notice on top would be two messages about one thing.
+
+        scheduled_datetime follows the slot rather than being recomputed from
+        it, because it is a plain stored field that only ever gets written,
+        never blanked - see _apply_slot_datetime.
+        """
+        if not target_event:
+            return
+        for rec in self:
+            if rec.status != 'scheduled':
+                continue
+            origin = rec.occurrence_id
+            if origin == target_event:
+                continue
+            vals = {'occurrence_id': target_event.id}
+            self._apply_slot_datetime(vals, target_event.start)
+            rec.sudo().write(vals)
+            _logger.info(
+                "[TRIAL] Request %s follows its booking from event %s to "
+                "event %s", rec.id, origin.id or '-', target_event.id)
 
     def action_decline(self):
         """Open the dialog that asks why before cancelling."""

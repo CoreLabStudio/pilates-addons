@@ -191,6 +191,11 @@
                    placeholder="Free-text note left by the requester about when they'd prefer to come."/>
           </group>
         </sheet>
+        <!-- The history, not a conversation: who moved the slot, who changed
+             the status, and when. Four requests named a class the student was
+             not booked into and nothing on the record said which side had
+             moved. -->
+        <chatter/>
       </form>
     </field>
   </record>
