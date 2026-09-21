@@ -1,4 +1,9 @@
-from odoo import models, fields, api
+import logging
+
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class ResUsers(models.Model):
@@ -49,6 +54,114 @@ class ResUsers(models.Model):
         )
         for user in self:
             user.fitness_is_teacher = bool(teacher_group and teacher_group in user.all_group_ids)
+
+    # ── Verification ──────────────────────────────────────────────────────────
+
+    fitness_is_verified_student = fields.Boolean(
+        compute='_compute_fitness_is_verified_student',
+        search='_search_fitness_is_verified_student',
+        string='Has shop access',
+        help="Whether this account holds the student group. Without it the "
+             "shop and the checkout send the person back to /my, whatever "
+             "else is set on them.",
+    )
+
+    @api.depends('all_group_ids')
+    def _compute_fitness_is_verified_student(self):
+        group = self.env.ref(
+            'fitness_core.group_fitness_student', raise_if_not_found=False)
+        for user in self:
+            user.fitness_is_verified_student = bool(
+                group and group in user.all_group_ids)
+
+    def _search_fitness_is_verified_student(self, operator, value):
+        """Make the field filterable, so the studio can list who is stuck.
+
+        A non-stored compute cannot be searched without this, and the filter
+        that matters - "Cannot open the shop" - is a search. Answered through
+        the group's own all_user_ids, which already accounts for implied
+        groups, rather than by re-deriving membership here.
+        """
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            raise NotImplementedError(
+                "fitness_is_verified_student supports = and != against a "
+                "boolean only")
+        group = self.env.ref(
+            'fitness_core.group_fitness_student', raise_if_not_found=False)
+        if not group:
+            # No group means nobody holds it, so "verified" matches nobody.
+            return [('id', '=', False)] if (value == (operator == '=')) else []
+        wanted = value if operator == '=' else not value
+        return [('id', 'in' if wanted else 'not in',
+                 group.sudo().all_user_ids.ids)]
+
+    def action_fitness_verify_student(self):
+        """Grant shop access by hand, exactly as clicking the email link does.
+
+        /corelab/verify-email was the only place in the codebase that granted
+        this group, and its link is a signed payload embedding the account's
+        latest login time - so logging in, even only to check whether
+        verification had worked, invalidated the student's own outstanding
+        link. Somebody anxious enough to keep checking could never get in, and
+        the studio had no way to help: two people needed a one-off script run
+        against production on 2026-09-21.
+
+        This is that script, made permanent and put where the studio already
+        looks. It does the same two things the route does and nothing more:
+        adds the group, then cancels the signup so a stale link left in an
+        inbox cannot be replayed afterwards.
+
+        Deliberately narrow:
+          * managers only, re-checked here rather than trusted to the button's
+            groups= attribute, which only hides it
+          * portal accounts only, so a misclick on the wrong record can never
+            hand an internal user a group
+        """
+        group = self.env.ref('fitness_core.group_fitness_student')
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user.has_group('base.group_system')):
+            raise UserError(_("Only studio managers can give a student access."))
+
+        done, skipped = self.env['res.users'], self.env['res.users']
+        for user in self:
+            if not user.share:
+                raise UserError(_(
+                    "%(name)s is not a portal account. This is for students "
+                    "who signed up and could not get through verification.",
+                    name=user.name))
+            if group in user.all_group_ids:
+                skipped |= user
+                continue
+            user.sudo().write({'group_ids': [(4, group.id)]})
+            user.partner_id.sudo().signup_cancel()
+            done |= user
+            _logger.info(
+                "[VERIFY] %s given student access by %s from the back office",
+                user.login, self.env.user.login)
+
+        if not done:
+            title, kind = _("No change"), 'warning'
+            message = _("%(who)s already had access; nothing changed.",
+                        who=', '.join(skipped.mapped('name')) or _("Nobody"))
+        else:
+            title, kind = _("Access granted"), 'success'
+            message = _(
+                "%(who)s can now open the shop and book. They log in with the "
+                "password they already chose - no new email is sent.",
+                who=', '.join(done.mapped('name')))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': title,
+                'message': message,
+                'type': kind,
+                'sticky': False,
+                # The form behind the dialog still shows the old state, and
+                # the button would still be sitting there offering itself.
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+            },
+        }
 
     # ── Student actions ───────────────────────────────────────────────────────
 
