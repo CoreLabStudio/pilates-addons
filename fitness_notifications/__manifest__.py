@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Notifications – Yoleyva Studio',
+    'name': 'Fitness Notifications – CoreLab Studio',
     'version': '19.0.1.5.17',
     'category': 'Services',
     'summary': 'Email and in-app notifications for booking lifecycle, credit status, and teacher changes',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'mail',

@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Teacher Swap – Yoleyva Studio',
+    'name': 'Fitness Teacher Swap – CoreLab Studio',
     'version': '19.0.1.3.8',
     'category': 'Services',
     'summary': 'Portal page letting a teacher reassign one of their own upcoming classes to another teacher',
-    'author': 'Yoleyva Studio',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': [
         'portal',

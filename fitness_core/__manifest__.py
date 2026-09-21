@@ -1,9 +1,9 @@
 {
-    'name': 'Fitness Core – Yoleyva Studio',
-    'version': '19.0.2.6.59',
+    'name': 'Fitness Core – CoreLab Studio',
+    'version': '19.0.2.6.60',
     'category': 'Services',
-    'summary': 'Core models for Yoleyva Pilates & Barre Studio',
-    'author': 'Yoleyva Studio',
+    'summary': 'Core models for CoreLab Studio - Pilates & Barre',
+    'author': 'Core Lab Studio, S.L.',
     'license': 'LGPL-3',
     'depends': ['base', 'calendar', 'payment'],
     'data': [
