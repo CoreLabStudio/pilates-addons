@@ -5390,3 +5390,23 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
 @media (prefers-reduced-motion: reduce) {
   .mv-theme-btn svg { transition: none; }
 }
+
+/* ── 32. color-scheme follows the choice, not just the phone ────────────────
+   :root declares "light dark", which hands the browser's own canvas,
+   scrollbars and form controls to the operating system. That is right while
+   nobody has chosen, and wrong the moment somebody has: a student who picked
+   light on a dark phone kept dark scrollbars and a dark canvas behind the
+   page, and the canvas is what shows during the first paint of a navigation.
+   Naming the scheme explicitly makes the browser paint our side of it. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+/* ── 33. The body follows the theme on every CoreLab page ───────────────────
+   body:has(.mv-app) themes the body only where a page wraps its content in
+   .mv-app, and three portal pages - Profile, Saldo and the /my index - do
+   not. Their #wrapwrap was themed, so the page looked right, and the white
+   body underneath showed only where the wrapper stopped: below a short page,
+   and on the rubber-band overscroll of a phone, which is a white flash at
+   the bottom of a dark screen. Keyed on the header instead, so it covers
+   every page that renders the CoreLab shell however its body is built. */
+body:has(.mv-header-right) { background: var(--mv-bg) !important; }
