@@ -2,6 +2,30 @@
 <odoo>
 
     <!-- ── Google Fonts — Cormorant Garamond + Inter ────────────────────── -->
+    <!-- The stored scheme, stamped before the browser paints.
+         corelab.js cannot do this: it rides in web.assets_frontend, which the
+         browser loads with defer, so it runs after the document is parsed and
+         after the first paint. Every navigation therefore painted in the
+         operating system's scheme and then flipped to the chosen one - a dark
+         flash on the way to a light page, on exactly the setup the switch
+         exists for. Inline and synchronous is the only thing that runs early
+         enough.
+
+         On web.frontend_layout rather than portal.frontend_layout: the head
+         belongs to that one, and every frontend page comes through it -
+         portal pages, and the login, signup and public trial pages, which are
+         drawn by web.login_layout and carry no switch of their own but must
+         still honour a choice already made. -->
+    <template id="mv_theme_boot" name="CoreLab Theme Boot" inherit_id="web.frontend_layout">
+        <xpath expr="//head/meta[@charset]" position="after">
+            <script type="text/javascript">
+                (function(){try{var t=localStorage.getItem('corelab-theme');
+                if(t==='dark'||t==='light'){
+                document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+            </script>
+        </xpath>
+    </template>
+
     <template id="mv_google_fonts" name="CoreLab Google Fonts" inherit_id="portal.frontend_layout">
         <xpath expr="//head/meta[@charset]" position="after">
             <link rel="preconnect" href="https://fonts.googleapis.com"/>

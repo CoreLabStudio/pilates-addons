@@ -40,15 +40,27 @@
                 }
                 /* The public form has no tokens to inherit, so dark mode is
                    spelled out for it rather than left to a white default. */
+                /* Guarded, so an explicit light choice beats a dark phone
+                   here as it does everywhere else, and repeated for the
+                   switch so this page follows it too. Every selector in both
+                   copies is prefixed - a rule left unprefixed would escape
+                   its media query and paint cream text on the white card. */
                 @media (prefers-color-scheme: dark) {
-                    .mv-slot-card {
+                    :root:not([data-theme="light"]) .mv-slot-card {
                         background: var(--mv-card-bg, #241c18);
                         color: var(--mv-ink-text, #F2EAE3);
                         border-color: var(--mv-border, #3b302a);
                     }
-                    .mv-slot-card .mv-slot-name { color: var(--mv-ink-text, #F2EAE3); }
-                    .mv-slot-card .mv-slot-meta { color: var(--mv-muted, #b3a49a); }
+                    :root:not([data-theme="light"]) .mv-slot-card .mv-slot-name { color: var(--mv-ink-text, #F2EAE3); }
+                    :root:not([data-theme="light"]) .mv-slot-card .mv-slot-meta { color: var(--mv-muted, #b3a49a); }
                 }
+                :root[data-theme="dark"] .mv-slot-card {
+                    background: var(--mv-card-bg, #241c18);
+                    color: var(--mv-ink-text, #F2EAE3);
+                    border-color: var(--mv-border, #3b302a);
+                }
+                :root[data-theme="dark"] .mv-slot-card .mv-slot-name { color: var(--mv-ink-text, #F2EAE3); }
+                :root[data-theme="dark"] .mv-slot-card .mv-slot-meta { color: var(--mv-muted, #b3a49a); }
                 .mv-slot-card input[type="radio"] { margin-top: 0.2rem; flex-shrink: 0; }
                 .mv-date-filters {
                     display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
