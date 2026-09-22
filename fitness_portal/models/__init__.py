@@ -5,5 +5,6 @@ from . import res_users
 from . import sale_order
 from . import studio_message
 from . import new_conversation_wizard
+from . import desk_sale_wizard
 from . import calendar_grid
 from . import email_verification

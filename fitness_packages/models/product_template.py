@@ -141,6 +141,100 @@ class ProductTemplate(models.Model):
             return float_round(full * (1.0 - pct / 100.0), precision_rounding=rounding)
         return full
 
+    def fitness_taxed_price(self, price, partner=None, price_includes_tax=False):
+        """The taxable base and the final total for a displayed price.
+
+        Studio prices are advertised tax-included, but the inherited customer
+        tax is configured tax-exclusive, so the advertised figure has to be
+        reversed before it becomes a line's price_unit. Writing the advertised
+        number straight onto the line adds the tax on top instead: a 75.00
+        pack became an 86.25 order, which is not what was in the till.
+
+        Shared with the portal checkout - a second copy of this arithmetic is
+        how the page and the order come to disagree.
+        """
+        self.ensure_one()
+        taxes = self.taxes_id.filtered(
+            lambda t: t.company_id == self.env.company)
+        if not taxes:
+            return price, price
+        variant = self.product_variant_ids[:1]
+        if price_includes_tax and any(not tax.price_include for tax in taxes):
+            probe = taxes.compute_all(
+                price, currency=self.currency_id, quantity=1.0,
+                product=variant, partner=partner)
+            if probe['total_included']:
+                price = price * price / probe['total_included']
+        result = taxes.compute_all(
+            price, currency=self.currency_id, quantity=1.0,
+            product=variant, partner=partner)
+        return result['total_excluded'], result['total_included']
+
+    def fitness_price_unit_for_gross(self, gross, partner=None):
+        """The price_unit that makes an order total exactly `gross`.
+
+        Whether a line's price_unit is the gross or the taxable base depends
+        on how the product's tax is configured, and this database has both
+        kinds: a price-included tax wants the gross written straight on, a
+        price-excluded one wants the base, or the tax is added a second time.
+        Getting it wrong is silent - the order simply totals the wrong number,
+        and the studio's books stop matching the till.
+
+        Asked as a question rather than branched on a flag: price the line at
+        the gross, see what Odoo makes the total, and scale by the difference.
+        A price-included tax answers gross already and the ratio is 1.
+        """
+        self.ensure_one()
+        gross = gross or 0.0
+        if not gross:
+            return 0.0
+        taxes = self.taxes_id.filtered(
+            lambda t: t.company_id == self.env.company)
+        if not taxes:
+            return gross
+        probe = taxes.compute_all(
+            gross, currency=self.currency_id, quantity=1.0,
+            product=self.product_variant_ids[:1], partner=partner)
+        total = probe.get('total_included') or 0.0
+        if not total:
+            return gross
+        return gross * gross / total
+
+    def fitness_sale_line_vals(self, price):
+        """The order lines this pack is sold as, priced at `price`.
+
+        One builder, because a combined pack is one price but two credit
+        pools and getting that wrong charges the membership twice or lets one
+        discipline be spent on the other. The portal checkout and the desk
+        wizard both come through here so what a student is charged online and
+        what the studio charges at the desk cannot drift apart - the same
+        reason _order_lines_for says it is the only place lines are built.
+
+        Callers add their own extra lines (the matricula, for instance); this
+        covers the pack itself.
+        """
+        self.ensure_one()
+        variant = self.product_variant_ids[:1]
+        if not variant:
+            return []
+        lines = [{
+            'product_id': variant.id,
+            'product_uom_qty': 1,
+            'price_unit': price,
+            'fitness_class_type': self.fitness_class_type,
+        }]
+        if self.fitness_secondary_class_type:
+            # No price on this one at all: it is a pool, not a sale, and
+            # sale.order.line computes its price and discount to zero so a
+            # later recompute cannot restore the full price and charge twice.
+            lines.append({
+                'product_id': variant.id,
+                'product_uom_qty': 1,
+                'fitness_is_secondary_pool': True,
+                'fitness_class_type': self.fitness_secondary_class_type,
+            })
+        return lines
+
     def fitness_price_is_free(self, on=None):
         """Does this resolve to nothing to pay?
 

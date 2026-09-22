@@ -14,6 +14,10 @@ class SaleOrder(models.Model):
         ('stripe', 'Stripe (Online)'),
         ('bizum', 'Bizum'),
         ('transfer', 'Bank Transfer'),
+        # Taken in person at the desk. Unlike Bizum and bank transfer there is
+        # nothing left to chase: the money is in the till before the order is
+        # written, so a cash order is not waiting on anybody.
+        ('cash', 'Cash (at the studio)'),
         # Not a method so much as the absence of one: the order came to zero,
         # so nothing was charged and no provider was involved. Recorded rather
         # than left blank so a free order is tellable from one whose method was

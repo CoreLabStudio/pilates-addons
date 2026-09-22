@@ -5,3 +5,4 @@ access_fitness_studio_message_portal,fitness.studio.message portal,model_fitness
 access_fitness_studio_message_user,fitness.studio.message user,model_fitness_studio_message,base.group_user,1,1,1,1
 access_fitness_studio_new_conv_wizard_user,fitness.studio.new_conversation.wizard user,model_fitness_studio_new_conversation_wizard,base.group_user,1,1,1,1
 access_fitness_email_verification_system,fitness.email.verification system,model_fitness_email_verification,base.group_system,1,1,1,1
+access_fitness_desk_sale_wizard_manager,fitness.desk.sale.wizard.manager,model_fitness_desk_sale_wizard,fitness_core.group_fitness_manager,1,1,1,1
