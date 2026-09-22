@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.24.98',
+    'version': '19.0.1.24.99',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',
@@ -9,6 +9,10 @@
         'web',
         'portal',
         'sale',
+        # Named directly by the desk wizard when it invoices a cash sale.
+        # Present transitively through sale -> account_payment -> account,
+        # but a module that references account.journal should say so.
+        'account',
         'payment',
         'auth_signup',
         'fitness_core',

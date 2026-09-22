@@ -113,6 +113,65 @@ class FitnessDeskSaleWizard(models.TransientModel):
         return self.product_id.fitness_price_unit_for_gross(
             self.amount_paid or 0.0, self.partner_id)
 
+    def _invoice_cash_sale(self, order):
+        """A cash sale gets the same invoice an online one gets.
+
+        Every paying order on this system is invoiced - all three of them, by
+        Odoo's own hook: a completed payment transaction calls
+        _invoice_sale_orders, which creates the invoice, and posting it is
+        what mails it to the student, through the action_post override in
+        fitness_notifications. Cash has no transaction, so none of that fires,
+        and a desk sale would have been the first paying customer to receive
+        no invoice - the exact inconsistency this wizard exists to avoid.
+
+        Done unconditionally rather than behind sale.automatic_invoice, which
+        gates the online path. That setting exists because a transaction may
+        not have completed; cash has, by definition - the money is in the till
+        before the order is written.
+
+        Payment is registered only into a cash journal. Posting cash into the
+        bank journal would say the money is in the bank when it is in a
+        drawer, and a wrong entry is worse than a missing one: the invoice
+        stands either way, and an unpaid invoice is a thing the studio can
+        settle, where a misfiled one has to be found first.
+        """
+        invoice = order._create_invoices()
+        if not invoice:
+            _logger.warning(
+                "[DESK SALE] %s produced no invoice - nothing to post", order.name)
+            return invoice
+        invoice.action_post()
+        _logger.info("[DESK SALE] invoice %s posted for order %s (%.2f)",
+                     invoice.name, order.name, invoice.amount_total)
+
+        # sudo throughout: a fitness manager is not an accounting user and
+        # cannot read a journal, let alone register a payment. Taking cash is
+        # something the studio authorises her to do; the entry that follows is
+        # a consequence of it, not a second permission she has to hold.
+        journal = self.env['account.journal'].sudo().search([
+            ('type', '=', 'cash'),
+            ('company_id', '=', order.company_id.id),
+        ], limit=1)
+        if not journal:
+            _logger.warning(
+                "[DESK SALE] no cash journal on %s, so invoice %s is posted "
+                "but unpaid - the money was taken, the entry is not made",
+                order.company_id.name, invoice.name)
+            return invoice
+        try:
+            self.env['account.payment.register'].sudo().with_context(
+                active_model='account.move', active_ids=invoice.ids,
+            ).create({'journal_id': journal.id}).action_create_payments()
+            _logger.info("[DESK SALE] invoice %s paid from %s",
+                         invoice.name, journal.name)
+        except Exception:
+            # The sale and its invoice are real whatever happens here; losing
+            # them to a payment-registration problem would be the worse trade.
+            _logger.exception(
+                "[DESK SALE] could not register the cash payment for %s",
+                invoice.name)
+        return invoice
+
     def action_create_sale(self):
         self.ensure_one()
         if not (self.env.user.has_group(MANAGER_GROUP)
@@ -161,6 +220,9 @@ class FitnessDeskSaleWizard(models.TransientModel):
             self.env.user.login, product.display_name, self.partner_id.id,
             0.0 if self.payment_method == 'free' else (self.amount_paid or 0.0),
             self.payment_method, order.name, order.amount_total)
+
+        if self.payment_method == 'cash':
+            self._invoice_cash_sale(order)
 
         # Opening the order is the nicer ending, but a fitness manager is not
         # necessarily a Sales user - on this database only the owner is - and
