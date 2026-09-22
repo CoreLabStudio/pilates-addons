@@ -3766,3 +3766,9 @@ msgstr "Trae toalla, calcetines antideslizantes y agua."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Contact"
 msgstr "Contactar"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "Switch between light and dark"
+msgstr "Cambiar entre modo claro y oscuro"

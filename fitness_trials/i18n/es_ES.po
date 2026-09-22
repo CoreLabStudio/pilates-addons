@@ -454,3 +454,35 @@ msgstr "El estudio está cerrado ese día. Elige otro: %(days)s."
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "The class booking was cancelled."
 msgstr "La reserva de la clase fue cancelada."
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__suggested_slot_ids
+msgid "Classes matching the request"
+msgstr "Clases que coinciden con la solicitud"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__occurrence_id_domain
+msgid "Class Slot domain"
+msgstr "Dominio de franja de clase"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__show_all_slots
+msgid "Show every class"
+msgstr "Mostrar todas las clases"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Slots for %(who)s - what they asked for"
+msgstr "Horarios para %(who)s - lo que pidió"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Slots for %(who)s - every class"
+msgstr "Horarios para %(who)s - todas las clases"
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_form
+msgid "Nothing runs on the day they asked for, so every class is being offered."
+msgstr "No hay ninguna clase el día que pidió, así que se muestran todas."

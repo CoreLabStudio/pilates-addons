@@ -2719,27 +2719,13 @@ class FitnessStudentPortal(http.Controller):
         return bool(product.fitness_is_package or product.fitness_is_subscription_plan)
 
     def _taxed_price(self, prod, price, partner, price_includes_tax=False):
-        """Return the taxable base and final total for a displayed price."""
-        taxes = prod.taxes_id.filtered(
-            lambda t: t.company_id == request.env.company)
-        if not taxes:
-            return price, price
+        """Return the taxable base and final total for a displayed price.
 
-        product = prod.product_variant_ids[:1]
-        if price_includes_tax and any(not tax.price_include for tax in taxes):
-            # Registration is advertised as a final, tax-included amount, but
-            # its inherited customer tax is configured as tax-exclusive.
-            # Reverse that tax before creating the sale line.
-            probe = taxes.compute_all(
-                price, currency=prod.currency_id, quantity=1.0,
-                product=product, partner=partner)
-            if probe['total_included']:
-                price = price * price / probe['total_included']
-
-        result = taxes.compute_all(
-            price, currency=prod.currency_id, quantity=1.0,
-            product=product, partner=partner)
-        return result['total_excluded'], result['total_included']
+        The arithmetic lives on the product so the desk wizard reverses tax
+        the same way this page does. A second copy is how a page and an order
+        come to disagree - which is the fault this helper was written for.
+        """
+        return prod.fitness_taxed_price(price, partner, price_includes_tax)
 
     def _checkout_totals(self, product, partner, plan=None):
         """The numbers on the order summary, computed once.
@@ -3220,35 +3206,14 @@ class FitnessStudentPortal(http.Controller):
         if not variant:
             return []
         months = self._plan_months(plan) if plan else 1
-        lines = [{
-            'product_id': variant.id,
-            'product_uom_qty': 1,
-            # The promotion price, not the list price, times the number of
-            # months the period covers - a quarterly membership is three
-            # months charged at once. This is the number the student was shown
-            # and the number Stripe is asked for; a second calculation here is
-            # how those two come apart.
-            'price_unit': self._student_price(partner, product) * months,
-            'fitness_class_type': product.fitness_class_type,
-        }]
-        # A combined package is sold at one price but grants two separate
-        # pools, so it is written as two lines: the second carries the other
-        # discipline and no price. Charging the whole amount on the first line
-        # keeps the order total equal to the advertised price, while giving
-        # the second pool a line of its own to count credits against - which
-        # is what stops one discipline being spent on the other.
-        if product.fitness_secondary_class_type:
-            lines.append({
-                'product_id': variant.id,
-                'product_uom_qty': 1,
-                # No price is written here at all. This line is flagged as a
-                # pool rather than a sale, and sale.order.line computes both
-                # price_unit and discount to zero for it - so a later
-                # recompute produces the same answer instead of restoring the
-                # full price and charging the membership twice.
-                'fitness_is_secondary_pool': True,
-                'fitness_class_type': product.fitness_secondary_class_type,
-            })
+        # The pack itself - one line, or two when it grants two pools - is
+        # built on the product, so the desk wizard sells exactly what checkout
+        # sells. The price is still worked out here: the promotion price, not
+        # the list price, times the number of months the period covers, since
+        # a quarterly membership is three months charged at once. This is the
+        # number the student was shown and the number Stripe is asked for.
+        lines = product.fitness_sale_line_vals(
+            self._student_price(partner, product) * months)
         matricula = self._matricula_due(partner, product, plan)
         if matricula:
             mat_variant = matricula.product_variant_ids[:1]
