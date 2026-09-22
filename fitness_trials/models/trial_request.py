@@ -169,6 +169,46 @@ class FitnessTrialRequest(models.Model):
             domain.append(('class_type_id.classroom_type', '=', discipline))
         return domain
 
+    @api.depends('preferred_date', 'preferred_period', 'class_interest',
+                 'class_type_id', 'show_all_slots')
+    def _compute_slot_suggestions(self):
+        """The classes that answer the request, and what the picker offers.
+
+        Built on _trial_slot_domain, the same rule the public form uses, so
+        the studio cannot place somebody where the student could never have
+        asked to go - and so the two cannot drift apart. Its docstring already
+        claimed the candidate list was built on it; it was not, and that gap
+        is what this closes.
+
+        The picker narrows to the matching classes rather than merely sorting
+        them, because a many2one offers whatever the domain allows in the
+        target model's own order and there is no 'preferred first'. Narrowing
+        would be wrong as a hard rule - the studio moves people into a fuller
+        class on purpose - so it lifts the moment there is nothing matching,
+        and Show every class lifts it by hand.
+        """
+        events = self.env['calendar.event']
+        for rec in self:
+            broad = rec._trial_slot_domain(discipline=rec.class_interest)
+            if rec.class_type_id:
+                broad = broad + [('class_type_id', '=', rec.class_type_id.id)]
+
+            matching = events
+            if rec.preferred_date:
+                narrow = rec._trial_slot_domain(
+                    rec.preferred_date, rec.preferred_period,
+                    rec.class_interest)
+                if rec.class_type_id:
+                    narrow = narrow + [
+                        ('class_type_id', '=', rec.class_type_id.id)]
+                matching = events.sudo().search(narrow, order='start asc')
+
+            rec.suggested_slot_ids = matching
+            if matching and not rec.show_all_slots:
+                rec.occurrence_id_domain = [('id', 'in', matching.ids)]
+            else:
+                rec.occurrence_id_domain = broad
+
     @api.model
     def _trial_slots(self, day, period=None, discipline=None):
         """The classes to offer for a day and period, with room left on each.
@@ -351,6 +391,25 @@ class FitnessTrialRequest(models.Model):
         compute='_compute_scheduled_datetime_display',
         store=False,
     )
+    # What the student actually asked for, turned into classes. The slot
+    # pickers used to ignore preferred_date and preferred_period entirely and
+    # offer every future class of the right discipline, nearest first - so the
+    # easy pick was the soonest class, not the one that was asked for. Two
+    # students were approved onto a class six and ten days before the date
+    # they wrote down.
+    suggested_slot_ids = fields.Many2many(
+        'calendar.event', string='Classes matching the request',
+        compute='_compute_slot_suggestions',
+        help="The classes that match the date and time of day this student "
+             "asked for. Empty when nothing runs then.")
+    occurrence_id_domain = fields.Binary(
+        string='Class Slot domain', compute='_compute_slot_suggestions')
+    show_all_slots = fields.Boolean(
+        string='Show every class',
+        help="Offer every class of the right discipline, not only the ones "
+             "matching what the student asked for. The studio does place "
+             "people elsewhere on purpose - to fill a class that would "
+             "otherwise not run - so this is always one tick away.")
     confirmation_email_sent = fields.Boolean(
         string='Confirmation Email Sent', default=False, copy=False
     )
@@ -583,20 +642,35 @@ class FitnessTrialRequest(models.Model):
         Opens the ordinary class list rather than a bespoke screen, so the
         capacity columns, filters and grouping the studio already knows all
         work here too.
+
+        Built on _trial_slot_domain now, the same rule the public form uses.
+        It used to assemble its own, which let it offer private and duo
+        sessions as free trials and - because it ignored the requested date
+        entirely - put the soonest class at the top whatever the student had
+        asked for. The day narrowing drops away when nothing runs then, so
+        the list is never empty when there is somewhere to put them.
         """
         self.ensure_one()
-        domain = [
-            ('is_fitness_class', '=', True),
-            ('class_state', '!=', 'cancelled'),
-            ('start', '>=', fields.Datetime.now()),
-        ]
-        if self.class_interest:
-            domain.append(('class_type_id.classroom_type', '=', self.class_interest))
+        domain = self._trial_slot_domain(
+            self.preferred_date, self.preferred_period, self.class_interest)
         if self.class_type_id:
             domain.append(('class_type_id', '=', self.class_type_id.id))
+        narrowed = bool(self.preferred_date)
+        if narrowed and not self.env['calendar.event'].sudo().search_count(domain):
+            narrowed = False
+            domain = self._trial_slot_domain(discipline=self.class_interest)
+            if self.class_type_id:
+                domain.append(('class_type_id', '=', self.class_type_id.id))
+        if narrowed:
+            title = _(
+                "Slots for %(who)s - what they asked for",
+                who=self.name or _("this request"))
+        else:
+            title = _("Slots for %(who)s - every class",
+                      who=self.name or _("this request"))
         return {
             'type': 'ir.actions.act_window',
-            'name': _("Slots for %(who)s", who=self.name or _("this request")),
+            'name': title,
             'res_model': 'calendar.event',
             'view_mode': 'list,calendar,form',
             'domain': domain,

@@ -317,3 +317,145 @@ class TestTrialSubmitRevalidates(TransactionCase):
             "browse(int(occurrence_raw))", source,
             "the posted occurrence id is being browsed directly instead of "
             "being validated first")
+
+
+@tagged("post_install", "-at_install")
+class TestAdminSlotPicker(TransactionCase):
+    """What the studio is offered when it places a trial.
+
+    Both pickers used to ignore preferred_date and preferred_period and offer
+    every future class of the right discipline, nearest first. Two students
+    were approved onto a class six and ten days before the date they had
+    written down, and the confirmation email told them so.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "Picker room", "classroom_type": "reformer",
+            "capacity": 6})
+        cls.ctype = cls.env["fitness.class.type"].create({
+            "name": "Picker Reformer", "classroom_type": "reformer",
+            "duration": 50, "level": "all", "session_type": "group",
+            "classroom_id": cls.room.id})
+        cls.asked_for = (fields.Datetime.now() + timedelta(days=12)).date()
+        cls.sooner = (fields.Datetime.now() + timedelta(days=4)).date()
+
+    def _at(self, hour, day, ctype=None, name=None):
+        local = STUDIO_TZ.localize(datetime.combine(day, time(hour, 0)))
+        start = local.astimezone(pytz.utc).replace(tzinfo=None)
+        return self.env["calendar.event"].create({
+            "name": name or ("Picker %02d:00" % hour),
+            "start": start,
+            "stop": start + timedelta(minutes=50),
+            "class_type_id": (ctype or self.ctype).id,
+            "is_fitness_class": True,
+        })
+
+    def _request(self, **extra):
+        vals = {
+            "name": "Picker Requester",
+            "email": "picker@example.invalid",
+            "class_interest": "reformer",
+            "preferred_date": self.asked_for,
+            "preferred_period": "evening",
+        }
+        vals.update(extra)
+        return self.env["fitness.trial.request"].create(vals)
+
+    def test_the_picker_offers_the_day_that_was_asked_for(self):
+        evening = self._at(19, self.asked_for, name="The one she asked for")
+        morning = self._at(9, self.asked_for, name="Same day, wrong half")
+        request = self._request()
+
+        self.assertIn(evening, request.suggested_slot_ids)
+        self.assertNotIn(
+            morning, request.suggested_slot_ids,
+            "she asked for an evening, so a nine o'clock class is not what "
+            "she asked for")
+
+    def test_a_sooner_class_is_not_offered_over_the_requested_day(self):
+        """Marta asked for the 28th and was approved onto the 18th. The
+        soonest class was simply the easiest thing to pick."""
+        asked = self._at(19, self.asked_for, name="The 28th")
+        soon = self._at(19, self.sooner, name="The 18th")
+        request = self._request()
+
+        self.assertEqual(request.suggested_slot_ids, asked)
+        domain_ids = request.occurrence_id_domain[0][2]
+        self.assertIn(asked.id, domain_ids)
+        self.assertNotIn(
+            soon.id, domain_ids,
+            "a class a week before the requested date is still top of the "
+            "picker, which is how two students were booked into the wrong "
+            "week")
+
+    def test_the_picker_widens_when_nothing_runs_that_day(self):
+        """Narrowing to an empty list would leave nowhere to place anybody."""
+        soon = self._at(19, self.sooner, name="The only class running")
+        request = self._request()
+
+        self.assertFalse(request.suggested_slot_ids)
+        self.assertTrue(
+            self.env["calendar.event"].search(
+                request.occurrence_id_domain) >= soon,
+            "with nothing on the requested day the picker has to fall back "
+            "to every class, or the request cannot be approved at all")
+
+    def test_show_all_slots_lifts_the_narrowing(self):
+        """Placing somebody in a fuller class is a real thing the studio
+        does - Eva and Ana were both moved that way on purpose."""
+        self._at(19, self.asked_for, name="The one she asked for")
+        soon = self._at(19, self.sooner, name="Somewhere fuller")
+        request = self._request()
+        self.assertNotIn(soon.id, request.occurrence_id_domain[0][2])
+
+        request.show_all_slots = True
+
+        self.assertIn(
+            soon, self.env["calendar.event"].search(
+                request.occurrence_id_domain),
+            "the studio must always be one tick away from every class")
+
+    def test_the_candidate_list_narrows_to_the_request(self):
+        asked = self._at(19, self.asked_for, name="The 28th")
+        soon = self._at(19, self.sooner, name="The 18th")
+        request = self._request()
+
+        action = request.action_view_candidate_slots()
+        found = self.env["calendar.event"].search(action["domain"])
+
+        self.assertIn(asked, found)
+        self.assertNotIn(soon, found)
+        self.assertIn("asked for", action["name"])
+
+    def test_the_candidate_list_widens_when_nothing_matches(self):
+        soon = self._at(19, self.sooner, name="The only class running")
+        request = self._request()
+
+        action = request.action_view_candidate_slots()
+        found = self.env["calendar.event"].search(action["domain"])
+
+        self.assertIn(soon, found)
+        self.assertIn("every class", action["name"])
+
+    def test_a_private_session_is_never_offered(self):
+        """The old admin domain built its own rule and let these through, so
+        a free trial could be placed into a session the studio sells."""
+        private_type = self.env["fitness.class.type"].create({
+            "name": "Picker Private", "classroom_type": "reformer",
+            "duration": 50, "level": "all", "session_type": "private",
+            "classroom_id": self.room.id})
+        private = self._at(19, self.asked_for, ctype=private_type,
+                           name="A private session")
+        self._at(20, self.asked_for, name="A real group class")
+        request = self._request()
+
+        self.assertNotIn(private, request.suggested_slot_ids)
+        self.assertNotIn(
+            private, self.env["calendar.event"].search(
+                request.action_view_candidate_slots()["domain"]),
+            "a private session is sold, not given away as a free trial")
