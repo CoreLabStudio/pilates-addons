@@ -195,6 +195,51 @@ class TestDeskSale(TransactionCase):
             action.get("res_model"), "sale.order",
             "sending them to a form they cannot open ends a good sale badly")
 
+    # -- invoicing -------------------------------------------------------
+
+    def test_a_cash_sale_produces_a_posted_invoice(self):
+        """Every paying order on production is invoiced. A cash sale would
+        otherwise have been the first paying customer without one."""
+        order = self._order_from(self._wizard().action_create_sale())
+
+        self.assertTrue(order.invoice_ids, "a cash sale must raise an invoice")
+        inv = order.invoice_ids[:1]
+        self.assertEqual(inv.move_type, "out_invoice")
+        self.assertEqual(inv.state, "posted",
+                         "a draft invoice is not sent and not counted")
+        self.assertAlmostEqual(inv.amount_total, order.amount_total, places=2)
+
+    def test_a_free_grant_raises_no_invoice(self):
+        """It is a gift at zero, like the free trials - 78 of which carry no
+        invoice and correctly so."""
+        order = self._order_from(self._wizard(
+            payment_method="free", reason="Her sister.").action_create_sale())
+
+        self.assertFalse(
+            order.invoice_ids,
+            "invoicing a gift would put revenue in the books that nobody paid")
+
+    def test_the_invoice_bills_what_was_taken(self):
+        order = self._order_from(
+            self._wizard(amount_paid=60.0).action_create_sale())
+
+        self.assertAlmostEqual(
+            order.invoice_ids[:1].amount_total, 60.0, places=2,
+            msg="the invoice has to say what the student actually handed over")
+
+    def test_the_sale_survives_a_failure_to_register_payment(self):
+        """Without a cash journal the money cannot be booked, but the invoice
+        must still stand - an unpaid invoice can be settled, a missing one
+        has to be discovered first."""
+        self.env["account.journal"].search([("type", "=", "cash")]).write(
+            {"active": False})
+
+        order = self._order_from(self._wizard().action_create_sale())
+
+        self.assertEqual(order.state, "sale")
+        self.assertTrue(order.invoice_ids)
+        self.assertEqual(order.invoice_ids[:1].state, "posted")
+
     def test_only_a_manager_can_sell_from_the_desk(self):
         """Blocked by the access rule before the method's own guard is even
         reached - a student cannot so much as open the wizard."""
