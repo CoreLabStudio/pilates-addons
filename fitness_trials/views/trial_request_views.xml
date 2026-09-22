@@ -154,11 +154,27 @@
                    request, and the approval then failed on the booking's
                    discipline check with a message about subscriptions that
                    said nothing about the real mistake. -->
+              <!-- Narrowed to the day and time of day the student asked for,
+                   computed in Python so the public form and this picker share
+                   one rule. It used to ignore the request entirely and offer
+                   every future class nearest-first, which is how two students
+                   were approved onto a class six and ten days early. The
+                   narrowing lifts itself when nothing runs then, and Show
+                   every class lifts it by hand - placing somebody in a fuller
+                   class on purpose is a real thing the studio does. -->
+              <field name="occurrence_id_domain" invisible="1"/>
+              <!-- Otherwise the picker quietly showing everything looks the
+                   same as the picker being narrowed, and the studio cannot
+                   tell which it is looking at. -->
+              <div class="alert alert-warning mb-2" role="alert" colspan="2"
+                   invisible="not preferred_date or suggested_slot_ids">
+                Nothing runs on the day they asked for, so every class is being offered.
+              </div>
               <field name="occurrence_id" options="{'no_create': True}"
-                     domain="[('is_fitness_class', '=', True),
-                              ('class_state', '!=', 'cancelled'),
-                              ('start', '&gt;=', context_today().strftime('%Y-%m-%d')),
-                              ('class_type_id.classroom_type', '=', class_interest)]"/>
+                     domain="occurrence_id_domain"/>
+              <field name="show_all_slots"
+                     invisible="not preferred_date or not suggested_slot_ids"/>
+              <field name="suggested_slot_ids" invisible="1"/>
               <!-- How full the chosen slot is, so placing somebody is an
                    informed decision rather than a guess followed by a
                    capacity error on save. -->
@@ -191,6 +207,11 @@
                    placeholder="Free-text note left by the requester about when they'd prefer to come."/>
           </group>
         </sheet>
+        <!-- The history, not a conversation: who moved the slot, who changed
+             the status, and when. Four requests named a class the student was
+             not booked into and nothing on the record said which side had
+             moved. -->
+        <chatter/>
       </form>
     </field>
   </record>

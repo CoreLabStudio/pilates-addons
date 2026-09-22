@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Packages – CoreLab Studio',
-    'version': '19.0.1.1.10',
+    'version': '19.0.1.1.11',
     'category': 'Services',
     'summary': 'Class-pack products, credit balance tracking and validity management',
     'author': 'Core Lab Studio, S.L.',

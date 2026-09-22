@@ -429,6 +429,143 @@ class TestTrialWorkflow(TransactionCase):
         }).action_confirm()
         self.assertEqual(request.status, "declined")
 
+    # -- moving ------------------------------------------------------------
+
+    def _move(self, booking, target):
+        """Move a booking the way the desk does, through the wizard."""
+        wizard = self.env["fitness.booking.reassign.wizard"].create({
+            "booking_id": booking.id,
+            "target_event_id": target.id,
+        })
+        return wizard.action_move_student()
+
+    def test_moving_the_booking_moves_the_request(self):
+        """Four requests on production named a class the student had been
+        moved out of. The seat moved, both rosters were refreshed and the
+        student was told - and the request went on naming the old class,
+        which is what the confirmation email quotes."""
+        request = self._approved()
+        origin = request.occurrence_id
+        target = self._event(days=9, name="Somewhere else")
+
+        self._move(request.booking_id, target)
+
+        self.assertEqual(
+            request.occurrence_id, target,
+            "the request must name the class the student is actually in",
+        )
+        self.assertEqual(
+            request.scheduled_datetime, target.start,
+            "the time the student is quoted has to follow the slot too",
+        )
+        self.assertNotEqual(request.occurrence_id, origin)
+
+    def test_moving_by_a_plain_write_moves_the_request(self):
+        """Typing a new class into the booking form skips the wizard, so
+        nothing fires. One student was moved that way on production and never
+        heard about it; the records should agree even on that path."""
+        request = self._approved()
+        target = self._event(days=11, name="Typed in by hand")
+
+        request.booking_id.write({"calendar_event_id": target.id})
+
+        self.assertEqual(request.occurrence_id, target)
+        self.assertEqual(request.scheduled_datetime, target.start)
+
+    def test_a_request_from_before_the_link_existed_follows_a_move(self):
+        """The legacy match resolves by student and class, which only works
+        against the event the booking is leaving - so it has to be read
+        before the write, not after."""
+        request = self._approved()
+        booking = request.booking_id
+        request.booking_id = False
+        target = self._event(days=13, name="Legacy move target")
+
+        self._move(booking, target)
+
+        self.assertEqual(
+            request.occurrence_id, target,
+            "a request approved before booking_id existed still has to follow",
+        )
+
+    def test_a_request_that_is_not_scheduled_is_left_alone(self):
+        """A finished request is not waiting to be corrected.
+
+        The status is set the way the model allows - writing it directly is
+        refused on purpose, so that cancelling always goes through the button
+        that tells the student.
+        """
+        request = self._approved()
+        booking = request.booking_id
+        origin = request.occurrence_id
+        request.with_context(**{request._DECLINE_KEY: True}).write(
+            {"status": "declined"})
+        target = self._event(days=15, name="Not a trial move")
+
+        booking.write({"calendar_event_id": target.id})
+
+        self.assertEqual(booking.calendar_event_id, target)
+        self.assertEqual(
+            request.occurrence_id, origin,
+            "a request that is no longer scheduled must not be rewritten",
+        )
+
+    def test_a_booking_with_no_trial_behind_it_moves_fine(self):
+        """Most bookings are not trials at all. The hook must not care.
+
+        The request is removed rather than unlinked from the booking: the
+        legacy fallback matches on student and class, so a request with its
+        booking_id cleared is still found - which is the point of it.
+        """
+        request = self._approved()
+        booking = request.booking_id
+        request.unlink()
+        target = self._event(days=21, name="Ordinary move")
+
+        booking.write({"calendar_event_id": target.id})
+
+        self.assertEqual(booking.calendar_event_id, target)
+
+    def test_a_moved_request_can_still_be_cancelled(self):
+        """The move hook writes the field the cancel hook reads."""
+        request = self._approved()
+        target = self._event(days=17, name="Move then cancel")
+        self._move(request.booking_id, target)
+
+        self.env["fitness.booking.cancel.wizard"].create({
+            "booking_id": request.booking_id.id,
+            "reason": "She cannot make the new one either.",
+        }).action_confirm()
+
+        self.assertEqual(request.status, "declined")
+
+    def test_the_move_is_written_into_the_history(self):
+        """Nothing on the record said which side had moved or when, which is
+        the whole reason these four took a day to explain."""
+        request = self._approved()
+        target = self._event(days=19, name="Tracked move")
+        # mail.thread suppresses tracking for a record created in the same
+        # transaction - _track_discard sets its initial values to None, so
+        # nothing is compared against. Running the precommit queue clears that
+        # and leaves the request in the state production sees it in: created
+        # earlier, moved now. Without this the test would report the feature
+        # broken when only the fixture is.
+        self.env.flush_all()
+        self.env.cr.precommit.run()
+
+        self._move(request.booking_id, target)
+        # Tracking is finalised by a precommit callback, not inside write(),
+        # and a TransactionCase never commits.
+        self.env.flush_all()
+        self.env.cr.precommit.run()
+
+        tracked = request.message_ids.tracking_value_ids.filtered(
+            lambda t: t.field_id.name == "occurrence_id")
+        self.assertTrue(
+            tracked,
+            "the slot changing has to leave a trace on the request",
+        )
+
     # -- cancelling --------------------------------------------------------
 
     def _decline(self, request, reason="No space that week."):

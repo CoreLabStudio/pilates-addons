@@ -53,6 +53,12 @@ class SaleOrderLine(models.Model):
         related='product_id.fitness_session_type', store=False, string="Session Type",
     )
 
+    # When this was bought. The balances list showed what a student holds and
+    # what is left of it, but never when it was sold - so answering "when did
+    # she buy what" meant opening each order in turn. Related rather than
+    # stored: the order's own date is the fact, and a copy would only drift.
+    fitness_purchased_on = fields.Datetime(
+        related='order_id.date_order', string='Bought On', readonly=True)
     fitness_is_secondary_pool = fields.Boolean(
         "Second Pool Line",
         default=False,
