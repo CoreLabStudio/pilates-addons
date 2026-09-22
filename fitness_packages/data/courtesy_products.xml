@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- The classes the studio gives away.
+
+       A free booking still needs an order behind it: the expiry, the Saldo
+       ledger, the payment-source picker and the cancellation refund all read
+       one, and a booking without a source is the shape behind every
+       records-disagree fault found in this codebase. These products exist so
+       a comped class can have that order while costing nothing.
+
+       noupdate="1" deliberately: the studio may rename or re-price these, and
+       a module upgrade must not put its own wording back over hers. -->
+  <data noupdate="1">
+
+    <record id="product_courtesy_barre" model="product.template">
+      <field name="name">Clase de cortesía (Barre)</field>
+      <field name="type">service</field>
+      <field name="list_price">0.0</field>
+      <field name="sale_ok" eval="False"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="fitness_is_package" eval="True"/>
+      <field name="fitness_is_courtesy" eval="True"/>
+      <field name="fitness_class_count">1</field>
+      <field name="fitness_validity_days">30</field>
+      <field name="fitness_class_type">barre</field>
+      <field name="fitness_session_type">group</field>
+    </record>
+
+    <record id="product_courtesy_reformer" model="product.template">
+      <field name="name">Clase de cortesía (Reformer)</field>
+      <field name="type">service</field>
+      <field name="list_price">0.0</field>
+      <field name="sale_ok" eval="False"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="fitness_is_package" eval="True"/>
+      <field name="fitness_is_courtesy" eval="True"/>
+      <field name="fitness_class_count">1</field>
+      <field name="fitness_validity_days">30</field>
+      <field name="fitness_class_type">reformer</field>
+      <field name="fitness_session_type">group</field>
+    </record>
+
+  </data>
+</odoo>

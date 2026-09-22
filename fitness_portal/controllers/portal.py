@@ -1232,6 +1232,12 @@ class FitnessStudentPortal(http.Controller):
             domain = [('fitness_is_package', '=', True), ('fitness_class_count', '<=', 1)]
         else:
             domain = [('fitness_is_package', '=', True), ('fitness_class_count', '>', 1)]
+        # A courtesy class is given, never sold. It is a one-class package so
+        # it would otherwise sit on the Classes tab at zero euros, which is an
+        # invitation. sale_ok does not keep it out - these domains never asked
+        # about it, which is why two products with sale_ok=False were on sale
+        # here until somebody tested buying one.
+        domain = domain + [('fitness_is_courtesy', '=', False)]
 
         # Smallest first, then up. Ordering by price alone shuffled the pack
         # sizes together - Barre came out 5, 2, 10, 4, 6 - so a student
