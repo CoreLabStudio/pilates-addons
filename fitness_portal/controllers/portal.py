@@ -2765,9 +2765,19 @@ class FitnessStudentPortal(http.Controller):
                 matricula, matricula.fitness_effective_price(), partner,
                 price_includes_tax=True)
 
+        # The saving this student actually gets, not the one the product
+        # advertises. They differ for a trial: the promo makes it free for
+        # everybody, and _student_price then charges list price to somebody
+        # who has already had theirs. Reading the product alone printed
+        # "Gratis -12.00" above a total of 12.00 - the page telling her it
+        # was free and the order charging her, which is the drift this
+        # function exists to prevent.
+        full = (product.list_price or 0.0) * months
+        saving = max(full - price, 0.0)
+
         return {
-            'co_full':     (product.list_price or 0.0) * months,
-            'co_discount': product.fitness_promo_saving * months,
+            'co_full':     full,
+            'co_discount': saving,
             'co_subtotal': subtotal + mat_subtotal,
             'co_tax':      (total - subtotal) + (mat_total - mat_subtotal),
             'co_total':    total + mat_total,
