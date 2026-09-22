@@ -4845,7 +4845,7 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
    purpose below; leaving it would have quietly destroyed every button.
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     /* ── grounds and surfaces ── */
     --mv-bg:          #1B1613;
     --mv-card-bg:     #241D19;
@@ -4912,6 +4912,79 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     --mv-card-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 10px 22px -4px rgba(0,0,0,0.55);
     --mv-card-shadow-pressed: 0 1px 2px rgba(0,0,0,0.5);
   }
+}
+
+/* The switch, rather than the operating system. Same palette as the block
+   above - the two are kept in step by test_theme_switch.py, which fails if
+   one gains a token the other lacks. Plain CSS has no way to write a palette
+   once and apply it under two different conditions, so it is written twice
+   and the drift is caught instead of hoped against. */
+:root[data-theme="dark"] {
+  /* ── grounds and surfaces ── */
+  --mv-bg:          #1B1613;
+  --mv-card-bg:     #241D19;
+  --mv-info-bg:     #2C2420;
+  --mv-sand:        #3A2F27;
+  --mv-border:      #47392F;
+
+  /* ── text ── */
+  --mv-paco:        #F2EAE3;   /* headings and strong text */
+  --mv-active-fill: #C9B4A3;   /* pill fill, and the text alias below */
+  --mv-ink-text:    #DCCFC4;   /* body text - 86 uses, the workhorse */
+  --mv-muted:       #AA9C90;
+  --mv-muted2:      #948880;   /* 4.82:1 on the card; #8D8177 measured 4.38 */
+
+  /* The photo chips, flipped as a pair - see the light block. Cream text on
+     the dark scrim measures 9.31:1 even where the photo underneath is white. */
+  --mv-overlay-bg:        rgba(27,22,19,0.84);
+  --mv-overlay-bg-strong: rgba(27,22,19,0.88);
+  --mv-overlay-fg:        #F2EAE3;
+  --mv-track-bg:          #2C2420;   /* 5.70:1 for the inactive label */
+  /* --mv-accent is light here, so the tick on it has to be dark. */
+  --mv-check-mark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%231B1613' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+  --mv-ink:         #C4A895;   /* hemp, lifted to read on the dark ground */
+
+  /* ── avatars, focus rings, form accents ──
+     Flipped as a pair. A near-black avatar on a near-black page disappears,
+     so the circle becomes light and its text becomes dark. The same token
+     draws focus rings, which need to be light here for the same reason. */
+  --mv-accent:      #EDE3DA;
+  --mv-accent-fg:   #1B1613;
+
+  /* ── buttons. Heather is unchanged; only the text on it moves. ── */
+  --mv-btn-bg:      #9ABACD;
+  --mv-btn-fg:      #17120F;
+  --mv-btn-hover:   #B0C9D8;
+  --mv-clay:        #9ABACD;
+  --mv-clay-text:   #9CC6E0;   /* links: lifted for AA on the dark ground */
+  --mv-paco-hover:  #E0D5CB;
+
+  /* ── status ── */
+  --mv-ok-bg:       #1E2E27;
+  --mv-ok-ink:      #8FC2A8;
+  --mv-sage:        #8FA394;
+  --mv-warn-bg:     #34211F;
+  --mv-warn-ink:    #F09386;   /* #D40924 is unreadable on dark; this is AA */
+
+  /* ── discipline coding ──
+     The flat fills and the light/mid tiers are already light enough to work
+     as fills on a dark ground, and they keep their documented dark text, so
+     the whole contrast table above still holds. Only the deep tiers move:
+     they were dark fills carrying cream, which on a dark page reads as a
+     hole rather than a shade. */
+  --mv-reformer-deep: #6E9CB8;
+  --mv-barre-deep:    #A98A72;
+  --mv-on-shade-deep: #17120F;
+
+  /* ── card tints ── */
+  --mv-barre-card:  #3A2E26;
+  --mv-reform-card: #2F2A2E;
+  --mv-fall-card:   #372C24;
+
+  /* ── elevation. Warm-brown shadows vanish on a dark ground, so these
+         carry real black and lean on the border for the edge. ── */
+  --mv-card-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 10px 22px -4px rgba(0,0,0,0.55);
+  --mv-card-shadow-pressed: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* ── 30. Autofilled fields ─────────────────────────────────────────────────
@@ -5259,3 +5332,61 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
   color: var(--mv-ink-text);
 }
 .mv-class-bring-text { color: var(--mv-muted); }
+
+/* ── 31. The light/dark switch ──────────────────────────────────────────────
+   Sits beside the bell, same size and same ink, so it reads as part of the
+   header rather than as something bolted on. Only one of the two icons is
+   ever shown: the one for the scheme you would get by pressing it, which is
+   the convention people already know from their phones.
+
+   Both icons are laid on top of each other rather than swapped in the DOM, so
+   pressing the button cannot change the header's width and nudge the bell. */
+.mv-theme-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mv-ink-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-theme-btn:hover { background: var(--mv-sand); }
+.mv-theme-btn:focus-visible {
+  outline: 2px solid var(--mv-accent);
+  outline-offset: 2px;
+}
+.mv-theme-btn svg {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity .18s ease, transform .18s ease;
+}
+/* Light now, so offer the moon. */
+.mv-theme-sun  { opacity: 0; transform: rotate(-90deg) scale(.6); }
+.mv-theme-moon { opacity: 1; transform: none; }
+/* Dark now, so offer the sun. Both ways of being dark are covered: the
+   operating system's, unless overridden, and the switch's own. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mv-theme-sun  { opacity: 1; transform: none; }
+  :root:not([data-theme="light"]) .mv-theme-moon { opacity: 0; transform: rotate(90deg) scale(.6); }
+}
+:root[data-theme="dark"] .mv-theme-sun  { opacity: 1; transform: none; }
+:root[data-theme="dark"] .mv-theme-moon { opacity: 0; transform: rotate(90deg) scale(.6); }
+/* An explicit light choice on a dark phone has to put the moon back. */
+:root[data-theme="light"] .mv-theme-sun  { opacity: 0; transform: rotate(-90deg) scale(.6); }
+:root[data-theme="light"] .mv-theme-moon { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-theme-btn svg { transition: none; }
+}

@@ -182,7 +182,19 @@ class ResUsers(models.Model):
             'type': 'ir.actions.act_window',
             'name': f'Packages — {self.name}',
             'res_model': 'sale.order.line',
-            'view_mode': 'list',
+            # list,form, so clicking a balance opens onto when it was bought,
+            # how it was paid for and what has been spent from it. With list
+            # alone a click did nothing and the studio had to go and find the
+            # order instead.
+            'view_mode': 'list,form',
+            'views': [
+                (self.env.ref(
+                    'fitness_packages.view_fitness_package_line_list').id,
+                 'list'),
+                (self.env.ref(
+                    'fitness_packages.view_fitness_package_line_form').id,
+                 'form'),
+            ],
             'domain': [
                 ('order_id.partner_id', '=', self.partner_id.id),
                 ('order_id.state', 'in', ('sale', 'done')),

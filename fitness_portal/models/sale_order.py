@@ -31,3 +31,18 @@ class SaleOrder(models.Model):
         help="When the student ticked 'I agree to the Terms and Conditions' "
              "during portal checkout.",
     )
+
+
+class SaleOrderLine(models.Model):
+    """How a pack was paid for, readable from the pack itself.
+
+    The payment method is recorded on the order, but the studio reads the
+    balances list, which is lines - so answering "did she pay cash for this
+    one" meant opening the order. Lives here rather than in fitness_packages
+    because the field it mirrors is defined in this module.
+    """
+    _inherit = 'sale.order.line'
+
+    fitness_payment_method = fields.Selection(
+        related='order_id.fitness_payment_method', string='Paid By',
+        readonly=True)

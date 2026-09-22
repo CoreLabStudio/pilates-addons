@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- How a pack was paid for, added to the balance card here rather than in
+       fitness_packages. The field is a mirror of sale.order.fitness_payment_method,
+       which this module defines, and fitness_packages loads first - putting the
+       field on that module's form made the view fail to validate on a clean
+       install, because at that point the field does not exist yet. -->
+  <record id="view_fitness_package_line_form_payment" model="ir.ui.view">
+    <field name="name">fitness.package.line.form.payment</field>
+    <field name="model">sale.order.line</field>
+    <field name="inherit_id" ref="fitness_packages.view_fitness_package_line_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='order_id']" position="after">
+        <field name="fitness_payment_method" readonly="1"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

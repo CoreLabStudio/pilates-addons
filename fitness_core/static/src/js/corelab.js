@@ -1434,3 +1434,94 @@
     init();
   }
 })();
+
+/* ── The light/dark switch ──────────────────────────────────────────────────
+   The scheme used to follow the phone and nothing else. That is right most of
+   the time and wrong exactly when it matters: a student on a dark phone
+   standing in daylight, or a light phone at night in the studio.
+
+   The choice is stamped on <html> as data-theme, which the stylesheet lets
+   beat prefers-color-scheme in both directions. It is remembered per device
+   in localStorage - a theme is a property of the screen you are holding, not
+   of the account, so syncing it to the server would fight the person the
+   moment they picked up a different phone.
+
+   Storage is wrapped because it throws outright in a private window and in
+   embedded browsers, and a theme button is not worth breaking the page for.
+*/
+(function () {
+    "use strict";
+    var KEY = "corelab-theme";
+
+    function stored() {
+        try { return window.localStorage.getItem(KEY); } catch (e) { return null; }
+    }
+    function remember(value) {
+        try {
+            if (value) { window.localStorage.setItem(KEY, value); }
+            else { window.localStorage.removeItem(KEY); }
+        } catch (e) { /* private window: honour it for this page only */ }
+    }
+    function systemIsDark() {
+        return !!(window.matchMedia
+                  && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+    function currentIsDark() {
+        var set = document.documentElement.getAttribute("data-theme");
+        if (set === "dark") { return true; }
+        if (set === "light") { return false; }
+        return systemIsDark();
+    }
+    function apply(value) {
+        if (value === "dark" || value === "light") {
+            document.documentElement.setAttribute("data-theme", value);
+        } else {
+            document.documentElement.removeAttribute("data-theme");
+        }
+    }
+
+    // Before anything is painted, so the page never flashes the wrong scheme
+    // on its way to the right one. This file is in the frontend bundle, which
+    // loads in <head>, so this runs before the body is drawn.
+    apply(stored());
+
+    function label(btn) {
+        // Describes what pressing it does, not what you are looking at.
+        btn.setAttribute("aria-pressed", currentIsDark() ? "true" : "false");
+    }
+
+    function wire() {
+        var buttons = document.querySelectorAll("[data-mv-theme-toggle]");
+        Array.prototype.forEach.call(buttons, function (btn) {
+            label(btn);
+            btn.addEventListener("click", function () {
+                var next = currentIsDark() ? "light" : "dark";
+                apply(next);
+                remember(next);
+                Array.prototype.forEach.call(
+                    document.querySelectorAll("[data-mv-theme-toggle]"), label);
+            });
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", wire);
+    } else {
+        wire();
+    }
+
+    // Someone who has never pressed the button keeps following their phone,
+    // including when it switches at sunset. Someone who has chosen is left
+    // alone - that is what choosing means.
+    if (window.matchMedia) {
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        var onChange = function () {
+            if (!stored()) {
+                Array.prototype.forEach.call(
+                    document.querySelectorAll("[data-mv-theme-toggle]"), label);
+            }
+        };
+        if (mq.addEventListener) { mq.addEventListener("change", onChange); }
+        else if (mq.addListener) { mq.addListener(onChange); }
+    }
+})();

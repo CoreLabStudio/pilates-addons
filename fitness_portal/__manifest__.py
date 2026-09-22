@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.24.96',
+    'version': '19.0.1.24.97',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',
@@ -29,6 +29,7 @@
         'views/teacher_profile_simple.xml',
         'views/student_profile_views.xml',
         'views/desk_sale_wizard_views.xml',
+        'views/package_line_views.xml',
         'views/portal_templates.xml',
         'views/portal_shell_override.xml',
         'views/login_override.xml',
