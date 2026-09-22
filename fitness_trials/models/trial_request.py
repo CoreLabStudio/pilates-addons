@@ -1010,17 +1010,45 @@ class FitnessTrialRequest(models.Model):
             lambda l: not l.fitness_validity_end_date
             or l.fitness_validity_end_date >= today)[:1]
 
-    def _trial_already_claimed(self, partner, product):
-        """Mirrors the portal's rule: a confirmed, zero-cost order of this
-        product means the free trial has been used."""
+    @api.model
+    def _all_trial_products(self):
+        """Both trial products, whichever disciplines are configured."""
+        products = self.env['product.template'].browse()
+        for xmlid in self.TRIAL_PRODUCT_XMLID.values():
+            found = self.env.ref(xmlid, raise_if_not_found=False)
+            if found:
+                products |= found
+        return products
+
+    def _trial_already_claimed(self, partner, product=None):
+        """Has this student had their one free trial, in either discipline?
+
+        The docstring here used to say it mirrored the portal's rule, and it
+        did not. The portal asks whether this student has had ANY free trial -
+        its own comment reads "they are a single entitlement, not one of each"
+        and it tells the student exactly that: "It is one per student, Barre
+        or Reformer." This asked only about the discipline in front of it, so
+        somebody who had taken the Reformer trial for free could still be
+        approved for a free Barre one from the desk. That happened.
+
+        product is kept in the signature and ignored on purpose: every caller
+        has one to hand and passing it reads naturally, but the answer must
+        not depend on it or the two sides disagree again. _existing_trial_credit
+        stays per product, because an unspent credit belongs to the discipline
+        it was bought for - that is a different question from entitlement.
+        """
+        trials = self._all_trial_products()
+        if not trials or not partner:
+            return False
         orders = self.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
             ('state', '=', 'sale'),
         ])
         for order in orders:
+            if float(order.amount_total or 0.0) != 0.0:
+                continue
             for line in order.order_line:
-                if (line.product_id.product_tmpl_id.id == product.id
-                        and float(order.amount_total or 0.0) == 0.0):
+                if line.product_id.product_tmpl_id in trials:
                     return True
         return False
 
