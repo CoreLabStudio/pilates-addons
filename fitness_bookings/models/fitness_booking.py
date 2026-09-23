@@ -369,6 +369,52 @@ class FitnessBooking(models.Model):
                 "deletion", count, event.name)
         return result
 
+    def write(self, vals):
+        """Moving a booking moves its seat, however the move was made.
+
+        Three things can move or remove a booking and only two used to keep
+        the seat counts honest: deleting one recounts through unlink, and the
+        reassign wizard recounts both events itself. Typing a new class
+        straight into calendar_event_id on the booking form did neither, so
+        the class being left kept the seat and the class being joined never
+        gained it - one edit, two wrong counters, in opposite directions.
+
+        Found on production on 2026-09-23: Barre Groove read 1 with an empty
+        roster while Barre Harmony read 1 with two students on it, both from a
+        single field edit the night before. The delete fix had shipped two
+        days earlier, so this was new drift rather than damage it had missed.
+
+        Here rather than in the wizard because this is the layer every route
+        passes through. The wizard now writes and lets this do the rest, so
+        the student is not told twice about one move.
+        """
+        moving = 'calendar_event_id' in vals
+        origins = {b.id: b.calendar_event_id for b in self} if moving else {}
+
+        result = super().write(vals)
+
+        if moving:
+            for booking in self:
+                origin = origins.get(booking.id)
+                if not origin or origin == booking.calendar_event_id:
+                    continue
+                # The class they are in now, and the one they left.
+                booking._refresh_booked_seats()
+                count = self.search_count([
+                    ('calendar_event_id', '=', origin.id),
+                    ('state', 'in', ('booked', 'attended')),
+                ])
+                origin.sudo().booked_seats = count
+                _logger.info(
+                    "[BOOKING] moved %s from event %s to %s; left count %d",
+                    booking.id, origin.id, booking.calendar_event_id.id, count)
+                # They did not ask to be moved, and the class they think they
+                # are attending is no longer theirs. Skipped only where the
+                # caller has already said it - a cancellation, for instance.
+                if not self.env.context.get('skip_fitness_notification'):
+                    booking._notify_moved(origin)
+        return result
+
     def _refresh_booked_seats(self):
         """Re-count active bookings and write back to the calendar event."""
         count = self.search_count([
