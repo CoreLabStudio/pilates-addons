@@ -45,6 +45,13 @@ class FitnessAddStudentWizard(models.TransientModel):
         'reformer': 'fitness_packages.product_private_single',
         'barre': 'fitness_packages.product_barre_privada_single',
     }
+    # What a given-away class is charged against: zero euros, and a product
+    # the shop never shows. Same reasoning as the private map - named, not
+    # searched, so it cannot drift onto whatever somebody adds later.
+    COURTESY_PRODUCT_XMLID = {
+        'reformer': 'fitness_packages.product_courtesy_reformer',
+        'barre': 'fitness_packages.product_courtesy_barre',
+    }
 
     event_id = fields.Many2one(
         'calendar.event', string='Class', required=True, readonly=True)
@@ -53,12 +60,28 @@ class FitnessAddStudentWizard(models.TransientModel):
         help="Any contact. The booking and the paid line are both created "
              "against them.")
     price = fields.Float(
-        string='Agreed price', required=True,
+        string='Agreed price', default=0.0,
         help="What the studio agreed with the student. Defaults to the list "
              "price of the private class, and is meant to be changed when the "
              "conversation landed somewhere else.")
+    # Not required on the field: required=True puts a NOT NULL constraint on
+    # the column, and a constraint cannot know that a courtesy class has no
+    # price to give. The form asks for it when the mode charges, and
+    # action_add refuses a charged booking without one - both of which can
+    # see the mode, where the database cannot.
     product_id = fields.Many2one(
         'product.template', string='Charged as', readonly=True)
+    # Asked outright rather than inferred from a price of zero, for the same
+    # reason the desk wizard asks: charging nothing by accident and giving a
+    # class away on purpose must not look identical on the record.
+    mode = fields.Selection(
+        [('charge', 'Charge the agreed price'),
+         ('courtesy', 'Free class - the studio is giving it')],
+        default='charge', required=True, string='This is a')
+    reason = fields.Text(
+        string='Reason',
+        help="Why the class was given. Required for a free class, and the "
+             "only record anyone will have of it later.")
 
     # Shown, not computed at save: the studio should see the room it has
     # before it picks a student, not after being refused.
@@ -81,6 +104,17 @@ class FitnessAddStudentWizard(models.TransientModel):
                     taken=taken, capacity=capacity,
                     free=max(0, capacity - taken))
 
+    @api.onchange('mode')
+    def _onchange_mode(self):
+        """Switching the act switches what it is charged against."""
+        for wiz in self:
+            if not wiz.event_id:
+                continue
+            product = wiz._product_for(wiz.event_id, wiz.mode)
+            wiz.product_id = product.id if product else False
+            wiz.price = (0.0 if wiz.mode == 'courtesy'
+                         else (product.list_price or 0.0 if product else 0.0))
+
     @api.model
     def default_get(self, fields_list):
         """Opened from a class, so the class and its price come with it."""
@@ -92,17 +126,46 @@ class FitnessAddStudentWizard(models.TransientModel):
             event = self.env['calendar.event'].browse(event_id)
             if event.exists():
                 res['event_id'] = event.id
-                product = self._product_for(event)
+                # A group class has no product to charge against - the
+                # private ones are refused by the booking validator for a
+                # group session, and the single-class group packs are
+                # archived. So the sensible default there is the act that
+                # actually works, rather than one that fails on save.
+                is_group = (event.class_type_id.session_type
+                            or 'group') == 'group'
+                # Assigned, and read from the context rather than from res:
+                # the field's own default of 'charge' is already sitting in
+                # res by now, so setdefault does nothing and res.get() cannot
+                # tell a real request apart from that default. Same trap as
+                # the price default three lines down, for the same reason.
+                mode = (self.env.context.get('default_mode')
+                        or ('courtesy' if is_group else 'charge'))
+                res['mode'] = mode
+                product = self._product_for(event, mode)
                 if product:
                     res['product_id'] = product.id
-                    res.setdefault('price', product.list_price or 0.0)
+                    # Assigned, not setdefault: the field carries a default
+                    # of 0.0 so the column is never null, and setdefault then
+                    # left every charged booking at zero - which the price
+                    # guard duly refused.
+                    res['price'] = (0.0 if mode == 'courtesy'
+                                    else (product.list_price or 0.0))
         return res
 
-    def _product_for(self, event):
-        """The credit product for this class's discipline."""
+    def _product_for(self, event, mode='charge'):
+        """The credit product for this class's discipline.
+
+        Two maps, because the two acts are different: a private class agreed
+        in conversation is sold, and a courtesy class is given. The courtesy
+        product costs nothing and never appears in the shop, so a free
+        booking still has a real order behind it without putting a zero-euro
+        class in front of students.
+        """
         discipline = (event.class_type_id.classroom_type
                       or event.classroom_id.classroom_type or '')
-        xmlid = self.PRIVATE_PRODUCT_XMLID.get(discipline)
+        table = (self.COURTESY_PRODUCT_XMLID if mode == 'courtesy'
+                 else self.PRIVATE_PRODUCT_XMLID)
+        xmlid = table.get(discipline)
         if not xmlid:
             return self.env['product.template'].browse()
         return self.env.ref(xmlid, raise_if_not_found=False) \
@@ -129,11 +192,28 @@ class FitnessAddStudentWizard(models.TransientModel):
                 name=event.name, taken=event.booked_seats,
                 capacity=event.capacity))
 
-        product = self.product_id or self._product_for(event)
+        if self.mode == 'charge' and (
+                event.class_type_id.session_type or 'group') == 'group':
+            raise UserError(_(
+                "'%(name)s' is a group class, and there is no group class to "
+                "charge a single booking against - the single-class packs are "
+                "not on sale. Give the class instead, or sell the student a "
+                "pack and let them book it.", name=event.name))
+        if self.mode == 'charge' and not (self.price or 0.0) > 0.0:
+            raise UserError(_(
+                "Enter the price agreed, or switch to a free class."))
+        if self.mode == 'courtesy' and not (self.reason or '').strip():
+            raise UserError(_(
+                "Say why this class is being given. It is the only record "
+                "anyone will have of it later."))
+
+        product = self.product_id or self._product_for(event, self.mode)
         if not product:
             raise UserError(_(
-                "There is no private class product for this discipline, so "
-                "there is nothing to charge the booking against."))
+                "There is no %(kind)s product for this discipline, so there "
+                "is nothing to book the class against.",
+                kind=_("courtesy class") if self.mode == 'courtesy'
+                else _("private class")))
         variant = product.product_variant_ids[:1]
         if not variant:
             raise UserError(_("%(name)s has no variant to sell.",
@@ -151,7 +231,9 @@ class FitnessAddStudentWizard(models.TransientModel):
             'order_line': [(0, 0, {
                 'product_id': variant.id,
                 'product_uom_qty': 1,
-                'price_unit': self.price,
+                # A given class is zero whatever is in the box; the studio
+                # cannot accidentally charge for something it is donating.
+                'price_unit': 0.0 if self.mode == 'courtesy' else self.price,
                 'fitness_class_type': discipline,
             })],
         })
@@ -171,10 +253,20 @@ class FitnessAddStudentWizard(models.TransientModel):
             'manager_override_timewindow': True,
         })
 
+        if (self.reason or '').strip():
+            order.message_post(body=_(
+                "Added to %(name)s by %(who)s. %(kind)s.<br/>Reason: %(why)s",
+                name=event.name, who=self.env.user.name,
+                kind=_("Free class, nothing charged")
+                if self.mode == 'courtesy' else _("Charged the agreed price"),
+                why=self.reason.strip()))
+
         _logger.info(
-            "[ADD STUDENT] %s booked onto %s (%s) by %s, charged %s on %s",
+            "[ADD STUDENT] %s booked onto %s (%s) by %s, %s, order %s",
             self.student_id.display_name, event.name, event.start,
-            self.env.user.login, self.price, order.name)
+            self.env.user.login,
+            'COURTESY (0.00)' if self.mode == 'courtesy'
+            else 'charged %.2f' % (self.price or 0.0), order.name)
 
         return {
             'type': 'ir.actions.client',

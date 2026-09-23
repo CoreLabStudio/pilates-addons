@@ -147,6 +147,18 @@
                     </div>
                 </t>
 
+                <!-- One free trial per student, either discipline. Told here
+                     rather than after she has chosen a day and a class and
+                     waited to be declined. The form stays on the page: the
+                     studio can still take a request and sell her the class,
+                     and hiding it would leave her on a page with nothing on
+                     it and no explanation. -->
+                <t t-if="trial_already_used">
+                    <div class="alert alert-warning small mb-3" role="alert">
+                        You have already used your free trial class. It is one per student, Barre or Reformer. You can still ask, and the studio will tell you what a class costs.
+                    </div>
+                </t>
+
                 <form method="post" action="/trial/submit" class="mv-trial-form">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <!-- Which entry point this was. Stamped here rather than

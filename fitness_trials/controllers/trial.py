@@ -314,10 +314,24 @@ class TrialRequestController(http.Controller):
         if wanted in ('barre', 'reformer'):
             prefill['class_interest'] = wanted
 
-        return request.render(
-            'fitness_trials.trial_request_form',
-            self._form_ctx(error=kw.get('error'), form_values=prefill,
-                           source=_source))
+        # Say no here rather than after she has filled it in. The entitlement
+        # is one trial per student, either discipline, and approval refuses a
+        # second - so a student whose trial is spent could complete the whole
+        # form, wait, and be declined. Home already hides the offer from her;
+        # this page did not, because it never asked.
+        #
+        # Only for somebody we can identify. A public visitor is not asked to
+        # prove who they are before seeing a form, and matching on a typed
+        # email would tell a stranger whether that address has an account.
+        already_used = False
+        if not request.env.user._is_public():
+            already_used = request.env['fitness.trial.request'].sudo(
+            )._trial_already_claimed(request.env.user.partner_id)
+
+        ctx = self._form_ctx(error=kw.get('error'), form_values=prefill,
+                             source=_source)
+        ctx['trial_already_used'] = already_used
+        return request.render('fitness_trials.trial_request_form', ctx)
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
                 methods=['POST'], sitemap=False, multilang=False)

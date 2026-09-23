@@ -12,6 +12,15 @@ class ProductTemplate(models.Model):
         default=False,
         help="Enable for class-pack products. Activates credit tracking on sale order lines.",
     )
+    fitness_is_courtesy = fields.Boolean(
+        "Courtesy Class",
+        default=False,
+        help="A class the studio gives away, never one it sells. Courtesy "
+             "products back free admin-granted bookings so that every booking "
+             "still has a real order behind it, and they are kept out of all "
+             "three shop tabs - a comped class is not a product a student "
+             "should be able to find and buy for nothing.",
+    )
     fitness_class_count = fields.Integer(
         "Classes in Pack",
         default=1,

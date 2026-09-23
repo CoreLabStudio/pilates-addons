@@ -340,3 +340,45 @@ msgstr "Añadir una alumna"
 #: model_terms:ir.ui.view,arch_db:fitness_packages.view_calendar_event_form_add_student
 msgid "Add a student"
 msgstr "Añadir una alumna"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_is_courtesy
+msgid "Courtesy Class"
+msgstr "Clase de cortesía"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__mode
+msgid "This is a"
+msgstr "Esto es"
+
+#. module: fitness_packages
+#: model:ir.model.fields.selection,name:fitness_packages.selection__fitness_add_student_wizard__mode__charge
+msgid "Charge the agreed price"
+msgstr "Cobrar el precio acordado"
+
+#. module: fitness_packages
+#: model:ir.model.fields.selection,name:fitness_packages.selection__fitness_add_student_wizard__mode__courtesy
+msgid "Free class - the studio is giving it"
+msgstr "Clase gratuita - la invita el estudio"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__reason
+msgid "Reason"
+msgstr "Motivo"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Nothing is charged. The class is given, and the student keeps their credits."
+msgstr "No se cobra nada. La clase se regala y la alumna conserva sus créditos."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Say why this class is being given. It is the only record anyone will have of it later."
+msgstr "Indica por qué se regala esta clase. Es el único registro que quedará."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Enter the price agreed, or switch to a free class."
+msgstr "Introduce el precio acordado, o cambia a clase gratuita."
