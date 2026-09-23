@@ -376,6 +376,12 @@
 
                 <!-- The trial itself, offered directly rather than through a
                      news post - and only while the student still has one. -->
+                <!-- Once she has asked, the offer goes and this says why.
+                     Hiding it on its own left her looking for a button that
+                     had been there a minute earlier. -->
+                <t t-if="trial_pending">
+                    <p class="mv-home-note" t-out="lbl_trial_pending"/>
+                </t>
                 <t t-if="trial_offer_url">
                     <a t-att-href="trial_offer_url" class="mv-home-cta mv-home-cta--soft"
                        t-out="lbl_trial_offer"/>
