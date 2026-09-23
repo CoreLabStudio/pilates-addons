@@ -239,6 +239,10 @@ class TestTrialWorkflow(TransactionCase):
         If the studio opens a Saturday, the form should follow without anyone
         editing it.
         """
+        # The studio's real timetable runs Monday to Friday, so the answer
+        # here is only this test's once the test owns the schedule - the same
+        # clearing the no-timetable case above does. Rolled back after.
+        self.env["fitness.class.schedule"].search([]).active = False
         trials = self.env["fitness.trial.request"]
         self._schedule_row(self.class_type, "mon")
         self._schedule_row(self.class_type, "wed")

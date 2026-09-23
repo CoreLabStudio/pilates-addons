@@ -334,6 +334,17 @@ class TestAdminSlotPicker(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # These tests assert on the whole of what the picker returns, so they
+        # only mean anything if this test owns the calendar. A restore of the
+        # studio's real database carries ~390 future classes, several of them
+        # on the very days the fixtures below use, and the picker then answers
+        # about the studio's timetable instead of this test's own events.
+        # Archived rather than deleted, so the picker leaves them out by its
+        # own rule; TransactionCase rolls it back.
+        cls.env["calendar.event"].search([
+            ("is_fitness_class", "=", True),
+            ("start", ">=", fields.Datetime.now()),
+        ]).active = False
         cls.room = cls.env["fitness.classroom"].create({
             "name": "Picker room", "classroom_type": "reformer",
             "capacity": 6})
@@ -425,7 +436,11 @@ class TestAdminSlotPicker(TransactionCase):
         soon = self._at(19, self.sooner, name="The 18th")
         request = self._request()
 
-        action = request.action_view_candidate_slots()
+        # Asked for in English, because the title is built with _(): on a
+        # database whose admin reads Spanish it comes back "lo que pidio" and
+        # the assertion below is about the reader's language, not the picker.
+        action = request.with_context(
+            lang="en_US").action_view_candidate_slots()
         found = self.env["calendar.event"].search(action["domain"])
 
         self.assertIn(asked, found)
@@ -436,7 +451,8 @@ class TestAdminSlotPicker(TransactionCase):
         soon = self._at(19, self.sooner, name="The only class running")
         request = self._request()
 
-        action = request.action_view_candidate_slots()
+        action = request.with_context(
+            lang="en_US").action_view_candidate_slots()
         found = self.env["calendar.event"].search(action["domain"])
 
         self.assertIn(soon, found)
