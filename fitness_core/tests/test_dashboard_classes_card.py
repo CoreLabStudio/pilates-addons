@@ -18,6 +18,13 @@ class TestDashboardClassesCard(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+        # The card counts every class in its window, so on a restore of the
+        # studio's real calendar it reports the studio's day - 17 classes
+        # today, 83 this week - and never this test's one. Cleared so the
+        # window belongs to the test; TransactionCase rolls it back.
+        cls.env["calendar.event"].search([
+            ("is_fitness_class", "=", True),
+        ]).active = False
         cls.class_type = cls.env["fitness.class.type"].create({
             "name": "Card Barre",
             "classroom_type": "barre",
@@ -56,7 +63,11 @@ class TestDashboardClassesCard(TransactionCase):
         return self._event_at(end + timedelta(hours=10), name)
 
     def _card(self, span="today"):
-        dash = self.env["fitness.admin.dashboard"].create({"classes_range": span})
+        # English explicitly: the card is built with _(), and the studio's own
+        # database reads Spanish, so asserting on English text would be
+        # asserting who is logged in rather than what the card counted.
+        dash = self.env["fitness.admin.dashboard"].with_context(
+            lang="en_US").create({"classes_range": span})
         return dash, dash.preview_classes_html or ""
 
     def test_the_card_opens_on_today(self):
