@@ -273,11 +273,21 @@ class FitnessAddStudentWizard(models.TransientModel):
             'tag': 'display_notification',
             'params': {
                 'title': _("Student added"),
-                'message': _(
-                    "%(student)s is booked on %(name)s, charged %(price)s on "
-                    "%(order)s.",
-                    student=self.student_id.display_name, name=event.name,
-                    price=self.price, order=order.name),
+                # The line, not self.price. A courtesy booking forces the line
+                # to zero whatever is in the price box, so reporting the box
+                # told the studio it had charged 25.00 for a class it had just
+                # given away - on an order that reads 0.00. Whoever read the
+                # confirmation and not the order would have believed it.
+                'message': (
+                    _("%(student)s is booked on %(name)s. Free class, nothing "
+                      "charged - %(order)s.",
+                      student=self.student_id.display_name, name=event.name,
+                      order=order.name)
+                    if self.mode == 'courtesy' else
+                    _("%(student)s is booked on %(name)s, charged %(price).2f "
+                      "on %(order)s.",
+                      student=self.student_id.display_name, name=event.name,
+                      price=line.price_unit, order=order.name)),
                 'type': 'success',
                 'sticky': False,
                 # The roster behind the dialog is stale the moment this
