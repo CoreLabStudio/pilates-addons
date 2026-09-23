@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The Renew button lives in this module, not fitness_subscriptions,
+         because the action it calls does - and fitness_subscriptions does not
+         depend on fitness_portal. A button there would resolve at runtime
+         with both installed and break the moment it was not. -->
+    <record id="view_sale_order_form_fitness_renewal" model="ir.ui.view">
+        <field name="name">sale.order.form.fitness.renewal</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="is_subscription" invisible="1"/>
+                <field name="subscription_state" invisible="1"/>
+                <field name="fitness_subscription_product_id" invisible="1"/>
+                <!-- Only a running membership can be renewed, and only by the
+                     desk. Hidden rather than disabled: a button that refuses
+                     when pressed teaches nothing. -->
+                <button name="action_fitness_renew_cash"
+                        type="object"
+                        string="Renew (cash)"
+                        class="btn-primary"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="not is_subscription
+                                   or subscription_state != '3_progress'
+                                   or not fitness_subscription_product_id"
+                        confirm="Take the next period's payment in cash? The student will be invoiced and emailed."/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

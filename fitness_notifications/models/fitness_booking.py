@@ -423,11 +423,20 @@ class FitnessBookingNotifications(models.Model):
             plan_name = sub.fitness_subscription_product_id.name if sub.fitness_subscription_product_id else sub.name
             renew_date_str = target_date.strftime("%d %b %Y")
             lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            # "No action needed" was true when nothing a student could do
+            # affected her renewal. It is not true now: she can renew from the
+            # app, and the studio can take the money in person. It was also
+            # never true on this database - Odoo's recurring invoicing is
+            # switched off and most members hold no saved card, so the
+            # promise was being made to people nothing was going to bill.
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'billing_reminder',
                 lang_env.env._('Subscription renews in %d days', LEAD_DAYS),
-                lang_env.env._('Your %s plan renews on %s. No action needed.', plan_name, renew_date_str),
+                lang_env.env._(
+                    'Your %s plan reaches the end of its period on %s. You '
+                    'can renew it in the app, or pay at the studio.',
+                    plan_name, renew_date_str),
                 action_url='/my/packages',
             )
             notified += 1
