@@ -1565,6 +1565,14 @@
                 <t t-if="active_tab == 'classes' and trial_offered">
                     <div class="mv-trial-note" t-out="lbl_trial_pick_one"/>
                 </t>
+                <!-- The other half of that sentence: once it is spent, the
+                     single-class cards are gone and this says where to go
+                     instead. Shown whether or not anything else is left on
+                     the tab - the private and duo cards remain, so it never
+                     reaches the "no products" branch below. -->
+                <t t-if="active_tab == 'classes' and trial_spent">
+                    <div class="mv-trial-note" t-out="lbl_trial_spent"/>
+                </t>
 
                 <t t-if="not products">
                     <div class="mv-empty" t-out="empty_msg"/>
@@ -1621,8 +1629,7 @@
                                             </div>
                                             <!-- Card body: name · meta · price + buy -->
                                             <div class="mv-card-body">
-                                                <p class="mv-class-name"
-                                                   t-out="product_labels.get(product.id) or product.name"/>
+                                                <p class="mv-class-name" t-out="product.name"/>
                                                 <t t-if="pkg_meta.get(product.id)">
                                                     <p class="mv-class-meta" t-out="pkg_meta.get(product.id, '')"/>
                                                 </t>
@@ -1744,7 +1751,7 @@
                     <!-- Name + type tag -->
                     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
                         <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:400;color:var(--mv-ink);margin:0;line-height:1.2;flex:1;"
-                            t-out="product_label or product.name"/>
+                            t-out="product.name"/>
                         <t t-if="ct != 'any'">
                             <span class="mv-card-tag" style="position:static;margin:2px 0 0;" t-out="ct.capitalize()"/>
                         </t>
@@ -1932,7 +1939,7 @@
                              and Stripe asked for 27.23. -->
                         <t t-set="_live" t-value="product.fitness_promo_is_live"/>
                         <div class="mv-summary-row">
-                            <p class="mv-summary-name" t-out="product_label or product.name"/>
+                            <p class="mv-summary-name" t-out="product.name"/>
                             <span class="mv-summary-total">
                                 <t t-out="'%.2f' % co_full"/> <t t-out="co_currency"/>
                             </span>
@@ -2101,8 +2108,7 @@
                     <div class="mv-panel" style="margin-bottom:16px;">
                         <p class="mv-panel-label">Order summary</p>
                         <div class="mv-summary-row">
-                            <p class="mv-summary-name"
-                               t-out="(product_label or product.name) if product else order.name"/>
+                            <p class="mv-summary-name" t-out="product.name if product else order.name"/>
                             <span class="mv-summary-total">
                                 <t t-esc="'%.2f' % amount"/> <t t-esc="currency.symbol or '€'"/>
                             </span>

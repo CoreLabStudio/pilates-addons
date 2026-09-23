@@ -137,9 +137,6 @@ class FitnessStudioConversation(models.Model):
             parts.append('</div>')
             conv.thread_html = ''.join(parts)
 
-    def name_get(self):
-        return [(r.id, r.display_name_computed or f"Conv #{r.id}") for r in self]
-
     @api.onchange('user_id')
     def _onchange_user_id(self):
         if self.user_id:

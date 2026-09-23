@@ -137,7 +137,7 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
             "open, directly above the line saying it is with the studio")
 
 
-    # -- once the trial is gone, it is an ordinary paid class --------------
+    # -- once the trial is gone, it is not offered at all ------------------
 
     def _spend_her_trial(self):
         """A confirmed zero-price order for a trial product is what
@@ -153,88 +153,98 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
         order.action_confirm()
         return order
 
-    def test_the_card_stops_calling_it_a_trial_once_it_is_spent(self):
-        """It is the studio's only single-class product, priced 12.00, and
-        it was still telling her it was a trial class. One student reported
-        that as "I bought a credit to try a Barre class".
-
-        Asserted on the English label, because url_open lands on /en/ and the
-        page renders in English - the Spanish wording would be testing which
-        language the test happens to run in, not the rename.
-        """
-        before = self._page("/my/packages/%d" % self.barre.id)
+    def test_the_card_disappears_from_the_shop_once_the_trial_is_spent(self):
+        """The studio's decision: a spent trial is not offered again in any
+        form. These are also the only single-class products, so she is left
+        with packs and memberships - taken knowingly."""
+        before = self._page("/my/packages")
         self.assertIn(
-            "Trial", before,
-            "fixture is wrong: the card is not calling itself a trial to "
-            "begin with, so the rename cannot be what this proves")
-        self.assertNotIn("single class", before)
+            self.barre.name, before,
+            "fixture is wrong: the Barre card is not on the shop to begin "
+            "with, so its disappearance would prove nothing")
 
         self._spend_her_trial()
 
-        after = self._page("/my/packages/%d" % self.barre.id)
+        after = self._page("/my/packages")
+        self.assertNotIn(
+            self.barre.name, after,
+            "the Barre trial card is still on the shop after the trial was "
+            "spent")
+
+    def test_the_other_discipline_goes_too(self):
+        """One entitlement covers both - "one per student, Barre or
+        Reformer" - so spending it on Barre hides Reformer as well."""
+        self._spend_her_trial()
+        html = self._page("/my/packages")
+        self.assertNotIn(self.reformer.name, html)
+
+    def test_the_product_page_refuses_a_kept_link(self):
+        """Hidden means hidden, including to somebody who typed the id."""
+        self._spend_her_trial()
+        self.env.flush_all()
+        self.authenticate(self.user.login, self.password)
+        res = self.url_open("/my/packages/%d" % self.barre.id, timeout=30)
+        self.assertNotIn(
+            self.barre.name, res.text,
+            "the page behind the hidden card still sells her the class")
+
+    def test_an_unused_trial_is_still_offered(self):
+        """The hiding must not reach somebody whose trial is genuinely hers."""
+        html = self._page("/my/packages")
+        self.assertIn(self.barre.name, html)
+        self.assertIn(self.reformer.name, html)
+
+    def test_packs_are_untouched(self):
+        """She keeps everything else - this removes one card, not the shop."""
+        pack = self.env["product.template"].create({
+            "name": "Hidden-test pack of 5", "list_price": 90.0,
+            "type": "service", "fitness_is_package": True,
+            "fitness_class_count": 5, "fitness_validity_days": 60,
+            "fitness_class_type": "barre", "fitness_session_type": "group"})
+        self._spend_her_trial()
+
+        # ?tab=packages, because /my/packages lands on the CLASSES tab -
+        # fitness_class_count <= 1 - and a five-class pack is not on it. The
+        # first version of this test asked the wrong page and read an empty
+        # tab as the filter having swallowed the packs.
+        html = self._page("/my/packages?tab=packages")
         self.assertIn(
-            "single class", after,
-            "a student whose trial is spent is still shown a trial class")
+            pack.name, html,
+            "hiding the trial took the ordinary packs with it")
 
-    def test_an_unused_trial_is_still_called_a_trial(self):
-        """The rename must not reach somebody whose trial is genuinely free."""
-        html = self._page("/my/packages/%d" % self.barre.id)
-        self.assertIn("Trial", html)
-        self.assertNotIn("single class", html)
-
-    def test_the_renamed_card_is_still_buyable_again_and_again(self):
-        """A paid single class is an ordinary product.
-
-        Only the FREE claim is once-per-student: claimed_ids is built from
-        free_ids, so a product that is no longer free for her can never enter
-        it. Buying it at 12.00 must therefore never hide it - she can come
-        back for another class next week.
-        """
-        self._spend_her_trial()
-        self._buy_it_at_full_price()
-
-        html = self._page("/my/packages/%d" % self.barre.id)
+    def test_she_is_told_why_the_classes_tab_changed(self):
+        """A tab with the ordinary cards removed and nothing said is the same
+        confusion this change set out to end. The note names the reason and
+        where to go instead."""
+        before = self._page("/my/packages")
         self.assertNotIn(
-            "Already used", html,
-            "a paid class was marked as used up; she cannot buy another")
-        self.assertIn("single class", html)
+            "already used your trial classes", before,
+            "fixture is wrong: the note is showing before the trial is spent")
 
-    def _buy_it_at_full_price(self):
-        order = self.env["sale.order"].create({
-            "partner_id": self.partner.id,
-            "order_line": [(0, 0, {
-                "product_id": self.barre.product_variant_ids[:1].id,
-                "product_uom_qty": 1,
-                "price_unit": 12.0,
-            })],
-        })
-        order.action_confirm()
-        return order
-
-    def test_a_spent_trial_can_still_be_bought_while_a_request_is_open(self):
-        """The f39797b interaction.
-
-        The shop disables a trial card while a request is open, which is right
-        while the trial is hers to claim. These products are also the only
-        single-class products, so gating on the open request alone left a
-        student who had already used her trial unable to buy a class at all.
-        /trial/submit refuses a second OPEN request but not a student whose
-        entitlement is spent, so she really can hold one.
-        """
         self._spend_her_trial()
-        self._open_reformer_request()
 
-        html = self._page("/my/packages/%d" % self.barre.id)
-        self.assertNotIn(
-            "Request sent", html,
-            "a spent trial is an ordinary paid class; an open request must "
-            "not stop her buying one")
-        self.assertNotIn("Solicitud enviada", html)
+        after = self._page("/my/packages")
+        self.assertIn(
+            "already used your trial classes", after,
+            "nothing explains why the single classes are gone")
+        self.assertIn(
+            "a membership or a class", after,
+            "the note does not say where to go instead")
 
-    def test_an_unspent_trial_is_still_gated_by_an_open_request(self):
-        """The behaviour f39797b added must survive the fix above."""
-        self._open_reformer_request()
-        html = self._page("/my/packages/%d" % self.barre.id)
-        self.assertTrue(
-            "Request sent" in html or "Solicitud enviada" in html,
-            "an open request no longer closes the trial card")
+    def test_the_note_stays_off_the_other_tabs(self):
+        """It explains the Classes tab, so it belongs only there."""
+        self._spend_her_trial()
+        packs = self._page("/my/packages?tab=packages")
+        self.assertNotIn("already used your trial classes", packs)
+
+    def test_the_classes_tab_is_what_empties(self):
+        """Worth stating outright, because it is the studio's decision made
+        visible: the trial products are single classes, so hiding them empties
+        the tab a student lands on. She is left with the private and duo
+        contact-only cards there, and must move to Packs or Memberships to buy
+        anything."""
+        self._spend_her_trial()
+        classes = self._page("/my/packages")
+
+        self.assertNotIn(self.barre.name, classes)
+        self.assertNotIn(self.reformer.name, classes)
