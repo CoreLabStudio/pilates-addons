@@ -1363,9 +1363,16 @@ class FitnessStudentPortal(http.Controller):
         # still open could open the Barre card, fill the whole form in and
         # only be refused at submit - the form and /trial/submit have always
         # asked per student. The card now says what the form will say.
+        # Only while the trial is still hers to claim. These products are
+        # also the only single-class products the studio sells, so gating them
+        # on an open request alone left a student who had already used her
+        # trial unable to buy a class at all - not the free one, which is
+        # right, and not the paid one either, which is not. An open request
+        # says nothing about whether she may buy an ordinary class.
         pending_trial_ids = frozenset(
             p.id for p in products
             if self._is_trial_product(p)
+            and not self._trial_entitlement_used(partner)
             and self._pending_trial_request(partner))
 
         pkg_meta = {}
@@ -1479,6 +1486,11 @@ class FitnessStudentPortal(http.Controller):
             'free_ids':                 free_ids,
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
+            # Per student: the trial products are the single-class
+            # products too, and what they are called depends on
+            # whether her free trial is still hers to take.
+            'product_labels':           {p.id: self._shop_label(partner, p)
+                                        for p in products},
             'lbl_trial_pending':        _('Request sent'),
             'student_price':            student_price,
             # Trials claimable right now, and where their card points. Kept
@@ -1611,6 +1623,7 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_package_detail', {
             'product':         product,
+            'product_label':   self._shop_label(partner, product),
             'meta':            meta,
             'is_subscription': is_sub,
             'back_url':        ('/my/packages?tab=subscriptions' if is_sub
@@ -1637,6 +1650,7 @@ class FitnessStudentPortal(http.Controller):
             # student - offering Barre to somebody with a Reformer request
             # open only walks them into a refusal after they have typed.
             'trial_pending':   bool(self._is_trial_product(product)
+                                    and not self._trial_entitlement_used(partner)
                                     and self._pending_trial_request(partner)),
             'lbl_trial_pending': _('Request sent'),
             'free_claimed':    (self._is_free_for(partner, product)
@@ -1827,6 +1841,7 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
             'product':            product,
+            'product_label':      self._shop_label(partner, product),
             **self._checkout_totals(product, partner, selected_plan),
             'is_subscription':    is_subscription,
             'plan_options':       self._plan_options(
@@ -2886,6 +2901,36 @@ class FitnessStudentPortal(http.Controller):
 
     def _is_trial_product(self, product):
         return product.id in self._trial_products().ids
+
+    def _shop_label(self, partner, product):
+        """What this product is called for this student.
+
+        The two trial products are also the studio's only single-class
+        products: "Barre Single Class" and "Reformer Single" are archived on
+        purpose, and 12.00 / 18.00 are the real single-class prices. So a
+        student whose free trial is gone was shown a card reading "Clase de
+        prueba" - trial class - for a class she has to pay for. One of them
+        reported it as "I bought a credit to try a Barre class", which is
+        exactly what the card told her she was doing.
+
+        Renamed for her rather than on the record, because the same product
+        is still a genuine free trial for somebody who has not used hers.
+        """
+        # Bound from the request, like the other 31 methods here - this
+        # controller does not import _ at module level, and the first version
+        # of this helper raised NameError and served a 500 on every product
+        # page. Translated per request, so the label follows the reader.
+        _ = request.env._
+        if not self._is_trial_product(product):
+            return product.name
+        if not self._trial_entitlement_used(partner):
+            return product.name
+        discipline = product.fitness_class_type
+        if discipline == 'barre':
+            return _('Barre - single class')
+        if discipline == 'reformer':
+            return _('Reformer - single class')
+        return product.name
 
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?

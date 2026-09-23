@@ -3782,3 +3782,15 @@ msgstr "Canviar entre mode clar i fosc"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your trial request is with the studio"
 msgstr "La teva sol·licitud de classe de prova és amb l'estudi"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Barre - single class"
+msgstr "Classe de Barre — Una classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reformer - single class"
+msgstr "Classe de Reformer — Una classe"

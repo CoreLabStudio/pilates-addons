@@ -135,3 +135,106 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
             "mv-home-cta--ghost", after,
             "Home still invites her to book a trial while her request is "
             "open, directly above the line saying it is with the studio")
+
+
+    # -- once the trial is gone, it is an ordinary paid class --------------
+
+    def _spend_her_trial(self):
+        """A confirmed zero-price order for a trial product is what
+        _trial_entitlement_used reads, so that is what this makes."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [(0, 0, {
+                "product_id": self.barre.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 0.0,
+            })],
+        })
+        order.action_confirm()
+        return order
+
+    def test_the_card_stops_calling_it_a_trial_once_it_is_spent(self):
+        """It is the studio's only single-class product, priced 12.00, and
+        it was still telling her it was a trial class. One student reported
+        that as "I bought a credit to try a Barre class".
+
+        Asserted on the English label, because url_open lands on /en/ and the
+        page renders in English - the Spanish wording would be testing which
+        language the test happens to run in, not the rename.
+        """
+        before = self._page("/my/packages/%d" % self.barre.id)
+        self.assertIn(
+            "Trial", before,
+            "fixture is wrong: the card is not calling itself a trial to "
+            "begin with, so the rename cannot be what this proves")
+        self.assertNotIn("single class", before)
+
+        self._spend_her_trial()
+
+        after = self._page("/my/packages/%d" % self.barre.id)
+        self.assertIn(
+            "single class", after,
+            "a student whose trial is spent is still shown a trial class")
+
+    def test_an_unused_trial_is_still_called_a_trial(self):
+        """The rename must not reach somebody whose trial is genuinely free."""
+        html = self._page("/my/packages/%d" % self.barre.id)
+        self.assertIn("Trial", html)
+        self.assertNotIn("single class", html)
+
+    def test_the_renamed_card_is_still_buyable_again_and_again(self):
+        """A paid single class is an ordinary product.
+
+        Only the FREE claim is once-per-student: claimed_ids is built from
+        free_ids, so a product that is no longer free for her can never enter
+        it. Buying it at 12.00 must therefore never hide it - she can come
+        back for another class next week.
+        """
+        self._spend_her_trial()
+        self._buy_it_at_full_price()
+
+        html = self._page("/my/packages/%d" % self.barre.id)
+        self.assertNotIn(
+            "Already used", html,
+            "a paid class was marked as used up; she cannot buy another")
+        self.assertIn("single class", html)
+
+    def _buy_it_at_full_price(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [(0, 0, {
+                "product_id": self.barre.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 12.0,
+            })],
+        })
+        order.action_confirm()
+        return order
+
+    def test_a_spent_trial_can_still_be_bought_while_a_request_is_open(self):
+        """The f39797b interaction.
+
+        The shop disables a trial card while a request is open, which is right
+        while the trial is hers to claim. These products are also the only
+        single-class products, so gating on the open request alone left a
+        student who had already used her trial unable to buy a class at all.
+        /trial/submit refuses a second OPEN request but not a student whose
+        entitlement is spent, so she really can hold one.
+        """
+        self._spend_her_trial()
+        self._open_reformer_request()
+
+        html = self._page("/my/packages/%d" % self.barre.id)
+        self.assertNotIn(
+            "Request sent", html,
+            "a spent trial is an ordinary paid class; an open request must "
+            "not stop her buying one")
+        self.assertNotIn("Solicitud enviada", html)
+
+    def test_an_unspent_trial_is_still_gated_by_an_open_request(self):
+        """The behaviour f39797b added must survive the fix above."""
+        self._open_reformer_request()
+        html = self._page("/my/packages/%d" % self.barre.id)
+        self.assertTrue(
+            "Request sent" in html or "Solicitud enviada" in html,
+            "an open request no longer closes the trial card")

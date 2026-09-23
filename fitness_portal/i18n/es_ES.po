@@ -3778,3 +3778,15 @@ msgstr "Cambiar entre modo claro y oscuro"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Your trial request is with the studio"
 msgstr "Tu solicitud de clase de prueba está con el estudio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Barre - single class"
+msgstr "Clase de Barre — Una clase"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reformer - single class"
+msgstr "Clase de Reformer — Una clase"
