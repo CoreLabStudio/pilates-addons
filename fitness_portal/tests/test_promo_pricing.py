@@ -236,7 +236,15 @@ class TestPromoCheckout(HttpCase):
             })],
         })
         self.assertEqual(order.order_line.price_unit, 22.5)
-        self.assertAlmostEqual(order.amount_untaxed, 22.5, places=2)
+        # The total, not amount_untaxed. Where the studio's tax is
+        # price-included - as it is on the real database, 21% IVA incluido -
+        # 22.50 IS the gross and the untaxed base beneath it is 18.60, so
+        # asserting 22.50 there asserted that tax gets added on top. That is
+        # a fact about the fixture's database, not about the number Stripe is
+        # asked for. Worked out through the product's own taxes, like the
+        # page assertions above, so it holds whatever the studio charges.
+        self.assertAlmostEqual(
+            order.amount_total, self._gross(22.50), places=2)
 
     def test_an_expired_promotion_charges_full_price(self):
         self.product.write({

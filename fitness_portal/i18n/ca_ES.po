@@ -3776,3 +3776,9 @@ msgstr "Contactar"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
 msgid "Switch between light and dark"
 msgstr "Canviar entre mode clar i fosc"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your trial request is with the studio"
+msgstr "La teva sol·licitud de classe de prova és amb l'estudi"

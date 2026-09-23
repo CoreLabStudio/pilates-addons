@@ -324,13 +324,20 @@ class TrialRequestController(http.Controller):
         # prove who they are before seeing a form, and matching on a typed
         # email would tell a stranger whether that address has an account.
         already_used = False
+        pending = False
         if not request.env.user._is_public():
-            already_used = request.env['fitness.trial.request'].sudo(
-            )._trial_already_claimed(request.env.user.partner_id)
+            TR = request.env['fitness.trial.request'].sudo()
+            partner = request.env.user.partner_id
+            already_used = TR._trial_already_claimed(partner)
+            # She has asked and the studio has not answered yet. The shop
+            # already said "Request sent"; this form did not ask, so she
+            # could fill it in again and send a second one.
+            pending = bool(TR._open_request_for(partner))
 
         ctx = self._form_ctx(error=kw.get('error'), form_values=prefill,
                              source=_source)
         ctx['trial_already_used'] = already_used
+        ctx['trial_request_pending'] = pending
         return request.render('fitness_trials.trial_request_form', ctx)
 
     @http.route('/trial/submit', type='http', auth='public', website=True,
@@ -443,6 +450,20 @@ class TrialRequestController(http.Controller):
                     errors.append(_(
                         'That class is no longer available. Please choose '
                         'another one.'))
+
+        # One open request at a time. The form is reachable directly, and a
+        # student who asked yesterday could send another today - the studio
+        # then has two rows for one person and no way to tell which she meant.
+        # Matched on the logged-in student rather than the typed email: a
+        # public visitor is not identified, and answering on an email would
+        # tell a stranger whether that address has asked for anything.
+        if not request.env.user._is_public():
+            TR = request.env['fitness.trial.request'].sudo()
+            open_already = TR._open_request_for(request.env.user.partner_id)
+            if open_already:
+                errors.append(_(
+                    'You already have a trial request with the studio. '
+                    'We will be in touch shortly.'))
 
         if errors:
             return request.render(
