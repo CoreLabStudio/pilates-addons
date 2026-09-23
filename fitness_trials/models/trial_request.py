@@ -538,7 +538,50 @@ class FitnessTrialRequest(models.Model):
         if 'status' in vals or 'scheduled_datetime' in vals:
             prev_status = {r.id: r.status for r in self}
 
+        # The slot this request is being moved to, and where each one stood
+        # before. _moved_with_booking already handles the other direction -
+        # the booking moves and the request follows - and this is its mirror.
+        moving_slot = 'occurrence_id' in vals and vals.get('occurrence_id')
+        slot_before = ({r.id: r.occurrence_id for r in self}
+                       if moving_slot else {})
+
         result = super().write(vals)
+
+        # Changing the slot on a scheduled request has to move the seat with
+        # it. It did not: the request and the email said one class while the
+        # student's booking stayed on another, and re-sending the
+        # confirmation then named a day she had no place on. That reached a
+        # customer - two confirmations fifty-five seconds apart, naming
+        # different days, the second one wrong.
+        #
+        # Routed through fitness.booking.write() rather than done here, so
+        # both rosters are recounted and the student is told once, by the
+        # message written for exactly this news. Doing it here as well would
+        # be a second mechanism telling her a second time.
+        if moving_slot:
+            for rec in self:
+                if rec.status != 'scheduled':
+                    continue
+                booking = rec._find_booking()
+                target = rec.occurrence_id
+                if not booking or not target:
+                    continue
+                if booking.calendar_event_id == target:
+                    continue
+                if booking.state not in ('booked', 'no_show'):
+                    # A cancelled seat is not moved, it is gone. Dragging it
+                    # onto another class would put somebody back in a room
+                    # they had been taken out of.
+                    _logger.info(
+                        "[TRIAL] Request %s slot changed but its booking %s is "
+                        "%s - not moved", rec.id, booking.id, booking.state)
+                    continue
+                origin = slot_before.get(rec.id)
+                booking.sudo().write({'calendar_event_id': target.id})
+                _logger.info(
+                    "[TRIAL] Request %s moved its booking %s from event %s "
+                    "to %s", rec.id, booking.id,
+                    origin.id if origin else '-', target.id)
 
         # A corrected email should find its student too, not leave the field
         # showing whoever the old address matched.
@@ -1009,6 +1052,33 @@ class FitnessTrialRequest(models.Model):
         return lines.filtered(
             lambda l: not l.fitness_validity_end_date
             or l.fitness_validity_end_date >= today)[:1]
+
+    @api.model
+    def _open_request_for(self, partner, discipline=None):
+        """This student's request that the studio has not closed yet.
+
+        Pending or contacted - not scheduled or declined, which are finished,
+        and somebody whose trial has been and gone may ask again.
+
+        Nothing asked this on the student's side, so the Home card went on
+        offering a free trial to somebody who had already asked for one, the
+        form opened, and a second request could be submitted while the first
+        was still sitting in the studio's list. The entitlement check answers
+        a different question - whether the trial has been *taken* - and a
+        pending request has no order behind it yet, so it answered False.
+
+        Lives on the model because the portal and the trial form both need
+        it, and a second copy is how two screens come to disagree.
+        """
+        if not partner:
+            return self.browse()
+        domain = [
+            ('partner_id', '=', partner.id),
+            ('status', 'in', list(self.OPEN_STATES)),
+        ]
+        if discipline:
+            domain.append(('class_interest', '=', discipline))
+        return self.sudo().search(domain, order='id desc', limit=1)
 
     @api.model
     def _all_trial_products(self):

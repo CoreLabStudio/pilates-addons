@@ -222,10 +222,20 @@ class FitnessStudentPortal(http.Controller):
             # classes and booked one outright, which cannot work alongside a
             # three-student minimum, so the wording says request rather than
             # book.
+            # Hidden once she has asked, as well as once she has taken it.
+            # The entitlement check answers whether the trial was TAKEN, and a
+            # request still sitting with the studio has no order behind it, so
+            # it answered False - Home went on offering a free trial to
+            # somebody who had already asked for one, and the form opened.
+            # The shop grid and the product page already said "Request sent";
+            # this card never asked.
             'trial_offer_url':  ('/my/trial'
                                  if (self._trial_offer_open()
-                                     and not self._trial_entitlement_used(partner))
+                                     and not self._trial_entitlement_used(partner)
+                                     and not self._pending_trial_request(partner))
                                  else False),
+            'trial_pending':    bool(self._pending_trial_request(partner)),
+            'lbl_trial_pending': _('Your trial request is with the studio'),
             'lbl_trial_offer':  _('Request your free trial class'),
             'lbl_lets_book':    _("Let's book your first class."),
             'lbl_timetable':      _('Weekly Timetable'),
@@ -2027,16 +2037,10 @@ class FitnessStudentPortal(http.Controller):
         behalf of a particular card - a Barre request says nothing about
         whether the Reformer card should still be offered.
         """
-        Trial = request.env['fitness.trial.request'].sudo()
-        if not partner:
-            return Trial.browse()
-        domain = [
-            ('partner_id', '=', partner.id),
-            ('status', 'in', list(self.TRIAL_OPEN_STATES)),
-        ]
-        if discipline:
-            domain.append(('class_interest', '=', discipline))
-        return Trial.search(domain, order='id desc', limit=1)
+        # The model owns the question now, so the trial form and this page
+        # cannot drift apart on what counts as still open.
+        return request.env['fitness.trial.request'].sudo()._open_request_for(
+            partner, discipline)
 
     @http.route('/my/news/<int:post_id>', type='http', auth='user',
                 website=True, sitemap=False)
@@ -3401,6 +3405,11 @@ class FitnessStudentPortal(http.Controller):
         if not partner or not self._trial_offer_open():
             return pools
         if self._trial_entitlement_used(partner):
+            return pools
+        # Nor once she has asked. "1 free trial available" beside a request
+        # already sitting with the studio reads as a second one going spare,
+        # and the badge links straight back to the form.
+        if self._pending_trial_request(partner):
             return pools
         _ = request.env._
         return list(pools) + [{
