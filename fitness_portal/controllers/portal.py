@@ -1305,6 +1305,13 @@ class FitnessStudentPortal(http.Controller):
         products = products.filtered(
             lambda p: 'discontinued' not in (p.name or '').lower()
         )
+        # A spent trial is not offered again in any form. These being the only
+        # single-class products, that means she sees packs and memberships and
+        # nothing else - which is the studio's decision, taken knowing it
+        # leaves no way to buy one class on its own.
+        products = products.filtered(
+            lambda p: not self._hidden_from_shop(partner, p)
+        )
         contact_only_ids = frozenset(p.id for p in products if not p.sale_ok)
 
         # Which cards get a one-tap Book button, and which have already been
@@ -1486,11 +1493,6 @@ class FitnessStudentPortal(http.Controller):
             'free_ids':                 free_ids,
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
-            # Per student: the trial products are the single-class
-            # products too, and what they are called depends on
-            # whether her free trial is still hers to take.
-            'product_labels':           {p.id: self._shop_label(partner, p)
-                                        for p in products},
             'lbl_trial_pending':        _('Request sent'),
             'student_price':            student_price,
             # Trials claimable right now, and where their card points. Kept
@@ -1512,6 +1514,15 @@ class FitnessStudentPortal(http.Controller):
             # trial products is priced at zero for them. The note above the
             # cards is about that offer, so it is what the note hangs on.
             'trial_offered':            bool(set(student_price) & free_ids),
+            # Her free class is gone and the cards that were it are gone with
+            # it, so the Classes tab shows only the private and duo options -
+            # not empty, but with nothing ordinary on it and no reason given.
+            # Without this she reads a shop that looks broken, which is the
+            # same confusion this whole change set out to remove.
+            'trial_spent':              self._trial_entitlement_used(partner),
+            'lbl_trial_spent':          _('You have already used your free '
+                                          'class. Choose a pack or a '
+                                          'membership to keep training.'),
             # Said once, above the two trial cards, because a student who takes
             # the wrong one has spent the only one they get.
             # Names the two products rather than the two disciplines. This
@@ -1549,6 +1560,11 @@ class FitnessStudentPortal(http.Controller):
 
         product = request.env['product.template'].sudo().browse(product_id)
         if not product.exists() or not product.active or not self._is_buyable(product):
+            return request.redirect('/my/packages')
+        # Hidden means hidden, including to somebody who kept the link or
+        # typed the id. The card is gone from the shop; the page behind it
+        # must not still sell her the class.
+        if self._hidden_from_shop(request.env.user.partner_id, product):
             return request.redirect('/my/packages')
 
         is_sub = bool(product.fitness_is_subscription_plan)
@@ -1623,7 +1639,6 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_package_detail', {
             'product':         product,
-            'product_label':   self._shop_label(partner, product),
             'meta':            meta,
             'is_subscription': is_sub,
             'back_url':        ('/my/packages?tab=subscriptions' if is_sub
@@ -1841,7 +1856,6 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
             'product':            product,
-            'product_label':      self._shop_label(partner, product),
             **self._checkout_totals(product, partner, selected_plan),
             'is_subscription':    is_subscription,
             'plan_options':       self._plan_options(
@@ -2902,35 +2916,22 @@ class FitnessStudentPortal(http.Controller):
     def _is_trial_product(self, product):
         return product.id in self._trial_products().ids
 
-    def _shop_label(self, partner, product):
-        """What this product is called for this student.
+    def _hidden_from_shop(self, partner, product):
+        """Is this product not to be shown to this student at all?
 
-        The two trial products are also the studio's only single-class
-        products: "Barre Single Class" and "Reformer Single" are archived on
-        purpose, and 12.00 / 18.00 are the real single-class prices. So a
-        student whose free trial is gone was shown a card reading "Clase de
-        prueba" - trial class - for a class she has to pay for. One of them
-        reported it as "I bought a credit to try a Barre class", which is
-        exactly what the card told her she was doing.
+        The two trial products are the studio's only single-class products -
+        "Barre Single Class" and "Reformer Single" are archived on purpose.
+        Once a student's one free trial is spent, the studio's decision is
+        that she is not offered a single class at all: packs and memberships
+        only. So the card goes entirely rather than being relabelled.
 
-        Renamed for her rather than on the record, because the same product
-        is still a genuine free trial for somebody who has not used hers.
+        The entitlement is one per student across both disciplines, so
+        spending it on Barre hides the Reformer card too. That is the rule as
+        the studio states it: "one per student, Barre or Reformer".
         """
-        # Bound from the request, like the other 31 methods here - this
-        # controller does not import _ at module level, and the first version
-        # of this helper raised NameError and served a 500 on every product
-        # page. Translated per request, so the label follows the reader.
-        _ = request.env._
         if not self._is_trial_product(product):
-            return product.name
-        if not self._trial_entitlement_used(partner):
-            return product.name
-        discipline = product.fitness_class_type
-        if discipline == 'barre':
-            return _('Barre - single class')
-        if discipline == 'reformer':
-            return _('Reformer - single class')
-        return product.name
+            return False
+        return self._trial_entitlement_used(partner)
 
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?

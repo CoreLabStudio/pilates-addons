@@ -3786,11 +3786,5 @@ msgstr "La teva sol·licitud de classe de prova és amb l'estudi"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Barre - single class"
-msgstr "Classe de Barre — Una classe"
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Reformer - single class"
-msgstr "Classe de Reformer — Una classe"
+msgid "You have already used your free class. Choose a pack or a membership to keep training."
+msgstr "Ja has fet servir la teva classe gratuïta. Tria un bo o una membresía per continuar entrenant."
