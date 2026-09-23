@@ -340,3 +340,45 @@ msgstr "Afegir una alumna"
 #: model_terms:ir.ui.view,arch_db:fitness_packages.view_calendar_event_form_add_student
 msgid "Add a student"
 msgstr "Afegir una alumna"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_is_courtesy
+msgid "Courtesy Class"
+msgstr "Classe de cortesia"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__mode
+msgid "This is a"
+msgstr "Això és"
+
+#. module: fitness_packages
+#: model:ir.model.fields.selection,name:fitness_packages.selection__fitness_add_student_wizard__mode__charge
+msgid "Charge the agreed price"
+msgstr "Cobrar el preu acordat"
+
+#. module: fitness_packages
+#: model:ir.model.fields.selection,name:fitness_packages.selection__fitness_add_student_wizard__mode__courtesy
+msgid "Free class - the studio is giving it"
+msgstr "Classe gratuïta - la convida l'estudi"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__reason
+msgid "Reason"
+msgstr "Motiu"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Nothing is charged. The class is given, and the student keeps their credits."
+msgstr "No es cobra res. La classe es regala i l'alumna conserva els seus crèdits."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Say why this class is being given. It is the only record anyone will have of it later."
+msgstr "Indica per què es regala aquesta classe. És l'únic registre que quedarà."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Enter the price agreed, or switch to a free class."
+msgstr "Introdueix el preu acordat, o canvia a classe gratuïta."

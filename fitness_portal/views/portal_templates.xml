@@ -1931,7 +1931,13 @@
                             </span>
                         </div>
                         <t t-if="_live">
-                            <div class="mv-summary-row mv-summary-discount">
+                            <!-- Only when this student is actually saving
+                                 something. The promo can be live while she
+                                 pays full price - a trial she has already
+                                 used - and the row then announced a discount
+                                 the total did not give her. -->
+                            <div class="mv-summary-row mv-summary-discount"
+                                 t-if="co_discount &gt; 0">
                                 <p class="mv-summary-name" t-out="product.fitness_promo_summary"/>
                                 <span class="mv-summary-total">
                                     &#8722;<t t-out="'%.2f' % co_discount"/> <t t-out="co_currency"/>

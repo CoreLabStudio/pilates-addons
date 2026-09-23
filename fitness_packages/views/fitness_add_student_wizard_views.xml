@@ -23,10 +23,22 @@
                         <field name="student_id"
                                options="{'no_quick_create': True}"
                                placeholder="Search an existing contact"/>
+                        <!-- The act named outright, before the price is even
+                             asked. Charging nothing by accident and giving a
+                             class away on purpose read identically on a
+                             record otherwise. -->
+                        <field name="mode" widget="radio"/>
                         <field name="product_id" readonly="1"/>
                         <!-- Defaulted from the product, meant to be changed:
                              a private class is priced in the conversation. -->
-                        <field name="price"/>
+                        <field name="price" invisible="mode == 'courtesy'"
+                               required="mode == 'charge'"/>
+                        <div class="alert alert-warning mb-2" role="status"
+                             colspan="2" invisible="mode != 'courtesy'">
+                            Nothing is charged. The class is given, and the student keeps their credits.
+                        </div>
+                        <field name="reason" required="mode == 'courtesy'"
+                               placeholder="Why this class is being given - the only record anyone will have later."/>
                     </group>
                     <div class="alert alert-info mb-0" role="status">
                         This creates a confirmed order line for the agreed

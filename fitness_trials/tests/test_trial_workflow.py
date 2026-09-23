@@ -689,3 +689,97 @@ class TestTrialWorkflow(TransactionCase):
         self.assertFalse(request._find_booking())
         self._decline(request, "Nothing behind this one.")
         self.assertEqual(request.status, "declined")
+
+    # -- one free trial per student, either discipline ----------------------
+
+    def _claim_free_trial(self, partner, xmlid):
+        """A student takes their free trial: a confirmed, zero-cost order."""
+        product = self.env.ref(xmlid)
+        order = self.env["sale.order"].sudo().create({
+            "partner_id": partner.id,
+            "order_line": [(0, 0, {
+                "product_id": product.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 0.0,
+            })],
+        })
+        order.action_confirm()
+        return order
+
+    def test_a_reformer_trial_spends_the_barre_one_too(self):
+        """The whole point: one entitlement, not one of each. The portal has
+        always said so - "It is one per student, Barre or Reformer" - and the
+        desk used to disagree, handing out a second free trial."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "One Trial Only", "email": "one.trial@example.invalid"})
+        barre = self.env.ref("fitness_packages.product_barre_trial")
+
+        self.assertFalse(
+            TR._trial_already_claimed(partner, barre),
+            "fixture is wrong: she has claimed nothing yet")
+
+        self._claim_free_trial(partner, "fitness_packages.product_reformer_trial")
+
+        self.assertTrue(
+            TR._trial_already_claimed(partner, barre),
+            "taking the Reformer trial has to spend the Barre one as well")
+
+    def test_a_barre_trial_spends_the_reformer_one_too(self):
+        """The same, the other way round - the direction nobody checked."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Other Way", "email": "other.way@example.invalid"})
+        reformer = self.env.ref("fitness_packages.product_reformer_trial")
+
+        self._claim_free_trial(partner, "fitness_packages.product_barre_trial")
+
+        self.assertTrue(
+            TR._trial_already_claimed(partner, reformer),
+            "it has to hold in both directions or it is not one entitlement")
+
+    def test_a_student_who_has_claimed_nothing_is_not_blocked(self):
+        """The rule must not refuse everybody - which a too-broad search would."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Never Claimed", "email": "never@example.invalid"})
+
+        for xmlid in ("fitness_packages.product_barre_trial",
+                      "fitness_packages.product_reformer_trial"):
+            self.assertFalse(
+                TR._trial_already_claimed(partner, self.env.ref(xmlid)),
+                "a student with no trial behind them is entitled to one")
+
+    def test_a_paid_trial_class_does_not_spend_the_entitlement(self):
+        """Somebody who paid for a trial class has not used their free one -
+        the rule reads zero-cost orders, not any order of the product."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Paid For It", "email": "paid@example.invalid"})
+        product = self.env.ref("fitness_packages.product_barre_trial")
+        order = self.env["sale.order"].sudo().create({
+            "partner_id": partner.id,
+            "order_line": [(0, 0, {
+                "product_id": product.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 12.0,
+            })],
+        })
+        order.action_confirm()
+
+        self.assertFalse(
+            TR._trial_already_claimed(partner, product),
+            "paying for a class must not burn the free entitlement")
+
+    def test_approval_refuses_a_second_free_trial_in_the_other_discipline(self):
+        """End to end, through the button Yoleyva actually presses."""
+        from odoo.exceptions import UserError
+        partner = self.env["res.partner"].create(
+            {"name": "Second Bite", "email": "second.bite@example.invalid"})
+        self._claim_free_trial(partner, "fitness_packages.product_reformer_trial")
+
+        request = self._request(partner_id=partner.id, class_interest="barre")
+        request.occurrence_id = self._event()
+
+        with self.assertRaises(UserError):
+            request.action_approve_and_book()

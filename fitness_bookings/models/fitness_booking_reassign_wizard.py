@@ -208,21 +208,15 @@ class FitnessBookingReassignWizard(models.TransientModel):
             raise UserError(_("They are already in that class."))
 
         self._validate_move(target, booking)
-        booking.write({'calendar_event_id': target.id})
 
-        # The student has to hear about this: they did not ask to be moved,
-        # and the class they think they are attending is no longer theirs.
+        # The write does the rest. fitness.booking.write() recounts both
+        # rosters and tells the student, because a booking can also be moved
+        # by editing the field on the form - which used to do neither. Doing
+        # it here as well would count twice and send two messages about one
+        # move, so this passes the reason down and gets out of the way.
         booking.with_context(
-            move_reason=(self.reason or '').strip() or False)._notify_moved(origin)
-
-        # Both rosters changed, so both seat counts are stale.
-        booking._refresh_booked_seats()
-        if origin:
-            count = self.env['fitness.booking'].search_count([
-                ('calendar_event_id', '=', origin.id),
-                ('state', 'in', ('booked', 'attended')),
-            ])
-            origin.sudo().booked_seats = count
+            move_reason=(self.reason or '').strip() or False
+        ).write({'calendar_event_id': target.id})
 
     def _validate_move(self, target, booking=None):
         """The booking rules that still apply when nobody is paying again.

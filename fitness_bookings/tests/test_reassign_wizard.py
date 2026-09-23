@@ -363,3 +363,138 @@ class TestReassignWizard(TransactionCase):
         wiz.action_cancel_only()
         self.assertEqual(self.booking.state, "cancelled")
         self.assertEqual(self.line.fitness_remaining_classes, before + 1)
+
+
+@tagged("post_install", "-at_install")
+class TestDirectMoveKeepsSeatsHonest(TransactionCase):
+    """Moving a booking by editing the field, not through the wizard.
+
+    The third route. Deleting a booking recounted, and the wizard recounted,
+    but typing a new class straight into calendar_event_id did neither - so
+    the class being left kept the seat and the class being joined never
+    gained it. Found on production: one edit left Barre Groove reading 1 with
+    nobody on it and Barre Harmony reading 1 with two students on it.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.room = cls.env["fitness.classroom"].create({
+            "name": "Drift room", "classroom_type": "barre", "capacity": 8})
+        cls.ctype = cls.env["fitness.class.type"].create({
+            "name": "Drift Barre", "classroom_type": "barre", "duration": 45,
+            "level": "all", "session_type": "group",
+            "classroom_id": cls.room.id})
+        cls.student = cls.env["res.users"].create({
+            "name": "Drift Student",
+            "login": "drift.student@example.invalid",
+            "email": "drift.student@example.invalid",
+            "group_ids": [(6, 0, [
+                cls.env.ref("base.group_portal").id,
+                cls.env.ref("fitness_core.group_fitness_student").id])]})
+        pack = cls.env["product.template"].create({
+            "name": "Drift pack", "list_price": 100.0, "type": "service",
+            "fitness_is_package": True, "fitness_class_count": 10,
+            "fitness_validity_days": 90, "fitness_class_type": "barre",
+            "fitness_session_type": "group"})
+        order = cls.env["sale.order"].create(
+            {"partner_id": cls.student.partner_id.id})
+        cls.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": pack.product_variant_ids[:1].id,
+            "product_uom_qty": 1, "price_unit": 100.0,
+            "fitness_class_type": "barre"})
+        order.action_confirm()
+        cls.line = order.order_line[:1]
+
+    def _class(self, name, days=4):
+        start = fields.Datetime.now() + timedelta(days=days)
+        return self.env["calendar.event"].create({
+            "name": name, "start": start,
+            "stop": start + timedelta(minutes=45),
+            "class_type_id": self.ctype.id, "is_fitness_class": True})
+
+    def _book(self, event):
+        return self.env["fitness.booking"].create({
+            "student_id": self.student.partner_id.id,
+            "calendar_event_id": event.id,
+            "package_order_line_id": self.line.id,
+            "manager_override_timewindow": True})
+
+    def test_a_direct_edit_moves_the_seat_with_the_student(self):
+        origin, target = self._class("Left behind"), self._class("Joined")
+        booking = self._book(origin)
+        origin.invalidate_recordset()
+        self.assertEqual(origin.booked_seats, 1, "fixture is wrong")
+
+        booking.write({"calendar_event_id": target.id})
+
+        origin.invalidate_recordset(); target.invalidate_recordset()
+        self.assertEqual(
+            origin.booked_seats, 0,
+            "the class she left kept her seat - it shows fuller than it is")
+        self.assertEqual(
+            target.booked_seats, 1,
+            "the class she joined never gained the seat - it shows a free "
+            "place that is already taken")
+
+    def test_the_wizard_still_recounts_both(self):
+        """It delegates to write() now; the outcome must not have changed."""
+        origin, target = self._class("Wizard from"), self._class("Wizard to")
+        booking = self._book(origin)
+
+        self.env["fitness.booking.reassign.wizard"].create({
+            "booking_id": booking.id, "target_event_id": target.id,
+        }).action_move_student()
+
+        origin.invalidate_recordset(); target.invalidate_recordset()
+        self.assertEqual(origin.booked_seats, 0)
+        self.assertEqual(target.booked_seats, 1)
+
+    def test_the_student_is_told_once_not_twice(self):
+        """The wizard used to notify and now the write does. Doing both would
+        send two messages about one move."""
+        origin, target = self._class("Told from"), self._class("Told to")
+        booking = self._book(origin)
+        before = len(booking.message_ids)
+
+        self.env["fitness.booking.reassign.wizard"].create({
+            "booking_id": booking.id, "target_event_id": target.id,
+        }).action_move_student()
+
+        booking.invalidate_recordset()
+        moved = [m for m in booking.message_ids
+                 if "cambiado" in (m.subject or "").lower()
+                 or "moved" in (m.subject or "").lower()
+                 or "canviat" in (m.subject or "").lower()]
+        self.assertLessEqual(
+            len(moved), 1,
+            "the student was told twice about a single move")
+        self.assertGreater(len(booking.message_ids), before,
+                           "nothing at all was posted about the move")
+
+    def test_writing_something_else_does_not_recount(self):
+        """Only a change of class touches the counters."""
+        event = self._class("Untouched")
+        booking = self._book(event)
+        event.invalidate_recordset()
+
+        booking.write({"manager_override_timewindow": True})
+
+        event.invalidate_recordset()
+        self.assertEqual(event.booked_seats, 1)
+
+    def test_rewriting_the_same_class_is_not_a_move(self):
+        """A no-op write must not tell anybody they have been moved."""
+        event = self._class("Same class")
+        booking = self._book(event)
+        before = len(booking.message_ids)
+
+        booking.write({"calendar_event_id": event.id})
+
+        booking.invalidate_recordset(); event.invalidate_recordset()
+        self.assertEqual(event.booked_seats, 1)
+        self.assertEqual(len(booking.message_ids), before,
+                         "a write that moved nothing announced a move")

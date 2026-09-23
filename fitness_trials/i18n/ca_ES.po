@@ -486,3 +486,8 @@ msgstr "Horaris per a %(who)s - totes les classes"
 #: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_form
 msgid "Nothing runs on the day they asked for, so every class is being offered."
 msgstr "No hi ha cap classe el dia que va demanar, així que es mostren totes."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.trial_request_form
+msgid "You have already used your free trial class. It is one per student, Barre or Reformer. You can still ask, and the studio will tell you what a class costs."
+msgstr "Ja has fet servir la teva classe de prova gratuïta. És una per alumna, de Barre o de Reformer. Pots demanar-la igualment i l'estudi et dirà quant costa una classe."
