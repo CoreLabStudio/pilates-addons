@@ -1,0 +1,23 @@
+CORRECTION (2026-09-23): the claim in this message that posting the
+invoice mails it to the student is wrong, and was wrong when written.
+
+This commit says: "posting the invoice is what mails it to the student -
+through the action_post override in fitness_notifications". That override,
+_fitness_notify_invoice, creates an IN-APP notification linking to
+/my/invoices/<id>. It sends no email.
+
+Online invoicing is mailed by sale's send_invoice_cron, and that cron
+searches payment transactions:
+
+    self.search([('state', '=', 'done'),
+                 ('is_post_processed', '=', True), ...])._send_invoice()
+
+A cash sale creates no payment transaction, so it could never be selected -
+not on posting, not later by the cron. Measured on the production restore: a
+desk cash sale produced a correct posted invoice and zero mail.mail rows.
+
+So this commit closed the invoice-CREATION gap and left the invoice-EMAIL
+gap open. The inconsistency it set out to remove survived it, one step
+further along, until _email_invoice() was added to the desk wizard.
+
+The code here was and is correct; only the message overstated what it did.
