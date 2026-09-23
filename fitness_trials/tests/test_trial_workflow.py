@@ -239,6 +239,10 @@ class TestTrialWorkflow(TransactionCase):
         If the studio opens a Saturday, the form should follow without anyone
         editing it.
         """
+        # The studio's real timetable runs Monday to Friday, so the answer
+        # here is only this test's once the test owns the schedule - the same
+        # clearing the no-timetable case above does. Rolled back after.
+        self.env["fitness.class.schedule"].search([]).active = False
         trials = self.env["fitness.trial.request"]
         self._schedule_row(self.class_type, "mon")
         self._schedule_row(self.class_type, "wed")
@@ -783,3 +787,148 @@ class TestTrialWorkflow(TransactionCase):
 
         with self.assertRaises(UserError):
             request.action_approve_and_book()
+
+    # -- the mirror: the request's slot moves the booking -------------------
+
+    def test_changing_the_slot_moves_the_booking(self):
+        """The direction that reached a customer. Yoleyva corrected the slot
+        on the request and re-sent the confirmation; the booking stayed where
+        it was, so the email named a day the student had no place on."""
+        request = self._approved()
+        booking = request.booking_id
+        origin = request.occurrence_id
+        target = self._event(days=23, name="Corrected slot")
+
+        request.write({'occurrence_id': target.id})
+
+        booking.invalidate_recordset()
+        self.assertEqual(
+            booking.calendar_event_id, target,
+            "the seat has to move with the slot, or the email lies")
+        self.assertNotEqual(booking.calendar_event_id, origin)
+
+    def test_both_seat_counts_follow(self):
+        """It goes through fitness.booking.write(), so the rosters recount."""
+        request = self._approved()
+        origin = request.occurrence_id
+        target = self._event(days=25, name="Counted slot")
+        origin.invalidate_recordset()
+        self.assertEqual(origin.booked_seats, 1, "fixture is wrong")
+
+        request.write({'occurrence_id': target.id})
+
+        origin.invalidate_recordset(); target.invalidate_recordset()
+        self.assertEqual(origin.booked_seats, 0)
+        self.assertEqual(target.booked_seats, 1)
+
+    def test_the_student_is_told_once(self):
+        """Two mechanisms telling her would be two messages about one move -
+        which is what she already received, naming different days."""
+        request = self._approved()
+        booking = request.booking_id
+        before = len(booking.message_ids)
+        target = self._event(days=27, name="Told once")
+
+        request.write({'occurrence_id': target.id})
+
+        booking.invalidate_recordset()
+        moved = [m for m in booking.message_ids
+                 if 'cambiado' in (m.subject or '').lower()
+                 or 'moved' in (m.subject or '').lower()
+                 or 'canviat' in (m.subject or '').lower()]
+        self.assertLessEqual(len(moved), 1, "she was told twice about one move")
+        self.assertGreater(len(booking.message_ids), before)
+
+    def test_the_two_directions_do_not_chase_each_other(self):
+        """The request moves the booking, and the booking syncs the request.
+        If neither stopped, this would not return."""
+        request = self._approved()
+        target = self._event(days=29, name="No loop")
+
+        request.write({'occurrence_id': target.id})
+
+        request.invalidate_recordset()
+        request.booking_id.invalidate_recordset()
+        self.assertEqual(request.occurrence_id, target)
+        self.assertEqual(request.booking_id.calendar_event_id, target)
+
+    def test_a_cancelled_seat_is_not_dragged_along(self):
+        """Moving it would put her back in a room she was taken out of."""
+        request = self._approved()
+        booking = request.booking_id
+        self.env["fitness.booking.cancel.wizard"].create({
+            "booking_id": booking.id, "reason": "She cannot come."}).action_confirm()
+        booking.invalidate_recordset()
+        was_on = booking.calendar_event_id
+        target = self._event(days=31, name="Not for the cancelled")
+
+        request.write({'occurrence_id': target.id})
+
+        booking.invalidate_recordset()
+        self.assertEqual(booking.state, "cancelled")
+        self.assertEqual(
+            booking.calendar_event_id, was_on,
+            "a cancelled seat must stay where it was, not follow the slot")
+
+    def test_a_request_that_is_not_scheduled_moves_nothing(self):
+        """Choosing a slot before approving is not moving anybody."""
+        request = self._request(partner_id=self.partner.id)
+        first = self._event(days=33, name="Just considering")
+        request.occurrence_id = first.id
+        second = self._event(days=35, name="Changed my mind")
+
+        request.write({'occurrence_id': second.id})
+
+        self.assertEqual(request.status, "pending")
+        self.assertFalse(request.booking_id)
+        first.invalidate_recordset(); second.invalidate_recordset()
+        self.assertEqual(first.booked_seats, 0)
+        self.assertEqual(second.booked_seats, 0)
+
+    # -- one open request at a time ----------------------------------------
+
+    def test_a_second_request_is_refused_while_one_is_open(self):
+        """She asked yesterday and asked again today: the studio then has two
+        rows for one person and no way to tell which she meant."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Asked Twice", "email": "asked.twice@example.invalid"})
+        self._request(partner_id=partner.id, status="pending")
+
+        self.assertTrue(
+            TR._open_request_for(partner),
+            "the first request has to count as open")
+
+    def test_a_finished_request_does_not_block_a_new_one(self):
+        """Declined and scheduled are finished - somebody whose trial has
+        been and gone may ask again."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Asked Before", "email": "asked.before@example.invalid"})
+        req = self._request(partner_id=partner.id, status="pending")
+        self._decline(req, "No space that week.")
+
+        self.assertFalse(
+            TR._open_request_for(partner),
+            "a declined request must not block her from asking again")
+
+    def test_the_open_check_is_per_student_not_per_discipline_by_default(self):
+        """Home offers one trial, so any open request hides it; the shop asks
+        per discipline because its cards are per discipline."""
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "One Discipline", "email": "one.disc@example.invalid"})
+        self._request(partner_id=partner.id, status="pending",
+                      class_interest="barre")
+
+        self.assertTrue(TR._open_request_for(partner))
+        self.assertTrue(TR._open_request_for(partner, "barre"))
+        self.assertFalse(
+            TR._open_request_for(partner, "reformer"),
+            "an open Barre request must not silence the Reformer card")
+
+    def test_nobody_with_no_request_is_blocked(self):
+        TR = self.env["fitness.trial.request"]
+        partner = self.env["res.partner"].create(
+            {"name": "Never Asked", "email": "never.asked@example.invalid"})
+        self.assertFalse(TR._open_request_for(partner))

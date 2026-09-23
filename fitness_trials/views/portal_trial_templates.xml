@@ -153,6 +153,12 @@
                      studio can still take a request and sell her the class,
                      and hiding it would leave her on a page with nothing on
                      it and no explanation. -->
+                <t t-if="trial_request_pending">
+                    <div class="alert alert-info small mb-3" role="alert">
+                        Your trial request is already with the studio. We will be in touch shortly - there is no need to send another.
+                    </div>
+                </t>
+
                 <t t-if="trial_already_used">
                     <div class="alert alert-warning small mb-3" role="alert">
                         You have already used your free trial class. It is one per student, Barre or Reformer. You can still ask, and the studio will tell you what a class costs.
