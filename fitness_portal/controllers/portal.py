@@ -154,8 +154,20 @@ class FitnessStudentPortal(http.Controller):
         _trial_post = request.env['fitness.news.post'].search(
             [('cta_url', '!=', False)], order='sequence asc, id asc', limit=1
         )
+        # Gated on the same rule as trial_offer_url below. This is the second,
+        # quieter trial CTA and it was gated on nothing at all - so a student
+        # who had already asked saw "Book a Free Trial" sitting directly above
+        # the line telling her the request was with the studio - one inviting
+        # her to ask, the other saying she already had. It opens the trial news
+        # post rather than the form, so it is a contradiction rather than a
+        # second way in, but it is the contradiction 68e5314 set out to remove
+        # and it closed only the loud offer. Found by looking at the rendered
+        # page, which is the only place the two appear together.
+        _trial_open = (self._trial_offer_open()
+                       and not self._trial_entitlement_used(partner)
+                       and not self._pending_trial_request(partner))
         trial_post_url = (('/my/news/%d?back=/my/home' % _trial_post.id)
-                          if _trial_post else False)
+                          if (_trial_post and _trial_open) else False)
 
         credit_pools = self._trial_pool_appended(partner, self._credit_pools(partner.id))
 
@@ -1347,10 +1359,14 @@ class FitnessStudentPortal(http.Controller):
         # invited a second request as though the first had not happened. Asked
         # per discipline, because that is what a request is for - an open
         # Barre request must not silence the Reformer card, or the reverse.
+        # Per student, not per discipline. A student with a Reformer request
+        # still open could open the Barre card, fill the whole form in and
+        # only be refused at submit - the form and /trial/submit have always
+        # asked per student. The card now says what the form will say.
         pending_trial_ids = frozenset(
             p.id for p in products
             if self._is_trial_product(p)
-            and self._pending_trial_request(partner, p.fitness_class_type))
+            and self._pending_trial_request(partner))
 
         pkg_meta = {}
         for p in products:
@@ -1614,12 +1630,14 @@ class FitnessStudentPortal(http.Controller):
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)
                                 if self._is_trial_product(product) else None),
-            # Same rule as the shop grid: while the studio still has an
-            # open request from this student in this discipline, the product
-            # page says so rather than offering to take another one.
+            # Same rule as the shop grid: while the studio still has any
+            # open request from this student, the product page says so rather
+            # than offering to take another one. Asked per student and not
+            # per discipline, because the form behind the button refuses per
+            # student - offering Barre to somebody with a Reformer request
+            # open only walks them into a refusal after they have typed.
             'trial_pending':   bool(self._is_trial_product(product)
-                                    and self._pending_trial_request(
-                                        partner, product.fitness_class_type)),
+                                    and self._pending_trial_request(partner)),
             'lbl_trial_pending': _('Request sent'),
             'free_claimed':    (self._is_free_for(partner, product)
                                 and self._free_already_claimed(partner, product)),
@@ -2033,9 +2051,13 @@ class FitnessStudentPortal(http.Controller):
 
         Pending or contacted, not scheduled or declined: those are finished,
         and a student whose trial has been and gone may ask for another.
-        Narrowed to one discipline when asked, because the shop asks on
-        behalf of a particular card - a Barre request says nothing about
-        whether the Reformer card should still be offered.
+
+        Narrowing to one discipline is still possible and nothing asks for it
+        now. The shop used to, on the reasoning that a Barre request says
+        nothing about the Reformer card - but the form behind both cards
+        refuses per student, so the Reformer card was opening a form that
+        would not take the answer. A card that leads somewhere the student
+        cannot finish is worse than one that says why.
         """
         # The model owns the question now, so the trial form and this page
         # cannot drift apart on what counts as still open.

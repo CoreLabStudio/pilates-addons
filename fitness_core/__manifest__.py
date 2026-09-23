@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – CoreLab Studio',
-    'version': '19.0.2.6.64',
+    'version': '19.0.2.6.65',
     'category': 'Services',
     'summary': 'Core models for CoreLab Studio - Pilates & Barre',
     'author': 'Core Lab Studio, S.L.',

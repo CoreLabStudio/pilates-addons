@@ -15,3 +15,4 @@ from . import test_subscription_payment
 from . import test_verify_student
 from . import test_email_verification
 from . import test_desk_sale
+from . import test_shop_trial_pending
