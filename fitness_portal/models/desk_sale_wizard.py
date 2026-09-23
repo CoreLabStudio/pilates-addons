@@ -143,6 +143,7 @@ class FitnessDeskSaleWizard(models.TransientModel):
         invoice.action_post()
         _logger.info("[DESK SALE] invoice %s posted for order %s (%.2f)",
                      invoice.name, order.name, invoice.amount_total)
+        self._email_invoice(invoice)
 
         # sudo throughout: a fitness manager is not an accounting user and
         # cannot read a journal, let alone register a payment. Taking cash is
@@ -171,6 +172,56 @@ class FitnessDeskSaleWizard(models.TransientModel):
                 "[DESK SALE] could not register the cash payment for %s",
                 invoice.name)
         return invoice
+
+    def _email_invoice(self, invoice):
+        """Mail the invoice, the way an online purchase mails it.
+
+        Posting does not send anything. Online, the mail comes from
+        sale's `send_invoice_cron`, and that cron searches **payment
+        transactions**:
+
+            self.search([('state', '=', 'done'),
+                         ('is_post_processed', '=', True), ...])._send_invoice()
+
+        A cash sale has no transaction, so it can never be selected - not on
+        posting and not later. f34c389 said posting "is what mails it, through
+        the action_post override in fitness_notifications"; that override
+        creates an in-app notification, not an email. So the cash buyer got a
+        correct invoice she was never sent, which is the inconsistency that
+        commit set out to remove, one step further along.
+
+        Sent here through the same helper and the same configured template the
+        online path uses, so there is one invoice mail in the system rather
+        than a second one that drifts. Never allowed to raise: the money is in
+        the till and the invoice is posted, and a mail-server problem must not
+        undo either.
+        """
+        if not invoice or invoice.state != 'posted':
+            return
+        try:
+            to_send = invoice.filtered(
+                lambda i: not i.is_move_sent and i._is_ready_to_be_sent())
+            if not to_send:
+                _logger.info("[DESK SALE] invoice %s was already sent",
+                             invoice.name)
+                return
+            send_context = {'allow_raising': False, 'allow_fallback_pdf': True}
+            template_id = self.env['ir.config_parameter'].sudo().get_param(
+                'sale.default_invoice_email_template', False)
+            if template_id:
+                template = self.env['mail.template'].sudo().browse(
+                    int(template_id))
+                if template.exists():
+                    send_context['mail_template'] = template
+            to_send.is_move_sent = True
+            self.env['account.move.send'].sudo()._generate_and_send_invoices(
+                to_send, **send_context)
+            _logger.info("[DESK SALE] invoice %s emailed to %s",
+                         invoice.name, invoice.partner_id.email or '(no email)')
+        except Exception:
+            _logger.exception(
+                "[DESK SALE] could not email invoice %s - it is posted and "
+                "the sale stands", invoice.name)
 
     def action_create_sale(self):
         self.ensure_one()

@@ -209,6 +209,47 @@ class TestDeskSale(TransactionCase):
                          "a draft invoice is not sent and not counted")
         self.assertAlmostEqual(inv.amount_total, order.amount_total, places=2)
 
+    def test_a_cash_invoice_is_actually_sent_to_the_student(self):
+        """Posted is not sent, and the student never got the invoice.
+
+        Online, the mail comes from sale's send_invoice_cron, which searches
+        payment transactions - a cash sale has none, so it could never be
+        picked up, on posting or later. The invoice was correct and silent.
+        is_move_sent is what Odoo itself marks when an invoice goes out, so it
+        is what this asserts rather than counting mail rows, which depend on a
+        mail server being configured.
+        """
+        before = self.env["mail.mail"].sudo().search([]).ids
+        order = self._order_from(self._wizard().action_create_sale())
+        inv = order.invoice_ids[:1]
+        self.assertTrue(inv, "no invoice to send")
+
+        # is_move_sent alone would be asserting a flag this fix sets itself,
+        # which would still pass if nothing were actually mailed. The mail is
+        # what the student receives, so the mail is what this asserts.
+        new_mails = self.env["mail.mail"].sudo().search(
+            [("id", "not in", before)])
+        invoice_mails = new_mails.filtered(
+            lambda m: self.student.partner_id in m.recipient_ids)
+        self.assertTrue(
+            invoice_mails,
+            "the invoice was posted but nothing was mailed - the cash buyer "
+            "gets a document she is never sent, where an online buyer is "
+            "emailed it")
+        self.assertTrue(
+            any(inv.name in (m.subject or "") for m in invoice_mails),
+            "a mail went out but it does not name the invoice")
+        self.assertTrue(
+            invoice_mails.attachment_ids,
+            "the invoice mail carries no document")
+        self.assertTrue(inv.is_move_sent, "the invoice is not marked as sent")
+
+    def test_a_free_grant_sends_nothing_because_it_raises_nothing(self):
+        """A gift has no invoice, so there is nothing to send either."""
+        order = self._order_from(self._wizard(
+            payment_method="free", reason="Her sister.").action_create_sale())
+        self.assertFalse(order.invoice_ids)
+
     def test_a_free_grant_raises_no_invoice(self):
         """It is a gift at zero, like the free trials - 78 of which carry no
         invoice and correctly so."""
