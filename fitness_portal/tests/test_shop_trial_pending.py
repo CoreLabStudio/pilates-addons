@@ -111,6 +111,17 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
         rather than the label, because the label is translated and the page
         renders in the studio's language, not the reader's.
         """
+        # Home only carries this CTA when a news post with a cta_url exists.
+        # The studio's database has one; a fresh build does not, so the odoo.sh
+        # main build failed on the guard below rather than on the gate. The
+        # test owns the post now, so the precondition holds on any database.
+        self.env["fitness.news.post"].create({
+            "title": "Your first class is on us",
+            "cta_url": "/my/studio",
+            "cta_label": "Book a Free Trial",
+            "sequence": 1,
+        })
+
         before = self._page("/my/home")
         self.assertIn(
             "mv-home-cta--ghost", before,
