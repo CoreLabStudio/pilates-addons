@@ -2384,6 +2384,17 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
    hero keep the hero's padding and do not end up on 40px. Inset with margin,
    like .mv-home-cta below, so the box edge is the visual edge. */
 .mv-app > .mv-home-sub { margin: 5px 20px 0; }
+/* The pending-trial note stands where the trial CTA stood, so it is a direct
+   child of .mv-app and missed the hero's 20px exactly as .mv-home-sub above
+   did - flush to the screen edge with every other line inset beside it. Same
+   remedy: inset with margin, so the box edge is the visual edge. It replaces
+   a button, so it takes the button's 16px top rather than the 5px a
+   subtitle uses. */
+.mv-home-note {
+  font-size: 0.84rem;
+  color: var(--mv-muted);
+  margin: 16px 20px 0;
+}
 .mv-home-cta {
   display: block;
   margin: 16px 20px 0;

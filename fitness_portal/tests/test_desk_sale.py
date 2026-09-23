@@ -209,6 +209,174 @@ class TestDeskSale(TransactionCase):
                          "a draft invoice is not sent and not counted")
         self.assertAlmostEqual(inv.amount_total, order.amount_total, places=2)
 
+    def test_a_cash_invoice_is_actually_sent_to_the_student(self):
+        """Posted is not sent, and the student never got the invoice.
+
+        Online, the mail comes from sale's send_invoice_cron, which searches
+        payment transactions - a cash sale has none, so it could never be
+        picked up, on posting or later. The invoice was correct and silent.
+        is_move_sent is what Odoo itself marks when an invoice goes out, so it
+        is what this asserts rather than counting mail rows, which depend on a
+        mail server being configured.
+        """
+        before = self.env["mail.mail"].sudo().search([]).ids
+        order = self._order_from(self._wizard().action_create_sale())
+        inv = order.invoice_ids[:1]
+        self.assertTrue(inv, "no invoice to send")
+
+        # is_move_sent alone would be asserting a flag this fix sets itself,
+        # which would still pass if nothing were actually mailed. The mail is
+        # what the student receives, so the mail is what this asserts.
+        new_mails = self.env["mail.mail"].sudo().search(
+            [("id", "not in", before)])
+        invoice_mails = new_mails.filtered(
+            lambda m: self.student.partner_id in m.recipient_ids)
+        self.assertTrue(
+            invoice_mails,
+            "the invoice was posted but nothing was mailed - the cash buyer "
+            "gets a document she is never sent, where an online buyer is "
+            "emailed it")
+        self.assertTrue(
+            any(inv.name in (m.subject or "") for m in invoice_mails),
+            "a mail went out but it does not name the invoice")
+        self.assertTrue(
+            invoice_mails.attachment_ids,
+            "the invoice mail carries no document")
+        self.assertTrue(inv.is_move_sent, "the invoice is not marked as sent")
+
+    def test_a_free_grant_sends_nothing_because_it_raises_nothing(self):
+        """A gift has no invoice, so there is nothing to send either."""
+        order = self._order_from(self._wizard(
+            payment_method="free", reason="Her sister.").action_create_sale())
+        self.assertFalse(order.invoice_ids)
+
+    def test_the_gift_products_are_not_on_the_desk_picker(self):
+        """The studio's two 0.00 courtesy products are for giving a class
+        away from the Roster, not for selling at the desk.
+
+        3deca50 kept them out of all three shop tabs and said why: these
+        domains never asked about sale_ok, so marking them unsellable was
+        never going to be enough. This picker was the screen that fix did not
+        reach, so both sat in a cash-sale dropdown.
+        """
+        domain = self.env["fitness.desk.sale.wizard"]._fields["product_id"].domain
+        offered = self.env["product.template"].search(domain)
+
+        courtesy = self.env["product.template"].search([
+            ("fitness_is_courtesy", "=", True)])
+        self.assertTrue(
+            courtesy,
+            "fixture is wrong: no courtesy products exist, so this test "
+            "could pass without the exclusion working")
+        self.assertFalse(
+            offered & courtesy,
+            "a gift product can be picked in the cash-sale wizard: %s"
+            % (offered & courtesy).mapped("name"))
+        self.assertIn(
+            self.pack, offered,
+            "the exclusion has taken ordinary packs out with it")
+
+    # ── Selling a membership at the desk ──────────────────────────────────
+
+    def _membership(self):
+        return self.env["product.template"].create({
+            "name": "Desk membership",
+            "list_price": 95.0,
+            "type": "service",
+            "fitness_is_subscription_plan": True,
+            # Both flags, because a real membership carries both: the studio's
+            # twelve all set recurring_invoice in their data records, and Odoo
+            # refuses to confirm an order that has a plan but no recurring
+            # product - "add a recurring product or remove the recurring
+            # plan". A fixture with only fitness_is_subscription_plan is not a
+            # membership, it is a product that looks like one.
+            "recurring_invoice": True,
+            "fitness_class_type": "barre",
+            "fitness_session_type": "group",
+            "weekly_class_allowance": 2,
+        })
+
+    def _sell_membership(self, plan, amount=None):
+        product = self._membership()
+        wiz = self.env["fitness.desk.sale.wizard"].with_user(self.manager).create({
+            "partner_id": self.student.partner_id.id,
+            "product_id": product.id,
+            "plan_id": plan.id,
+            "payment_method": "cash",
+            "amount_paid": amount if amount is not None else 0.0,
+        })
+        if amount is None:
+            wiz._onchange_product_id()
+            wiz._onchange_plan_id()
+        return product, wiz
+
+    def test_a_membership_can_be_sold_at_the_desk(self):
+        """It could not be, before: the picker only offered packs."""
+        month = self.env.ref("sale_subscription.subscription_plan_month")
+        product, wiz = self._sell_membership(month)
+        order = self._order_from(wiz.action_create_sale())
+
+        self.assertTrue(order, "no order was created")
+        self.assertEqual(order.state, "sale")
+        self.assertTrue(
+            order.is_subscription,
+            "the order is not a subscription, so nothing will ever renew it")
+        self.assertEqual(
+            order.plan_id, month,
+            "the order is not on the plan the desk sold")
+
+    def test_a_quarterly_membership_takes_three_months_of_money(self):
+        """The fault on record: 585.00 sold, 195.00 billed, every quarter."""
+        quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
+        product, wiz = self._sell_membership(quarter)
+
+        self.assertAlmostEqual(
+            wiz.normal_price, 285.0, places=2,
+            msg="the desk shows one month's price for a three-month commitment")
+        self.assertAlmostEqual(
+            wiz.amount_paid, 285.0, places=2,
+            msg="the cash prefill is one month for a three-month commitment")
+
+    def test_the_cash_taken_is_not_multiplied_again(self):
+        """The manager types the money in the till for the whole sale."""
+        quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
+        product, wiz = self._sell_membership(quarter, amount=250.0)
+        order = self._order_from(wiz.action_create_sale())
+
+        self.assertAlmostEqual(
+            order.amount_total, 250.0, places=2,
+            msg="the order does not total the cash actually taken")
+
+    def test_a_first_monthly_membership_carries_the_matricula(self):
+        """Checkout charges it; the desk skipped it entirely before."""
+        month = self.env.ref("sale_subscription.subscription_plan_month")
+        matricula = self.env.ref("fitness_subscriptions.product_matricula")
+        product, wiz = self._sell_membership(month)
+        order = self._order_from(wiz.action_create_sale())
+
+        self.assertIn(
+            matricula.product_variant_ids[:1],
+            order.order_line.mapped("product_id"),
+            "the registration fee is missing from a first monthly membership")
+
+    def test_three_months_waives_the_matricula(self):
+        quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
+        matricula = self.env.ref("fitness_subscriptions.product_matricula")
+        product, wiz = self._sell_membership(quarter)
+        order = self._order_from(wiz.action_create_sale())
+
+        self.assertNotIn(
+            matricula.product_variant_ids[:1],
+            order.order_line.mapped("product_id"),
+            "the fee was charged on a commitment that waives it")
+
+    def test_a_pack_is_still_sold_with_no_plan(self):
+        """The ordinary case must not have acquired a billing period."""
+        order = self._order_from(self._wizard().action_create_sale())
+        self.assertFalse(
+            order.is_subscription,
+            "a pack became a subscription")
+
     def test_a_free_grant_raises_no_invoice(self):
         """It is a gift at zero, like the free trials - 78 of which carry no
         invoice and correctly so."""

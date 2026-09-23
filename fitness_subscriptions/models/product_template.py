@@ -90,3 +90,125 @@ class ProductTemplate(models.Model):
     # Discipline restriction reuses the same two-field model as fitness_packages
     # (fitness_class_type + fitness_session_type, defined on product.template
     # by the fitness_packages module) — no new discipline field is introduced.
+
+    # ── Purchase shape: months, matrícula, and the lines that follow ────────
+    #
+    # These were controller methods on fitness_portal, reachable only from a
+    # web request. The desk wizard could not call them, so it sold a pack by
+    # calling fitness_sale_line_vals() directly - which meant it applied no
+    # months multiplier and never charged the matrícula. Harmless while the
+    # desk sold only packs; wrong the moment it sells a membership, because a
+    # Trimestral sold there would charge one month of a three-month
+    # commitment. That is the shape of the 585.00-billed-as-195.00 fault
+    # already recorded in the checkout code.
+    #
+    # Moved here so checkout and the desk build a purchase from the same
+    # rules. _order_lines_for's own docstring already said one place builds
+    # them; this is that place.
+
+    MATRICULA_WAIVED_FROM_MONTHS = 3
+
+    @staticmethod
+    def fitness_plan_months(plan):
+        """How many months one billing period covers.
+
+        Weeks and days are rounded down deliberately: they are not commitment
+        periods the studio sells, and a plan that does not reach a month must
+        not accidentally clear the three-month waiver.
+        """
+        if not plan:
+            return 1
+        # sudo to read: sale.subscription.plan is a Sales model, and a fitness
+        # manager is not a Sales user. Reading how long a period lasts is not
+        # a permission the studio needs to hold - it is a property of what she
+        # is already authorised to sell. Left unsudoed this raised AccessError
+        # the moment a manager picked a membership at the desk.
+        plan = plan.sudo()
+        value = plan.billing_period_value or 1
+        unit = plan.billing_period_unit
+        if unit == 'year':
+            return value * 12
+        if unit == 'month':
+            return value
+        if unit == 'week':
+            return (value * 7) // 30
+        if unit == 'day':
+            return value // 30
+        return 1
+
+    def fitness_matricula_due(self, partner, plan=None):
+        """The registration fee product when it should be charged, else empty.
+
+        Two conditions, both the studio's: it is a student's first membership,
+        and the commitment is shorter than three months. Committing to three
+        months or more waives it.
+        """
+        empty = self.env['product.template'].browse()
+        self.ensure_one()
+        if not self.fitness_is_subscription_plan:
+            return empty
+        matricula = self.env.ref('fitness_subscriptions.product_matricula',
+                                 raise_if_not_found=False)
+        if not matricula or not matricula.sudo().active:
+            return empty
+        if self.fitness_plan_months(plan) >= self.MATRICULA_WAIVED_FROM_MONTHS:
+            return empty
+        if self.fitness_has_paid_membership_before(partner):
+            return empty
+        return matricula.sudo()
+
+    @staticmethod
+    def fitness_has_paid_membership_before(partner):
+        """Has this student ever held a membership?
+
+        Read from what actually happened rather than a flag somebody has to
+        remember to set: any confirmed order carrying a subscription plan
+        counts, whether it was made in the portal, the back office or an
+        import. Drafts do not - the checkout reuses them, so an abandoned
+        attempt must not make a first membership look like a second and skip
+        the fee. The order being built right now is still draft when this is
+        asked, which is what stops it excluding itself.
+        """
+        if not partner:
+            return False
+        return bool(partner.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id.product_tmpl_id.fitness_is_subscription_plan', '=', True),
+        ], limit=1))
+
+    def fitness_order_line_vals(self, partner, plan=None, period_price=None,
+                                total_price=None):
+        """The lines this purchase should carry, priced.
+
+        `period_price` is the price of ONE billing period - the student price,
+        which the trial rule can change - and the months multiplier is applied
+        to it here, because a quarterly membership is three months charged at
+        once.
+
+        `total_price` replaces that calculation outright and is what the desk
+        passes: a manager types the cash actually taken for the whole sale,
+        not a price per month.
+        """
+        self.ensure_one()
+        variant = self.product_variant_ids[:1]
+        if not variant:
+            return []
+        if total_price is None:
+            base = (period_price if period_price is not None
+                    else self.fitness_effective_price())
+            total_price = base * self.fitness_plan_months(plan)
+        lines = self.fitness_sale_line_vals(total_price)
+        matricula = self.fitness_matricula_due(partner, plan)
+        if matricula:
+            mat_variant = matricula.product_variant_ids[:1]
+            if mat_variant:
+                mat_base, _total = matricula.fitness_taxed_price(
+                    matricula.fitness_effective_price(), partner,
+                    price_includes_tax=True)
+                lines.append({
+                    'product_id': mat_variant.id,
+                    'product_uom_qty': 1,
+                    'price_unit': mat_base,
+                })
+        return lines

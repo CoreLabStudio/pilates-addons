@@ -154,8 +154,20 @@ class FitnessStudentPortal(http.Controller):
         _trial_post = request.env['fitness.news.post'].search(
             [('cta_url', '!=', False)], order='sequence asc, id asc', limit=1
         )
+        # Gated on the same rule as trial_offer_url below. This is the second,
+        # quieter trial CTA and it was gated on nothing at all - so a student
+        # who had already asked saw "Book a Free Trial" sitting directly above
+        # the line telling her the request was with the studio - one inviting
+        # her to ask, the other saying she already had. It opens the trial news
+        # post rather than the form, so it is a contradiction rather than a
+        # second way in, but it is the contradiction 68e5314 set out to remove
+        # and it closed only the loud offer. Found by looking at the rendered
+        # page, which is the only place the two appear together.
+        _trial_open = (self._trial_offer_open()
+                       and not self._trial_entitlement_used(partner)
+                       and not self._pending_trial_request(partner))
         trial_post_url = (('/my/news/%d?back=/my/home' % _trial_post.id)
-                          if _trial_post else False)
+                          if (_trial_post and _trial_open) else False)
 
         credit_pools = self._trial_pool_appended(partner, self._credit_pools(partner.id))
 
@@ -1347,10 +1359,21 @@ class FitnessStudentPortal(http.Controller):
         # invited a second request as though the first had not happened. Asked
         # per discipline, because that is what a request is for - an open
         # Barre request must not silence the Reformer card, or the reverse.
+        # Per student, not per discipline. A student with a Reformer request
+        # still open could open the Barre card, fill the whole form in and
+        # only be refused at submit - the form and /trial/submit have always
+        # asked per student. The card now says what the form will say.
+        # Only while the trial is still hers to claim. These products are
+        # also the only single-class products the studio sells, so gating them
+        # on an open request alone left a student who had already used her
+        # trial unable to buy a class at all - not the free one, which is
+        # right, and not the paid one either, which is not. An open request
+        # says nothing about whether she may buy an ordinary class.
         pending_trial_ids = frozenset(
             p.id for p in products
             if self._is_trial_product(p)
-            and self._pending_trial_request(partner, p.fitness_class_type))
+            and not self._trial_entitlement_used(partner)
+            and self._pending_trial_request(partner))
 
         pkg_meta = {}
         for p in products:
@@ -1463,6 +1486,11 @@ class FitnessStudentPortal(http.Controller):
             'free_ids':                 free_ids,
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
+            # Per student: the trial products are the single-class
+            # products too, and what they are called depends on
+            # whether her free trial is still hers to take.
+            'product_labels':           {p.id: self._shop_label(partner, p)
+                                        for p in products},
             'lbl_trial_pending':        _('Request sent'),
             'student_price':            student_price,
             # Trials claimable right now, and where their card points. Kept
@@ -1595,6 +1623,7 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_package_detail', {
             'product':         product,
+            'product_label':   self._shop_label(partner, product),
             'meta':            meta,
             'is_subscription': is_sub,
             'back_url':        ('/my/packages?tab=subscriptions' if is_sub
@@ -1614,12 +1643,15 @@ class FitnessStudentPortal(http.Controller):
             # trial is already spent. See _student_price.
             'price_override':  (self._student_price(partner, product)
                                 if self._is_trial_product(product) else None),
-            # Same rule as the shop grid: while the studio still has an
-            # open request from this student in this discipline, the product
-            # page says so rather than offering to take another one.
+            # Same rule as the shop grid: while the studio still has any
+            # open request from this student, the product page says so rather
+            # than offering to take another one. Asked per student and not
+            # per discipline, because the form behind the button refuses per
+            # student - offering Barre to somebody with a Reformer request
+            # open only walks them into a refusal after they have typed.
             'trial_pending':   bool(self._is_trial_product(product)
-                                    and self._pending_trial_request(
-                                        partner, product.fitness_class_type)),
+                                    and not self._trial_entitlement_used(partner)
+                                    and self._pending_trial_request(partner)),
             'lbl_trial_pending': _('Request sent'),
             'free_claimed':    (self._is_free_for(partner, product)
                                 and self._free_already_claimed(partner, product)),
@@ -1809,6 +1841,7 @@ class FitnessStudentPortal(http.Controller):
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_checkout_payment', {
             'product':            product,
+            'product_label':      self._shop_label(partner, product),
             **self._checkout_totals(product, partner, selected_plan),
             'is_subscription':    is_subscription,
             'plan_options':       self._plan_options(
@@ -2033,9 +2066,13 @@ class FitnessStudentPortal(http.Controller):
 
         Pending or contacted, not scheduled or declined: those are finished,
         and a student whose trial has been and gone may ask for another.
-        Narrowed to one discipline when asked, because the shop asks on
-        behalf of a particular card - a Barre request says nothing about
-        whether the Reformer card should still be offered.
+
+        Narrowing to one discipline is still possible and nothing asks for it
+        now. The shop used to, on the reasoning that a Barre request says
+        nothing about the Reformer card - but the form behind both cards
+        refuses per student, so the Reformer card was opening a form that
+        would not take the answer. A card that leads somewhere the student
+        cannot finish is worse than one that says why.
         """
         # The model owns the question now, so the trial form and this page
         # cannot drift apart on what counts as still open.
@@ -2813,23 +2850,10 @@ class FitnessStudentPortal(http.Controller):
     def _plan_months(plan):
         """How many months one billing period covers.
 
-        Weeks and days are rounded down deliberately: they are not commitment
-        periods the studio sells, and a plan that does not reach a month must
-        not accidentally clear the three-month waiver.
+        The rule lives on product.template so the desk wizard can reach it
+        too; this stays as the name the rest of this controller already uses.
         """
-        if not plan:
-            return 1
-        value = plan.billing_period_value or 1
-        unit = plan.billing_period_unit
-        if unit == 'year':
-            return value * 12
-        if unit == 'month':
-            return value
-        if unit == 'week':
-            return (value * 7) // 30
-        if unit == 'day':
-            return value // 30
-        return 1
+        return request.env['product.template'].fitness_plan_months(plan)
 
     # ── The free trial: one per student, either discipline ───────────────
     #
@@ -2877,6 +2901,36 @@ class FitnessStudentPortal(http.Controller):
 
     def _is_trial_product(self, product):
         return product.id in self._trial_products().ids
+
+    def _shop_label(self, partner, product):
+        """What this product is called for this student.
+
+        The two trial products are also the studio's only single-class
+        products: "Barre Single Class" and "Reformer Single" are archived on
+        purpose, and 12.00 / 18.00 are the real single-class prices. So a
+        student whose free trial is gone was shown a card reading "Clase de
+        prueba" - trial class - for a class she has to pay for. One of them
+        reported it as "I bought a credit to try a Barre class", which is
+        exactly what the card told her she was doing.
+
+        Renamed for her rather than on the record, because the same product
+        is still a genuine free trial for somebody who has not used hers.
+        """
+        # Bound from the request, like the other 31 methods here - this
+        # controller does not import _ at module level, and the first version
+        # of this helper raised NameError and served a 500 on every product
+        # page. Translated per request, so the label follows the reader.
+        _ = request.env._
+        if not self._is_trial_product(product):
+            return product.name
+        if not self._trial_entitlement_used(partner):
+            return product.name
+        discipline = product.fitness_class_type
+        if discipline == 'barre':
+            return _('Barre - single class')
+        if discipline == 'reformer':
+            return _('Reformer - single class')
+        return product.name
 
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?
@@ -2940,12 +2994,8 @@ class FitnessStudentPortal(http.Controller):
         the fee. The order being built right now is still draft when this is
         asked, which is what stops it excluding itself.
         """
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_id.partner_id', '=', partner.id),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('product_id.product_tmpl_id.fitness_is_subscription_plan', '=', True),
-        ], limit=1)
-        return bool(lines)
+        return request.env['product.template'].fitness_has_paid_membership_before(
+            partner)
 
     def _matricula_due(self, partner, product, plan):
         """The registration fee product when it should be charged, else empty.
@@ -2954,17 +3004,7 @@ class FitnessStudentPortal(http.Controller):
         and the commitment is shorter than three months. Committing to three
         months or more waives it.
         """
-        empty = request.env['product.template'].browse()
-        if not product.fitness_is_subscription_plan:
-            return empty
-        matricula = self._matricula_product()
-        if not matricula or not matricula.active:
-            return empty
-        if self._plan_months(plan) >= self.MATRICULA_WAIVED_FROM_MONTHS:
-            return empty
-        if self._has_paid_membership_before(partner):
-            return empty
-        return matricula
+        return product.sudo().fitness_matricula_due(partner, plan)
 
     def _membership_plans(self, product):
         """The billing plans a student may choose for this membership.
@@ -3222,31 +3262,14 @@ class FitnessStudentPortal(http.Controller):
         helpers, so what the student was shown and what the order charges
         cannot drift apart.
         """
-        variant = product.product_variant_ids[:1]
-        if not variant:
-            return []
-        months = self._plan_months(plan) if plan else 1
-        # The pack itself - one line, or two when it grants two pools - is
-        # built on the product, so the desk wizard sells exactly what checkout
-        # sells. The price is still worked out here: the promotion price, not
-        # the list price, times the number of months the period covers, since
-        # a quarterly membership is three months charged at once. This is the
-        # number the student was shown and the number Stripe is asked for.
-        lines = product.fitness_sale_line_vals(
-            self._student_price(partner, product) * months)
-        matricula = self._matricula_due(partner, product, plan)
-        if matricula:
-            mat_variant = matricula.product_variant_ids[:1]
-            if mat_variant:
-                mat_base, _mat_total = self._taxed_price(
-                    matricula, matricula.fitness_effective_price(), partner,
-                    price_includes_tax=True)
-                lines.append({
-                    'product_id': mat_variant.id,
-                    'product_uom_qty': 1,
-                    'price_unit': mat_base,
-                })
-        return lines
+        # Built on the product, so the desk wizard sells exactly what checkout
+        # sells - it now calls the same method rather than a narrower one. The
+        # student price is still decided here, because the trial rule is a
+        # portal rule and depends on who is asking; the months multiplier and
+        # the matricula are the product's own and live with it.
+        return product.fitness_order_line_vals(
+            partner, plan=plan,
+            period_price=self._student_price(partner, product))
 
     def _create_order(self, partner, product, method, plan=None):
         """Return the draft sale order for this purchase, reusing an abandoned

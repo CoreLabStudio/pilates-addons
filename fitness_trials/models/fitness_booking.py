@@ -44,10 +44,12 @@ class FitnessBooking(models.Model):
         was moved that way and never heard about it. Whether to tell her is a
         separate question, but the records should agree either way.
 
-        fitness.booking deliberately has no write() override of its own, so
-        the wizard can move a seat without the booking rules firing. This adds
-        no rules - it reads the new event and syncs another model - so that
-        stays true.
+        fitness.booking had no write() override of its own when this was
+        written, and d132f6e added one: it recounts both events and tells the
+        student. super() reaches it, so that fix still runs underneath this -
+        do not stop calling super(), and do not duplicate the recount here.
+        This override adds no booking rules of its own; it reads the new event
+        and syncs another model.
         """
         moving = 'calendar_event_id' in vals
         # Collected before the write, while the bookings still point at the

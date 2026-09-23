@@ -35,11 +35,33 @@ class TestLegalDetails(HttpCase):
             ])],
         })
         cls.company = cls.env.company
-        # Write the details rather than assume the database carries them: a
-        # freshly built database has none, which is what made these fail on
-        # odoo.sh. What is under test here is the rendering, not the data.
-        from odoo.addons.fitness_core.company_defaults import apply_company_details
-        apply_company_details(cls.env)
+        # Write the details rather than assume the database carries them, and
+        # write them directly rather than through apply_company_details().
+        #
+        # That helper deliberately fills only fields that are still EMPTY, so
+        # a correction the studio makes in Settings is never reverted by a
+        # later deploy. Correct for a deploy, useless as a fixture: a build
+        # with demo data already has an address - "8000 Marina Blvd, Suite
+        # 300, Brisbane" - so the helper skipped the very fields asserted on
+        # below and left the demo address in place. It filled `vat`, which was
+        # empty, which is why the NIF assertions passed and the street ones
+        # did not. odoo.sh builds development branches with demo data.
+        #
+        # What is under test here is the rendering, so the fixture states the
+        # details outright.
+        from odoo.addons.fitness_core.company_defaults import (
+            COMPANY_DETAILS, COUNTRY_CODE, STATE_NAME)
+        vals = dict(COMPANY_DETAILS)
+        country = cls.env["res.country"].search(
+            [("code", "=", COUNTRY_CODE)], limit=1)
+        if country:
+            vals["country_id"] = country.id
+            state = cls.env["res.country.state"].search(
+                [("country_id", "=", country.id), ("name", "=", STATE_NAME)],
+                limit=1)
+            if state:
+                vals["state_id"] = state.id
+        cls.company.sudo().write(vals)
 
     def _terms(self):
         # the HTTP request reads from the database, so pending ORM writes have

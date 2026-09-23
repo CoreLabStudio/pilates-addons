@@ -20,6 +20,12 @@ class TestCancelReasonAndBulk(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+        # Same reason as test_manage_classes: the day summary counts the whole
+        # day, and on the studio's restore that is the studio's timetable.
+        cls.env["calendar.event"].search([
+            ("is_fitness_class", "=", True),
+            ("start", ">=", fields.Datetime.now()),
+        ]).active = False
         cls.student = cls.env["res.users"].create({
             "name": "Reason Student",
             "login": "reason.student@example.invalid",
@@ -126,7 +132,11 @@ class TestCancelReasonAndBulk(TransactionCase):
         # Through the onchange, the way the dialog itself loads: the lines are
         # built there, not by a compute, so creating the record alone leaves
         # an empty list.
-        wizard = self.env["fitness.class.bulk.cancel.wizard"].create({"day": day})
+        # English explicitly: day_summary is built with _(), and the studio's
+        # own database reads Spanish, so an assertion on English text would
+        # be an assertion about who is logged in.
+        wizard = self.env["fitness.class.bulk.cancel.wizard"].with_context(
+            lang="en_US").create({"day": day})
         wizard._onchange_day()
         return wizard
 

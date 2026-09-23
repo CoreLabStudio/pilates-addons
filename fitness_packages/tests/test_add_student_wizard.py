@@ -353,6 +353,26 @@ class TestCourtesyBooking(TransactionCase):
             [("partner_id", "=", self.student.id)], order="id desc", limit=1)
         self.assertEqual(order.amount_total, 0.0)
 
+    def test_the_confirmation_does_not_claim_a_gift_was_charged(self):
+        """The order said 0.00 and the dialog said 25.00.
+
+        The test above pins the order; nothing pinned the sentence the studio
+        actually reads, and it was built from the price box rather than from
+        the line. So giving a class away reported "charged 35.00" on an order
+        that reads nothing, and only somebody who opened the order would have
+        known which to believe.
+        """
+        event = self._group_class()
+        res = self._wizard(event, price=35.0).action_add()
+        message = res["params"]["message"]
+
+        self.assertNotIn(
+            "35", message,
+            "the confirmation still reports the price box for a free class")
+        order = self.env["sale.order"].search(
+            [("partner_id", "=", self.student.id)], order="id desc", limit=1)
+        self.assertIn(order.name, message, "the order is not named")
+
     def test_courtesy_products_are_not_in_the_shop(self):
         """A one-class package at zero euros would otherwise sit on the
         Classes tab, which is an invitation rather than a gift."""

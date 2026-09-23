@@ -29,8 +29,18 @@
           <group string="Who and what">
             <field name="partner_id" options="{'no_create_edit': True}"/>
             <field name="product_id" options="{'no_create': True}"/>
-            <field name="credits_granted" invisible="not product_id"/>
-            <field name="validity_days" invisible="not product_id"/>
+            <field name="is_membership" invisible="1"/>
+            <!-- Memberships only: a pack is credits with an expiry and has no
+                 billing period to choose. Required once it is shown, because
+                 the commitment decides both the price and whether the
+                 registration fee is charged. -->
+            <field name="plan_id" invisible="not is_membership"
+                   required="is_membership"
+                   options="{'no_create': True, 'no_open': True}"/>
+            <field name="credits_granted"
+                   invisible="not product_id or is_membership"/>
+            <field name="validity_days"
+                   invisible="not product_id or is_membership"/>
           </group>
 
           <group string="Money" invisible="payment_method != 'cash'">

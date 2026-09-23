@@ -31,9 +31,22 @@ class TestManageClassesBothWays(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+        # The day summary counts every class on the day, so on a restore of
+        # the studio's real calendar it reports the studio's 18 classes and
+        # not this test's one. Cleared so the day belongs to the test;
+        # TransactionCase rolls it back.
+        cls.env["calendar.event"].search([
+            ("is_fitness_class", "=", True),
+            ("start", ">=", fields.Datetime.now()),
+        ]).active = False
+        # The summaries under test are built with _(), so on a database whose
+        # users read Spanish these assertions were about the reader's
+        # language rather than the wizard. The studio's own restore is such a
+        # database.
         cls.manager = cls.env["res.users"].create({
             "name": "Manage Classes Manager",
             "login": "manage.classes@example.invalid",
+            "lang": "en_US",
             "group_ids": [(6, 0, [
                 cls.env.ref("base.group_user").id,
                 cls.env.ref("fitness_core.group_fitness_manager").id])],
