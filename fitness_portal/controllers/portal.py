@@ -1514,15 +1514,22 @@ class FitnessStudentPortal(http.Controller):
             # trial products is priced at zero for them. The note above the
             # cards is about that offer, so it is what the note hangs on.
             'trial_offered':            bool(set(student_price) & free_ids),
-            # Her free class is gone and the cards that were it are gone with
-            # it, so the Classes tab shows only the private and duo options -
-            # not empty, but with nothing ordinary on it and no reason given.
-            # Without this she reads a shop that looks broken, which is the
-            # same confusion this whole change set out to remove.
+            # Her trial entitlement is spent and the cards that were it are
+            # gone with it, so the Classes tab shows only the private and duo
+            # options - not empty, but with nothing ordinary on it and no
+            # reason given. Without this she reads a shop that looks broken,
+            # which is the same confusion this change set out to remove.
+            # The note says "trial classes", not "free class", deliberately:
+            # the trial is free only until 30 Sep 2026, and the studio may
+            # still gift a second one by hand from the back office. The word
+            # that stays true either way is "trial". It also points at a
+            # class as well as packs and memberships, because the privates
+            # left on the tab are real things she can still buy.
             'trial_spent':              self._trial_entitlement_used(partner),
-            'lbl_trial_spent':          _('You have already used your free '
-                                          'class. Choose a pack or a '
-                                          'membership to keep training.'),
+            'lbl_trial_spent':          _('You have already used your trial '
+                                          'classes. Choose a pack, a '
+                                          'membership or a class to keep '
+                                          'training.'),
             # Said once, above the two trial cards, because a student who takes
             # the wrong one has spent the only one they get.
             # Names the two products rather than the two disciplines. This

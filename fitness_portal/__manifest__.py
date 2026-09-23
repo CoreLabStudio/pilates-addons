@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.24.109',
+    'version': '19.0.1.24.111',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',

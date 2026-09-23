@@ -218,24 +218,24 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
         where to go instead."""
         before = self._page("/my/packages")
         self.assertNotIn(
-            "free class", before,
+            "already used your trial classes", before,
             "fixture is wrong: the note is showing before the trial is spent")
 
         self._spend_her_trial()
 
         after = self._page("/my/packages")
         self.assertIn(
-            "free class", after,
+            "already used your trial classes", after,
             "nothing explains why the single classes are gone")
         self.assertIn(
-            "pack or a membership", after,
+            "a membership or a class", after,
             "the note does not say where to go instead")
 
     def test_the_note_stays_off_the_other_tabs(self):
         """It explains the Classes tab, so it belongs only there."""
         self._spend_her_trial()
         packs = self._page("/my/packages?tab=packages")
-        self.assertNotIn("free class", packs)
+        self.assertNotIn("already used your trial classes", packs)
 
     def test_the_classes_tab_is_what_empties(self):
         """Worth stating outright, because it is the studio's decision made
