@@ -2835,23 +2835,10 @@ class FitnessStudentPortal(http.Controller):
     def _plan_months(plan):
         """How many months one billing period covers.
 
-        Weeks and days are rounded down deliberately: they are not commitment
-        periods the studio sells, and a plan that does not reach a month must
-        not accidentally clear the three-month waiver.
+        The rule lives on product.template so the desk wizard can reach it
+        too; this stays as the name the rest of this controller already uses.
         """
-        if not plan:
-            return 1
-        value = plan.billing_period_value or 1
-        unit = plan.billing_period_unit
-        if unit == 'year':
-            return value * 12
-        if unit == 'month':
-            return value
-        if unit == 'week':
-            return (value * 7) // 30
-        if unit == 'day':
-            return value // 30
-        return 1
+        return request.env['product.template'].fitness_plan_months(plan)
 
     # ── The free trial: one per student, either discipline ───────────────
     #
@@ -2962,12 +2949,8 @@ class FitnessStudentPortal(http.Controller):
         the fee. The order being built right now is still draft when this is
         asked, which is what stops it excluding itself.
         """
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_id.partner_id', '=', partner.id),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('product_id.product_tmpl_id.fitness_is_subscription_plan', '=', True),
-        ], limit=1)
-        return bool(lines)
+        return request.env['product.template'].fitness_has_paid_membership_before(
+            partner)
 
     def _matricula_due(self, partner, product, plan):
         """The registration fee product when it should be charged, else empty.
@@ -2976,17 +2959,7 @@ class FitnessStudentPortal(http.Controller):
         and the commitment is shorter than three months. Committing to three
         months or more waives it.
         """
-        empty = request.env['product.template'].browse()
-        if not product.fitness_is_subscription_plan:
-            return empty
-        matricula = self._matricula_product()
-        if not matricula or not matricula.active:
-            return empty
-        if self._plan_months(plan) >= self.MATRICULA_WAIVED_FROM_MONTHS:
-            return empty
-        if self._has_paid_membership_before(partner):
-            return empty
-        return matricula
+        return product.sudo().fitness_matricula_due(partner, plan)
 
     def _membership_plans(self, product):
         """The billing plans a student may choose for this membership.
@@ -3244,31 +3217,14 @@ class FitnessStudentPortal(http.Controller):
         helpers, so what the student was shown and what the order charges
         cannot drift apart.
         """
-        variant = product.product_variant_ids[:1]
-        if not variant:
-            return []
-        months = self._plan_months(plan) if plan else 1
-        # The pack itself - one line, or two when it grants two pools - is
-        # built on the product, so the desk wizard sells exactly what checkout
-        # sells. The price is still worked out here: the promotion price, not
-        # the list price, times the number of months the period covers, since
-        # a quarterly membership is three months charged at once. This is the
-        # number the student was shown and the number Stripe is asked for.
-        lines = product.fitness_sale_line_vals(
-            self._student_price(partner, product) * months)
-        matricula = self._matricula_due(partner, product, plan)
-        if matricula:
-            mat_variant = matricula.product_variant_ids[:1]
-            if mat_variant:
-                mat_base, _mat_total = self._taxed_price(
-                    matricula, matricula.fitness_effective_price(), partner,
-                    price_includes_tax=True)
-                lines.append({
-                    'product_id': mat_variant.id,
-                    'product_uom_qty': 1,
-                    'price_unit': mat_base,
-                })
-        return lines
+        # Built on the product, so the desk wizard sells exactly what checkout
+        # sells - it now calls the same method rather than a narrower one. The
+        # student price is still decided here, because the trial rule is a
+        # portal rule and depends on who is asking; the months multiplier and
+        # the matricula are the product's own and live with it.
+        return product.fitness_order_line_vals(
+            partner, plan=plan,
+            period_price=self._student_price(partner, product))
 
     def _create_order(self, partner, product, method, plan=None):
         """Return the draft sale order for this purchase, reusing an abandoned

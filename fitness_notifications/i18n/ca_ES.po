@@ -95,8 +95,8 @@ msgstr "La subscripció es renova en %d dies"
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
-msgid "Your %s plan renews on %s. No action needed."
-msgstr "El teu pla %s es renova el %s. No cal que facis res."
+msgid "Your %s plan reaches the end of its period on %s. You can renew it in the app, or pay at the studio."
+msgstr "El teu pla %s arriba al final del seu període el %s. El pots renovar a l'aplicació, o pagar a l'estudi."
 
 #. module: fitness_notifications
 #. odoo-python

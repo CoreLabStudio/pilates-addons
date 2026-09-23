@@ -33,9 +33,27 @@ class FitnessDeskSaleWizard(models.TransientModel):
         help="Who the credits are for.")
     product_id = fields.Many2one(
         'product.template', string='Pack', required=True,
-        domain=[('fitness_is_package', '=', True)],
-        help="The pack or class being sold. Only packs appear here: a "
-             "membership renews itself every month, and cash does not.")
+        # Courtesy excluded explicitly, not left to sale_ok. 3deca50 kept
+        # these two out of all three shop tabs for the same reason and in the
+        # same words - "these domains never asked about sale_ok, which is how
+        # two products sat in the shop unbuyable until somebody tried to buy
+        # one" - and this picker was the screen that fix did not reach. They
+        # are the studio's gift products at 0.00; a cash sale must not be able
+        # to pick one, and a gift is given from the Roster, not sold here.
+        domain=['|', ('fitness_is_package', '=', True),
+                     ('fitness_is_subscription_plan', '=', True),
+                ('fitness_is_courtesy', '=', False)],
+        help="The pack, class or membership being sold.")
+
+    # Memberships only. A pack has no billing period - it is credits with an
+    # expiry - so this stays empty for one and decides the commitment for the
+    # other. Quarterly is three months charged at once, and it is also what
+    # waives the registration fee, so picking it here is not a formality.
+    is_membership = fields.Boolean(compute='_compute_normal_price')
+    plan_id = fields.Many2one(
+        'sale.subscription.plan', string='Billing period',
+        help="How long the membership is committed for. Mensual bills every "
+             "month; Trimestral is three months, charged at once.")
 
     normal_price = fields.Monetary(
         string='Normal price', compute='_compute_normal_price',
@@ -66,21 +84,74 @@ class FitnessDeskSaleWizard(models.TransientModel):
     validity_days = fields.Integer(
         string='Valid for (days)', compute='_compute_normal_price')
 
-    @api.depends('product_id')
+    @api.depends('product_id', 'plan_id')
     def _compute_normal_price(self):
         for wiz in self:
             product = wiz.product_id
+            wiz.is_membership = bool(
+                product and product.fitness_is_subscription_plan)
+            # Times the months the period covers, or a Trimestral shows one
+            # month's price and the manager takes one month's money for a
+            # three-month commitment.
             wiz.normal_price = (
-                product.fitness_effective_price() if product else 0.0)
+                product.fitness_effective_price() * wiz._months()
+                if product else 0.0)
             wiz.credits_granted = product.fitness_class_count if product else 0
             wiz.validity_days = product.fitness_validity_days if product else 0
+
+    def _months(self):
+        """How many months this sale covers. One for anything without a plan."""
+        self.ensure_one()
+        if not (self.product_id and self.product_id.fitness_is_subscription_plan):
+            return 1
+        return self.env['product.template'].fitness_plan_months(
+            self._effective_plan())
+
+    def _effective_plan(self):
+        """The plan this sale is on: the one chosen, else the product's own.
+
+        Never left to whatever sale.subscription.plan happens to be first in
+        the table - checkout learned that the hard way, where search([],
+        limit=1) always returned Monthly and Yearly could not be bought at all.
+        """
+        self.ensure_one()
+        Plan = self.env['sale.subscription.plan'].sudo()
+        product = self.product_id
+        if not (product and product.fitness_is_subscription_plan):
+            return Plan.browse()
+        # sudo throughout: a fitness manager is not a Sales user and cannot
+        # read sale.subscription.plan. Selling what the studio authorises her
+        # to sell should not require Sales rights, and without this every
+        # membership sale raised AccessError on the plan's own fields.
+        if self.plan_id:
+            return self.plan_id.sudo()
+        own = product.sudo().fitness_subscription_plan_id
+        if own and own.sudo().active:
+            return own.sudo()
+        fallback = self.env.ref('sale_subscription.subscription_plan_month',
+                                raise_if_not_found=False)
+        return fallback.sudo() if fallback else Plan.browse()
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
         """Start from the real price, so the usual case is one click."""
         for wiz in self:
             if wiz.product_id:
-                wiz.amount_paid = wiz.product_id.fitness_effective_price()
+                if (wiz.product_id.fitness_is_subscription_plan
+                        and not wiz.plan_id):
+                    wiz.plan_id = wiz._effective_plan()
+                if not wiz.product_id.fitness_is_subscription_plan:
+                    wiz.plan_id = False
+                wiz.amount_paid = (
+                    wiz.product_id.fitness_effective_price() * wiz._months())
+
+    @api.onchange('plan_id')
+    def _onchange_plan_id(self):
+        """A longer commitment is a different price, and may drop the fee."""
+        for wiz in self:
+            if wiz.product_id and wiz.product_id.fitness_is_subscription_plan:
+                wiz.amount_paid = (
+                    wiz.product_id.fitness_effective_price() * wiz._months())
 
     @api.onchange('payment_method')
     def _onchange_payment_method(self):
@@ -114,114 +185,10 @@ class FitnessDeskSaleWizard(models.TransientModel):
             self.amount_paid or 0.0, self.partner_id)
 
     def _invoice_cash_sale(self, order):
-        """A cash sale gets the same invoice an online one gets.
-
-        Every paying order on this system is invoiced - all three of them, by
-        Odoo's own hook: a completed payment transaction calls
-        _invoice_sale_orders, which creates the invoice, and posting it is
-        what mails it to the student, through the action_post override in
-        fitness_notifications. Cash has no transaction, so none of that fires,
-        and a desk sale would have been the first paying customer to receive
-        no invoice - the exact inconsistency this wizard exists to avoid.
-
-        Done unconditionally rather than behind sale.automatic_invoice, which
-        gates the online path. That setting exists because a transaction may
-        not have completed; cash has, by definition - the money is in the till
-        before the order is written.
-
-        Payment is registered only into a cash journal. Posting cash into the
-        bank journal would say the money is in the bank when it is in a
-        drawer, and a wrong entry is worse than a missing one: the invoice
-        stands either way, and an unpaid invoice is a thing the studio can
-        settle, where a misfiled one has to be found first.
-        """
-        invoice = order._create_invoices()
-        if not invoice:
-            _logger.warning(
-                "[DESK SALE] %s produced no invoice - nothing to post", order.name)
-            return invoice
-        invoice.action_post()
-        _logger.info("[DESK SALE] invoice %s posted for order %s (%.2f)",
-                     invoice.name, order.name, invoice.amount_total)
-        self._email_invoice(invoice)
-
-        # sudo throughout: a fitness manager is not an accounting user and
-        # cannot read a journal, let alone register a payment. Taking cash is
-        # something the studio authorises her to do; the entry that follows is
-        # a consequence of it, not a second permission she has to hold.
-        journal = self.env['account.journal'].sudo().search([
-            ('type', '=', 'cash'),
-            ('company_id', '=', order.company_id.id),
-        ], limit=1)
-        if not journal:
-            _logger.warning(
-                "[DESK SALE] no cash journal on %s, so invoice %s is posted "
-                "but unpaid - the money was taken, the entry is not made",
-                order.company_id.name, invoice.name)
-            return invoice
-        try:
-            self.env['account.payment.register'].sudo().with_context(
-                active_model='account.move', active_ids=invoice.ids,
-            ).create({'journal_id': journal.id}).action_create_payments()
-            _logger.info("[DESK SALE] invoice %s paid from %s",
-                         invoice.name, journal.name)
-        except Exception:
-            # The sale and its invoice are real whatever happens here; losing
-            # them to a payment-registration problem would be the worse trade.
-            _logger.exception(
-                "[DESK SALE] could not register the cash payment for %s",
-                invoice.name)
-        return invoice
-
-    def _email_invoice(self, invoice):
-        """Mail the invoice, the way an online purchase mails it.
-
-        Posting does not send anything. Online, the mail comes from
-        sale's `send_invoice_cron`, and that cron searches **payment
-        transactions**:
-
-            self.search([('state', '=', 'done'),
-                         ('is_post_processed', '=', True), ...])._send_invoice()
-
-        A cash sale has no transaction, so it can never be selected - not on
-        posting and not later. f34c389 said posting "is what mails it, through
-        the action_post override in fitness_notifications"; that override
-        creates an in-app notification, not an email. So the cash buyer got a
-        correct invoice she was never sent, which is the inconsistency that
-        commit set out to remove, one step further along.
-
-        Sent here through the same helper and the same configured template the
-        online path uses, so there is one invoice mail in the system rather
-        than a second one that drifts. Never allowed to raise: the money is in
-        the till and the invoice is posted, and a mail-server problem must not
-        undo either.
-        """
-        if not invoice or invoice.state != 'posted':
-            return
-        try:
-            to_send = invoice.filtered(
-                lambda i: not i.is_move_sent and i._is_ready_to_be_sent())
-            if not to_send:
-                _logger.info("[DESK SALE] invoice %s was already sent",
-                             invoice.name)
-                return
-            send_context = {'allow_raising': False, 'allow_fallback_pdf': True}
-            template_id = self.env['ir.config_parameter'].sudo().get_param(
-                'sale.default_invoice_email_template', False)
-            if template_id:
-                template = self.env['mail.template'].sudo().browse(
-                    int(template_id))
-                if template.exists():
-                    send_context['mail_template'] = template
-            to_send.is_move_sent = True
-            self.env['account.move.send'].sudo()._generate_and_send_invoices(
-                to_send, **send_context)
-            _logger.info("[DESK SALE] invoice %s emailed to %s",
-                         invoice.name, invoice.partner_id.email or '(no email)')
-        except Exception:
-            _logger.exception(
-                "[DESK SALE] could not email invoice %s - it is posted and "
-                "the sale stands", invoice.name)
+        """Delegates. The renewal path needs the same steps, and a second copy
+        of "post it, take the cash, mail it" is how two ways of taking money
+        come to disagree about what the student receives."""
+        return order.fitness_invoice_cash_sale()
 
     def action_create_sale(self):
         self.ensure_one()
@@ -237,16 +204,30 @@ class FitnessDeskSaleWizard(models.TransientModel):
                 "Enter the cash taken, or switch to No charge (goodwill)."))
 
         product = self.product_id
-        lines = product.fitness_sale_line_vals(self._price_to_charge())
+        plan = self._effective_plan()
+        # The same builder checkout uses, so the desk sells what the shop
+        # sells: the matricula when the studio's two conditions are met, and
+        # no months multiplier here because the figure below is the cash taken
+        # for the whole sale, not a price per month.
+        lines = product.fitness_order_line_vals(
+            self.partner_id, plan=plan, total_price=self._price_to_charge())
         if not lines:
             raise UserError(_(
                 "%(pack)s has no sellable variant, so it cannot be sold.",
                 pack=product.display_name))
 
-        order = self.env['sale.order'].sudo().create({
+        vals = {
             'partner_id': self.partner_id.id,
-            'order_line': [(0, 0, vals) for vals in lines],
-        })
+            'order_line': [(0, 0, line) for line in lines],
+        }
+        # Set at create, never written afterwards alongside the lines. Writing
+        # plan_id and order_line together discards an explicit price_unit -
+        # that is how a quarterly membership at 585.00 came to bill 195.00
+        # every three months on production. See the double-submit test in
+        # tests/test_subscription_payment.py.
+        if plan and 'plan_id' in self.env['sale.order']._fields:
+            vals['plan_id'] = plan.id
+        order = self.env['sale.order'].sudo().create(vals)
         order.write({'fitness_payment_method': self.payment_method})
         order.action_confirm()
 
