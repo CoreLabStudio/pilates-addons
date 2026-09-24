@@ -169,7 +169,14 @@ class CalendarEvent(models.Model):
                         # address on the booking is what the studio has, and a
                         # student without an account is the one least able to
                         # find out any other way.
-                        if template:
+                        #
+                        # Unless there is no address. Some students have none
+                        # on purpose - see RUNBOOK-students-without-email.md -
+                        # and queueing a mail for them only fills the outgoing
+                        # queue with permanent failures. The studio has to tell
+                        # those students by phone; a dead mail.mail row does
+                        # not do it and hides that nobody did.
+                        if template and booking.student_id.email:
                             try:
                                 template.sudo().send_mail(
                                     booking.id, force_send=False)
@@ -178,6 +185,11 @@ class CalendarEvent(models.Model):
                                 _logger.exception(
                                     "[RESCHEDULE] Failed to queue mail for "
                                     "booking %s", booking.id)
+                        elif template:
+                            _logger.info(
+                                "[RESCHEDULE] %s has no email address - tell "
+                                "her by phone; nothing was queued",
+                                booking.student_id.display_name)
                     if teacher and teacher.id:
                         new_dt_str = _fmt_event_dt(new_start)
                         tenv = self.with_context(lang=teacher.lang or DEFAULT_LANG)
@@ -283,7 +295,9 @@ class CalendarEvent(models.Model):
                         student_env.env._('Your class will now be taught by %s.', new_teacher.name),
                         action_url=f'/my/classes/{self.id}',
                     )
-                if template:
+                # No address means no mail - see the reschedule path above and
+                # RUNBOOK-students-without-email.md.
+                if template and booking.student_id.email:
                     try:
                         template.send_mail(booking.id, force_send=False)
                     except Exception:
@@ -291,6 +305,11 @@ class CalendarEvent(models.Model):
                             "[TEACHER-SWAP] Failed to queue swap email for booking %d",
                             booking.id,
                         )
+                elif template:
+                    _logger.info(
+                        "[TEACHER-SWAP] %s has no email address; nothing "
+                        "queued for booking %d",
+                        booking.student_id.display_name, booking.id)
             _logger.info(
                 "[TEACHER-SWAP] Notified %d student(s) of teacher change on class %d.",
                 len(affected_bookings), self.id,

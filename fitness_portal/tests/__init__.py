@@ -20,3 +20,4 @@ from . import test_membership_renewal
 from . import test_login_destination
 from . import test_cash_request
 from . import test_cash_paths_matrix
+from . import test_blank_email
