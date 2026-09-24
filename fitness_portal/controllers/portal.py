@@ -1953,7 +1953,12 @@ class FitnessStudentPortal(http.Controller):
             'error_msg':          error_msg,
             'back_url':           f'/my/packages/{product.id}',
             'student_name':       full_name.split()[0] if full_name else '',
-            'lbl_pay_at_studio':  _('Pay at the studio'),
+            # Names the method, not just the place. "Pay at the studio"
+            # reads as "settle up when you are there, somehow" - a student
+            # could reasonably expect to tap a card. The studio takes cash
+            # only for this, and finding that out at the desk costs her the
+            # trip.
+            'lbl_pay_at_studio':  _('Pay cash at the studio'),
             'lbl_pay_at_studio_note': _('Reserve it now and pay in cash when '
                                         'you come in. You have 24 hours.'),
             'terms_label':        _('I agree to the'),

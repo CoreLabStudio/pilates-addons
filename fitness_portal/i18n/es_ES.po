@@ -3850,3 +3850,51 @@ msgstr "Tu pago en efectivo no se ha completado"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "We did not receive payment for %(product)s, so the order has been closed. Come to the studio or order again in the app whenever you are ready."
 msgstr "No hemos recibido el pago de %(product)s, así que hemos cerrado el pedido. Ven al estudio o vuelve a pedirlo en la app cuando quieras."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/controllers/portal.py:0
+msgid "Pay cash at the studio"
+msgstr "Pagar en efectivo en el estudio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "Only a studio manager can create a student account."
+msgstr "Solo una responsable del estudio puede crear una cuenta de alumna."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "A login is required."
+msgstr "Hace falta un usuario."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "The student group is missing from this database."
+msgstr "Falta el grupo de alumnas en esta base de datos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "The account was created against the wrong contact. Nothing has been saved."
+msgstr "La cuenta se ha creado sobre el contacto equivocado. No se ha guardado nada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "%(name)s already has a student account (%(login)s)."
+msgstr "%(name)s ya tiene una cuenta de alumna (%(login)s)."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "%(name)s already has an account (%(login)s). This will add the student role to it rather than make a second one."
+msgstr "%(name)s ya tiene una cuenta (%(login)s). Se le añadirá el rol de alumna en lugar de crear una segunda."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "Made a student by %(user)s. Login: %(login)s"
+msgstr "Convertida en alumna por %(user)s. Usuario: %(login)s"
