@@ -125,7 +125,18 @@ class FitnessAddStudentWizard(models.TransientModel):
         Only the private table now. The courtesy products are still used -
         the gift wizard books a given class against them - but nothing on
         this screen gives anything away any more.
+
+        Returns nothing for a group class. This screen sells a private
+        session; there is no group single-class product to charge against,
+        and action_add refuses one anyway. Resolving the private product
+        regardless put "Charged as: Reformer Private Single - 50.00" on the
+        form of an ordinary group class, which reads as an offer and is not
+        one. Better to show nothing and let the refusal say why.
         """
+        session = (event.class_type_id.session_type
+                   or event.session_type or 'group')
+        if session == 'group':
+            return self.env['product.template'].browse()
         discipline = (event.class_type_id.classroom_type
                       or event.classroom_id.classroom_type or '')
         xmlid = self.PRIVATE_PRODUCT_XMLID.get(discipline)
