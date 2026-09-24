@@ -3796,3 +3796,57 @@ msgstr "%(credits)s. Reserva una clase desde tu horario."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You have used this week's classes. Your membership opens new slots next week."
 msgstr "Has usado las clases de esta semana. Tu membresía abre nuevas plazas la semana que viene."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Pay at the studio"
+msgstr "Pagar en el estudio"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reserve it now and pay in cash when you come in. You have 24 hours."
+msgstr "Resérvalo ahora y paga en efectivo cuando vengas. Tienes 24 horas."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reserved for you."
+msgstr "Reservado para ti."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Come to the studio within 24 hours to pay, and we will activate it straight away. Nothing is charged until then."
+msgstr "Ven al estudio en 24 horas para pagar y lo activamos al momento. Hasta entonces no se cobra nada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have already asked to pay for this at the studio. Come and pay and we will activate it."
+msgstr "Ya has pedido pagar esto en el estudio. Ven a pagar y lo activamos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Waiting for your payment"
+msgstr "Esperando tu pago"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Come to the studio to pay and we will activate it."
+msgstr "Ven al estudio a pagar y lo activamos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your cash payment was not completed"
+msgstr "Tu pago en efectivo no se ha completado"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "We did not receive payment for %(product)s, so the order has been closed. Come to the studio or order again in the app whenever you are ready."
+msgstr "No hemos recibido el pago de %(product)s, así que hemos cerrado el pedido. Ven al estudio o vuelve a pedirlo en la app cuando quieras."

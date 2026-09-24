@@ -261,3 +261,85 @@ class TestCashRequestFromThePortal(HttpCase, CashRequestFixture):
         order = self._request(self.pack)
         with self.assertRaises(AccessError):
             order.with_user(self.user).action_fitness_approve_cash()
+
+
+@tagged("post_install", "-at_install")
+class TestDecliningACashRequest(TransactionCase, CashRequestFixture):
+    """The studio's other answer: she did not come with the money.
+
+    Before this there was only Approve, so a request nobody paid for had to
+    be closed with the generic Cancel - no reason, no record, and nothing
+    told the student. She would turn up expecting a class she no longer had.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._build()
+
+    def test_declining_cancels_the_order(self):
+        order = self._request(self.pack)
+        order.with_user(self.manager).action_fitness_decline_cash()
+        self.env.invalidate_all()
+        self.assertEqual(order.state, "cancel",
+                         "the declined request is still open")
+
+    def test_declining_grants_nothing(self):
+        user = self.user
+        before = user.partner_id._fitness_credit_total()
+        order = self._request(self.pack)
+        order.with_user(self.manager).action_fitness_decline_cash()
+        self.env.invalidate_all()
+        self.assertEqual(user.partner_id._fitness_credit_total(), before,
+                         "a declined request handed over credits")
+
+    def test_declining_takes_it_off_the_desk_list(self):
+        order = self._request(self.pack)
+        order.with_user(self.manager).action_fitness_decline_cash()
+        self.env.invalidate_all()
+        self.assertFalse(order.fitness_cash_pending,
+                         "a declined request is still waiting to be actioned")
+
+    def test_the_student_is_told(self):
+        """A request that vanishes with no word is worse than a refusal."""
+        order = self._request(self.pack)
+        self.env["fitness.notification"].sudo().search([]).unlink()
+        order.with_user(self.manager).action_fitness_decline_cash()
+        notes = self.env["fitness.notification"].sudo().search(
+            [("user_id", "=", self.user.id)])
+        self.assertTrue(notes, "she was never told it had been closed")
+
+    def test_the_reason_reaches_the_chatter(self):
+        order = self._request(self.pack)
+        order.with_user(self.manager).with_context(
+            fitness_decline_reason="Never came in.").action_fitness_decline_cash()
+        bodies = " ".join(order.message_ids.mapped("body") or [])
+        self.assertIn("Never came in.", bodies,
+                      "the studio's reason was not recorded")
+
+    def test_an_approved_request_cannot_then_be_declined(self):
+        order = self._request(self.pack)
+        order.with_user(self.manager).action_fitness_approve_cash()
+        with self.assertRaises(UserError):
+            order.with_user(self.manager).action_fitness_decline_cash()
+
+    def test_a_student_cannot_decline_her_own_request(self):
+        order = self._request(self.pack)
+        with self.assertRaises(AccessError):
+            order.with_user(self.user).action_fitness_decline_cash()
+
+    def test_declining_frees_her_to_order_again(self):
+        """The whole point of closing it: she is no longer blocked from
+        asking for the same thing a second time."""
+        from odoo.addons.fitness_portal.controllers.portal import (
+            FitnessStudentPortal)
+        order = self._request(self.pack)
+        order.with_user(self.manager).action_fitness_decline_cash()
+        self.env.invalidate_all()
+        self.assertFalse(
+            self.env["sale.order"].sudo().search_count([
+                ("partner_id", "=", self.partner.id),
+                ("fitness_cash_pending", "=", True)]),
+            "she is still shown as waiting to pay after being declined")

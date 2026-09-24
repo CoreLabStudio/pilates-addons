@@ -3800,3 +3800,57 @@ msgstr "%(credits)s. Reserva una classe des del teu horari."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You have used this week's classes. Your membership opens new slots next week."
 msgstr "Has fet servir les classes d'aquesta setmana. La teva membresia obre noves places la setmana vinent."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Pay at the studio"
+msgstr "Pagar a l'estudi"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reserve it now and pay in cash when you come in. You have 24 hours."
+msgstr "Reserva'l ara i paga en efectiu quan vinguis. Tens 24 hores."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Reserved for you."
+msgstr "Reservat per a tu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Come to the studio within 24 hours to pay, and we will activate it straight away. Nothing is charged until then."
+msgstr "Vine a l'estudi en 24 hores per pagar i ho activem al moment. Fins llavors no es cobra res."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have already asked to pay for this at the studio. Come and pay and we will activate it."
+msgstr "Ja has demanat pagar això a l'estudi. Vine a pagar i ho activem."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Waiting for your payment"
+msgstr "Esperant el teu pagament"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Come to the studio to pay and we will activate it."
+msgstr "Vine a l'estudi a pagar i ho activem."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your cash payment was not completed"
+msgstr "El teu pagament en efectiu no s'ha completat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "We did not receive payment for %(product)s, so the order has been closed. Come to the studio or order again in the app whenever you are ready."
+msgstr "No hem rebut el pagament de %(product)s, així que hem tancat la comanda. Vine a l'estudi o torna a demanar-ho a l'app quan vulguis."
