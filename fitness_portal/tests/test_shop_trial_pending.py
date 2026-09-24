@@ -140,8 +140,19 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
     # -- once the trial is gone, it is not offered at all ------------------
 
     def _spend_her_trial(self):
-        """A confirmed zero-price order for a trial product is what
-        _trial_entitlement_used reads, so that is what this makes."""
+        """Claim the trial AND use the class it paid for.
+
+        Confirming a zero-price trial order is only half of it. The trial
+        products are credit-bearing packages (fitness_is_package, class_count
+        1), so confirming one mints a real credit that lives until a booking
+        spends it. A fixture that stops at action_confirm leaves the student
+        holding a bookable credit, which is a different state from the one
+        these tests mean by "spent".
+
+        The credit is zeroed rather than booked against a real class: that is
+        precisely what fitness_packages does on booking ("Deducted 1 credit
+        from line N"), without needing a timetable to exist.
+        """
         order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
             "order_line": [(0, 0, {
@@ -151,6 +162,7 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
             })],
         })
         order.action_confirm()
+        order.order_line.write({"fitness_remaining_classes": 0})
         return order
 
     def test_the_card_disappears_from_the_shop_once_the_trial_is_spent(self):
@@ -248,3 +260,254 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
 
         self.assertNotIn(self.barre.name, classes)
         self.assertNotIn(self.reformer.name, classes)
+
+
+@tagged("post_install", "-at_install")
+class TestTheSpentTrialNoteMatchesWhatSheHolds(HttpCase):
+    """The note over the emptied Classes tab must describe her situation.
+
+    The first version asked one question - has this student ever taken a
+    trial - and told everyone who had to "choose a pack, a membership or a
+    class". On the production restore 14 of the 19 students with a spent
+    trial were already holding live credit, so the larger group was being
+    told to buy what they had already bought.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.password = "spent-note-pw-1"
+        cls.user = cls.env["res.users"].create({
+            "name": "Note Student",
+            "login": "note.student@example.invalid",
+            "password": cls.password,
+            "lang": "en_US",
+            "group_ids": [(6, 0, [
+                cls.env.ref("base.group_portal").id,
+                cls.env.ref("fitness_core.group_fitness_student").id,
+            ])],
+        })
+        cls.partner = cls.user.partner_id
+        cls.barre = cls.env.ref("fitness_packages.product_barre_trial")
+
+        cls.pack = cls.env["product.template"].create({
+            "name": "Note Barre Pack 5",
+            "list_price": 60.0,
+            "sale_ok": True,
+            "fitness_is_package": True,
+            "fitness_class_count": 5,
+            "fitness_validity_days": 90,
+            "fitness_class_type": "barre",
+            "fitness_session_type": "group",
+        })
+
+    def _page(self):
+        self.env.flush_all()
+        self.authenticate(self.user.login, self.password)
+        res = self.url_open("/my/packages", timeout=30)
+        self.assertEqual(res.status_code, 200, res.text[:200])
+        self.assertNotIn('name="password"', res.text, "session lost")
+        return res.text
+
+    def _claim_her_trial(self):
+        """Claim it and stop - she now holds one unbooked trial credit."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [(0, 0, {
+                "product_id": self.barre.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 0.0,
+            })],
+        })
+        order.action_confirm()
+        return order
+
+    def _spend_her_trial(self):
+        """Claim it and use the class, which is what leaves her holding
+        nothing. See the note on the other class's copy of this."""
+        order = self._claim_her_trial()
+        order.order_line.write({"fitness_remaining_classes": 0})
+        return order
+
+    def _buy_the_pack(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [(0, 0, {
+                "product_id": self.pack.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 60.0,
+            })],
+        })
+        order.action_confirm()
+        return order
+
+    BUY = "Choose a pack, a membership or a class"
+    BOOK = "Book a class from your schedule"
+
+    def test_a_student_holding_nothing_is_told_to_buy(self):
+        """The original case, which must keep working."""
+        self._spend_her_trial()
+        page = self._page()
+        self.assertIn(self.BUY, page,
+                      "a student with no credit is no longer told where to go")
+        self.assertNotIn(self.BOOK, page,
+                         "she is told to book with credit she does not have")
+
+    def test_a_student_holding_credit_is_sent_to_her_schedule(self):
+        """The defect this class exists for: she already bought a pack, and
+        the shop told her to buy a pack."""
+        self._spend_her_trial()
+        self._buy_the_pack()
+        page = self._page()
+        self.assertIn(self.BOOK, page,
+                      "a student holding credit is not pointed at her schedule")
+        self.assertNotIn(
+            self.BUY, page,
+            "she already holds a pack and is still being told to choose one")
+
+    def test_the_note_names_the_credit_she_actually_has(self):
+        """Not a bare count: the pool's own sentence, which is per-discipline
+        and singular/plural correct in every language."""
+        self._spend_her_trial()
+        self._buy_the_pack()
+        page = self._page()
+        self.assertIn("5 barre credits available", page,
+                      "the note does not say what she is holding")
+
+    def test_one_credit_reads_as_singular(self):
+        """res_partner went to real trouble so that 1 credit does not read
+        "1 barre credits". Building the sentence here would undo it."""
+        self._spend_her_trial()
+        order = self._buy_the_pack()
+        line = order.order_line[:1]
+        line.write({"fitness_remaining_classes": 1})
+        page = self._page()
+        self.assertIn("1 barre credit available", page)
+        self.assertNotIn("1 barre credits available", page)
+
+    def test_the_note_is_absent_before_the_trial_is_spent(self):
+        """None of the three apply to a student who still has her trial."""
+        page = self._page()
+        self.assertNotIn(self.BUY, page)
+        self.assertNotIn(self.BOOK, page)
+
+    def test_the_note_stays_off_the_other_tabs(self):
+        """It explains the Classes tab, so it belongs only there."""
+        self._spend_her_trial()
+        self._buy_the_pack()
+        self.env.flush_all()
+        self.authenticate(self.user.login, self.password)
+        packs = self.url_open("/my/packages?tab=packages", timeout=30).text
+        self.assertNotIn(self.BOOK, packs)
+        self.assertNotIn(self.BUY, packs)
+
+    # -- the membership branch, and the ordering trap inside it ------------
+
+    def _exhausted_membership(self):
+        """A running membership with no slots left in it.
+
+        The state is reached through the allowance rather than by booking
+        classes all week: fitness_weekly_used_this_week is computed from
+        bookings and cannot be written, while fitness_weekly_class_allowance
+        is related to the product. Both routes arrive at the same thing the
+        note actually reads - a membership pool whose remaining is 0.
+        """
+        membership = self.env["product.template"].create({
+            "name": "Note Barre Membership",
+            "list_price": 95.0,
+            "type": "service",
+            "fitness_is_subscription_plan": True,
+            "recurring_invoice": True,
+            "fitness_class_type": "barre",
+            "fitness_session_type": "group",
+            "weekly_class_allowance": 0,
+        })
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "plan_id": self.env.ref("sale_subscription.subscription_plan_month").id,
+            "order_line": [(0, 0, {
+                "product_id": membership.product_variant_ids[:1].id,
+                "product_uom_qty": 1,
+                "price_unit": 95.0,
+            })],
+        })
+        order.action_confirm()
+        self.assertEqual(order.subscription_state, "3_progress",
+                         "fixture is not a running membership")
+        return order
+
+    # Deliberately apostrophe-free: QWeb escapes ' to &#39;, so the clause
+    # with the apostrophe in it can never match the rendered HTML.
+    WEEK = "Your membership opens new slots next week"
+
+    def test_a_member_with_no_slots_left_is_told_that_and_not_to_buy(self):
+        """Neither of the other two notes is true for her: she cannot book,
+        and telling her to buy a membership is absurd - she has one."""
+        self._spend_her_trial()
+        self._exhausted_membership()
+        page = self._page()
+        self.assertIn(self.WEEK, page,
+                      "a member out of slots is not told why she cannot book")
+        self.assertNotIn(self.BUY, page,
+                         "a paying member is being told to buy a membership")
+        self.assertNotIn(self.BOOK, page,
+                         "she is sent to book with nothing left to book with")
+
+    def test_a_member_out_of_slots_who_holds_a_pack_is_sent_to_book(self):
+        """The ordering trap, and the reason the note takes the first pool
+        with anything left rather than pools[0].
+
+        _fitness_credit_pools puts the membership's weekly slots first,
+        because they reset soonest. Reading pools[0] blindly would tell a
+        student she has no slots this week while a perfectly bookable pack
+        sat directly underneath it.
+        """
+        self._spend_her_trial()
+        self._exhausted_membership()
+        self._buy_the_pack()
+        page = self._page()
+        self.assertIn(self.BOOK, page,
+                      "her pack is bookable and the note ignored it")
+        self.assertIn("5 barre credits available", page,
+                      "the note does not name the pack she can actually use")
+        self.assertNotIn(
+            self.WEEK, page,
+            "she was told this week is used up while holding a usable pack")
+
+    # -- the state this work did not know existed until the note was built --
+
+    def test_a_claimed_but_unbooked_trial_is_a_credit_to_spend(self):
+        """She took the free trial and has not booked the class yet.
+
+        The trial products are credit-bearing packages, so claiming one mints
+        a real credit. She is not someone to sell to - she is someone with a
+        class already paid for and nothing on her timetable. This state was
+        found by the note rendering "1 barre credit available" for a fixture
+        that believed it had left her holding nothing.
+        """
+        self._claim_her_trial()
+        page = self._page()
+        self.assertIn("1 barre credit available", page,
+                      "her unbooked trial class is not named")
+        self.assertIn(self.BOOK, page,
+                      "she is not sent to book the class she already has")
+        self.assertNotIn(
+            self.BUY, page,
+            "she is told to buy a class while holding an unbooked one")
+
+    def test_using_the_class_is_what_turns_the_note_into_an_offer(self):
+        """The same student, one booking later. This is the pair that shows
+        the note tracks her real position rather than her history."""
+        order = self._claim_her_trial()
+        before = self._page()
+        self.assertIn(self.BOOK, before)
+
+        order.order_line.write({"fitness_remaining_classes": 0})
+
+        after = self._page()
+        self.assertIn(self.BUY, after,
+                      "with the class used up she is still not offered anything")
+        self.assertNotIn(self.BOOK, after,
+                         "she is sent to book with no credit left")

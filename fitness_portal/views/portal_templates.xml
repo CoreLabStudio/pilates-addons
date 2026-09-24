@@ -1571,7 +1571,12 @@
                      the tab - the private and duo cards remain, so it never
                      reaches the "no products" branch below. -->
                 <t t-if="active_tab == 'classes' and trial_spent">
-                    <div class="mv-trial-note" t-out="lbl_trial_spent"/>
+                    <!-- trial_spent_note is whatever her own situation makes
+                         true - credits to spend, a membership week used up,
+                         or nothing. It falls back to the buy-something note
+                         only when she really does hold nothing. -->
+                    <div class="mv-trial-note"
+                         t-out="trial_spent_note or lbl_trial_spent"/>
                 </t>
 
                 <t t-if="not products">
