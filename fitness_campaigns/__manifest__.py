@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Campaigns – CoreLab Studio',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Services',
     'summary': 'Send a survey Yoleyva built to a chosen group of students, '
                'by email and in the app, and read the answers',

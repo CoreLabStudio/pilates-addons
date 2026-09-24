@@ -196,6 +196,40 @@ class TestFitnessCampaign(TransactionCase):
             answer.access_token, notif[:1].action_url or "",
             "the bell points at a different token than the email")
 
+    def test_a_student_with_an_email_actually_gets_one(self):
+        """The half that was missing, and it cost a red build.
+
+        action_send wraps the send in try/except and logs, so a template
+        that cannot render fails every single send and the suite stays
+        green. That is exactly what happened: the invite referenced
+        survey_id.company_id, survey.survey has no company_id, and every
+        campaign email died in the log while 567 tests passed. odoo.sh
+        grades on ERROR lines, so it failed there and nowhere else.
+
+        Asserting "no mail for a student with no address" without this is
+        satisfied by a campaign that emails nobody at all.
+        """
+        user = self._student("mailed")
+        camp = self._campaign()
+        before = self.env["mail.mail"].sudo().search_count([])
+        camp.action_send()
+
+        self.assertGreater(
+            self.env["mail.mail"].sudo().search_count([]), before,
+            "no email was queued for a student who has an address - if the "
+            "template cannot render, action_send swallows it and only the "
+            "log knows")
+
+        mail = self.env["mail.mail"].sudo().search(
+            [], order="id desc", limit=1)
+        self.assertTrue(
+            mail.email_from,
+            "the email has no sender, which the mail server will refuse")
+        self.assertIn(
+            "corelabstudio.es", mail.email_from,
+            "the sender is not the studio - a foreign envelope sender is "
+            "refused outright by the mail host")
+
     def test_a_student_with_no_email_is_still_reached_in_the_app(self):
         user = self._student("silent", email=False)
         camp = self._campaign()
