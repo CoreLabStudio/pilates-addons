@@ -30,16 +30,28 @@ class TestReassignWizard(TransactionCase):
         cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
         cls.manager = cls.env.ref("base.user_admin")
 
+        # The email address matters here, and was missing. A partner with no
+        # address is still put into recipient_ids by partner_to, so the mail
+        # was created and then parked by mail.mail._send() as
+        # 'mail_email_missing' - a permanent failure in the outgoing queue
+        # that these two tests were counting as a success.
+        #
+        # Students with no address are now skipped on purpose, so a fixture
+        # without one asserts the opposite of what it says it does. See
+        # RUNBOOK-students-without-email.md, and the companion test below
+        # that pins the skip.
         cls.student = cls.env["res.users"].with_context(
             no_reset_password=True).create({
                 "name": "Move Test Student",
                 "login": "move.test@example.invalid",
+                "email": "move.test@example.invalid",
                 "group_ids": [(6, 0, [
                     cls.env.ref("base.group_portal").id,
                     cls.env.ref("fitness_core.group_fitness_student").id,
                 ])],
             })
         cls.partner = cls.student.partner_id
+        cls.partner.write({"email": "move.test@example.invalid"})
 
         cls.barre_type = cls._class_type("barre", "Barre Move Test")
         cls.reformer_type = cls._class_type("reformer", "Reformer Move Test")
@@ -276,6 +288,31 @@ class TestReassignWizard(TransactionCase):
         self._wizard(target=self.target).action_move_student()
         mail = self.env['mail.mail'].search([], order='id desc', limit=1)
         self.assertIn(self.partner, mail.recipient_ids)
+
+    def test_a_student_with_no_address_is_moved_but_not_emailed(self):
+        """The other half of the rule, pinned where the dispatch happens.
+
+        Some students have no email at all - see
+        RUNBOOK-students-without-email.md. Queueing for them does not reach
+        anyone; it parks a permanent failure in the outgoing queue, once per
+        move, for ever. The bell is her channel and must still ring, because
+        skipping the mail cannot be allowed to mean she is told nothing.
+        """
+        self.partner.write({"email": False})
+        Notif = self.env['fitness.notification']
+        bells_before = Notif.search_count([('user_id', '=', self.student.id)])
+        mails_before = self.env['mail.mail'].search_count([])
+
+        self._wizard(target=self.target).action_move_student()
+
+        self.assertEqual(
+            self.env['mail.mail'].search_count([]), mails_before,
+            "a mail was queued for a student with no address to send it to")
+        self.assertEqual(
+            Notif.search_count([('user_id', '=', self.student.id)]),
+            bells_before + 1,
+            "she has no email, so the bell is the only way she finds out - "
+            "and it did not ring")
 
     # ── what the button hands back to the web client ─────────────────────────
     #
