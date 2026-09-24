@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.24.114',
+    'version': '19.0.1.24.115',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',
@@ -23,6 +23,19 @@
         # The shop's trial cards link into this module's request form and
         # read fitness.trial.request to know whether one is already open.
         'fitness_trials',
+        # Odoo's own Surveys app, for studio feedback and announcements.
+        #
+        # Declared here rather than kept out of the dependency chain, which
+        # was the original plan. Installing it from a shell against the live
+        # database fails: gamification, which survey depends on, adds a karma
+        # column to res_users, and that ALTER TABLE needs an exclusive lock
+        # every logged-in session is holding. It timed out on production.
+        #
+        # As a dependency it installs during the deploy instead, when
+        # odoo.sh restarts the instance and nobody is holding the table.
+        # The cost is that survey can no longer be uninstalled without
+        # touching this manifest, which is worth less than it installing.
+        'survey',
     ],
     'data': [
         'security/ir.model.access.csv',
