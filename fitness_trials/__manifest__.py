@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Trial Requests – CoreLab Studio',
-    'version': '19.0.1.5.24',
+    'version': '19.0.1.5.25',
     'category': 'Services',
     'summary': 'Public trial-class request form (Barre & Reformer), admin review list, and automated EN/ES/CA emails',
     'author': 'CoreLab Studio',
