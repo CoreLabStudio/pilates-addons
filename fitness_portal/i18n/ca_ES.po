@@ -3800,31 +3800,3 @@ msgstr "%(credits)s. Reserva una classe des del teu horari."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You have used this week's classes. Your membership opens new slots next week."
 msgstr "Has fet servir les classes d'aquesta setmana. La teva membresia obre noves places la setmana vinent."
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Your order is reserved. Come to the studio within 24 hours to pay and we will confirm it. Nothing is booked until then."
-msgstr "La teva comanda està reservada. Vine a l'estudi en 24 hores per pagar i ho confirmem. Fins llavors no hi ha res reservat."
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
-msgid "Cash request: %(student)s"
-msgstr "Pagament en efectiu: %(student)s"
-
-#. module: fitness_portal
-#. odoo-python
-#: code:addons/fitness_portal/controllers/portal.py:0
-msgid "%(student)s wants to pay for %(product)s in cash at the studio. Nothing is active until you approve it."
-msgstr "%(student)s vol pagar %(product)s en efectiu a l'estudi. No s'activa res fins que ho aprovis."
-
-#. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Pay at the studio (cash)"
-msgstr "Pagar a l'estudi (efectiu)"
-
-#. module: fitness_portal
-#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_packages
-msgid "Nothing is booked until you pay. Come to the studio within 24 hours and we will confirm it."
-msgstr "No es reserva res fins que paguis. Vine a l'estudi en 24 hores i ho confirmem."
