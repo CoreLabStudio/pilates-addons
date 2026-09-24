@@ -1846,6 +1846,14 @@ class FitnessStudentPortal(http.Controller):
             return request.redirect('/my/packages')
         if not product.sale_ok:
             return request.redirect('/my/packages')
+        # The same rule the card and the product page apply, applied here too.
+        # Both of those already refuse a trial this student has taken, but
+        # this route is reachable on its own - a kept link, a back button, a
+        # typed id - and without this it would happily sell a third trial to
+        # somebody who has had both. Checked on the buyer rather than the
+        # product, because the answer is different per student.
+        if self._hidden_from_shop(partner, product):
+            return request.redirect('/my/packages')
 
         # Determine whether any enabled/test online payment provider is configured.
         online_providers = request.env['payment.provider'].sudo().search([
@@ -3028,22 +3036,49 @@ class FitnessStudentPortal(http.Controller):
     def _is_trial_product(self, product):
         return product.id in self._trial_products().ids
 
+    def _trial_taken(self, partner, product):
+        """Has she already had THIS trial class, free or paid?
+
+        A different question from the free entitlement. The entitlement is
+        one per student across both disciplines - spend it on Reformer and
+        the free one is gone for Barre too. This asks only whether she has
+        had this particular class, which is what decides whether there is
+        anything left to sell her.
+
+        Read off confirmed order lines rather than a flag, for the same
+        reason the entitlement is: the order is the fact. A free trial and a
+        paid one are the same row here, differing only in price, and both
+        mean she has done that class.
+        """
+        if not partner:
+            return False
+        return bool(request.env['sale.order.line'].sudo().search_count([
+            ('order_partner_id', '=', partner.id),
+            ('product_id', 'in', product.product_variant_ids.ids),
+            ('state', '=', 'sale'),
+        ]))
+
     def _hidden_from_shop(self, partner, product):
         """Is this product not to be shown to this student at all?
 
         The two trial products are the studio's only single-class products -
         "Barre Single Class" and "Reformer Single" are archived on purpose.
-        Once a student's one free trial is spent, the studio's decision is
-        that she is not offered a single class at all: packs and memberships
-        only. So the card goes entirely rather than being relabelled.
 
-        The entitlement is one per student across both disciplines, so
-        spending it on Barre hides the Reformer card too. That is the rule as
-        the studio states it: "one per student, Barre or Reformer".
+        A trial card goes only once that class has actually been taken.
+        Hiding both the moment the free entitlement was spent was the rule
+        until a student who had done her free Reformer wrote in asking why
+        she could no longer book a trial: she had never done Barre, the
+        studio sells it at 12 EUR, and the shop was quietly refusing to take
+        her money. The free one is still one per student, either discipline;
+        what remains on sale afterwards is the class she has not had.
+
+        Reformer done -> Barre still buyable at its own price.
+        Both done -> neither comes back, and packs, memberships and the
+        private and duo classes are what is left.
         """
         if not self._is_trial_product(product):
             return False
-        return self._trial_entitlement_used(partner)
+        return self._trial_taken(partner, product)
 
     @staticmethod
     def _pending_cash_product_ids(partner):

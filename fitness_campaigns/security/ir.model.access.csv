@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fitness_campaign_manager,fitness.campaign manager,model_fitness_campaign,fitness_core.group_fitness_manager,1,1,1,1
+access_survey_user_input_fitness_manager,survey.user_input fitness manager read,survey.model_survey_user_input,fitness_core.group_fitness_manager,1,0,0,0
+access_survey_survey_fitness_manager,survey.survey fitness manager read,survey.model_survey_survey,fitness_core.group_fitness_manager,1,0,0,0
