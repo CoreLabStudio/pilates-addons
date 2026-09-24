@@ -69,15 +69,34 @@ class FitnessClaseFija(models.Model):
                 continue
             if sub.fitness_is_unlimited:
                 continue
-            eff = sub.fitness_effective_weekly_allowance()
-            if eff <= 0:
-                continue
-            active_count = len(sub.fitness_clase_fija_ids.filtered('active'))
-            if active_count > eff:
-                raise ValidationError(
-                    f"Cannot activate this slot: {sub.name} would have "
-                    f"{active_count} active fixed slot(s), but the effective "
-                    f"weekly allowance is {eff}. "
-                    "Deactivate an existing slot first, or increase the member's "
-                    "Weekly Allowance Override."
-                )
+            # Counted per discipline, not in total.
+            #
+            # A combined plan - "1 Barre + 1 Reformer per week" - carries the
+            # Barre number in weekly_class_allowance and names Reformer as the
+            # secondary discipline. Comparing every slot against that single
+            # number made one Barre slot plus one Reformer slot look like two
+            # against an allowance of one, so a member on a combined plan
+            # could not have her two fixed classes at all - the exact thing
+            # she bought. fitness_effective_weekly_allowance already answers
+            # per discipline; this now asks it that way.
+            by_discipline = {}
+            for other in sub.fitness_clase_fija_ids.filtered('active'):
+                ev = other.calendar_event_id
+                room = (ev.class_type_id.classroom_type
+                        or ev.class_type_id.fitness_class_type
+                        or '') if ev.class_type_id else ''
+                by_discipline.setdefault(room, 0)
+                by_discipline[room] += 1
+
+            for room, count in by_discipline.items():
+                eff = sub.fitness_effective_weekly_allowance(discipline=room)
+                if eff <= 0:
+                    continue
+                if count > eff:
+                    raise ValidationError(
+                        f"Cannot activate this slot: {sub.name} would have "
+                        f"{count} active {room or 'class'} slot(s), but the "
+                        f"weekly allowance for {room or 'that discipline'} is "
+                        f"{eff}. Deactivate one first, or increase the "
+                        "member's Weekly Allowance Override."
+                    )
