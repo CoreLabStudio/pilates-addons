@@ -519,24 +519,34 @@ class TrialRequestController(http.Controller):
         # request lands as pending and the studio places it. With a
         # three-student minimum an instant booking could not have known
         # whether the class would actually run.
-        # The same person asking for the same class on the same day again is
-        # not a second request, it is the same one arriving twice - a double
-        # click, a refreshed confirmation, a browser retry. Sending them back
-        # to the same confirmation is what they meant, and it keeps the
-        # studio's list showing one row per person rather than one per click.
-        # Still open only: once it has been declined or already scheduled,
-        # asking again is a real second ask.
+        # One open request per address, whoever is asking.
+        #
+        # This used to match on email AND class AND date, which only ever
+        # caught a double click. Changing the class or the date produced a
+        # second row, and the studio's Pending list filled up with the same
+        # person several times over - Núria Mundó Guixà twice, Laia Ubia
+        # twice, Eva Morales seven times. Measured on the live form: same
+        # address, different class, two requests created.
+        #
+        # Deliberately answered with the SAME confirmation page rather than
+        # an error. A public visitor is not identified, and a message saying
+        # "you already have a request" would tell whoever typed an address
+        # whether that address has ever contacted the studio. Returning her
+        # to the confirmation blocks the duplicate and discloses nothing -
+        # and it is true: her request is with the studio.
+        #
+        # Still open only. Once a request has been declined or scheduled,
+        # asking again is a real second ask - she may want to buy a class
+        # now - and the studio sees that one flagged Trial Used instead.
         twin = request.env['fitness.trial.request'].sudo().search([
             ('email', '=ilike', email),
-            ('class_type_id', '=', class_type.id if class_type else False),
-            ('preferred_date', '=', preferred_date or False),
             ('status', 'in', ('pending', 'contacted')),
         ], limit=1)
         if twin:
             _logger.info(
-                "Duplicate trial submission for %s (%s on %s); returning the "
-                "existing request %s", email,
-                class_type.name if class_type else '-', preferred_date, twin.id)
+                "Duplicate trial submission for %s; she already has open "
+                "request %s, returning her to the confirmation",
+                email, twin.id)
             return request.render(
                 'fitness_trials.trial_request_form',
                 self._form_ctx(success=True, submitted_interest=class_interest,
