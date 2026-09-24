@@ -9,3 +9,4 @@ from . import new_conversation_wizard
 from . import calendar_grid
 from . import email_verification
 from . import fitness_gift
+from . import make_student_wizard
