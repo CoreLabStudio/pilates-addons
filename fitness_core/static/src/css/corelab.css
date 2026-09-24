@@ -2865,6 +2865,63 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 }
 .mv-terms-row a { color: var(--mv-ink-text); text-decoration: underline; }
 
+/* ── Pay at the studio (cash) ─────────────────────────────────────────
+   A real second option, not a link tacked under the Pay button. It is
+   deliberately quieter than Pay online - outlined rather than filled - so
+   the card stays the obvious default while cash reads as equally real.
+   Every colour is a token, so it themes for dark mode with everything
+   else. */
+.mv-paycash { margin-top: 18px; }
+.mv-paycash-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: var(--mv-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.mv-paycash-or::before,
+.mv-paycash-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--mv-border);
+}
+.mv-btn-cash {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mv-btn-bg);
+  background: transparent;
+  border: 1.5px solid var(--mv-btn-bg);
+  border-radius: var(--mv-r);
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+.mv-btn-cash:hover:not(:disabled) { background: rgba(154,186,205,0.14); }
+.mv-btn-cash:active:not(:disabled) { transform: scale(0.97); opacity: 0.86; }
+.mv-btn-cash:disabled { opacity: 0.45; cursor: default; }
+.mv-paycash-note {
+  margin: 10px 2px 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--mv-muted);
+  text-align: center;
+}
+/* The confirmation she lands on. Given its own tone rather than the plain
+   info blue: this is good news, and it carries a deadline. */
+.mv-flash-cash {
+  background: rgba(154,186,205,0.16);
+  border: 1px solid var(--mv-border);
+  color: var(--mv-ink-text);
+}
+.mv-flash-cash strong { display: block; margin-bottom: 3px; }
+
 .mv-btn-primary-lg {
   display: block;
   width: 100%;

@@ -50,6 +50,36 @@
                         groups="fitness_core.group_fitness_manager"
                         invisible="not fitness_cash_pending"
                         confirm="Confirm the student has paid this in cash? Her credits become active immediately and she is invoiced and emailed."/>
+                <button name="action_fitness_decline_cash"
+                        type="object"
+                        string="Not paid - decline"
+                        class="btn-secondary"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="not fitness_cash_pending"
+                        confirm="Close this request as unpaid? The order is cancelled and the student is told. Nothing is charged."/>
+            </xpath>
+
+            <!-- Everything Odoo normally offers on a quotation is hidden
+                 while the request is waiting for money.
+
+                 Confirm is the dangerous one: it confirms the order and
+                 grants her credits without recording that the cash arrived,
+                 without invoicing it and without settling it in the till -
+                 the same outcome as approving, minus every record that it
+                 was paid for. Send, Print and Preview are merely noise on a
+                 screen whose only two answers are "she paid" and "she did
+                 not". -->
+            <xpath expr="//header/button[@name='action_quotation_send']"
+                   position="attributes">
+                <attribute name="invisible">fitness_cash_pending</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_confirm']"
+                   position="attributes">
+                <attribute name="invisible">fitness_cash_pending</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_preview_sale_order']"
+                   position="attributes">
+                <attribute name="invisible">fitness_cash_pending</attribute>
             </xpath>
         </field>
     </record>

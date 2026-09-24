@@ -1382,6 +1382,13 @@ class FitnessStudentPortal(http.Controller):
             and not self._trial_entitlement_used(partner)
             and self._pending_trial_request(partner))
 
+        # Products this student has already asked to pay for in cash and is
+        # not yet approved for. Offering Buy again beside an outstanding
+        # request invites her to order the same membership twice and turn up
+        # owing double - and the second request looks identical to the first
+        # on the studio's list, so nobody can tell which one she paid for.
+        pending_cash_ids = self._pending_cash_product_ids(partner)
+
         pkg_meta = {}
         for p in products:
             parts = []
@@ -1496,6 +1503,10 @@ class FitnessStudentPortal(http.Controller):
             'free_ids':                 free_ids,
             'claimed_free_ids':         claimed_ids,
             'pending_trial_ids':        pending_trial_ids,
+            'pending_cash_ids':         pending_cash_ids,
+            'lbl_cash_pending':         _('Waiting for your payment'),
+            'lbl_cash_pending_note':    _('Come to the studio to pay and we '
+                                          'will activate it.'),
             'lbl_trial_pending':        _('Request sent'),
             'student_price':            student_price,
             # Trials claimable right now, and where their card points. Kept
@@ -1566,10 +1577,16 @@ class FitnessStudentPortal(http.Controller):
             # rather than only in an email, because the 24 hours start now and
             # she is looking at the screen now.
             'cash_requested':           bool(kw.get('cash_requested')),
-            'lbl_cash_requested':       _('Your order is reserved. Come to '
-                                          'the studio within 24 hours to pay '
-                                          'and we will confirm it. Nothing is '
-                                          'booked until then.'),
+            # She came back to a checkout she has already used.
+            'cash_pending':             bool(kw.get('cash_pending')),
+            'lbl_cash_already':         _('You have already asked to pay for '
+                                          'this at the studio. Come and pay '
+                                          'and we will activate it.'),
+            'lbl_cash_requested_head':  _('Reserved for you.'),
+            'lbl_cash_requested':       _('Come to the studio within 24 hours '
+                                          'to pay, and we will activate it '
+                                          'straight away. Nothing is charged '
+                                          'until then.'),
             'empty_msg':                (_('No subscriptions available right now.') if active_tab == 'subscriptions'
                                          else _('No classes available right now.') if active_tab == 'classes'
                                          else _('No packages available right now.')),
@@ -1844,6 +1861,13 @@ class FitnessStudentPortal(http.Controller):
         if self._is_free_for(partner, product):
             return request.redirect('/my/packages/%d' % product.id)
 
+        # Already waiting to pay for this one in cash. Hiding the card is not
+        # enough on its own - the checkout has its own URL, and a student who
+        # backs into it from history would otherwise raise a second request
+        # for the same thing and owe double.
+        if product.id in self._pending_cash_product_ids(partner):
+            return request.redirect('/my/packages?cash_pending=1')
+
         # The plan the student picked, validated against what was offered. It
         # is read on GET as well as POST so choosing one can re-render the
         # page with that plan's totals before anything is committed.
@@ -1921,6 +1945,9 @@ class FitnessStudentPortal(http.Controller):
             'error_msg':          error_msg,
             'back_url':           f'/my/packages/{product.id}',
             'student_name':       full_name.split()[0] if full_name else '',
+            'lbl_pay_at_studio':  _('Pay at the studio'),
+            'lbl_pay_at_studio_note': _('Reserve it now and pay in cash when '
+                                        'you come in. You have 24 hours.'),
             'terms_label':        _('I agree to the'),
             'terms_link_label':   _('Terms and Conditions'),
             # No free-item values here any more: a zero-price product never
@@ -3017,6 +3044,22 @@ class FitnessStudentPortal(http.Controller):
         if not self._is_trial_product(product):
             return False
         return self._trial_entitlement_used(partner)
+
+    @staticmethod
+    def _pending_cash_product_ids(partner):
+        """Templates this student is already waiting to pay for in cash.
+
+        Read off the draft orders themselves rather than held as a flag, for
+        the same reason the trial entitlement is: the order is the fact, and
+        a flag beside it is a second copy that can disagree with it.
+        """
+        if not partner:
+            return frozenset()
+        lines = request.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.fitness_cash_pending', '=', True),
+        ])
+        return frozenset(lines.mapped('product_id.product_tmpl_id').ids)
 
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?

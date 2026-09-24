@@ -232,7 +232,21 @@ class FitnessBooking(models.Model):
         )
 
         # ── 1. Class must be in the future ────────────────────────────────────
-        if time_until.total_seconds() <= 0:
+        #
+        # Except when the studio is writing down what already happened. A
+        # walk-in who turned up, paid cash and took the class is a fact, and
+        # the roster has to be able to say so afterwards - otherwise her
+        # attendance exists only in somebody's memory and her weekly
+        # allowance is never consumed.
+        #
+        # Deliberately narrow: a context flag, and only for a manager. It is
+        # not a relaxation of the rule for students, who must never be able
+        # to book into the past; it is a separate act with a separate name.
+        recording_history = (
+            self.env.context.get('fitness_record_past_attendance')
+            and (self.env.user.has_group('fitness_core.group_fitness_manager')
+                 or self.env.user._is_admin()))
+        if time_until.total_seconds() <= 0 and not recording_history:
             raise ValidationError(
                 f"Cannot book a class that has already started or passed "
                 f"({class_start.strftime('%Y-%m-%d %H:%M')} UTC)."
