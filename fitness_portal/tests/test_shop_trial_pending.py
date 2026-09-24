@@ -183,12 +183,24 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
             "the Barre trial card is still on the shop after the trial was "
             "spent")
 
-    def test_the_other_discipline_goes_too(self):
-        """One entitlement covers both - "one per student, Barre or
-        Reformer" - so spending it on Barre hides Reformer as well."""
+    def test_the_other_discipline_stays_on_sale(self):
+        """The rule changed, and this test changed with it.
+
+        It used to assert that spending the entitlement on Barre hid the
+        Reformer card too. Marta Munoz then wrote to the studio asking why
+        she could no longer book a trial: she had done her free Reformer,
+        had never done Barre, and the shop was refusing to sell her a class
+        it advertises at 12 EUR.
+
+        The free entitlement is still one per student across both
+        disciplines. What is on sale afterwards is the class she has not
+        had."""
         self._spend_her_trial()
         html = self._page("/my/packages")
-        self.assertNotIn(self.reformer.name, html)
+        self.assertIn(
+            self.reformer.name, html,
+            "she has never done Reformer and the studio sells it - hiding "
+            "it refuses her money")
 
     def test_the_product_page_refuses_a_kept_link(self):
         """Hidden means hidden, including to somebody who typed the id."""
@@ -250,16 +262,20 @@ class TestShopTrialPendingIsPerStudent(HttpCase):
         self.assertNotIn("already used your trial classes", packs)
 
     def test_the_classes_tab_is_what_empties(self):
-        """Worth stating outright, because it is the studio's decision made
-        visible: the trial products are single classes, so hiding them empties
-        the tab a student lands on. She is left with the private and duo
-        contact-only cards there, and must move to Packs or Memberships to buy
-        anything."""
+        """Only the class she has taken leaves the tab.
+
+        This used to assert the tab emptied completely, which was the rule
+        until a student wrote in asking why she could not buy the discipline
+        she had never tried. The taken one goes; the other stays, priced."""
         self._spend_her_trial()
         classes = self._page("/my/packages")
 
-        self.assertNotIn(self.barre.name, classes)
-        self.assertNotIn(self.reformer.name, classes)
+        self.assertNotIn(
+            self.barre.name, classes,
+            "the class she has already had is still being offered")
+        self.assertIn(
+            self.reformer.name, classes,
+            "the discipline she has not tried is still for sale")
 
 
 @tagged("post_install", "-at_install")
