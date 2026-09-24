@@ -162,6 +162,36 @@ class TestMakeStudent(TransactionCase):
         user.invalidate_recordset()
         self.assertIn(self.student_group, user.group_ids)
 
+    def test_a_student_with_no_email_can_still_be_saved(self):
+        """Odoo marks the address required once a contact has a user:
+
+            <field name="email" widget="email" required="user_ids"/>
+
+        which assumes every account holder has one. Making a student with no
+        address therefore left her contact unsaveable - the form refused
+        with "Missing required fields" on a field the studio deliberately
+        left blank. Seven students and a paying member hit it live.
+        """
+        partner = self.env["res.partner"].create({
+            "name": "Saveable Student", "email": False, "phone": "600333444"})
+        self._wizard(partner).action_make_student()
+        partner.invalidate_recordset()
+        self.assertTrue(partner.fitness_is_student)
+        self.assertFalse(partner.email)
+
+        # The model must accept a write with the address still blank - this
+        # is what the form does on save.
+        partner.write({"phone": "600555666"})
+        self.assertEqual(partner.phone, "600555666")
+
+        # And the composed form must not demand one back.
+        arch = self.env["res.partner"].with_user(
+            self.manager).get_view(view_type="form")["arch"]
+        self.assertNotIn(
+            'required="user_ids"', arch,
+            "the contact form still requires an email from an account "
+            "holder, so a student without one cannot be saved")
+
     # ── the flag the contact form reads ─────────────────────────────────────
 
     def test_the_contact_list_can_be_filtered_on_it(self):

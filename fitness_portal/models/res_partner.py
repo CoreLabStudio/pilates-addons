@@ -160,6 +160,14 @@ class ResPartner(models.Model):
             ('order_partner_id', '=', self.id),
             ('product_id.fitness_is_package', '=', True),
             ('fitness_remaining_classes', '>', 0),
+            # Confirmed orders only. Cancelling an order does not zero the
+            # credits on its lines, so without this a cancelled sale keeps
+            # paying for classes: Nuria's duplicate 50 EUR private was
+            # cancelled, its credit was handed back to the line on the way
+            # out, and she was left holding one free Reformer Private that
+            # nobody had bought. Draft lines never minted a credit in the
+            # first place, so this only ever removes cancelled ones.
+            ('order_id.state', '=', 'sale'),
         ]
         if single_class is True:
             domain += [('product_id.fitness_class_count', '<=', 1)]

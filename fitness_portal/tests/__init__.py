@@ -23,3 +23,4 @@ from . import test_cash_paths_matrix
 from . import test_blank_email
 from . import test_make_student
 from . import test_trial_per_discipline
+from . import test_cancelled_order_credits

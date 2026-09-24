@@ -98,6 +98,39 @@
       <xpath expr="//sheet" position="inside">
         <field name="fitness_is_student" invisible="1"/>
       </xpath>
+
+      <!-- Odoo's own form marks the address required the moment a contact
+           has a user:
+
+               <field name="email" widget="email" required="user_ids"/>
+
+           which assumes every account holder has one. Some students here do
+           not, on purpose - see RUNBOOK-students-without-email.md - and
+           giving one an app login therefore made her contact record
+           impossible to save at all. Seven students and a paying member hit
+           this the evening it shipped: the form refuses with "Missing
+           required fields" on a field the studio deliberately left blank.
+
+           Relaxed rather than worked around with a placeholder address,
+           because a fake address is the thing this all started with, and
+           a reserved one like @corelab.invalid would still read as
+           truthy everywhere and put dead mail back in the outgoing queue.
+
+           It is a view modifier, not a model constraint, so nothing about
+           the data is being loosened - only the claim that an account
+           holder must be reachable by email. -->
+      <!-- Matched on the attribute, not by position. There are THREE email
+           fields in this view and only the first and third carry the
+           modifier - indexing [1] and [2] silently relaxed one of them and
+           the one in the middle, which never had it, and left the third
+           still demanding an address. Each xpath below takes the first
+           remaining match, so the second one finds what the first left. -->
+      <xpath expr="//field[@name='email'][@required='user_ids']" position="attributes">
+        <attribute name="required">0</attribute>
+      </xpath>
+      <xpath expr="//field[@name='email'][@required='user_ids']" position="attributes">
+        <attribute name="required">0</attribute>
+      </xpath>
     </field>
   </record>
 
