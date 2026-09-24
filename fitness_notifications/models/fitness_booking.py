@@ -64,6 +64,22 @@ class FitnessBookingNotifications(models.Model):
             _logger.warning("[NOTIFICATIONS] Template %s not found, skipping send.", template_xmlid)
             return
         for booking in self:
+            # Some students have no email address at all, on purpose - see
+            # RUNBOOK-students-without-email.md. send_mail() does not care:
+            # it builds the mail.mail anyway, and mail.mail._send() then
+            # parks it in state='exception' with failure_type
+            # 'mail_email_missing'. That is not a skip, it is a permanent
+            # failure sitting in the outgoing queue for somebody to
+            # investigate, once per booking, for ever.
+            #
+            # The bell notification is her channel and fires regardless, so
+            # nothing reaches her any later for not queueing this.
+            if not booking.student_id.email:
+                _logger.info(
+                    "[NOTIFICATIONS] %s has no email address; %s not queued "
+                    "(the in-app notification still fires)",
+                    booking.student_id.display_name, template_xmlid)
+                continue
             try:
                 template.sudo().send_mail(booking.id, force_send=False)
                 _logger.info("[NOTIFICATIONS] Queued %s for booking %s (student=%s)",

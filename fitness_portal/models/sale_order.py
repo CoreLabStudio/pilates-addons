@@ -320,6 +320,26 @@ class SaleOrder(models.Model):
                 _logger.info("[CASH] invoice %s was already sent",
                              invoice.name)
                 return
+
+            # Some students have no email address at all - see
+            # RUNBOOK-students-without-email.md. That is a supported state,
+            # not a broken contact, and it is handled here rather than left
+            # to account.move.send, which drops the mail silently further
+            # down and leaves this method claiming it sent one.
+            #
+            # is_move_sent is deliberately not set for them. Marking an
+            # invoice sent when nothing was sent means that if she gives us
+            # an address later, this invoice is skipped for ever on the
+            # grounds that it already went out.
+            unreachable = to_send.filtered(lambda i: not i.partner_id.email)
+            if unreachable:
+                _logger.info(
+                    "[CASH] invoice %s not emailed - %s has no email "
+                    "address; hand her a printed copy",
+                    invoice.name, invoice.partner_id.display_name)
+                to_send -= unreachable
+            if not to_send:
+                return
             send_context = {'allow_raising': False, 'allow_fallback_pdf': True}
             template_id = self.env['ir.config_parameter'].sudo().get_param(
                 'sale.default_invoice_email_template', False)
