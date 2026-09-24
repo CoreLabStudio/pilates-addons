@@ -8,6 +8,71 @@ class ResPartner(models.Model):
     consent_marketing = fields.Boolean(string='Marketing Email Consent', default=False)
     consent_marketing_date = fields.Datetime(string='Marketing Consent On', readonly=True)
 
+    # Whether this contact is a student - a question about her user account
+    # rather than about the contact. Being a student means carrying
+    # group_fitness_student, and a contact typed in at the desk has no user
+    # at all, so the back office had no way to see on the contact itself that
+    # somebody was not yet a student and needed to be made one.
+    #
+    # Not stored: it is a statement about res.users.group_ids, which changes
+    # without ever touching this record. Searchable anyway, so the contact
+    # list can be filtered on it.
+    fitness_is_student = fields.Boolean(
+        string='Is a Student', compute='_compute_fitness_is_student',
+        search='_search_fitness_is_student',
+        help="True when this contact has a portal account carrying the "
+             "student role.")
+
+    def _compute_fitness_is_student(self):
+        group = self.env.ref('fitness_core.group_fitness_student',
+                             raise_if_not_found=False)
+        if not group:
+            for rec in self:
+                rec.fitness_is_student = False
+            return
+        # active_test=False: an archived account still means this person was
+        # made a student once, and offering "Make This Person a Student" for
+        # somebody whose account was deliberately archived would quietly
+        # reactivate it.
+        # all_group_ids, not group_ids: the first is "groups and implied
+        # groups", the second only the ones assigned by hand. The search
+        # below has to ask the same question or the column and the filter
+        # disagree about the same person, which is worse than either being
+        # wrong on its own.
+        users = self.env['res.users'].sudo().with_context(
+            active_test=False).search([('partner_id', 'in', self.ids)])
+        students = {u.partner_id.id for u in users if group in u.all_group_ids}
+        for rec in self:
+            rec.fitness_is_student = rec.id in students
+
+    def _search_fitness_is_student(self, operator, value):
+        group = self.env.ref('fitness_core.group_fitness_student',
+                             raise_if_not_found=False)
+        if not group:
+            return [('id', '=', False)]
+
+        # Odoo does not always hand a boolean search the operator it was
+        # written with - ('=', True) can arrive as ('in', [True]) - and a
+        # naive `operator == '='` check then inverts the whole filter and
+        # quietly lists every non-student as a student.
+        if operator in ('in', 'not in'):
+            vals = value if isinstance(value, (list, tuple)) else [value]
+            wants_students = bool(vals) and bool(vals[0])
+            if operator == 'not in':
+                wants_students = not wants_students
+        elif operator in ('=', '!='):
+            wants_students = bool(value)
+            if operator == '!=':
+                wants_students = not wants_students
+        else:
+            raise NotImplementedError(
+                "fitness_is_student does not support %r" % operator)
+
+        ids = self.env['res.users'].sudo().with_context(
+            active_test=False).search(
+                [('all_group_ids', 'in', group.id)]).mapped('partner_id').ids
+        return [('id', 'in' if wants_students else 'not in', ids)]
+
     # ── What the student tells us about themselves ───────────────────────────
     #
     # Filled in by the student from the portal, never required. The studio uses
