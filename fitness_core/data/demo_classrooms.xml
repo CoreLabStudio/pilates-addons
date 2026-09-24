@@ -202,5 +202,49 @@
             <field name="color">1</field>
         </record>
 
+        <!-- Private (1-on-1) class types.
+
+             Added because every other type here is a group class, so making a
+             one-off private session meant borrowing a group type and then
+             flipping Session Type afterwards. The order mattered and nothing
+             said so: _onchange_class_type_id copies session_type off the
+             type, so choosing the type after setting Private silently put it
+             back to Group and capacity back to 6 or 7 - a private session
+             quietly open to five other people.
+
+             With these, picking the type is the whole job: session_type comes
+             across as private, and calendar.event._compute_capacity sets
+             capacity to 1 from that. max_capacity is set to 1 as well so the
+             type reads correctly on its own page, though the event does not
+             need it to.
+
+             noupdate="1" like everything else in this file - the studio owns
+             the name, duration and photo once it has them. -->
+        <record id="class_type_barre_private" model="fitness.class.type">
+            <field name="name">Barre Private</field>
+            <field name="classroom_type">barre</field>
+            <field name="classroom_id" ref="classroom_a_barre"/>
+            <field name="duration">45</field>
+            <field name="level">all</field>
+            <field name="intensity">moderate</field>
+            <field name="session_type">private</field>
+            <field name="max_capacity">1</field>
+            <field name="description">One-to-one Barre session, just the student and her instructor.</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="class_type_reformer_private" model="fitness.class.type">
+            <field name="name">Reformer Private</field>
+            <field name="classroom_type">reformer</field>
+            <field name="classroom_id" ref="classroom_b_reformer"/>
+            <field name="duration">50</field>
+            <field name="level">all</field>
+            <field name="intensity">moderate</field>
+            <field name="session_type">private</field>
+            <field name="max_capacity">1</field>
+            <field name="description">One-to-one Reformer session, just the student and her instructor.</field>
+            <field name="color">4</field>
+        </record>
+
     </data>
 </odoo>

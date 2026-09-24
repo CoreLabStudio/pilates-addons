@@ -1562,6 +1562,14 @@ class FitnessStudentPortal(http.Controller):
             'credit_line':              credit_line,
             'student_name':             student_name,
             'bought':                   bool(kw.get('bought')),
+            # She has asked to pay at the desk. Said on the page she lands on
+            # rather than only in an email, because the 24 hours start now and
+            # she is looking at the screen now.
+            'cash_requested':           bool(kw.get('cash_requested')),
+            'lbl_cash_requested':       _('Your order is reserved. Come to '
+                                          'the studio within 24 hours to pay '
+                                          'and we will confirm it. Nothing is '
+                                          'booked until then.'),
             'empty_msg':                (_('No subscriptions available right now.') if active_tab == 'subscriptions'
                                          else _('No classes available right now.') if active_tab == 'classes'
                                          else _('No packages available right now.')),
@@ -1844,7 +1852,35 @@ class FitnessStudentPortal(http.Controller):
         error_msg = None
         method = kw.get('payment_method')
         if request.httprequest.method == 'POST':
-            if use_online:
+            # Cash is offered whether or not Stripe is on, and is answered
+            # before the online branch for exactly that reason: a student who
+            # has chosen to pay at the desk must not be handed a card form
+            # because a provider happens to be configured.
+            #
+            # Nothing is confirmed here. The order stays draft, mints no
+            # credits and books nothing; it becomes real when somebody at the
+            # desk says the money arrived. That is the whole point of the
+            # flow - the studio is not extending credit to anyone.
+            if method == 'cash':
+                if not kw.get('terms_accepted'):
+                    error_msg = _('Please accept the Terms and Conditions to continue.')
+                else:
+                    order = self._create_order(partner, product, 'cash',
+                                               plan=selected_plan)
+                    if not order:
+                        return request.redirect('/my/packages')
+                    order.sudo().write({
+                        'fitness_cash_requested_on': fields.Datetime.now(),
+                        'fitness_terms_accepted_on': fields.Datetime.now(),
+                    })
+                    _logger.info(
+                        '[CASH] %s requested by partner %s for product %s '
+                        '(%s) - waiting on payment at the desk.',
+                        order.name, partner.id, product.id,
+                        order.amount_total)
+                    self._notify_admins_of_cash_request(order)
+                    return request.redirect('/my/packages?cash_requested=1')
+            elif use_online:
                 # Online (Stripe) path: only terms acceptance needed.
                 if not kw.get('terms_accepted'):
                     error_msg = _('Please accept the Terms and Conditions to continue.')
@@ -2023,6 +2059,40 @@ class FitnessStudentPortal(http.Controller):
         if self._clase_fija_subs_needing_slots(order.partner_id):
             return request.redirect('/my/fixed-class')
         return request.redirect('/my/packages?bought=1')
+
+    @staticmethod
+    def _notify_admins_of_cash_request(order):
+        """Tell the studio somebody intends to pay at the desk.
+
+        Without this the request sits on a list nobody has been given a
+        reason to open, and the first the studio hears of it is the student
+        standing in front of them saying she already ordered. Each manager is
+        told in her own language, the same way a purchase is announced.
+        """
+        managers = request.env['res.users'].sudo().search([
+            ('group_ids', 'in', [
+                request.env.ref('fitness_core.group_fitness_manager').id]),
+        ])
+        if not managers:
+            return
+        Notif = request.env['fitness.notification'].sudo()
+        line = order.order_line[:1]
+        product_name = line.product_id.display_name if line else order.name
+        for manager in managers:
+            translate = request.env(context=dict(request.env.context,
+                                                 lang=manager.lang or DEFAULT_LANG))._
+            Notif._create_for_user(
+                manager.id,
+                'cash_requested',
+                translate('Cash request: %(student)s',
+                          student=order.partner_id.name or ''),
+                translate(
+                    '%(student)s wants to pay for %(product)s in cash at the '
+                    'studio. Nothing is active until you approve it.',
+                    student=order.partner_id.name or '',
+                    product=product_name),
+                action_url='/odoo/action-fitness_portal.action_fitness_cash_requests',
+            )
 
     @staticmethod
     def _notify_admins_of_purchase(order):

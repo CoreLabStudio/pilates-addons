@@ -250,132 +250,22 @@ class TestAddStudentWizard(TransactionCase):
             % event.capacity)
 
 
-@tagged("post_install", "-at_install")
-class TestCourtesyBooking(TransactionCase):
-    """Giving a class away on an ordinary group class.
 
-    The wizard was built for private classes agreed in conversation. This is
-    the other case: a student past their trial, or anyone the studio wants to
-    treat, put into a normal group class for nothing. It still writes a real
-    confirmed order - at zero - because a booking with no payment source is
-    the shape behind every records-disagree fault in this codebase.
+@tagged("post_install", "-at_install")
+class TestCourtesyProductsStillExist(TransactionCase):
+    """The free option moved off this screen to the gift wizard.
+
+    TestCourtesyBooking went with it: giving a class away is now tested in
+    fitness_portal/tests/test_gift.py, against the wizard that actually does
+    it, for classes, packs and memberships alike. What is still worth
+    asserting here is the products themselves - the gift wizard books a given
+    class against them, and a zero-price one-class package must never reach
+    the shop, where it would read as an invitation rather than a gift.
     """
 
     longMessage = False
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.manager = cls.env["res.users"].create({
-            "name": "Courtesy Manager",
-            "login": "courtesy.mgr@example.invalid",
-            "email": "courtesy.mgr@example.invalid",
-            "group_ids": [(6, 0, [
-                cls.env.ref("base.group_user").id,
-                cls.env.ref("fitness_core.group_fitness_manager").id])],
-        })
-        cls.student = cls.env["res.partner"].create({
-            "name": "Courtesy Student", "email": "courtesy@example.invalid"})
-        cls.room = cls.env["fitness.classroom"].create({
-            "name": "Courtesy room", "classroom_type": "barre", "capacity": 6})
-        cls.ctype = cls.env["fitness.class.type"].create({
-            "name": "Courtesy Barre", "classroom_type": "barre",
-            "duration": 45, "level": "all", "session_type": "group",
-            "classroom_id": cls.room.id})
-
-    def _group_class(self):
-        start = fields.Datetime.now() + timedelta(days=3)
-        return self.env["calendar.event"].create({
-            "name": "Ordinary group class", "start": start,
-            "stop": start + timedelta(minutes=45),
-            "class_type_id": self.ctype.id, "is_fitness_class": True})
-
-    def _wizard(self, event, **extra):
-        vals = {"event_id": event.id, "student_id": self.student.id,
-                "mode": "courtesy", "reason": "A treat, she has had her trial."}
-        vals.update(extra)
-        return self.env["fitness.add.student.wizard"].with_user(
-            self.manager).create(vals)
-
-    def test_a_free_booking_on_an_ordinary_group_class(self):
-        """Not a private class - the case the wizard could not do before."""
-        event = self._group_class()
-        self.assertEqual(event.class_type_id.session_type, "group")
-
-        self._wizard(event).action_add()
-
-        booking = self.env["fitness.booking"].search([
-            ("student_id", "=", self.student.id),
-            ("calendar_event_id", "=", event.id)])
-        self.assertEqual(len(booking), 1, "the student has to end up booked")
-        self.assertEqual(booking.state, "booked")
-
-    def test_the_order_behind_it_costs_nothing(self):
-        event = self._group_class()
-        self._wizard(event).action_add()
-
-        order = self.env["sale.order"].search(
-            [("partner_id", "=", self.student.id)], order="id desc", limit=1)
-        self.assertEqual(order.state, "sale")
-        self.assertEqual(order.amount_total, 0.0,
-                         "a given class must not show as money taken")
-        self.assertTrue(order.order_line[:1].product_id.product_tmpl_id
-                        .fitness_is_courtesy,
-                        "it has to be charged against a courtesy product")
-
-    def test_the_seat_count_updates(self):
-        event = self._group_class()
-        before = event.booked_seats or 0
-
-        self._wizard(event).action_add()
-        event.invalidate_recordset()
-
-        self.assertEqual(event.booked_seats, before + 1,
-                         "the roster has to know somebody is coming")
-
-    def test_a_free_class_demands_a_reason(self):
-        event = self._group_class()
-        with self.assertRaises(UserError):
-            self._wizard(event, reason="").action_add()
-
-    def test_a_reason_of_spaces_is_not_a_reason(self):
-        event = self._group_class()
-        with self.assertRaises(UserError):
-            self._wizard(event, reason="   ").action_add()
-
-    def test_the_price_box_cannot_charge_a_donated_class(self):
-        """Zero whatever is typed - the studio cannot bill for a gift by
-        leaving an old number in the field."""
-        event = self._group_class()
-        self._wizard(event, price=35.0).action_add()
-
-        order = self.env["sale.order"].search(
-            [("partner_id", "=", self.student.id)], order="id desc", limit=1)
-        self.assertEqual(order.amount_total, 0.0)
-
-    def test_the_confirmation_does_not_claim_a_gift_was_charged(self):
-        """The order said 0.00 and the dialog said 25.00.
-
-        The test above pins the order; nothing pinned the sentence the studio
-        actually reads, and it was built from the price box rather than from
-        the line. So giving a class away reported "charged 35.00" on an order
-        that reads nothing, and only somebody who opened the order would have
-        known which to believe.
-        """
-        event = self._group_class()
-        res = self._wizard(event, price=35.0).action_add()
-        message = res["params"]["message"]
-
-        self.assertNotIn(
-            "35", message,
-            "the confirmation still reports the price box for a free class")
-        order = self.env["sale.order"].search(
-            [("partner_id", "=", self.student.id)], order="id desc", limit=1)
-        self.assertIn(order.name, message, "the order is not named")
-
     def test_courtesy_products_are_not_in_the_shop(self):
-        """A one-class package at zero euros would otherwise sit on the
-        Classes tab, which is an invitation rather than a gift."""
         shop = self.env["product.template"].search([
             ("fitness_is_package", "=", True),
             ("fitness_class_count", "<=", 1),
@@ -385,24 +275,12 @@ class TestCourtesyBooking(TransactionCase):
         self.assertTrue(courtesy.fitness_is_courtesy)
         self.assertNotIn(courtesy, shop)
 
-    def test_charging_a_group_class_is_refused_in_words(self):
-        """There is no group single-class product to charge against - the
-        booking validator would refuse it anyway, with a sentence about
-        packages and sessions that says nothing about what to do."""
-        event = self._group_class()
-        wiz = self._wizard(event, mode="charge", price=30.0, reason="")
-
-        with self.assertRaises(UserError) as caught:
-            wiz.action_add()
-        self.assertIn("group class", str(caught.exception))
-
-    def test_a_group_class_opens_on_the_mode_that_works(self):
-        """Defaulting to charge would put her one save away from an error."""
-        event = self._group_class()
-        wiz = self.env["fitness.add.student.wizard"].with_user(
-            self.manager).with_context(
-                default_event_id=event.id, active_id=event.id,
-                active_model="calendar.event").create(
-                    {"student_id": self.student.id})
-
-        self.assertEqual(wiz.mode, "courtesy")
+    def test_both_disciplines_still_have_one_to_give(self):
+        """The gift wizard resolves these by xmlid; a missing one would make
+        gifting a class in that discipline impossible."""
+        for xmlid in ("fitness_packages.product_courtesy_barre",
+                      "fitness_packages.product_courtesy_reformer"):
+            product = self.env.ref(xmlid, raise_if_not_found=False)
+            self.assertTrue(product, "%s is gone" % xmlid)
+            self.assertEqual(product.list_price, 0.0,
+                             "%s is not free any more" % xmlid)

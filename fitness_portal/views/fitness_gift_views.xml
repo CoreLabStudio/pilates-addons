@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── The wizard ──────────────────────────────────────────────────── -->
+
+    <record id="view_fitness_gift_wizard_form" model="ir.ui.view">
+        <field name="name">fitness.gift.wizard.form</field>
+        <field name="model">fitness.gift.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Give a free gift">
+                <sheet>
+                    <group>
+                        <field name="student_id"
+                               options="{'no_create': True}"/>
+                        <field name="gift_type" widget="radio"/>
+                    </group>
+
+                    <!-- A class. The seat count is shown beside the picker
+                         so the studio chooses a class that has room, rather
+                         than finding out on save. -->
+                    <group invisible="gift_type != 'class'">
+                        <field name="available_event_ids" invisible="1"/>
+                        <field name="calendar_event_id"
+                               required="gift_type == 'class'"
+                               options="{'no_create': True}"/>
+                        <field name="seats_label" string="Spots"
+                               invisible="not calendar_event_id"/>
+                    </group>
+
+                    <!-- A package or a membership. -->
+                    <group invisible="gift_type == 'class'">
+                        <field name="available_product_ids" invisible="1"/>
+                        <field name="product_id"
+                               required="gift_type != 'class'"
+                               options="{'no_create': True}"/>
+                        <field name="plan_id"
+                               invisible="gift_type != 'membership'"
+                               required="gift_type == 'membership'"
+                               options="{'no_create': True}"/>
+                    </group>
+
+                    <group>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="value" widget="monetary" readonly="1"/>
+                        <field name="reason" required="1"
+                               placeholder="Why is this being given? It is the only record anyone will have of it later."/>
+                    </group>
+
+                    <!-- Said on the screen, not only in the button label.
+                         "Gift a spot in this class" has been read as making
+                         the whole class free; this removes the doubt. -->
+                    <div class="alert alert-info" role="status"
+                         invisible="gift_type != 'class'">
+                        This gives <strong>one free spot to this one
+                        student</strong>. The class is not made free for
+                        anybody else.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_give" type="object"
+                            string="Give it" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_gift_wizard" model="ir.actions.act_window">
+        <field name="name">Give a free gift</field>
+        <field name="res_model">fitness.gift.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ── The history ─────────────────────────────────────────────────── -->
+
+    <record id="view_fitness_gift_log_tree" model="ir.ui.view">
+        <field name="name">fitness.gift.log.list</field>
+        <field name="model">fitness.gift.log</field>
+        <field name="arch" type="xml">
+            <list string="Free gifts" create="false" delete="false">
+                <field name="given_on"/>
+                <field name="student_id"/>
+                <field name="gift_type"/>
+                <field name="product_id"/>
+                <field name="calendar_event_id" optional="show"/>
+                <field name="reason"/>
+                <field name="given_by"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="value" widget="monetary" sum="Value given away"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_gift_log_form" model="ir.ui.view">
+        <field name="name">fitness.gift.log.form</field>
+        <field name="model">fitness.gift.log</field>
+        <field name="arch" type="xml">
+            <form string="Free gift" create="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="student_id" readonly="1"/>
+                            <field name="gift_type" readonly="1"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="calendar_event_id" readonly="1"
+                                   invisible="gift_type != 'class'"/>
+                        </group>
+                        <group>
+                            <field name="given_on" readonly="1"/>
+                            <field name="given_by" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="value" widget="monetary" readonly="1"/>
+                            <field name="order_id" readonly="1"/>
+                            <field name="booking_id" readonly="1"
+                                   invisible="gift_type != 'class'"/>
+                        </group>
+                    </group>
+                    <group string="Reason">
+                        <field name="reason" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fitness_gift_log_search" model="ir.ui.view">
+        <field name="name">fitness.gift.log.search</field>
+        <field name="model">fitness.gift.log</field>
+        <field name="arch" type="xml">
+            <search string="Free gifts">
+                <field name="student_id"/>
+                <field name="product_id"/>
+                <field name="reason"/>
+                <filter name="type_class" string="Classes"
+                        domain="[('gift_type', '=', 'class')]"/>
+                <filter name="type_package" string="Packages"
+                        domain="[('gift_type', '=', 'package')]"/>
+                <filter name="type_membership" string="Memberships"
+                        domain="[('gift_type', '=', 'membership')]"/>
+                <separator/>
+                <filter name="by_student" string="Student"
+                        context="{'group_by': 'student_id'}"/>
+                <filter name="by_type" string="Type"
+                        context="{'group_by': 'gift_type'}"/>
+                <filter name="by_giver" string="Given by"
+                        context="{'group_by': 'given_by'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fitness_gift_log" model="ir.actions.act_window">
+        <field name="name">Free gifts</field>
+        <field name="res_model">fitness.gift.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_fitness_gift_log_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nothing has been given away yet
+            </p>
+            <p>
+                Every free class, package and membership the studio gives is
+                recorded here, with the reason it was given.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_fitness_gift_log"
+        name="Free gifts"
+        parent="fitness_core.menu_group_bookings"
+        action="action_fitness_gift_log"
+        sequence="37"
+        groups="fitness_core.group_fitness_manager"/>
+
+    <!-- ── Entry point 1: the student's profile ────────────────────────── -->
+
+    <record id="view_partner_form_fitness_gift" model="ir.ui.view">
+        <field name="name">res.partner.form.fitness.gift</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="action"
+                        name="%(action_fitness_gift_wizard)d"
+                        class="oe_stat_button"
+                        icon="fa-gift"
+                        groups="fitness_core.group_fitness_manager"
+                        context="{'default_student_id': id}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Give free</span>
+                        <span class="o_stat_text">gift</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ── Entry point 2: a class on the timetable ─────────────────────── -->
+
+    <record id="view_calendar_event_form_fitness_gift" model="ir.ui.view">
+        <field name="name">calendar.event.form.fitness.gift</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="is_fitness_class" invisible="1"/>
+                <!-- Wording chosen so it cannot be read as making the whole
+                     class free: "one spot", not "this class". The wizard
+                     says it again on the screen itself. -->
+                <button type="action"
+                        name="%(action_fitness_gift_wizard)d"
+                        string="Gift one spot to a student"
+                        class="btn-secondary"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="not is_fitness_class"
+                        context="{'default_calendar_event_id': id,
+                                  'default_gift_type': 'class'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1165,6 +1165,11 @@
     const terms = $('#mv-terms-check', form);
     if (!next || !terms) return;
 
+    // Pay-at-the-studio, on the online path only. It is a submit button
+    // rather than a radio, so it needs the terms tick but not a chosen
+    // method - the method is the button itself.
+    const cash = $('#mv-payment-cash', form);
+
     const sync = () => {
       const methodInput = form.querySelector('input[name="payment_method"]');
       // Online payment path (Stripe): no method radios present — only terms needed.
@@ -1173,6 +1178,7 @@
         ? form.querySelector('input[name="payment_method"]:checked')
         : true;
       next.disabled = !(method && terms.checked);
+      if (cash) cash.disabled = !terms.checked;
     };
     form.addEventListener('change', sync);
     sync();
