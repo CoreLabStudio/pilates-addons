@@ -27,7 +27,7 @@
       <t t-else="">Barre</t>
     </div>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Hem rebut la teva sol·licitud de classe de prova. Ens posarem en contacte amb tu aviat per confirmar el dia i l'hora.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tens cap pregunta, no dubtis en respondre a aquest correu.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tens cap pregunta, escriu-nos per l'app o per WhatsApp — tens les dades al final d'aquest correu.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Fins aviat.</p>
   </t>
 
@@ -39,7 +39,7 @@
       <t t-else="">Barre</t>
     </div>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Hemos recibido tu solicitud de clase de prueba. Nos pondremos en contacto contigo pronto para confirmar el día y la hora.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tienes alguna pregunta, no dudes en responder a este correo.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tienes alguna pregunta, escríbenos por la app o por WhatsApp — tienes los datos al final de este correo.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Hasta pronto.</p>
   </t>
 
@@ -51,10 +51,12 @@
       <t t-else="">Barre</t>
     </div>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Your trial class request has been received. We'll be in touch shortly to confirm a date and time that works for you.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">If you have any questions in the meantime, feel free to reply to this email.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">If you have any questions in the meantime, message us in the app or on WhatsApp — the details are at the bottom of this email.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>See you on the mat.</p>
   </t>
 
+  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
   </record>
@@ -89,7 +91,7 @@
       </div>
       <div style="font-size:18px;font-weight:500;letter-spacing:-0.01em;"><t t-out="object.scheduled_datetime_display"/></div>
     </div>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">T'esperem a l'estudi. Si necessites canviar el dia, respon a aquest correu amb antelació.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">T'esperem a l'estudi. Si necessites canviar el dia, escriu-nos per l'app o per WhatsApp amb antelació.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Fins aviat.</p>
   </t>
 
@@ -105,7 +107,7 @@
       </div>
       <div style="font-size:18px;font-weight:500;letter-spacing:-0.01em;"><t t-out="object.scheduled_datetime_display"/></div>
     </div>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Te esperamos en el estudio. Si necesitas cambiar el día, responde a este correo con antelación.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Te esperamos en el estudio. Si necesitas cambiar el día, escríbenos por la app o por WhatsApp con antelación.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Hasta pronto.</p>
   </t>
 
@@ -121,10 +123,12 @@
       </div>
       <div style="font-size:18px;font-weight:500;letter-spacing:-0.01em;"><t t-out="object.scheduled_datetime_display"/></div>
     </div>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">We look forward to welcoming you. If you need to reschedule, simply reply to this email with as much notice as possible.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">We look forward to welcoming you. If you need to reschedule, message us in the app or on WhatsApp with as much notice as possible.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>See you on the mat.</p>
   </t>
 
+  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
   </record>
@@ -218,7 +222,7 @@
       </div>
     </t>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Gràcies per l'interès en CoreLab. En aquest moment no podem accommodar la teva sol·licitud de classe de prova, però t'animem a tornar a contactar-nos en el futur.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tens preguntes o vols explorar altres opcions, respon a aquest correu i parlarem.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tens preguntes o vols explorar altres opcions, escriu-nos per l'app o per WhatsApp i en parlem.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
   </t>
 
@@ -239,7 +243,7 @@
       </div>
     </t>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Gracias por tu interés en CoreLab. En este momento no podemos acomodar tu solicitud de clase de prueba, pero te animamos a volver a contactarnos en el futuro.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tienes preguntas o quieres explorar otras opciones, responde a este correo y hablamos.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Si tienes preguntas o quieres explorar otras opciones, escríbenos por la app o por WhatsApp y hablamos.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
   </t>
 
@@ -260,10 +264,12 @@
       </div>
     </t>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Thank you for your interest in CoreLab. Unfortunately we're not able to accommodate your trial class request at this time, but we hope to welcome you in the future.</p>
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">If you have questions or would like to explore other options, please reply to this email and we'll be happy to help.</p>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">If you have questions or would like to explore other options, message us in the app or on WhatsApp and we'll be happy to help.</p>
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
   </t>
 
+  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
   </record>
@@ -295,16 +301,18 @@
   <t t-elif="object.lang == 'en_US'">
     <p style="font-size:18px;margin:0 0 18px;">Hi <t t-out="object.name or ''"/>,</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">We are sorry - we have had to cancel the class you had booked for your trial.</p>
-    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Your trial class is still yours. We will be in touch shortly to find you another time, or you can reply to this email and we will arrange it.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Your trial class is still yours. We will be in touch shortly to find you another time, or message us in the app or on WhatsApp and we will arrange it.</p>
     <p style="font-size:15px;line-height:1.7;margin:0;">Thank you for your patience.<br/>The CoreLab team</p>
   </t>
   <t t-else="">
     <p style="font-size:18px;margin:0 0 18px;">Hola <t t-out="object.name or ''"/>,</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Lo sentimos mucho: hemos tenido que cancelar la clase que hab\u00edas reservado para tu clase de prueba.</p>
-    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Tu clase de prueba sigue siendo tuya. Nos pondremos en contacto contigo muy pronto para buscarte otro horario, o puedes responder a este correo y lo organizamos.</p>
+    <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Tu clase de prueba sigue siendo tuya. Nos pondremos en contacto contigo muy pronto para buscarte otro horario, o escríbenos por la app o por WhatsApp y lo organizamos.</p>
     <p style="font-size:15px;line-height:1.7;margin:0;">Gracias por tu paciencia.<br/>El equipo de CoreLab</p>
   </t>
 
+  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
   </record>

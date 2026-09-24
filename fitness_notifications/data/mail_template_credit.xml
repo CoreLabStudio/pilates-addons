@@ -28,6 +28,8 @@
     <p>Te recordamos que tienes cr&#233;ditos en tu paquete que caducan pronto. Inicia sesi&#243;n para reservar tus clases restantes antes de que venzan.</p>
     <p>El equipo de CoreLab</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>

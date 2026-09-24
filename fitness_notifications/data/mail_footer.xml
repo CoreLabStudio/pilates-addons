@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- One footer, called by every student-facing template.
+
+         Written once rather than pasted into eleven templates in three
+         languages each. Thirty-three copies of a phone number is thirty-three
+         places to miss when it changes, and the studio has already been
+         caught out by stale contact details reaching students.
+
+         Callers set notice_lang before calling, because the language lives on
+         a different field per model - student_id.lang on a booking, lang on a
+         trial request - and the footer should not have to know which model it
+         is being rendered under.
+
+             <t t-set="notice_lang" t-value="object.student_id.lang"/>
+             <t t-call="fitness_notifications.mail_footer_no_reply"/>
+
+         Why it exists: replies to these emails go to info@corelabstudio.es,
+         which Odoo does not read - there is no incoming mail server and no
+         catchall alias, confirmed on production. A student who replies is
+         answered by whatever that mailbox does on its own, and is not heard
+         by the studio through the app at all. So the footer sends her
+         somewhere that is actually read. -->
+    <template id="mail_footer_no_reply" name="CoreLab: no-reply footer">
+        <t t-set="_l" t-value="notice_lang or 'es_ES'"/>
+        <div style="margin:22px 0 0;padding:16px 0 0;border-top:1px solid #E4DFD8;font-size:13px;line-height:1.6;color:#6B615B;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+            <t t-if="_l == 'en_US'">
+                <p style="margin:0 0 10px;"><strong>Please do not reply to this email.</strong> This address is not monitored, so a reply will not reach us.</p>
+                <p style="margin:0 0 6px;">To talk to the studio:</p>
+                <p style="margin:0 0 6px;">&#183; <a href="https://app.corelabstudio.es/my/messages" style="color:#4A7FA5;text-decoration:underline;">Messages in the app</a></p>
+                <p style="margin:0;">&#183; WhatsApp <a href="https://wa.me/34628139121" style="color:#4A7FA5;text-decoration:underline;">+34 628 13 91 21</a></p>
+            </t>
+            <t t-elif="_l == 'ca_ES'">
+                <p style="margin:0 0 10px;"><strong>Si us plau, no responguis a aquest correu.</strong> Aquesta adre&#231;a no es llegeix, aix&#237; que la teva resposta no ens arribar&#224;.</p>
+                <p style="margin:0 0 6px;">Per parlar amb l&#39;estudi:</p>
+                <p style="margin:0 0 6px;">&#183; <a href="https://app.corelabstudio.es/my/messages" style="color:#4A7FA5;text-decoration:underline;">Missatges a l&#39;app</a></p>
+                <p style="margin:0;">&#183; WhatsApp <a href="https://wa.me/34628139121" style="color:#4A7FA5;text-decoration:underline;">+34 628 13 91 21</a></p>
+            </t>
+            <t t-else="">
+                <p style="margin:0 0 10px;"><strong>Por favor, no respondas a este correo.</strong> Esta direcci&#243;n no se lee, as&#237; que tu respuesta no nos llegar&#225;.</p>
+                <p style="margin:0 0 6px;">Para hablar con el estudio:</p>
+                <p style="margin:0 0 6px;">&#183; <a href="https://app.corelabstudio.es/my/messages" style="color:#4A7FA5;text-decoration:underline;">Mensajes en la app</a></p>
+                <p style="margin:0;">&#183; WhatsApp <a href="https://wa.me/34628139121" style="color:#4A7FA5;text-decoration:underline;">+34 628 13 91 21</a></p>
+            </t>
+        </div>
+    </template>
+
+</odoo>
