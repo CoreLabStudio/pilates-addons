@@ -1481,6 +1481,9 @@ class FitnessStudentPortal(http.Controller):
             else:
                 credit_line = _('%d credits') % credit['remaining']
 
+        trial_spent = self._trial_entitlement_used(partner)
+        trial_spent_note = self._trial_spent_note(partner) if trial_spent else None
+
         return request.render('fitness_portal.portal_packages', {
             'active_tab':               active_tab,
             'groups':                   groups,
@@ -1525,11 +1528,16 @@ class FitnessStudentPortal(http.Controller):
             # that stays true either way is "trial". It also points at a
             # class as well as packs and memberships, because the privates
             # left on the tab are real things she can still buy.
-            'trial_spent':              self._trial_entitlement_used(partner),
+            'trial_spent':              trial_spent,
             'lbl_trial_spent':          _('You have already used your trial '
                                           'classes. Choose a pack, a '
                                           'membership or a class to keep '
                                           'training.'),
+            # Which of the three notes above the emptied tab applies. Telling
+            # a student who already holds a pack to "choose a pack" is the
+            # same species of wrong the note was added to fix, just aimed at
+            # a different group - and on the restore it was the larger group.
+            'trial_spent_note':         trial_spent_note,
             # Said once, above the two trial cards, because a student who takes
             # the wrong one has spent the only one they get.
             # Names the two products rather than the two disciplines. This
@@ -2962,6 +2970,57 @@ class FitnessStudentPortal(http.Controller):
         ])
         return any(float_is_zero(l.price_total or 0.0, precision_rounding=rounding)
                    for l in lines)
+
+    def _trial_spent_note(self, partner):
+        """What to tell a student on the Classes tab once her trial is spent.
+
+        The tab has had its ordinary cards removed, so something has to say
+        why. What to say depends on what she actually holds now, which the
+        first version of this note never asked: it told every student who had
+        ever taken a trial to "choose a pack, a membership or a class", and on
+        the production restore 14 of the 19 such students were already holding
+        live credit. Being told to buy the thing you have just bought reads as
+        the shop not knowing who you are.
+
+        Three cases, in the order they are decided:
+
+        1. She can book something right now - the first pool with anything
+           left in it. Point her at the timetable, not the shop.
+        2. She holds a membership whose weekly slots are used up and nothing
+           else. Neither "buy something" nor "go book" is true; say what is.
+        3. She holds nothing. The original note is correct for her.
+
+        Pool order matters in case 1. _fitness_credit_pools puts the
+        membership's weekly slots first because they reset soonest, so a
+        member who has used this week's slots but still holds a pack would be
+        told "0 slots left this week" if this took pools[0] blindly - while a
+        perfectly bookable pack sat underneath it. It takes the first pool
+        with remaining > 0 instead.
+
+        The sentence naming the number comes from the pool's own
+        credits_available_text rather than being built here. That text is
+        already per-discipline and already singular/plural correct in all
+        three languages, and res_partner carries a long comment about why
+        splicing a count into a phrase had to be abandoned. A second
+        implementation here would reintroduce exactly that bug.
+        """
+        _ = request.env._
+        pools = self._credit_pools(partner.id) if partner else []
+        if not pools:
+            return None
+
+        bookable = next((p for p in pools if (p.get('remaining') or 0) > 0), None)
+        if bookable:
+            return _('%(credits)s. Book a class from your schedule.') % {
+                'credits': (bookable.get('credits_available_text')
+                            or bookable.get('label') or ''),
+            }
+
+        # Only the membership pool can be empty and still present; package
+        # lines are filtered on fitness_remaining_classes > 0 before they
+        # ever become a pool.
+        return _("You have used this week's classes. Your membership opens "
+                 "new slots next week.")
 
     def _unused_trial_credit(self, partner):
         """An unspent trial credit, if the student is holding one.
