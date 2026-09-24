@@ -1524,6 +1524,12 @@
                         <div class="mv-flash mv-flash-ok">Your order is confirmed. Thank you!</div>
                     </div>
                 </t>
+                <t t-if="cash_requested">
+                    <div class="mv-flashes">
+                        <div class="mv-flash mv-flash-info"
+                             t-out="lbl_cash_requested"/>
+                    </div>
+                </t>
                 <t t-if="booked">
                     <div class="mv-flashes">
                         <div class="mv-flash mv-flash-ok">
@@ -2026,6 +2032,24 @@
                                 Pay online
                             </button>
 
+                            <!-- Cash sits beside the card, not instead of it.
+                                 A submit button rather than a radio on
+                                 purpose: the gate script looks for
+                                 input[name=payment_method] to decide whether
+                                 this is the manual path, and a radio here
+                                 would make it demand a method before
+                                 enabling Pay online. -->
+                            <button type="submit" class="mv-btn-secondary-lg"
+                                    id="mv-payment-cash"
+                                    name="payment_method" value="cash"
+                                    disabled="disabled">
+                                Pay at the studio (cash)
+                            </button>
+                            <p class="mv-paymethod-note" style="padding:0 2px;">
+                                Nothing is booked until you pay. Come to the
+                                studio within 24 hours and we will confirm it.
+                            </p>
+
                             <!-- who the customer is actually buying from,
                                  stated before they commit rather than only
                                  behind the Terms link -->
@@ -2043,6 +2067,20 @@
                             </t>
 
                             <p class="mv-panel-label" style="padding:0 2px;">Choose payment method</p>
+
+                            <!-- Cash at the studio -->
+                            <div class="mv-paymethod">
+                                <label class="mv-paymethod-head">
+                                    <input type="radio" name="payment_method" value="cash"
+                                           t-att-checked="'checked' if selected_method == 'cash' else None"/>
+                                    <span>Pay at the studio (cash)</span>
+                                </label>
+                                <p class="mv-paymethod-note">
+                                    Nothing is booked until you pay. Come to
+                                    the studio within 24 hours and we will
+                                    confirm it.
+                                </p>
+                            </div>
 
                             <!-- Bizum -->
                             <div class="mv-paymethod">
