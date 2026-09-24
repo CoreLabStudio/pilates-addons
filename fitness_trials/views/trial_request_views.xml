@@ -56,6 +56,14 @@
         <field name="other_open_count" string="Dupes" optional="show"
                widget="badge" decoration-danger="other_open_count > 0"
                invisible="other_open_count == 0"/>
+        <!-- Asking again after her trial is finished. Not a duplicate - the
+             column above only counts requests nobody has answered yet - and
+             not an error either, since she may want to buy a class. Shown
+             because approving it WILL be refused, and finding that out by
+             clicking Approve is what made it read as a bug. -->
+        <field name="trial_already_used" string="Trial Used" optional="show"
+               widget="boolean_toggle" readonly="1"
+               invisible="not trial_already_used"/>
         <field name="partner_id" string="Student" optional="show"/>
         <field name="occurrence_id" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
@@ -110,6 +118,17 @@
             <button name="action_view_other_open" type="object"
                     string="Show them" class="btn btn-sm btn-warning"/>
           </div>
+          <!-- Separate banner rather than folded into the one above: they
+               are different facts with different answers. "Two people are
+               waiting under this name" means pick one. "She has already had
+               her trial" means this one cannot be approved at all, and the
+               studio should be told that before it tries. -->
+          <div class="alert alert-danger d-flex align-items-center gap-2"
+               role="alert" invisible="not trial_already_used">
+            <field name="trial_used_warning" nolabel="1" readonly="1"
+                   class="flex-grow-1 mb-0"/>
+          </div>
+          <field name="trial_already_used" invisible="1"/>
           <field name="other_open_count" invisible="1"/>
           <field name="other_open_ids" invisible="1"/>
           <div class="oe_title">

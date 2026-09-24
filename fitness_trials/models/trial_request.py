@@ -437,6 +437,55 @@ class FitnessTrialRequest(models.Model):
         compute='_compute_other_open', string='Duplicates')
     duplicate_warning = fields.Char(compute='_compute_other_open')
 
+    # Whether the person behind this request has already had their one free
+    # trial. A different question from other_open_count, which only counts
+    # requests nobody has answered yet: a student whose trial is spent and
+    # finished has no *open* request at all, so that banner stays silent and
+    # the row reads as perfectly ordinary.
+    #
+    # That is how Núria Mundó Guixà came to sit in Pending after taking her
+    # trial the same morning. The entitlement check exists and does work -
+    # action_approve_and_book refuses her - but only once somebody has
+    # already clicked Approve, and the studio's question was why the request
+    # was accepted at all. It was accepted on purpose: a second ask after a
+    # finished trial is a real ask, and she may well want to buy a class.
+    # What was missing is that nothing said so before the click.
+    #
+    # Not stored, for the same reason other_open_count is not: it is a
+    # statement about her order history, which changes underneath this
+    # record without ever touching it.
+    trial_already_used = fields.Boolean(
+        compute='_compute_trial_already_used', string='Trial Already Used')
+    trial_used_warning = fields.Char(compute='_compute_trial_already_used')
+
+    @api.depends('partner_id', 'email', 'status')
+    def _compute_trial_already_used(self):
+        """Has the person behind this request already spent their trial?
+
+        Resolved through partner_id when it is set and by email when it is
+        not, because a public submission arrives unattached and is matched at
+        approval time - which is exactly the request this warning is for.
+
+        Only computed while the request is still open. On a scheduled one the
+        answer is trivially yes and the banner would be telling the studio
+        off for a decision it already made correctly.
+        """
+        for rec in self:
+            rec.trial_already_used = False
+            rec.trial_used_warning = False
+            if rec.status not in self.OPEN_STATES:
+                continue
+            partner = rec.partner_id or rec._match_partner()
+            if not partner:
+                continue
+            if not rec._trial_already_claimed(partner):
+                continue
+            rec.trial_already_used = True
+            rec.trial_used_warning = _(
+                "%(name)s has already used their free trial. Approving this "
+                "will be refused - sell them a class, or book it from the "
+                "back office.", name=partner.name)
+
     @api.depends('scheduled_datetime', 'lang')
     def _compute_scheduled_datetime_display(self):
         for rec in self:
