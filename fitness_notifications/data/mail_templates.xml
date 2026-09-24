@@ -83,6 +83,8 @@
     </t>
     <p>¡Nos vemos pronto!</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>
@@ -147,6 +149,8 @@
       <p>No se ha devuelto el crédito (cancelado con menos de 6 horas de antelación).</p>
     </t>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>
@@ -196,6 +200,8 @@
     </ul>
     <p>¡Nos vemos allí!</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>
@@ -223,7 +229,7 @@
       <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
-    <p>If this does not suit you, reply to this email or call the studio and we will find you another class.</p>
+    <p>If this does not suit you, message us in the app or on WhatsApp and we will find you another class.</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
@@ -243,8 +249,10 @@
       <li style="color:#2E2724;">Fecha y hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
-    <p>Si no te viene bien, responde a este correo o llama al estudio y te buscamos otra clase.</p>
+    <p>Si no te viene bien, escríbenos por la app o por WhatsApp y te buscamos otra clase.</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>

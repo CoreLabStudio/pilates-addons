@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Teacher Swap â€“ CoreLab Studio',
-    'version': '19.0.1.3.9',
+    'version': '19.0.1.3.10',
     'category': 'Services',
     'summary': 'Portal page letting a teacher reassign one of their own upcoming classes to another teacher',
     'author': 'Core Lab Studio, S.L.',
