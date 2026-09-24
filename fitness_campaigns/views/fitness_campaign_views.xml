@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_fitness_campaign_form" model="ir.ui.view">
+    <field name="name">fitness.campaign.form</field>
+    <field name="model">fitness.campaign</field>
+    <field name="arch" type="xml">
+      <form string="Campaign">
+        <header>
+          <button name="action_send" type="object" string="Send"
+                  class="btn-primary" invisible="state != 'draft'"
+                  confirm="Send this survey to every student in the audience?"/>
+          <field name="state" widget="statusbar" statusbar_visible="draft,sent"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_recipients" type="object"
+                    class="oe_stat_button" icon="fa-users">
+              <div class="o_field_widget o_stat_info">
+                <span class="o_stat_value"><field name="recipient_count"/></span>
+                <span class="o_stat_text">Recipients</span>
+              </div>
+            </button>
+            <button name="action_view_results" type="object"
+                    class="oe_stat_button" icon="fa-bar-chart"
+                    invisible="state != 'sent'">
+              <div class="o_field_widget o_stat_info">
+                <span class="o_stat_value"><field name="response_count"/></span>
+                <span class="o_stat_text">Answered</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="oe_title">
+            <label for="name"/>
+            <h1><field name="name" placeholder="Autumn feedback"/></h1>
+          </div>
+
+          <group>
+            <group>
+              <field name="survey_id"
+                     options="{'no_create_edit': True}"
+                     readonly="state == 'sent'"/>
+              <field name="audience" readonly="state == 'sent'"/>
+              <field name="days" readonly="state == 'sent'"
+                     invisible="audience != 'attended_recently'"/>
+            </group>
+            <group>
+              <field name="sent_on" invisible="state != 'sent'"/>
+              <field name="sent_by" invisible="state != 'sent'"/>
+              <field name="sent_count" invisible="state != 'sent'"/>
+              <field name="response_rate" widget="percentage"
+                     invisible="state != 'sent'"/>
+            </group>
+          </group>
+
+          <!-- Who, by name, before she sends it. A count alone is a number
+               to trust; the list is something she can check. -->
+          <notebook>
+            <page string="Recipients">
+              <field name="recipient_ids" readonly="1">
+                <list>
+                  <field name="name"/>
+                  <field name="email" placeholder="no email - in-app only"/>
+                </list>
+              </field>
+            </page>
+            <page string="Answers" invisible="state != 'sent'">
+              <field name="user_input_ids" readonly="1">
+                <list>
+                  <field name="partner_id"/>
+                  <field name="state"/>
+                  <field name="create_date"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_fitness_campaign_list" model="ir.ui.view">
+    <field name="name">fitness.campaign.list</field>
+    <field name="model">fitness.campaign</field>
+    <field name="arch" type="xml">
+      <list string="Campaigns" decoration-muted="state == 'sent'">
+        <field name="name"/>
+        <field name="survey_id"/>
+        <field name="audience"/>
+        <field name="recipient_count" string="Recipients"/>
+        <field name="sent_on"/>
+        <field name="response_count" string="Answered"/>
+        <field name="response_rate" widget="percentage"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'sent'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_fitness_campaign" model="ir.actions.act_window">
+    <field name="name">Campaigns</field>
+    <field name="res_model">fitness.campaign</field>
+    <field name="view_mode">list,form</field>
+    <field name="group_ids" eval="[(4, ref('fitness_core.group_fitness_manager'))]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Ask your students something</p>
+      <p>Build the survey in the Surveys app, then send it here to the
+         students you choose. They get it by email and in the app.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_fitness_campaigns"
+            name="Campaigns"
+            parent="fitness_core.menu_fitness_root"
+            action="action_fitness_campaign"
+            sequence="60"
+            groups="fitness_core.group_fitness_manager"/>
+
+</odoo>

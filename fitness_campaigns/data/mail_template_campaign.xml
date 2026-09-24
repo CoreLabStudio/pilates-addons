@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Our own invite rather than survey's mail_template_user_input_invite.
+             Odoo's is addressed from whoever clicked Send and invites a reply;
+             every student-facing email from this studio carries the no-reply
+             footer with WhatsApp and in-app Messages instead, because the
+             mailbox is not read. Same model (survey.user_input), so the token
+             and the partner are both in scope. -->
+        <record id="mail_template_campaign_invite" model="mail.template">
+            <field name="name">CoreLab: Campaign Invite</field>
+            <field name="model_id" ref="survey.model_survey_user_input"/>
+            <field name="subject">{{ object.survey_id.title }}</field>
+            <field name="email_from">{{ (object.survey_id.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="use_default_to" eval="False"/>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="description">Sent to a student when the studio runs a campaign</field>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-size:14px;">
+    <p>
+        <t t-out="object.partner_id.name or ''">Hola</t>,
+    </p>
+    <p t-if="object.partner_id.lang == 'ca_ES'">
+        Ens agradaria molt saber què en penses. Només et prendrà un moment.
+    </p>
+    <p t-elif="object.partner_id.lang == 'en_US'">
+        We would really like to know what you think. It only takes a moment.
+    </p>
+    <p t-else="">
+        Nos encantaría saber qué opinas. Solo te llevará un momento.
+    </p>
+    <p style="margin:24px 0;">
+        <a t-attf-href="{{ object.get_start_url() }}"
+           style="background:#6b2c3e;color:#ffffff;padding:12px 22px;
+                  border-radius:6px;text-decoration:none;display:inline-block;">
+            <t t-if="object.partner_id.lang == 'ca_ES'">Respondre</t>
+            <t t-elif="object.partner_id.lang == 'en_US'">Answer</t>
+            <t t-else="">Responder</t>
+        </a>
+    </p>
+    <t t-call="fitness_notifications.mail_footer_no_reply"/>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>
