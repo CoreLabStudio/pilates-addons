@@ -233,12 +233,17 @@ class TestFitnessCampaign(TransactionCase):
     def test_a_student_with_no_email_is_still_reached_in_the_app(self):
         user = self._student("silent", email=False)
         camp = self._campaign()
-        before = self.env["mail.mail"].sudo().search_count([])
         camp.action_send()
 
+        # Counted against HER, not against the table. A campaign on a real
+        # database reaches every other student too, so a global before/after
+        # measures the studio's roll rather than this student - it passed on
+        # an empty database and failed the moment it met real data.
+        hers = self.env["mail.mail"].sudo().search_count(
+            [("recipient_ids", "in", user.partner_id.ids)])
         self.assertEqual(
-            self.env["mail.mail"].sudo().search_count([]), before,
-            "a mail was queued for a student with no address")
+            hers, 0,
+            "a mail was queued for a student with no address to send it to")
         self.assertTrue(
             self.env["fitness.notification"].sudo().search(
                 [("user_id", "=", user.id),
@@ -284,8 +289,14 @@ class TestFitnessCampaign(TransactionCase):
         answers[:1].write({"state": "done"})
         camp.invalidate_recordset()
 
-        self.assertEqual(camp.sent_count, 2)
+        # sent_count is whatever the studio's roll is on this database, so
+        # the assertions are about the ratio and the exclusion, not a
+        # hardcoded 2 - which was only ever true on an empty one.
+        self.assertGreaterEqual(
+            camp.sent_count, 2, "the two students under test were not sent it")
         self.assertEqual(
             camp.response_count, 1,
             "an answer from outside the campaign was counted in it")
-        self.assertAlmostEqual(camp.response_rate, 50.0, places=1)
+        self.assertAlmostEqual(
+            camp.response_rate, 100.0 / camp.sent_count, places=4,
+            msg="the rate does not match answered over sent")

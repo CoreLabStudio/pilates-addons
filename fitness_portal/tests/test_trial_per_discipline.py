@@ -109,22 +109,33 @@ class TestTrialPerDiscipline(HttpCase):
             "she has never done %s and the studio sells it - hiding it "
             "refuses her money" % self.second_name)
 
+    def _lands_on(self, path):
+        """Where the browser ends up, following redirects.
+
+        Asserted on the destination rather than the status code, because the
+        two differ by database and not by behaviour: a shape with the website
+        module rewrites /my/... to /es/my/... and answers 303 where a shape
+        without it answers 200. Both are the page opening. What tells a
+        refusal apart is being sent somewhere else.
+        """
+        resp = self.url_open(path, allow_redirects=True)
+        self.assertEqual(resp.status_code, 200, "%s did not resolve" % path)
+        return resp.url
+
     def test_the_untaken_one_can_be_reached_and_bought(self):
         """Refusing everything would also pass the test above, and would be
         the bug this set out to fix."""
         self._take(self.first_id, 0.0)
         self.authenticate(self.login, self.password)
 
-        page = self.url_open(
-            "/my/packages/%d" % self.second_id, allow_redirects=False)
-        self.assertEqual(
-            page.status_code, 200,
-            "she cannot even open the class she is entitled to buy")
-        checkout = self.url_open(
+        self.assertIn(
+            "/my/packages/%d" % self.second_id,
+            self._lands_on("/my/packages/%d" % self.second_id),
+            "she was sent away from the class she is entitled to buy")
+        self.assertIn(
             "/my/packages/%d/checkout" % self.second_id,
-            allow_redirects=False)
-        self.assertEqual(
-            checkout.status_code, 200, "she can see it but cannot buy it")
+            self._lands_on("/my/packages/%d/checkout" % self.second_id),
+            "she can see it but cannot buy it")
 
     def test_the_free_entitlement_is_still_one_per_student(self):
         """Buying the second is not a second free trial. The entitlement
@@ -156,13 +167,12 @@ class TestTrialPerDiscipline(HttpCase):
 
         for pid, name in ((self.first_id, self.first_name),
                           (self.second_id, self.second_name)):
-            page = self.url_open(
-                "/my/packages/%d" % pid, allow_redirects=False)
-            self.assertEqual(
-                page.status_code, 303,
+            self.assertNotIn(
+                "/my/packages/%d" % pid,
+                self._lands_on("/my/packages/%d" % pid),
                 "the product page for %s still opens" % name)
-            checkout = self.url_open(
-                "/my/packages/%d/checkout" % pid, allow_redirects=False)
-            self.assertEqual(
-                checkout.status_code, 303,
-                "checkout for %s still sells it" % name)
+            self.assertNotIn(
+                "/my/packages/%d/checkout" % pid,
+                self._lands_on("/my/packages/%d/checkout" % pid),
+                "checkout for %s still sells it - a kept link would buy a "
+                "third trial" % name)

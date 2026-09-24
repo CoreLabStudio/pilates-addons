@@ -3854,3 +3854,51 @@ msgstr "El teu pagament en efectiu no s'ha completat"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "We did not receive payment for %(product)s, so the order has been closed. Come to the studio or order again in the app whenever you are ready."
 msgstr "No hem rebut el pagament de %(product)s, així que hem tancat la comanda. Vine a l'estudi o torna a demanar-ho a l'app quan vulguis."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/controllers/portal.py:0
+msgid "Pay cash at the studio"
+msgstr "Pagar en efectiu a l'estudi"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "Only a studio manager can create a student account."
+msgstr "Només una responsable de l'estudi pot crear un compte d'alumna."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "A login is required."
+msgstr "Cal un usuari."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "The student group is missing from this database."
+msgstr "Falta el grup d'alumnes en aquesta base de dades."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "The account was created against the wrong contact. Nothing has been saved."
+msgstr "El compte s'ha creat sobre el contacte equivocat. No s'ha desat res."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "%(name)s already has a student account (%(login)s)."
+msgstr "%(name)s ja té un compte d'alumna (%(login)s)."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "%(name)s already has an account (%(login)s). This will add the student role to it rather than make a second one."
+msgstr "%(name)s ja té un compte (%(login)s). S'hi afegirà el rol d'alumna en lloc de crear-ne un segon."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/models/make_student_wizard.py:0
+msgid "Made a student by %(user)s. Login: %(login)s"
+msgstr "Convertida en alumna per %(user)s. Usuari: %(login)s"
