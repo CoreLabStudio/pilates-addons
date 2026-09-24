@@ -18,3 +18,4 @@ from . import test_desk_sale
 from . import test_shop_trial_pending
 from . import test_membership_renewal
 from . import test_login_destination
+from . import test_cash_request

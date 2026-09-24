@@ -1,9 +1,15 @@
 import logging
+from datetime import timedelta
 
-from odoo import models, fields, _
-from odoo.exceptions import UserError
+from odoo import api, models, fields, _
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
+
+# How long the studio gives a student to turn up with the money. Nothing
+# expires on its own - an unpaid request simply stays on the studio's list,
+# because deciding it is too late is the studio's call and not a cron's.
+CASH_WINDOW_HOURS = 24
 
 
 class SaleOrder(models.Model):
@@ -19,9 +25,12 @@ class SaleOrder(models.Model):
         ('stripe', 'Stripe (Online)'),
         ('bizum', 'Bizum'),
         ('transfer', 'Bank Transfer'),
-        # Taken in person at the desk. Unlike Bizum and bank transfer there is
-        # nothing left to chase: the money is in the till before the order is
-        # written, so a cash order is not waiting on anybody.
+        # Taken in person at the desk. This used to mean the money was
+        # already in the till before the order was written, so a cash order
+        # was not waiting on anybody. It now also covers a student asking in
+        # the portal to pay cash, which is the opposite: nothing is hers
+        # until somebody at the desk says the money arrived. The two are told
+        # apart by fitness_cash_requested_on, not by the method.
         ('cash', 'Cash (at the studio)'),
         # Not a method so much as the absence of one: the order came to zero,
         # so nothing was charged and no provider was involved. Recorded rather
@@ -36,6 +45,110 @@ class SaleOrder(models.Model):
         help="When the student ticked 'I agree to the Terms and Conditions' "
              "during portal checkout.",
     )
+
+    # ── A student asking to pay cash ───────────────────────────────────────
+    #
+    # She chooses Cash in the portal and the order stops there: draft, no
+    # credits, nothing bookable. It becomes real only when somebody at the
+    # desk confirms the money arrived. Holding it as a draft order rather
+    # than a separate request model is deliberate - the thing she asked for
+    # is already described perfectly by the order lines, and approving it has
+    # to run the same confirmation an online purchase runs, not a parallel
+    # one that drifts.
+    fitness_cash_requested_on = fields.Datetime(
+        "Cash Requested On", copy=False, readonly=True,
+        help="When the student asked to pay this order in cash at the "
+             "studio. Set only by the portal; a desk sale leaves it empty.",
+    )
+    fitness_cash_approved_on = fields.Datetime(
+        "Cash Approved On", copy=False, readonly=True,
+        help="When the studio confirmed the cash was received.",
+    )
+    fitness_cash_approved_by = fields.Many2one(
+        'res.users', "Cash Approved By", copy=False, readonly=True,
+    )
+    fitness_cash_pending = fields.Boolean(
+        "Waiting For Cash", compute='_compute_fitness_cash_pending',
+        store=True,
+        help="A student has asked to pay cash and has not yet been "
+             "confirmed as having paid.",
+    )
+    fitness_cash_deadline = fields.Datetime(
+        "Pay By", compute='_compute_fitness_cash_pending', store=True,
+        help="24 hours after the request. Shown to the student and used to "
+             "sort the studio's list; nothing expires on its own.",
+    )
+
+    @api.depends('fitness_cash_requested_on', 'fitness_cash_approved_on',
+                 'state')
+    def _compute_fitness_cash_pending(self):
+        for order in self:
+            asked = order.fitness_cash_requested_on
+            order.fitness_cash_pending = bool(
+                asked and not order.fitness_cash_approved_on
+                and order.state in ('draft', 'sent'))
+            order.fitness_cash_deadline = (
+                asked + timedelta(hours=CASH_WINDOW_HOURS) if asked else False)
+
+    def action_fitness_approve_cash(self):
+        """The money arrived. Make the purchase real.
+
+        Runs the same two steps the portal runs when a card payment
+        succeeds - action_confirm(), then tell the studio - so a cash
+        purchase and an online one leave the student in exactly the same
+        place: same credits, same validity, same matricula rules, same
+        invoice, same notification. Anything done differently here is a
+        difference she would eventually find.
+        """
+        # Gate explicitly, then read through sudo. A fitness manager cannot
+        # read sale.order at all - group_fitness_manager grants nothing on
+        # it - so without the sudo this fails on the very first field access,
+        # for exactly the people the button is for. Without the explicit
+        # check, the sudo would then let anybody who can reach the method
+        # approve their own order.
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user._is_admin()):
+            raise AccessError(self.env._(
+                "Only studio managers can approve a cash payment."))
+
+        for order in self.sudo():
+            if not order.fitness_cash_requested_on:
+                raise UserError(self.env._(
+                    "%(name)s is not a cash request.", name=order.name))
+            if order.fitness_cash_approved_on:
+                raise UserError(self.env._(
+                    "%(name)s has already been approved.", name=order.name))
+            if order.state not in ('draft', 'sent'):
+                raise UserError(self.env._(
+                    "%(name)s is already confirmed.", name=order.name))
+
+            order_sudo = order
+            order_sudo.write({
+                'fitness_cash_approved_on': fields.Datetime.now(),
+                'fitness_cash_approved_by': self.env.user.id,
+            })
+            order_sudo.action_confirm()
+            # The invoice, settled in cash and mailed - the same three steps
+            # a desk sale takes, because the money arrived the same way.
+            try:
+                invoice = order_sudo.fitness_invoice_cash_sale()
+                if invoice:
+                    order_sudo.fitness_settle_invoice_in_cash(invoice)
+                    order_sudo.fitness_email_invoice(invoice)
+            except Exception:
+                # An invoicing problem must not un-sell the class she has
+                # just paid for in front of somebody. The purchase stands and
+                # the studio is told.
+                _logger.exception(
+                    "[CASH] %s confirmed but could not be invoiced",
+                    order.name)
+            order_sudo.message_post(body=self.env._(
+                "Cash received and approved by %(user)s.",
+                user=self.env.user.name))
+            _logger.info("[CASH] %s approved by %s (requested %s)",
+                         order.name, self.env.user.name,
+                         order.fitness_cash_requested_on)
+        return True
 
 
     # ── Taking cash: invoice it, settle it, send it ────────────────────────

@@ -24,6 +24,11 @@ class FitnessNotification(models.Model):
         ('class_rescheduled', 'Class Rescheduled'),
         ('invoice_issued', 'Invoice Issued'),
         ('purchase_completed', 'Purchase Completed'),
+        # Studio-facing. Distinct from purchase_completed on purpose:
+        # nothing has been bought yet, and treating the two alike
+        # would tell the desk a sale had happened when what happened
+        # is that somebody said they would come in with the money.
+        ('cash_requested', 'Cash Payment Requested'),
         ('message_reply', 'New Message Reply'),
         ('billing_reminder', 'Subscription Renewal Reminder'),
         ('class_reminder', 'Class Reminder'),

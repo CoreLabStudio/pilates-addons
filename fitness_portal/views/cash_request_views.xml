@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Cash requests are ordinary draft sale orders carrying
+         fitness_cash_requested_on. There is no separate model on purpose: what
+         she asked for is already described exactly by the order lines, and
+         approving it has to run the same confirmation an online purchase runs
+         rather than a parallel one that drifts away from it. -->
+
+    <record id="view_sale_order_tree_fitness_cash" model="ir.ui.view">
+        <field name="name">sale.order.list.fitness.cash</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <!-- Oldest request first: the student who has been waiting
+                 longest is the one most likely standing at the desk. -->
+            <list string="Cash requests" create="false"
+                  default_order="fitness_cash_requested_on asc"
+                  decoration-danger="fitness_cash_deadline &lt; current_date">
+                <field name="name" string="Order"/>
+                <field name="partner_id" string="Student"/>
+                <field name="amount_total" string="To collect"
+                       sum="To collect"/>
+                <field name="fitness_cash_requested_on" string="Asked"/>
+                <field name="fitness_cash_deadline" string="Pay by"/>
+                <field name="fitness_cash_pending" column_invisible="1"/>
+                <button name="action_fitness_approve_cash"
+                        type="object"
+                        string="Approve"
+                        icon="fa-check"
+                        class="btn-primary"
+                        confirm="Confirm the student has paid this in cash? Her credits become active immediately and she is invoiced and emailed."/>
+            </list>
+        </field>
+    </record>
+
+    <!-- The form is the ordinary sale order form plus one button, so the
+         desk can open a request, see exactly what she chose, and approve it
+         without learning a second screen. -->
+    <record id="view_sale_order_form_fitness_cash" model="ir.ui.view">
+        <field name="name">sale.order.form.fitness.cash</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="fitness_cash_pending" invisible="1"/>
+                <button name="action_fitness_approve_cash"
+                        type="object"
+                        string="Cash received - approve"
+                        class="btn-primary"
+                        groups="fitness_core.group_fitness_manager"
+                        invisible="not fitness_cash_pending"
+                        confirm="Confirm the student has paid this in cash? Her credits become active immediately and she is invoiced and emailed."/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_fitness_cash_requests" model="ir.actions.act_window">
+        <field name="name">Cash requests</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('fitness_cash_pending', '=', True)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nobody is waiting to pay
+            </p>
+            <p>
+                When a student chooses "Pay at the studio" in the app, her
+                order waits here until somebody confirms the money arrived.
+                Nothing is hers until then - no credits, no bookings.
+            </p>
+        </field>
+    </record>
+
+    <!-- The list view is bound explicitly so the action gets the one with
+         the Approve button on it, not sale's default list. -->
+    <record id="action_fitness_cash_requests_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_sale_order_tree_fitness_cash"/>
+        <field name="act_window_id" ref="action_fitness_cash_requests"/>
+    </record>
+
+    <menuitem
+        id="menu_fitness_cash_requests"
+        name="Cash requests"
+        parent="fitness_core.menu_group_bookings"
+        action="action_fitness_cash_requests"
+        sequence="36"
+        groups="fitness_core.group_fitness_manager"/>
+
+</odoo>
