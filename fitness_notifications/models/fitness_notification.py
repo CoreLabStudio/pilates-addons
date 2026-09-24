@@ -37,6 +37,11 @@ class FitnessNotification(models.Model):
         # being generated, which breaks booking and every fixed-slot
         # renewal at once if nobody notices.
         ('generation_stalled', 'Class Generation Stalled'),
+        # A survey or announcement sent to a group of students. Its own type
+        # rather than reusing message_reply: the bell links to her personal
+        # survey token, and somebody tapping what she thinks is a message
+        # from Yoleyva should not land on a questionnaire.
+        ('campaign', 'Studio Survey'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")
