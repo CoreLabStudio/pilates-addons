@@ -491,3 +491,15 @@ msgstr "No hi ha cap classe el dia que va demanar, així que es mostren totes."
 #: model_terms:ir.ui.view,arch_db:fitness_trials.trial_request_form
 msgid "You have already used your free trial class. It is one per student, Barre or Reformer. You can still ask, and the studio will tell you what a class costs."
 msgstr "Ja has fet servir la teva classe de prova gratuïta. És una per alumna, de Barre o de Reformer. Pots demanar-la igualment i l'estudi et dirà quant costa una classe."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(name)s has already used their free trial. Approving this will be refused - sell them a class, or book it from the back office."
+msgstr "%(name)s ja ha fet servir la seva classe de prova gratuïta. Aprovar aquesta sol·licitud donarà error: ven-li una classe o reserva-la des de l'administració."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Trial Already Used"
+msgstr "Prova ja utilitzada"

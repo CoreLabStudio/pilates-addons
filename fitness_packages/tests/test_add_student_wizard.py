@@ -284,3 +284,62 @@ class TestCourtesyProductsStillExist(TransactionCase):
             self.assertTrue(product, "%s is gone" % xmlid)
             self.assertEqual(product.list_price, 0.0,
                              "%s is not free any more" % xmlid)
+
+
+@tagged("post_install", "-at_install")
+class TestTheWizardDoesNotOfferAPrivateOnAGroupClass(TransactionCase):
+    """Opened on an ordinary group class, the form used to fill itself in
+    with "Charged as: Reformer Private Single - 50.00".
+
+    That is an offer the screen cannot honour: there is no group
+    single-class product, action_add refuses a group class outright, and the
+    price shown belongs to a different kind of session entirely. The studio
+    reads it as a price it can charge and finds out otherwise on save.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+        cls.group_type = cls.env["fitness.class.type"].create({
+            "name": "Group Probe", "classroom_type": "reformer",
+            "duration": 50, "level": "all", "session_type": "group",
+        })
+        cls.private_type = cls.env["fitness.class.type"].create({
+            "name": "Private Probe", "classroom_type": "reformer",
+            "duration": 50, "level": "all", "session_type": "private",
+        })
+
+    def _event(self, class_type):
+        start = fields.Datetime.now() + timedelta(days=3)
+        return self.env["calendar.event"].create({
+            "name": "Probe %s" % class_type.name,
+            "start": start, "stop": start + timedelta(minutes=50),
+            "class_type_id": class_type.id, "is_fitness_class": True,
+        })
+
+    def test_a_group_class_offers_no_product_and_no_price(self):
+        event = self._event(self.group_type)
+        res = self.env["fitness.add.student.wizard"].with_context(
+            default_event_id=event.id, active_id=event.id,
+            active_model="calendar.event").default_get(
+                ["event_id", "product_id", "price"])
+        self.assertEqual(res.get("event_id"), event.id)
+        self.assertFalse(res.get("product_id"),
+                         "a group class was offered a private product")
+        self.assertFalse(res.get("price") or 0.0,
+                         "a group class was given a private class's price")
+
+    def test_a_private_class_still_fills_itself_in(self):
+        """The screen's actual job must keep working."""
+        event = self._event(self.private_type)
+        res = self.env["fitness.add.student.wizard"].with_context(
+            default_event_id=event.id, active_id=event.id,
+            active_model="calendar.event").default_get(
+                ["event_id", "product_id", "price"])
+        self.assertTrue(res.get("product_id"),
+                        "a private class no longer resolves its product")
+        self.assertGreater(res.get("price") or 0.0, 0.0,
+                           "a private class no longer carries its price")
