@@ -86,6 +86,16 @@ class FitnessBookingReassignWizard(models.TransientModel):
         """
         if not line:
             return False
+        # sudo: a fitness manager is not a Sales user, and reading the credit
+        # line raises AccessError on sale.order.line for every manager except
+        # the owner, who happens to be an administrator. That made the move
+        # impossible for anybody she delegated to, while working perfectly
+        # for her - so it never showed up in her own testing.
+        #
+        # Taken here rather than at each call site so a future caller cannot
+        # forget it. Reading the pool to decide coverage is the wizard's own
+        # business; nothing about the line is shown to anyone.
+        line = line.sudo()
         product = line.product_id
         pool_type = line.fitness_class_type or product.fitness_class_type
         if pool_type not in ('any', self._event_studio(event)):
@@ -124,11 +134,11 @@ class FitnessBookingReassignWizard(models.TransientModel):
             # the first: five bookings can hold five different credits, and a
             # target that suits one may not be covered for another.
             for other in bookings:
-                other_line = other.package_order_line_id
+                other_line = other.package_order_line_id.sudo()
                 if other_line:
                     candidates = candidates.filtered(
                         lambda e: wiz._line_covers(other_line, e))
-            line = wiz.booking_id.package_order_line_id
+            line = wiz.booking_id.package_order_line_id.sudo()
             if line:
                 candidates = candidates.filtered(
                     lambda e: wiz._line_covers(line, e))
@@ -237,7 +247,7 @@ class FitnessBookingReassignWizard(models.TransientModel):
             raise UserError(_(
                 "'%(name)s' is cancelled.", name=target.name))
 
-        line = booking.package_order_line_id
+        line = booking.package_order_line_id.sudo()
         if line and not self._line_covers(line, target):
             raise UserError(_(
                 "The credit on this booking does not cover '%(name)s'. It "

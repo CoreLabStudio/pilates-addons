@@ -43,6 +43,8 @@
     <p>Todo lo dem&#225;s sigue igual. &#161;Nos vemos en clase!</p>
     <p>El equipo de CoreLab</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>
@@ -71,7 +73,7 @@
       <li>Class: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>New time: <strong t-out="when"/></li>
     </ul>
-    <p>Your place is still booked and your credit is unchanged. If the new time does not suit you, reply to this email and we will sort it out.</p>
+    <p>Your place is still booked and your credit is unchanged. If the new time does not suit you, message us in the app or on WhatsApp and we will sort it out.</p>
     <p>The CoreLab team</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
@@ -81,7 +83,7 @@
       <li>Classe: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Nou horari: <strong t-out="when"/></li>
     </ul>
-    <p>La teva pla&#231;a segueix reservada i el teu cr&#232;dit no canvia. Si el nou horari no et va b&#233;, respon a aquest correu i ho arreglem.</p>
+    <p>La teva pla&#231;a segueix reservada i el teu cr&#232;dit no canvia. Si el nou horari no et va b&#233;, escriu-nos per l'app o per WhatsApp i ho arreglem.</p>
     <p>L&#39;equip de CoreLab</p>
   </t>
   <t t-else="">
@@ -91,9 +93,11 @@
       <li>Clase: <strong t-out="object.calendar_event_id.name or ''"/></li>
       <li>Nuevo horario: <strong t-out="when"/></li>
     </ul>
-    <p>Tu plaza sigue reservada y tu cr&#233;dito no cambia. Si el nuevo horario no te va bien, responde a este correo y lo solucionamos.</p>
+    <p>Tu plaza sigue reservada y tu cr&#233;dito no cambia. Si el nuevo horario no te va bien, escríbenos por la app o por WhatsApp y lo solucionamos.</p>
     <p>El equipo de CoreLab</p>
   </t>
+  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
         </record>

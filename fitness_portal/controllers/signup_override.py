@@ -101,6 +101,31 @@ class FitnessSignup(AuthSignupHome):
         """
         return user.partner_id.sudo().signup_type == 'signup'
 
+    @staticmethod
+    def _mv_safe_dest(redirect):
+        """Where a student should land, or None to use the default.
+
+        Only a path on this site is honoured. "//evil.example" and
+        "https://evil.example" are both rejected: `redirect` arrives from the
+        query string, so anything else turns the login page into an open
+        redirect that arrives wearing our domain.
+
+        A generic destination is treated as no destination, because Odoo fills
+        it in by default and a student who asked for nothing in particular
+        wants the portal home, not /web.
+        """
+        if not redirect or not isinstance(redirect, str):
+            return None
+        if not redirect.startswith('/') or redirect.startswith('//'):
+            return None
+        # "/my/messages?" - the language-prefix redirect leaves a bare '?'
+        # behind, which is not a generic destination but does not match one
+        # either. Compared on the path alone.
+        if redirect.split('?')[0].rstrip('/') in {
+                r.rstrip('/') for r in _GENERIC_REDIRECTS}:
+            return None
+        return redirect
+
     def _login_redirect(self, uid, redirect=None):
         user = request.env['res.users'].sudo().browse(uid)
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
@@ -141,9 +166,8 @@ class FitnessSignup(AuthSignupHome):
         if request.session.uid:
             user = request.env['res.users'].sudo().browse(request.session.uid)
             if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
-                dest = (redirect if redirect and redirect not in _GENERIC_REDIRECTS
-                        else '/my/home')
-                return request.redirect(dest)
+                return request.redirect(
+                    self._mv_safe_dest(redirect) or '/my/home')
 
         response = super().web_login(redirect=redirect, **kw)
 
@@ -172,7 +196,15 @@ class FitnessSignup(AuthSignupHome):
         ):
             user = request.env['res.users'].sudo().browse(request.session.uid)
             if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP):
-                return request.redirect('/my/home')
+                # Honour where she was going. This used to be an unconditional
+                # '/my/home', which meant every deep link into the portal lost
+                # its destination the moment the student had to log in to
+                # follow it: she clicked "Messages" in an email, signed in,
+                # and arrived at Home with no idea why. The emails now carry
+                # exactly such a link, so this is the difference between the
+                # link working and the link lying.
+                return request.redirect(
+                    self._mv_safe_dest(redirect) or '/my/home')
             elif not user._is_internal():
                 if self._mv_awaiting_verification(user):
                     return request.redirect('/corelab/pending-verification')
