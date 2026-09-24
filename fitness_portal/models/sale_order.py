@@ -90,6 +90,63 @@ class SaleOrder(models.Model):
             order.fitness_cash_deadline = (
                 asked + timedelta(hours=CASH_WINDOW_HOURS) if asked else False)
 
+    def action_fitness_decline_cash(self):
+        """She did not come with the money. Close the request.
+
+        A separate action rather than the generic Cancel, because the studio
+        needs to be able to say so: the reason is written to the chatter and
+        the student is told, so a request that quietly vanished can never be
+        confused with one nobody acted on.
+
+        The order is cancelled rather than deleted. It is the record of what
+        she asked for, and deleting it would leave the studio unable to say
+        whether a request had ever existed.
+        """
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user._is_admin()):
+            raise AccessError(self.env._(
+                "Only studio managers can decline a cash payment."))
+
+        reason = (self.env.context.get('fitness_decline_reason') or '').strip()
+        for order in self.sudo():
+            if not order.fitness_cash_requested_on:
+                raise UserError(self.env._(
+                    "%(name)s is not a cash request.", name=order.name))
+            if order.fitness_cash_approved_on:
+                raise UserError(self.env._(
+                    "%(name)s was already approved and cannot be declined.",
+                    name=order.name))
+
+            order._action_cancel()
+            order.message_post(body=self.env._(
+                "Cash request declined by %(user)s.%(why)s",
+                user=self.env.user.name,
+                why=(" %s" % reason) if reason else ""))
+
+            # Tell her, in her own language. A request that disappears with
+            # no word is worse than a refusal: she turns up expecting a class
+            # she no longer has.
+            user = order.partner_id.user_ids[:1]
+            if user:
+                translate = self.env(context=dict(
+                    self.env.context, lang=user.lang or 'es_ES'))._
+                line = order.order_line[:1]
+                what = line.product_id.display_name if line else order.name
+                self.env['fitness.notification'].sudo()._create_for_user(
+                    user.id,
+                    'cash_requested',
+                    translate('Your cash payment was not completed'),
+                    translate(
+                        'We did not receive payment for %(product)s, so the '
+                        'order has been closed. Come to the studio or order '
+                        'again in the app whenever you are ready.',
+                        product=what),
+                    action_url='/my/packages',
+                )
+            _logger.info("[CASH] %s declined by %s", order.name,
+                         self.env.user.name)
+        return True
+
     def action_fitness_approve_cash(self):
         """The money arrived. Make the purchase real.
 
