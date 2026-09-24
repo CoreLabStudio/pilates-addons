@@ -3784,3 +3784,15 @@ msgstr "Tu solicitud de clase de prueba está con el estudio"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You have already used your trial classes. Choose a pack, a membership or a class to keep training."
 msgstr "Ya has usado tus clases de prueba. Elige un bono, una membresía o una clase para seguir entrenando."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "%(credits)s. Book a class from your schedule."
+msgstr "%(credits)s. Reserva una clase desde tu horario."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You have used this week's classes. Your membership opens new slots next week."
+msgstr "Has usado las clases de esta semana. Tu membresía abre nuevas plazas la semana que viene."

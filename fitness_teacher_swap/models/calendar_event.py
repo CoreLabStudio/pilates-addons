@@ -133,7 +133,25 @@ class CalendarEvent(models.Model):
                         ('calendar_event_id', '=', event.id),
                         ('state', '=', 'booked'),
                     ])
+                    # Email as well as the bell. The bell alone never reaches
+                    # a student who does not open the app before the old start
+                    # time, which is precisely the student a time change is
+                    # for. Cancellation has always sent both; a reschedule is
+                    # no less urgent, and it was in-app only until now.
+                    #
+                    # Queued per booking rather than once for the class,
+                    # because the template renders in each student's own
+                    # language and addresses her by name.
+                    template = self.env.ref(
+                        'fitness_teacher_swap.mail_template_class_rescheduled',
+                        raise_if_not_found=False)
+                    if not template:
+                        _logger.warning(
+                            "[RESCHEDULE] mail template missing; '%s' went "
+                            "out by bell only.", event.name)
+
                     notified = 0
+                    mailed = 0
                     for booking in bookings:
                         student_user = booking.student_id.user_ids[:1]
                         if student_user:
@@ -147,6 +165,19 @@ class CalendarEvent(models.Model):
                                 action_url=f'/my/classes/{event.id}',
                             )
                             notified += 1
+                        # Sent whether or not she has a portal login: the
+                        # address on the booking is what the studio has, and a
+                        # student without an account is the one least able to
+                        # find out any other way.
+                        if template:
+                            try:
+                                template.sudo().send_mail(
+                                    booking.id, force_send=False)
+                                mailed += 1
+                            except Exception:
+                                _logger.exception(
+                                    "[RESCHEDULE] Failed to queue mail for "
+                                    "booking %s", booking.id)
                     if teacher and teacher.id:
                         new_dt_str = _fmt_event_dt(new_start)
                         tenv = self.with_context(lang=teacher.lang or DEFAULT_LANG)
@@ -158,8 +189,10 @@ class CalendarEvent(models.Model):
                             action_url=f'/my/instructor/classes/{event.id}',
                         )
                     _logger.info(
-                        "[RESCHEDULE] '%s' (id=%d): %s → %s, %d student(s) + teacher notified",
-                        event.name, event.id, old_start, new_start, notified,
+                        "[RESCHEDULE] '%s' (id=%d): %s → %s, %d student(s) "
+                        "belled, %d emailed, teacher notified",
+                        event.name, event.id, old_start, new_start,
+                        notified, mailed,
                     )
 
         return result
