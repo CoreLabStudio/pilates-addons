@@ -17,7 +17,7 @@ fitness.booking has no write() override to enforce them.
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -498,3 +498,149 @@ class TestDirectMoveKeepsSeatsHonest(TransactionCase):
         self.assertEqual(event.booked_seats, 1)
         self.assertEqual(len(booking.message_ids), before,
                          "a write that moved nothing announced a move")
+
+
+@tagged("post_install", "-at_install")
+class TestAManagerWhoIsNotAnAdministratorCanMove(TransactionCase):
+    """The move as the studio's own staff actually run it.
+
+    Every other test here runs as base.user_admin, who can read anything. A
+    fitness manager cannot: group_fitness_manager grants nothing on
+    sale.order.line, so reading the credit behind the booking raised
+
+        AccessError: You are not allowed to access 'Sales Order Line'
+
+    and the move failed for every manager except the owner, whose account
+    happens to be an administrator. It therefore worked in her hands and
+    nowhere else, which is the shape of the "no roster" report: somebody
+    tried to move a student, it failed, and the class looked wrong after.
+    """
+
+    longMessage = False
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env["ir.config_parameter"].sudo().set_param("fitness.opening_date", "")
+
+        cls.manager = cls.env["res.users"].with_context(
+            no_reset_password=True).create({
+                "name": "Desk Manager",
+                "login": "desk.manager@example.invalid",
+                "group_ids": [(6, 0, [
+                    cls.env.ref("base.group_user").id,
+                    cls.env.ref("fitness_core.group_fitness_manager").id,
+                ])],
+            })
+        cls.student = cls.env["res.users"].with_context(
+            no_reset_password=True).create({
+                "name": "Moved By Manager",
+                "login": "moved.by.manager@example.invalid",
+                "group_ids": [(6, 0, [
+                    cls.env.ref("base.group_portal").id,
+                    cls.env.ref("fitness_core.group_fitness_student").id,
+                ])],
+            })
+        cls.partner = cls.student.partner_id
+
+        cls.ctype = cls.env["fitness.class.type"].create({
+            "name": "Manager Move Barre", "classroom_type": "barre",
+            "duration": 45, "level": "all", "session_type": "group",
+        })
+        cls.origin = cls._mkevent(cls, "Origin", 4)
+        cls.target = cls._mkevent(cls, "Target", 5)
+
+        cls.pack = cls.env["product.template"].create({
+            "name": "Manager Move Pack", "list_price": 100.0, "type": "service",
+            "fitness_is_package": True, "fitness_class_count": 10,
+            "fitness_validity_days": 90, "fitness_class_type": "barre",
+            "fitness_session_type": "group",
+        })
+        order = cls.env["sale.order"].create({"partner_id": cls.partner.id})
+        cls.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": cls.pack.product_variant_ids[:1].id,
+            "product_uom_qty": 1, "price_unit": 100.0,
+            "fitness_class_type": "barre",
+        })
+        order.action_confirm()
+        cls.booking = cls.env["fitness.booking"].create({
+            "student_id": cls.partner.id,
+            "calendar_event_id": cls.origin.id,
+            "package_order_line_id": order.order_line[:1].id,
+            "manager_override_timewindow": True,
+        })
+
+    def _mkevent(self, label, days):
+        start = fields.Datetime.now() + timedelta(days=days)
+        return self.env["calendar.event"].create({
+            "name": "Manager Move %s" % label,
+            "start": start, "stop": start + timedelta(minutes=45),
+            "class_type_id": self.ctype.id,
+            "is_fitness_class": True, "capacity": 10,
+        })
+
+    def test_the_fixture_manager_really_cannot_read_a_credit_line(self):
+        """Without this the rest proves nothing: if the fixture happened to
+        grant sales rights, the move would pass for the wrong reason."""
+        self.env.invalidate_all()
+        with self.assertRaises(AccessError):
+            self.env["sale.order.line"].with_user(
+                self.manager).check_access("read")
+
+    def test_a_manager_can_move_a_student(self):
+        """The failure the studio hit. Cache invalidated first, because the
+        fixture was built by admin and a cached value would answer the read
+        without ever consulting the manager's rights - the exact way six
+        renewal tests once passed while the feature was broken."""
+        self.env.invalidate_all()
+        wizard = self.env["fitness.booking.reassign.wizard"].with_user(
+            self.manager).create({
+                "booking_id": self.booking.id,
+                "target_event_id": self.target.id,
+            })
+        wizard.action_move_student()
+
+        self.assertEqual(self.booking.calendar_event_id, self.target,
+                         "the manager's move did not take effect")
+
+    def test_the_roster_moves_with_the_student(self):
+        """The complaint in its own terms: the student leaves one roster and
+        appears on the other, and is still booked."""
+        self.env.invalidate_all()
+        self.env["fitness.booking.reassign.wizard"].with_user(
+            self.manager).create({
+                "booking_id": self.booking.id,
+                "target_event_id": self.target.id,
+            }).action_move_student()
+
+        self.assertIn(self.booking, self.target.booking_ids,
+                      "missing from the new class roster")
+        self.assertNotIn(self.booking, self.origin.booking_ids,
+                         "still on the old class roster")
+        self.assertEqual(self.booking.state, "booked",
+                         "the booking is no longer booked, which is what "
+                         "would empty a roster")
+
+    def test_the_credit_rules_still_bite_for_a_manager(self):
+        """sudo is for reading the pool, not for waiving the rule it feeds.
+        A Barre credit must still refuse a Reformer class, whoever asks."""
+        reformer = self.env["fitness.class.type"].create({
+            "name": "Manager Move Reformer", "classroom_type": "reformer",
+            "duration": 45, "level": "all", "session_type": "group",
+        })
+        start = fields.Datetime.now() + timedelta(days=6)
+        other = self.env["calendar.event"].create({
+            "name": "Manager Move Reformer Class",
+            "start": start, "stop": start + timedelta(minutes=45),
+            "class_type_id": reformer.id,
+            "is_fitness_class": True, "capacity": 10,
+        })
+        self.env.invalidate_all()
+        wizard = self.env["fitness.booking.reassign.wizard"].with_user(
+            self.manager).create({
+                "booking_id": self.booking.id,
+                "target_event_id": other.id,
+            })
+        with self.assertRaises(UserError):
+            wizard.action_move_student()
