@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── The wizard ───────────────────────────────────────────────────────── -->
+  <record id="view_fitness_make_student_wizard_form" model="ir.ui.view">
+    <field name="name">fitness.make.student.wizard.form</field>
+    <field name="model">fitness.make.student.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Make This Person a Student">
+
+        <!-- Said before anything is filled in, because both cases change
+             what the button will do. -->
+        <div class="alert alert-info" role="alert"
+             invisible="not warning or already_student">
+          <field name="warning" nolabel="1" readonly="1"/>
+        </div>
+        <div class="alert alert-warning" role="alert"
+             invisible="not already_student">
+          <field name="warning" nolabel="1" readonly="1"/>
+        </div>
+
+        <group>
+          <group>
+            <field name="partner_id" invisible="1"/>
+            <field name="already_student" invisible="1"/>
+            <field name="existing_user_id" invisible="1"/>
+            <field name="partner_name" string="Contact" readonly="1"/>
+            <field name="partner_email" string="Email" readonly="1"
+                   placeholder="no email address"/>
+          </group>
+          <group>
+            <field name="login"/>
+            <field name="password" password="True"/>
+            <field name="lang"/>
+          </group>
+        </group>
+
+        <!-- The point of the whole screen, said plainly rather than left
+             for the manager to infer from an empty field. -->
+        <div class="text-muted mt-2" invisible="partner_email">
+          <i class="fa fa-info-circle me-1"/>
+          This person has no email address, which is fine. The login above is
+          a username, so nothing has to be invented. She will get in-app
+          notifications; no email will be sent to her.
+        </div>
+        <div class="text-muted mt-2" invisible="not partner_email">
+          <i class="fa fa-info-circle me-1"/>
+          Give her this password directly. She can change it once she is in.
+        </div>
+
+        <footer>
+          <button string="Make Student" name="action_make_student"
+                  type="object" class="btn-primary"
+                  invisible="already_student"/>
+          <button string="Cancel" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_fitness_make_student" model="ir.actions.act_window">
+    <field name="name">Make This Person a Student</field>
+    <field name="res_model">fitness.make.student.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="base.model_res_partner"/>
+    <field name="binding_view_types">form,list</field>
+    <!-- group_ids, not groups_id: renamed in Odoo 19, and the old name
+         fails the whole module load rather than being ignored. -->
+    <field name="group_ids" eval="[(4, ref('fitness_core.group_fitness_manager'))]"/>
+  </record>
+
+  <!-- ── The button on the contact itself ─────────────────────────────────── -->
+  <!--                                                                         -->
+  <!-- In the header rather than only in the Action menu: a manager who has    -->
+  <!-- just typed in a walk-in is looking at the form, not hunting through a   -->
+  <!-- cog menu for a step they may not know exists. That step being invisible -->
+  <!-- is what left contacts sitting in the database as non-students.          -->
+  <record id="view_partner_form_make_student" model="ir.ui.view">
+    <field name="name">res.partner.form.make.student</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="before">
+        <header>
+          <button name="%(action_fitness_make_student)d" type="action"
+                  string="Make This Person a Student"
+                  class="btn-primary"
+                  groups="fitness_core.group_fitness_manager"
+                  invisible="fitness_is_student"/>
+          <button name="%(action_fitness_make_student)d" type="action"
+                  string="Student Account"
+                  class="btn-secondary"
+                  groups="fitness_core.group_fitness_manager"
+                  invisible="not fitness_is_student"/>
+        </header>
+      </xpath>
+      <xpath expr="//sheet" position="inside">
+        <field name="fitness_is_student" invisible="1"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

@@ -21,3 +21,4 @@ from . import test_login_destination
 from . import test_cash_request
 from . import test_cash_paths_matrix
 from . import test_blank_email
+from . import test_make_student
