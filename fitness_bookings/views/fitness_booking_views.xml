@@ -49,7 +49,32 @@
                             type="object"
                             class="btn-primary"
                             invisible="state != 'booked'"/>
+                    <!-- Attendance goes through the methods, never through
+                         the field. They are what set marked_by_id and
+                         marked_date and what recount the seats; a bare write
+                         to state records neither who nor when.
+                         Manager-only: an instructor marks her own classes
+                         from /my/instructor, where the class is already
+                         hers. -->
+                    <button name="action_mark_attended"
+                            string="Attended"
+                            type="object"
+                            class="btn-success"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state != 'booked'"/>
+                    <button name="action_mark_no_show"
+                            string="No-show"
+                            type="object"
+                            class="btn-warning"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state != 'booked'"/>
+                    <!-- Not clickable, said out loud. It is already the
+                         default (the widget disables itself unless the
+                         clickable option is set), and writing it down is
+                         what stops somebody switching it on later and
+                         quietly bypassing the two buttons above. -->
                     <field name="state" widget="statusbar"
+                           options="{'clickable': False}"
                            statusbar_visible="booked,attended,no_show,cancelled"/>
                 </header>
                 <sheet>

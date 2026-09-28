@@ -52,6 +52,12 @@
                                    decoration-danger="state == 'cancelled'"
                                    decoration-warning="state == 'no_show'"/>
                             <field name="credit_returned" optional="show"/>
+                            <button name="action_mark_attended" type="object"
+                                    string="Attended" icon="fa-check"
+                                    invisible="state != 'booked'"/>
+                            <button name="action_mark_no_show" type="object"
+                                    string="No-show" icon="fa-times"
+                                    invisible="state != 'booked'"/>
                             <button name="action_open_reassign_wizard" type="object"
                                     string="Cancel / Move" icon="fa-exchange"
                                     invisible="state != 'booked'"/>

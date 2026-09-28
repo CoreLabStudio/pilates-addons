@@ -610,6 +610,32 @@ class FitnessBooking(models.Model):
 
     # ─── ATTENDANCE ───────────────────────────────────────────────────────────
 
+    def _check_may_mark_attendance(self, booking):
+        """Who is allowed to say whether somebody turned up.
+
+        The studio, or the instructor whose class it is. Not the student.
+
+        She has write access to her own booking - that is how cancelling
+        works - and the record rule scopes it to her own rows, so nothing
+        stopped her calling this over RPC and marking herself attended once
+        the class had started. No screen offered it, which is why it went
+        unnoticed; a screen is not a permission.
+
+        The instructor is allowed because the portal roster at
+        /my/instructor is where attendance is actually taken, and that route
+        has already checked the class is hers.
+        """
+        user = self.env.user
+        if user.has_group('base.group_system') or user._is_admin():
+            return
+        if user.has_group('fitness_core.group_fitness_manager'):
+            return
+        if booking.calendar_event_id.sudo().user_id == user:
+            return
+        raise UserError(self.env._(
+            "Only the studio or the instructor teaching this class can mark "
+            "attendance."))
+
     def action_mark_attended(self):
         """Teacher marks student as attended."""
         is_manager = (
@@ -617,6 +643,7 @@ class FitnessBooking(models.Model):
             or self.env.user.has_group('fitness_core.group_fitness_manager')
         )
         for booking in self:
+            self._check_may_mark_attendance(booking)
             if not is_manager and fields.Datetime.now() < booking.calendar_event_id.start:
                 raise UserError(
                     "This class hasn’t started yet — "
@@ -643,6 +670,7 @@ class FitnessBooking(models.Model):
             or self.env.user.has_group('fitness_core.group_fitness_manager')
         )
         for booking in self:
+            self._check_may_mark_attendance(booking)
             if not is_manager and fields.Datetime.now() < booking.calendar_event_id.start:
                 raise UserError(
                     "This class hasn’t started yet — "
