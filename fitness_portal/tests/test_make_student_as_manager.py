@@ -188,3 +188,35 @@ class TestMakeStudentAsRealManager(TransactionCase):
         self.assertEqual(
             partner._fitness_credit_total(), 5,
             "a cash purchase for a hands-off student granted no credits")
+
+    # ── the language it writes to her account ───────────────────────────────
+
+    def test_it_never_proposes_a_language_the_database_does_not_have(self):
+        """Odoo does not validate a language code on write, and the failure
+        surfaces nowhere near this wizard: the next thing that reads her
+        partner through env.lang - a sale order line building its own
+        description, say - raises "Invalid language code" instead.
+
+        Spanish is the right default for this studio and is installed on
+        production. This is about the wizard not writing a code blind.
+        """
+        installed = set(
+            self.env["res.lang"].sudo().search([]).mapped("code"))
+        partner = self.env["res.partner"].create({"name": "Manager Lang"})
+        wiz = self._wizard_for(partner)
+        self.assertIn(
+            wiz.lang, installed,
+            "the wizard proposed %r, which this database does not have"
+            % wiz.lang)
+
+    def test_a_contacts_own_language_is_kept_when_it_is_installed(self):
+        """The fallback must not flatten somebody who has a language set."""
+        installed = self.env["res.lang"].sudo().search([])
+        if len(installed) < 2:
+            self.skipTest("only one language installed; nothing to keep")
+        other = installed.filtered(lambda l: l.code != "es_ES")[:1]
+        partner = self.env["res.partner"].create(
+            {"name": "Manager Haslang", "lang": other.code})
+        self.assertEqual(
+            self._wizard_for(partner).lang, other.code,
+            "her own language was replaced by the default")
