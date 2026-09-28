@@ -83,8 +83,21 @@
                          opens the shop is missing. -->
                     <field name="fitness_is_verified_student" invisible="1"/>
                     <field name="share" invisible="1"/>
+                    <field name="fitness_is_teacher" invisible="1"/>
+                    <!-- An instructor is a portal account without the student
+                         group, which is this warning's exact shape - so it
+                         fired on all four of them and told the studio they
+                         "signed up but never got through email verification".
+                         None of them signed up as a student. Raquel made it
+                         four; every instructor added makes the list noisier,
+                         and a warning that is wrong four times out of four
+                         stops being read.
+                         She genuinely cannot open the shop - the gate is the
+                         student group - but that is a decision, not a stuck
+                         signup, and it is made in Settings. -->
                     <div class="alert alert-warning" role="alert"
-                         invisible="fitness_is_verified_student or not share"
+                         invisible="fitness_is_verified_student or not share
+                                    or fitness_is_teacher"
                          groups="fitness_core.group_fitness_manager">
                         <strong>This student cannot open the shop yet.</strong>
                         They signed up but never got through email
