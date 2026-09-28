@@ -405,7 +405,31 @@ class FitnessBooking(models.Model):
         moving = 'calendar_event_id' in vals
         origins = {b.id: b.calendar_event_id for b in self} if moving else {}
 
+        # A state change moves a seat too. booked_seats counts
+        # ('booked','attended'), so booked -> no_show frees a seat and
+        # no_show -> booked takes one back, while booked -> attended changes
+        # nothing. The action methods recount for themselves, but they are
+        # not the only way in: an import, an RPC call or a server action
+        # writes state and used to leave the counter behind, exactly as a
+        # typed calendar_event_id did before the fix above.
+        #
+        # Compared against the value already on the record, so a write that
+        # sets state to what it already was does not trigger a pointless
+        # recount.
+        restating = 'state' in vals
+        prior = {b.id: b.state for b in self} if restating else {}
+
         result = super().write(vals)
+
+        if restating:
+            counted = {'booked', 'attended'}
+            for booking in self:
+                was, now_ = prior.get(booking.id), booking.state
+                if was == now_:
+                    continue
+                if (was in counted) == (now_ in counted):
+                    continue          # the seat did not move
+                booking._refresh_booked_seats()
 
         if moving:
             for booking in self:
