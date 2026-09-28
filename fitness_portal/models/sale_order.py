@@ -202,6 +202,17 @@ class SaleOrder(models.Model):
             order_sudo.message_post(body=self.env._(
                 "Cash received and approved by %(user)s.",
                 user=self.env.user.name))
+            # A fixed-class membership is not finished when it is paid for.
+            # Approval confirms it, placement runs, finds no slot and books
+            # nothing - so the one moment the manager is certainly looking at
+            # this order is the moment to say so. In the chatter rather than a
+            # popup, because it has to still be here tomorrow for whoever
+            # picks the question up.
+            slot_warning = order_sudo._fitness_fixed_slot_message()
+            if slot_warning:
+                order_sudo.message_post(body=slot_warning)
+                _logger.info("[CASH] %s needs a weekly hour: %s",
+                             order.name, slot_warning)
             _logger.info("[CASH] %s approved by %s (requested %s)",
                          order.name, self.env.user.name,
                          order.fitness_cash_requested_on)
