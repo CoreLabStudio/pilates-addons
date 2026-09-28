@@ -64,6 +64,13 @@
         <field name="trial_already_used" string="Trial Used" optional="show"
                widget="boolean_toggle" readonly="1"
                invisible="not trial_already_used"/>
+        <!-- A weaker claim than Trial Used and kept separate on purpose:
+             that one agrees with what approval will do, this one is a guess
+             from a phone number. Folding them together would make the
+             studio stop trusting either. -->
+        <field name="phone_matches_spent_student" string="Phone Match"
+               optional="show" widget="boolean_toggle" readonly="1"
+               invisible="not phone_matches_spent_student"/>
         <field name="partner_id" string="Student" optional="show"/>
         <field name="occurrence_id" optional="show"/>
         <field name="scheduled_datetime" string="Scheduled" optional="show"/>
@@ -129,6 +136,15 @@
                    class="flex-grow-1 mb-0"/>
           </div>
           <field name="trial_already_used" invisible="1"/>
+          <!-- Amber, not red. "She has had her trial" is a fact approval
+               will act on; "this number belongs to somebody who has" is a
+               reason to pick up the phone before booking anything. -->
+          <div class="alert alert-warning d-flex align-items-center gap-2"
+               role="alert" invisible="not phone_matches_spent_student">
+            <field name="phone_match_warning" nolabel="1" readonly="1"
+                   class="flex-grow-1 mb-0"/>
+          </div>
+          <field name="phone_matches_spent_student" invisible="1"/>
           <field name="other_open_count" invisible="1"/>
           <field name="other_open_ids" invisible="1"/>
           <div class="oe_title">

@@ -458,6 +458,108 @@ class FitnessTrialRequest(models.Model):
         compute='_compute_trial_already_used', string='Trial Already Used')
     trial_used_warning = fields.Char(compute='_compute_trial_already_used')
 
+    # Somebody asking again under a new address, recognised by her phone.
+    #
+    # Deliberately NOT folded into trial_already_used. That flag means "this
+    # person has had her trial" and agrees exactly with what approval will
+    # do. This one means "may be the same person as a student who has" - a
+    # guess from a phone number, which is a weaker claim and needs its own
+    # words, or the studio would stop trusting either.
+    #
+    # Only raised when the email flag is silent. If the address already
+    # identifies her, that flag says so and a second badge is noise.
+    #
+    # Warning only. It never blocks a submission, never changes approval,
+    # and nothing about it is visible to the person submitting - a public
+    # visitor who typed a number must not learn from the response whether it
+    # is known here.
+    phone_matches_spent_student = fields.Boolean(
+        compute='_compute_phone_match', string='Phone Matches')
+    phone_match_warning = fields.Char(compute='_compute_phone_match')
+
+    @staticmethod
+    def _phone_key(raw):
+        """The comparable part of a phone number, or '' if there is none.
+
+        Spanish numbers arrive written every way a person can write one:
+        612 34 56 78, +34612345678, 0034 612 345 678, 612-345-678,
+        (612) 345678. The last nine digits are the number itself and the
+        rest is punctuation and country prefix, so that is what is compared.
+
+        Fewer than nine digits never matches anything. A three-digit
+        fragment would match half the studio.
+        """
+        digits = re.sub(r'\D', '', raw or '')
+        if len(digits) < 9:
+            return ''
+        return digits[-9:]
+
+    @api.depends('phone', 'partner_id', 'email', 'status')
+    def _compute_phone_match(self):
+        """Is this number already a student's, and has she had her trial?
+
+        The partner scan is done once for the whole recordset rather than
+        per record: this computes in a list view, and a search per row would
+        be a query per row. Odoo 19 has no res.partner.mobile - phone is the
+        only number a contact carries - so there is one field to read.
+        """
+        open_recs = self.filtered(lambda r: r.status in self.OPEN_STATES)
+        for rec in self - open_recs:
+            rec.phone_matches_spent_student = False
+            rec.phone_match_warning = False
+        if not open_recs:
+            return
+
+        wanted = {}
+        for rec in open_recs:
+            key = self._phone_key(rec.phone)
+            if key:
+                wanted.setdefault(key, self.browse())
+                wanted[key] |= rec
+        if not wanted:
+            for rec in open_recs:
+                rec.phone_matches_spent_student = False
+                rec.phone_match_warning = False
+            return
+
+        by_key = {}
+        partners = self.env['res.partner'].sudo().search(
+            [('phone', '!=', False)])
+        for partner in partners:
+            key = self._phone_key(partner.phone)
+            if key in wanted:
+                by_key.setdefault(key, []).append(partner)
+
+        spent_cache = {}
+        for rec in open_recs:
+            rec.phone_matches_spent_student = False
+            rec.phone_match_warning = False
+            key = self._phone_key(rec.phone)
+            if not key:
+                continue
+            # Her own contact is not somebody else.
+            candidates = [c for c in by_key.get(key, [])
+                          if c != rec.partner_id]
+            if not candidates:
+                continue
+            # The email flag already covers the case where we know who she
+            # is; this is only for when it does not.
+            if rec.trial_already_used:
+                continue
+            for candidate in candidates:
+                if candidate.id not in spent_cache:
+                    spent_cache[candidate.id] = self._trial_already_claimed(
+                        candidate)
+                if spent_cache[candidate.id]:
+                    rec.phone_matches_spent_student = True
+                    # One name, not a list. A shared number is common and a
+                    # roll call of everyone on it helps nobody.
+                    rec.phone_match_warning = _(
+                        "This phone number belongs to %(name)s, who has "
+                        "already used her free trial. Worth a call before "
+                        "booking anything.", name=candidate.name)
+                    break
+
     @api.depends('partner_id', 'email', 'status')
     def _compute_trial_already_used(self):
         """Has the person behind this request already spent their trial?
@@ -1130,6 +1232,38 @@ class FitnessTrialRequest(models.Model):
         return self.sudo().search(domain, order='id desc', limit=1)
 
     @api.model
+    def _trial_taken(self, partner, product):
+        """Has she already had THIS trial class, free or paid?
+
+        A different question from the free entitlement. The entitlement is
+        one per student across both disciplines - spend it on Reformer and
+        the free one is gone for Barre too. This asks only whether she has
+        had this particular class, which is what decides whether there is
+        anything left to sell her.
+
+        Lives on the model so the shop rule and the app's trial route ask it
+        the same way. fitness_portal depends on this module, not the other
+        way round, so the controller there delegates here rather than
+        carrying a second copy that can drift.
+        """
+        if not partner:
+            return False
+        return bool(self.env['sale.order.line'].sudo().search_count([
+            ('order_partner_id', '=', partner.id),
+            ('product_id', 'in', product.product_variant_ids.ids),
+            ('state', '=', 'sale'),
+        ]))
+
+    def _untaken_trial_products(self, partner):
+        """The trial classes she has not had, in configured order.
+
+        Empty when she has had both - and that is a real state, not an
+        error: there is nothing single left to sell her and the shop points
+        her at packs and memberships instead.
+        """
+        return self._all_trial_products().filtered(
+            lambda prod: not self._trial_taken(partner, prod))
+
     def _all_trial_products(self):
         """Both trial products, whichever disciplines are configured."""
         products = self.env['product.template'].browse()
