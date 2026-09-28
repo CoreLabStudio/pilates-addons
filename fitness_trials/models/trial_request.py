@@ -1130,6 +1130,38 @@ class FitnessTrialRequest(models.Model):
         return self.sudo().search(domain, order='id desc', limit=1)
 
     @api.model
+    def _trial_taken(self, partner, product):
+        """Has she already had THIS trial class, free or paid?
+
+        A different question from the free entitlement. The entitlement is
+        one per student across both disciplines - spend it on Reformer and
+        the free one is gone for Barre too. This asks only whether she has
+        had this particular class, which is what decides whether there is
+        anything left to sell her.
+
+        Lives on the model so the shop rule and the app's trial route ask it
+        the same way. fitness_portal depends on this module, not the other
+        way round, so the controller there delegates here rather than
+        carrying a second copy that can drift.
+        """
+        if not partner:
+            return False
+        return bool(self.env['sale.order.line'].sudo().search_count([
+            ('order_partner_id', '=', partner.id),
+            ('product_id', 'in', product.product_variant_ids.ids),
+            ('state', '=', 'sale'),
+        ]))
+
+    def _untaken_trial_products(self, partner):
+        """The trial classes she has not had, in configured order.
+
+        Empty when she has had both - and that is a real state, not an
+        error: there is nothing single left to sell her and the shop points
+        her at packs and memberships instead.
+        """
+        return self._all_trial_products().filtered(
+            lambda prod: not self._trial_taken(partner, prod))
+
     def _all_trial_products(self):
         """Both trial products, whichever disciplines are configured."""
         products = self.env['product.template'].browse()
