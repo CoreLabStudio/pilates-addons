@@ -64,8 +64,8 @@ class FitnessMakeStudentWizard(models.TransientModel):
         string='Password', required=True,
         help="Give this to her directly. She can change it once she is in.")
     lang = fields.Selection(
-        selection='_lang_selection', string='Language', default='es_ES',
-        required=True)
+        selection='_lang_selection', string='Language',
+        default=lambda self: self._default_lang(), required=True)
 
     existing_user_id = fields.Many2one(
         'res.users', compute='_compute_existing', string='Existing Account')
@@ -76,6 +76,32 @@ class FitnessMakeStudentWizard(models.TransientModel):
     def _lang_selection(self):
         return [(l.code, l.name)
                 for l in self.env['res.lang'].sudo().search([])]
+
+    @api.model
+    def _installed_lang(self, code):
+        """That language code, but only if the database actually has it."""
+        if not code:
+            return False
+        exists = self.env['res.lang'].sudo().search_count(
+            [('code', '=', code)])
+        return code if exists else False
+
+    @api.model
+    def _default_lang(self):
+        """Spanish, because the studio is - but only if it is installed.
+
+        The code written here ends up on her user record, and Odoo does not
+        check it. Anything that later reads a partner's language through
+        env.lang - a sale order line building its own description, for one -
+        raises UserError: Invalid language code on a code the database does
+        not have, and the failure surfaces nowhere near this wizard.
+
+        Production has Spanish and Catalan, so this falls back on a database
+        set up differently rather than in daily use.
+        """
+        return (self._installed_lang('es_ES')
+                or self._installed_lang(self.env.user.lang)
+                or 'en_US')
 
     @api.depends('partner_id')
     def _compute_existing(self):
@@ -107,7 +133,15 @@ class FitnessMakeStudentWizard(models.TransientModel):
             return res
         partner = self.env['res.partner'].browse(partner_id)
         res['partner_id'] = partner.id
-        res.setdefault('lang', partner.lang or 'es_ES')
+        # Assigned, not setdefault: the field carries a default of its own,
+        # so super() has already put es_ES in res and a setdefault here would
+        # never fire. That is why a Catalan-speaking contact was handed a
+        # Spanish account - her own language was read and then discarded.
+        partner_lang = self._installed_lang(partner.lang)
+        if partner_lang:
+            res['lang'] = partner_lang
+        else:
+            res.setdefault('lang', self._default_lang())
         # Her own address when she has one - that is the login she will
         # expect. A username only when there is nothing to use.
         res.setdefault('login', partner.email and partner.email.strip()

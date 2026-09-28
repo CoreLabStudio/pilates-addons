@@ -3044,24 +3044,15 @@ class FitnessStudentPortal(http.Controller):
     def _trial_taken(self, partner, product):
         """Has she already had THIS trial class, free or paid?
 
-        A different question from the free entitlement. The entitlement is
-        one per student across both disciplines - spend it on Reformer and
-        the free one is gone for Barre too. This asks only whether she has
-        had this particular class, which is what decides whether there is
-        anything left to sell her.
-
-        Read off confirmed order lines rather than a flag, for the same
-        reason the entitlement is: the order is the fact. A free trial and a
-        paid one are the same row here, differing only in price, and both
-        mean she has done that class.
+        Delegated to the model so the shop card, the product page, the
+        checkout route and the app's trial form all ask one implementation.
+        The app now refuses a spent student's submission and sends her to
+        whichever trial she has not had, which is the same question this
+        asks - and two copies of it would eventually disagree about the same
+        student on two screens.
         """
-        if not partner:
-            return False
-        return bool(request.env['sale.order.line'].sudo().search_count([
-            ('order_partner_id', '=', partner.id),
-            ('product_id', 'in', product.product_variant_ids.ids),
-            ('state', '=', 'sale'),
-        ]))
+        return request.env['fitness.trial.request'].sudo()._trial_taken(
+            partner, product)
 
     def _hidden_from_shop(self, partner, product):
         """Is this product not to be shown to this student at all?

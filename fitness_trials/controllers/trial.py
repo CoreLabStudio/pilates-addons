@@ -340,6 +340,21 @@ class TrialRequestController(http.Controller):
         ctx['trial_request_pending'] = pending
         return request.render('fitness_trials.trial_request_form', ctx)
 
+    def _spent_trial_redirect(self, partner):
+        """Where to send a student whose free trial is spent.
+
+        The trial she has NOT had, if there is one - it is a real class at a
+        real price and she can buy it there and then. Once both are taken
+        there is nothing single left to sell, which is the studio's rule and
+        not an oversight, so she goes to the Classes tab where the note
+        already explains what to do instead. Never a dead end either way.
+        """
+        TR = request.env['fitness.trial.request'].sudo()
+        remaining = TR._untaken_trial_products(partner)
+        if remaining:
+            return '/my/packages/%d' % remaining[0].id
+        return '/my/packages?tab=classes'
+
     @http.route('/trial/submit', type='http', auth='public', website=True,
                 methods=['POST'], sitemap=False, multilang=False)
     def trial_submit(self, **kw):
@@ -372,6 +387,31 @@ class TrialRequestController(http.Controller):
             'preferred_date': preferred_date,
             'preferred_period': preferred_period,
         }
+
+        # In the app, a student whose free trial is spent does not get to
+        # submit this form at all.
+        #
+        # This reverses a deliberate choice. The form used to stay open with
+        # a notice, on the reasoning that asking again after a finished
+        # trial is a real ask. That is still true on the public website,
+        # where there is nothing to buy and the studio wants the request so
+        # it can ring her. Inside the app it is not: she is signed in, the
+        # shop is one tap away, and handing her a form that approval will
+        # refuse is a dead end dressed up as a next step.
+        #
+        # Website submissions are untouched. A public visitor is not
+        # identified, and checking a typed address would tell a stranger
+        # whether it has an account here - the reason the twin guard answers
+        # with the confirmation page rather than an error.
+        if source == 'app' and not request.env.user._is_public():
+            TR = request.env['fitness.trial.request'].sudo()
+            partner = request.env.user.partner_id
+            if TR._trial_already_claimed(partner):
+                _logger.info(
+                    "Trial submission from %s refused in the app: her free "
+                    "trial is spent; sending her to what she can buy",
+                    request.env.user.login)
+                return request.redirect(self._spent_trial_redirect(partner))
 
         errors = []
         if not name:

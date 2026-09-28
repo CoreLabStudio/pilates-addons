@@ -503,3 +503,15 @@ msgstr "%(name)s ya ha usado su clase de prueba gratuita. Aprobar esta solicitud
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "Trial Already Used"
 msgstr "Prueba ya usada"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "This phone number belongs to %(name)s, who has already used her free trial. Worth a call before booking anything."
+msgstr "Este teléfono pertenece a %(name)s, que ya ha usado su clase de prueba gratuita. Conviene llamarla antes de reservar nada."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "Phone Matches"
+msgstr "Coincide el teléfono"
