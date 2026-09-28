@@ -27,3 +27,4 @@ from . import test_cancelled_order_credits
 from . import test_make_student_as_manager
 from . import test_fixed_slot_warning
 from . import test_cash_approval_start_date
+from . import test_cash_checkout_http
