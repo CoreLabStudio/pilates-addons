@@ -100,6 +100,40 @@
         </field>
     </record>
 
+    <!-- Organizer: instructors only -->
+    <record id="view_calendar_event_form_fitness_organizer" model="ir.ui.view">
+        <field name="name">calendar.event.form.fitness.organizer</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <!-- The field is labelled Instructor and offered every user on
+                 the database - 136 of them, students included. Picking a
+                 student is not only a wrong label: the instructor portal is
+                 gated on being the class's organiser, so she would see that
+                 class's full roster at /my/instructor, and since the
+                 attendance guard allows "the instructor whose class it is",
+                 she could mark it too.
+
+                 Filtered on fitness_is_teacher rather than a group id. A
+                 window domain is a string the BROWSER evaluates, so ref()
+                 is not available in it and a literal id would differ on
+                 every database odoo.sh builds - the same trap the Weekly
+                 Hours action hit, which is why that searchable field exists
+                 (fitness_core/models/res_users.py).
+
+                 A domain, deliberately not a constraint. It filters what is
+                 offered; it does not re-validate what is already stored. Six
+                 upcoming classes are organised by OdooBot because the cron
+                 creates them under itself, and a constraint would refuse to
+                 save them. They keep showing OdooBot until somebody
+                 re-picks, and then only instructors are on offer. -->
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="domain">[('fitness_is_teacher', '=', True)]</attribute>
+                <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
     <!-- Action: Schedule (fitness classes only) -->
     <!-- The Schedule used to fall back to Odoo's stock calendar.event calendar,
          which carries js_class="attendee_calendar": the personal-meetings view.

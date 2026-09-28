@@ -8,6 +8,12 @@
     <record id="view_fitness_teacher_hours_list" model="ir.ui.view">
         <field name="name">fitness.teacher.hours.list</field>
         <field name="model">res.users</field>
+        <!-- Without this it defaults to 16 and beats every other res.users
+             list in the repo, so it became THE default list view for users:
+             any picker with no view specified rendered students in
+             instructor columns, reading "0 classes, 0.00 hours" for people
+             who do not teach. Its siblings all carry 32 for this reason. -->
+        <field name="priority">32</field>
         <field name="arch" type="xml">
             <list string="Weekly Teaching Hours" create="false" delete="false">
                 <field name="name" string="Instructor"/>

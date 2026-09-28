@@ -7,6 +7,24 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+            <!-- A fixed-class membership with no weekly hour chosen.
+                 At the top of the form rather than inside the Fitness tab:
+                 the manager who needs to see this is the one who has just
+                 taken the money, and she has no reason to open a tab she
+                 has never had to open before.
+                 Manager-only - the student is asked this in the app, in
+                 words written for her, and being told twice in two voices
+                 helps nobody. -->
+            <xpath expr="//sheet" position="before">
+              <div class="alert alert-warning m-0 rounded-0"
+                   role="alert"
+                   groups="fitness_core.group_fitness_manager"
+                   invisible="not fitness_needs_fixed_slot">
+                <field name="fitness_fixed_slot_warning" nolabel="1"
+                       readonly="1" class="mb-0"/>
+              </div>
+              <field name="fitness_needs_fixed_slot" invisible="1"/>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Fitness Subscription" name="fitness_subscription_usage"
                       invisible="not fitness_subscription_product_id">
