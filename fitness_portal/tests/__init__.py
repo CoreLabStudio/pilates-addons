@@ -26,3 +26,4 @@ from . import test_trial_per_discipline
 from . import test_cancelled_order_credits
 from . import test_make_student_as_manager
 from . import test_fixed_slot_warning
+from . import test_cash_approval_start_date
