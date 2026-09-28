@@ -228,6 +228,35 @@ class FitnessBookingReassignWizard(models.TransientModel):
             move_reason=(self.reason or '').strip() or False
         ).write({'calendar_event_id': target.id})
 
+        # The studio's own record of the move, written down rather than
+        # spoken once.
+        #
+        # The reason used to exist only as context, and only to compose the
+        # in-app notification body. A student with no account never gets that
+        # notification - the code returns before creating one - so whatever
+        # the studio typed was discarded, and the email never carried it for
+        # anybody. Laura's move on 29 Sep 2026 went out by email with no
+        # reason, and nothing anywhere recorded why she had been moved.
+        #
+        # An internal note, so it is the studio talking to itself: she has
+        # already been told what happened, in her own language, by the email
+        # the write sent. This is for whoever asks next week why she is in a
+        # different class.
+        #
+        # Posted whether or not a reason was given, because "nobody said why"
+        # is itself worth knowing, and a chatter that is silent half the time
+        # cannot be read as a record.
+        why = (self.reason or '').strip()
+        booking.message_post(
+            body=(
+                _("Moved from '%(old)s' to '%(new)s'. Reason: %(why)s",
+                  old=origin.name or '', new=target.name or '', why=why)
+                if why else
+                _("Moved from '%(old)s' to '%(new)s'. No reason given.",
+                  old=origin.name or '', new=target.name or '')),
+            message_type='comment',
+            subtype_xmlid='mail.mt_note')
+
     def _validate_move(self, target, booking=None):
         """The booking rules that still apply when nobody is paying again.
 
