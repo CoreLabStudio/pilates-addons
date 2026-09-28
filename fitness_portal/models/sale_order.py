@@ -184,6 +184,27 @@ class SaleOrder(models.Model):
                 'fitness_cash_approved_on': fields.Datetime.now(),
                 'fitness_cash_approved_by': self.env.user.id,
             })
+            # A request that sat for a few days must not start the period
+            # on the day she asked. start_date is a stored compute filled
+            # when the quotation was created, and _confirm_subscription
+            # copies it straight into fitness_period_start_date - so a
+            # request made on the 25th and approved on the 28th began its
+            # quarter three days before anybody was paid, and placement then
+            # booked classes that had already run. S00410 had to be corrected
+            # by hand for exactly this.
+            #
+            # Only ever moved forward, and only into the present: a start
+            # date somebody has deliberately set in the future is a decision,
+            # not an accident, and overwriting it would be the same bug in
+            # the other direction.
+            if order_sudo.is_subscription:
+                today = fields.Date.context_today(order_sudo)
+                if order_sudo.start_date and order_sudo.start_date < today:
+                    _logger.info(
+                        "[CASH] %s: start date %s is in the past, moving to "
+                        "%s so the period begins when the money did",
+                        order.name, order_sudo.start_date, today)
+                    order_sudo.write({'start_date': today})
             order_sudo.action_confirm()
             # The invoice, settled in cash and mailed - the same three steps
             # a desk sale takes, because the money arrived the same way.
@@ -202,6 +223,17 @@ class SaleOrder(models.Model):
             order_sudo.message_post(body=self.env._(
                 "Cash received and approved by %(user)s.",
                 user=self.env.user.name))
+            # A fixed-class membership is not finished when it is paid for.
+            # Approval confirms it, placement runs, finds no slot and books
+            # nothing - so the one moment the manager is certainly looking at
+            # this order is the moment to say so. In the chatter rather than a
+            # popup, because it has to still be here tomorrow for whoever
+            # picks the question up.
+            slot_warning = order_sudo._fitness_fixed_slot_message()
+            if slot_warning:
+                order_sudo.message_post(body=slot_warning)
+                _logger.info("[CASH] %s needs a weekly hour: %s",
+                             order.name, slot_warning)
             _logger.info("[CASH] %s approved by %s (requested %s)",
                          order.name, self.env.user.name,
                          order.fitness_cash_requested_on)

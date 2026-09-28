@@ -113,6 +113,25 @@ class SaleOrder(models.Model):
         "Fixed Class Slots",
     )
 
+    # A Clase Fija membership that nobody has chosen an hour for yet.
+    #
+    # The member picks her hour in the app, and until today that was the only
+    # place the question was ever asked. A membership sold at the desk, or
+    # approved from a cash request, arrives with no slot: placement walks the
+    # slots, finds none, books nothing and raises nothing, so the absence of
+    # an error reads as success. Laura Bucur paid for a quarter of weekly
+    # Barre on 28 Sep 2026 and was booked into no class at all.
+    #
+    # Warning only. It never blocks a sale, never touches the money and never
+    # places anything by itself - the hour is hers to choose, and guessing one
+    # for her would be worse than saying nothing.
+    fitness_fixed_slot_warning = fields.Char(
+        compute='_compute_fitness_fixed_slot_warning',
+        compute_sudo=True, store=False, string="Fixed Slot Warning")
+    fitness_needs_fixed_slot = fields.Boolean(
+        compute='_compute_fitness_fixed_slot_warning',
+        compute_sudo=True, store=False, string="Needs A Weekly Hour")
+
     # ── DISPLAY: live weekly-state readouts shown on the subscription form ─────
     # Non-stored; recomputed on every read. fitness_subscription_used_classes is
     # used as a proxy dependency so the web client refreshes after each booking.
@@ -200,6 +219,123 @@ class SaleOrder(models.Model):
         if self.fitness_weekly_allowance_override > 0:
             return self.fitness_weekly_allowance_override
         return product.weekly_class_allowance if product else 0
+
+    def fitness_missing_fixed_slots(self):
+        """Weekly hours this membership still owes, per discipline.
+
+        Returns {discipline: how_many_missing}, empty when nothing is owed -
+        which is the ordinary case and the one every caller tests.
+
+        The count rather than a flag, because a plan selling two fixed classes
+        a week is only finished when both are chosen, and asking again for the
+        second is the same question as asking for the first.
+
+        Per discipline, because a combined plan ("2 Barre + 1 Reformer") has a
+        separate cap for each and they are never traded off. Counting the
+        slots together would call a member finished who has chosen two Barre
+        hours and no Reformer one. A single-discipline plan counts every
+        active slot, which is what it has always done, and what the form's own
+        domain already guarantees.
+
+        This is THE rule. The member's prompt in the app and the manager's
+        warning in the back office both call it, so the two can never come to
+        different conclusions about the same membership - they did not use to
+        share an implementation, and the app was the only one asking.
+        """
+        self.ensure_one()
+        if not self.fitness_is_clase_fija or self.fitness_is_unlimited:
+            return {}
+        if self.subscription_state != ACTIVE_SUBSCRIPTION_STATE:
+            return {}
+        product = self.fitness_subscription_product_id
+        if not product:
+            return {}
+
+        disciplines = [product.fitness_class_type]
+        secondary = product.fitness_secondary_class_type
+        if secondary and secondary != product.fitness_class_type:
+            disciplines.append(secondary)
+
+        active = self.fitness_clase_fija_ids.filtered('active')
+        missing = {}
+        for discipline in disciplines:
+            allowance = self.fitness_effective_weekly_allowance(
+                discipline=discipline)
+            if allowance <= 0:
+                continue
+            if len(disciplines) == 1:
+                chosen = len(active)
+            else:
+                chosen = len(active.filtered(
+                    lambda s: s.calendar_event_id.class_type_id.classroom_type
+                    == discipline))
+            if chosen < allowance:
+                missing[discipline] = allowance - chosen
+        return missing
+
+    @api.model
+    def fitness_subs_needing_fixed_slots(self, partner):
+        """Her running memberships that are still owed a weekly hour."""
+        if not partner:
+            return self.browse()
+        subs = self.sudo().search([
+            ('partner_id', '=', partner.id),
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', ACTIVE_SUBSCRIPTION_STATE),
+        ])
+        return subs.filtered(lambda s: s.fitness_missing_fixed_slots())
+
+    @api.depends('fitness_clase_fija_ids', 'fitness_clase_fija_ids.active',
+                 'subscription_state', 'fitness_weekly_allowance_override')
+    def _compute_fitness_fixed_slot_warning(self):
+        for order in self:
+            missing = order.fitness_missing_fixed_slots()
+            order.fitness_needs_fixed_slot = bool(missing)
+            order.fitness_fixed_slot_warning = (
+                order._fitness_fixed_slot_message(missing) if missing
+                else False)
+
+    def _fitness_fixed_slot_message(self, missing=None):
+        """What to tell the manager, in words she can act on.
+
+        Shared by the form banner, the cash approval and the desk sale, so a
+        manager is told the same thing wherever she is standing when it
+        matters. Returns False when there is nothing to say.
+
+        It says "reserved", and says nothing about how many classes she has
+        booked. An earlier wording claimed she was "booked into none", which
+        was false for two of the three real cases the day it was written:
+        Isabel Silva and Paula Masip each had three bookings they had made
+        themselves against the weekly allowance. What they are missing is the
+        reserved hour they paid extra for, not classes. A warning that is
+        wrong about the obvious part teaches the studio to ignore the rest.
+        """
+        self.ensure_one()
+        if missing is None:
+            missing = self.fitness_missing_fixed_slots()
+        if not missing:
+            return False
+        total = sum(missing.values())
+        product = self.fitness_subscription_product_id
+        combined = bool(product and product.fitness_secondary_class_type
+                        and product.fitness_secondary_class_type
+                        != product.fitness_class_type)
+        if combined:
+            # Naming the discipline is the whole point on a combined plan:
+            # "choose an hour" is useless advice when one of the two is
+            # already chosen.
+            which = ', '.join(
+                '%s (%s)' % (discipline, count)
+                for discipline, count in sorted(missing.items()))
+            return _(
+                "No weekly hour reserved for %(which)s yet. Placement will "
+                "book nothing for it. Set her slot, then click Place "
+                "Classes.", which=which)
+        return _(
+            "No weekly hour reserved yet. She is paying for %(count)s "
+            "reserved class(es) a week and none is set, so placement will "
+            "book nothing. Set her slot, then click Place Classes.",
+            count=total)
 
     def fitness_weekly_used_count(self, ref_date, discipline=None):
         """Return the number of weekly-allowance slots consumed by this

@@ -2353,25 +2353,14 @@ class FitnessStudentPortal(http.Controller):
     def _clase_fija_subs_needing_slots(self, partner):
         """Running Clase Fija subscriptions with fewer slots than they allow.
 
-        The count, not a flag: a plan selling two fixed classes a week is only
-        finished when both are chosen, and asking again for the second is the
-        same question as asking for the first.
+        The rule itself lives on sale.order now, because the studio needed to
+        be told the same thing in the back office and two copies of a rule
+        like this drift. This is the member's side of the same question; the
+        manager's warning asks it through the same method, so the prompt she
+        sees and the warning the studio sees cannot disagree.
         """
-        subs = request.env['sale.order'].sudo().search([
-            ('partner_id', '=', partner.id),
-            ('is_subscription', '=', True),
-            ('subscription_state', '=', '3_progress'),
-        ])
-        pending = request.env['sale.order'].sudo().browse()
-        for sub in subs:
-            if not sub.fitness_is_clase_fija or sub.fitness_is_unlimited:
-                continue
-            allowance = sub.fitness_effective_weekly_allowance()
-            if allowance <= 0:
-                continue
-            if len(sub.fitness_clase_fija_ids.filtered('active')) < allowance:
-                pending |= sub
-        return pending
+        return request.env['sale.order'].sudo().fitness_subs_needing_fixed_slots(
+            partner)
 
     @staticmethod
     def _weekday_name(local_dt, lang_code):

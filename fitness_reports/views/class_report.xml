@@ -36,6 +36,7 @@
                 <field name="class_date"      type="row" interval="month"/>
                 <field name="teacher_user_id" type="row"/>
                 <field name="class_type_id"   type="col"/>
+                <field name="duration_hours"  type="measure"/>
                 <field name="booked_count"    type="measure"/>
                 <field name="attended_count"  type="measure"/>
                 <field name="occupancy_pct"   type="measure"/>
@@ -65,6 +66,18 @@
                 <field name="event_id"        string="Class"/>
                 <field name="teacher_user_id" string="Instructor"/>
                 <field name="class_type_id"   string="Class Type"/>
+                <separator/>
+                <!-- Classes that actually happened: not cancelled, and
+                     already finished. On by default in the action, because
+                     "classes taught" counting next week's timetable is a
+                     number nobody wants. Untick it to see the whole
+                     schedule. -->
+                <filter name="filter_did_run"
+                        string="Ran"
+                        domain="[('did_run','=',True)]"/>
+                <filter name="filter_cancelled"
+                        string="Cancelled"
+                        domain="[('class_state','=','cancelled')]"/>
                 <separator/>
                 <!-- B5: visible date-range chips -->
                 <filter name="filter_this_month"
@@ -101,6 +114,10 @@
         <field name="res_model">fitness.report.class</field>
         <field name="view_mode">pivot,graph,list</field>
         <field name="search_view_id" ref="view_fitness_class_report_search"/>
+        <!-- Opens on classes that actually ran. Anything else makes
+             "classes taught" include next week's timetable and the ones
+             the studio cancelled. -->
+        <field name="context">{'search_default_filter_did_run': 1}</field>
         <field name="view_ids" eval="[
             (5, 0, 0),
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_class_report_pivot')}),

@@ -256,6 +256,16 @@ class FitnessDeskSaleWizard(models.TransientModel):
         if self.payment_method == 'cash':
             self._invoice_cash_sale(order)
 
+        # A fixed-class plan sold here arrives with no weekly hour, because
+        # the hour is chosen in the app and this sale never went near it.
+        # Placement will book nothing and say nothing, so this is said twice
+        # on purpose: in the chatter, where it survives, and in the message
+        # the manager is about to read - she may have no access to the order
+        # itself and never see the chatter at all.
+        slot_warning = order._fitness_fixed_slot_message()
+        if slot_warning:
+            order.message_post(body=slot_warning)
+
         # Opening the order is the nicer ending, but a fitness manager is not
         # necessarily a Sales user - on this database only the owner is - and
         # sending anybody else to a Sales Order form ends the sale on an
@@ -268,11 +278,15 @@ class FitnessDeskSaleWizard(models.TransientModel):
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'type': 'success',
-                    'sticky': False,
+                    'type': 'warning' if slot_warning else 'success',
+                    # Sticky when there is something to do about it: a
+                    # message that fades is no use to somebody who has to act
+                    # on it after the student has walked away.
+                    'sticky': bool(slot_warning),
                     'message': _(
                         "%(order)s created for %(who)s.",
-                        order=order.name, who=self.partner_id.name),
+                        order=order.name, who=self.partner_id.name)
+                    + ((' ' + slot_warning) if slot_warning else ''),
                     'next': {'type': 'ir.actions.act_window_close'},
                 },
             }
