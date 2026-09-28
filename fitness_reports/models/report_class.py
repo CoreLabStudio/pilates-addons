@@ -23,6 +23,30 @@ class FitnessReportClass(models.Model):
         digits=(5, 1),
         aggregator='avg',
     )
+    duration_hours = fields.Float(
+        string='Hours',
+        readonly=True,
+        digits=(16, 2),
+        help=(
+            'Scheduled length of the class, from its start and stop, not the '
+            'class type nominal duration - the two can differ once a '
+            'class has been edited, and what the instructor stood in the '
+            'room for is the span that was actually booked.'
+        ),
+    )
+    class_state = fields.Selection(
+        [('scheduled', 'Scheduled'), ('cancelled', 'Cancelled')],
+        string='Class Status', readonly=True,
+    )
+    did_run = fields.Boolean(
+        string='Ran',
+        readonly=True,
+        help=(
+            'The class was not cancelled and has already finished. A class '
+            'that ran with nobody in it still counts - the instructor was '
+            'there.'
+        ),
+    )
     attributed_revenue = fields.Float(
         string='Attributed Revenue (approx., may overlap)',
         readonly=True,
@@ -45,6 +69,9 @@ class FitnessReportClass(models.Model):
                 ce.class_type_id,
                 ce.user_id                                                  AS teacher_user_id,
                 ce.capacity,
+                EXTRACT(EPOCH FROM (ce.stop - ce.start)) / 3600.0           AS duration_hours,
+                ce.class_state,
+                (ce.class_state <> 'cancelled' AND ce.stop < now())         AS did_run,
                 COUNT(fb.id) FILTER (WHERE fb.state IN ('booked','attended'))  AS booked_count,
                 COUNT(fb.id) FILTER (WHERE fb.state = 'attended')              AS attended_count,
                 COUNT(fb.id) FILTER (WHERE fb.state = 'no_show')               AS no_show_count,
@@ -66,6 +93,15 @@ class FitnessReportClass(models.Model):
                 GROUP BY fb2.calendar_event_id
             ) ar ON ar.calendar_event_id = ce.id
             WHERE ce.is_fitness_class = TRUE
-            GROUP BY ce.id, ce.start, ce.class_type_id, ce.user_id,
-                     ce.capacity, ar.attributed_revenue
+              -- Archived classes were being counted. This is raw SQL, so
+              -- Odoo's active_test never reached it: on the production
+              -- restore the view returned 959 rows of which 404 were
+              -- archived, well over a third of every figure the studio
+              -- read. An archived
+              -- class is one the studio took off the timetable, and nobody
+              -- taught it.
+              AND ce.active = TRUE
+            GROUP BY ce.id, ce.start, ce.stop, ce.class_type_id, ce.user_id,
+                     ce.capacity, ce.class_state, ce.active,
+                     ar.attributed_revenue
         """ % self._table)
