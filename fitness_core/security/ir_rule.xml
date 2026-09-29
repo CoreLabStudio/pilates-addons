@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        An instructor may read the classes she is down to teach.
+
+        Without this she can read none of them, and the whole instructor
+        portal is blank: the dashboard, the class list, the roster and the
+        attendance buttons all search calendar.event as her, without sudo.
+
+        Nothing else reaches her. The two rules Odoo ships give portal users
+        the events they are ATTENDING (partner_ids) and internal users
+        everything; our instructors are portal users, and a fitness class has
+        no attendees at all - fitness_core's create() clears partner_ids on
+        every one of them, on purpose, because the roster is fitness.booking
+        and a calendar attendee on a class is a phantom. On the production
+        database that is 959 classes with nought attendee rows between them.
+        The students' rule is scoped to group_fitness_student, which an
+        instructor deliberately does not hold.
+
+        So this rule is the only thing that lets an instructor see her own
+        timetable. It existed on production as a record made by hand in
+        Settings > Technical > Record Rules, with no xmlid and in no module,
+        which meant every fresh install and every rebuilt database came up
+        with the portal silently empty for staff. The migration alongside
+        this file adopts that hand-made record so this definition updates it
+        rather than creating a second one.
+
+        Read only, and only her own: user_id is the Organizer, which is what
+        every screen in fitness_teacher_swap already treats as "whose class
+        this is".
+    -->
+    <record id="rule_fitness_teacher_calendar_event" model="ir.rule">
+        <field name="name">Fitness Teachers: read own assigned classes</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('fitness_core.group_fitness_teacher'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

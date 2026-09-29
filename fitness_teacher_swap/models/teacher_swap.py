@@ -25,6 +25,15 @@ class FitnessTeacherSwap(models.Model):
         ondelete='restrict', readonly=True,
     )
     reason = fields.Text(string='Reason')
+    # WHO made the change, as distinct from what kind of change it was.
+    # initiated_by says 'admin' or 'teacher'; on the admin path that is a
+    # label, not a person, so a swap made from the back office recorded
+    # that somebody with rights did it and never which somebody.
+    # Existing rows stay empty: there is nothing to back-fill them from,
+    # and an invented value would be worse than a blank.
+    changed_by_id = fields.Many2one(
+        'res.users', string='Changed By', readonly=True,
+        help="The account that made this change, whichever route it took.")
     initiated_by = fields.Selection([
         ('admin', 'Admin Backend'),
         ('teacher', 'Teacher Portal'),
