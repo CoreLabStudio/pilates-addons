@@ -17,6 +17,12 @@ SMTPDataError: (550, 'SMTP mailfrom domain "gmail.com" must match
 assignments were all being lost as they were written, with nothing on screen to
 say so. A student simply never heard back.
 
+Both are **still on production** and nothing will ever remove them — audited
+2026-09-28: `mail.default.from = info@corelabstudio.es` (Yoleyva, 2026-08-14) and
+`mail.catchall.domain = corelabstudio-pilates-addons.odoo.com`. They are hand-made
+rows with no xmlid, so no upgrade corrects or deletes them; they look authoritative
+in Settings and decide nothing. Change the alias domain, not these.
+
 ## What actually decides the sender
 
 The company's **alias domain** — a `mail.alias.domain` record pointed at by

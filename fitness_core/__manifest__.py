@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Core – CoreLab Studio',
-    'version': '19.0.2.6.69',
+    'version': '19.0.2.6.70',
     'category': 'Services',
     'summary': 'Core models for CoreLab Studio - Pilates & Barre',
     'author': 'Core Lab Studio, S.L.',
@@ -9,6 +9,7 @@
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
+        'security/ir_rule.xml',
         'views/fitness_classroom_views.xml',
         'views/fitness_class_category_views.xml',
         'views/fitness_class_type_views.xml',

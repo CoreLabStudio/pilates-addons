@@ -115,6 +115,7 @@ class CalendarEvent(models.Model):
                                     'original_teacher_id': old_teacher_id,
                                     'new_teacher_id': new_teacher.id,
                                     'initiated_by': 'admin',
+                                    'changed_by_id': self.env.uid,
                                 })
                             except Exception:
                                 _logger.exception(
@@ -269,9 +270,31 @@ class CalendarEvent(models.Model):
                 'new_teacher_id': new_teacher.id,
                 'reason': reason.strip() if reason else False,
                 'initiated_by': 'teacher',
+                'changed_by_id': self.env.uid,
             })
         except Exception:
             _logger.exception("[TEACHER-SWAP] Failed to log swap record for class %d", self.id)
+
+        # Tell the instructor taking it on.
+        #
+        # This route writes under skip_fitness_notification=True and then
+        # sends its own notifications, and its own set left her out - so a
+        # handover arranged between two instructors reached the students
+        # and never the person who now has to teach the class. Editing the
+        # Organizer in the back office DID tell her, through the write()
+        # hook above, which is how the gap stayed invisible: whichever
+        # route somebody happened to use decided whether she heard.
+        #
+        # Deliberately the same notification the other route sends - same
+        # type, same wording, same link - so the two cannot drift.
+        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
+        self.env['fitness.notification'].sudo()._create_for_user(
+            new_teacher.id,
+            'teacher_swap',
+            tenv.env._('Class assigned to you: %s', self.name),
+            tenv.env._('You have been assigned as instructor for this class.'),
+            action_url=f'/my/instructor/classes/{self.id}',
+        )
 
         # Notify affected students: in-app + email
         affected_bookings = self.env['fitness.booking'].sudo().search([
