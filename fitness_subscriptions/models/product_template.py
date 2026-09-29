@@ -203,12 +203,21 @@ class ProductTemplate(models.Model):
         if matricula:
             mat_variant = matricula.product_variant_ids[:1]
             if mat_variant:
-                mat_base, _total = matricula.fitness_taxed_price(
-                    matricula.fitness_effective_price(), partner,
-                    price_includes_tax=True)
+                # The same question the pack line asks, and for the same
+                # reason: whether price_unit is the gross or the taxable
+                # base depends on how the tax is configured, so it is
+                # measured rather than assumed.
+                #
+                # This line used to take the tax-EXCLUDED figure out of
+                # fitness_taxed_price and write that. On this database the
+                # 21% is configured tax-included, so Odoo read 32.23 as the
+                # gross and took the tax off a second time: a 39.00
+                # registration fee became a 32.23 line at 26.64 net, and
+                # every membership carrying one was undercharged 6.77.
                 lines.append({
                     'product_id': mat_variant.id,
                     'product_uom_qty': 1,
-                    'price_unit': mat_base,
+                    'price_unit': matricula.fitness_price_unit_for_gross(
+                        matricula.fitness_effective_price(), partner),
                 })
         return lines
