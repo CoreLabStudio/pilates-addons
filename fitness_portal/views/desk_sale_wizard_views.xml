@@ -43,8 +43,20 @@
                    invisible="not product_id or is_membership"/>
           </group>
 
+          <!-- The registration fee is shown as its own line whenever it
+               applies, and counted into the total. It used to be added to
+               the order AFTER the sale and never appeared here at all: the
+               manager was told to collect 145.00, the order came to 177.23,
+               and the till and the books disagreed by the fee on every
+               first membership. Both breakdown lines hide when no fee is
+               due, because then the total IS the membership and saying it
+               twice helps nobody. -->
           <group string="Money" invisible="payment_method != 'cash'">
             <field name="currency_id" invisible="1"/>
+            <field name="membership_price"
+                   invisible="not product_id or matricula_fee == 0"/>
+            <field name="matricula_fee"
+                   invisible="matricula_fee == 0"/>
             <field name="normal_price" invisible="not product_id"/>
             <field name="amount_paid"
                    required="payment_method == 'cash'"/>
