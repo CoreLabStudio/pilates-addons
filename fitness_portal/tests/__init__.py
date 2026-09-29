@@ -29,3 +29,5 @@ from . import test_fixed_slot_warning
 from . import test_cash_approval_start_date
 from . import test_cash_checkout_http
 from . import test_shop_warning_not_for_instructors
+from . import test_signup_view_duplicate
+from . import test_desk_sale_shows_the_fee

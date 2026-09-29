@@ -55,10 +55,27 @@ class FitnessDeskSaleWizard(models.TransientModel):
         help="How long the membership is committed for. Mensual bills every "
              "month; Trimestral is three months, charged at once.")
 
-    normal_price = fields.Monetary(
-        string='Normal price', compute='_compute_normal_price',
+    # Three figures where there was one. "Cash taken" defaulted to the
+    # membership alone, the registration fee was appended to the order
+    # afterwards, and neither the form nor the manager ever saw it: Yoleyva
+    # collected 145.00 against an order of 177.23 and reported the numbers
+    # as being off, which they were - the till, the order and the invoice
+    # disagreed by the fee. It is now shown, counted, and part of what she
+    # is told to collect.
+    membership_price = fields.Monetary(
+        string='Membership', compute='_compute_normal_price',
         currency_field='currency_id',
-        help="What this pack costs today, promotions included.")
+        help="The pack or membership itself, for the period chosen.")
+    matricula_fee = fields.Monetary(
+        string='Registration (one-off)', compute='_compute_normal_price',
+        currency_field='currency_id',
+        help="Charged on a student's first membership when the commitment "
+             "is shorter than three months. Zero when it does not apply.")
+    normal_price = fields.Monetary(
+        string='Total to collect', compute='_compute_normal_price',
+        currency_field='currency_id',
+        help="The membership and the registration fee together - the whole "
+             "sale, and what the order will come to.")
     # Two genuinely different acts, so the form asks which one outright
     # rather than leaving it to be inferred from whether an amount happens to
     # be filled in. A cash sale that silently records nothing, or a gift that
@@ -84,7 +101,14 @@ class FitnessDeskSaleWizard(models.TransientModel):
     validity_days = fields.Integer(
         string='Valid for (days)', compute='_compute_normal_price')
 
-    @api.depends('product_id', 'plan_id')
+    # partner_id is in here because the registration fee depends on WHO is
+    # buying - it is charged on a first membership and waived on a second -
+    # so the total changes when the student does.
+    #
+    # payment_method is in here because a gift carries no fee at all. Left
+    # out, switching Cash to Free kept the cached fee and the form went on
+    # showing 39.00 on a giveaway.
+    @api.depends('product_id', 'plan_id', 'partner_id', 'payment_method')
     def _compute_normal_price(self):
         for wiz in self:
             product = wiz.product_id
@@ -93,11 +117,46 @@ class FitnessDeskSaleWizard(models.TransientModel):
             # Times the months the period covers, or a Trimestral shows one
             # month's price and the manager takes one month's money for a
             # three-month commitment.
-            wiz.normal_price = (
+            wiz.membership_price = (
                 product.fitness_effective_price() * wiz._months()
                 if product else 0.0)
+            wiz.matricula_fee = wiz._matricula_fee()
+            wiz.normal_price = wiz.membership_price + wiz.matricula_fee
             wiz.credits_granted = product.fitness_class_count if product else 0
             wiz.validity_days = product.fitness_validity_days if product else 0
+
+    def _matricula_fee(self):
+        """The registration fee this sale will carry, gross, or 0.00.
+
+        Asked of the same method that actually builds the line, so the
+        figure on the form and the figure on the order cannot disagree.
+        Anything else is a second opinion about the studio's own rule.
+        """
+        self.ensure_one()
+        # A gift is a gift. Nothing is charged for it, so nothing is
+        # charged alongside it either - the shared line builder appends
+        # the fee whenever the studio's rule says it is due, which on a
+        # free first membership produced a 0.00 pack and a 39.00 order
+        # with nobody to collect it from.
+        if self.payment_method == 'free':
+            return 0.0
+        product = self.product_id
+        if not (product and product.fitness_is_subscription_plan
+                and self.partner_id):
+            return 0.0
+        matricula = product.fitness_matricula_due(
+            self.partner_id, self._effective_plan())
+        return matricula.fitness_effective_price() if matricula else 0.0
+
+    def _matricula_variant_ids(self):
+        """The variant ids of the registration product, or []."""
+        self.ensure_one()
+        product = self.product_id
+        if not (product and product.fitness_is_subscription_plan):
+            return []
+        matricula = product.fitness_matricula_due(
+            self.partner_id, self._effective_plan())
+        return matricula.product_variant_ids.ids if matricula else []
 
     def _months(self):
         """How many months this sale covers. One for anything without a plan."""
@@ -132,6 +191,10 @@ class FitnessDeskSaleWizard(models.TransientModel):
                                 raise_if_not_found=False)
         return fallback.sudo() if fallback else Plan.browse()
 
+    # Every one of these defaults to normal_price, which now INCLUDES the
+    # registration fee. The figure the manager is shown is the figure she
+    # collects and the figure the order comes to - the three used to differ
+    # by the fee, which is how 145.00 was taken against a 177.23 order.
     @api.onchange('product_id')
     def _onchange_product_id(self):
         """Start from the real price, so the usual case is one click."""
@@ -142,16 +205,32 @@ class FitnessDeskSaleWizard(models.TransientModel):
                     wiz.plan_id = wiz._effective_plan()
                 if not wiz.product_id.fitness_is_subscription_plan:
                     wiz.plan_id = False
-                wiz.amount_paid = (
-                    wiz.product_id.fitness_effective_price() * wiz._months())
+                wiz.amount_paid = wiz.normal_price
 
     @api.onchange('plan_id')
     def _onchange_plan_id(self):
-        """A longer commitment is a different price, and may drop the fee."""
+        """A longer commitment is a different price, and drops the fee.
+
+        Three months or more waives the registration fee outright, so
+        switching Mensual to Trimestral has to move the total twice over -
+        more months of membership, and no fee at all.
+        """
         for wiz in self:
             if wiz.product_id and wiz.product_id.fitness_is_subscription_plan:
-                wiz.amount_paid = (
-                    wiz.product_id.fitness_effective_price() * wiz._months())
+                wiz.amount_paid = wiz.normal_price
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        """Whether the fee applies depends on WHO is buying.
+
+        It is charged on a first membership and waived on a second, so
+        picking the student changes the total. Without this the form
+        would show the fee for everybody and collect it from nobody, or
+        the reverse.
+        """
+        for wiz in self:
+            if wiz.product_id and wiz.payment_method == 'cash':
+                wiz.amount_paid = wiz.normal_price
 
     @api.onchange('payment_method')
     def _onchange_payment_method(self):
@@ -159,7 +238,7 @@ class FitnessDeskSaleWizard(models.TransientModel):
             if wiz.payment_method == 'free':
                 wiz.amount_paid = 0.0
             elif wiz.product_id and not wiz.amount_paid:
-                wiz.amount_paid = wiz.product_id.fitness_effective_price()
+                wiz.amount_paid = wiz.normal_price
 
     def _price_to_charge(self):
         """The line's price_unit, so the order totals what was taken.
@@ -177,12 +256,23 @@ class FitnessDeskSaleWizard(models.TransientModel):
         taken into an 86.25 order, and reversing the tax under a
         price-included one made 95.00 taken into a 78.51 order. Both were
         found by testing against real data rather than by reading the code.
+
+        The figure typed in covers the WHOLE sale, registration fee
+        included, because that is what the manager is told to collect and
+        what the form now shows her. The fee is a fixed studio charge and
+        prices itself, so it comes off the top and the membership takes
+        the rest - and a discount she types therefore comes off the
+        membership, not off the registration. The order then totals
+        exactly the cash in the till, which is the whole point: it used
+        to total the cash PLUS the fee, so 145.00 taken became a 177.23
+        order and an invoice nobody could reconcile.
         """
         self.ensure_one()
         if self.payment_method == 'free':
             return 0.0
+        membership_gross = (self.amount_paid or 0.0) - self._matricula_fee()
         return self.product_id.fitness_price_unit_for_gross(
-            self.amount_paid or 0.0, self.partner_id)
+            membership_gross, self.partner_id)
 
     def _invoice_cash_sale(self, order):
         """Delegates. The renewal path needs the same steps, and a second copy
@@ -202,6 +292,19 @@ class FitnessDeskSaleWizard(models.TransientModel):
         if self.payment_method == 'cash' and (self.amount_paid or 0.0) <= 0.0:
             raise UserError(_(
                 "Enter the cash taken, or switch to No charge (goodwill)."))
+        # The fee prices itself and comes off the top, so a figure below it
+        # would leave the membership at a negative price and the order
+        # totalling less than the fee alone. Refused here rather than
+        # silently clamped: a manager who types 30.00 against a 39.00
+        # registration has made a mistake worth telling her about.
+        fee = self._matricula_fee()
+        if self.payment_method == 'cash' and fee \
+                and (self.amount_paid or 0.0) < fee:
+            raise UserError(_(
+                "This sale carries a %(fee)s registration fee, so the cash "
+                "taken cannot be less than that. The whole sale comes to "
+                "%(total)s.",
+                fee="%.2f" % fee, total="%.2f" % self.normal_price))
 
         product = self.product_id
         plan = self._effective_plan()
@@ -211,6 +314,16 @@ class FitnessDeskSaleWizard(models.TransientModel):
         # for the whole sale, not a price per month.
         lines = product.fitness_order_line_vals(
             self.partner_id, plan=plan, total_price=self._price_to_charge())
+        # A gift carries no registration fee. The shared builder adds one
+        # whenever the studio's rule says it is due, which is right for a
+        # sale and wrong for a giveaway: it produced a 0.00 membership
+        # line beside a 39.00 fee, so an order that was supposed to cost
+        # nothing came to 39.00 with no invoice and nobody to collect it.
+        if self.payment_method == 'free':
+            mat_ids = self._matricula_variant_ids()
+            if mat_ids:
+                lines = [l for l in lines
+                         if l.get('product_id') not in mat_ids]
         if not lines:
             raise UserError(_(
                 "%(pack)s has no sellable variant, so it cannot be sold.",

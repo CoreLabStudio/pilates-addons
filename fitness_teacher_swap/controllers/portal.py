@@ -246,6 +246,14 @@ class FitnessTeacherSwapPortal(http.Controller):
             return request.redirect('/my')
 
         _ = request.env._
+        # Read as her, not as sudo, so the record rules decide. The one that
+        # decides is fitness_core.rule_fitness_teacher_calendar_event:
+        # user_id = user.id, instructor group, read only. Nothing else
+        # reaches her - our instructors are portal users, Odoo's portal rule
+        # grants the events she is ATTENDING, and a fitness class has no
+        # attendees because fitness_core clears them. Without that rule
+        # reading event.user_id below raises AccessError rather than
+        # redirecting, so every page here is blank.
         event = request.env['calendar.event'].browse(event_id)
 
         if not event.exists() or event.user_id.id != request.env.user.id:
@@ -262,8 +270,11 @@ class FitnessTeacherSwapPortal(http.Controller):
                 '/my/instructor/classes?error=' + quote(_('This class has been cancelled.'))
             )
 
-        # Search without sudo — teacher ir.rule scopes to own classes.
-        # Re-browse with sudo so template can read student_id.name.
+        # Search without sudo: fitness_bookings' teacher rule
+        # (fitness_booking_rule_teacher_own_classes) scopes this to bookings
+        # whose class she organises. That one has always been in the module;
+        # it is the calendar.event side above that had not.
+        # Re-browse with sudo so the template can read student_id.name.
         booking_ids = request.env['fitness.booking'].search([
             ('calendar_event_id', '=', event_id),
             ('state', 'in', ('booked', 'attended', 'no_show')),
@@ -306,7 +317,11 @@ class FitnessTeacherSwapPortal(http.Controller):
                 '/my/instructor/classes?error=' + quote(_('Class not found or not assigned to you.'))
             )
 
-        # Teacher ir.rule scopes booking search to own classes at DB level.
+        # fitness_bookings' teacher rule scopes this to her own classes at
+        # DB level, so a booking_id from somebody else's class raises rather
+        # than being marked. The ownership check below is the belt to that
+        # brace, and catches a booking on a class that is hers but not this
+        # one.
         booking = request.env['fitness.booking'].browse(booking_id)
 
         if not booking.exists() or booking.calendar_event_id.id != event_id:
