@@ -419,6 +419,45 @@ class FitnessBooking(models.Model):
         restating = 'state' in vals
         prior = {b.id: b.state for b in self} if restating else {}
 
+        # Moving somebody to a class still to come clears the mark they
+        # were given for the class they are leaving.
+        #
+        # Agostina marked Marta a no-show for 29 Sep 2026. Yoly then moved
+        # her to 2 Oct. The move worked, the seat moved with it, and the
+        # no-show stayed: Marta was recorded as having missed a class that
+        # had not happened yet, and there was no way to take it back short
+        # of editing the record. The mark described the class she was
+        # pulled out of, not the one she is now in, so it does not travel.
+        #
+        # Only forward. A mark on a class that has already run is a record
+        # of what happened in the room and is left exactly as it is - which
+        # the wizard can never reach anyway, because _validate_move refuses
+        # a target that has already started, but a typed calendar_event_id
+        # on the booking form can.
+        #
+        # Skipped when the caller names a state itself: cancel-and-move
+        # writes 'cancelled' in the same breath and means it.
+        if moving and not restating:
+            target = self.env['calendar.event'].browse(vals['calendar_event_id'])
+            if target.start and target.start > fields.Datetime.now():
+                stale = self.filtered(
+                    lambda b: b.state in ('attended', 'no_show'))
+                if stale:
+                    cleared = dict(vals, state='booked',
+                                   marked_by_id=False, marked_date=False)
+                    # Split rather than loop: a record written twice would
+                    # recount its seat twice and tell the student about one
+                    # move two times over. Each booking is written once,
+                    # with the vals that suit it.
+                    if stale != self:
+                        rest = self - stale
+                        stale.write(cleared)
+                        rest.write(vals)
+                        return True
+                    vals = cleared
+                    restating = True
+                    prior = {b.id: b.state for b in self}
+
         result = super().write(vals)
 
         if restating:

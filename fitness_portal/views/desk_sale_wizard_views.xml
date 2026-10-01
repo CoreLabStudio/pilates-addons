@@ -51,12 +51,18 @@
                first membership. Both breakdown lines hide when no fee is
                due, because then the total IS the membership and saying it
                twice helps nobody. -->
+          <!-- The breakdown is ALWAYS shown once a pack is chosen, fee or
+               no fee, and the registration line always says why it reads
+               what it reads. Hiding it when nothing was due left a single
+               figure that could not be told apart from a fee silently
+               missed - which, after the desk collected 145.00 against a
+               177.23 order, is the first thing anybody checks. -->
           <group string="Money" invisible="payment_method != 'cash'">
             <field name="currency_id" invisible="1"/>
-            <field name="membership_price"
-                   invisible="not product_id or matricula_fee == 0"/>
-            <field name="matricula_fee"
-                   invisible="matricula_fee == 0"/>
+            <field name="membership_price" invisible="not product_id"/>
+            <field name="matricula_fee" invisible="not product_id"/>
+            <field name="matricula_note" invisible="not matricula_note"
+                   readonly="1" class="text-muted fst-italic"/>
             <field name="normal_price" invisible="not product_id"/>
             <field name="amount_paid"
                    required="payment_method == 'cash'"/>

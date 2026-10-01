@@ -23,6 +23,10 @@ from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.fitness_subscriptions.models.sale_order import (
+    CLASSES_PER_MONTH_PER_SLOT,
+)
+
 
 @tagged("post_install", "-at_install")
 class ClaseFijaFixture(TransactionCase):
@@ -125,7 +129,14 @@ class ClaseFijaFixture(TransactionCase):
 
 @tagged("post_install", "-at_install")
 class TestAutoPlacementCoversThePeriod(ClaseFijaFixture):
-    """3.3 - a fixed slot books every week she paid for, not just the first."""
+    """3.3 - a fixed slot books every class she paid for, not just the first.
+
+    "Every class she paid for" was read as "every week in the period"
+    until the client settled it: the plan sells a COUNT. Both readings
+    agree when the period happens to hold exactly that many weeks, which
+    is why the difference went unnoticed until a 29th-to-29th month
+    turned up with five of somebody's weekday in it.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -157,10 +168,31 @@ class TestAutoPlacementCoversThePeriod(ClaseFijaFixture):
             len(booked), 1,
             "only one class was booked - a membership pays for a period, not "
             "a single week, and booking the anchor alone looks like success")
+        # Confirmed by the client: a fixed-class plan is sold as a COUNT
+        # of classes, not a calendar span. A monthly plan is four classes
+        # a slot a month, and this fixture's plan is the monthly one -
+        # the period being stretched to eight weeks does not buy eight
+        # classes, which is the very confusion the rule settles.
+        #
+        # This assertion used to be len(booked) == len(events). That was
+        # the span reading, and it is what put Eva Morales on ten classes
+        # against the eight she paid for and Sonia on five against four.
+        cap = CLASSES_PER_MONTH_PER_SLOT * self.env[
+            'product.template'].fitness_plan_months(order.plan_id)
         self.assertEqual(
-            len(booked), len(events),
-            "she paid for %s weeks and holds %s booking(s)"
-            % (len(events), len(booked)))
+            len(booked), cap,
+            "the plan pays for %s class(es) on this slot and she holds %s"
+            % (cap, len(booked)))
+        # Earliest first, and never skipping an early one: the classes she
+        # holds must be the first `cap` in date order, not any `cap` of
+        # them. Taking the last four would also satisfy the count above
+        # while leaving her with nothing for a month.
+        self.assertEqual(
+            booked.sorted(lambda b: b.calendar_event_id.start).mapped(
+                'calendar_event_id').ids,
+            events.sorted('start')[:cap].ids,
+            "she was placed into the right number of classes but not the "
+            "earliest ones; an early week was skipped")
 
     def test_it_books_that_slot_and_not_some_other_class(self):
         """A second series at a different time must not be swept in."""
@@ -333,9 +365,17 @@ class TestCombinedPlanKeepsTwoPools(ClaseFijaFixture):
                      [("student_id", "=", partner.id)])]
         self.assertIn("barre", rooms, "no Barre class was placed")
         self.assertIn("reformer", rooms, "no Reformer class was placed")
+        # The cap is per discipline, not shared: a combined plan buys four
+        # Barre and four Reformer, not four between them. That is the fault
+        # this class was written for in the first place, in its other form -
+        # one pool counted against both slots.
+        cap = CLASSES_PER_MONTH_PER_SLOT * self.env[
+            'product.template'].fitness_plan_months(order.plan_id)
         self.assertEqual(
-            rooms.count("barre"), len(barre),
-            "she is short of Barre classes for the period")
+            rooms.count("barre"), cap,
+            "the plan pays for %s Barre class(es) and she holds %s"
+            % (cap, rooms.count("barre")))
         self.assertEqual(
-            rooms.count("reformer"), len(reformer),
-            "she is short of Reformer classes for the period")
+            rooms.count("reformer"), cap,
+            "the plan pays for %s Reformer class(es) and she holds %s"
+            % (cap, rooms.count("reformer")))

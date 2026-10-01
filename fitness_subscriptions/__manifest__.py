@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Subscriptions – CoreLab Studio',
-    'version': '19.0.1.4.18',
+    'version': '19.0.1.4.19',
     'category': 'Services',
     'summary': 'Monthly recurring subscriptions (Reformer Mensual, Barre Ilimitado) on sale_subscription',
     'author': 'Core Lab Studio, S.L.',
@@ -21,6 +21,7 @@
         'data/subscription_plans.xml',
         'data/products.xml',
         'data/combo_memberships.xml',
+        'data/ir_cron_place_fixed_classes.xml',
     ],
     'installable': True,
     'application': False,
