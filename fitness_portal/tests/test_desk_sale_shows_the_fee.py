@@ -243,6 +243,65 @@ class TestDeskSaleShowsTheFee(TransactionCase):
             billed, 150.00, places=2,
             msg="the invoice is for %.2f and 150.00 was taken" % billed)
 
+    # -- the form says WHY, every time -----------------------------------
+    #
+    # The breakdown used to hide itself when no fee was due. That left one
+    # figure on screen that could not be told apart from a fee silently
+    # missed - and after the desk collected 145.00 against a 177.23 order,
+    # that is the first thing anybody checks. So the line is always there
+    # and always carries a reason.
+
+    def test_a_first_membership_is_told_the_fee_is_charged(self):
+        wiz = self._wizard(self.student, self.membership, self.monthly)
+        self.assertAlmostEqual(wiz.matricula_fee, self.fee, places=2)
+        self.assertTrue(
+            wiz.matricula_note,
+            "the registration line gives no reason at all")
+        self.assertIn(
+            "first membership", wiz.matricula_note.lower(),
+            "the note does not say why it is being charged: %r"
+            % wiz.matricula_note)
+
+    def test_a_returning_student_is_told_why_there_is_none(self):
+        wiz = self._wizard(self.returning, self.membership, self.monthly)
+        self.assertAlmostEqual(wiz.matricula_fee, 0.0, places=2)
+        self.assertIn(
+            "held a membership", wiz.matricula_note.lower(),
+            "a waived fee with no explanation reads exactly like a fee "
+            "that was forgotten: %r" % wiz.matricula_note)
+
+    def test_a_quarterly_commitment_is_told_why_there_is_none(self):
+        wiz = self._wizard(self.student, self.membership, self.quarterly)
+        wiz._onchange_plan_id()
+        self.assertAlmostEqual(wiz.matricula_fee, 0.0, places=2)
+        self.assertIn(
+            "waived", wiz.matricula_note.lower(),
+            "the note does not say the fee was waived: %r"
+            % wiz.matricula_note)
+
+    def test_a_pack_is_told_it_carries_none(self):
+        wiz = self._wizard(self.student, self.pack)
+        self.assertAlmostEqual(wiz.matricula_fee, 0.0, places=2)
+        self.assertIn(
+            "pack", wiz.matricula_note.lower(),
+            "a pack shows a blank registration line and no reason: %r"
+            % wiz.matricula_note)
+
+    def test_the_breakdown_adds_up_whether_or_not_a_fee_applies(self):
+        """Package + registration = total, on every path."""
+        for who, plan, label in ((self.student, self.monthly, 'first'),
+                                 (self.returning, self.monthly, 'returning'),
+                                 (self.student, self.quarterly, 'quarterly')):
+            wiz = self._wizard(who, self.membership, plan)
+            wiz._onchange_plan_id()
+            self.assertAlmostEqual(
+                wiz.membership_price + wiz.matricula_fee, wiz.normal_price,
+                places=2,
+                msg="on the %s path the breakdown does not add up: "
+                    "%.2f + %.2f is not %.2f"
+                    % (label, wiz.membership_price, wiz.matricula_fee,
+                       wiz.normal_price))
+
     # -- a gift is a gift --------------------------------------------------
 
     def test_a_free_first_membership_carries_no_fee(self):

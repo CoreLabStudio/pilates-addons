@@ -31,3 +31,5 @@ from . import test_cash_checkout_http
 from . import test_shop_warning_not_for_instructors
 from . import test_signup_view_duplicate
 from . import test_desk_sale_shows_the_fee
+
+from . import test_nightly_placements_show_on_my_schedule

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Nightly top-up for fixed-class memberships.
+
+        Placement only ever booked the classes that already existed when
+        the member bought. The timetable is generated about eight weeks
+        ahead, so a quarterly membership got roughly five weeks of its
+        thirteen and nothing ever came back for the rest. Measured on
+        production 2026-10-01: Laura Bucur, 195.00 for three months from
+        5 October, five classes placed out of twelve. Nothing told her,
+        the studio, or anybody else.
+
+        This runs AFTER fitness_core's schedule-extension job, which is
+        what creates the classes it then places. Both are daily; the
+        hour is left to Odoo, and the order only matters in the sense
+        that whatever this does not reach tonight it reaches tomorrow.
+        A member is therefore never more than a day behind the timetable.
+
+        It is idempotent. A class already booked is skipped and one the
+        student cancelled is left cancelled, so running it twice - or
+        running it the morning after a manual Place Classes - changes
+        nothing.
+    -->
+    <record id="ir_cron_place_fixed_classes" model="ir.cron">
+        <field name="name">Fitness: place fixed classes as the timetable extends</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_place_fixed_classes()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>
