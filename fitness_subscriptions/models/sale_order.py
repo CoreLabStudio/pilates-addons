@@ -10,6 +10,12 @@ _logger = logging.getLogger(__name__)
 # '4_paused' is deliberately excluded: a paused subscription must not be bookable.
 ACTIVE_SUBSCRIPTION_STATE = '3_progress'
 
+# A fixed-class plan is sold as a count of classes, not a calendar span.
+# The studio confirmed it on 2026-10-01: "they pay for 4 classes or 8, it
+# shouldn't depend on days." A month is four classes a slot however many
+# times the weekday happens to fall inside a 29th-to-29th period.
+CLASSES_PER_MONTH_PER_SLOT = 4
+
 # ISO weekday number that starts each cap window (1=Monday … 7=Sunday).
 # THIS IS THE SINGLE PLACE to change the week boundary — never inline this value.
 # Changing to 7 (Sunday) would make Sun–Sat weeks; adding Saturday classes later
@@ -498,25 +504,41 @@ class SaleOrder(models.Model):
             )
         return period_start, period_end
 
-    def _auto_place_clase_fija(self):
-        """Create fitness.booking records for every occurrence of EACH active
-        fitness.clase.fija slot within the current billing period.
+    def _fitness_place_slots(self, future_only=False):
+        """Place what can be placed, and return (booked, errors).
 
-        FIX 1 rule: any failure (no schedule found for a slot, class full,
-        unexpected error) is collected and raised as a visible ValidationError —
-        never swallowed silently.
+        The one implementation. _auto_place_clase_fija wraps it and
+        raises, which is what the button, the picker and confirmation
+        have always done; the nightly job calls this directly, because
+        it must place everyone it can rather than stop at the first
+        member it cannot.
 
-        Idempotent: already-booked occurrences are silently skipped, so calling
-        this on re-confirm or manual retry is safe.
+        future_only clamps the window to now. The nightly run uses it
+        because placement deliberately bypasses the "class has already
+        started" guard - right when a quarter is set up in one go,
+        wrong for a job that runs every night and would book yesterday.
+
+        Idempotent: already-booked occurrences are skipped, cancelled
+        ones included, so a week the student called off is not
+        rebooked and running twice changes nothing.
         """
         self.ensure_one()
         active_slots = self.fitness_clase_fija_ids.filtered('active')
         if not active_slots:
-            return 0  # no slots configured — no-op
+            return 0, []  # no slots configured - no-op
 
         period_start, period_end = self._fitness_billing_period()
         period_start_dt = datetime.datetime.combine(period_start, datetime.time.min)
         period_end_dt = datetime.datetime.combine(period_end, datetime.time.min)
+        if future_only:
+            now = fields.Datetime.now()
+            if period_start_dt < now:
+                period_start_dt = now
+            if period_end_dt <= period_start_dt:
+                return 0, []   # the whole period is behind us
+        # How many months this period covers, for the per-slot cap below.
+        months = self.env['product.template'].fitness_plan_months(
+            self.plan_id) or 1
         partner = self.partner_id
         all_errors = []
         total_booked = 0
@@ -543,7 +565,34 @@ class SaleOrder(models.Model):
                 )
                 continue
 
+            # A fixed-class plan is sold as a COUNT, not a calendar span.
+            # Confirmed by the studio on 2026-10-01: "they pay for 4
+            # classes or 8, it shouldn't depend on days."
+            #
+            # Placement used to book every occurrence the period
+            # happened to contain, and a 29th-to-29th month contains five
+            # of some weekdays. Eva Morales got 10 against 8 paid for and
+            # Sonia 5 against 4. Capping per slot also gives combined
+            # plans their per-discipline count for free, because their
+            # slots are one per discipline.
+            cap = CLASSES_PER_MONTH_PER_SLOT * months
+            held = self.env['fitness.booking'].search_count([
+                ('student_id', '=', partner.id),
+                ('calendar_event_id', 'in', occurrences.ids),
+                ('state', 'in', ('booked', 'attended', 'no_show')),
+            ])
+            room_left = cap - held
+            if room_left <= 0:
+                _logger.info(
+                    "[CLASE FIJA] %s: slot '%s' already holds %d of %d "
+                    "for %s to %s; nothing to place",
+                    self.name, slot.name, held, cap, period_start,
+                    period_end)
+                continue
+
             for event in occurrences:
+                if room_left <= 0:
+                    break
                 # Idempotent: skip occurrences already assigned this period.
                 # Includes no_show/cancelled so reruns don't create duplicate slots
                 # for weeks the student already missed or intentionally cancelled.
@@ -572,6 +621,7 @@ class SaleOrder(models.Model):
                         'subscription_id': self.id,
                     })
                     total_booked += 1
+                    room_left -= 1
                 except Exception as exc:
                     # FIX 1: unexpected errors also surfaced
                     all_errors.append(
@@ -579,22 +629,111 @@ class SaleOrder(models.Model):
                         f"'{event.name}' — {exc}"
                     )
 
-        if all_errors:
-            raise ValidationError(
-                f"[CLASE FIJA] {self.name}: auto-placement failed for "
-                f"{len(all_errors)} slot/event(s) "
-                f"({total_booked} booked successfully):\n"
-                + "\n".join(all_errors) + "\n\n"
-                "Resolve issues above, then re-confirm or manually book remaining slots."
-            )
-
         if total_booked > 0:
             _logger.info(
-                "[CLASE FIJA] %s: auto-placed %d booking(s) across %d slot(s) "
-                "for %s–%s",
-                self.name, total_booked, len(active_slots), period_start, period_end,
+                "[CLASE FIJA] %s: auto-placed %d booking(s) across "
+                "%d slot(s) for %s to %s",
+                self.name, total_booked, len(active_slots),
+                period_start, period_end,
             )
-        return total_booked
+        return total_booked, all_errors
+
+    def _auto_place_clase_fija(self, future_only=False):
+        """Place the period's classes, raising if anything was missed.
+
+        Unchanged for every caller it already had: confirmation,
+        renewal, the app picker and the manual button. A full class or
+        a missing series is a ValidationError somebody can read.
+
+        The nightly job does NOT use this. It cannot: raising here
+        would roll back the bookings that did succeed, and one full
+        class would stop every member after it.
+        """
+        self.ensure_one()
+        booked, errors = self._fitness_place_slots(future_only=future_only)
+        if errors:
+            raise ValidationError(
+                f"[CLASE FIJA] {self.name}: auto-placement failed for "
+                f"{len(errors)} slot/event(s) "
+                f"({booked} booked successfully):\n"
+                + "\n".join(errors) + "\n\n"
+                "Resolve issues above, then re-confirm or place the "
+                "remaining slots by hand."
+            )
+        return booked
+
+    # ─── The nightly top-up ────────────────────────────────────────────────
+
+    @api.model
+    def _cron_place_fixed_classes(self):
+        """Book each member's weekly slot as the timetable reaches it.
+
+        Placement only ever booked what already existed when the member
+        bought. The timetable is generated about eight weeks ahead, so a
+        quarterly membership got about five weeks of its thirteen and
+        nothing came back for the rest. Laura Bucur paid 195.00 for three
+        months on 5 October 2026 and held five classes: the other seven
+        were never going to appear, and nothing anywhere said so.
+
+        This runs after the schedule-extension cron, so the classes it
+        places are the ones that job has just created.
+
+        It calls _fitness_place_slots directly rather than
+        _auto_place_clase_fija, for two reasons that matter:
+
+          * raising would roll back the bookings that DID succeed in the
+            same transaction;
+          * one full class would stop every member processed after it.
+
+        So each subscription is placed inside its own savepoint, failures
+        are collected and logged, and the run continues. A full class is
+        news for the studio, not a reason to leave forty other members
+        unbooked.
+
+        future_only=True because placement deliberately bypasses the
+        "class has already started" guard. That is right when a quarter
+        is set up in one go and wrong for a job that runs every night:
+        without it, a member who cancelled yesterday's class would find
+        it booked again this morning.
+        """
+        subs = self.search([
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', ACTIVE_SUBSCRIPTION_STATE),
+        ])
+        candidates = subs.filtered(
+            lambda s: s.fitness_clase_fija_ids.filtered('active'))
+        if not candidates:
+            _logger.info("[CLASE FIJA CRON] no fixed-class memberships to "
+                         "place")
+            return True
+
+        placed_total = 0
+        failed = []
+        for sub in candidates:
+            try:
+                with self.env.cr.savepoint():
+                    booked, errors = sub._fitness_place_slots(
+                        future_only=True)
+                placed_total += booked
+                if booked:
+                    _logger.info("[CLASE FIJA CRON] %s: placed %d",
+                                 sub.name, booked)
+                if errors:
+                    failed.append((sub, errors))
+            except Exception as exc:          # noqa: BLE001 - see docstring
+                failed.append((sub, [str(exc)]))
+
+        for sub, errors in failed:
+            _logger.warning(
+                "[CLASE FIJA CRON] %s (%s) could not be fully placed:\n%s",
+                sub.name, sub.partner_id.display_name,
+                "\n".join(errors))
+
+        _logger.info(
+            "[CLASE FIJA CRON] %d membership(s) considered, %d booking(s) "
+            "placed, %d with something unplaced",
+            len(candidates), placed_total, len(failed))
+        return True
 
     # ─── UI-7: manual "Place Classes" trigger for Clase Fija subscriptions ──────
 

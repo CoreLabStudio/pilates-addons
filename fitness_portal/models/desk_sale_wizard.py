@@ -63,14 +63,19 @@ class FitnessDeskSaleWizard(models.TransientModel):
     # disagreed by the fee. It is now shown, counted, and part of what she
     # is told to collect.
     membership_price = fields.Monetary(
-        string='Membership', compute='_compute_normal_price',
+        string='Package price', compute='_compute_normal_price',
         currency_field='currency_id',
-        help="The pack or membership itself, for the period chosen.")
+        help="The pack or membership itself, for the period chosen, "
+             "before the registration fee.")
     matricula_fee = fields.Monetary(
         string='Registration (one-off)', compute='_compute_normal_price',
         currency_field='currency_id',
         help="Charged on a student's first membership when the commitment "
-             "is shorter than three months. Zero when it does not apply.")
+             "is shorter than three months. Zero when it does not apply, "
+             "and the line beneath says why.")
+    matricula_note = fields.Char(
+        string=' ', compute='_compute_normal_price',
+        help="Why the registration line reads what it reads.")
     normal_price = fields.Monetary(
         string='Total to collect', compute='_compute_normal_price',
         currency_field='currency_id',
@@ -121,9 +126,48 @@ class FitnessDeskSaleWizard(models.TransientModel):
                 product.fitness_effective_price() * wiz._months()
                 if product else 0.0)
             wiz.matricula_fee = wiz._matricula_fee()
+            wiz.matricula_note = wiz._matricula_note()
             wiz.normal_price = wiz.membership_price + wiz.matricula_fee
             wiz.credits_granted = product.fitness_class_count if product else 0
             wiz.validity_days = product.fitness_validity_days if product else 0
+
+    def _matricula_note(self):
+        """Why the registration line reads what it reads.
+
+        The form used to hide the fee when none was due, on the grounds
+        that the total was then the membership and saying it twice was
+        noise. That left a single figure with no way to tell whether the
+        fee had been considered and waived or silently missed - which,
+        after an afternoon of the two disagreeing, is the first thing
+        anybody wants to know. So it is always shown, and always says
+        why.
+        """
+        self.ensure_one()
+        _ = self.env._
+        product = self.product_id
+        if not product:
+            return ''
+        if not product.fitness_is_subscription_plan:
+            return _("Packs carry no registration fee.")
+        if self.payment_method == 'free':
+            return _("Nothing is charged on a gift, the fee included.")
+        if not self.partner_id:
+            return _("Choose the student: the fee depends on whether this "
+                     "is her first membership.")
+        months = self.env['product.template'].fitness_plan_months(
+            self._effective_plan())
+        waived_from = self.env['product.template'].MATRICULA_WAIVED_FROM_MONTHS
+        if months >= waived_from:
+            return _("Waived: %(months)s months or more.",
+                     months=waived_from)
+        if product.fitness_has_paid_membership_before(self.partner_id):
+            return _("Waived: she has held a membership before. It is "
+                     "charged once, on a first membership.")
+        if not self.matricula_fee:
+            return _("No registration product is set up, so none is "
+                     "charged.")
+        return _("Charged once, on a first membership under %(months)s "
+                 "months.", months=waived_from)
 
     def _matricula_fee(self):
         """The registration fee this sale will carry, gross, or 0.00.
