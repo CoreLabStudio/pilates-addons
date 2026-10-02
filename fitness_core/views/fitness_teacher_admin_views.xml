@@ -71,6 +71,16 @@
     <record id="action_fitness_teacher_list_server" model="ir.actions.server">
         <field name="name">Instructors</field>
         <field name="model_id" ref="base.model_res_users"/>
+        <!-- Required, not decorative. _can_execute_action_on_records checks
+             group membership when a server action declares groups, and
+             otherwise demands WRITE access on the action's model - here
+             res.users, which only an Access Rights user has. The menu above
+             is shown to group_fitness_manager, so without this a studio
+             manager was offered Instructor List and refused the moment she
+             clicked it: "You don't have enough access rights to run this
+             action." It went unnoticed because Yoleyva is a full
+             administrator and never hit it. -->
+        <field name="group_ids" eval="[(4, ref('fitness_core.group_fitness_manager'))]"/>
         <field name="state">code</field>
         <field name="code">
 teacher_g = env.ref('fitness_core.group_fitness_teacher', raise_if_not_found=False)
@@ -79,7 +89,12 @@ if teacher_g:
     ids = [r[0] for r in env.cr.fetchall()]
 else:
     ids = []
-base_action = env.ref('fitness_core.action_fitness_teacher_list').read()[0]
+# sudo() on the read: reading an ir.actions.act_window record needs
+# Administrator, and this runs as whoever clicked the menu. It only reads
+# the action's own definition - which records she may then see is decided
+# by the domain below and by the rules on res.users, neither of which this
+# relaxes.
+base_action = env.ref('fitness_core.action_fitness_teacher_list').sudo().read()[0]
 base_action['domain'] = [('id', 'in', ids)] if ids else [('id', '=', False)]
 action = base_action
         </field>
