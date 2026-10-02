@@ -47,11 +47,16 @@
         ]"/>
         <field name="dashboard_group_id"
                ref="spreadsheet_dashboard_group_corelab"/>
-        <!-- Manager-only, like every other report in this module. The
-             hand-made row was scoped to a group called "Rol / Usuario",
-             which is not the studio's manager group. -->
+        <!-- Manager-only, like every other report in this module.
+             SET, not link. The hand-made row was scoped to "Rol /
+             Usuario", which is base.group_user - every internal user,
+             instructors included. This dashboard carries revenue, ARPU
+             and retention, so that was wider than it should ever have
+             been; Command.link would have ADDED the manager group and
+             left the studio's finances on every instructor's screen.
+             (6, 0, [...]) replaces the list outright. -->
         <field name="group_ids"
-               eval="[Command.link(ref('fitness_core.group_fitness_manager'))]"/>
+               eval="[(6, 0, [ref('fitness_core.group_fitness_manager')])]"/>
         <field name="sequence">10</field>
         <field name="is_published">True</field>
     </record>
@@ -75,8 +80,9 @@
         ]"/>
         <field name="dashboard_group_id"
                ref="spreadsheet_dashboard_group_corelab"/>
+        <!-- Set rather than linked, for the same reason as above. -->
         <field name="group_ids"
-               eval="[Command.link(ref('fitness_core.group_fitness_manager'))]"/>
+               eval="[(6, 0, [ref('fitness_core.group_fitness_manager')])]"/>
         <field name="sequence">20</field>
         <field name="is_published">True</field>
     </record>
