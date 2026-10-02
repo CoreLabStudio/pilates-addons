@@ -77,4 +77,40 @@
         groups="fitness_core.group_fitness_manager"
     />
 
+    <menuitem
+        id="menu_fitness_report_daypart_all"
+        name="Attendance by Time of Day"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_report_daypart_all"
+        sequence="55"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_report_daypart_paying"
+        name="Time of Day (Paying)"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_report_daypart_paying"
+        sequence="56"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_report_daypart_membership"
+        name="Time of Day (Memberships)"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_report_daypart_membership"
+        sequence="57"
+        groups="fitness_core.group_fitness_manager"
+    />
+
+    <menuitem
+        id="menu_fitness_report_daypart_pack"
+        name="Time of Day (Packs)"
+        parent="menu_fitness_reports_root"
+        action="fitness_reports.action_fitness_report_daypart_pack"
+        sequence="58"
+        groups="fitness_core.group_fitness_manager"
+    />
+
 </odoo>

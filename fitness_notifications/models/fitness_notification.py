@@ -46,6 +46,31 @@ class FitnessNotification(models.Model):
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")
 
+    # ── Which of these mean "something about a class you hold has changed" ──
+    #
+    # The bell treated every notification alike: an invoice, a survey and
+    # "the studio moved your class to Friday" arrived as the same grey card
+    # with the same dot. The one a student has to act on looked exactly like
+    # the one she can read next week.
+    #
+    # A confirmation is not a change, so booking_confirmed is not here. A
+    # reminder is not a change either - class_reminder is about a class she
+    # already knows she has. These three are the ones where what she had
+    # arranged is no longer what is happening.
+    SCHEDULE_TYPES = ('class_rescheduled', 'booking_cancelled', 'teacher_swap')
+
+    is_schedule_change = fields.Boolean(
+        string='Changes her schedule',
+        compute='_compute_is_schedule_change',
+        help="True when this notification says a class she holds has moved, "
+             "been cancelled, or changed instructor.")
+
+    @api.depends('notification_type')
+    def _compute_is_schedule_change(self):
+        for notif in self:
+            notif.is_schedule_change = (
+                notif.notification_type in self.SCHEDULE_TYPES)
+
     @api.model
     def _create_for_user(self, user_id, notif_type, title, body=None, action_url=None):
         """Create a single in-app notification; silently skips if user_id is falsy."""

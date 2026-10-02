@@ -116,7 +116,18 @@ class FitnessAddStudentWizard(models.TransientModel):
                     # of 0.0 so the column is never null, and setdefault then
                     # left every charged booking at zero - which the price
                     # guard duly refused.
-                    res['price'] = product.list_price or 0.0
+                    #
+                    # The PROMOTIONAL price, not list_price. The promotion
+                    # block - Full price / Free / Percentage off, with a date
+                    # window - sits on every fitness product, and the studio
+                    # sets it there expecting the app to charge it. The shop,
+                    # the desk sale wizard and the membership lines all ask
+                    # fitness_effective_price(); this screen asked for
+                    # list_price, so a promotion put on a private-class
+                    # product was the one discount the studio could set and
+                    # not get. Outside its window the two are the same
+                    # number, which is why nothing looked wrong.
+                    res['price'] = product.fitness_effective_price()
         return res
 
     def _product_for(self, event):

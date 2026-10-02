@@ -82,7 +82,15 @@ class ClaseFijaFixture(TransactionCase):
         # id-only branch books a single class and looks like success.
         recurrence = self.env["calendar.recurrence"].create(
             {"rrule_type": False})
-        start = (fields.Datetime.now() + datetime.timedelta(
+        # Counted from the next Monday, not from today. The allowance
+        # tests ask about the ISO week containing the first class, and
+        # two series at "now + 1" and "now + 3" straddle a week boundary
+        # whenever the suite runs on a Friday or a Saturday - which is
+        # how a test about Barre and Reformer pools came to fail on the
+        # date instead of on the pools.
+        now = fields.Datetime.now()
+        next_monday = now + datetime.timedelta(days=(7 - now.weekday()) or 7)
+        start = (next_monday + datetime.timedelta(
             days=weekday_offset)).replace(
                 hour=hour, minute=0, second=0, microsecond=0)
         events = self.env["calendar.event"]

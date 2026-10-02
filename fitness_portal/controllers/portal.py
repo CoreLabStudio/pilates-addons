@@ -2670,9 +2670,19 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/notifications', type='http', auth='user', website=True, sitemap=False)
     def notifications_page(self, **kw):
-        """Full archive. Auto-marks all as read on load so state persists
-        correctly when the user re-opens. The 'is_new' flag in each entry
-        preserves the unread indicator for the current view."""
+        """Full archive. Reading the page does NOT mark anything read.
+
+        It used to mark everything read on load, and on a phone that made
+        the bell destructive: below 600px the bell does not open a dropdown,
+        it navigates here, so tapping it to see what had arrived cleared
+        every unread notification at once with no way to review them. On a
+        desktop the same student would have had them marked one at a time as
+        she clicked them.
+
+        Now both behave the same way - an item is read when she opens it -
+        and "Mark all read" is the button above, where clearing everything is
+        something she chose rather than something tapping the bell did to
+        her."""
         _ = request.env._
         notifs = request.env['fitness.notification'].sudo().search(
             [('user_id', '=', request.env.user.id)]
@@ -2686,10 +2696,6 @@ class FitnessStudentPortal(http.Controller):
             'time_ago': _time_ago(now - n.create_date, _),
         } for n in notifs]
         unread_count = sum(1 for e in entries if e['is_new'])
-
-        # Persist read state now — re-opening the archive will show all as read.
-        if unread_count:
-            notifs.filtered(lambda n: not n.is_read).write({'is_read': True})
 
         partner = request.env.user.partner_id
         full_name = partner.name or ''
@@ -2743,6 +2749,9 @@ class FitnessStudentPortal(http.Controller):
                 'read': False,
                 'time_ago': time_ago,
                 'type': n.notification_type,
+                # Sent and, until now, thrown away: the panel built every
+                # row with the same class whatever this said.
+                'is_schedule_change': n.is_schedule_change,
                 'action_url': n.action_url or '',
             })
         return request.make_response(
@@ -2995,15 +3004,8 @@ class FitnessStudentPortal(http.Controller):
     # studio can move or lift it without a deploy; the constant is only the
     # default. Claiming is what closes - a trial already claimed keeps its
     # credit and its ordinary validity, which is rule four: nothing special.
-    TRIAL_OFFER_END_PARAM = 'fitness.trial_offer_end'
-    TRIAL_OFFER_END_DEFAULT = '2026-09-30'
     def _trial_offer_end(self):
-        raw = (request.env['ir.config_parameter'].sudo()
-               .get_param(self.TRIAL_OFFER_END_PARAM)
-               or self.TRIAL_OFFER_END_DEFAULT or '').strip()
-        if not raw:
-            return None
-        return fields.Date.to_date(raw)
+        return request.env['fitness.trial.request'].sudo()._trial_offer_end()
 
     def _trial_offer_open(self):
         """Is a new trial still claimable at all, by anybody?
@@ -3013,11 +3015,15 @@ class FitnessStudentPortal(http.Controller):
         the window, the price on the shop card, and the trial page itself. If
         they disagreed, a student would be offered something the next screen
         refuses.
+
+        It was asked in two. fitness_trials read the same parameter with no
+        fallback while this carried a hardcoded TRIAL_OFFER_END_DEFAULT of
+        '2026-09-30', so on any database where nobody had set the parameter
+        the shop said closed and the trial form said open. Now both ask
+        fitness.trial.request, which this module already depends on, and the
+        answer cannot differ because there is only one of it.
         """
-        end = self._trial_offer_end()
-        if not end:
-            return True
-        return fields.Date.context_today(request.env.user) <= end
+        return request.env['fitness.trial.request'].sudo()._trial_offer_open()
 
     def _trial_products(self):
         out = request.env['product.template'].sudo().browse()

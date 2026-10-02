@@ -33,3 +33,6 @@ from . import test_signup_view_duplicate
 from . import test_desk_sale_shows_the_fee
 
 from . import test_nightly_placements_show_on_my_schedule
+from . import test_desk_sale_end_to_end
+from . import test_notification_bell
+from . import test_trial_offer_gate
