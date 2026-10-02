@@ -76,6 +76,14 @@
      "chain": "class_date",
      "type": "date",
      "offset": 0
+    },
+    "d4b2c6e5-3f5a-4c9d-be11-4c8f7a2b9c55": {
+     "chain": "class_type_id",
+     "type": "many2one"
+    },
+    "e5c3d7f6-4a6b-4dae-cf22-5d9a8b3c0d66": {
+     "chain": "daypart",
+     "type": "selection"
     }
    }
   }
@@ -111,6 +119,14 @@
     "c2e1d5b3-2e4f-4b8c-ad99-3b7e6f1a8b22": {
      "chain": "is_paying",
      "type": "boolean"
+    },
+    "d4b2c6e5-3f5a-4c9d-be11-4c8f7a2b9c55": {
+     "chain": "class_type_id",
+     "type": "many2one"
+    },
+    "e5c3d7f6-4a6b-4dae-cf22-5d9a8b3c0d66": {
+     "chain": "daypart",
+     "type": "selection"
     }
    }
   }
@@ -121,6 +137,20 @@
    "type": "date",
    "label": "Periodo",
    "defaultValue": "last_90_days"
+  },
+  {
+   "id": "d4b2c6e5-3f5a-4c9d-be11-4c8f7a2b9c55",
+   "type": "relation",
+   "label": "Clase",
+   "modelName": "fitness.class.type",
+   "defaultValueDisplayNames": []
+  },
+  {
+   "id": "e5c3d7f6-4a6b-4dae-cf22-5d9a8b3c0d66",
+   "type": "selection",
+   "label": "Franja",
+   "resModel": "fitness.report.attendance.daypart",
+   "selectionField": "daypart"
   },
   {
    "id": "c2e1d5b3-2e4f-4b8c-ad99-3b7e6f1a8b22",
