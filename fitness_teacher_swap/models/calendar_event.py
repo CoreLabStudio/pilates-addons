@@ -1,6 +1,7 @@
 import pytz as _pytz
 
 from odoo import models, fields
+from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.exceptions import UserError
 
 import logging
@@ -74,34 +75,16 @@ class CalendarEvent(models.Model):
                 if new_teacher_id and snap.get('teacher_id') != new_teacher_id:
                     new_teacher = self.env['res.users'].browse(new_teacher_id)
                     if new_teacher.exists():
-                        bookings = self.env['fitness.booking'].sudo().search([
-                            ('calendar_event_id', '=', event.id),
-                            ('state', '=', 'booked'),
-                        ])
-                        notified = 0
-                        for booking in bookings:
-                            student_user = booking.student_id.user_ids[:1]
-                            if student_user:
-                                senv = self.with_context(lang=student_user.lang or DEFAULT_LANG)
-                                Notif._create_for_user(
-                                    student_user.id,
-                                    'teacher_swap',
-                                    senv.env._('Instructor updated: %s', event.name),
-                                    senv.env._('Your class will now be taught by %s.', new_teacher.name),
-                                    action_url=f'/my/classes/{event.id}',
-                                )
-                                notified += 1
-                        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
-                        Notif._create_for_user(
-                            new_teacher.id,
-                            'teacher_swap',
-                            tenv.env._('Class assigned to you: %s', event.name),
-                            tenv.env._('You have been assigned as instructor for this class.'),
-                            action_url=f'/my/instructor/classes/{event.id}',
-                        )
+                        # Shared with the portal route. This copy used to
+                        # send no email at all while that one tried to, so
+                        # editing the Organizer told the student on the bell
+                        # and never in her inbox.
+                        notified, mailed = event._fitness_notify_teacher_change(
+                            new_teacher)
                         _logger.info(
-                            "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) notified",
-                            event.name, new_teacher.name, notified,
+                            "[TEACHER-ASSIGN] '%s': assigned to %s, %d student(s) "
+                            "belled, %d emailed, teacher notified",
+                            event.name, new_teacher.name, notified, mailed,
                         )
                         # Log a permanent swap record for the admin history view.
                         old_teacher_id = snap.get('teacher_id')
@@ -210,6 +193,99 @@ class CalendarEvent(models.Model):
 
         return result
 
+    # ── one implementation, both routes ──────────────────────────────────
+    def _fitness_notify_teacher_change(self, new_teacher):
+        """Tell everyone a class changed instructor. Returns (belled, mailed).
+
+        WHY THIS IS SHARED
+        ------------------
+        A class can change instructor two ways: a teacher hands it over in
+        the portal, or somebody edits the Organizer in the back office.
+        Those were two copies of this logic, and they drifted twice.
+
+        First the portal copy never told the incoming instructor, so a
+        handover arranged between two teachers reached the students and
+        never the person who had to teach the class - while the back-office
+        edit told her correctly. Whichever route somebody happened to use
+        decided whether she heard.
+
+        Then, once that was fixed, the two disagreed about email: the portal
+        copy tried to send it and the back-office copy did not send one at
+        all. Production ran nine swaps and sent zero emails.
+
+        So there is now one copy, and neither route can quietly do less than
+        the other.
+
+        ON THE EMAIL FAILING
+        --------------------
+        Only MailDeliveryException is caught. It is tempting to catch
+        UserError too and let a swap through whatever happens to the mail,
+        but AccessError SUBCLASSES UserError - and an unsudoed send raising
+        AccessError, swallowed, is precisely why this never sent a single
+        email. A bug here must be loud. A post office that is down may
+        reasonably be quiet.
+        """
+        self.ensure_one()
+        Notif = self.env['fitness.notification'].sudo()
+        template = self.env.ref(
+            'fitness_teacher_swap.mail_template_teacher_swap',
+            raise_if_not_found=False,
+        )
+        if not template:
+            _logger.warning(
+                "[TEACHER-SWAP] mail template missing; '%s' changed "
+                "instructor with no email to anyone", self.name)
+
+        bookings = self.env['fitness.booking'].sudo().search([
+            ('calendar_event_id', '=', self.id),
+            ('state', '=', 'booked'),
+        ])
+
+        belled = mailed = 0
+        for booking in bookings:
+            student_user = booking.student_id.user_ids[:1]
+            if student_user:
+                senv = self.with_context(
+                    lang=student_user.lang or DEFAULT_LANG)
+                Notif._create_for_user(
+                    student_user.id,
+                    'teacher_swap',
+                    senv.env._('Instructor updated: %s', self.name),
+                    senv.env._('Your class will now be taught by %s.',
+                               new_teacher.name),
+                    action_url=f'/my/classes/{self.id}',
+                )
+                belled += 1
+            # No address means no mail, and that is a supported state - see
+            # RUNBOOK-students-without-email.md. sudo() because the portal
+            # route runs as the instructor, who cannot write mail.mail.
+            if template and booking.student_id.email:
+                try:
+                    template.sudo().send_mail(booking.id, force_send=False)
+                    mailed += 1
+                except MailDeliveryException:
+                    _logger.warning(
+                        "[TEACHER-SWAP] mail server refused the instructor "
+                        "change for booking %s; the bell notification still "
+                        "went to %s",
+                        booking.id, booking.student_id.display_name)
+            elif template:
+                _logger.info(
+                    "[TEACHER-SWAP] %s has no email address; nothing queued "
+                    "for booking %s",
+                    booking.student_id.display_name, booking.id)
+
+        # The instructor taking it on, in her own language.
+        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
+        Notif._create_for_user(
+            new_teacher.id,
+            'teacher_swap',
+            tenv.env._('Class assigned to you: %s', self.name),
+            tenv.env._('You have been assigned as instructor for this class.'),
+            action_url=f'/my/instructor/classes/{self.id}',
+        )
+        return belled, mailed
+
     def fitness_reassign_teacher(self, new_teacher_id, reason=''):
         self.ensure_one()
 
@@ -287,53 +363,14 @@ class CalendarEvent(models.Model):
         #
         # Deliberately the same notification the other route sends - same
         # type, same wording, same link - so the two cannot drift.
-        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
-        self.env['fitness.notification'].sudo()._create_for_user(
-            new_teacher.id,
-            'teacher_swap',
-            tenv.env._('Class assigned to you: %s', self.name),
-            tenv.env._('You have been assigned as instructor for this class.'),
-            action_url=f'/my/instructor/classes/{self.id}',
+        # Shared with the back-office route, so the two cannot drift again.
+        # The send inside is sudoed: this route runs as the instructor, who
+        # cannot write mail.mail, and the AccessError that caused was
+        # swallowed here for months while the bell notification beside it
+        # went out normally.
+        belled, mailed = self._fitness_notify_teacher_change(new_teacher)
+        _logger.info(
+            "[TEACHER-SWAP] class %d: %d student(s) belled, %d emailed, "
+            "teacher notified",
+            self.id, belled, mailed,
         )
-
-        # Notify affected students: in-app + email
-        affected_bookings = self.env['fitness.booking'].sudo().search([
-            ('calendar_event_id', '=', self.id),
-            ('state', '=', 'booked'),
-        ])
-        if affected_bookings:
-            notif_model = self.env['fitness.notification'].sudo()
-            template = self.env.ref(
-                'fitness_teacher_swap.mail_template_teacher_swap',
-                raise_if_not_found=False,
-            )
-            for booking in affected_bookings:
-                student_user = booking.student_id.user_ids[:1]
-                if student_user:
-                    student_env = self.with_context(lang=student_user.lang or DEFAULT_LANG)
-                    notif_model._create_for_user(
-                        student_user.id,
-                        'teacher_swap',
-                        student_env.env._('Instructor updated: %s', self.name),
-                        student_env.env._('Your class will now be taught by %s.', new_teacher.name),
-                        action_url=f'/my/classes/{self.id}',
-                    )
-                # No address means no mail - see the reschedule path above and
-                # RUNBOOK-students-without-email.md.
-                if template and booking.student_id.email:
-                    try:
-                        template.send_mail(booking.id, force_send=False)
-                    except Exception:
-                        _logger.exception(
-                            "[TEACHER-SWAP] Failed to queue swap email for booking %d",
-                            booking.id,
-                        )
-                elif template:
-                    _logger.info(
-                        "[TEACHER-SWAP] %s has no email address; nothing "
-                        "queued for booking %d",
-                        booking.student_id.display_name, booking.id)
-            _logger.info(
-                "[TEACHER-SWAP] Notified %d student(s) of teacher change on class %d.",
-                len(affected_bookings), self.id,
-            )
