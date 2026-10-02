@@ -31,6 +31,8 @@ msgid "Class Summary"
 msgstr "Resum de classes"
 
 #. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
 #: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_classes
 msgid "Classes"
 msgstr "Classes"
@@ -205,6 +207,8 @@ msgid "Capacity"
 msgstr "Capacitat"
 
 #. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
 #: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__class_date
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
@@ -234,6 +238,8 @@ msgid "Display Name"
 msgstr "Nom mostrat"
 
 #. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
 #: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__event_id
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
@@ -608,3 +614,506 @@ msgstr "Total (IVA incl.)"
 #: model_terms:ir.ui.view,arch_db:fitness_reports.view_sale_order_revenue_list
 msgid "Type"
 msgstr "Tipus"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "% Evening"
+msgstr "% tarda"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "% Morning"
+msgstr "% matí"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Active Customers by Month"
+msgstr "Clients actius per mes"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+#: model:ir.actions.act_window,name:fitness_reports.action_fitness_report_daypart_all
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_report_daypart_all
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_graph
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Attendance by Time of Day"
+msgstr "Assistència per franja horària"
+
+#. module: fitness_reports
+#: model:ir.actions.act_window,name:fitness_reports.action_fitness_report_daypart_paying
+msgid "Attendance by Time of Day (Paying Students)"
+msgstr "Assistència per franja horària (alumnes que han pagat)"
+
+#. module: fitness_reports
+#: model:ir.model,name:fitness_reports.model_fitness_report_attendance_daypart
+msgid "Attendance by Time of Day (SQL View)"
+msgstr "Assistència per franja horària (vista SQL)"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Attendances"
+msgstr "Assistències"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Attendances by Class Type"
+msgstr "Assistències per tipus de classe"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Attendances by Teacher"
+msgstr "Assistències per professor"
+
+#. module: fitness_reports
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_attendance_daypart__discipline__barre
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Barre"
+msgstr "Barre"
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__discipline
+msgid ""
+"Barre or Reformer - the studio's two rooms, which is the 'class type' "
+"split the report is usually read by."
+msgstr ""
+"Barre o Reformer: les dues sales de l’estudi, que és la divisió per "
+"\"tipus de classe\" amb què sol llegir-se l’informe."
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__booked_count
+msgid "Booked Seats"
+msgstr "Places reservades"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__booking_id
+msgid "Booking"
+msgstr "Reserva"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__booking_state
+msgid "Booking Status"
+msgstr "Estat de la reserva"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Class Occupancy by Type (%)"
+msgstr "Ocupació de classe per tipus (%)"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__class_state
+msgid "Class Status"
+msgstr "Estat de la classe"
+
+#. module: fitness_reports
+#: model:ir.model,name:fitness_reports.model_fitness_report_class
+msgid "Class Summary Report (SQL View)"
+msgstr "Informe resum de classes (vista SQL)"
+
+#. module: fitness_reports
+#: model:spreadsheet.dashboard.group,name:fitness_reports.spreadsheet_dashboard_group_corelab
+msgid "CoreLab Analytics"
+msgstr "CoreLab Analytics"
+
+#. module: fitness_reports
+#: model:spreadsheet.dashboard,name:fitness_reports.dashboard_corelab_attendance
+msgid "CoreLab — Attendance by Time of Day"
+msgstr "CoreLab — Assistència per franja"
+
+#. module: fitness_reports
+#: model:spreadsheet.dashboard,name:fitness_reports.dashboard_corelab_monthly
+msgid "CoreLab — Monthly Summary"
+msgstr "CoreLab — Resum Mensual"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Customers"
+msgstr "Clients"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "EUR"
+msgstr "EUR"
+
+#. module: fitness_reports
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_attendance_daypart__daypart__evening
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_class__daypart__evening
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Evening"
+msgstr "Tarda"
+
+#. module: fitness_reports
+#: model_terms:ir.actions.act_window,help:fitness_reports.action_fitness_report_daypart_all
+msgid ""
+"Every booking on a class that has already run, split by the\n"
+"               hour it started on a Madrid clock. Cancelled bookings,\n"
+"               cancelled classes, archived classes and classes still to\n"
+"               come are all left out."
+msgstr ""
+"Totes les reserves de classes que ja s’han impartit, dividides per\n"
+"               l’hora en què van començar en horari de Madrid. Es deixen\n"
+"               fora les reserves cancel·lades, les classes cancel·lades, "
+"les\n"
+"               classes arxivades i les classes encara per venir."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__attendance_count
+msgid ""
+"Every booking that was not cancelled on a class that ran, including "
+"no-shows: the seat was taken and nobody else could have it."
+msgstr ""
+"Totes les reserves no cancel·lades d’una classe que es va impartir, "
+"incloses les absències: la plaça estava ocupada i ningú més no la podia "
+"tenir."
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "Hour"
+msgstr "Hora"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__local_hour
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__local_hour
+msgid "Hour (Madrid)"
+msgstr "Hora (Madrid)"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_client__id
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_retention__id
+#: model:ir.model.fields,field_description:fitness_reports.field_sale_order__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__teacher_user_id
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_booking_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_list
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_class_search
+msgid "Instructor"
+msgstr "Instructor"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "KPI - % Evening"
+msgstr "KPI - % tarda"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "KPI - % Morning"
+msgstr "KPI - % matí"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "KPI - Evening Seats"
+msgstr "KPI - Places a la tarda"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "KPI - Morning Seats"
+msgstr "KPI - Places al matí"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "KPI - Seats Held"
+msgstr "KPI - Places ocupades"
+
+#. module: fitness_reports
+#: model:ir.model.fields.selection,name:fitness_reports.selection__sale_order__revenue_type__membership
+msgid "Membership"
+msgstr "Membresia"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Membership payers"
+msgstr "Alumnes amb membresia"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Monthly ARPU (€ per active customer)"
+msgstr "ARPU mensual (€ per client actiu)"
+
+#. module: fitness_reports
+#: model:ir.model,name:fitness_reports.model_fitness_report_retention
+msgid "Monthly Retention & ARPU Report (SQL View)"
+msgstr "Informe mensual de retenció i ARPU (vista SQL)"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Monthly Retention Rate (%)"
+msgstr "Taxa de retenció mensual (%)"
+
+#. module: fitness_reports
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_attendance_daypart__daypart__morning
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_class__daypart__morning
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Morning"
+msgstr "Matí"
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_class__daypart
+msgid ""
+"Morning is anything starting before 14:00 Madrid time; evening is 14:00 "
+"onward - the same split the trial form offers students."
+msgstr ""
+"Matí és tot el que comença abans de les 14:00 hora de Madrid; tarda és a "
+"partir de les 14:00: la mateixa divisió que el formulari de classe de "
+"prova ofereix a les alumnes."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__daypart
+msgid ""
+"Morning is anything starting before 14:00 Madrid time; evening is 14:00 "
+"onward. The same two words, and the same boundary, the trial form asks "
+"students to choose between."
+msgstr ""
+"Matí és tot el que comença abans de les 14:00 hora de Madrid; tarda és a "
+"partir de les 14:00. Les mateixes dues paraules, i el mateix límit, entre "
+"les quals el formulari de classe de prova demana triar a les alumnes."
+
+#. module: fitness_reports
+#: model_terms:ir.actions.act_window,help:fitness_reports.action_fitness_report_daypart_all
+msgid "No attendance yet"
+msgstr "Encara no hi ha assistència"
+
+#. module: fitness_reports
+#: model_terms:ir.actions.act_window,help:fitness_reports.action_fitness_report_daypart_paying
+msgid "No paying attendance yet"
+msgstr "Encara no hi ha assistència d’alumnes que hagin pagat"
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__attended_count
+msgid "Only the bookings marked attended."
+msgstr "Només les reserves marcades com a assistides."
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Pack payers"
+msgstr "Alumnes amb bo"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Paid Membership"
+msgstr "Membresia pagada"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Paid Pack"
+msgstr "Bo pagat"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__paid_membership
+msgid "Paid for a Membership"
+msgstr "Ha pagat una membresia"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__paid_pack
+msgid "Paid for a Pack"
+msgstr "Ha pagat un bo"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Paying"
+msgstr "Ha pagat"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__is_paying
+msgid "Paying Student"
+msgstr "Alumna que ha pagat"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Paying students"
+msgstr "Alumnes que han pagat"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "Paying students only"
+msgstr "Només alumnes que han pagat"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "Period"
+msgstr "Període"
+
+#. module: fitness_reports
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__did_run
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_class_report_search
+msgid "Ran"
+msgstr "Es va impartir"
+
+#. module: fitness_reports
+#: model:ir.model.fields.selection,name:fitness_reports.selection__fitness_report_attendance_daypart__discipline__reformer
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Reformer"
+msgstr "Reformer"
+
+#. module: fitness_reports
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_reports_root
+msgid "Reports"
+msgstr "Informes"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/corelab_dashboard.json:0
+msgid "Revenue excl. VAT by Month (€)"
+msgstr "Ingressos sense IVA per mes (€)"
+
+#. module: fitness_reports
+#: model:ir.model,name:fitness_reports.model_sale_order
+msgid "Sales Order"
+msgstr "Comanda de venda"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__attendance_count
+msgid "Seats Held"
+msgstr "Places ocupades"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_list
+msgid "Seats held"
+msgstr "Places ocupades"
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+msgid "Students"
+msgstr "Alumnes"
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_class__did_run
+msgid ""
+"The class was not cancelled and has already finished. A class that ran "
+"with nobody in it still counts - the instructor was there."
+msgstr ""
+"La classe no es va cancel·lar i ja ha acabat. Una classe que es va "
+"impartir sense ningú a dins també compta: l’instructor hi era."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__local_hour
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_class__local_hour
+msgid "The hour the class started on a Madrid clock, not UTC."
+msgstr ""
+"L’hora a la qual va començar la classe en horari de Madrid, no UTC."
+
+#. module: fitness_reports
+#: model_terms:ir.actions.act_window,help:fitness_reports.action_fitness_report_daypart_paying
+msgid ""
+"The same split, narrowed to students who have paid for a pack\n"
+"               or a membership at some point - more than zero euros, so "
+"a\n"
+"               free trial or a gifted class does not make somebody a "
+"paying\n"
+"               client."
+msgstr ""
+"La mateixa divisió, limitada a les alumnes que en algun moment\n"
+"               han pagat un bo o una membresia: més de zero euros, de\n"
+"               manera que una classe de prova gratuïta o una classe "
+"regalada\n"
+"               no converteixen ningú en clienta de pagament."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__is_paying
+msgid ""
+"This student has at least one confirmed order carrying a pack or a "
+"membership line above zero euros. The amount is what makes it a purchase: "
+"a free trial IS a package on this system, so asking only whether she owns "
+"one would count every trial visitor as a paying client. Gifts are zero "
+"too, and are excluded by the same test."
+msgstr ""
+"Aquesta alumna té com a mínim una comanda confirmada amb una línia de bo "
+"o de membresia per sobre de zero euros. És l’import el que ho converteix "
+"en una compra: en aquest sistema una classe de prova gratuïta ÉS un bo, "
+"així que preguntar només si en té un comptaria com a clienta de pagament "
+"tota visitant de prova. Els regals també són zero, i queden exclosos per "
+"la mateixa prova."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__paid_membership
+msgid ""
+"This student has bought a membership at some point - a recurring plan, "
+"not a pack of classes."
+msgstr ""
+"Aquesta alumna ha comprat una membresia en algun moment: un pla "
+"recurrent, no un bo de classes."
+
+#. module: fitness_reports
+#: model:ir.model.fields,help:fitness_reports.field_fitness_report_attendance_daypart__paid_pack
+msgid ""
+"This student has bought a pack of classes at some point. Independent of "
+"the membership flag: somebody who has bought both is true for both, so "
+"the two do not add up to the paying total."
+msgstr ""
+"Aquesta alumna ha comprat un bo de classes en algun moment. És "
+"independent de la marca de membresia: qui hagi comprat les dues coses és "
+"certa en totes dues, de manera que les dues no sumen el total d’alumnes "
+"que han pagat."
+
+#. module: fitness_reports
+#. odoo-javascript
+#: code:addons/fitness_reports/data/files/attendance_dashboard.json:0
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_attendance_daypart__daypart
+#: model:ir.model.fields,field_description:fitness_reports.field_fitness_report_class__daypart
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Time of Day"
+msgstr "Franja horària"
+
+#. module: fitness_reports
+#: model:ir.actions.act_window,name:fitness_reports.action_fitness_report_daypart_membership
+msgid "Time of Day (Membership Payers)"
+msgstr "Franja horària (clientes amb membresia)"
+
+#. module: fitness_reports
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_report_daypart_membership
+msgid "Time of Day (Memberships)"
+msgstr "Franja horària (membresies)"
+
+#. module: fitness_reports
+#: model:ir.actions.act_window,name:fitness_reports.action_fitness_report_daypart_pack
+msgid "Time of Day (Pack Payers)"
+msgstr "Franja horària (clientes amb bo)"
+
+#. module: fitness_reports
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_report_daypart_pack
+msgid "Time of Day (Packs)"
+msgstr "Franja horària (bons)"
+
+#. module: fitness_reports
+#: model:ir.ui.menu,name:fitness_reports.menu_fitness_report_daypart_paying
+msgid "Time of Day (Paying)"
+msgstr "Franja horària (alumnes que han pagat)"
+
+#. module: fitness_reports
+#: model_terms:ir.ui.view,arch_db:fitness_reports.view_fitness_report_daypart_search
+msgid "Turned up"
+msgstr "Va venir"

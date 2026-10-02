@@ -382,3 +382,259 @@ msgstr "Indica per què es regala aquesta classe. És l'únic registre que queda
 #: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
 msgid "Enter the price agreed, or switch to a free class."
 msgstr "Introdueix el preu acordat, o canvia a classe gratuïta."
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"%(student)s is booked on %(name)s, charged %(price).2f on %(order)s."
+msgstr ""
+"%(student)s està reservada a %(name)s, amb un càrrec de %(price).2f a "
+"%(order)s."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"'%(name)s' is a group class, and there is no group class to charge a "
+"single booking against - the single-class packs are not on sale. Use the "
+"Gift one spot to a student button to give it, or sell the student a pack "
+"and let them book it."
+msgstr ""
+"'%(name)s' és una classe de grup i no hi ha cap classe de grup contra la "
+"qual cobrar una reserva individual: els bons de classe solta no estan a "
+"la venda. Fes servir el botó Regalar una plaça a una alumna per donar-la, "
+"o ven-li un bo a l’alumna i deixa que reservi."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Added to %(name)s by %(who)s, charged the agreed price."
+msgstr "Afegida a %(name)s per %(who)s, amb el preu acordat."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_fitness_add_student_wizard__student_id
+msgid ""
+"Any contact. The booking and the paid line are both created against them."
+msgstr ""
+"Qualsevol contacte. La reserva i la línia cobrada es creen al seu nom."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_class_type
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_class_type
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__fitness_class_type
+msgid "Class Type"
+msgstr "Tipus de classe"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_validity_days
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_validity_days
+msgid "Credits expire this many days after the sale order is confirmed."
+msgstr ""
+"Els crèdits caduquen aquests dies després de confirmar la comanda de "
+"venda."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_promo_percent
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_promo_percent
+msgid "Discount (%)"
+msgstr "Descompte (%)"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_booking__display_name
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__display_name
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order__display_name
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_is_package
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_is_package
+msgid ""
+"Enable for class-pack products. Activates credit tracking on sale order "
+"lines."
+msgstr ""
+"Activa’l en els productes de bo de classes. Activa el seguiment de "
+"crèdits a les línies de la comanda."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"Enter the price agreed. To give the class instead, use the Gift one spot "
+"to a student button."
+msgstr ""
+"Introdueix el preu acordat. Per regalar la classe, fes servir el botó "
+"Regalar una plaça a una alumna."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_promo_start
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_promo_start
+msgid "First day the promotion applies. Leave empty to start immediately."
+msgstr ""
+"Primer dia en què s’aplica la promoció. Deixa-ho buit per començar "
+"immediatament."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_promo_mode
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_promo_mode
+msgid ""
+"How this product is priced while the promotion window is open. Outside "
+"that window it always sells at the full sales price."
+msgstr ""
+"Com es cobra aquest producte mentre la promoció és oberta. Fora d’aquesta "
+"finestra sempre es ven al preu de venda complet."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__id
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_booking__id
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__id
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order__id
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_promo_end
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_promo_end
+msgid ""
+"Last day the promotion applies, inclusive. Leave empty for no end date. "
+"After this day the product returns to its full price."
+msgstr ""
+"Últim dia en què s’aplica la promoció, inclòs. Deixa-ho buit perquè no "
+"tingui fi. Passat aquest dia el producte torna al seu preu complet."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_class_count
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_class_count
+msgid "Number of class credits granted when this product is sold."
+msgstr ""
+"Nombre de crèdits de classe que es concedeixen en vendre aquest producte."
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_package_line_form
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_package_line_list
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_sale_order_form_fitness
+msgid "Package"
+msgstr "Bo"
+
+#. module: fitness_packages
+#: model:ir.model.fields.selection,name:fitness_packages.selection__product_template__fitness_promo_mode__percent
+msgid "Percentage off"
+msgstr "Percentatge de descompte"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_promo_percent
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_promo_percent
+msgid "Percentage taken off the sales price, e.g. 10 for 10% off."
+msgstr ""
+"Percentatge que es descompta del preu de venda, p. ex. 10 per a un 10 % "
+"de descompte."
+
+#. module: fitness_packages
+#: model:ir.model,name:fitness_packages.model_product_template
+msgid "Product"
+msgstr "Producte"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_promo_mode
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_promo_mode
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_form_fitness
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_product_template_packages_list
+msgid "Promotion"
+msgstr "Promoció"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_promo_end
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_promo_end
+msgid "Promotion Ends"
+msgstr "Fi de la promoció"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_promo_start
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_promo_start
+msgid "Promotion Starts"
+msgstr "Inici de la promoció"
+
+#. module: fitness_packages
+#: model:product.template,name:fitness_packages.product_private_single
+msgid "Reformer Privado Single"
+msgstr "Reformer Privado Single"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_session_type
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_session_type
+#: model:ir.model.fields,help:fitness_packages.field_sale_order_line__fitness_session_type
+msgid "Restricts which session type the credits can be used for."
+msgstr "Limita en quin tipus de sessió es poden fer servir els crèdits."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_product_product__fitness_class_type
+#: model:ir.model.fields,help:fitness_packages.field_product_template__fitness_class_type
+msgid "Restricts which studio type the credits can be used for."
+msgstr "Limita en quin tipus de sala es poden fer servir els crèdits."
+
+#. module: fitness_packages
+#: model:ir.model,name:fitness_packages.model_sale_order
+msgid "Sales Order"
+msgstr "Comanda de venda"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_product_product__fitness_session_type
+#: model:ir.model.fields,field_description:fitness_packages.field_product_template__fitness_session_type
+#: model:ir.model.fields,field_description:fitness_packages.field_sale_order_line__fitness_session_type
+msgid "Session Type"
+msgstr "Tipus de sessió"
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_sale_order__fitness_is_package
+msgid ""
+"Set automatically when any line contains a fitness class-pack product."
+msgstr "Es marca automàticament quan alguna línia conté un bo de classes."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_sale_order_line__fitness_class_type
+msgid ""
+"The discipline these credits may be spent on. Normally the product's own; "
+"on the second line of a combined package it is the second discipline."
+msgstr ""
+"La disciplina en què es poden gastar aquests crèdits. Normalment la del "
+"mateix producte; a la segona línia d’un bo combinat és la segona "
+"disciplina."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"There is no private class product for this discipline, so there is "
+"nothing to book the class against."
+msgstr ""
+"No hi ha cap producte de classe privada per a aquesta disciplina, així "
+"que no hi ha res contra el qual reservar la classe."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_fitness_add_student_wizard__price
+msgid ""
+"What the studio agreed with the student. Defaults to the list price of "
+"the private class, and is meant to be changed when the conversation "
+"landed somewhere else."
+msgstr ""
+"El que l’estudi va acordar amb l’alumna. Per defecte és el preu de tarifa "
+"de la classe privada, i està pensat per canviar-se quan la conversa va "
+"acabar en un altre lloc."

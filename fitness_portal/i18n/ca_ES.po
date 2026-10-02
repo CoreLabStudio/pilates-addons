@@ -3902,3 +3902,646 @@ msgstr "%(name)s ja té un compte (%(login)s). S'hi afegirà el rol d'alumna en 
 #: code:addons/fitness_portal/models/models/make_student_wizard.py:0
 msgid "Made a student by %(user)s. Login: %(login)s"
 msgstr "Convertida en alumna per %(user)s. Usuari: %(login)s"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"%(name)s carries no membership product, so its plan cannot be changed."
+msgstr ""
+"%(name)s no porta cap producte de membresia, així que no se ’n pot "
+"canviar el pla."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s has already been approved."
+msgstr "%(name)s ja està aprovada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"%(name)s has not been billed for its first period yet, so there is "
+"nothing to renew from. Renew it on its current plan first, or change the "
+"plan on the membership itself."
+msgstr ""
+"A %(name)s encara no se li ha facturat el primer període, així que no hi "
+"ha res des d’on renovar. Renova-la primer en el seu pla actual, o canvia "
+"el pla a la mateixa membresia."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s is already confirmed."
+msgstr "%(name)s ja està confirmada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s is not a cash request."
+msgstr "%(name)s no és una sol·licitud de pagament en efectiu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s is not a membership, so there is nothing to renew."
+msgstr "%(name)s no és una membresia, així que no hi ha res a renovar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s is not running, so it cannot be renewed. Reopen it first."
+msgstr ""
+"%(name)s no està activa, així que no es pot renovar. Reobre-la primer."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s was already approved and cannot be declined."
+msgstr "%(name)s ja estava aprovada i no es pot rebutjar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "%(order)s created for %(who)s."
+msgstr "%(order)s creada per a %(who)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "%(pack)s has no sellable variant, so it cannot be sold."
+msgstr "%(pack)s no té cap variant vendible, així que no es pot vendre."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"%(who)s is now on %(plan)s as %(q)s. Invoice %(inv)s was sent to her."
+msgstr ""
+"%(who)s ja està a %(plan)s com a %(q)s. Se li ha enviat la factura "
+"%(inv)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(who)s is paid up to %(date)s. Invoice %(inv)s was sent to her."
+msgstr ""
+"%(who)s està pagada fins al %(date)s. Se li ha enviat la factura %(inv)s."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid ""
+"<strong>This student cannot open the shop yet.</strong>\n"
+"                        They signed up but never got through email\n"
+"                        verification, so they can log in and see nothing "
+"to\n"
+"                        book. Give them access here - they keep the "
+"password\n"
+"                        they already chose and no new email is sent."
+msgstr ""
+"<strong>Aquesta alumna encara no pot obrir la botiga.</strong>\n"
+"                        Es va registrar però mai va arribar a verificar\n"
+"                        el seu correu, així que pot entrar i no veu res\n"
+"                        per reservar. Dona-li accés aquí: manté la\n"
+"                        contrasenya que ja va triar i no s’envia cap "
+"correu nou."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_gift_wizard__gift_type__class
+msgid "A class"
+msgstr "Una classe"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_gift_wizard__gift_type__package
+msgid "A package"
+msgstr "Un bo"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__plan_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__plan_id
+msgid "Billing period"
+msgstr "Període de facturació"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__booking_id
+msgid "Booking"
+msgstr "Reserva"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Cash received and approved by %(user)s."
+msgstr "Efectiu rebut i aprovat per %(user)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Cash request declined by %(user)s.%(why)s"
+msgstr "Sol·licitud de pagament en efectiu rebutjada per %(user)s.%(why)s"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__amount_paid
+msgid "Cash taken"
+msgstr "Efectiu rebut"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__matricula_fee
+msgid ""
+"Charged on a student's first membership when the commitment is shorter "
+"than three months. Zero when it does not apply, and the line beneath says "
+"why."
+msgstr ""
+"Es cobra en la primera membresia d’una alumna quan el compromís és menor "
+"de tres mesos. Zero quan no correspon, i la línia de sota diu per què."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Charged once, on a first membership under %(months)s months."
+msgstr ""
+"Es cobra una sola vegada, en una primera membresia de menys de %(months)s "
+"mesos."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"Choose the student: the fee depends on whether this is her first "
+"membership."
+msgstr ""
+"Tria l’alumna: la matrícula depèn de si és la seva primera membresia."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Confirm Password"
+msgstr "Confirma la contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Confirma la contrasenya"
+msgstr "Confirma la contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Confirmar contraseña"
+msgstr "Confirma la contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Contrasenya"
+msgstr "Contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Contraseña"
+msgstr "Contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_login_logo
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+msgid "CoreLab"
+msgstr "CoreLab"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__currency_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__currency_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Desk sale: %(name)s"
+msgstr "Venda a recepció: %(name)s"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_language_picker
+msgid "English"
+msgstr "Anglès"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Enter the cash taken, or switch to No charge (goodwill)."
+msgstr "Introdueix l’efectiu rebut, o canvia a Sense càrrec (cortesia)."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "Give shop access"
+msgstr "Donar accés a la botiga"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_make_student_wizard__password
+msgid "Give this to her directly. She can change it once she is in."
+msgstr "Dona-li-ho directament. Pot canviar-ho un cop a dins."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_is_verified_student
+msgid "Has shop access"
+msgstr "Té accés a la botiga"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__plan_id
+msgid ""
+"How long the membership is committed for. Mensual bills every month; "
+"Trimestral is three months, charged at once."
+msgstr ""
+"Durada del compromís de la membresia. Mensual factura cada mes; "
+"Trimestral són tres mesos, cobrats d’una vegada."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_calendar_grid__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_ir_http__id
+#: model:ir.model.fields,field_description:fitness_portal.field_ir_qweb__id
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__id
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__id
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order__id
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order_line__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__login
+msgid "Login"
+msgstr "Usuari"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Membership renewed"
+msgstr "Membresia renovada"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Membership renewed on a new plan"
+msgstr "Membresia renovada amb un pla nou"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "No registration product is set up, so none is charged."
+msgstr ""
+"No hi ha cap producte de matrícula configurat, així que no se’n cobra cap."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__value
+msgid "Normally costs"
+msgstr "Normalment costa"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Nothing is charged on a gift, the fee included."
+msgstr "En un regal no es cobra res, matrícula inclosa."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"Odoo raised no invoice for %(name)s, so nothing was renewed and no money "
+"has been recorded. Its next billing date is %(date)s."
+msgstr ""
+"Odoo no va emetre cap factura per a %(name)s, així que no es va renovar "
+"res i no s’ha registrat cap import. La seva pròxima data de facturació és "
+"%(date)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Only a studio manager can renew a membership."
+msgstr "Només un gerent de l’estudi pot renovar una membresia."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Only a studio manager can sell from the desk."
+msgstr "Només un gerent de l’estudi pot vendre a recepció."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Only studio managers can approve a cash payment."
+msgstr ""
+"Només els gerents de l’estudi poden aprovar un pagament en efectiu."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "Only studio managers can decline a cash payment."
+msgstr ""
+"Només els gerents de l’estudi poden rebutjar un pagament en efectiu."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__product_id
+msgid "Pack"
+msgstr "Bo"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__membership_price
+msgid "Package price"
+msgstr "Preu del bo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Packs carry no registration fee."
+msgstr "Els bons no porten matrícula."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__password
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_fields_i18n
+msgid "Password"
+msgstr "Contrasenya"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_teacher_profile_simple
+msgid "Phone"
+msgstr "Telèfon"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__reason
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__reason
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__reason
+msgid "Reason"
+msgstr "Motiu"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Reason: %(why)s"
+msgstr "Motiu: %(why)s"
+
+#. module: fitness_portal
+#: model:ir.model,name:fitness_portal.model_sale_order
+msgid "Sales Order"
+msgstr "Comanda de venda"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"Say why this is being given for free. It is the only record anyone will "
+"have of it later."
+msgstr ""
+"Digues per què es regala. És l’únic registre que ningú en tindrà més "
+"endavant."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.mv_teacher_page_header
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_notifications
+msgid "Schedule change"
+msgstr "Canvi d’horari"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"Sold at the desk by %(who)s. Payment: %(method)s. Amount: %(amount)s."
+msgstr ""
+"Venut a recepció per %(who)s. Pagament: %(method)s. Import: %(amount)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_gift_log__calendar_event_id
+msgid "The class the spot was given in, when the gift was a class."
+msgstr ""
+"La classe en què es va regalar la plaça, quan el regal va ser una classe."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__normal_price
+msgid ""
+"The membership and the registration fee together - the whole sale, and "
+"what the order will come to."
+msgstr ""
+"La membresia i la matrícula juntes: la venda completa, i a quant "
+"ascendirà la comanda."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"The new commitment %(q)s was created but nothing could be invoiced, so no "
+"money has been recorded."
+msgstr ""
+"El nou compromís %(q)s es va crear però no es va poder facturar res, així "
+"que no s’ha registrat cap import."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__membership_price
+msgid ""
+"The pack or membership itself, for the period chosen, before the "
+"registration fee."
+msgstr ""
+"El bo o la membresia en si, per al període triat, abans de la matrícula."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__product_id
+msgid "The pack, class or membership being sold."
+msgstr "El bo, la classe o la membresia que es ven."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__payment_method
+msgid "This is a"
+msgstr "Això és un"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"This sale carries a %(fee)s registration fee, so the cash taken cannot be "
+"less than that. The whole sale comes to %(total)s."
+msgstr ""
+"Aquesta venda porta una matrícula de %(fee)s, així que l’efectiu rebut no "
+"pot ser menor. La venda completa ascendeix a %(total)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__user_id
+msgid "To"
+msgstr "Per a"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__normal_price
+msgid "Total to collect"
+msgstr "Total a cobrar"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__fitness_is_vip
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_booking_search_vip
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_membership_balance_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_package_balance_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_list
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+msgid "VIP"
+msgstr "VIP"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__value
+msgid "Value given away"
+msgstr "Valor regalat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Waived: %(months)s months or more."
+msgstr "Exempta: %(months)s mesos o més."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"Waived: she has held a membership before. It is charged once, on a first "
+"membership."
+msgstr ""
+"Exempta: ja ha tingut una membresia abans. Es cobra una sola vegada, en "
+"la primera membresia."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__warning
+msgid "Warning"
+msgstr "Avís"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_make_student_wizard__login
+msgid ""
+"What she types to sign in. A username when she has no email address, so "
+"nothing has to be invented to create the account."
+msgstr ""
+"El que escriu per entrar. Un nom d’usuari quan no té adreça de correu, "
+"per no haver d’inventar res en crear el compte."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_gift_log__value
+msgid ""
+"What the student would have paid. Zero was charged; this is what the "
+"studio chose not to take."
+msgstr ""
+"El que hauria pagat l’alumna. Es va cobrar zero; això és el que l’estudi "
+"va decidir no cobrar."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__amount_paid
+msgid ""
+"What was actually put in the till. Defaults to the normal price; lower it "
+"for a discount."
+msgstr ""
+"El que realment va entrar a caixa. Per defecte el preu normal; abaixa’l "
+"per aplicar un descompte."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__product_id
+msgid "What was given"
+msgstr "Què es va regalar"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_res_users__fitness_is_verified_student
+msgid ""
+"Whether this account holds the student group. Without it the shop and the "
+"checkout send the person back to /my, whatever else is set on them."
+msgstr ""
+"Si aquest compte pertany al grup d’alumnes. Sense ell, la botiga i la "
+"caixa tornen la persona a /my, sigui el que sigui que tingui configurat."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_res_users__fitness_is_teacher
+msgid "Whether this user is in the instructor group."
+msgstr "Si aquest usuari pertany al grup d’instructors."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__calendar_event_id
+msgid "Which class"
+msgstr "Quina classe"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__product_id
+msgid "Which one"
+msgstr "Quin"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__partner_id
+msgid "Who the credits are for."
+msgstr "Per a qui són els crèdits."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__matricula_note
+msgid "Why the registration line reads what it reads."
+msgstr "Per què la línia de matrícula diu el que diu."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_gift_wizard__reason
+msgid ""
+"Why this is being given. It is the only record anyone will have of it "
+"later."
+msgstr ""
+"Per què es regala. És l’únic registre que ningú en tindrà més endavant."
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_desk_sale_wizard__reason
+msgid ""
+"Why this was given. Recorded on the order, and the only record anyone "
+"will have later."
+msgstr ""
+"Per què es va regalar. Queda a la comanda, i és l’únic registre que ningú "
+"tindrà més endavant."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.signup_consent_gdpr
+msgid "and the"
+msgstr "i la"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.public_privacy_policy
+msgid "info@corelabstudio.es"
+msgstr "info@corelabstudio.es"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_make_student_wizard_form
+msgid "no email address"
+msgstr "sense adreça de correu"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "not set"
+msgstr "sense definir"

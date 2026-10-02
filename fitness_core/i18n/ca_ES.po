@@ -911,3 +911,336 @@ msgstr "Programada"
 #: model:ir.model.fields.selection,name:fitness_core.selection__calendar_event__class_state__cancelled
 msgid "Cancelled"
 msgstr "Cancel·lada"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_class_schedule__capacity
+msgid "0 keeps whatever the class type / room implies."
+msgstr "0 manté el que impliqui el tipus de classe o la sala."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_schedule_search
+msgid "Archived"
+msgstr "Arxivat"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_class_schedule__teacher_user_id
+msgid "Becomes the organiser (user_id) on each generated class."
+msgstr "Passa a ser l’organitzador (user_id) de cada classe generada."
+
+#. module: fitness_core
+#: model:ir.model,name:fitness_core.model_calendar_event
+msgid "Calendar Event"
+msgstr "Esdeveniment de calendari"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_calendar_event_form_fitness
+msgid "Class Photo (overrides type default)"
+msgstr "Foto de la classe (substitueix la del tipus)"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_calendar_event_form_fitness
+msgid "Class Setup"
+msgstr "Configuració de la classe"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Classes / week"
+msgstr "Classes / setmana"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__classroom_id
+msgid "Classroom"
+msgstr "Sala"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_calendar_event__capacity
+msgid ""
+"Computed from class type / classroom but can be overridden for a specific "
+"session."
+msgstr ""
+"Es calcula a partir del tipus de classe o la sala, però es pot canviar "
+"per a una sessió concreta."
+
+#. module: fitness_core
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_root
+msgid "CoreLab"
+msgstr "CoreLab"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__create_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Days"
+msgstr "Dies"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_closure_day__tz
+msgid ""
+"Defines where the closed day starts and ends. Not the admin's timezone."
+msgstr ""
+"Defineix on comença i acaba el dia tancat. No és la zona horària de "
+"l’administrador."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_classroom_form
+msgid "Display"
+msgstr "Mostrar"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_calendar_event_form_fitness
+msgid "Fitness Class"
+msgstr "Classe de fitness"
+
+#. module: fitness_core
+#: model:res.groups,name:fitness_core.group_fitness_teacher
+msgid "Fitness Studio Instructor"
+msgstr "Instructor de l'estudi"
+
+#. module: fitness_core
+#: model:res.groups,name:fitness_core.group_fitness_manager
+msgid "Fitness Studio Manager"
+msgstr "Gerent de l'estudi"
+
+#. module: fitness_core
+#: model:res.groups,name:fitness_core.group_fitness_student
+msgid "Fitness Studio Student"
+msgstr "Alumna de l'estudi"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Hours / week"
+msgstr "Hores / setmana"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_class_schedule__horizon_weeks
+msgid ""
+"How far into the future occurrences are kept generated. A nightly job "
+"tops this up, so the schedule never runs dry."
+msgstr ""
+"Fins on en el futur es mantenen generades les ocurrències. Un procés "
+"nocturn ho reomple, de manera que l’horari no es queda mai buit."
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_calendar_event__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__id
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__id
+#: model:ir.model.fields,field_description:fitness_core.field_payment_method__id
+#: model:ir.model.fields,field_description:fitness_core.field_res_users__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_res_users__fitness_is_teacher
+msgid "Is Instructor"
+msgstr "És instructor"
+
+#. module: fitness_core
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_admin_dashboard__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_category__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_schedule__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_class_type__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_classroom__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_closure_day__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_news_post__write_date
+#: model:ir.model.fields,field_description:fitness_core.field_fitness_session_type__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_class_schedule__start_time
+msgid "Local studio time, 24h. 9.5 = 09:30."
+msgstr "Hora local de l’estudi, format 24h. 9,5 = 09:30."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Login"
+msgstr "Usuari"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_calendar_event__booked_seats
+msgid "Maintained by the fitness_bookings module."
+msgstr "El manté el mòdul fitness_bookings."
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_classroom__capacity
+msgid "Maximum number of students per class session."
+msgstr "Nombre màxim d’alumnes per sessió."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_calendar_event_form_fitness
+msgid "Optional note for this specific class…"
+msgstr "Nota opcional per a aquesta classe concreta…"
+
+#. module: fitness_core
+#: model:ir.model.fields.selection,name:fitness_core.selection__fitness_class_schedule__weekday__sat
+msgid "Saturday"
+msgstr "Dissabte"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_schedule_list
+msgid "Session"
+msgstr "Sessió"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_calendar_event__class_state
+msgid ""
+"Set to Cancelled when the studio cancels the entire class occurrence."
+msgstr ""
+"Es posa a Cancel·lada quan l’estudi cancel·la tota l’ocurrència de la "
+"classe."
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_class_schedule__tz
+msgid ""
+"Times above are in this timezone. Deliberately NOT the logged-in user's "
+"timezone - an admin abroad must not shift the studio's schedule."
+msgstr ""
+"Les hores de dalt són en aquesta zona horària. Deliberadament NO és la "
+"zona horària de l’usuari connectat: un administrador a l’estranger no ha "
+"de desplaçar l’horari de l’estudi."
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Total hours"
+msgstr "Hores totals"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_res_users__fitness_weekly_hours
+msgid ""
+"Total hours a week from the recurring schedule. Calculated from the "
+"assigned classes, never entered by hand."
+msgstr ""
+"Hores totals a la setmana segons l’horari recurrent. Es calcula a partir "
+"de les classes assignades, mai s’introdueix a mà."
+
+#. module: fitness_core
+#: model:ir.actions.act_window,name:fitness_core.action_fitness_teacher_hours
+#: model:ir.model.fields,field_description:fitness_core.field_res_users__fitness_weekly_hours
+#: model:ir.ui.menu,name:fitness_core.menu_fitness_teacher_hours
+msgid "Weekly Hours"
+msgstr "Hores setmanals"
+
+#. module: fitness_core
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_form
+#: model_terms:ir.ui.view,arch_db:fitness_core.view_fitness_teacher_hours_list
+msgid "Weekly Teaching Hours"
+msgstr "Hores lectives setmanals"
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_res_users__fitness_is_teacher
+msgid "Whether this user is in the instructor group."
+msgstr "Si aquest usuari pertany al grup d’instructors."
+
+#. module: fitness_core
+#: model:ir.model.fields,help:fitness_core.field_fitness_session_type__code
+msgid "e.g. GROUP, PRIVATE, DUO"
+msgstr "p. ex. GROUP, PRIVATE, DUO"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "is_fitness_class"
+msgstr "is_fitness_class"
+
+####################################################################
+# Dashboard preview headings and empty states, which were
+# hardcoded English until they were wrapped in _().
+####################################################################
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Class"
+msgstr "Classe"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Day"
+msgstr "Dia"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Interest"
+msgstr "Interès"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Last Activity"
+msgstr "Última activitat"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No messages awaiting reply."
+msgstr "No hi ha missatges pendents de resposta."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No pending trial requests."
+msgstr "No hi ha sol·licituds de classe de prova pendents."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this class"
+msgstr "Obrir aquesta classe"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this conversation"
+msgstr "Obrir aquesta conversa"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this trial request"
+msgstr "Obrir aquesta sol·licitud de classe de prova"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Role"
+msgstr "Rol"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Seats"
+msgstr "Places"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Student"
+msgstr "Alumna"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Time"
+msgstr "Hora"

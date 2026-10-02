@@ -499,3 +499,48 @@ msgstr "Veure totes les meves classes"
 #: code:addons/fitness_teacher_swap/controllers/portal.py:0
 msgid "Students expected"
 msgstr "Alumnes esperats"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_teacher_swap
+#: model:ir.model,name:fitness_teacher_swap.model_calendar_event
+msgid "Calendar Event"
+msgstr "Esdeveniment de calendari"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__changed_by_id
+msgid "Changed By"
+msgstr "Modificat per"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_calendar_event__id
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_teacher_swap
+#: model_terms:ir.ui.view,arch_db:fitness_teacher_swap.view_fitness_teacher_swap_form
+msgid "Instructors"
+msgstr "Instructors"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_fitness_teacher_swap__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,field_description:fitness_teacher_swap.field_calendar_event__user_id
+msgid "Organizer"
+msgstr "Organitzador"
+
+#. module: fitness_teacher_swap
+#: model:ir.model.fields,help:fitness_teacher_swap.field_fitness_teacher_swap__changed_by_id
+msgid "The account that made this change, whichever route it took."
+msgstr "El compte que va fer aquest canvi, per la via que fos."

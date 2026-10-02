@@ -49,6 +49,9 @@ class TestFixedSlotWarning(TransactionCase):
             no_reset_password=True).create({
                 "name": "Slot Warning Manager",
                 "login": "slot.warn.manager@example.invalid",
+                # en_US on purpose: these tests assert on the words
+                # of the warning, and the restore's users are es_ES.
+                "lang": "en_US",
                 "group_ids": [(6, 0, [
                     cls.env.ref("base.group_user").id,
                     cls.env.ref("fitness_core.group_fitness_manager").id,
@@ -138,7 +141,9 @@ class TestFixedSlotWarning(TransactionCase):
             "a paid fixed-class membership with no weekly hour said nothing")
         self.assertEqual(order.fitness_missing_fixed_slots(), {"barre": 1})
         self.assertIn(
-            "Place Classes", order.fitness_fixed_slot_warning or "",
+            "Place Classes",
+            order.with_context(
+                lang="en_US").fitness_fixed_slot_warning or "",
             "the warning does not say what to do about it")
 
     def test_once_the_hour_is_chosen_it_goes_quiet(self):
@@ -405,6 +410,9 @@ class TestFixedSlotWarningReachesHer(TransactionCase):
             no_reset_password=True).create({
                 "name": "Banner Owner",
                 "login": "banner.owner@example.invalid",
+                # en_US on purpose: these tests assert on the words
+                # of the warning, and the restore's users are es_ES.
+                "lang": "en_US",
                 "group_ids": [(6, 0, base_groups + [
                     cls.env.ref("sales_team.group_sale_salesman").id])],
             })
@@ -413,6 +421,9 @@ class TestFixedSlotWarningReachesHer(TransactionCase):
             no_reset_password=True).create({
                 "name": "Banner Desk Manager",
                 "login": "banner.desk@example.invalid",
+                # en_US on purpose: these tests assert on the words
+                # of the warning, and the restore's users are es_ES.
+                "lang": "en_US",
                 "group_ids": [(6, 0, base_groups)],
             })
         cls.plan = cls.env.ref("sale_subscription.subscription_plan_month")

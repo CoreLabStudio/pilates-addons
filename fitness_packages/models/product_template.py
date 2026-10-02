@@ -108,8 +108,13 @@ class ProductTemplate(models.Model):
         help="What a student is charged today, after any running promotion.")
     fitness_promo_saving = fields.Float(
         "Saving", compute='_compute_fitness_price', digits='Product Price')
+    # depends_context='lang': the value below is a translated string, and
+    # Odoo partitions a computed field's cache only by the context keys the
+    # field declares. Without it the first language to compute it in a
+    # transaction is handed to every later reader in that transaction.
     fitness_promo_summary = fields.Char(
-        "Promotion Summary", compute='_compute_fitness_price')
+        "Promotion Summary", compute='_compute_fitness_price',
+        depends_context=('lang',))
 
     # ── the single source of truth ───────────────────────────────────────
     def _fitness_promo_window_open(self, on=None):

@@ -268,3 +268,79 @@ msgstr ""
 "%(detail)s\n"
 "\n"
 "Hasta que se solucione, las alumnas no podrán reservar las semanas que no se han creado, y las socias con una clase fija semanal no tendrán nada reservado cuando se renueve su membresía."
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_push_subscription__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: fitness_notifications
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_search
+msgid "Booking"
+msgstr "Reserva"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__is_schedule_change
+msgid "Changes her schedule"
+msgstr "Cambia su horario"
+
+#. module: fitness_notifications
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_form
+msgid "Content"
+msgstr "Contenido"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__create_date
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_push_subscription__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_push_subscription__endpoint
+msgid "Endpoint"
+msgstr "Endpoint"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_account_move__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_class_schedule__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_push_subscription__id
+#: model:ir.model.fields,field_description:fitness_notifications.field_sale_order__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_notification__write_date
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_push_subscription__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: fitness_notifications
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_form
+msgid "Notification"
+msgstr "Notificación"
+
+#. module: fitness_notifications
+#: model:ir.actions.act_window,name:fitness_notifications.action_fitness_notification_admin
+#: model_terms:ir.ui.view,arch_db:fitness_notifications.view_fitness_notification_list
+msgid "Notifications"
+msgstr "Notificaciones"
+
+#. module: fitness_notifications
+#: model:ir.model,name:fitness_notifications.model_sale_order
+msgid "Sales Order"
+msgstr "Pedido de venta"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,help:fitness_notifications.field_fitness_notification__is_schedule_change
+msgid ""
+"True when this notification says a class she holds has moved, been "
+"cancelled, or changed instructor."
+msgstr ""
+"Verdadero cuando esta notificación dice que una clase suya se ha movido, "
+"se ha cancelado o ha cambiado de instructor."

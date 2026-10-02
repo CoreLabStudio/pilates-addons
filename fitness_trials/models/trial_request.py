@@ -526,7 +526,12 @@ class FitnessTrialRequest(models.Model):
         string='Other Open Requests')
     other_open_count = fields.Integer(
         compute='_compute_other_open', string='Duplicates')
-    duplicate_warning = fields.Char(compute='_compute_other_open')
+    # depends_context='lang': the value below is a translated string, and
+    # Odoo partitions a computed field's cache only by the context keys the
+    # field declares. Without it the first language to compute it in a
+    # transaction is handed to every later reader in that transaction.
+    duplicate_warning = fields.Char(
+        compute='_compute_other_open', depends_context=('lang',))
 
     # Whether the person behind this request has already had their one free
     # trial. A different question from other_open_count, which only counts
@@ -547,7 +552,9 @@ class FitnessTrialRequest(models.Model):
     # record without ever touching it.
     trial_already_used = fields.Boolean(
         compute='_compute_trial_already_used', string='Trial Already Used')
-    trial_used_warning = fields.Char(compute='_compute_trial_already_used')
+    trial_used_warning = fields.Char(
+        compute='_compute_trial_already_used',
+        depends_context=('lang',))
 
     # Somebody asking again under a new address, recognised by her phone.
     #
@@ -566,7 +573,8 @@ class FitnessTrialRequest(models.Model):
     # is known here.
     phone_matches_spent_student = fields.Boolean(
         compute='_compute_phone_match', string='Phone Matches')
-    phone_match_warning = fields.Char(compute='_compute_phone_match')
+    phone_match_warning = fields.Char(
+        compute='_compute_phone_match', depends_context=('lang',))
 
     @staticmethod
     def _phone_key(raw):
@@ -890,6 +898,7 @@ class FitnessTrialRequest(models.Model):
 
     occurrence_fill = fields.Char(
         string='How full', compute='_compute_occurrence_fill',
+        depends_context=('lang',),
         help="Places taken on the chosen slot, out of its capacity.")
 
     @api.depends('occurrence_id')
