@@ -141,13 +141,33 @@
     const empty  = document.getElementById('mv-notif-empty');
     const list   = document.getElementById('mv-notif-list');
 
-    // Load unread count
+    // The three panel states, and now the badge's label, come from the page
+    // rather than from here: a string in a .js file is never extracted for
+    // translation, so hard-coding them left a translated screen in English.
+    // Hoisted out of the click handler because the badge needs it too.
+    const _s = (name, fallback) => {
+      const el = document.querySelector('.mv-notif-i18n .mv-s-' + name);
+      return (el && el.textContent.trim()) || fallback;
+    };
+
+    // Load unread count.
+    //
+    // It used to fetch the same number and throw it away, showing an 8px dot
+    // whether one notification was waiting or fifteen. The count is what
+    // tells a student whether the bell is worth opening now.
+    const _label = btn.getAttribute('aria-label') || 'Notifications';
     fetch('/my/notifications/count', {credentials: 'same-origin'})
       .then(r => r.json())
       .then(data => {
         const n = data.count || 0;
         if (n > 0 && badge) {
+          // Capped so a long absence cannot push the bell out of the header.
+          badge.textContent = n > 99 ? '99+' : String(n);
           badge.style.display = 'block';
+          // The badge is aria-hidden, so the count reaches a screen reader
+          // through the button's own name or not at all.
+          btn.setAttribute('aria-label',
+                           _label + ' (' + n + ' ' + _s('unread', 'unread') + ')');
         }
       }).catch(() => {});
 
@@ -163,14 +183,11 @@
       const open = panel.style.display !== 'none';
       if (open) { panel.style.display = 'none'; return; }
       panel.style.display = 'block';
-      if (badge) badge.style.display = 'none';
+      if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+      btn.setAttribute('aria-label', _label);
       // The three states come from the page, not from here: a string in a
       // .js file is never extracted for translation, so hard-coding them left
       // the panel in English on an otherwise translated screen.
-      const _s = (name, fallback) => {
-        const el = panel.querySelector('.mv-notif-i18n .mv-s-' + name);
-        return (el && el.textContent.trim()) || fallback;
-      };
       if (empty) { empty.textContent = _s('loading', 'Loading…'); empty.style.display = ''; }
       if (list)  list.style.display = 'none';
 
@@ -185,9 +202,17 @@
           if (empty) empty.style.display = 'none';
           if (list) {
             list.innerHTML = notifs.map(function(n) {
-              var cls = 'mv-notif-item mv-notif-item--unread';
+              // is_schedule_change was already in this payload and was
+              // being discarded: every row was built with the same class, so
+              // "the studio moved your class" looked like an invoice.
+              var cls = 'mv-notif-item mv-notif-item--unread' +
+                (n.is_schedule_change ? ' mv-notif-item--schedule' : '');
               var dId = ' data-id="' + n.id + '"';
-              var inner = '<span class="mv-notif-title">' + _escHtml(n.title) + '</span>' +
+              var inner = (n.is_schedule_change
+                  ? '<span class="mv-notif-tag">' +
+                    _escHtml(_s('schedule', 'Schedule change')) + '</span>'
+                  : '') +
+                '<span class="mv-notif-title">' + _escHtml(n.title) + '</span>' +
                 (n.body ? '<span class="mv-notif-body">' + _escHtml(n.body) + '</span>' : '') +
                 '<span class="mv-notif-time">' + _escHtml(n.time_ago) + '</span>';
               if (n.action_url) {
@@ -223,6 +248,49 @@
     // Close panel when clicking outside
     document.addEventListener('click', () => {
       if (panel) panel.style.display = 'none';
+    });
+  }
+
+  /* ── 8b. The notifications archive page ─────────────────────
+     Marks one notification read when she opens it.
+
+     /my/notifications used to mark every one read the moment the page
+     loaded. On a phone that made the bell destructive: below 600px the bell
+     does not open a dropdown, it comes here, so tapping it to see what had
+     arrived cleared the lot. The server no longer does that, which leaves
+     the marking to be done per item - here - exactly as the desktop
+     dropdown has always done it.
+
+     Clearing everything at once is still available, as the button that
+     says so. */
+  function setupNotificationArchive() {
+    const list = document.querySelector('.mv-notif-page-list');
+    if (!list) return;
+
+    list.addEventListener('click', (e) => {
+      const card = e.target.closest('[data-id]');
+      if (!card) return;
+      const id = card.getAttribute('data-id');
+      if (!id || card.dataset.mvRead === '1') return;
+      card.dataset.mvRead = '1';
+
+      // keepalive, because a linked card navigates away in the same gesture
+      // and an ordinary fetch would be cancelled before it arrived - which
+      // is how it would come back still unread.
+      fetch('/my/notifications/mark_read', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'notif_id=' + encodeURIComponent(id),
+        keepalive: true,
+      }).catch(() => {});
+
+      // Shown as read straight away. A card she has just opened that still
+      // looks unread reads as a failure, and the server's answer may not
+      // arrive before the page changes.
+      card.classList.remove('mv-notif-card--unread');
+      const dot = card.querySelector('.mv-notif-dot');
+      if (dot) dot.remove();
     });
   }
 
@@ -1423,6 +1491,7 @@
     setupCancelFallback();
     setupReassignConfirm();
     setupNotificationBell();
+    setupNotificationArchive();
     setupBackLinks();
     setupPackageControls();
     setupCheckoutGate();

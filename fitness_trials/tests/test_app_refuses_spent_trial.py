@@ -32,6 +32,14 @@ class TestAppRefusesSpentTrial(HttpCase):
         super().setUp()
         self.env["ir.config_parameter"].sudo().set_param(
             "fitness.opening_date", "")
+        # The trial offer has a deadline, and it lapsed on 30 September
+        # 2026. fitness_portal falls back to a hardcoded
+        # TRIAL_OFFER_END_DEFAULT when the parameter is unset, so from
+        # 1 October every test that needs a claimable trial began failing
+        # on the calendar rather than on anything it asserts. Pinned here
+        # so these keep testing what they name.
+        self.env["ir.config_parameter"].sudo().set_param(
+            "fitness.trial_offer_end", "2099-12-31")
         self.TR = self.env["fitness.trial.request"].sudo()
         trials = self.TR._all_trial_products()
         self.assertGreaterEqual(
@@ -68,9 +76,26 @@ class TestAppRefusesSpentTrial(HttpCase):
         self.env.flush_all()
 
     def _a_slot(self):
-        """A real offered slot, from the endpoint the form itself calls."""
+        """A real offered slot, from the endpoint the form itself calls.
+
+        Skips days the studio is shut. _is_open_on() derives the open
+        weekdays from the active schedules and /trial/submit enforces it,
+        so a day that offers slots is not necessarily a day a request can
+        be made on.
+
+        Taking the first day with slots was enough until three leftover
+        test classes turned up on a Saturday and a Sunday: this picked the
+        Sunday, the submit refused it, and four tests failed on data
+        rather than on anything they were asserting. Asking the same
+        question the submit asks means it cannot happen again, whatever a
+        database happens to be carrying.
+        """
+        trials = self.env["fitness.trial.request"].sudo()
         for n in range(2, 21):
-            day = (date.today() + timedelta(days=n)).isoformat()
+            the_day = date.today() + timedelta(days=n)
+            if not trials._is_open_on(the_day):
+                continue
+            day = the_day.isoformat()
             for period in ("morning", "evening"):
                 res = self.url_open(
                     "/trial/classes?date=%s&period=%s" % (day, period))

@@ -1,0 +1,372 @@
+{
+ "version": "18.5.10",
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "name": "English (US)",
+   "code": "en_US",
+   "thousandsSeparator": ",",
+   "decimalSeparator": ".",
+   "dateFormat": "mm/dd/yyyy",
+   "timeFormat": "hh:mm:ss",
+   "formulaArgSeparator": ",",
+   "weekStart": 7
+  }
+ },
+ "pivotNextId": 2,
+ "listNextId": 2,
+ "uniqueFigureIds": true,
+ "borders": {},
+ "customTableStyles": {},
+ "chartOdooMenusReferences": {},
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 16,
+   "textColor": "#01666b"
+  },
+  "2": {
+   "bold": true,
+   "fontSize": 11,
+   "textColor": "#434343"
+  },
+  "3": {
+   "bold": true,
+   "fillColor": "#F2F6FA",
+   "textColor": "#434343"
+  }
+ },
+ "formats": {
+  "1": "#,##0",
+  "2": "0.0%",
+  "3": "hh:mm"
+ },
+ "lists": {
+  "1": {
+   "id": "1",
+   "name": "Clases por franja",
+   "model": "fitness.report.attendance.daypart",
+   "columns": [
+    "class_date",
+    "local_hour",
+    "class_type_id",
+    "daypart",
+    "attendance_count"
+   ],
+   "domain": [],
+   "context": {},
+   "orderBy": [
+    {
+     "name": "class_date",
+     "asc": false
+    },
+    {
+     "name": "local_hour",
+     "asc": true
+    }
+   ],
+   "fieldMatching": {
+    "b1f0c4a2-1d3e-4a7b-9c88-2a6d5e0f7a11": {
+     "chain": "class_date",
+     "type": "date",
+     "offset": 0
+    },
+    "c2e1d5b3-2e4f-4b8c-ad99-3b7e6f1a8b22": {
+     "chain": "is_paying",
+     "type": "boolean"
+    }
+   }
+  }
+ },
+ "pivots": {
+  "1": {
+   "id": "1",
+   "type": "ODOO",
+   "name": "Plazas por franja",
+   "model": "fitness.report.attendance.daypart",
+   "formulaId": "1",
+   "domain": [],
+   "context": {},
+   "measures": [
+    {
+     "id": "attendance_count",
+     "fieldName": "attendance_count",
+     "aggregator": "sum",
+     "userDefinedName": "Plazas"
+    }
+   ],
+   "columns": [],
+   "rows": [
+    {
+     "fieldName": "daypart"
+    }
+   ],
+   "fieldMatching": {
+    "b1f0c4a2-1d3e-4a7b-9c88-2a6d5e0f7a11": {
+     "chain": "class_date",
+     "type": "date",
+     "offset": 0
+    },
+    "c2e1d5b3-2e4f-4b8c-ad99-3b7e6f1a8b22": {
+     "chain": "is_paying",
+     "type": "boolean"
+    }
+   }
+  }
+ },
+ "globalFilters": [
+  {
+   "id": "b1f0c4a2-1d3e-4a7b-9c88-2a6d5e0f7a11",
+   "type": "date",
+   "label": "Periodo",
+   "defaultValue": "last_90_days"
+  },
+  {
+   "id": "c2e1d5b3-2e4f-4b8c-ad99-3b7e6f1a8b22",
+   "type": "boolean",
+   "label": "Solo alumnas que han pagado"
+  }
+ ],
+ "sheets": [
+  {
+   "id": "d3f2e6c4-3f5a-4c9d-be00-4c8f7a2b9c33",
+   "name": "Dashboard",
+   "colNumber": 12,
+   "rowNumber": 40,
+   "cols": {},
+   "rows": {},
+   "cells": {
+    "A1": "=_t(\"Asistencia por franja horaria\")",
+    "A3": "=_t(\"Plazas ocupadas\")",
+    "A11": "=_t(\"Clases\")",
+    "A12": "=ODOO.LIST.HEADER(1,\"class_date\",_t(\"Fecha\"))",
+    "A13": "=ODOO.LIST(1,1,\"class_date\")",
+    "A14": "=ODOO.LIST(1,2,\"class_date\")",
+    "A15": "=ODOO.LIST(1,3,\"class_date\")",
+    "A16": "=ODOO.LIST(1,4,\"class_date\")",
+    "A17": "=ODOO.LIST(1,5,\"class_date\")",
+    "A18": "=ODOO.LIST(1,6,\"class_date\")",
+    "A19": "=ODOO.LIST(1,7,\"class_date\")",
+    "A20": "=ODOO.LIST(1,8,\"class_date\")",
+    "A21": "=ODOO.LIST(1,9,\"class_date\")",
+    "A22": "=ODOO.LIST(1,10,\"class_date\")",
+    "A23": "=ODOO.LIST(1,11,\"class_date\")",
+    "A24": "=ODOO.LIST(1,12,\"class_date\")",
+    "A25": "=ODOO.LIST(1,13,\"class_date\")",
+    "A26": "=ODOO.LIST(1,14,\"class_date\")",
+    "A27": "=ODOO.LIST(1,15,\"class_date\")",
+    "B12": "=ODOO.LIST.HEADER(1,\"local_hour\",_t(\"Hora\"))",
+    "B13": "=ODOO.LIST(1,1,\"local_hour\")",
+    "B14": "=ODOO.LIST(1,2,\"local_hour\")",
+    "B15": "=ODOO.LIST(1,3,\"local_hour\")",
+    "B16": "=ODOO.LIST(1,4,\"local_hour\")",
+    "B17": "=ODOO.LIST(1,5,\"local_hour\")",
+    "B18": "=ODOO.LIST(1,6,\"local_hour\")",
+    "B19": "=ODOO.LIST(1,7,\"local_hour\")",
+    "B20": "=ODOO.LIST(1,8,\"local_hour\")",
+    "B21": "=ODOO.LIST(1,9,\"local_hour\")",
+    "B22": "=ODOO.LIST(1,10,\"local_hour\")",
+    "B23": "=ODOO.LIST(1,11,\"local_hour\")",
+    "B24": "=ODOO.LIST(1,12,\"local_hour\")",
+    "B25": "=ODOO.LIST(1,13,\"local_hour\")",
+    "B26": "=ODOO.LIST(1,14,\"local_hour\")",
+    "B27": "=ODOO.LIST(1,15,\"local_hour\")",
+    "C12": "=ODOO.LIST.HEADER(1,\"class_type_id\",_t(\"Clase\"))",
+    "C13": "=ODOO.LIST(1,1,\"class_type_id\")",
+    "C14": "=ODOO.LIST(1,2,\"class_type_id\")",
+    "C15": "=ODOO.LIST(1,3,\"class_type_id\")",
+    "C16": "=ODOO.LIST(1,4,\"class_type_id\")",
+    "C17": "=ODOO.LIST(1,5,\"class_type_id\")",
+    "C18": "=ODOO.LIST(1,6,\"class_type_id\")",
+    "C19": "=ODOO.LIST(1,7,\"class_type_id\")",
+    "C20": "=ODOO.LIST(1,8,\"class_type_id\")",
+    "C21": "=ODOO.LIST(1,9,\"class_type_id\")",
+    "C22": "=ODOO.LIST(1,10,\"class_type_id\")",
+    "C23": "=ODOO.LIST(1,11,\"class_type_id\")",
+    "C24": "=ODOO.LIST(1,12,\"class_type_id\")",
+    "C25": "=ODOO.LIST(1,13,\"class_type_id\")",
+    "C26": "=ODOO.LIST(1,14,\"class_type_id\")",
+    "C27": "=ODOO.LIST(1,15,\"class_type_id\")",
+    "D12": "=ODOO.LIST.HEADER(1,\"daypart\",_t(\"Franja\"))",
+    "D13": "=ODOO.LIST(1,1,\"daypart\")",
+    "D14": "=ODOO.LIST(1,2,\"daypart\")",
+    "D15": "=ODOO.LIST(1,3,\"daypart\")",
+    "D16": "=ODOO.LIST(1,4,\"daypart\")",
+    "D17": "=ODOO.LIST(1,5,\"daypart\")",
+    "D18": "=ODOO.LIST(1,6,\"daypart\")",
+    "D19": "=ODOO.LIST(1,7,\"daypart\")",
+    "D20": "=ODOO.LIST(1,8,\"daypart\")",
+    "D21": "=ODOO.LIST(1,9,\"daypart\")",
+    "D22": "=ODOO.LIST(1,10,\"daypart\")",
+    "D23": "=ODOO.LIST(1,11,\"daypart\")",
+    "D24": "=ODOO.LIST(1,12,\"daypart\")",
+    "D25": "=ODOO.LIST(1,13,\"daypart\")",
+    "D26": "=ODOO.LIST(1,14,\"daypart\")",
+    "D27": "=ODOO.LIST(1,15,\"daypart\")",
+    "E12": "=ODOO.LIST.HEADER(1,\"attendance_count\",_t(\"Plazas\"))",
+    "E13": "=ODOO.LIST(1,1,\"attendance_count\")",
+    "E14": "=ODOO.LIST(1,2,\"attendance_count\")",
+    "E15": "=ODOO.LIST(1,3,\"attendance_count\")",
+    "E16": "=ODOO.LIST(1,4,\"attendance_count\")",
+    "E17": "=ODOO.LIST(1,5,\"attendance_count\")",
+    "E18": "=ODOO.LIST(1,6,\"attendance_count\")",
+    "E19": "=ODOO.LIST(1,7,\"attendance_count\")",
+    "E20": "=ODOO.LIST(1,8,\"attendance_count\")",
+    "E21": "=ODOO.LIST(1,9,\"attendance_count\")",
+    "E22": "=ODOO.LIST(1,10,\"attendance_count\")",
+    "E23": "=ODOO.LIST(1,11,\"attendance_count\")",
+    "E24": "=ODOO.LIST(1,12,\"attendance_count\")",
+    "E25": "=ODOO.LIST(1,13,\"attendance_count\")",
+    "E26": "=ODOO.LIST(1,14,\"attendance_count\")",
+    "E27": "=ODOO.LIST(1,15,\"attendance_count\")"
+   },
+   "styles": {
+    "A1": 1,
+    "A3": 2,
+    "A11": 2,
+    "A12": 3,
+    "B12": 3,
+    "C12": 3,
+    "D12": 3,
+    "E12": 3
+   },
+   "formats": {},
+   "borders": {},
+   "merges": [],
+   "figures": [
+    {
+     "id": "f1a00001-0000-4000-8000-000000000001",
+     "tag": "chart",
+     "col": 0,
+     "row": 0,
+     "offset": {
+      "x": 0,
+      "y": 11
+     },
+     "width": 300,
+     "height": 109,
+     "data": {
+      "type": "scorecard",
+      "title": {
+       "text": "Plazas ocupadas",
+       "color": "#434343",
+       "bold": true
+      },
+      "background": "#EFF6FF",
+      "keyValue": "Data!B1",
+      "baselineMode": "text",
+      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#DC6965",
+      "humanize": false,
+      "chartId": "f1a00001-0000-4000-8000-000000000001"
+     }
+    },
+    {
+     "id": "f1a00002-0000-4000-8000-000000000002",
+     "tag": "chart",
+     "col": 4,
+     "row": 0,
+     "offset": {
+      "x": 0,
+      "y": 11
+     },
+     "width": 300,
+     "height": 109,
+     "data": {
+      "type": "scorecard",
+      "title": {
+       "text": "% mañana",
+       "color": "#434343",
+       "bold": true
+      },
+      "background": "#EFF6FF",
+      "keyValue": "Data!B4",
+      "baselineMode": "text",
+      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#DC6965",
+      "humanize": false,
+      "chartId": "f1a00002-0000-4000-8000-000000000002"
+     }
+    },
+    {
+     "id": "f1a00003-0000-4000-8000-000000000003",
+     "tag": "chart",
+     "col": 8,
+     "row": 0,
+     "offset": {
+      "x": 0,
+      "y": 11
+     },
+     "width": 300,
+     "height": 109,
+     "data": {
+      "type": "scorecard",
+      "title": {
+       "text": "% tarde",
+       "color": "#434343",
+       "bold": true
+      },
+      "background": "#EFF6FF",
+      "keyValue": "Data!B5",
+      "baselineMode": "text",
+      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#DC6965",
+      "humanize": false,
+      "chartId": "f1a00003-0000-4000-8000-000000000003"
+     }
+    }
+   ],
+   "areGridLinesVisible": false,
+   "isVisible": true,
+   "headerGroups": {
+    "ROW": [],
+    "COL": []
+   },
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "tables": [],
+   "comments": {}
+  },
+  {
+   "id": "e4a3f7d5-4a6b-4dae-cf11-5d9a8b3c0d44",
+   "name": "Data",
+   "colNumber": 4,
+   "rowNumber": 12,
+   "cols": {},
+   "rows": {},
+   "cells": {
+    "A1": "=_t(\"KPI - Plazas ocupadas\")",
+    "B1": "=PIVOT.VALUE(1,\"attendance_count\")",
+    "A2": "=_t(\"KPI - Plazas por la mañana\")",
+    "B2": "=PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"morning\")",
+    "A3": "=_t(\"KPI - Plazas por la tarde\")",
+    "B3": "=PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"evening\")",
+    "A4": "=_t(\"KPI - % mañana\")",
+    "B4": "=IFERROR(B2/B1,0)",
+    "A5": "=_t(\"KPI - % tarde\")",
+    "B5": "=IFERROR(B3/B1,0)"
+   },
+   "styles": {},
+   "formats": {
+    "B1": 1,
+    "B2": 1,
+    "B3": 1,
+    "B4": 2,
+    "B5": 2
+   },
+   "borders": {},
+   "merges": [],
+   "figures": [],
+   "areGridLinesVisible": true,
+   "isVisible": true,
+   "headerGroups": {
+    "ROW": [],
+    "COL": []
+   },
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "tables": [],
+   "comments": {}
+  }
+ ]
+}

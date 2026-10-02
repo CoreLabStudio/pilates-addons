@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ATTENDANCE BY TIME OF DAY — fitness.report.attendance.daypart
+         One row per booking on a class that actually ran.
+
+         Two menu entries, ONE model. The second is the first with
+         [('is_paying','=',True)] on it. Deliberately not a second SQL
+         view: two definitions of "a class that ran" would drift, and
+         this studio has already had one pair of duplicated rules end up
+         disagreeing - the free trial's deadline was read in two places
+         and closed the offer in one of them.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- PIVOT ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_daypart_pivot" model="ir.ui.view">
+        <field name="name">fitness.report.attendance.daypart.pivot</field>
+        <field name="model">fitness.report.attendance.daypart</field>
+        <field name="arch" type="xml">
+            <pivot string="Attendance by Time of Day">
+                <field name="daypart" type="row"/>
+                <field name="discipline" type="col"/>
+                <field name="attendance_count" type="measure"/>
+                <field name="attended_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH ────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_daypart_graph" model="ir.ui.view">
+        <field name="name">fitness.report.attendance.daypart.graph</field>
+        <field name="model">fitness.report.attendance.daypart</field>
+        <field name="arch" type="xml">
+            <graph string="Attendance by Time of Day" type="bar">
+                <field name="daypart"/>
+                <field name="discipline"/>
+                <field name="attendance_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- LIST ─────────────────────────────────────────────────── -->
+    <record id="view_fitness_report_daypart_list" model="ir.ui.view">
+        <field name="name">fitness.report.attendance.daypart.list</field>
+        <field name="model">fitness.report.attendance.daypart</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" default_order="class_date desc">
+                <field name="class_date"/>
+                <field name="local_hour"/>
+                <field name="daypart"/>
+                <field name="discipline"/>
+                <field name="class_type_id"/>
+                <field name="student_id"/>
+                <field name="booking_state"/>
+                <field name="is_paying"/>
+                <field name="paid_membership"/>
+                <field name="paid_pack"/>
+                <field name="attendance_count" sum="Seats held"/>
+                <field name="attended_count" sum="Attended"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH ───────────────────────────────────────────────── -->
+    <record id="view_fitness_report_daypart_search" model="ir.ui.view">
+        <field name="name">fitness.report.attendance.daypart.search</field>
+        <field name="model">fitness.report.attendance.daypart</field>
+        <field name="arch" type="xml">
+            <search string="Attendance by Time of Day">
+                <field name="student_id"/>
+                <field name="class_type_id"/>
+                <filter name="morning" string="Morning"
+                        domain="[('daypart','=','morning')]"/>
+                <filter name="evening" string="Evening"
+                        domain="[('daypart','=','evening')]"/>
+                <separator/>
+                <filter name="barre" string="Barre"
+                        domain="[('discipline','=','barre')]"/>
+                <filter name="reformer" string="Reformer"
+                        domain="[('discipline','=','reformer')]"/>
+                <separator/>
+                <!-- A no-show held the seat but did not turn up. Both
+                     numbers are in the pivot as separate measures; this is
+                     for narrowing the rows themselves. -->
+                <filter name="attended_only" string="Turned up"
+                        domain="[('booking_state','=','attended')]"/>
+                <filter name="paying" string="Paying students"
+                        domain="[('is_paying','=',True)]"/>
+                <filter name="members" string="Membership payers"
+                        domain="[('paid_membership','=',True)]"/>
+                <filter name="packs" string="Pack payers"
+                        domain="[('paid_pack','=',True)]"/>
+                <group>
+                    <filter name="g_daypart" string="Time of Day"
+                            context="{'group_by': 'daypart'}"/>
+                    <filter name="g_discipline" string="Room"
+                            context="{'group_by': 'discipline'}"/>
+                    <filter name="g_type" string="Class Type"
+                            context="{'group_by': 'class_type_id'}"/>
+                    <filter name="g_month" string="Month"
+                            context="{'group_by': 'class_date:month'}"/>
+                    <filter name="g_paying" string="Paying"
+                            context="{'group_by': 'is_paying'}"/>
+                    <filter name="g_membership" string="Paid Membership"
+                            context="{'group_by': 'paid_membership'}"/>
+                    <filter name="g_pack" string="Paid Pack"
+                            context="{'group_by': 'paid_pack'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- REPORT 1: everyone ───────────────────────────────────── -->
+    <record id="action_fitness_report_daypart_all" model="ir.actions.act_window">
+        <field name="name">Attendance by Time of Day</field>
+        <field name="res_model">fitness.report.attendance.daypart</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_report_daypart_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_daypart_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_daypart_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_daypart_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiley_face">No attendance yet</p>
+            <p>Every booking on a class that has already run, split by the
+               hour it started on a Madrid clock. Cancelled bookings,
+               cancelled classes, archived classes and classes still to
+               come are all left out.</p>
+        </field>
+    </record>
+
+    <!-- REPORT 2: the same thing, paying students only ───────── -->
+    <record id="action_fitness_report_daypart_paying" model="ir.actions.act_window">
+        <field name="name">Attendance by Time of Day (Paying Students)</field>
+        <field name="res_model">fitness.report.attendance.daypart</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_report_daypart_search"/>
+        <field name="domain">[('is_paying', '=', True)]</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_daypart_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_daypart_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_daypart_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiley_face">No paying attendance yet</p>
+            <p>The same split, narrowed to students who have paid for a pack
+               or a membership at some point - more than zero euros, so a
+               free trial or a gifted class does not make somebody a paying
+               client.</p>
+        </field>
+    </record>
+
+    <!-- REPORT 2a: membership payers ─────────────────────────── -->
+    <record id="action_fitness_report_daypart_membership" model="ir.actions.act_window">
+        <field name="name">Time of Day (Membership Payers)</field>
+        <field name="res_model">fitness.report.attendance.daypart</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_report_daypart_search"/>
+        <field name="domain">[('paid_membership', '=', True)]</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_daypart_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_daypart_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_daypart_list')}),
+        ]"/>
+    </record>
+
+    <!-- REPORT 2b: pack payers ───────────────────────────────── -->
+    <record id="action_fitness_report_daypart_pack" model="ir.actions.act_window">
+        <field name="name">Time of Day (Pack Payers)</field>
+        <field name="res_model">fitness.report.attendance.daypart</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_fitness_report_daypart_search"/>
+        <field name="domain">[('paid_pack', '=', True)]</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_fitness_report_daypart_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_fitness_report_daypart_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_fitness_report_daypart_list')}),
+        ]"/>
+    </record>
+
+</odoo>

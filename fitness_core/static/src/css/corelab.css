@@ -31,6 +31,12 @@
   --mv-clay-dark:   var(--mv-btn-hover); /* alias → all button hovers become Paco dark */
   --mv-clay-text:   #357393;   /* darkened heather for AA text on light bg — 4.96:1 on #FAF9F6 */
   --mv-ink:         #92786C;   /* Hemp brown */
+  /* "A class you hold has changed". Deliberately not --mv-clay: that blue
+     is what the unread tint is made of, and the two signals have to be
+     separable from each other, not shades of one. Terracotta reads as
+     attention without reading as an error. */
+  --mv-schedule:      #B4603A;
+  --mv-schedule-text: #9A4E2C;   /* darkened for AA body text on #FAF9F6 */
 
   /* Chips that float on a photo - the time on a class card, the back button on
      a class page. The pill and the text on it have to move together, and they
@@ -1493,6 +1499,31 @@ a.mv-empty-cta:active, .mv-empty a.mv-empty-cta:active { transform: scale(0.97);
   border-radius: 50%;
   background: var(--mv-accent);
   border: 2px solid var(--mv-bg);
+  pointer-events: none;
+}
+/* The same marker, carrying the number. --mv-accent and --mv-accent-fg are
+   a declared pair and swap together in dark mode - accent is near-black on
+   the light ground and near-white on the dark one - so the digits keep
+   their contrast without a second rule for the dark theme.
+   min-width with centred text keeps "3" round and lets "12" and "99+"
+   grow sideways instead of clipping. */
+.mv-bell-count {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--mv-accent);
+  color: var(--mv-accent-fg);
+  border: 2px solid var(--mv-bg);
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
 
@@ -3190,6 +3221,32 @@ a.mv-notif-card, a.mv-notif-card:visited { text-decoration: none; color: inherit
 .mv-notif-dot {
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--mv-accent); flex-shrink: 0; margin-top: 5px;
+}
+
+/* ── "A class you hold has changed" ─────────────────────────────────────
+   An invoice, a survey and "the studio moved your class to Friday" were
+   the same grey card with the same dot. The one she has to act on is
+   marked here.
+
+   A border AND a word, never colour alone: the unread state is already a
+   pale clay tint, a second tint would read as a shade of the same thing,
+   and a reader who cannot separate the two hues would get no signal at
+   all. The border carries it at a glance, the tag says which.
+
+   --mv-schedule is its own token rather than a reuse of --mv-clay, which
+   is what the unread tint is made of. */
+.mv-notif-card--schedule,
+.mv-notif-item--schedule {
+  border-left: 3px solid var(--mv-schedule);
+}
+.mv-notif-tag {
+  margin: 0 0 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mv-schedule-text);
+  display: block;
 }
 .mv-mark-read-btn {
   background: none; border: 1px solid var(--mv-border);
@@ -4943,6 +5000,11 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
        so the circle becomes light and its text becomes dark. The same token
        draws focus rings, which need to be light here for the same reason. */
     --mv-accent:      #EDE3DA;
+    /* Same lift as the data-theme block below. Both are needed: this one
+       serves a student whose phone is dark and who never touched the
+       toggle, which is most of them. */
+    --mv-schedule:      #D98659;
+    --mv-schedule-text: #E8A079;
     --mv-accent-fg:   #1B1613;
 
     /* ── buttons. Heather is unchanged; only the text on it moves. ── */
@@ -5018,6 +5080,11 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
      draws focus rings, which need to be light here for the same reason. */
   --mv-accent:      #EDE3DA;
   --mv-accent-fg:   #1B1613;
+  /* The terracotta is lifted off the dark ground the same way --mv-clay-text
+     is: the light-mode value is a mid tone and sits too close to #1B1613 to
+     be read as either a border or a word. */
+  --mv-schedule:      #D98659;
+  --mv-schedule-text: #E8A079;
 
   /* ── buttons. Heather is unchanged; only the text on it moves. ── */
   --mv-btn-bg:      #9ABACD;

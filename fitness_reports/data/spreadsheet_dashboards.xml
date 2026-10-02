@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CORELAB DASHBOARDS
+
+         These existed only as rows in the production database. Somebody
+         built them in the Spreadsheet UI, exported the JSON and
+         committed the file - and nothing ever loaded it. No xmlid, no
+         module, no mention in any manifest. A rebuilt staging or a
+         fresh install had no CoreLab dashboard at all, and nothing
+         would have said so.
+
+         The content here is that same export. It is the live production
+         dashboard, not a reconstruction: production reports 15304 bytes
+         of base64, which decodes to 11478, against 11477 bytes of file,
+         and both carry one sheet with seven figures and no cells,
+         pivots, lists or filters.
+
+         The matching migration gives the hand-made rows these xmlids
+         BEFORE this file loads, so the loader updates them instead of
+         creating a second copy of each. See
+         migrations/*/pre-adopt-corelab-dashboard.py.
+         ═══════════════════════════════════════════════════════════ -->
+
+    <record id="spreadsheet_dashboard_group_corelab"
+            model="spreadsheet.dashboard.group">
+        <field name="name">CoreLab Analytics</field>
+        <!-- After Odoo's own groups, which run 100-800. The hand-made
+             row carried sequence 0, which put the studio's own
+             analytics above Sales and Finance for no reason. -->
+        <field name="sequence">900</field>
+    </record>
+
+    <record id="dashboard_corelab_monthly" model="spreadsheet.dashboard">
+        <field name="name">CoreLab — Resumen Mensual</field>
+        <field name="spreadsheet_binary_data" type="base64"
+               file="fitness_reports/data/files/corelab_dashboard.json"/>
+        <!-- What the dashboard is actually built on. Odoo uses this to
+             decide whether to show the sample dashboard instead of an
+             empty one; the hand-made row had it blank, so a studio with
+             no data yet would have been shown a blank page rather than
+             the sample. -->
+        <field name="main_data_model_ids" eval="[
+            (4, ref('fitness_reports.model_fitness_report_retention')),
+            (4, ref('fitness_reports.model_fitness_report_class')),
+        ]"/>
+        <field name="dashboard_group_id"
+               ref="spreadsheet_dashboard_group_corelab"/>
+        <!-- Manager-only, like every other report in this module. The
+             hand-made row was scoped to a group called "Rol / Usuario",
+             which is not the studio's manager group. -->
+        <field name="group_ids"
+               eval="[Command.link(ref('fitness_core.group_fitness_manager'))]"/>
+        <field name="sequence">10</field>
+        <field name="is_published">True</field>
+    </record>
+
+    <!-- The attendance dashboard: built on fitness.report.attendance.daypart,
+         which is one row per booking on a class that actually ran.
+
+         Hand-written rather than authored in the UI, following the shapes
+         in Odoo's own spreadsheet_dashboard_account dashboard: the tiles
+         are scorecard figures whose keyValue points at cells on a second
+         sheet, and those cells hold the PIVOT.VALUE formulas. A global
+         filter only reaches a list or pivot through fieldMatching, so both
+         filters are matched on both datasources - otherwise toggling one
+         would move the list and leave the tiles saying something else. -->
+    <record id="dashboard_corelab_attendance" model="spreadsheet.dashboard">
+        <field name="name">CoreLab — Asistencia por franja</field>
+        <field name="spreadsheet_binary_data" type="base64"
+               file="fitness_reports/data/files/attendance_dashboard.json"/>
+        <field name="main_data_model_ids" eval="[
+            (4, ref('fitness_reports.model_fitness_report_attendance_daypart')),
+        ]"/>
+        <field name="dashboard_group_id"
+               ref="spreadsheet_dashboard_group_corelab"/>
+        <field name="group_ids"
+               eval="[Command.link(ref('fitness_core.group_fitness_manager'))]"/>
+        <field name="sequence">20</field>
+        <field name="is_published">True</field>
+    </record>
+
+</odoo>
