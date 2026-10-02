@@ -1,5 +1,20 @@
 from odoo import models, fields, tools
 
+from odoo.addons.fitness_trials.models.trial_request import (
+    FitnessTrialRequest,
+)
+
+# The same hour the trial form cuts the day at, and the same one the
+# attendance report uses. Borrowed, never redeclared: a second number
+# here would let this report call a 13:00 class 'evening' while the
+# trial form calls it 'morning', about the same class on the same day.
+MORNING_ENDS_AT = FitnessTrialRequest.MORNING_ENDS_AT
+
+# calendar_event.start is UTC; the studio reads a Madrid clock. Spain
+# is +2 in summer and +1 in winter, so bucketing on the stored column
+# would move classes across the boundary for half the year.
+STUDIO_TZ = 'Europe/Madrid'
+
 
 class FitnessReportClass(models.Model):
     _name = 'fitness.report.class'
@@ -34,6 +49,15 @@ class FitnessReportClass(models.Model):
             'room for is the span that was actually booked.'
         ),
     )
+    local_hour = fields.Integer(
+        string='Hour (Madrid)', readonly=True,
+        help="The hour the class started on a Madrid clock, not UTC.")
+    daypart = fields.Selection(
+        [('morning', 'Morning'), ('evening', 'Evening')],
+        string='Time of Day', readonly=True,
+        help="Morning is anything starting before %d:00 Madrid time; "
+             "evening is %d:00 onward - the same split the trial form "
+             "offers students." % (MORNING_ENDS_AT, MORNING_ENDS_AT))
     class_state = fields.Selection(
         [('scheduled', 'Scheduled'), ('cancelled', 'Cancelled')],
         string='Class Status', readonly=True,
@@ -66,6 +90,13 @@ class FitnessReportClass(models.Model):
                 ce.id,
                 ce.id                                                       AS event_id,
                 ce.start::date                                              AS class_date,
+                EXTRACT(HOUR FROM (ce.start AT TIME ZONE 'UTC'
+                    AT TIME ZONE %%(tz)s))::int                  AS local_hour,
+                CASE
+                    WHEN EXTRACT(HOUR FROM (ce.start AT TIME ZONE 'UTC'
+                        AT TIME ZONE %%(tz)s)) < %%(cutoff)s
+                    THEN 'morning' ELSE 'evening'
+                END                                             AS daypart,
                 ce.class_type_id,
                 ce.user_id                                                  AS teacher_user_id,
                 ce.capacity,
@@ -104,4 +135,7 @@ class FitnessReportClass(models.Model):
             GROUP BY ce.id, ce.start, ce.stop, ce.class_type_id, ce.user_id,
                      ce.capacity, ce.class_state, ce.active,
                      ar.attributed_revenue
-        """ % self._table)
+        """ % self._table, {
+            'tz': STUDIO_TZ,
+            'cutoff': MORNING_ENDS_AT,
+        })

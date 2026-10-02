@@ -151,15 +151,16 @@ class TrialRequestController(http.Controller):
         # the end of the offer happen to be the same date today, which is why
         # the lists look right; a week from now the rolling window would run
         # past the offer and show classes nobody could take.
-        offer_end = request.env['ir.config_parameter'].sudo().get_param(
-            'fitness.trial_offer_end')
+        #
+        # Asked of fitness.trial.request rather than read here. This used to
+        # parse the parameter itself, with no fallback, while fitness_portal
+        # parsed it with a hardcoded one - so the two disagreed about every
+        # database where it was unset: this form offered classes the shop
+        # said could not be claimed.
+        offer_end = request.env['fitness.trial.request'].sudo(
+        )._trial_offer_end()
         if offer_end:
-            try:
-                end_dt = datetime.combine(
-                    _date.fromisoformat(offer_end), _time.max)
-                horizon = min(horizon, end_dt)
-            except (ValueError, TypeError):
-                pass
+            horizon = min(horizon, datetime.combine(offer_end, _time.max))
 
         if horizon <= now:
             return []

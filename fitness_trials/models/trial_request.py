@@ -51,6 +51,81 @@ class FitnessTrialRequest(models.Model):
     # Monday first, the way the timetable reads.
     WEEKDAY_ORDER = ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
 
+    # ── When the free trial offer closes ────────────────────────────────
+    #
+    # One implementation, reachable from both modules, because this used to
+    # be two and they disagreed.
+    #
+    # fitness_portal carried a hardcoded TRIAL_OFFER_END_DEFAULT of
+    # '2026-09-30' and fell back to it whenever the parameter was unset.
+    # This module read the same parameter with no fallback at all. So on any
+    # database where nobody had set it - a fresh install, a rebuilt staging,
+    # every odoo.sh test build - the shop said the offer was closed and the
+    # trial form said it was open, about the same studio on the same day.
+    #
+    # On 1 October 2026 that stopped being theoretical: the hardcoded date
+    # passed, and four tests that needed a claimable trial began failing on
+    # the calendar rather than on anything they asserted. Setting the real
+    # parameter in admin fixed the live site and could never fix a build,
+    # because a build's database has no parameter to read.
+    #
+    # UNSET MEANS OPEN, WITH NO END DATE. That is not a new rule - the
+    # portal's own gate already read `if not end: return True`, and this
+    # module already behaved that way. The constant was overriding both.
+    # Requiring the parameter instead would make every fresh install and
+    # restored staging silently wrong, which is the failure above rather
+    # than a guard against it.
+    #
+    # The deadline is a business decision and lives in configuration. Note
+    # there is no res.config.settings anywhere in this addon set, so the
+    # only way to set it is Technical > System Parameters - which is why a
+    # deadline expired without anyone seeing it.
+
+    TRIAL_OFFER_END_PARAM = 'fitness.trial_offer_end'
+
+    @api.model
+    def _trial_offer_end(self):
+        """The last day a trial may be claimed, or None for no deadline."""
+        raw = (self.env['ir.config_parameter'].sudo()
+               .get_param(self.TRIAL_OFFER_END_PARAM) or '').strip()
+        if not raw:
+            return None
+        try:
+            return fields.Date.to_date(raw)
+        except (ValueError, TypeError):
+            # Loud, and open. Both halves are deliberate: the two modules
+            # have to agree on a value neither can read, and this module
+            # already swallowed a bad date silently. Treating it as a
+            # closure would let one typo shut the whole funnel with nothing
+            # to show for it - which is the fault this comment block exists
+            # about - so it is logged instead of acted on.
+            #
+            # WARNING rather than ERROR, and the level is load-bearing:
+            # odoo.sh grades a build on ERROR lines in the log, not on the
+            # test summary. The two tests that feed this a bad date made a
+            # passing suite - 810 of 810 - produce a red build, because the
+            # thing being tested is that this gets logged. A mistyped date
+            # is somebody to tell, not a system fault, so it is a warning.
+            _logger.warning(
+                "[TRIAL] %s is %r, which is not a date. Treating the offer "
+                "as having no end date. Fix it in Technical > System "
+                "Parameters.", self.TRIAL_OFFER_END_PARAM, raw)
+            return None
+
+    @api.model
+    def _trial_offer_open(self):
+        """Is a new trial claimable at all today, by anybody?
+
+        Gates the browsing eligibility, the Book button on a class outside
+        the window, the price on the shop card, the trial page and the class
+        list the trial form offers. If any of those disagreed, a student
+        would be offered something the next screen refuses.
+        """
+        end = self._trial_offer_end()
+        if not end:
+            return True
+        return fields.Date.context_today(self) <= end
+
     @api.model
     def _live_schedule(self):
         """The studio's timetable: active, group slots.
@@ -150,6 +225,22 @@ class FitnessTrialRequest(models.Model):
             ('start', '>=', fields.Datetime.now()),
         ]
         if day:
+            # A day the studio does not open is not a day a trial can be
+            # offered on. _is_open_on() derives the open weekdays from the
+            # active schedules, and /trial/submit refuses anything outside
+            # them - so without this the form could show a slot and then
+            # reject the student who picked it.
+            #
+            # That is not hypothetical. Three leftover test classes sat on
+            # a Saturday and a Sunday with no schedule behind them; the
+            # form offered the Sunday and the submit refused it, which is
+            # what failed TestAppRefusesSpentTrial and TestPhoneMatch. The
+            # stray rows are archived now, but "there happen to be no
+            # weekend classes today" is not the same as the two questions
+            # agreeing, and a one-off Saturday workshop would bring it
+            # straight back.
+            if not self._is_open_on(day):
+                return [('id', '=', False)]
             tz = _STUDIO_TZ
             midnight = tz.localize(_dt.combine(day, _time(0, 0)))
             noonish = tz.localize(

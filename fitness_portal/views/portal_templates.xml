@@ -72,7 +72,7 @@
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                         </svg>
-                        <span class="mv-bell-dot" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
+                        <span class="mv-bell-count" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
                     </button>
                     <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
                         <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
@@ -85,6 +85,14 @@
                             <div class="mv-s-loading">Loading…</div>
                             <div class="mv-s-empty">No new notifications</div>
                             <div class="mv-s-error">Could not load notifications</div>
+                            <!-- The badge shows a number, which is read by
+                                 nobody using a screen reader: it is decorative
+                                 and the count has to reach the button's label
+                                 instead. Written here rather than in the .js
+                                 for the reason above - a literal in a script
+                                 is never extracted for translation. -->
+                            <div class="mv-s-unread">unread</div>
+                            <div class="mv-s-schedule">Schedule change</div>
                         </div>
                         <ul class="mv-notif-list" id="mv-notif-list" style="display:none;margin:0;padding:0;list-style:none;"/>
                         <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
@@ -142,7 +150,7 @@
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                         </svg>
-                        <span class="mv-bell-dot" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
+                        <span class="mv-bell-count" id="mv-bell-badge" style="display:none" aria-hidden="true"/>
                     </button>
                     <div class="mv-notif-panel" id="mv-notif-panel" style="display:none">
                         <p class="mv-notif-empty" id="mv-notif-empty">Loading…</p>
@@ -155,6 +163,14 @@
                             <div class="mv-s-loading">Loading…</div>
                             <div class="mv-s-empty">No new notifications</div>
                             <div class="mv-s-error">Could not load notifications</div>
+                            <!-- The badge shows a number, which is read by
+                                 nobody using a screen reader: it is decorative
+                                 and the count has to reach the button's label
+                                 instead. Written here rather than in the .js
+                                 for the reason above - a literal in a script
+                                 is never extracted for translation. -->
+                            <div class="mv-s-unread">unread</div>
+                            <div class="mv-s-schedule">Schedule change</div>
                         </div>
                         <ul class="mv-notif-list" id="mv-notif-list" style="display:none;margin:0;padding:0;list-style:none;"/>
                         <a href="/my/notifications" class="mv-notif-viewall">View all notifications</a>
@@ -2322,10 +2338,13 @@
                     <div class="mv-notif-page-list">
                         <t t-foreach="entries" t-as="entry">
                             <t t-set="n" t-value="entry['record']"/>
-                            <t t-set="_ncls" t-value="'mv-notif-card' + (' mv-notif-card--unread' if entry.get('is_new') else '')"/>
+                            <t t-set="_ncls" t-value="'mv-notif-card' + (' mv-notif-card--unread' if entry.get('is_new') else '') + (' mv-notif-card--schedule' if n.is_schedule_change else '')"/>
                             <t t-if="n.action_url">
-                                <a t-att-href="n.action_url" t-att-class="_ncls + ' mv-notif-card--linked'">
+                                <a t-att-href="n.action_url" t-att-class="_ncls + ' mv-notif-card--linked'" t-att-data-id="n.id">
                                     <div class="mv-notif-card-main">
+                                        <t t-if="n.is_schedule_change">
+                                            <p class="mv-notif-tag">Schedule change</p>
+                                        </t>
                                         <p class="mv-notif-card-title" t-out="n.title"/>
                                         <t t-if="n.body">
                                             <p class="mv-notif-card-body" t-out="n.body"/>
@@ -2338,8 +2357,11 @@
                                 </a>
                             </t>
                             <t t-else="">
-                                <div t-att-class="_ncls">
+                                <div t-att-class="_ncls" t-att-data-id="n.id">
                                     <div class="mv-notif-card-main">
+                                        <t t-if="n.is_schedule_change">
+                                            <p class="mv-notif-tag">Schedule change</p>
+                                        </t>
                                         <p class="mv-notif-card-title" t-out="n.title"/>
                                         <t t-if="n.body">
                                             <p class="mv-notif-card-body" t-out="n.body"/>

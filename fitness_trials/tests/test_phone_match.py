@@ -38,6 +38,14 @@ class PhoneMatchFixture:
     def _build(cls):
         cls.env["ir.config_parameter"].sudo().set_param(
             "fitness.opening_date", "")
+        # The trial offer has a deadline, and it lapsed on 30 September
+        # 2026. fitness_portal falls back to a hardcoded
+        # TRIAL_OFFER_END_DEFAULT when the parameter is unset, so from
+        # 1 October every test that needs a claimable trial began failing
+        # on the calendar rather than on anything it asserts. Pinned here
+        # so these keep testing what they name.
+        cls.env["ir.config_parameter"].sudo().set_param(
+            "fitness.trial_offer_end", "2099-12-31")
         cls.TR = cls.env["fitness.trial.request"].sudo()
         cls.trial_product = cls.TR._all_trial_products()[:1]
         partners = cls.env["res.partner"].sudo().with_context(

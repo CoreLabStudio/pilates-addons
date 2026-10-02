@@ -23,6 +23,25 @@ import pytz
 from odoo import fields
 from odoo.tests import TransactionCase, tagged
 
+def _open_day(env, days_ahead):
+    """The first day at least `days_ahead` out that the studio opens on.
+
+    A fixed offset picks a different weekday every time the calendar
+    moves. These fixtures wanted "comfortably ahead", not "Saturday",
+    and _trial_slot_domain offers nothing on a day with no schedule
+    behind it - which is what /trial/submit enforces too.
+    """
+    from datetime import timedelta as _td
+    trials = env['fitness.trial.request'].sudo()
+    day = (fields.Datetime.now() + _td(days=days_ahead)).date()
+    for _ in range(7):
+        if trials._is_open_on(day):
+            return day
+        day += _td(days=1)
+    return day
+
+
+
 STUDIO_TZ = pytz.timezone('Europe/Madrid')
 
 
@@ -49,7 +68,7 @@ class TestTrialSlots(TransactionCase):
             "classroom_id": cls.barre_room.id})
         # A day comfortably ahead, so nothing here is fighting the booking
         # window or "not in the past".
-        cls.day = (fields.Datetime.now() + timedelta(days=9)).date()
+        cls.day = _open_day(cls.env, 9)
 
     # -- fixtures ----------------------------------------------------------
 
@@ -265,7 +284,7 @@ class TestTrialSubmitRevalidates(TransactionCase):
             "name": "Revalidate Barre", "classroom_type": "barre",
             "duration": 45, "level": "all", "session_type": "group",
             "classroom_id": cls.room.id})
-        cls.day = (fields.Datetime.now() + timedelta(days=9)).date()
+        cls.day = _open_day(cls.env, 9)
 
     def _event(self, hour=10):
         local = STUDIO_TZ.localize(datetime.combine(self.day, time(hour, 0)))
@@ -352,8 +371,8 @@ class TestAdminSlotPicker(TransactionCase):
             "name": "Picker Reformer", "classroom_type": "reformer",
             "duration": 50, "level": "all", "session_type": "group",
             "classroom_id": cls.room.id})
-        cls.asked_for = (fields.Datetime.now() + timedelta(days=12)).date()
-        cls.sooner = (fields.Datetime.now() + timedelta(days=4)).date()
+        cls.asked_for = _open_day(cls.env, 12)
+        cls.sooner = _open_day(cls.env, 4)
 
     def _at(self, hour, day, ctype=None, name=None):
         local = STUDIO_TZ.localize(datetime.combine(day, time(hour, 0)))
