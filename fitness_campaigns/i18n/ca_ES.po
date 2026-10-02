@@ -55,3 +55,49 @@ msgstr "Enviada a %(n)s alumna/es per %(who)s."
 #: code:addons/fitness_campaigns/models/models/fitness_campaign.py:0
 msgid "Recipients"
 msgstr "Destinatàries"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__display_name
+#: model:ir.model.fields,field_description:fitness_campaigns.field_survey_user_input__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__id
+#: model:ir.model.fields,field_description:fitness_campaigns.field_survey_user_input__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__days
+msgid "In the last (days)"
+msgstr "En els últims (dies)"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,help:fitness_campaigns.field_fitness_campaign__days
+msgid "Only used by 'Students who came recently'."
+msgstr "Només ho fa servir 'Alumnes que han vingut fa poc'."
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__state
+msgid "State"
+msgstr "Estat"

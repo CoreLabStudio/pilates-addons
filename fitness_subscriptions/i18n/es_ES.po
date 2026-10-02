@@ -205,3 +205,150 @@ msgstr "Secuencia"
 #: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__subscription_id
 msgid "Subscription"
 msgstr "MembresÃ­a"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,help:fitness_subscriptions.field_fitness_clase_fija__calendar_event_id
+msgid ""
+"Any occurrence of the recurring class slot reserved for this member. "
+"Auto-placement finds all occurrences in the billing period via "
+"recurrence_id (if part of a series) or this exact event if not recurring."
+msgstr ""
+"Cualquier ocurrencia de la clase fija reservada para esta miembro. La "
+"colocación automática encuentra todas las ocurrencias del periodo de "
+"facturación mediante recurrence_id (si forma parte de una serie) o este "
+"mismo evento si no es recurrente."
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_class_type
+msgid "Class Type"
+msgstr "Tipo de clase"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,help:fitness_subscriptions.field_product_product__fitness_is_subscription_plan
+#: model:ir.model.fields,help:fitness_subscriptions.field_product_template__fitness_is_subscription_plan
+msgid ""
+"Enable for recurring fitness plans. Activates weekly-allowance tracking "
+"on the subscription (sale.order)."
+msgstr ""
+"Actívalo en los planes de fitness recurrentes. Activa el seguimiento del "
+"cupo semanal en la suscripción (sale.order)."
+
+#. module: fitness_subscriptions
+#: model:ir.actions.server,name:fitness_subscriptions.ir_cron_place_fixed_classes_ir_actions_server
+msgid "Fitness: place fixed classes as the timetable extends"
+msgstr ""
+"Fitness: coloca las clases fijas a medida que se amplia el horario"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_booking__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_class_schedule__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_product_template__id
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_fitness_clase_fija__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,help:fitness_subscriptions.field_product_product__weekly_class_allowance
+#: model:ir.model.fields,help:fitness_subscriptions.field_product_template__weekly_class_allowance
+#: model:ir.model.fields,help:fitness_subscriptions.field_sale_order__fitness_weekly_class_allowance
+msgid ""
+"Maximum allowance-paid bookings a member may make in one ISO week (Mon "
+"00:00 – Sun 23:59). Admin-editable; changes take effect immediately for "
+"all new bookings. Ignored for unlimited plans."
+msgstr ""
+"Máximo de reservas con cargo al cupo que una miembro puede hacer en una "
+"semana ISO (lun 00:00 – dom 23:59). Editable por el administrador; los "
+"cambios se aplican de inmediato a todas las reservas nuevas. Se ignora en "
+"los planes ilimitados."
+
+#. module: fitness_subscriptions
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_fitness_class_schedule_form_fixed_slots
+msgid "Members"
+msgstr "Miembros"
+
+#. module: fitness_subscriptions
+#. odoo-python
+#: code:addons/fitness_subscriptions/models/sale_order.py:0
+msgid ""
+"No weekly hour reserved for %(which)s yet. Placement will book nothing "
+"for it. Set her slot, then click Place Classes."
+msgstr ""
+"Todavía no hay hora semanal reservada para %(which)s. La colocación no "
+"reservará nada. Fija su hora y pulsa Colocar clases."
+
+#. module: fitness_subscriptions
+#. odoo-python
+#: code:addons/fitness_subscriptions/models/sale_order.py:0
+msgid ""
+"No weekly hour reserved yet. She is paying for %(count)s reserved "
+"class(es) a week and none is set, so placement will book nothing. Set her "
+"slot, then click Place Classes."
+msgstr ""
+"Todavía no hay hora semanal reservada. Está pagando %(count)s clase(s) "
+"fija(s) a la semana y no hay ninguna fijada, así que la colocación no "
+"reservará nada. Fija su hora y pulsa Colocar clases."
+
+#. module: fitness_subscriptions
+#: model:product.template,description_sale:fitness_subscriptions.product_matricula
+msgid "One-off registration fee, charged with your first membership."
+msgstr "Matrícula única, que se cobra con tu primera membresía."
+
+#. module: fitness_subscriptions
+#: model:ir.model,name:fitness_subscriptions.model_product_template
+msgid "Product"
+msgstr "Producto"
+
+#. module: fitness_subscriptions
+#: model:product.template,name:fitness_subscriptions.product_matricula
+msgid "Registration (Matrícula)"
+msgstr "Matrícula"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,help:fitness_subscriptions.field_sale_order__fitness_session_type
+msgid "Restricts which session type the credits can be used for."
+msgstr "Limita en qué tipo de sesión se pueden usar los créditos."
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,help:fitness_subscriptions.field_sale_order__fitness_class_type
+msgid "Restricts which studio type the credits can be used for."
+msgstr "Limita en qué tipo de sala se pueden usar los créditos."
+
+#. module: fitness_subscriptions
+#: model:ir.model,name:fitness_subscriptions.model_sale_order
+msgid "Sales Order"
+msgstr "Pedido de venta"
+
+#. module: fitness_subscriptions
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_product_template_subscription_plans_list
+msgid "Session"
+msgstr "Sesión"
+
+#. module: fitness_subscriptions
+#: model:ir.model.fields,field_description:fitness_subscriptions.field_sale_order__fitness_session_type
+msgid "Session Type"
+msgstr "Tipo de sesión"
+
+#. module: fitness_subscriptions
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_fitness_membership_balances_list
+msgid "Student"
+msgstr "Alumna"
+
+#. module: fitness_subscriptions
+#: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_sale_order_form_fitness_subscription
+msgid "Place Classes for Current Period"
+msgstr "Colocar clases del periodo actual"

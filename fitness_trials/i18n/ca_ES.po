@@ -515,3 +515,137 @@ msgstr "Aquest telèfon pertany a %(name)s, que ja ha fet servir la seva classe 
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "Phone Matches"
 msgstr "Coincideix el telèfon"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__booking_id
+msgid "Booking"
+msgstr "Reserva"
+
+#. module: fitness_trials
+#: model:ir.model,name:fitness_trials.model_calendar_event
+msgid "Calendar Event"
+msgstr "Esdeveniment de calendari"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__source
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_form
+msgid "Came from"
+msgstr "Prové de"
+
+#. module: fitness_trials
+#: model:ir.model.fields.selection,name:fitness_trials.selection__fitness_trial_request__status__declined
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_search
+msgid "Cancelled"
+msgstr "Cancel·lada"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__class_type_id
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_form
+msgid "Class Requested"
+msgstr "Classe sol·licitada"
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_request_search
+msgid "Class Type"
+msgstr "Tipus de classe"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_decline_wizard__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: fitness_trials
+#: model:ir.model.fields.selection,name:fitness_trials.selection__fitness_trial_request__preferred_period__evening
+#: model_terms:ir.ui.view,arch_db:fitness_trials.trial_request_form
+msgid "Evening"
+msgstr "Tarda"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_calendar_event__id
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_booking__id
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_decline_wizard__id
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__id
+msgid "ID"
+msgstr "ID"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_decline_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__write_date
+msgid "Last Updated on"
+msgstr "Última actualització el"
+
+#. module: fitness_trials
+#: model:ir.model.fields.selection,name:fitness_trials.selection__fitness_trial_request__preferred_period__morning
+#: model_terms:ir.ui.view,arch_db:fitness_trials.trial_request_form
+msgid "Morning"
+msgstr "Matí"
+
+#. module: fitness_trials
+#: model:ir.model.fields,help:fitness_trials.field_fitness_trial_decline_wizard__reason
+msgid ""
+"Optional. Goes to the student, in the email and in the app. Write it as "
+"you would say it to them."
+msgstr ""
+"Opcional. S’envia a l’alumna, al correu i a l’aplicació. Escriu-ho com "
+"l’hi diries."
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_decline_wizard__reason
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_request__decline_reason
+msgid "Reason"
+msgstr "Motiu"
+
+#. module: fitness_trials
+#: model:ir.model.fields,field_description:fitness_trials.field_fitness_trial_decline_wizard__request_id
+msgid "Request"
+msgstr "Sol·licitud"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid "That class is no longer available. Please choose another one."
+msgstr ""
+"Aquesta classe ja no està disponible. Tria’n una altra, si us plau."
+
+#. module: fitness_trials
+#: model:ir.model.fields,help:fitness_trials.field_fitness_trial_request__booking_id
+msgid ""
+"The place this request was approved into. Cancelling either one cancels "
+"the other, and moving it moves the slot above."
+msgstr ""
+"La plaça en què es va aprovar aquesta sol·licitud. Cancel·lar-ne una "
+"cancel·la l’altra, i moure-la mou la plaça de dalt."
+
+#. module: fitness_trials
+#: model:ir.model.fields,help:fitness_trials.field_fitness_trial_request__class_type_id
+msgid ""
+"The specific class the person asked for. The discipline is still "
+"class_interest; this narrows it."
+msgstr ""
+"La classe concreta que va demanar la persona. La disciplina continua sent "
+"class_interest; això la concreta."
+
+#. module: fitness_trials
+#: model:ir.model.fields,help:fitness_trials.field_fitness_trial_request__partner_id
+msgid ""
+"The student's contact record, when the request came from a logged-in "
+"portal user. Approval books against this partner; if it is empty the "
+"email address is looked up instead."
+msgstr ""
+"El contacte de l’alumna, quan la sol·licitud va venir d’un usuari del "
+"portal amb sessió iniciada. L’aprovació reserva contra aquest contacte; "
+"si és buit es busca per l’adreça de correu."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/controllers/trial.py:0
+msgid ""
+"You already have a trial request with the studio. We will be in touch "
+"shortly."
+msgstr ""
+"Ja tens una sol·licitud de classe de prova amb l’estudi. Ens posarem en "
+"contacte amb tu aviat."

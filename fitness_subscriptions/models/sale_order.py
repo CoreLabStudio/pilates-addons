@@ -131,9 +131,18 @@ class SaleOrder(models.Model):
     # Warning only. It never blocks a sale, never touches the money and never
     # places anything by itself - the hour is hers to choose, and guessing one
     # for her would be worse than saying nothing.
+    #
+    # depends_context='lang' because the value IS a translated sentence.
+    # Odoo caches a computed field per field and record and partitions that
+    # cache only by the context keys the field declares. Without 'lang',
+    # whichever language computes it first in a transaction is handed to
+    # everyone else in it - an English reader opening the order after a
+    # Spanish one is served the Spanish warning. Invisible while the
+    # sentence had no translation, immediate once it had one.
     fitness_fixed_slot_warning = fields.Char(
         compute='_compute_fitness_fixed_slot_warning',
-        compute_sudo=True, store=False, string="Fixed Slot Warning")
+        compute_sudo=True, store=False, depends_context=('lang',),
+        string="Fixed Slot Warning")
     fitness_needs_fixed_slot = fields.Boolean(
         compute='_compute_fitness_fixed_slot_warning',
         compute_sudo=True, store=False, string="Needs A Weekly Hour")
