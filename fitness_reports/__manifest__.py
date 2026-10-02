@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Reports – CoreLab Studio',
-    'version': '19.0.2.4.6',
+    'version': '19.0.2.4.7',
     'category': 'Fitness',
     'summary': 'Manager-only analytics: bookings, revenue, clients, class occupancy (pivot/graph/list)',
     'author': 'Core Lab Studio, S.L.',
