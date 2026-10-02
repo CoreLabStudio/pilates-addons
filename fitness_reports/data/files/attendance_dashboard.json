@@ -91,7 +91,6 @@
     {
      "id": "attendance_count",
      "fieldName": "attendance_count",
-     "aggregator": "sum",
      "userDefinedName": "Plazas"
     }
    ],
@@ -238,10 +237,10 @@
      "id": "f1a00001-0000-4000-8000-000000000001",
      "tag": "chart",
      "col": 0,
-     "row": 0,
+     "row": 2,
      "offset": {
       "x": 0,
-      "y": 11
+      "y": 0
      },
      "width": 300,
      "height": 109,
@@ -265,10 +264,10 @@
      "id": "f1a00002-0000-4000-8000-000000000002",
      "tag": "chart",
      "col": 4,
-     "row": 0,
+     "row": 2,
      "offset": {
       "x": 0,
-      "y": 11
+      "y": 0
      },
      "width": 300,
      "height": 109,
@@ -292,10 +291,10 @@
      "id": "f1a00003-0000-4000-8000-000000000003",
      "tag": "chart",
      "col": 8,
-     "row": 0,
+     "row": 2,
      "offset": {
       "x": 0,
-      "y": 11
+      "y": 0
      },
      "width": 300,
      "height": 109,
@@ -336,11 +335,11 @@
    "rows": {},
    "cells": {
     "A1": "=_t(\"KPI - Plazas ocupadas\")",
-    "B1": "=PIVOT.VALUE(1,\"attendance_count\")",
+    "B1": "=IFERROR(PIVOT.VALUE(1,\"attendance_count\"),0)",
     "A2": "=_t(\"KPI - Plazas por la mañana\")",
-    "B2": "=PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"morning\")",
+    "B2": "=IFERROR(PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"morning\"),0)",
     "A3": "=_t(\"KPI - Plazas por la tarde\")",
-    "B3": "=PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"evening\")",
+    "B3": "=IFERROR(PIVOT.VALUE(1,\"attendance_count\",\"daypart\",\"evening\"),0)",
     "A4": "=_t(\"KPI - % mañana\")",
     "B4": "=IFERROR(B2/B1,0)",
     "A5": "=_t(\"KPI - % tarde\")",
