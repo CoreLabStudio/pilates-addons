@@ -21,6 +21,12 @@
          BEFORE this file loads, so the loader updates them instead of
          creating a second copy of each. See
          migrations/*/pre-adopt-corelab-dashboard.py.
+
+         The names below are English because name is translatable: the
+         stored value is the en_US source and Spanish and Catalan come
+         from i18n/*.po. The migration still matches the OLD Spanish
+         names on purpose - those are what the hand-made rows are
+         called on a database that has not run this upgrade yet.
          ═══════════════════════════════════════════════════════════ -->
 
     <record id="spreadsheet_dashboard_group_corelab"
@@ -33,7 +39,7 @@
     </record>
 
     <record id="dashboard_corelab_monthly" model="spreadsheet.dashboard">
-        <field name="name">CoreLab — Resumen Mensual</field>
+        <field name="name">CoreLab — Monthly Summary</field>
         <field name="spreadsheet_binary_data" type="base64"
                file="fitness_reports/data/files/corelab_dashboard.json"/>
         <!-- What the dashboard is actually built on. Odoo uses this to
@@ -72,7 +78,7 @@
          filters are matched on both datasources - otherwise toggling one
          would move the list and leave the tiles saying something else. -->
     <record id="dashboard_corelab_attendance" model="spreadsheet.dashboard">
-        <field name="name">CoreLab — Asistencia por franja</field>
+        <field name="name">CoreLab — Attendance by Time of Day</field>
         <field name="spreadsheet_binary_data" type="base64"
                file="fitness_reports/data/files/attendance_dashboard.json"/>
         <field name="main_data_model_ids" eval="[

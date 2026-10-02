@@ -824,3 +824,144 @@ msgstr "Motiu"
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__line_ids
 msgid "Classes"
 msgstr "Classes"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "Attendance"
+msgstr "Assistència"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__attended
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Attended"
+msgstr "Assistida"
+
+#. module: fitness_bookings
+#: model:ir.actions.act_window,name:fitness_bookings.action_fitness_booking
+#: model:ir.model.fields,field_description:fitness_bookings.field_calendar_event__booking_ids
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__booking_ids
+msgid "Bookings"
+msgstr "Reserves"
+
+#. module: fitness_bookings
+#: model:ir.model,name:fitness_bookings.model_calendar_event
+msgid "Calendar Event"
+msgstr "Esdeveniment de calendari"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__cancelled
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Cancelled"
+msgstr "Cancel·lada"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__capacity
+msgid ""
+"Computed from class type / classroom but can be overridden for a specific "
+"session."
+msgstr ""
+"Es calcula a partir del tipus de classe o la sala, però es pot canviar "
+"per a una sessió concreta."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__event_id
+msgid "Event"
+msgstr "Esdeveniment"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__target_event_id
+msgid "Leave empty to cancel without moving the student anywhere."
+msgstr "Deixa-ho buit per cancel·lar sense moure l’alumna enlloc."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__booked_seats
+msgid "Maintained by the fitness_bookings module."
+msgstr "El manté el mòdul fitness_bookings."
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__no_show
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "No-show"
+msgstr "Absència"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Only the studio or the instructor teaching this class can mark attendance."
+msgstr ""
+"Només l’estudi o l’instructor que imparteix aquesta classe poden marcar "
+"l’assistència."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_wizard__reason
+msgid ""
+"Optional. Goes to every student on the classes you switch off, with the "
+"message they already get, and is kept on their booking."
+msgstr ""
+"Opcional. S’envia a totes les alumnes de les classes que desactivis, "
+"juntament amb el missatge que ja reben, i es guarda a la seva reserva."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__reason
+msgid ""
+"Optional. Goes to the student with the message they already get, whether "
+"they are moved or cancelled, and is kept on the booking when it is a "
+"cancellation."
+msgstr ""
+"Opcional. S’envia a l’alumna juntament amb el missatge que ja rep, tant "
+"si se la mou com si es cancel·la, i es guarda a la reserva quan és una "
+"cancel·lació."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__reason
+msgid ""
+"Optional. Shown to the student in the cancellation message and kept on "
+"the booking, so next week somebody can still tell why this class was "
+"cancelled."
+msgstr ""
+"Opcional. Es mostra a l’alumna al missatge de cancel·lació i es guarda a "
+"la reserva, perquè la setmana vinent algú encara pugui saber per què es "
+"va cancel·lar aquesta classe."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__class_state
+msgid ""
+"Set to Cancelled when the studio cancels the entire class occurrence."
+msgstr ""
+"Es posa a Cancel·lada quan l’estudi cancel·la tota l’ocurrència de la "
+"classe."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__class_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__class_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__from_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__start
+msgid "Start date of an event, without time for full days events"
+msgstr ""
+"Data d’inici d’un esdeveniment, sense hora en els esdeveniments de dia "
+"complet"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_wizard__day
+msgid "The day to look at. Changing it reloads the classes below."
+msgstr ""
+"El dia que es consulta. En canviar-lo es recarreguen les classes de sota."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__package_order_line_id
+msgid "Which class-pack line deducted a credit for this booking."
+msgstr "Quina línia de bo va descomptar un crèdit per aquesta reserva."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__subscription_id
+msgid "Which subscription counted this booking against the monthly cap."
+msgstr ""
+"Quina subscripció va comptar aquesta reserva dins del límit mensual."

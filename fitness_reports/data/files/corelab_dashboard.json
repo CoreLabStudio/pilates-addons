@@ -23,7 +23,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Clientes activos por mes"
+              "text": "Active Customers by Month"
             },
             "background": "#F0F6FA",
             "legendPosition": "none",
@@ -54,7 +54,7 @@
             "axesDesign": {
               "y": {
                 "title": {
-                  "text": "Clientes"
+                  "text": "Customers"
                 }
               }
             },
@@ -76,7 +76,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Ingresos ex-IVA por mes (€)"
+              "text": "Revenue excl. VAT by Month (€)"
             },
             "background": "#F0F6FA",
             "legendPosition": "none",
@@ -129,7 +129,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Tasa de retención mensual (%)"
+              "text": "Monthly Retention Rate (%)"
             },
             "background": "#FFFFFF",
             "legendPosition": "none",
@@ -183,7 +183,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "ARPU mensual (€ por cliente activo)"
+              "text": "Monthly ARPU (€ per active customer)"
             },
             "background": "#FFFFFF",
             "legendPosition": "none",
@@ -236,7 +236,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Ocupación de clase por tipo (%)"
+              "text": "Class Occupancy by Type (%)"
             },
             "background": "#F0F8F4",
             "legendPosition": "none",
@@ -289,7 +289,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Asistencias por tipo de clase"
+              "text": "Attendances by Class Type"
             },
             "background": "#F0F8F4",
             "legendPosition": "none",
@@ -320,7 +320,7 @@
             "axesDesign": {
               "y": {
                 "title": {
-                  "text": "Clases"
+                  "text": "Classes"
                 }
               }
             },
@@ -342,7 +342,7 @@
           "tag": "chart",
           "data": {
             "title": {
-              "text": "Asistencias por profesor"
+              "text": "Attendances by Teacher"
             },
             "background": "#F5F0F7",
             "legendPosition": "none",
@@ -373,7 +373,7 @@
             "axesDesign": {
               "y": {
                 "title": {
-                  "text": "Asistencias"
+                  "text": "Attendances"
                 }
               }
             },

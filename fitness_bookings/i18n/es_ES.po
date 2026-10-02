@@ -826,3 +826,135 @@ msgstr "Motivo"
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__line_ids
 msgid "Classes"
 msgstr "Clases"
+
+####################################################################
+# Added 2026-10-02: terms introduced by this round of work.
+####################################################################
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "Attendance"
+msgstr "Asistencia"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__attended
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Attended"
+msgstr "Asistida"
+
+#. module: fitness_bookings
+#: model:ir.model,name:fitness_bookings.model_calendar_event
+msgid "Calendar Event"
+msgstr "Evento de calendario"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__cancelled
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Cancelled"
+msgstr "Cancelada"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__capacity
+msgid ""
+"Computed from class type / classroom but can be overridden for a specific "
+"session."
+msgstr ""
+"Se calcula a partir del tipo de clase o la sala, pero puede cambiarse "
+"para una sesión concreta."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_line__event_id
+msgid "Event"
+msgstr "Evento"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__target_event_id
+msgid "Leave empty to cancel without moving the student anywhere."
+msgstr "Déjalo vacío para cancelar sin mover a la alumna a ninguna parte."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__booked_seats
+msgid "Maintained by the fitness_bookings module."
+msgstr "Lo mantiene el módulo fitness_bookings."
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__no_show
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "No-show"
+msgstr "Ausencia"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Only the studio or the instructor teaching this class can mark attendance."
+msgstr ""
+"Solo el estudio o el instructor que imparte esta clase pueden marcar la "
+"asistencia."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_wizard__reason
+msgid ""
+"Optional. Goes to every student on the classes you switch off, with the "
+"message they already get, and is kept on their booking."
+msgstr ""
+"Opcional. Se envía a todas las alumnas de las clases que desactives, "
+"junto con el mensaje que ya reciben, y se guarda en su reserva."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__reason
+msgid ""
+"Optional. Goes to the student with the message they already get, whether "
+"they are moved or cancelled, and is kept on the booking when it is a "
+"cancellation."
+msgstr ""
+"Opcional. Se envía a la alumna junto con el mensaje que ya recibe, tanto "
+"si se la mueve como si se cancela, y se guarda en la reserva cuando es "
+"una cancelación."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__reason
+msgid ""
+"Optional. Shown to the student in the cancellation message and kept on "
+"the booking, so next week somebody can still tell why this class was "
+"cancelled."
+msgstr ""
+"Opcional. Se muestra a la alumna en el mensaje de cancelación y se guarda "
+"en la reserva, para que la semana que viene alguien pueda saber todavía "
+"por qué se canceló esta clase."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__class_state
+msgid ""
+"Set to Cancelled when the studio cancels the entire class occurrence."
+msgstr ""
+"Se pone en Cancelada cuando el estudio cancela toda la ocurrencia de la "
+"clase."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__class_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__class_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__from_start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__start
+msgid "Start date of an event, without time for full days events"
+msgstr ""
+"Fecha de inicio de un evento, sin hora en los eventos de día completo"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_wizard__day
+msgid "The day to look at. Changing it reloads the classes below."
+msgstr ""
+"El día que se consulta. Al cambiarlo se recargan las clases de abajo."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__package_order_line_id
+msgid "Which class-pack line deducted a credit for this booking."
+msgstr "Qué línea de bono descontó un crédito por esta reserva."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__subscription_id
+msgid "Which subscription counted this booking against the monthly cap."
+msgstr "Qué suscripción contó esta reserva dentro del límite mensual."
