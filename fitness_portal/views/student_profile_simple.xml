@@ -225,6 +225,55 @@
         <field name="search_view_id" ref="fitness_portal.view_fitness_student_search"/>
     </record>
 
+    <!-- ── Student List, in the Students menu ───────────────────────────────── -->
+    <!-- The same list the Students tile on the dashboard opens. Yoleyva could   -->
+    <!-- reach it by going Home and clicking the number, and nowhere else: the   -->
+    <!-- Instructors section has an Instructor List and the Students section had -->
+    <!-- no equivalent.                                                          -->
+    <!--                                                                         -->
+    <!-- A server action rather than the act_window above, for the same reason   -->
+    <!-- the instructor one is: the domain cannot be written in XML. Teachers    -->
+    <!-- are portal users too on this database, so share=True alone would list   -->
+    <!-- them among the students, and group membership is not searchable in      -->
+    <!-- Odoo 19 - hence the SQL, which is what fitness_core's teacher list and  -->
+    <!-- the dashboard tile both do.                                             -->
+    <record id="action_fitness_student_list_server" model="ir.actions.server">
+        <field name="name">Students</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <!-- Required, not decorative. _can_execute_action_on_records checks
+             group membership when a server action declares groups, and
+             otherwise demands WRITE access on the action's model - here
+             res.users, which only an Access Rights user has. Without this a
+             studio manager is shown the menu and refused the moment she
+             clicks it. -->
+        <field name="group_ids" eval="[(4, ref('fitness_core.group_fitness_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+teacher_g = env.ref('fitness_core.group_fitness_teacher', raise_if_not_found=False)
+if teacher_g:
+    env.cr.execute("SELECT uid FROM res_groups_users_rel WHERE gid = %s", [teacher_g.id])
+    teacher_ids = [r[0] for r in env.cr.fetchall()]
+else:
+    teacher_ids = []
+domain = [('share', '=', True), ('active', '=', True)]
+if teacher_ids:
+    domain.append(('id', 'not in', teacher_ids))
+base_action = env.ref('fitness_portal.action_fitness_student_list').sudo().read()[0]
+base_action['domain'] = domain
+action = base_action
+        </field>
+    </record>
+
+    <!-- Sequence 5: first in the section, as Instructor List is first in its. -->
+    <menuitem
+        id="menu_fitness_student_list"
+        name="Student List"
+        parent="fitness_core.menu_group_bookings"
+        action="fitness_portal.action_fitness_student_list_server"
+        sequence="5"
+        groups="fitness_core.group_fitness_manager"
+    />
+
 
     <!-- ── Credit ledger ────────────────────────────────────────────────────── -->
     <!-- The rows the balance is summed from. Opened by the Credits smart button  -->

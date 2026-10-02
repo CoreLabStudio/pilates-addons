@@ -7,3 +7,4 @@ from . import test_organizer_is_an_instructor
 from . import test_user_list_view_priority
 from . import test_teacher_calendar_rule
 from . import test_lang_cache
+from . import test_instructor_list_menu
