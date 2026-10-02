@@ -1161,3 +1161,86 @@ msgstr "p. ex. GROUP, PRIVATE, DUO"
 #: code:addons/fitness_core/models/fitness_dashboard.py:0
 msgid "is_fitness_class"
 msgstr "is_fitness_class"
+
+####################################################################
+# Dashboard preview headings and empty states, which were
+# hardcoded English until they were wrapped in _().
+####################################################################
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Class"
+msgstr "Classe"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Day"
+msgstr "Dia"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Interest"
+msgstr "Interès"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Last Activity"
+msgstr "Última activitat"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No messages awaiting reply."
+msgstr "No hi ha missatges pendents de resposta."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "No pending trial requests."
+msgstr "No hi ha sol·licituds de classe de prova pendents."
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this class"
+msgstr "Obrir aquesta classe"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this conversation"
+msgstr "Obrir aquesta conversa"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Open this trial request"
+msgstr "Obrir aquesta sol·licitud de classe de prova"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Role"
+msgstr "Rol"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Seats"
+msgstr "Places"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Student"
+msgstr "Alumna"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/fitness_dashboard.py:0
+msgid "Time"
+msgstr "Hora"

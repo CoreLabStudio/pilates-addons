@@ -40,8 +40,16 @@ class FitnessAdminDashboard(models.TransientModel):
 
     # ── Header (greeting + date) ──────────────────────────────────────────────
 
-    header_greeting = fields.Char(compute='_compute_header')
-    header_date = fields.Char(compute='_compute_header')
+    # depends_context='lang': the value below is a translated string, and
+    # Odoo partitions a computed field's cache only by the context keys the
+    # field declares. Without it the first language to compute it in a
+    # transaction is handed to every later reader in that transaction.
+    header_greeting = fields.Char(
+        compute='_compute_header', depends_context=('lang',))
+    # Rendered by babel's format_date, so locale-driven rather than
+    # _()-driven - language-dependent all the same.
+    header_date = fields.Char(
+        compute='_compute_header', depends_context=('lang',))
 
     def _compute_header(self):
         """Greeting and date, in the viewing user's timezone and language."""
@@ -64,14 +72,21 @@ class FitnessAdminDashboard(models.TransientModel):
 
     # ── Preview panels ────────────────────────────────────────────────────────
 
+    # depends_context='lang': the value below is a translated string, and
+    # Odoo partitions a computed field's cache only by the context keys the
+    # field declares. Without it the first language to compute it in a
+    # transaction is handed to every later reader in that transaction.
     preview_classes_html = fields.Html(
         compute='_compute_previews', sanitize=False, string='Classes Preview',
+        depends_context=('lang',),
     )
     preview_trials_html = fields.Html(
         compute='_compute_previews', sanitize=False, string='Trials Preview',
+        depends_context=('lang',),
     )
     preview_messages_html = fields.Html(
         compute='_compute_previews', sanitize=False, string='Messages Preview',
+        depends_context=('lang',),
     )
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -227,6 +242,9 @@ class FitnessAdminDashboard(models.TransientModel):
                 # Once the range spans days, the time alone does not say
                 # which class is which.
                 show_day = span_days > 1
+                # Hoisted out of the loop: one translation lookup for
+                # the whole table rather than one per row.
+                open_tip = _html.escape(_('Open this class'))
                 rows = ''
                 for cls in classes:
                     local = pytz.utc.localize(cls.start).astimezone(studio_tz)
@@ -243,9 +261,10 @@ class FitnessAdminDashboard(models.TransientModel):
                         f'<td><a class="cl-rowlink" href="{url}">{name}</a></td>'
                         f'<td>{teacher}</td><td>{booked}/{cap}</td>'
                         f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
-                        f'title="Open this class">→</a></td></tr>'
+                        f'title="{open_tip}">→</a></td></tr>'
                     )
-                day_head = '<th>Day</th>' if show_day else ''
+                day_head = (f'<th>{_html.escape(_("Day"))}</th>'
+                            if show_day else '')
                 more = ''
                 if len(all_classes) > len(classes):
                     more = _html.escape(_(
@@ -255,8 +274,12 @@ class FitnessAdminDashboard(models.TransientModel):
                 rec.preview_classes_html = (
                     f'<p class="mb-2"><strong>{_html.escape(rec._range_summary(live, span_days))}</strong></p>'
                     '<table class="table table-sm mb-0">'
-                    f'<thead><tr>{day_head}<th>Time</th><th>Class</th>'
-                    '<th>Instructor</th><th>Seats</th><th></th></tr></thead>'
+                    f'<thead><tr>{day_head}'
+                    f'<th>{_html.escape(_("Time"))}</th>'
+                    f'<th>{_html.escape(_("Class"))}</th>'
+                    f'<th>{_html.escape(_("Instructor"))}</th>'
+                    f'<th>{_html.escape(_("Seats"))}</th>'
+                    '<th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>{more}'
                 )
             else:
@@ -273,6 +296,7 @@ class FitnessAdminDashboard(models.TransientModel):
                 limit=5,
             )
             if trials:
+                open_tip = _html.escape(_('Open this trial request'))
                 rows = ''
                 for t in trials:
                     name = _html.escape(t.name or '—')
@@ -282,16 +306,19 @@ class FitnessAdminDashboard(models.TransientModel):
                         f'<tr><td><a class="cl-rowlink" href="{url}">{name}</a></td>'
                         f'<td>{interest}</td>'
                         f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
-                        f'title="Open this trial request">→</a></td></tr>'
+                        f'title="{open_tip}">→</a></td></tr>'
                     )
                 rec.preview_trials_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Name</th><th>Interest</th><th></th></tr></thead>'
+                    f'<thead><tr><th>{_html.escape(_("Name"))}</th>'
+                    f'<th>{_html.escape(_("Interest"))}</th>'
+                    '<th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:
                 rec.preview_trials_html = (
-                    '<p class="text-muted mb-0">No pending trial requests.</p>'
+                    '<p class="text-muted mb-0">%s</p>'
+                    % _html.escape(_('No pending trial requests.'))
                 )
 
             # ── Unread messages ───────────────────────────────────────────────
@@ -302,6 +329,7 @@ class FitnessAdminDashboard(models.TransientModel):
                 limit=5,
             )
             if convs:
+                open_tip = _html.escape(_('Open this conversation'))
                 rows = ''
                 for conv in convs:
                     student = _html.escape(
@@ -317,16 +345,20 @@ class FitnessAdminDashboard(models.TransientModel):
                         f'<tr><td><a class="cl-rowlink" href="{url}">{student}</a></td>'
                         f'<td>{role}</td><td>{last}</td>'
                         f'<td class="cl-go"><a class="cl-rowlink" href="{url}" '
-                        f'title="Open this conversation">→</a></td></tr>'
+                        f'title="{open_tip}">→</a></td></tr>'
                     )
                 rec.preview_messages_html = (
                     '<table class="table table-sm mb-0">'
-                    '<thead><tr><th>Student</th><th>Role</th><th>Last Activity</th><th></th></tr></thead>'
+                    f'<thead><tr><th>{_html.escape(_("Student"))}</th>'
+                    f'<th>{_html.escape(_("Role"))}</th>'
+                    f'<th>{_html.escape(_("Last Activity"))}</th>'
+                    '<th></th></tr></thead>'
                     f'<tbody>{rows}</tbody></table>'
                 )
             else:
                 rec.preview_messages_html = (
-                    '<p class="text-muted mb-0">No messages awaiting reply.</p>'
+                    '<p class="text-muted mb-0">%s</p>'
+                    % _html.escape(_('No messages awaiting reply.'))
                 )
 
     # ── Stat tile click actions ────────────────────────────────────────────────

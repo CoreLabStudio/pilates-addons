@@ -79,7 +79,12 @@ class FitnessAddStudentWizard(models.TransientModel):
 
     # Shown, not computed at save: the studio should see the room it has
     # before it picks a student, not after being refused.
-    seats_label = fields.Char(compute='_compute_seats_label')
+    # depends_context='lang': the value below is a translated string, and
+    # Odoo partitions a computed field's cache only by the context keys the
+    # field declares. Without it the first language to compute it in a
+    # transaction is handed to every later reader in that transaction.
+    seats_label = fields.Char(
+        compute='_compute_seats_label', depends_context=('lang',))
     is_private = fields.Boolean(compute='_compute_seats_label')
 
     @api.depends('event_id')
