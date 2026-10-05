@@ -41,14 +41,38 @@ class TestBookingEmailMentionsTheCancellationPolicy(TransactionCase):
                 out.append(code)
         return out
 
-    def test_every_language_states_the_window(self):
-        words = {'en_US': 'cancel', 'es_ES': 'cancelar', 'ca_ES': 'cancel'}
+    #: The phrasing the Terms themselves use. "Dentro de ese plazo el credito
+    #: se consume" was the first attempt and reads backwards in Spanish - it
+    #: can be taken as "if you cancel in time the credit is used" - so the
+    #: late case now names the window explicitly, as section 4 of the Terms
+    #: does.
+    GONE = ('Dentro de ese plazo', "Dins d'aquest termini", 'Inside that window')
+
+    def test_every_language_states_both_halves_of_the_rule(self):
+        halves = {
+            'en_US': ('at least', "less than"),
+            'es_ES': ('al menos', 'con menos de'),
+            'ca_ES': ('almenys', 'amb menys de'),
+        }
         for lang in self._langs():
             body = self._render(lang)
-            self.assertIn(words[lang], body.lower(),
-                          "the %s email does not mention cancelling" % lang)
+            early, late = halves[lang]
+            self.assertIn(early, body,
+                          "the %s email does not say how to keep the credit"
+                          % lang)
+            self.assertIn(late, body,
+                          "the %s email does not state the late case" % lang)
             self.assertIn('6', body,
                           "the %s email does not state the window" % lang)
+
+    def test_the_sentence_that_reads_backwards_is_gone(self):
+        for lang in self._langs():
+            body = self._render(lang)
+            for phrase in self.GONE:
+                self.assertNotIn(
+                    phrase, body,
+                    "the %s email still carries %r, which reads backwards"
+                    % (lang, phrase))
 
     def test_it_follows_the_setting_rather_than_a_hardcoded_six(self):
         self.env['ir.config_parameter'].sudo().set_param(
