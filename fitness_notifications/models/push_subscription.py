@@ -28,6 +28,14 @@ PARAM_PRIVATE = 'fitness.push.vapid_private'
 PARAM_SUBJECT = 'fitness.push.vapid_subject'
 DEFAULT_SUBJECT = 'mailto:info@corelabstudio.es'
 
+# Who may still be pushed to once Odoo has marked this database as a copy of
+# production. Comma-separated user ids; empty means nobody, which is the
+# default and the safe answer. ir.config_parameter is cached per process, so
+# a change made from the UI is picked up, but one written from another
+# process - a shell, a test - needs the server restarted or the registry
+# signalled before the running site sees it.
+PARAM_TEST_USERS = 'fitness.push.test_user_ids'
+
 
 class FitnessPushSubscription(models.Model):
     _name = 'fitness.push.subscription'
@@ -130,6 +138,72 @@ class FitnessPushSubscription(models.Model):
         vals['endpoint'] = endpoint
         return self.sudo().create(vals)
 
+    # ── copies of production ───────────────────────────────────────────────
+
+    @api.model
+    def _is_neutralized(self):
+        """Is this a copy of production that Odoo has neutralized?
+
+        odoo.sh runs base/data/neutralize.sql when it builds staging, which
+        sets database.is_neutralized, switches the crons off and points mail
+        at a dead server. It also clears Odoo's OWN push: the
+        mail.web_push_* keys and every row of mail_push_device.
+
+        It does not clear ours. fitness.push.* and fitness.push.subscription
+        appear in no neutralize.sql anywhere in Odoo, and this module ships
+        none - so a copy of production arrives holding real students'
+        endpoints, and the push service routes by endpoint without caring
+        which database asked.
+        """
+        raw = self.env['ir.config_parameter'].sudo().get_param(
+            'database.is_neutralized')
+        return str(raw or '').strip().lower() in ('1', 't', 'true', 'yes')
+
+    @api.model
+    def _push_test_user_ids(self):
+        """Who may still be pushed to on a neutralized copy.
+
+        Returns a set of ids, or None when the parameter cannot be read as a
+        list. None means suppress everything: a typo in this setting must
+        not be the reason a real student's phone rings from staging.
+        """
+        raw = self.env['ir.config_parameter'].sudo().get_param(
+            PARAM_TEST_USERS) or ''
+        out = set()
+        for piece in raw.split(','):
+            piece = piece.strip()
+            if not piece:
+                continue            # spaces and a trailing comma are fine
+            if not piece.isdigit():
+                _logger.warning(
+                    "[PUSH] %s contains %r, which is not a user id; every "
+                    "push on this neutralized database is suppressed until "
+                    "it is fixed", PARAM_TEST_USERS, piece[:32])
+                return None
+            out.add(int(piece))
+        return out
+
+    @api.model
+    def _may_push_to(self, user_id):
+        """Whether a push to this user may leave a neutralized database."""
+        if not self._is_neutralized():
+            return True             # production and local dev: unchanged
+        allowed = self._push_test_user_ids()
+        if allowed is None:
+            _logger.info(
+                "[PUSH] push suppressed on a neutralized database for user "
+                "%s; %s could not be read as a list of ids",
+                user_id, PARAM_TEST_USERS)
+            return False
+        if user_id in allowed:
+            return True
+        # INFO, never ERROR: odoo.sh grades a build on its ERROR lines, and
+        # a guard doing its job is not a failure.
+        _logger.info(
+            "[PUSH] push suppressed on a neutralized database for user %s; "
+            "add the id to %s to test", user_id, PARAM_TEST_USERS)
+        return False
+
     # ── sending ────────────────────────────────────────────────────────────
 
     @api.model
@@ -138,8 +212,15 @@ class FitnessPushSubscription(models.Model):
 
         Never raises: a delivery problem must not roll back the booking, the
         cancellation or the bell notification that caused it.
+
+        Only the push is gated. The caller has already written the in-app
+        notification by the time this runs, so the bell is unaffected on a
+        neutralized database - and email is already dead there, because
+        neutralization points the mail server at nothing.
         """
         if not user_id:
+            return 0
+        if not self._may_push_to(user_id):
             return 0
         subs = self.sudo().search([('user_id', '=', user_id), ('active', '=', True)])
         if not subs:

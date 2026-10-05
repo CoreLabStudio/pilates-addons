@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Notifications – CoreLab Studio',
-    'version': '19.0.1.5.23',
+    'version': '19.0.1.5.24',
     'category': 'Services',
     'summary': 'Email and in-app notifications for booking lifecycle, credit status, and teacher changes',
     'author': 'Core Lab Studio, S.L.',

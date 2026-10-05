@@ -23,6 +23,16 @@ class TestPushRegistration(HttpCase):
 
     def setUp(self):
         super().setUp()
+        # These assert that a push IS sent. A database restored from a
+        # neutralized dump - every odoo.sh staging build, and the local
+        # restore shape - carries database.is_neutralized, and the guard
+        # in _notify_user then correctly suppresses the send. Saying so
+        # here makes the precondition explicit rather than leaving these
+        # to depend on which database they happen to run against.
+        self.env['ir.config_parameter'].sudo().set_param(
+            'database.is_neutralized', 'False')
+        self.env.registry.clear_cache()
+        self.addCleanup(self.env.registry.clear_cache)
         self.Sub = self.env['fitness.push.subscription']
         portal = self.env.ref('base.group_portal')
         self.alice = self.env['res.users'].with_context(
