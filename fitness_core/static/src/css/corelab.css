@@ -2298,7 +2298,24 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
   max-width: 460px;
   background: var(--mv-bg);
   border-radius: 18px 18px 0 0;
-  padding: 18px 20px calc(22px + env(safe-area-inset-bottom));
+  /* The fallback matters. env() with no second argument is invalid in a
+     browser that does not support it, and an invalid value drops the WHOLE
+     shorthand - so a panel that merely lacked a home indicator would have
+     lost its top and side padding too. Every other env() in this file
+     already passes 0px; this one did not. */
+  padding: 18px 20px calc(22px + env(safe-area-inset-bottom, 0px));
+  /* A sheet on a small phone with large text ran to 645px of a 667px
+     screen, with no maximum and nothing scrollable: one more notch of text
+     size and the title left the screen with no way to reach it. dvh rather
+     than vh so the mobile browser's collapsing toolbar is accounted for;
+     vh is the taller value and would still overflow. */
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  /* Keeps a flick inside the sheet from scrolling the page behind it. */
+  overscroll-behavior: contain;
+}
+@supports not (height: 100dvh) {
+  .mv-ios-panel { max-height: calc(100vh - 24px); }
 }
 @media (min-width: 560px) {
   .mv-ios-sheet { align-items: center; }
