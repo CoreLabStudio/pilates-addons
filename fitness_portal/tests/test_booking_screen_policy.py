@@ -95,3 +95,31 @@ class TestBookingScreenStatesThePolicy(HttpCase):
         for expected in ('Booked!', 'Your spot is confirmed'):
             self.assertIn(expected, body,
                           "%r disappeared from the confirmation" % expected)
+
+    def test_the_free_trial_confirmation_states_it_too(self):
+        """A free trial is still a seat, and a late cancellation spends the
+        one free class she gets - proven on trialprobe: the entitlement stays
+        used unless the studio hands it back."""
+        halves = {
+            'en_US': ('at least', 'less than'),
+            'es_ES': ('al menos', 'con menos de'),
+            'ca_ES': ('almenys', 'amb menys de'),
+        }
+        for lang in self._langs():
+            body = self._get('/my/packages?booked=1', lang)
+            early, late = halves[lang]
+            self.assertIn(early, body,
+                          "%s: the free-trial confirmation is missing the rule"
+                          % lang)
+            self.assertIn(late, body,
+                          "%s: it does not state the late case" % lang)
+            self.assertIn('6', body, "%s: no window stated" % lang)
+
+    def test_the_free_trial_confirmation_follows_the_setting(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'fitness.cancellation_window_hours', '9')
+        self.env.registry.clear_cache()
+        self.addCleanup(self.env.registry.clear_cache)
+        body = self._get('/my/packages?booked=1')
+        self.assertIn('9 hours', body)
+        self.assertNotIn('6 hours before the class', body)

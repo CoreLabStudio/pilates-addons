@@ -1603,6 +1603,8 @@
                         <div class="mv-flash mv-flash-ok">
                             <strong>Booked!</strong> Your free class is confirmed.
                         </div>
+                        <p class="mv-cancel-policy"
+                           t-out="lbl_cancel_policy"/>
                     </div>
                 </t>
                 <!-- A refusal arrives here as a redirect now that the free

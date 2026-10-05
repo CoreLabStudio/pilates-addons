@@ -1628,6 +1628,10 @@ class FitnessStudentPortal(http.Controller):
                                           'want to try.') % trial_names,
 
             'booked':                   bool(kw.get('booked')),
+            # A free trial is still a seat somebody else cannot take,
+            # and a late cancellation spends the one free class she
+            # gets - so the rule belongs here as much as anywhere.
+            'lbl_cancel_policy':        self._cancel_policy_label(),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
             'lbl_price_free':           _('Free'),
