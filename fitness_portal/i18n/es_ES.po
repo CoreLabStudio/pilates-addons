@@ -4594,3 +4594,9 @@ msgstr "¿Quieres un aviso antes de esta clase?"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "We'll tell you if the time changes or the class is cancelled."
 msgstr "Te avisamos si cambia la hora o si se cancela la clase."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You must cancel at least %(hours)s hours before the class starts to recover your credit. Cancellations made less than %(hours)s hours before the class, or no-shows, will result in full credit deduction with no refund."
+msgstr "Debes cancelar al menos %(hours)s horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de %(hours)s horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso."

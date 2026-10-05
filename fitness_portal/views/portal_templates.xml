@@ -745,6 +745,13 @@
                     <div class="mv-flashes">
                         <t t-if="booked">
                             <div class="mv-flash mv-flash-ok"><strong>Booked!</strong> Your spot is confirmed. See you in class.</div>
+                            <!-- The rule, where she is told the
+                                 booking happened. Same sentence as the
+                                 confirmation email and the same source:
+                                 section 4 of the Terms. The number comes
+                                 from the setting, never written here. -->
+                            <p class="mv-cancel-policy"
+                               t-out="lbl_cancel_policy"/>
                             <!-- The high-intent moment: she has just said she
                                  cares when this class happens, which is the
                                  whole subject of a notification. Rendered only
@@ -1022,6 +1029,13 @@
                     <!-- Flash banners -->
                     <t t-if="booked">
                         <div class="mv-flash mv-flash-ok"><strong>Booked!</strong> Your spot is confirmed. See you in class.</div>
+                            <!-- The rule, where she is told the
+                                 booking happened. Same sentence as the
+                                 confirmation email and the same source:
+                                 section 4 of the Terms. The number comes
+                                 from the setting, never written here. -->
+                            <p class="mv-cancel-policy"
+                               t-out="lbl_cancel_policy"/>
                     </t>
                     <t t-if="error_msg">
                         <div class="mv-flash mv-flash-err"><strong>Oops:</strong><span style="margin-left:5px;" t-out="error_msg"/></div>

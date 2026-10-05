@@ -37,3 +37,4 @@ from . import test_desk_sale_end_to_end
 from . import test_notification_bell
 from . import test_trial_offer_gate
 from . import test_student_list_menu
+from . import test_booking_screen_policy

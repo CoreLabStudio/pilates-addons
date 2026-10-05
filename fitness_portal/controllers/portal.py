@@ -308,6 +308,28 @@ class FitnessStudentPortal(http.Controller):
             'lbl_timetable_cta':  _('View timetable'),
         })
 
+    def _cancel_policy_label(self):
+        """The studio's cancellation rule, in her language, with the real N.
+
+        Section 4 of the Terms, shortened to its two load-bearing sentences,
+        so the screen and the confirmation email say the same thing as the
+        legal text rather than a third version of it.
+
+        The number is never written down here. It comes from
+        fitness.cancellation_window_hours through the booking model's own
+        helper, so a studio that changes the setting changes this sentence
+        too - and _format_window keeps 6.0 from reaching a student as "6.0".
+        """
+        Booking = request.env['fitness.booking'].sudo()
+        hours = Booking._format_window(Booking._cancellation_window_hours())
+        return request.env._(
+            "You must cancel at least %(hours)s hours before the class "
+            "starts to recover your credit. Cancellations made less than "
+            "%(hours)s hours before the class, or no-shows, will result in "
+            "full credit deduction with no refund.",
+            hours=hours,
+        )
+
     # ══════════════════════════════════════════════════════════
     #  STUDIO  (bottom-nav tab 2 — "Available" | "My Schedule")
     # ══════════════════════════════════════════════════════════
@@ -336,6 +358,7 @@ class FitnessStudentPortal(http.Controller):
                 'Your free trial class is waiting - pick any class below and '
                 'book it. Booking opens a week before each class.'),
             'booked':          bool(booked),
+            'lbl_cancel_policy': self._cancel_policy_label(),
             'cancelled':       bool(cancelled),
             'credit_returned': bool(credit_returned),
             'error_msg':       error or None,
@@ -798,6 +821,7 @@ class FitnessStudentPortal(http.Controller):
             'primary_credit':      self._primary_credit(partner.id),
             'student_name':        student_name,
             'booked':              bool(kw.get('booked')),
+            'lbl_cancel_policy':   self._cancel_policy_label(),
             'error_msg':           kw.get('error') or None,
             'type_has_img':        type_has_img,
             'cat_id':              cat_id,
