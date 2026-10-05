@@ -1130,7 +1130,7 @@
                                        t-att-value="request.csrf_token()"/>
                                 <button type="submit" class="mv-cancel-btn mv-cancel-btn-lg">Cancel booking</button>
                             </form>
-                            <p class="mv-cancel-policy">Cancel up to 6 hours before class to keep your credit.</p>
+                            <p class="mv-cancel-policy" t-out="lbl_cancel_policy"/>
                         </t>
                     </t>
                     <t t-elif="can_book">
@@ -1175,7 +1175,7 @@
                     </t>
 
                     <!-- Cancellation policy note (Task 3) -->
-                    <p class="mv-cancel-policy">Cancel up to 6 hours before class to keep your credit.</p>
+                    <p class="mv-cancel-policy" t-out="lbl_cancel_policy"/>
 
                 </div>
                 </div>
@@ -3594,7 +3594,7 @@
                          a div is the same flex item a span was. -->
                     <div class="mv-ios-title">Cancel this class?</div>
                 </div>
-                <p class="mv-confirm-body">Cancel up to 6 hours before class to keep your credit. Inside that window the credit is used.</p>
+                <p class="mv-confirm-body" t-out="lbl_cancel_policy"/>
                 <div class="mv-confirm-actions">
                     <button type="button" class="mv-confirm-yes" id="mv-cancel-yes">Yes, cancel it</button>
                     <button type="button" class="mv-confirm-no" id="mv-cancel-no">Keep my booking</button>

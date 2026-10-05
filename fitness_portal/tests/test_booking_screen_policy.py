@@ -84,11 +84,29 @@ class TestBookingScreenStatesThePolicy(HttpCase):
         self.assertIn('1.5 hours', body)
         self.assertNotIn('6.0', body)
 
-    def test_it_is_not_shown_when_she_has_not_just_booked(self):
-        """An addition to the confirmation, not a banner on every visit."""
+    def test_the_confirmation_flash_is_not_shown_when_she_has_not_booked(self):
+        """An addition to the confirmation, not a banner on every visit.
+
+        Checked on the flash itself rather than on the page text. The cancel
+        sheet also carries the sentence now, by design, and it ships in the
+        markup of every studio page hidden until she taps Cancel - so the
+        words being present in the HTML no longer means she is being shown
+        them. This assertion used to pass for the wrong reason.
+        """
         body = self._get('/my/studio')
-        self.assertNotIn('recover your credit', body,
-                         "the rule is being shown outside the confirmation")
+        self.assertNotIn('mv-flash-ok', body,
+                         "the booking confirmation flash is showing when she "
+                         "has not just booked")
+
+    def test_the_cancel_sheet_carries_the_same_sentence(self):
+        """The sheet that asks "Cancel this class?" said it in its own words,
+        with the figure written in. One sentence now, from the setting."""
+        body = self._get('/my/studio')
+        self.assertIn('mv-confirm-body', body, "the cancel sheet is missing")
+        self.assertIn('recover your credit', body,
+                      "the cancel sheet does not state the rule")
+        self.assertNotIn('Inside that window the credit is used', body,
+                         "the old sheet wording is still there")
 
     def test_the_rest_of_the_confirmation_is_untouched(self):
         body = self._get('/my/studio?booked=1')
@@ -123,3 +141,27 @@ class TestBookingScreenStatesThePolicy(HttpCase):
         body = self._get('/my/packages?booked=1')
         self.assertIn('9 hours', body)
         self.assertNotIn('6 hours before the class', body)
+
+    # ── the places that already stated it, now sharing one sentence ──────
+    def test_the_upcoming_class_lines_use_the_shared_sentence(self):
+        """Two lines on the class page said "Cancel up to 6 hours before
+        class to keep your credit" with the figure written in. They now read
+        the same sentence as everywhere else, from the same setting."""
+        booking = self.env['fitness.booking'].sudo().search([], limit=1)
+        if not booking:
+            self.skipTest("no booking to open a class page against")
+        body = self._get('/my/classes/%d' % booking.calendar_event_id.id)
+        self.assertNotIn('Cancel up to 6 hours before class', body,
+                         "the old hardcoded line is still rendered")
+
+    def test_no_hardcoded_window_remains_in_the_portal_templates(self):
+        """The figure must not be written down anywhere these pages render."""
+        import io as _io
+        from odoo.modules.module import get_module_path
+        src = _io.open(
+            get_module_path('fitness_portal') +
+            '/views/portal_templates.xml', encoding='utf-8').read()
+        for phrase in ('Cancel up to 6 hours',
+                       'Inside that window the credit is used'):
+            self.assertNotIn(phrase, src,
+                             "%r is still hardcoded in the templates" % phrase)
