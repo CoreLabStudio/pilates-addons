@@ -2317,11 +2317,22 @@
                                 t-att-data-msg-blocked="lbl_push_blocked"
                                 t-att-data-msg-dismissed="lbl_push_dismissed"
                                 t-att-data-msg-failed="lbl_push_failed">Turn on phone notifications</button>
+                        <!-- One line while push is off, revealed by the script
+                             because only the browser knows whether THIS device
+                             is subscribed. Deliberately not a card: the page is
+                             a list of what has already been sent, and a second
+                             opt-in box on top of it would be nagging someone
+                             who came here to read. -->
+                        <p class="mv-push-hint" id="mv-push-hint" hidden="hidden"
+                           t-out="lbl_push_off_hint"/>
                         <!-- Whatever the browser answered, in words. Tapping a
                              button that greys out and comes back with no prompt
                              and no message leaves no way to tell a refusal from
-                             a bug. -->
-                        <p class="mv-push-state" id="mv-push-state" hidden="hidden"/>
+                             a bug. Announced as well as drawn: the whole point
+                             of the sentence is that the tap produced no visible
+                             prompt, which a screen reader had no way to learn. -->
+                        <p class="mv-push-state" id="mv-push-state" hidden="hidden"
+                           role="status" aria-live="polite"/>
                     </div>
                     <t t-if="unread">
                         <form method="post" action="/my/notifications/read-all" style="margin:0;">

@@ -5313,6 +5313,18 @@ body.mv-auth-body .card .card-body .form-check-input:focus {
   max-width: 34em;
 }
 
+/* The one-line "notifications are off" note on the Notifications page.
+   Same tokens as the status line above, deliberately: both are quiet asides
+   under the same heading, and giving this one a colour of its own would be a
+   new pair to measure for no gain in meaning. */
+.mv-push-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--mv-muted);
+  max-width: 34em;
+}
+
 /* The permission card reuses the install card's shell so the two read as one
    family. Deliberately NOT called mv-notif-card: that class is already the
    notification list item on the Notifications page, and reusing the name would

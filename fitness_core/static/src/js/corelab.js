@@ -1170,6 +1170,15 @@
     if (card) card.hidden = false;
   }
 
+  // The one-line note on the Notifications page. Off is every state that is
+  // not a live subscription - undecided, refused, or a browser that cannot
+  // take push at all - because from the student's side they are the same
+  // fact: the next cancellation will not reach this phone.
+  function setPushHint(on) {
+    const hint = $('#mv-push-hint');
+    if (hint) hint.hidden = !!on;
+  }
+
   async function setupPush(reg) {
     if (!reg || !('PushManager' in window) || !('Notification' in window)) {
       // The iPhone-in-Safari case, and by far the most common one here: 13
@@ -1178,6 +1187,7 @@
       // was told nothing - neither that notifications exist nor that
       // installing is what unlocks them.
       if (isIos() && !isStandalone()) showIosNotifHint();
+      setPushHint(false);
       return;
     }
     const btn = $('#mv-push-enable');
@@ -1194,6 +1204,7 @@
         note.textContent = btn ? (btn.dataset.msgOn || '') : '';
         note.hidden = !note.textContent;
       }
+      setPushHint(ok);
       await setupNotifPrompt(reg, ok);
       return;
     }
@@ -1201,6 +1212,7 @@
     // script - the browser will not show the prompt twice.
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
+      setPushHint(false);
       await setupNotifPrompt(reg, false);
       // Nothing at all was shown here before: both the card and the button
       // hide themselves, correctly refusing to draw a dead button, and the
@@ -1212,6 +1224,7 @@
     // fired on page load is the fastest way to get permission denied
     // permanently, and on iOS it is ignored entirely unless it follows a
     // real gesture.
+    setPushHint(false);
     await setupNotifPrompt(reg, false);
     if (!btn) return;
     btn.hidden = false;
@@ -1228,6 +1241,7 @@
           const ok = await subscribeToPush(reg);
           if (ok) {
             btn.hidden = true;
+            setPushHint(true);
             say(btn.dataset.msgOn || 'Notifications are on.', 'on');
           } else {
             // Permission is granted but the browser would not hand us a

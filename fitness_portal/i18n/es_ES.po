@@ -4576,3 +4576,9 @@ msgstr "iPhone: Ajustes, luego CoreLab, luego Notificaciones y Permitir."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Android: press and hold the CoreLab icon, tap App info, then Notifications."
 msgstr "Android: mantén pulsado el icono de CoreLab, toca Información de la app y luego Notificaciones."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Notifications are off - you may miss a class change."
+msgstr "Las notificaciones están desactivadas: puedes perderte un cambio de clase."

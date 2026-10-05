@@ -2741,6 +2741,12 @@ class FitnessStudentPortal(http.Controller):
                                     'Turn them on in your phone settings for CoreLab, '
                                     'then reload this page.'),
             'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
+            # One line, not a card. This page is a list of what the studio has
+            # already sent, so the person reading it is exactly the person who
+            # would want to know the next one will not reach her phone - but
+            # she came here to read, not to be sold a feature.
+            'lbl_push_off_hint':  _('Notifications are off - you may miss a '
+                                    'class change.'),
             'lbl_push_failed':    _('Could not register this device for notifications.'),
         })
 
