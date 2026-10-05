@@ -4581,3 +4581,15 @@ msgstr "Android: mantén premuda la icona de CoreLab, toca Informació de l'app 
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Notifications are off - you may miss a class change."
 msgstr "Les notificacions estan desactivades: pots perdre't un canvi de classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Want a reminder before this class?"
+msgstr "Vols un avís abans d'aquesta classe?"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "We'll tell you if the time changes or the class is cancelled."
+msgstr "T'avisem si canvia l'hora o si es cancel·la la classe."

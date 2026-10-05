@@ -745,6 +745,36 @@
                     <div class="mv-flashes">
                         <t t-if="booked">
                             <div class="mv-flash mv-flash-ok"><strong>Booked!</strong> Your spot is confirmed. See you in class.</div>
+                            <!-- The high-intent moment: she has just said she
+                                 cares when this class happens, which is the
+                                 whole subject of a notification. Rendered only
+                                 after a confirmed booking, and still shipped
+                                 hidden - the browser decides, under the same
+                                 rules and the same shared counter as the card
+                                 on Home, so the two cannot add up to six asks
+                                 while each believes it made three. -->
+                            <div class="mv-install-card mv-pushcard" id="mv-notif-booked"
+                                 hidden="hidden" role="region"
+                                 aria-labelledby="mv-notif-booked-title"
+                                 t-att-data-msg-on="lbl_push_on"
+                                 t-att-data-msg-blocked="lbl_push_blocked"
+                                 t-att-data-msg-dismissed="lbl_push_dismissed"
+                                 t-att-data-msg-failed="lbl_push_failed">
+                                <div class="mv-install-text">
+                                    <span class="mv-install-title" id="mv-notif-booked-title"
+                                          t-out="lbl_notif_booked_title"/>
+                                    <span class="mv-install-sub" t-out="lbl_notif_booked_sub"/>
+                                </div>
+                                <div class="mv-install-actions">
+                                    <button type="button" class="mv-install-btn"
+                                            t-out="lbl_notif_cta"/>
+                                    <button type="button" class="mv-install-dismiss"
+                                            t-att-aria-label="lbl_notif_dismiss"
+                                            t-out="lbl_notif_dismiss"/>
+                                </div>
+                                <p class="mv-push-state" hidden="hidden"
+                                   role="status" aria-live="polite"/>
+                            </div>
                         </t>
                         <t t-if="cancelled and credit_returned">
                             <div class="mv-flash mv-flash-ok"><strong>Booking cancelled.</strong> A credit has been returned to your pack.</div>

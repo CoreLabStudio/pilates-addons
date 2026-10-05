@@ -1081,11 +1081,17 @@
     return next;
   }
 
-  // The card on Home. Shown only to a browser that is not already subscribed,
-  // and only while the snooze allows it - a permission prompt that reappears
-  // on every visit is how a studio trains its students to ignore it.
-  async function setupNotifPrompt(reg, alreadyOn) {
-    const card = $('#mv-pushcard');
+  // One opt-in card, wherever it is standing. Shown only to a browser that is
+  // not already subscribed, and only while the snooze allows it - a permission
+  // prompt that reappears on every visit is how a studio trains its students
+  // to ignore it.
+  //
+  // Takes the card rather than looking one up, because there are now two of
+  // them: the quiet one on Home, and the one offered straight after a booking
+  // is confirmed. They share the snooze deliberately - they are the same ask
+  // in two places, and counting them separately would be how somebody gets
+  // asked six times while each card believes it asked three.
+  async function setupNotifPrompt(reg, alreadyOn, card) {
     if (!card) return;
     if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
     // Denied cannot be undone from script - the browser will not ask twice -
@@ -1094,11 +1100,11 @@
     let snooze = snoozeState();
     if (!snoozeAllowsAsking(snooze)) { card.hidden = true; return; }
 
-    const note = $('#mv-pushcard-state');
+    const note = card.querySelector('.mv-push-state');
     const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
     card.hidden = false;
 
-    const enable = $('#mv-notif-enable');
+    const enable = card.querySelector('.mv-install-btn');
     if (enable) {
       enable.addEventListener('click', async () => {
         enable.disabled = true;
@@ -1126,7 +1132,7 @@
         } finally { enable.disabled = false; }
       });
     }
-    const dismiss = $('#mv-notif-dismiss');
+    const dismiss = card.querySelector('.mv-install-dismiss');
     if (dismiss) {
       dismiss.addEventListener('click', () => {
         card.hidden = true;
@@ -1205,7 +1211,8 @@
         note.hidden = !note.textContent;
       }
       setPushHint(ok);
-      await setupNotifPrompt(reg, ok);
+      await setupNotifPrompt(reg, ok, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, ok, $('#mv-notif-booked'));
       return;
     }
     // Denied is the user's decision and asking again is not possible from
@@ -1213,7 +1220,8 @@
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
       setPushHint(false);
-      await setupNotifPrompt(reg, false);
+      await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
       // Nothing at all was shown here before: both the card and the button
       // hide themselves, correctly refusing to draw a dead button, and the
       // student was left with no notifications and no way to find out why.
@@ -1225,7 +1233,8 @@
     // permanently, and on iOS it is ignored entirely unless it follows a
     // real gesture.
     setPushHint(false);
-    await setupNotifPrompt(reg, false);
+    await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+    await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
     if (!btn) return;
     btn.hidden = false;
     btn.addEventListener('click', async () => {

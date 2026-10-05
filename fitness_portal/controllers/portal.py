@@ -340,6 +340,24 @@ class FitnessStudentPortal(http.Controller):
             'credit_returned': bool(credit_returned),
             'error_msg':       error or None,
             'primary_credit':  self._primary_credit(partner.id),
+            # The offer that follows a confirmed booking. Asked here because
+            # this is the one moment the student has just told us she cares
+            # when this class happens - which is exactly what a notification
+            # is for. The card itself is revealed by the browser under the
+            # same rules and the same counter as the one on Home.
+            'lbl_notif_booked_title': _('Want a reminder before this class?'),
+            'lbl_notif_booked_sub':   _("We'll tell you if the time changes "
+                                        'or the class is cancelled.'),
+            'lbl_notif_cta':          _('Turn on'),
+            'lbl_notif_dismiss':      _('Not now'),
+            'lbl_push_on':            _('Notifications are on for this device.'),
+            'lbl_push_blocked':       _('Your phone is blocking notifications for '
+                                        'this app. Turn them on in your phone '
+                                        'settings for CoreLab, then reload this page.'),
+            'lbl_push_dismissed':     _('No answer given yet - tap again and '
+                                        'choose Allow.'),
+            'lbl_push_failed':        _('Could not register this device for '
+                                        'notifications.'),
         }
         full_name = partner.name or ''
         values['student_name'] = full_name.split()[0] if full_name else full_name
