@@ -181,6 +181,7 @@
       <li style="color:#2E2724;">Date/Time: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li style="color:#2E2724;">Classroom: <t t-out="object.classroom_id.name or 'TBA'"/></li>
     </ul>
+    <p style="color:#2E2724;">You must cancel at least <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts to recover your credit. Cancellations made less than <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class, or no-shows, will result in full credit deduction with no refund.</p>
     <p>See you there!</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
@@ -191,6 +192,7 @@
       <li style="color:#2E2724;">Data/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Per confirmar'"/></li>
     </ul>
+    <p style="color:#2E2724;">Has de cancel·lar almenys <t t-out="object._format_window(object._cancellation_window_hours())"/> hores abans de l'inici de la classe per recuperar el teu crèdit. Les cancel·lacions amb menys de <t t-out="object._format_window(object._cancellation_window_hours())"/> hores d'antelació, o les absències, comportaran la deducció completa del crèdit sense reemborsament.</p>
     <p>Ens veiem allà!</p>
   </t>
   <t t-else="">
@@ -201,6 +203,7 @@
       <li style="color:#2E2724;">Fecha/Hora: <t t-out="format_datetime(object.class_start, tz='Europe/Madrid', dt_format='EEEE d MMMM y &#183; HH:mm') if object.class_start else ''"/></li>
       <li style="color:#2E2724;">Sala: <t t-out="object.classroom_id.name or 'Por confirmar'"/></li>
     </ul>
+    <p style="color:#2E2724;">Debes cancelar al menos <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de <t t-out="object._format_window(object._cancellation_window_hours())"/> horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</p>
     <p>¡Nos vemos allí!</p>
   </t>
   <t t-set="notice_lang" t-value="object.student_id.lang"/>

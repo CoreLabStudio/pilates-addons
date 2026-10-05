@@ -14,6 +14,7 @@ than before.
 from odoo.tests import TransactionCase, tagged
 
 TEMPLATE = 'fitness_notifications.mail_template_booking_confirmation'
+REMINDER = 'fitness_notifications.mail_template_class_reminder'
 
 
 @tagged("post_install", "-at_install")
@@ -102,3 +103,40 @@ class TestBookingEmailMentionsTheCancellationPolicy(TransactionCase):
                          'Classroom:', 'Instructor:', 'See you soon'):
             self.assertIn(expected, body,
                           "%r disappeared from the confirmation" % expected)
+
+    # ── the reminder, which shows the same specific booked class ─────────
+    def _render_reminder(self, lang):
+        self.booking.student_id.sudo().lang = lang
+        tmpl = self.env.ref(REMINDER)
+        return tmpl.with_context(lang=lang)._render_field(
+            'body_html', self.booking.ids)[self.booking.id]
+
+    def test_the_reminder_states_the_rule_in_every_language(self):
+        halves = {
+            'en_US': ('at least', 'less than'),
+            'es_ES': ('al menos', 'con menos de'),
+            'ca_ES': ('almenys', 'amb menys de'),
+        }
+        for lang in self._langs():
+            body = self._render_reminder(lang)
+            early, late = halves[lang]
+            self.assertIn(early, body,
+                          "%s: the reminder is missing the rule" % lang)
+            self.assertIn(late, body,
+                          "%s: it does not state the late case" % lang)
+            self.assertIn('6', body, "%s: no window stated" % lang)
+
+    def test_the_reminder_follows_the_setting(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'fitness.cancellation_window_hours', '4')
+        self.env.registry.clear_cache()
+        self.addCleanup(self.env.registry.clear_cache)
+        body = self._render_reminder('en_US')
+        self.assertIn('4 hours', body, "the reminder ignored the setting")
+        self.assertNotIn('6 hours before the class', body)
+
+    def test_the_rest_of_the_reminder_is_untouched(self):
+        body = self._render_reminder('en_US')
+        for expected in ('Reminder', 'See you there'):
+            self.assertIn(expected, body,
+                          "%r disappeared from the reminder" % expected)
