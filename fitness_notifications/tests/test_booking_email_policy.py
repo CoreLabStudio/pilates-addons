@@ -15,6 +15,7 @@ from odoo.tests import TransactionCase, tagged
 
 TEMPLATE = 'fitness_notifications.mail_template_booking_confirmation'
 REMINDER = 'fitness_notifications.mail_template_class_reminder'
+MOVED = 'fitness_notifications.mail_template_booking_moved'
 
 
 @tagged("post_install", "-at_install")
@@ -140,3 +141,41 @@ class TestBookingEmailMentionsTheCancellationPolicy(TransactionCase):
         for expected in ('Reminder', 'See you there'):
             self.assertIn(expected, body,
                           "%r disappeared from the reminder" % expected)
+
+    # ── the moved-class email: a different class, still one she holds ────
+    def _render_moved(self, lang):
+        self.booking.student_id.sudo().lang = lang
+        tmpl = self.env.ref(MOVED)
+        return tmpl.with_context(lang=lang)._render_field(
+            'body_html', self.booking.ids)[self.booking.id]
+
+    def test_the_moved_email_states_the_rule_in_every_language(self):
+        halves = {
+            'en_US': ('at least', 'less than'),
+            'es_ES': ('al menos', 'con menos de'),
+            'ca_ES': ('almenys', 'amb menys de'),
+        }
+        for lang in self._langs():
+            body = self._render_moved(lang)
+            early, late = halves[lang]
+            self.assertIn(early, body,
+                          "%s: the moved email is missing the rule" % lang)
+            self.assertIn(late, body,
+                          "%s: it does not state the late case" % lang)
+            self.assertIn('6', body, "%s: no window stated" % lang)
+
+    def test_the_moved_email_follows_the_setting(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'fitness.cancellation_window_hours', '3')
+        self.env.registry.clear_cache()
+        self.addCleanup(self.env.registry.clear_cache)
+        body = self._render_moved('en_US')
+        self.assertIn('3 hours', body, "the moved email ignored the setting")
+        self.assertNotIn('6 hours before the class', body)
+
+    def test_the_rest_of_the_moved_email_is_untouched(self):
+        body = self._render_moved('en_US')
+        for expected in ('We have moved your booking',
+                         'Your credit has not changed'):
+            self.assertIn(expected, body,
+                          "%r disappeared from the moved email" % expected)
