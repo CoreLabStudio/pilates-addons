@@ -309,6 +309,35 @@ class FitnessStudentPortal(http.Controller):
             'lbl_timetable_cta':  _('View timetable'),
         })
 
+    def _notif_labels(self):
+        """Every string the opt-in card, dialog and key-moment ask need.
+
+        One builder rather than a fourth copy. The same labels are already
+        spelled out in three contexts - Home, Studio and Notifications - and
+        a fourth would be a fourth place to forget when the wording changes.
+        Anything new asks for them here.
+        """
+        _ = request.env._
+        return {
+            'lbl_notif_title':   _('Turn on notifications'),
+            'lbl_notif_sub':     _('Get told when a class is cancelled, moved, '
+                                   'or your booking is confirmed.'),
+            'lbl_notif_cta':     _('Turn on'),
+            'lbl_notif_dismiss': _('Not now'),
+            'lbl_notif_close':   _('Close'),
+            'lbl_push_on':       _('Notifications are on for this device.'),
+            'lbl_push_blocked':  _('Your phone is blocking notifications for '
+                                   'this app. Turn them on in your phone '
+                                   'settings for CoreLab, then reload this page.'),
+            'lbl_push_dismissed': _('No answer given yet - tap again and '
+                                    'choose Allow.'),
+            'lbl_push_failed':   _('Could not register this device for '
+                                   'notifications.'),
+            'lbl_ios_step1':     _('Tap the Share button at the bottom of Safari.'),
+            'lbl_ios_step2':     _('Scroll down and tap "Add to Home Screen".'),
+            'lbl_ios_step3':     _('Tap "Add" in the top right corner.'),
+        }
+
     def _cancel_policy_label(self):
         """The studio's cancellation rule, in her language, with the real N.
 
@@ -823,6 +852,7 @@ class FitnessStudentPortal(http.Controller):
             'student_name':        student_name,
             'booked':              bool(kw.get('booked')),
             'lbl_cancel_policy':   self._cancel_policy_label(),
+            **self._notif_labels(),
             'error_msg':           kw.get('error') or None,
             'type_has_img':        type_has_img,
             'cat_id':              cat_id,
@@ -1633,6 +1663,9 @@ class FitnessStudentPortal(http.Controller):
             # and a late cancellation spends the one free class she
             # gets - so the rule belongs here as much as anywhere.
             'lbl_cancel_policy':        self._cancel_policy_label(),
+            # The opt-in ask on this page's success states. Only a
+            # logged-in student reaches this route at all (auth='user').
+            **self._notif_labels(),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
             'lbl_price_free':           _('Free'),

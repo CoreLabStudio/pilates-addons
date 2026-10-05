@@ -765,36 +765,7 @@
                                  from the setting, never written here. -->
                             <p class="mv-cancel-policy"
                                t-out="lbl_cancel_policy"/>
-                            <!-- The high-intent moment: she has just said she
-                                 cares when this class happens, which is the
-                                 whole subject of a notification. Rendered only
-                                 after a confirmed booking, and still shipped
-                                 hidden - the browser decides, under the same
-                                 rules and the same shared counter as the card
-                                 on Home, so the two cannot add up to six asks
-                                 while each believes it made three. -->
-                            <div class="mv-install-card mv-pushcard" id="mv-notif-booked"
-                                 hidden="hidden" role="region"
-                                 aria-labelledby="mv-notif-booked-title"
-                                 t-att-data-msg-on="lbl_push_on"
-                                 t-att-data-msg-blocked="lbl_push_blocked"
-                                 t-att-data-msg-dismissed="lbl_push_dismissed"
-                                 t-att-data-msg-failed="lbl_push_failed">
-                                <div class="mv-install-text">
-                                    <span class="mv-install-title" id="mv-notif-booked-title"
-                                          t-out="lbl_notif_booked_title"/>
-                                    <span class="mv-install-sub" t-out="lbl_notif_booked_sub"/>
-                                </div>
-                                <div class="mv-install-actions">
-                                    <button type="button" class="mv-install-btn"
-                                            t-out="lbl_notif_cta"/>
-                                    <button type="button" class="mv-install-dismiss"
-                                            t-att-aria-label="lbl_notif_dismiss"
-                                            t-out="lbl_notif_dismiss"/>
-                                </div>
-                                <p class="mv-push-state" hidden="hidden"
-                                   role="status" aria-live="polite"/>
-                            </div>
+                            <t t-call="fitness_portal.mv_notif_moment_ask"/>
                         </t>
                         <t t-if="cancelled and credit_returned">
                             <div class="mv-flash mv-flash-ok"><strong>Booking cancelled.</strong> A credit has been returned to your pack.</div>
@@ -1042,6 +1013,7 @@
                     <!-- Flash banners -->
                     <t t-if="booked">
                         <div class="mv-flash mv-flash-ok"><strong>Booked!</strong> Your spot is confirmed. See you in class.</div>
+                        <t t-call="fitness_portal.mv_notif_moment_ask"/>
                             <!-- The rule, where she is told the
                                  booking happened. Same sentence as the
                                  confirmation email and the same source:
@@ -1603,12 +1575,14 @@
                             <strong t-out="lbl_cash_requested_head"/>
                             <span t-out="lbl_cash_requested"/>
                         </div>
+                        <t t-call="fitness_portal.mv_notif_moment_ask"/>
                     </div>
                 </t>
                 <t t-if="cash_pending">
                     <div class="mv-flashes">
                         <div class="mv-flash mv-flash-info"
                              t-out="lbl_cash_already"/>
+                        <t t-call="fitness_portal.mv_notif_moment_ask"/>
                     </div>
                 </t>
                 <t t-if="booked">
@@ -1616,6 +1590,7 @@
                         <div class="mv-flash mv-flash-ok">
                             <strong>Booked!</strong> Your free class is confirmed.
                         </div>
+                        <t t-call="fitness_portal.mv_notif_moment_ask"/>
                         <p class="mv-cancel-policy"
                            t-out="lbl_cancel_policy"/>
                     </div>
@@ -3506,6 +3481,36 @@
          take push at all: the iPhone-in-Safari body carries the three Add to
          Home Screen steps and NO permission button, since a button there
          could not work and would only teach her the app is broken. -->
+    <!-- The ask at a key moment: under the confirmation she came to read,
+         never on top of it. Ships hidden; the browser reveals it only when
+         push is supported, permission is undecided and this device has no
+         subscription. Rendered ONLY inside a success branch by every caller,
+         so a payment failure or an error flash never carries it. -->
+    <template id="mv_notif_moment_ask" name="CoreLab Notification Ask (key moment)">
+        <div class="mv-install-card mv-pushcard" id="mv-notif-booked"
+             hidden="hidden" role="region"
+             aria-labelledby="mv-notif-booked-title"
+             t-att-data-msg-on="lbl_push_on"
+             t-att-data-msg-blocked="lbl_push_blocked"
+             t-att-data-msg-dismissed="lbl_push_dismissed"
+             t-att-data-msg-failed="lbl_push_failed">
+            <div class="mv-install-text">
+                <span class="mv-install-title" id="mv-notif-booked-title"
+                      t-out="lbl_notif_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_sub"/>
+            </div>
+            <div class="mv-install-actions">
+                <button type="button" class="mv-install-btn"
+                        t-out="lbl_notif_cta"/>
+                <button type="button" class="mv-install-dismiss"
+                        t-att-aria-label="lbl_notif_dismiss"
+                        t-out="lbl_notif_dismiss"/>
+            </div>
+            <p class="mv-push-state" hidden="hidden"
+               role="status" aria-live="polite"/>
+        </div>
+    </template>
+
     <template id="mv_notif_dialog" name="CoreLab Notification Dialog">
         <div class="mv-ios-sheet mv-notif-dialog" id="mv-notif-dialog"
              hidden="hidden" role="dialog" aria-modal="true"
