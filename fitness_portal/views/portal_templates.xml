@@ -249,7 +249,14 @@
     <!-- Student bottom navigation — 4 tabs.
          Icons keep the 1.6 stroke / round-cap line style used elsewhere. -->
     <template id="mv_bottom_nav" name="CoreLab Bottom Nav">
-        <nav class="mv-bottom-nav" aria-label="Main navigation">
+        <!-- data-mv-uid is how the opt-in remembers things per
+             ACCOUNT as well as per device. Two logins on one phone -
+             a mother and a daughter, or the studio's own test
+             account - must not share whether the dialog has been
+             shown today. Put on the nav because every student page
+             renders it, rather than on twenty-two page templates. -->
+        <nav class="mv-bottom-nav" aria-label="Main navigation"
+             t-att-data-mv-uid="request.env.user.id">
             <!-- Home — house -->
             <a href="/my/home" class="mv-nav-tab">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
