@@ -182,9 +182,17 @@ class TestScheduleSafeguards(TransactionCase):
 
         # Exactly at the limit is still fine: the cron runs daily and running
         # late is not the same as having stopped.
+        #
+        # Asked about this schedule rather than about the whole database, the
+        # way test_a_healthy_studio_raises_nothing above already does. The
+        # global `reason` is truthy on any copy of the live studio - its
+        # seventy-five schedules are all stale, because the dump froze
+        # generated_until while _target_until() keeps moving - so asserting
+        # on it answered a question about somebody else's rows.
         sched.generated_until = sched._target_until() - timedelta(days=slack)
         stale, reason = Schedule._generation_health()
-        self.assertFalse(reason, "a schedule inside the slack window alerted")
+        self.assertNotIn(sched, stale,
+                         "a schedule inside the slack window alerted")
 
         # A day past it is the signal.
         sched.generated_until = sched._target_until() - timedelta(days=slack + 1)
@@ -211,6 +219,21 @@ class TestScheduleSafeguards(TransactionCase):
                          "a deliberately ended schedule was reported as stalled")
 
     def test_the_cron_runs_clean_when_all_is_well(self):
-        self._schedule()
-        self.assertTrue(
-            self.env["fitness.class.schedule"]._cron_check_generation_health())
+        sched = self._schedule()
+        # "When all is well" has to be made true before it is asserted. On a
+        # fresh install it already is; on a copy of the live studio every one
+        # of the seventy-five real schedules is stale, because the dump froze
+        # generated_until while _target_until() keeps moving with today.
+        #
+        # The cron then logs the stall at ERROR - correctly, that is what the
+        # level is for - and this test passes anyway, since it only asserts
+        # the cron returns something. But odoo.sh grades a build on ERROR
+        # lines, so a green test still painted the build red, for a condition
+        # that has nothing to do with the cron being wired up.
+        Schedule = self.env["fitness.class.schedule"]
+        others = Schedule.search([("active", "=", True),
+                                  ("recurrence_id", "!=", False),
+                                  ("id", "!=", sched.id)])
+        for rec in others:
+            rec.generated_until = rec._target_until()
+        self.assertTrue(Schedule._cron_check_generation_health())
