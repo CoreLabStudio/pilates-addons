@@ -108,6 +108,23 @@ class FitnessPushSubscription(models.Model):
             # A shared device handed to a different person re-subscribes with
             # the same endpoint. Reassigning is what stops the previous owner
             # receiving the new one's notifications.
+            #
+            # DELIBERATE, and knowingly a trade. The endpoint arrives from the
+            # browser while the user comes from the session, so an
+            # authenticated student who knew another student's endpoint could
+            # move that device onto her own account and silence the original
+            # owner. An endpoint is opaque and is never printed by anything
+            # here, but it is not a secret. Refusing the reassignment would
+            # close that and break the shared phone, which is a real thing a
+            # studio does; the decision was to keep it and make it visible.
+            #
+            # Hence the log line - ids only, never the endpoint, because a log
+            # that carried one would hand over the very capability the rest of
+            # this file is careful not to print.
+            if existing.user_id.id != user_id:
+                _logger.info(
+                    "[PUSH] device %s reassigned from user %s to user %s",
+                    existing.id, existing.user_id.id, user_id)
             existing.write(vals)
             return existing
         vals['endpoint'] = endpoint
