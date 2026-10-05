@@ -309,6 +309,55 @@ class FitnessStudentPortal(http.Controller):
             'lbl_timetable_cta':  _('View timetable'),
         })
 
+    def _recent_payment_state(self, partner):
+        """done, pending or failed, for a student just back from paying.
+
+        done ONLY when the money arrived AND the order was confirmed, which
+        is what actually puts the credit in her account. Production shows
+        why the two are separate questions: S00414 sat with a done
+        transaction against an unconfirmed order because Stripe's
+        notification never reached Odoo, and had to be settled by hand.
+        Telling her "payment received" at that moment would have been a
+        promise the account could not keep.
+
+        pending covers draft, pending and authorized:
+
+          draft       the transaction was started and Odoo has not heard
+                      back. NOT harmless - S00389 is a live order with two
+                      draft transactions and Stripe saying the money was
+                      taken. So draft is "we are checking", never "nothing
+                      happened".
+          pending     the provider has it and has not settled. Bizum sits
+                      here while the bank app is open.
+          authorized  Stripe's manual-capture state: the amount is reserved
+                      on her card and nothing has been taken. Only Stripe
+                      offers it here, and only when capture_manually is set;
+                      Bizum does not. The studio has to capture it, so from
+                      her side it is still in progress.
+
+        failed is only cancel and error - a provider saying outright that it
+        did not happen.
+        """
+        if not partner:
+            return None
+        window = fields.Datetime.now() - timedelta(minutes=30)
+        tx = request.env['payment.transaction'].sudo().search(
+            [('partner_id', '=', partner.id),
+             ('create_date', '>=', fields.Datetime.to_string(window))],
+            order='create_date desc', limit=1)
+        if not tx:
+            return None
+        if tx.state in ('cancel', 'error'):
+            return 'failed'
+        if tx.state == 'done' and tx.sale_order_ids and all(
+                o.state in ('sale', 'done') for o in tx.sale_order_ids):
+            return 'done'
+        # Everything else - draft, pending, authorized, and done against an
+        # order that has not confirmed - is still in progress. Erring this
+        # way keeps a promise we can keep instead of a confirmation we
+        # cannot.
+        return 'pending'
+
     def _notif_labels(self):
         """Every string the opt-in card, dialog and key-moment ask need.
 
@@ -1681,6 +1730,23 @@ class FitnessStudentPortal(http.Controller):
             'cash_requested':           bool(kw.get('cash_requested')),
             # She came back to a checkout she has already used.
             'cash_pending':             bool(kw.get('cash_pending')),
+            'payment_state':            (
+                self._recent_payment_state(partner)
+                if kw.get('from_payment') else None),
+            'lbl_paid_head':            _('Payment received.'),
+            'lbl_paid':                 _('Your classes are ready to book.'),
+            'lbl_paying_head':          _('Payment in progress.'),
+            'lbl_paying':               _('Your bank has not confirmed it yet. We will tell you as soon as it goes through - you do not need to pay again.'),
+            'lbl_pay_failed_head':      _('That payment was not completed.'),
+            # Deliberately NOT "nothing has been charged". Production has an
+            # order sitting on two draft transactions with Stripe saying the
+            # money was taken, so that sentence can be false at exactly the
+            # moment a student is reading it. This says what we know and
+            # gives her somewhere to go.
+            'lbl_pay_failed':           _('You can try again, or pay at the '
+                                          'studio. If you see a charge in '
+                                          'your bank, write to us and we will '
+                                          'sort it out.'),
             'lbl_cash_already':         _('You have already asked to pay for '
                                           'this at the studio. Come and pay '
                                           'and we will activate it.'),
@@ -2744,6 +2810,11 @@ class FitnessStudentPortal(http.Controller):
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_subscription', {
+            # Her weekly hour is now booked for the whole period -
+            # the last step of buying a fixed class, and a moment she
+            # will want telling about if any of it moves.
+            'slot_set':     bool(kw.get('slot_set')),
+            **self._notif_labels(),
             'sub_data':          sub_data,
             'has_sub':           bool(sub_data),
             'student_name':      full_name.split()[0] if full_name else '',
@@ -4350,7 +4421,11 @@ class FitnessPackagePayment(_OdooPaymentPortal):
             # payment.transaction.sale_order_ids is set automatically and
             # _post_process() can call order.action_confirm() on payment success.
             'transaction_route':    f'/my/orders/{order_id}/transaction',
-            'landing_route':        '/my/packages',
+            # Carries a marker so the landing page knows she has just
+            # come back from paying. Without it a card or Bizum return
+            # is indistinguishable from opening the shop, and she was
+            # shown no confirmation at all.
+            'landing_route':        '/my/packages?from_payment=1',
             'access_token':         access_token,
             'student_name':         full_name.split()[0] if full_name else '',
             'back_url':             (f'/my/packages/{product.id}/checkout'

@@ -6,3 +6,4 @@ from . import test_admin_actions_notify
 from . import test_push_registration
 from . import test_push_neutralized
 from . import test_booking_email_policy
+from . import test_purchase_notification_coverage

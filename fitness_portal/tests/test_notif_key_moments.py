@@ -99,3 +99,67 @@ class TestKeyMomentAsk(HttpCase):
         body = self._logged_out('/trial')
         self.assertNotIn(ASK, body,
                          "a logged-out visitor is being shown the ask")
+
+    # ── back from a card or Bizum payment ────────────────────────────────
+    def _a_transaction(self, state):
+        """One recent transaction for this student, in the given state."""
+        provider = self.env['payment.provider'].sudo().search([], limit=1)
+        method = (provider.payment_method_ids[:1]
+                  or self.env['payment.method'].sudo().search([], limit=1))
+        if not provider or not method:
+            self.skipTest("no payment provider on this database")
+        tx = self.env['payment.transaction'].sudo().create({
+            'provider_id': provider.id,
+            'payment_method_id': method.id,
+            'reference': 'MOMENT-%s' % state,
+            'amount': 12.0,
+            'currency_id': self.env.company.currency_id.id,
+            'partner_id': self.student.partner_id.id,
+        })
+        tx.sudo().write({'state': state})
+        return tx
+
+    def test_a_confirmed_payment_carries_the_ask(self):
+        self._a_transaction('done')
+        body = self._as_student('/my/packages?from_payment=1')
+        self.assertIn(ASK, body, "a paid return does not carry the ask")
+        self.assertIn('Payment received', body,
+                      "she is not told the payment landed")
+
+    def test_a_pending_payment_carries_the_ask(self):
+        """Bizum confirms out of band, so she is back in the shop before her
+        bank has answered. This is the state where being told she will be
+        notified is worth most, and it had no message at all."""
+        self._a_transaction('pending')
+        body = self._as_student('/my/packages?from_payment=1')
+        self.assertIn(ASK, body, "a pending return does not carry the ask")
+        self.assertIn('not confirmed it yet', body,
+                      "she is not told the payment is still in progress")
+
+    def test_a_failed_payment_carries_no_ask(self):
+        """Not a moment to ask her for anything."""
+        self._a_transaction('error')
+        body = self._as_student('/my/packages?from_payment=1')
+        self.assertNotIn(ASK, body, "the ask appeared after a failed payment")
+        self.assertIn('did not go through', body,
+                      "she is not told the payment failed")
+
+    def test_without_the_marker_an_old_payment_changes_nothing(self):
+        """An ordinary visit to the shop is not a confirmation, however
+        recently she paid."""
+        self._a_transaction('done')
+        body = self._as_student('/my/packages')
+        self.assertNotIn(ASK, body,
+                         "an ordinary shop visit is showing the ask")
+
+    # ── the fixed-slot picker, the last step of buying a fixed class ─────
+    def test_choosing_a_weekly_slot_carries_the_ask(self):
+        body = self._as_student('/my/subscription?slot_set=1')
+        self.assertIn(ASK, body,
+                      "the fixed-slot confirmation does not carry the ask")
+
+    def test_the_subscription_page_alone_does_not(self):
+        body = self._as_student('/my/subscription')
+        self.assertNotIn(ASK, body,
+                         "the subscription page carries the ask with nothing "
+                         "to confirm")
