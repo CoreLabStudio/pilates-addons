@@ -1018,19 +1018,81 @@
   }
 
   const NOTIF_DISMISSED = 'mv_notif_prompt_dismissed';
+  const NOTIF_SNOOZE = 'mv_notif_snooze';
+  // Ask again a week later, and three times in all. "Not now" used to write a
+  // flag with no expiry and no counter, so one tap retired the card on that
+  // device for good. Because the flag lives in localStorage and never reaches
+  // the server, nobody at the studio could see that it had happened, to how
+  // many people, or that those students were now unreachable by any later
+  // change to the card.
+  const SNOOZE_DAYS = 7;
+  const MAX_ASKS = 3;
+
+  // Shape: {until: epochMs, count: n}. Storage that cannot be read means
+  // "never asked", which is the right default - a private window should see
+  // the card, not be silently treated as having already refused.
+  function snoozeState() {
+    let raw = null;
+    try { raw = localStorage.getItem(NOTIF_SNOOZE); } catch (e) { return null; }
+    if (!raw) {
+      // Carried over from the permanent flag, counted as one refusal rather
+      // than wiped. Somebody who already said no is asked once more a week
+      // from now, instead of the instant this ships - and is not left
+      // permanently unreachable, which is what honouring the old flag
+      // forever would have meant.
+      let old = null;
+      try { old = localStorage.getItem(NOTIF_DISMISSED); } catch (e) { old = null; }
+      if (old === '1') {
+        const migrated = { until: Date.now() + SNOOZE_DAYS * 86400000, count: 1 };
+        try {
+          localStorage.setItem(NOTIF_SNOOZE, JSON.stringify(migrated));
+          localStorage.removeItem(NOTIF_DISMISSED);
+        } catch (e) { /* private mode: it simply asks again next load */ }
+        return migrated;
+      }
+      return { until: 0, count: 0 };
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      return {
+        until: Number(parsed && parsed.until) || 0,
+        count: Number(parsed && parsed.count) || 0,
+      };
+    } catch (e) {
+      // A corrupt value - a half-written entry, or an older shape. Treated as
+      // never asked rather than as a refusal the student cannot clear.
+      return { until: 0, count: 0 };
+    }
+  }
+
+  function snoozeAllowsAsking(state) {
+    if (!state) return true;
+    if (state.count >= MAX_ASKS) return false;
+    return Date.now() >= (state.until || 0);
+  }
+
+  function recordSnooze(state) {
+    const next = {
+      until: Date.now() + SNOOZE_DAYS * 86400000,
+      count: ((state && state.count) || 0) + 1,
+    };
+    try { localStorage.setItem(NOTIF_SNOOZE, JSON.stringify(next)); }
+    catch (e) { /* private mode */ }
+    return next;
+  }
 
   // The card on Home. Shown only to a browser that is not already subscribed,
-  // and only until it is either used or dismissed - a permission prompt that
-  // reappears on every visit is how a studio trains its students to ignore it.
+  // and only while the snooze allows it - a permission prompt that reappears
+  // on every visit is how a studio trains its students to ignore it.
   async function setupNotifPrompt(reg, alreadyOn) {
     const card = $('#mv-pushcard');
     if (!card) return;
     if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
-    let dismissed = false;
-    try { dismissed = localStorage.getItem(NOTIF_DISMISSED) === '1'; } catch (e) { /* private mode */ }
     // Denied cannot be undone from script - the browser will not ask twice -
     // so the card would be a button that does nothing.
-    if (dismissed || Notification.permission === 'denied') { card.hidden = true; return; }
+    if (Notification.permission === 'denied') { card.hidden = true; return; }
+    let snooze = snoozeState();
+    if (!snoozeAllowsAsking(snooze)) { card.hidden = true; return; }
 
     const note = $('#mv-pushcard-state');
     const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
@@ -1044,8 +1106,16 @@
           const perm = await Notification.requestPermission();
           if (perm === 'granted') {
             const ok = await subscribeToPush(reg);
-            if (ok) { card.hidden = true; }
-            else { say(card.dataset.msgFailed || ''); }
+            if (ok) {
+              // Confirmed rather than vanished. The card used to disappear on
+              // success, which reads the same as the button having failed
+              // silently - and a screen reader was told nothing at all. The
+              // actions go, the confirmation stays, and the card does not
+              // come back next load because permission is granted by then.
+              const actions = card.querySelector('.mv-install-actions');
+              if (actions) actions.hidden = true;
+              say(card.dataset.msgOn || '');
+            } else { say(card.dataset.msgFailed || ''); }
           } else if (perm === 'denied') {
             say(card.dataset.msgBlocked || '');
           } else {
@@ -1060,7 +1130,7 @@
     if (dismiss) {
       dismiss.addEventListener('click', () => {
         card.hidden = true;
-        try { localStorage.setItem(NOTIF_DISMISSED, '1'); } catch (err) { /* private mode */ }
+        snooze = recordSnooze(snooze);
       });
     }
   }

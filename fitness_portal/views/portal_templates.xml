@@ -3427,13 +3427,19 @@
          would be told nothing on the phone, which is backwards. So the check
          happens client-side, per browser. -->
     <template id="mv_notif_prompt" name="CoreLab Notification Prompt">
+        <!-- A labelled region, so the card is something a screen reader can
+             find and announce as a unit rather than two loose buttons in the
+             middle of Home. aria-labelledby points at the title that is
+             already on screen, so the label cannot drift from what is read. -->
         <div class="mv-install-card mv-pushcard" id="mv-pushcard" hidden="hidden"
+             role="region" aria-labelledby="mv-pushcard-title"
              t-att-data-msg-on="lbl_push_on"
              t-att-data-msg-blocked="lbl_push_blocked"
              t-att-data-msg-dismissed="lbl_push_dismissed"
              t-att-data-msg-failed="lbl_push_failed">
             <div class="mv-install-text">
-                <span class="mv-install-title" t-out="lbl_notif_title"/>
+                <span class="mv-install-title" id="mv-pushcard-title"
+                      t-out="lbl_notif_title"/>
                 <span class="mv-install-sub" t-out="lbl_notif_sub"/>
             </div>
             <div class="mv-install-actions">
@@ -3442,7 +3448,15 @@
                 <button type="button" class="mv-install-dismiss" id="mv-notif-dismiss"
                         t-att-aria-label="lbl_notif_dismiss" t-out="lbl_notif_dismiss"/>
             </div>
-            <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"/>
+            <!-- Every outcome of the tap is written here - granted, blocked,
+                 dismissed, failed - and until now it was announced to nobody.
+                 polite rather than assertive: it follows the student's own
+                 tap, so it never needs to interrupt what is being read.
+                 aria-live has to be on an element that is already in the DOM
+                 when the text changes, which is why the paragraph ships
+                 present-and-hidden rather than being created on demand. -->
+            <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"
+               role="status" aria-live="polite"/>
         </div>
     </template>
 
