@@ -1135,8 +1135,51 @@
     }
   }
 
+  const BLOCKED_SNOOZE = 'mv_notif_blocked_seen';
+  const BLOCKED_DAYS = 4;
+
+  // The help card for a phone that has already refused. Shown every few days
+  // rather than every visit: it is not an ask, it is a reminder, and a
+  // reminder on every single load is just noise with no button to stop it.
+  function showBlockedHint() {
+    const card = $('#mv-notif-blocked');
+    if (!card) return;
+    let until = 0;
+    try { until = Number(localStorage.getItem(BLOCKED_SNOOZE)) || 0; }
+    catch (e) { until = 0; }
+    if (Date.now() < until) return;
+    card.hidden = false;
+    const dismiss = $('#mv-notif-blocked-dismiss');
+    if (dismiss) {
+      dismiss.addEventListener('click', () => {
+        card.hidden = true;
+        try {
+          localStorage.setItem(BLOCKED_SNOOZE,
+                               String(Date.now() + BLOCKED_DAYS * 86400000));
+        } catch (e) { /* private mode */ }
+      });
+    }
+  }
+
+  // An iPhone that has not been installed cannot take push at all, so this
+  // is the only thing worth showing it. No snooze: it is three steps and no
+  // button, it disappears for good the moment the app is installed, and a
+  // student who has not installed yet is exactly who it is for.
+  function showIosNotifHint() {
+    const card = $('#mv-notif-ios');
+    if (card) card.hidden = false;
+  }
+
   async function setupPush(reg) {
-    if (!reg || !('PushManager' in window) || !('Notification' in window)) return;
+    if (!reg || !('PushManager' in window) || !('Notification' in window)) {
+      // The iPhone-in-Safari case, and by far the most common one here: 13
+      // of the studio's 15 registered devices are Apple. It used to fall out
+      // of this function silently, so the student with the likeliest device
+      // was told nothing - neither that notifications exist nor that
+      // installing is what unlocks them.
+      if (isIos() && !isStandalone()) showIosNotifHint();
+      return;
+    }
     const btn = $('#mv-push-enable');
 
     // Already granted: re-register quietly. The endpoint can change under us
@@ -1159,6 +1202,10 @@
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
       await setupNotifPrompt(reg, false);
+      // Nothing at all was shown here before: both the card and the button
+      // hide themselves, correctly refusing to draw a dead button, and the
+      // student was left with no notifications and no way to find out why.
+      showBlockedHint();
       return;
     }
     // Otherwise offer it, and only ask when they press the button. A prompt

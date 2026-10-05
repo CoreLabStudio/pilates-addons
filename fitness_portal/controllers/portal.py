@@ -266,6 +266,28 @@ class FitnessStudentPortal(http.Controller):
                                    'then reload this page.'),
             'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
             'lbl_push_failed':   _('Could not register this device for notifications.'),
+            # An iPhone in Safari cannot take notifications at all - not
+            # "badly", not "after a prompt": the browser has no PushManager
+            # outside an installed app, so there is no button we could draw
+            # that would do anything. It used to be shown nothing whatsoever,
+            # which is the worst of both: no notifications and no way to find
+            # out why. The three steps below are the ones already written for
+            # the install prompt, reused rather than reworded, so a student
+            # who meets both cards reads the same instructions twice.
+            'lbl_notif_ios_title': _('Turn on notifications'),
+            'lbl_notif_ios_sub':   _('On iPhone, notifications work once CoreLab '
+                                     'is on your Home Screen. It takes three taps:'),
+            # Blocked is a decision the browser will not let the page revisit,
+            # so this card deliberately carries no button: only the phone's
+            # own settings can undo it.
+            'lbl_notif_blocked_title': _('Notifications are turned off'),
+            'lbl_notif_blocked_sub':   _('You may miss a cancellation or a change '
+                                         'of time. To turn them back on:'),
+            'lbl_notif_blocked_ios':   _('iPhone: Settings, then CoreLab, '
+                                         'then Notifications, then Allow.'),
+            'lbl_notif_blocked_android': _('Android: press and hold the CoreLab '
+                                           'icon, tap App info, then '
+                                           'Notifications.'),
             'lbl_install_title':   _('Install CoreLab'),
             'lbl_install_sub':     _('Add it to your home screen for one-tap booking.'),
             'lbl_install_cta':     _('Install'),

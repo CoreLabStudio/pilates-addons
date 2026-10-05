@@ -4546,3 +4546,33 @@ msgstr "sin dirección de correo"
 #: code:addons/fitness_portal/models/sale_order.py:0
 msgid "not set"
 msgstr "sin definir"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "On iPhone, notifications work once CoreLab is on your Home Screen. It takes three taps:"
+msgstr "En iPhone, las notificaciones funcionan cuando CoreLab está en tu pantalla de inicio. Son tres pasos:"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Notifications are turned off"
+msgstr "Las notificaciones están desactivadas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You may miss a cancellation or a change of time. To turn them back on:"
+msgstr "Puedes perderte una cancelación o un cambio de hora. Para volver a activarlas:"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "iPhone: Settings, then CoreLab, then Notifications, then Allow."
+msgstr "iPhone: Ajustes, luego CoreLab, luego Notificaciones y Permitir."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Android: press and hold the CoreLab icon, tap App info, then Notifications."
+msgstr "Android: mantén pulsado el icono de CoreLab, toca Información de la app y luego Notificaciones."

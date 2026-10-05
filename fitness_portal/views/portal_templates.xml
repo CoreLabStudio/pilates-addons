@@ -3458,6 +3458,48 @@
             <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"
                role="status" aria-live="polite"/>
         </div>
+
+        <!-- iPhone in Safari, not installed. No permission button, because
+             there is no PushManager to subscribe with: tapping one would do
+             nothing at all and teach her the app is broken. Steps instead.
+             Shipped hidden beside the main card so Home has one include
+             point, and the browser - the only thing that knows which case
+             this device is - reveals exactly one of them. -->
+        <div class="mv-install-card mv-pushcard" id="mv-notif-ios" hidden="hidden"
+             role="region" aria-labelledby="mv-notif-ios-title">
+            <div class="mv-install-text">
+                <span class="mv-install-title" id="mv-notif-ios-title"
+                      t-out="lbl_notif_ios_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_ios_sub"/>
+            </div>
+            <ol class="mv-ios-steps">
+                <li t-out="lbl_ios_step1"/>
+                <li t-out="lbl_ios_step2"/>
+                <li t-out="lbl_ios_step3"/>
+            </ol>
+        </div>
+
+        <!-- Permission already refused. Carries no button on purpose: the
+             browser will not show the prompt a second time, so the only route
+             back is the phone's own settings. Both platforms are named
+             because the page cannot reliably tell which one is asking once
+             an iPad reports itself as a Mac. -->
+        <div class="mv-install-card mv-pushcard" id="mv-notif-blocked" hidden="hidden"
+             role="region" aria-labelledby="mv-notif-blocked-title">
+            <div class="mv-install-text">
+                <span class="mv-install-title" id="mv-notif-blocked-title"
+                      t-out="lbl_notif_blocked_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_blocked_sub"/>
+            </div>
+            <ul class="mv-ios-steps">
+                <li t-out="lbl_notif_blocked_ios"/>
+                <li t-out="lbl_notif_blocked_android"/>
+            </ul>
+            <div class="mv-install-actions">
+                <button type="button" class="mv-install-dismiss" id="mv-notif-blocked-dismiss"
+                        t-att-aria-label="lbl_notif_dismiss" t-out="lbl_notif_dismiss"/>
+            </div>
+        </div>
     </template>
 
     <template id="mv_install_prompt" name="CoreLab Install App Prompt">
