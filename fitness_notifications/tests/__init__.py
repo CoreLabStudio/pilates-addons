@@ -3,3 +3,6 @@ from . import test_notification_language
 from . import test_generation_alert
 from . import test_purchase_notification
 from . import test_admin_actions_notify
+from . import test_push_registration
+from . import test_push_neutralized
+from . import test_booking_email_policy

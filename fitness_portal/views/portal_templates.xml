@@ -745,6 +745,36 @@
                     <div class="mv-flashes">
                         <t t-if="booked">
                             <div class="mv-flash mv-flash-ok"><strong>Booked!</strong> Your spot is confirmed. See you in class.</div>
+                            <!-- The high-intent moment: she has just said she
+                                 cares when this class happens, which is the
+                                 whole subject of a notification. Rendered only
+                                 after a confirmed booking, and still shipped
+                                 hidden - the browser decides, under the same
+                                 rules and the same shared counter as the card
+                                 on Home, so the two cannot add up to six asks
+                                 while each believes it made three. -->
+                            <div class="mv-install-card mv-pushcard" id="mv-notif-booked"
+                                 hidden="hidden" role="region"
+                                 aria-labelledby="mv-notif-booked-title"
+                                 t-att-data-msg-on="lbl_push_on"
+                                 t-att-data-msg-blocked="lbl_push_blocked"
+                                 t-att-data-msg-dismissed="lbl_push_dismissed"
+                                 t-att-data-msg-failed="lbl_push_failed">
+                                <div class="mv-install-text">
+                                    <span class="mv-install-title" id="mv-notif-booked-title"
+                                          t-out="lbl_notif_booked_title"/>
+                                    <span class="mv-install-sub" t-out="lbl_notif_booked_sub"/>
+                                </div>
+                                <div class="mv-install-actions">
+                                    <button type="button" class="mv-install-btn"
+                                            t-out="lbl_notif_cta"/>
+                                    <button type="button" class="mv-install-dismiss"
+                                            t-att-aria-label="lbl_notif_dismiss"
+                                            t-out="lbl_notif_dismiss"/>
+                                </div>
+                                <p class="mv-push-state" hidden="hidden"
+                                   role="status" aria-live="polite"/>
+                            </div>
                         </t>
                         <t t-if="cancelled and credit_returned">
                             <div class="mv-flash mv-flash-ok"><strong>Booking cancelled.</strong> A credit has been returned to your pack.</div>
@@ -2317,11 +2347,22 @@
                                 t-att-data-msg-blocked="lbl_push_blocked"
                                 t-att-data-msg-dismissed="lbl_push_dismissed"
                                 t-att-data-msg-failed="lbl_push_failed">Turn on phone notifications</button>
+                        <!-- One line while push is off, revealed by the script
+                             because only the browser knows whether THIS device
+                             is subscribed. Deliberately not a card: the page is
+                             a list of what has already been sent, and a second
+                             opt-in box on top of it would be nagging someone
+                             who came here to read. -->
+                        <p class="mv-push-hint" id="mv-push-hint" hidden="hidden"
+                           t-out="lbl_push_off_hint"/>
                         <!-- Whatever the browser answered, in words. Tapping a
                              button that greys out and comes back with no prompt
                              and no message leaves no way to tell a refusal from
-                             a bug. -->
-                        <p class="mv-push-state" id="mv-push-state" hidden="hidden"/>
+                             a bug. Announced as well as drawn: the whole point
+                             of the sentence is that the tap produced no visible
+                             prompt, which a screen reader had no way to learn. -->
+                        <p class="mv-push-state" id="mv-push-state" hidden="hidden"
+                           role="status" aria-live="polite"/>
                     </div>
                     <t t-if="unread">
                         <form method="post" action="/my/notifications/read-all" style="margin:0;">
@@ -3427,13 +3468,19 @@
          would be told nothing on the phone, which is backwards. So the check
          happens client-side, per browser. -->
     <template id="mv_notif_prompt" name="CoreLab Notification Prompt">
+        <!-- A labelled region, so the card is something a screen reader can
+             find and announce as a unit rather than two loose buttons in the
+             middle of Home. aria-labelledby points at the title that is
+             already on screen, so the label cannot drift from what is read. -->
         <div class="mv-install-card mv-pushcard" id="mv-pushcard" hidden="hidden"
+             role="region" aria-labelledby="mv-pushcard-title"
              t-att-data-msg-on="lbl_push_on"
              t-att-data-msg-blocked="lbl_push_blocked"
              t-att-data-msg-dismissed="lbl_push_dismissed"
              t-att-data-msg-failed="lbl_push_failed">
             <div class="mv-install-text">
-                <span class="mv-install-title" t-out="lbl_notif_title"/>
+                <span class="mv-install-title" id="mv-pushcard-title"
+                      t-out="lbl_notif_title"/>
                 <span class="mv-install-sub" t-out="lbl_notif_sub"/>
             </div>
             <div class="mv-install-actions">
@@ -3442,7 +3489,57 @@
                 <button type="button" class="mv-install-dismiss" id="mv-notif-dismiss"
                         t-att-aria-label="lbl_notif_dismiss" t-out="lbl_notif_dismiss"/>
             </div>
-            <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"/>
+            <!-- Every outcome of the tap is written here - granted, blocked,
+                 dismissed, failed - and until now it was announced to nobody.
+                 polite rather than assertive: it follows the student's own
+                 tap, so it never needs to interrupt what is being read.
+                 aria-live has to be on an element that is already in the DOM
+                 when the text changes, which is why the paragraph ships
+                 present-and-hidden rather than being created on demand. -->
+            <p class="mv-push-state" id="mv-pushcard-state" hidden="hidden"
+               role="status" aria-live="polite"/>
+        </div>
+
+        <!-- iPhone in Safari, not installed. No permission button, because
+             there is no PushManager to subscribe with: tapping one would do
+             nothing at all and teach her the app is broken. Steps instead.
+             Shipped hidden beside the main card so Home has one include
+             point, and the browser - the only thing that knows which case
+             this device is - reveals exactly one of them. -->
+        <div class="mv-install-card mv-pushcard" id="mv-notif-ios" hidden="hidden"
+             role="region" aria-labelledby="mv-notif-ios-title">
+            <div class="mv-install-text">
+                <span class="mv-install-title" id="mv-notif-ios-title"
+                      t-out="lbl_notif_ios_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_ios_sub"/>
+            </div>
+            <ol class="mv-ios-steps">
+                <li t-out="lbl_ios_step1"/>
+                <li t-out="lbl_ios_step2"/>
+                <li t-out="lbl_ios_step3"/>
+            </ol>
+        </div>
+
+        <!-- Permission already refused. Carries no button on purpose: the
+             browser will not show the prompt a second time, so the only route
+             back is the phone's own settings. Both platforms are named
+             because the page cannot reliably tell which one is asking once
+             an iPad reports itself as a Mac. -->
+        <div class="mv-install-card mv-pushcard" id="mv-notif-blocked" hidden="hidden"
+             role="region" aria-labelledby="mv-notif-blocked-title">
+            <div class="mv-install-text">
+                <span class="mv-install-title" id="mv-notif-blocked-title"
+                      t-out="lbl_notif_blocked_title"/>
+                <span class="mv-install-sub" t-out="lbl_notif_blocked_sub"/>
+            </div>
+            <ul class="mv-ios-steps">
+                <li t-out="lbl_notif_blocked_ios"/>
+                <li t-out="lbl_notif_blocked_android"/>
+            </ul>
+            <div class="mv-install-actions">
+                <button type="button" class="mv-install-dismiss" id="mv-notif-blocked-dismiss"
+                        t-att-aria-label="lbl_notif_dismiss" t-out="lbl_notif_dismiss"/>
+            </div>
         </div>
     </template>
 

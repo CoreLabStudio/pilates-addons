@@ -4545,3 +4545,51 @@ msgstr "sense adreça de correu"
 #: code:addons/fitness_portal/models/sale_order.py:0
 msgid "not set"
 msgstr "sense definir"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "On iPhone, notifications work once CoreLab is on your Home Screen. It takes three taps:"
+msgstr "A l'iPhone, les notificacions funcionen quan CoreLab és a la pantalla d'inici. Són tres passos:"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Notifications are turned off"
+msgstr "Les notificacions estan desactivades"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You may miss a cancellation or a change of time. To turn them back on:"
+msgstr "Pots perdre't una cancel·lació o un canvi d'hora. Per tornar a activar-les:"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "iPhone: Settings, then CoreLab, then Notifications, then Allow."
+msgstr "iPhone: Configuració, després CoreLab, després Notificacions i Permet."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Android: press and hold the CoreLab icon, tap App info, then Notifications."
+msgstr "Android: mantén premuda la icona de CoreLab, toca Informació de l'app i després Notificacions."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Notifications are off - you may miss a class change."
+msgstr "Les notificacions estan desactivades: pots perdre't un canvi de classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Want a reminder before this class?"
+msgstr "Vols un avís abans d'aquesta classe?"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "We'll tell you if the time changes or the class is cancelled."
+msgstr "T'avisem si canvia l'hora o si es cancel·la la classe."

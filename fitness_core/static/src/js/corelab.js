@@ -1018,25 +1018,93 @@
   }
 
   const NOTIF_DISMISSED = 'mv_notif_prompt_dismissed';
+  const NOTIF_SNOOZE = 'mv_notif_snooze';
+  // Ask again a week later, and three times in all. "Not now" used to write a
+  // flag with no expiry and no counter, so one tap retired the card on that
+  // device for good. Because the flag lives in localStorage and never reaches
+  // the server, nobody at the studio could see that it had happened, to how
+  // many people, or that those students were now unreachable by any later
+  // change to the card.
+  const SNOOZE_DAYS = 7;
+  const MAX_ASKS = 3;
 
-  // The card on Home. Shown only to a browser that is not already subscribed,
-  // and only until it is either used or dismissed - a permission prompt that
-  // reappears on every visit is how a studio trains its students to ignore it.
-  async function setupNotifPrompt(reg, alreadyOn) {
-    const card = $('#mv-pushcard');
+  // Shape: {until: epochMs, count: n}. Storage that cannot be read means
+  // "never asked", which is the right default - a private window should see
+  // the card, not be silently treated as having already refused.
+  function snoozeState() {
+    let raw = null;
+    try { raw = localStorage.getItem(NOTIF_SNOOZE); } catch (e) { return null; }
+    if (!raw) {
+      // Carried over from the permanent flag, counted as one refusal rather
+      // than wiped. Somebody who already said no is asked once more a week
+      // from now, instead of the instant this ships - and is not left
+      // permanently unreachable, which is what honouring the old flag
+      // forever would have meant.
+      let old = null;
+      try { old = localStorage.getItem(NOTIF_DISMISSED); } catch (e) { old = null; }
+      if (old === '1') {
+        const migrated = { until: Date.now() + SNOOZE_DAYS * 86400000, count: 1 };
+        try {
+          localStorage.setItem(NOTIF_SNOOZE, JSON.stringify(migrated));
+          localStorage.removeItem(NOTIF_DISMISSED);
+        } catch (e) { /* private mode: it simply asks again next load */ }
+        return migrated;
+      }
+      return { until: 0, count: 0 };
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      return {
+        until: Number(parsed && parsed.until) || 0,
+        count: Number(parsed && parsed.count) || 0,
+      };
+    } catch (e) {
+      // A corrupt value - a half-written entry, or an older shape. Treated as
+      // never asked rather than as a refusal the student cannot clear.
+      return { until: 0, count: 0 };
+    }
+  }
+
+  function snoozeAllowsAsking(state) {
+    if (!state) return true;
+    if (state.count >= MAX_ASKS) return false;
+    return Date.now() >= (state.until || 0);
+  }
+
+  function recordSnooze(state) {
+    const next = {
+      until: Date.now() + SNOOZE_DAYS * 86400000,
+      count: ((state && state.count) || 0) + 1,
+    };
+    try { localStorage.setItem(NOTIF_SNOOZE, JSON.stringify(next)); }
+    catch (e) { /* private mode */ }
+    return next;
+  }
+
+  // One opt-in card, wherever it is standing. Shown only to a browser that is
+  // not already subscribed, and only while the snooze allows it - a permission
+  // prompt that reappears on every visit is how a studio trains its students
+  // to ignore it.
+  //
+  // Takes the card rather than looking one up, because there are now two of
+  // them: the quiet one on Home, and the one offered straight after a booking
+  // is confirmed. They share the snooze deliberately - they are the same ask
+  // in two places, and counting them separately would be how somebody gets
+  // asked six times while each card believes it asked three.
+  async function setupNotifPrompt(reg, alreadyOn, card) {
     if (!card) return;
     if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
-    let dismissed = false;
-    try { dismissed = localStorage.getItem(NOTIF_DISMISSED) === '1'; } catch (e) { /* private mode */ }
     // Denied cannot be undone from script - the browser will not ask twice -
     // so the card would be a button that does nothing.
-    if (dismissed || Notification.permission === 'denied') { card.hidden = true; return; }
+    if (Notification.permission === 'denied') { card.hidden = true; return; }
+    let snooze = snoozeState();
+    if (!snoozeAllowsAsking(snooze)) { card.hidden = true; return; }
 
-    const note = $('#mv-pushcard-state');
+    const note = card.querySelector('.mv-push-state');
     const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
     card.hidden = false;
 
-    const enable = $('#mv-notif-enable');
+    const enable = card.querySelector('.mv-install-btn');
     if (enable) {
       enable.addEventListener('click', async () => {
         enable.disabled = true;
@@ -1044,8 +1112,16 @@
           const perm = await Notification.requestPermission();
           if (perm === 'granted') {
             const ok = await subscribeToPush(reg);
-            if (ok) { card.hidden = true; }
-            else { say(card.dataset.msgFailed || ''); }
+            if (ok) {
+              // Confirmed rather than vanished. The card used to disappear on
+              // success, which reads the same as the button having failed
+              // silently - and a screen reader was told nothing at all. The
+              // actions go, the confirmation stays, and the card does not
+              // come back next load because permission is granted by then.
+              const actions = card.querySelector('.mv-install-actions');
+              if (actions) actions.hidden = true;
+              say(card.dataset.msgOn || '');
+            } else { say(card.dataset.msgFailed || ''); }
           } else if (perm === 'denied') {
             say(card.dataset.msgBlocked || '');
           } else {
@@ -1056,17 +1132,70 @@
         } finally { enable.disabled = false; }
       });
     }
-    const dismiss = $('#mv-notif-dismiss');
+    const dismiss = card.querySelector('.mv-install-dismiss');
     if (dismiss) {
       dismiss.addEventListener('click', () => {
         card.hidden = true;
-        try { localStorage.setItem(NOTIF_DISMISSED, '1'); } catch (err) { /* private mode */ }
+        snooze = recordSnooze(snooze);
       });
     }
   }
 
+  const BLOCKED_SNOOZE = 'mv_notif_blocked_seen';
+  const BLOCKED_DAYS = 4;
+
+  // The help card for a phone that has already refused. Shown every few days
+  // rather than every visit: it is not an ask, it is a reminder, and a
+  // reminder on every single load is just noise with no button to stop it.
+  function showBlockedHint() {
+    const card = $('#mv-notif-blocked');
+    if (!card) return;
+    let until = 0;
+    try { until = Number(localStorage.getItem(BLOCKED_SNOOZE)) || 0; }
+    catch (e) { until = 0; }
+    if (Date.now() < until) return;
+    card.hidden = false;
+    const dismiss = $('#mv-notif-blocked-dismiss');
+    if (dismiss) {
+      dismiss.addEventListener('click', () => {
+        card.hidden = true;
+        try {
+          localStorage.setItem(BLOCKED_SNOOZE,
+                               String(Date.now() + BLOCKED_DAYS * 86400000));
+        } catch (e) { /* private mode */ }
+      });
+    }
+  }
+
+  // An iPhone that has not been installed cannot take push at all, so this
+  // is the only thing worth showing it. No snooze: it is three steps and no
+  // button, it disappears for good the moment the app is installed, and a
+  // student who has not installed yet is exactly who it is for.
+  function showIosNotifHint() {
+    const card = $('#mv-notif-ios');
+    if (card) card.hidden = false;
+  }
+
+  // The one-line note on the Notifications page. Off is every state that is
+  // not a live subscription - undecided, refused, or a browser that cannot
+  // take push at all - because from the student's side they are the same
+  // fact: the next cancellation will not reach this phone.
+  function setPushHint(on) {
+    const hint = $('#mv-push-hint');
+    if (hint) hint.hidden = !!on;
+  }
+
   async function setupPush(reg) {
-    if (!reg || !('PushManager' in window) || !('Notification' in window)) return;
+    if (!reg || !('PushManager' in window) || !('Notification' in window)) {
+      // The iPhone-in-Safari case, and by far the most common one here: 13
+      // of the studio's 15 registered devices are Apple. It used to fall out
+      // of this function silently, so the student with the likeliest device
+      // was told nothing - neither that notifications exist nor that
+      // installing is what unlocks them.
+      if (isIos() && !isStandalone()) showIosNotifHint();
+      setPushHint(false);
+      return;
+    }
     const btn = $('#mv-push-enable');
 
     // Already granted: re-register quietly. The endpoint can change under us
@@ -1081,21 +1210,31 @@
         note.textContent = btn ? (btn.dataset.msgOn || '') : '';
         note.hidden = !note.textContent;
       }
-      await setupNotifPrompt(reg, ok);
+      setPushHint(ok);
+      await setupNotifPrompt(reg, ok, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, ok, $('#mv-notif-booked'));
       return;
     }
     // Denied is the user's decision and asking again is not possible from
     // script - the browser will not show the prompt twice.
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
-      await setupNotifPrompt(reg, false);
+      setPushHint(false);
+      await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
+      // Nothing at all was shown here before: both the card and the button
+      // hide themselves, correctly refusing to draw a dead button, and the
+      // student was left with no notifications and no way to find out why.
+      showBlockedHint();
       return;
     }
     // Otherwise offer it, and only ask when they press the button. A prompt
     // fired on page load is the fastest way to get permission denied
     // permanently, and on iOS it is ignored entirely unless it follows a
     // real gesture.
-    await setupNotifPrompt(reg, false);
+    setPushHint(false);
+    await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+    await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
     if (!btn) return;
     btn.hidden = false;
     btn.addEventListener('click', async () => {
@@ -1111,6 +1250,7 @@
           const ok = await subscribeToPush(reg);
           if (ok) {
             btn.hidden = true;
+            setPushHint(true);
             say(btn.dataset.msgOn || 'Notifications are on.', 'on');
           } else {
             // Permission is granted but the browser would not hand us a

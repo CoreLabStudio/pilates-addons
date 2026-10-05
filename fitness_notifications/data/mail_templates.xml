@@ -37,6 +37,7 @@
         <p>Classes used this period: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
+    <p style="color:#2E2724;">You can cancel up to <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts and keep your credit. Inside that window the credit is used.</p>
     <p>See you soon!</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
@@ -59,6 +60,7 @@
         <p>Classes utilitzades aquest període: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
+    <p style="color:#2E2724;">Pots cancel·lar fins a <t t-out="object._format_window(object._cancellation_window_hours())"/> hores abans de l'inici de la classe i recuperar el teu crèdit. Dins d'aquest termini el crèdit es consumeix.</p>
     <p>Ens veiem aviat!</p>
   </t>
   <t t-else="">
@@ -81,6 +83,7 @@
         <p>Clases usadas este periodo: <strong style="color:#50423D;" t-out="object.subscription_id.fitness_subscription_used_classes"/>/<strong style="color:#50423D;" t-out="object.subscription_id.fitness_monthly_class_allowance"/></p>
       </t>
     </t>
+    <p style="color:#2E2724;">Puedes cancelar hasta <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase y recuperar tu crédito. Dentro de ese plazo el crédito se consume.</p>
     <p>¡Nos vemos pronto!</p>
   </t>
   <t t-set="notice_lang" t-value="object.student_id.lang"/>

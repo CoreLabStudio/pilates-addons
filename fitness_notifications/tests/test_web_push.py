@@ -92,6 +92,16 @@ class TestPushSubscriptions(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # These assert that a push IS sent. A database restored from a
+        # neutralized dump - every odoo.sh staging build, and the local
+        # restore shape - carries database.is_neutralized, and the guard
+        # in _notify_user then correctly suppresses the send. Saying so
+        # here makes the precondition explicit rather than leaving these
+        # to depend on which database they happen to run against.
+        cls.env['ir.config_parameter'].sudo().set_param(
+            'database.is_neutralized', 'False')
+        cls.env.registry.clear_cache()
+        cls.addClassCleanup(cls.env.registry.clear_cache)
         cls.student = cls.env['res.users'].create({
             'name': 'Push Student', 'login': 'push.student@example.invalid',
         })
