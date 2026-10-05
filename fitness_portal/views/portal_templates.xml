@@ -417,6 +417,12 @@
                      CTAs, so it never gets in the way of what someone opened
                      the app to do. -->
                 <t t-call="fitness_portal.mv_notif_prompt"/>
+                <!-- The dialog ships beside the card on Home. The card
+                     stands on every visit; the dialog opens on the
+                     first view of a login and once per local day, and
+                     the browser decides which, because only it knows
+                     what this device has already been asked. -->
+                <t t-call="fitness_portal.mv_notif_dialog"/>
 
                 <t t-if="has_any_bookings">
                 <!-- Two quick stats. Both are tappable. -->
@@ -3490,6 +3496,56 @@
          missing - someone with a laptop registered and a phone that is not
          would be told nothing on the phone, which is backwards. So the check
          happens client-side, per browser. -->
+    <!-- The once-a-day ask. A dialog rather than a card because the studio
+         wants it noticed, and a card she can scroll past is not noticed -
+         but it closes on Escape, on the X, and on the backdrop, and it never
+         appears twice in one page view.
+
+         Three bodies, one shell. Which one the student sees is decided in
+         the browser, because only the browser knows whether this device can
+         take push at all: the iPhone-in-Safari body carries the three Add to
+         Home Screen steps and NO permission button, since a button there
+         could not work and would only teach her the app is broken. -->
+    <template id="mv_notif_dialog" name="CoreLab Notification Dialog">
+        <div class="mv-ios-sheet mv-notif-dialog" id="mv-notif-dialog"
+             hidden="hidden" role="dialog" aria-modal="true"
+             aria-labelledby="mv-notif-dialog-title"
+             t-att-data-msg-on="lbl_push_on"
+             t-att-data-msg-blocked="lbl_push_blocked"
+             t-att-data-msg-dismissed="lbl_push_dismissed"
+             t-att-data-msg-failed="lbl_push_failed">
+            <div class="mv-ios-panel">
+                <div class="mv-ios-head">
+                    <span class="mv-ios-title" id="mv-notif-dialog-title"
+                          t-out="lbl_notif_title"/>
+                    <button type="button" class="mv-ios-close"
+                            id="mv-notif-dialog-close"
+                            t-att-aria-label="lbl_notif_close">&#215;</button>
+                </div>
+                <p class="mv-confirm-body" t-out="lbl_notif_sub"/>
+
+                <!-- Shown on an iPhone that is not installed. -->
+                <ol class="mv-ios-steps" id="mv-notif-dialog-steps" hidden="hidden">
+                    <li t-out="lbl_ios_step1"/>
+                    <li t-out="lbl_ios_step2"/>
+                    <li t-out="lbl_ios_step3"/>
+                </ol>
+
+                <div class="mv-install-actions" id="mv-notif-dialog-actions">
+                    <button type="button" class="mv-install-btn"
+                            t-out="lbl_notif_cta"/>
+                    <button type="button" class="mv-install-dismiss"
+                            t-att-aria-label="lbl_notif_dismiss"
+                            t-out="lbl_notif_dismiss"/>
+                </div>
+                <!-- Announced as well as drawn: the whole point of this line
+                     is to explain a tap that produced no visible prompt. -->
+                <p class="mv-push-state" hidden="hidden"
+                   role="status" aria-live="polite"/>
+            </div>
+        </div>
+    </template>
+
     <template id="mv_notif_prompt" name="CoreLab Notification Prompt">
         <!-- A labelled region, so the card is something a screen reader can
              find and announce as a unit rather than two loose buttons in the

@@ -1086,6 +1086,128 @@
     writeKey(NOTIF_FIRST_OPEN, '1');
   }
 
+  // Only one dialog per page view, whatever asks for it. Two at once is
+  // the thing that makes an app feel like it is shouting.
+  let dialogOpenedThisView = false;
+
+  // Pages where the ask would land on top of something she is in the middle
+  // of. She gets it on the next Home view instead, which costs her nothing
+  // and costs us one day at most.
+  function isSensitivePage() {
+    const p = window.location.pathname.replace(
+      /^\/(?:es|ca|en)(?:_[A-Z]{2})?(?=\/)/, '');
+    return /^\/my\/(checkout|packages\/\d+\/checkout)|^\/payment\//.test(p)
+      || !!document.querySelector('form[data-mv-payment]');
+  }
+
+  /* Opens the once-a-day dialog. Returns true if it actually opened.
+
+     Everything about WHICH body is shown is decided here rather than on the
+     server: only the browser knows whether this device has a PushManager,
+     what permission says, and whether she is already subscribed. */
+  async function openNotifDialog(reg, opts) {
+    const dlg = $('#mv-notif-dialog');
+    if (!dlg || dialogOpenedThisView) return false;
+
+    const supported = ('PushManager' in window) && ('Notification' in window);
+    const iosNotInstalled = isIos() && !isStandalone();
+    // Blocked is the help card's business, not the dialog's: the browser
+    // will not show its prompt a second time, so a dialog here would be a
+    // button that does nothing.
+    if (supported && Notification.permission !== 'default') return false;
+    if (!supported && !iosNotInstalled) return false;
+
+    const steps = $('#mv-notif-dialog-steps');
+    const actions = $('#mv-notif-dialog-actions');
+    if (!supported) {
+      // iPhone in Safari: the three taps, and no permission button.
+      if (steps) steps.hidden = false;
+      if (actions) actions.hidden = true;
+    } else {
+      if (steps) steps.hidden = true;
+      if (actions) actions.hidden = false;
+    }
+
+    const note = dlg.querySelector('.mv-push-state');
+    const say = (msg) => {
+      if (note) { note.textContent = msg; note.hidden = !msg; }
+    };
+
+    const opener = document.activeElement;
+    dlg.hidden = false;
+    dialogOpenedThisView = true;
+    markDialogShownToday();
+
+    const close = () => {
+      dlg.hidden = true;
+      document.removeEventListener('keydown', onKey);
+      // Focus goes back where she was, not to the top of the page.
+      try { if (opener && opener.focus) opener.focus(); } catch (e) { /* gone */ }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+
+    const closeBtn = $('#mv-notif-dialog-close');
+    if (closeBtn) closeBtn.addEventListener('click', close, { once: true });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
+
+    const dismiss = actions && actions.querySelector('.mv-install-dismiss');
+    if (dismiss) dismiss.addEventListener('click', close, { once: true });
+
+    const enable = actions && actions.querySelector('.mv-install-btn');
+    if (enable) {
+      enable.addEventListener('click', async () => {
+        enable.disabled = true;
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            const ok = await subscribeToPush(reg);
+            if (ok) { say(dlg.dataset.msgOn || ''); setPushHint(true);
+                      setTimeout(close, 1200); }
+            else { say(dlg.dataset.msgFailed || ''); }
+          } else if (perm === 'denied') {
+            say(dlg.dataset.msgBlocked || '');
+          } else {
+            // She closed the browser's own prompt without choosing. Treated
+            // as Not now for today. Chrome may decide on its own to stop
+            // showing that prompt after several of these, which is its
+            // behaviour and not something this code can prevent.
+            say(dlg.dataset.msgDismissed || '');
+          }
+        } catch (e) {
+          say((dlg.dataset.msgFailed || '') +
+              ' (' + (e && e.name ? e.name : 'error') + ')');
+        } finally { enable.disabled = false; }
+      });
+    }
+
+    // Focus the first thing she can act on, so a keyboard or a screen
+    // reader lands inside the dialog rather than behind it. Deliberately
+    // NOT a focus trap: in the installed iOS app a trap can leave her
+    // unable to reach the browser chrome at all.
+    const first = (actions && !actions.hidden && enable) ? enable : closeBtn;
+    try { if (first) first.focus(); } catch (e) { /* not focusable yet */ }
+    return true;
+  }
+
+  /* The two reasons to open it: the first portal view of a login, and the
+     first Home view of a local day. Both are suppressed on pages where she
+     is in the middle of paying or filling a form - she gets it on the next
+     Home view instead. */
+  async function maybeOpenDailyDialog(reg) {
+    if (isSensitivePage()) return false;
+    const onHome = /\/my\/home\/?$/.test(
+      window.location.pathname.replace(
+        /^\/(?:es|ca|en)(?:_[A-Z]{2})?(?=\/)/, ''));
+    const firstOpen = isFirstOpenOfThisLogin();
+    if (!firstOpen && !(onHome && dialogAllowedToday())) return false;
+    const opened = await openNotifDialog(reg, {});
+    // Marked whether or not it opened: a login whose first page could not
+    // show it has had its first open, and the daily rule takes over.
+    markFirstOpenSeen();
+    return opened;
+  }
+
   // One opt-in card, wherever it is standing. Shown only to a browser that is
   // not already subscribed, and only while the snooze allows it - a permission
   // prompt that reappears on every visit is how a studio trains its students
@@ -1200,7 +1322,10 @@
       // of this function silently, so the student with the likeliest device
       // was told nothing - neither that notifications exist nor that
       // installing is what unlocks them.
-      if (isIos() && !isStandalone()) showIosNotifHint();
+      if (isIos() && !isStandalone()) {
+        showIosNotifHint();
+        await maybeOpenDailyDialog(reg);
+      }
       setPushHint(false);
       return;
     }
@@ -1243,6 +1368,7 @@
     setPushHint(false);
     await setupNotifPrompt(reg, false, $('#mv-pushcard'));
     await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
+    await maybeOpenDailyDialog(reg);
     if (!btn) return;
     btn.hidden = false;
     btn.addEventListener('click', async () => {

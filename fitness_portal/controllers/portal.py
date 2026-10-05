@@ -260,6 +260,7 @@ class FitnessStudentPortal(http.Controller):
                                    'or your booking is confirmed.'),
             'lbl_notif_cta':     _('Turn on'),
             'lbl_notif_dismiss': _('Not now'),
+            'lbl_notif_close':   _('Close'),
             'lbl_push_on':       _('Notifications are on for this device.'),
             'lbl_push_blocked':  _('Your phone is blocking notifications for this app. '
                                    'Turn them on in your phone settings for CoreLab, '
