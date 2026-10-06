@@ -34,6 +34,19 @@ CAL_WINDOW_DAYS = 120
 STUDIO_TZ = 'Europe/Madrid'
 
 
+def _madrid_midnight_utc(local_date, tz):
+    """Midnight of a studio calendar date, as naive UTC.
+
+    Localise FIRST, then convert. Adding timedelta(days=1) to a UTC
+    instant is not the same as the next local midnight: on 25 October
+    the Madrid day is 25 hours long and on 29 March it is 23, so a
+    +1 day bound drops the last hour of one and overruns the other. A
+    class at 23:30 on 25 October would simply not be on her page.
+    """
+    naive = _dt_cls.combine(local_date, _dt_cls.min.time())
+    return tz.localize(naive).astimezone(pytz.UTC).replace(tzinfo=None)
+
+
 def _studio_tz():
     try:
         return pytz.timezone(STUDIO_TZ)
@@ -147,8 +160,12 @@ class FitnessTeacherSwapPortal(http.Controller):
 
         # Timezone-aware day boundaries for today/week filters
         now_local = pytz.UTC.localize(now).astimezone(user_tz)
-        today_start_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_utc = today_start_local.astimezone(pytz.UTC).replace(tzinfo=None)
+        today_local = now_local.date()
+        today_start_utc = _madrid_midnight_utc(today_local, user_tz)
+        tomorrow_start_utc = _madrid_midnight_utc(
+            today_local + timedelta(days=1), user_tz)
+        week_end_utc = _madrid_midnight_utc(
+            today_local + timedelta(days=7), user_tz)
 
         if filter not in ('today', 'week', 'all'):
             filter = 'all'
@@ -168,15 +185,26 @@ class FitnessTeacherSwapPortal(http.Controller):
         if filter == 'today':
             domain += [
                 ('start', '>=', today_start_utc),
-                ('start', '<',  today_start_utc + timedelta(days=1)),
+                ('start', '<',  tomorrow_start_utc),
             ]
         elif filter == 'week':
             domain += [
                 ('start', '>=', today_start_utc),
-                ('start', '<',  today_start_utc + timedelta(days=7)),
+                ('start', '<',  week_end_utc),
             ]
         else:
-            domain += [('start', '>=', now)]
+            # From the START OF TODAY, not from this moment.
+            #
+            # This was start >= now, so a class left her page the instant
+            # it began. An instructor checking at 10:05 what she was
+            # teaching at 10:00 saw nothing, and the morning message that
+            # told her about it would have linked to a list the class had
+            # already fallen off. A class she is teaching right now is the
+            # one she is most likely to be looking for.
+            #
+            # Yesterday and earlier stay in History, which is what that
+            # page is for.
+            domain += [('start', '>=', today_start_utc)]
 
         events = request.env['calendar.event'].search(domain, order='start asc')
 
