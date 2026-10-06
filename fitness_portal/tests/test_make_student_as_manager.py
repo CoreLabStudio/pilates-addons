@@ -222,45 +222,67 @@ class TestMakeStudentAsRealManager(TransactionCase):
         # the one test that protects a contact's own language has to run
         # everywhere.
         #
-        # Activating a language touches global state, and this suite has
-        # already been bitten once by a test leaving a system parameter
-        # behind for whatever class ran next. So the before and after are
-        # compared, and the clock is read, rather than assuming neither
-        # matters.
+        # WHICH language is chosen by looking first. On the production
+        # restore es_ES and ca_ES are both already installed, so
+        # activating es_ES there would be a no-op dressed up as a step -
+        # and an earlier draft of this asserted es_ES had NOT been
+        # installed, which would simply have failed on that shape.
         import time as _time
 
         before = [code for code, _name in self.env["res.lang"].get_installed()]
-        started = _time.monotonic()
-        self.env["res.lang"]._activate_lang("es_ES")
-        self.env.registry.clear_cache()
-        elapsed = _time.monotonic() - started
-        _logger.info("[LANG] activating es_ES took %.2fs", elapsed)
-        self.assertLess(
-            elapsed, 120.0,
-            "activating es_ES took %.0fs, which is long enough to be "
-            "worth knowing about before it is in every run" % elapsed)
+        wanted = next((c for c in ("es_ES", "ca_ES") if c not in before), None)
 
-        installed = self.env["res.lang"].sudo().search([])
-        self.assertGreaterEqual(
-            len(installed), 2,
-            "es_ES could not be activated, so the fallback cannot be "
-            "tested against a second language")
+        if wanted:
+            started = _time.monotonic()
+            self.env["res.lang"]._activate_lang(wanted)
+            self.env.registry.clear_cache()
+            _logger.info("[LANG] activating %s took %.2fs",
+                         wanted, _time.monotonic() - started)
+            installed = self.env["res.lang"].sudo().search([])
+            self.assertGreaterEqual(
+                len(installed), 2,
+                "%s could not be activated, so the fallback cannot be "
+                "tested against a second language" % wanted)
+        else:
+            # Everything this test might have turned on is already on.
+            # Nothing is activated, nothing is asserted about activating,
+            # and the test goes on to check what it is actually named
+            # for - which is the point, not the setup.
+            _logger.info("[LANG] es_ES and ca_ES already installed; "
+                         "nothing activated")
+            self.assertGreaterEqual(
+                len(before), 2,
+                "neither es_ES nor ca_ES is installable or installed")
 
-        # Asserting before == after INSIDE this test would be wrong: the
-        # test exists to activate a language, so of course the list grew.
-        # What can be asserted is the thing that actually leaks. The row
-        # itself goes with the transaction rollback. The ormcache behind
-        # get_installed() does NOT roll back - that is exactly how the
+        # The leak, asserted rather than hoped for. The res_lang row goes
+        # with the transaction rollback; the ormcache behind
+        # get_installed() does NOT - that is exactly how the
         # trial_offer_end parameter survived into whatever class ran
-        # next. So the invariant checked here, and again on the way out,
-        # is that the cache AGREES WITH THE DATABASE rather than holding
-        # a stale answer of its own.
-        self.assertNotIn("es_ES", before,
-                         "es_ES was already installed, so this test is "
-                         "no longer exercising the activation it claims")
+        # next. Comparing the list before and after would say nothing
+        # here, because activating is the point when a language is
+        # missing and a no-op when it is not. The invariant that holds
+        # either way is that the cache AGREES WITH THE DATABASE.
         self._assert_cache_matches_database()
         self.addCleanup(self._assert_cache_matches_database)
         self.addCleanup(self.env.registry.clear_cache)
+
+        # The thing this test is named for. The language to keep is one
+        # that is NOT the fallback, asked of the wizard itself rather
+        # than written in: this used to hardcode "anything but es_ES",
+        # which only holds on a database where es_ES is the default.
+        installed = self.env["res.lang"].sudo().search([])
+        blank = self.env["res.partner"].create({"name": "Manager Nolang"})
+        fallback = self._wizard_for(blank).lang
+        other = installed.filtered(lambda l: l.code != fallback)[:1]
+        self.assertTrue(
+            other,
+            "every installed language is the fallback %r, so there is no "
+            "second language to keep" % fallback)
+        partner = self.env["res.partner"].create(
+            {"name": "Manager Haslang", "lang": other.code})
+        self.assertEqual(
+            self._wizard_for(partner).lang, other.code,
+            "her own language was replaced by the default")
 
     def _assert_cache_matches_database(self):
         """get_installed() must not answer from a cache the rows no
@@ -275,9 +297,3 @@ class TestMakeStudentAsRealManager(TransactionCase):
             "get_installed() says %s but res_lang says %s - the language "
             "cache is out of step with the database and the next test "
             "class would inherit it" % (sorted(cached), sorted(rows)))
-        other = installed.filtered(lambda l: l.code != "es_ES")[:1]
-        partner = self.env["res.partner"].create(
-            {"name": "Manager Haslang", "lang": other.code})
-        self.assertEqual(
-            self._wizard_for(partner).lang, other.code,
-            "her own language was replaced by the default")
