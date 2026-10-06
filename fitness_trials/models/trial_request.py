@@ -4,7 +4,8 @@ from datetime import datetime as _dt, time as _time, timedelta
 
 import pytz
 from odoo import models, fields, api, _
-from odoo.addons.fitness_core.models.studio_time import studio_today
+from odoo.addons.fitness_core.models.studio_time import (
+    STUDIO_TZ as STUDIO_TZ_NAME, studio_today)
 from odoo.exceptions import UserError
 
 
@@ -112,6 +113,31 @@ class FitnessTrialRequest(models.Model):
                 "as having no end date. Fix it in Technical > System "
                 "Parameters.", self.TRIAL_OFFER_END_PARAM, raw)
             return None
+
+    #: A request made while the offer was open keeps the offer's price,
+    #: even if the studio approves it afterwards. Set False to price
+    #: approvals at the price on the day of APPROVAL instead - the whole
+    #: rule is this one flag and _price_date() below.
+    PRICE_FOLLOWS_REQUEST_DATE = True
+
+    def _price_date(self):
+        """The date whose prices this request is entitled to.
+
+        She asked on the 15th and the studio got to her on the 18th. The
+        delay is the studio's, not hers, so she is charged what she was
+        offered when she asked. Nothing about that is obvious enough to
+        leave implicit, which is why it is a named flag rather than a
+        quietly passed argument.
+
+        Madrid, like every other date decision here: the request's
+        create_date is stored in UTC, and a request made at 00:30 Madrid
+        belongs to that Madrid day, not to the one UTC was still on.
+        """
+        self.ensure_one()
+        if not self.PRICE_FOLLOWS_REQUEST_DATE or not self.create_date:
+            return studio_today()
+        return pytz.utc.localize(self.create_date).astimezone(
+            pytz.timezone(STUDIO_TZ_NAME)).date()
 
     @api.model
     def _trial_offer_open(self):
@@ -1478,7 +1504,8 @@ class FitnessTrialRequest(models.Model):
                 'order_line': [(0, 0, {
                     'product_id': variant.id,
                     'product_uom_qty': 1,
-                    'price_unit': product.fitness_effective_price(),
+                    'price_unit': product.fitness_effective_price(
+                        on=self._price_date()),
                 })],
             })
             order.action_confirm()
