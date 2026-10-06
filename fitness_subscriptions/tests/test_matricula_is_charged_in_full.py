@@ -41,6 +41,16 @@ class TestMatriculaIsChargedInFull(TransactionCase):
         # ran only on the restore. A tax is created and attached here
         # instead, because "the specific arithmetic that went wrong" is
         # not something to verify on one shape only.
+        #
+        # PRICE-INCLUDED, which is how Spanish IVA works and how the
+        # studio's real tax is configured. The first version of this
+        # created a tax-excluded one, so 145.00 became 175.45 and three
+        # assertions that had nothing to do with the registration fee
+        # started failing. They only failed on a REBUILT fresh_main: the
+        # old one had been upgraded in place for weeks, the product
+        # carried no tax at all there, and the membership it is copied
+        # onto therefore carried none either. The test was resting on
+        # that emptiness without saying so.
         if not cls.matricula.taxes_id.filtered(
                 lambda t: t.company_id == cls.env.company):
             tax = cls.env['account.tax'].sudo().create({
@@ -48,6 +58,7 @@ class TestMatriculaIsChargedInFull(TransactionCase):
                 'amount_type': 'percent',
                 'amount': 21.0,
                 'type_tax_use': 'sale',
+                'price_include_override': 'tax_included',
                 'company_id': cls.env.company.id,
             })
             cls.matricula.write({'taxes_id': [(6, 0, tax.ids)]})
