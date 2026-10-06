@@ -34,7 +34,7 @@ class TestBookingEmailMentionsTheCancellationPolicy(
         # database and only ran on the restore - and a skip is an untested
         # line, not a pass. They were written to protect wording the studio
         # cares about, so they have to run everywhere.
-        self.booking = self._a_booking()
+        self.booking = self._a_booking(source='pack')
 
 
     def _render(self, lang):
@@ -186,3 +186,48 @@ class TestBookingEmailMentionsTheCancellationPolicy(
                          'Your credit has not changed'):
             self.assertIn(expected, body,
                           "%r disappeared from the moved email" % expected)
+
+    def test_the_rule_is_stated_whatever_paid_for_the_class(self):
+        """Pack, trial and gift.
+
+        The cancellation window does not depend on what she paid with,
+        and the student given a courtesy class is the one most likely to
+        be surprised by losing it. Driven through the real products - the
+        gift source uses the studio's own courtesy product, the one the
+        gift wizard gives away, not a pack with the price typed to zero.
+
+        The window is moved to a figure the templates could not contain
+        by accident, so this proves the sentence FOLLOWS THE SETTING
+        rather than merely containing a number. Asserting the shipped
+        six would pass just as well against a hardcoded six.
+        """
+        from odoo.addons.fitness_bookings.tests.booking_fixture             import SOURCES
+
+        Booking = self.env['fitness.booking']
+        self.env['ir.config_parameter'].sudo().set_param(
+            'fitness.cancellation_window_hours', '11')
+        self.env.registry.clear_cache()
+        self.addCleanup(self.env.registry.clear_cache)
+        window = Booking._format_window(Booking._cancellation_window_hours())
+        self.assertIn('11', window,
+                      "the setting was not picked up at all, so this test "
+                      "cannot say anything about the templates")
+
+        for source in SOURCES:
+            with self.subTest(source=source):
+                booking = self._a_booking(source=source)
+                # en_US explicitly: the email renders in the STUDENT's
+                # language, and a contact created without one inherits
+                # the company default - Spanish on the restore.
+                booking.student_id.sudo().lang = 'en_US'
+                body = self.template.with_context(
+                    lang='en_US')._render_field(
+                        'body_html', booking.ids)[booking.id]
+                self.assertIn(
+                    window, body,
+                    "the confirmation for a %s booking does not state the "
+                    "cancellation window from the setting" % source)
+                self.assertNotIn(
+                    '6 hours', body,
+                    "the %s confirmation still carries the hardcoded six "
+                    "even though the setting says 11" % source)
