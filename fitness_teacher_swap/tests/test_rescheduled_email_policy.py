@@ -10,20 +10,24 @@ has not moved there, only who teaches it.
 """
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.fitness_bookings.tests.booking_fixture import BookingFixture
+
 TEMPLATE = 'fitness_teacher_swap.mail_template_class_rescheduled'
 SWAP = 'fitness_teacher_swap.mail_template_teacher_swap'
 
 
 @tagged("post_install", "-at_install")
-class TestRescheduledEmailStatesThePolicy(TransactionCase):
+class TestRescheduledEmailStatesThePolicy(
+        BookingFixture, TransactionCase):
 
     longMessage = False
 
     def setUp(self):
         super().setUp()
-        self.booking = self.env['fitness.booking'].sudo().search([], limit=1)
-        if not self.booking:
-            self.skipTest("no booking on this database to render against")
+        # Built, not borrowed: searching for any existing booking made
+        # these four skip on every fresh database and run only on the
+        # restore, which is not coverage.
+        self.booking = self._a_booking()
 
     def _render(self, xmlid, lang):
         self.booking.student_id.sudo().lang = lang

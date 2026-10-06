@@ -14,11 +14,13 @@ import re
 
 from odoo.tests import HttpCase, tagged
 
+from odoo.addons.fitness_bookings.tests.booking_fixture import BookingFixture
+
 LANG_PREFIX = re.compile(r'^/(?:es|ca|en)(?:_[A-Z]{2})?(?=/)')
 
 
 @tagged("post_install", "-at_install")
-class TestBookingScreenStatesThePolicy(HttpCase):
+class TestBookingScreenStatesThePolicy(BookingFixture, HttpCase):
 
     longMessage = False
 
@@ -147,9 +149,10 @@ class TestBookingScreenStatesThePolicy(HttpCase):
         """Two lines on the class page said "Cancel up to 6 hours before
         class to keep your credit" with the figure written in. They now read
         the same sentence as everywhere else, from the same setting."""
-        booking = self.env['fitness.booking'].sudo().search([], limit=1)
-        if not booking:
-            self.skipTest("no booking to open a class page against")
+        # Built, not borrowed. Searching for any existing booking meant
+        # this skipped on every fresh database, and the hardcoded line it
+        # guards against is exactly the sort of thing that comes back.
+        booking = self._a_booking()
         body = self._get('/my/classes/%d' % booking.calendar_event_id.id)
         self.assertNotIn('Cancel up to 6 hours before class', body,
                          "the old hardcoded line is still rendered")

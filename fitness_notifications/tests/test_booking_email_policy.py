@@ -13,22 +13,29 @@ than before.
 """
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.fitness_bookings.tests.booking_fixture import BookingFixture
+
 TEMPLATE = 'fitness_notifications.mail_template_booking_confirmation'
 REMINDER = 'fitness_notifications.mail_template_class_reminder'
 MOVED = 'fitness_notifications.mail_template_booking_moved'
 
 
 @tagged("post_install", "-at_install")
-class TestBookingEmailMentionsTheCancellationPolicy(TransactionCase):
+class TestBookingEmailMentionsTheCancellationPolicy(
+        BookingFixture, TransactionCase):
 
     longMessage = False
 
     def setUp(self):
         super().setUp()
         self.template = self.env.ref(TEMPLATE)
-        self.booking = self.env['fitness.booking'].sudo().search([], limit=1)
-        if not self.booking:
-            self.skipTest("no booking on this database to render against")
+        # Built here, not borrowed from the database. Searching for any
+        # existing booking meant these eleven tests skipped on every fresh
+        # database and only ran on the restore - and a skip is an untested
+        # line, not a pass. They were written to protect wording the studio
+        # cares about, so they have to run everywhere.
+        self.booking = self._a_booking()
+
 
     def _render(self, lang):
         self.booking.student_id.sudo().lang = lang
