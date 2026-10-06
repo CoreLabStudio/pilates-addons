@@ -74,6 +74,7 @@
       <li>New time: <strong t-out="when"/></li>
     </ul>
     <p>Your place is still booked and your credit is unchanged. If the new time does not suit you, message us in the app or on WhatsApp and we will sort it out.</p>
+    <p>You must cancel at least <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts to recover your credit. Cancellations made less than <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class, or no-shows, will result in full credit deduction with no refund.</p>
     <p>The CoreLab team</p>
   </t>
   <t t-elif="object.student_id.lang == 'ca_ES'">
@@ -84,6 +85,7 @@
       <li>Nou horari: <strong t-out="when"/></li>
     </ul>
     <p>La teva pla&#231;a segueix reservada i el teu cr&#232;dit no canvia. Si el nou horari no et va b&#233;, escriu-nos per l'app o per WhatsApp i ho arreglem.</p>
+    <p>Has de cancel&#183;lar almenys <t t-out="object._format_window(object._cancellation_window_hours())"/> hores abans de l'inici de la classe per recuperar el teu cr&#232;dit. Les cancel&#183;lacions amb menys de <t t-out="object._format_window(object._cancellation_window_hours())"/> hores d'antelaci&#243;, o les abs&#232;ncies, comportaran la deducci&#243; completa del cr&#232;dit sense reemborsament.</p>
     <p>L&#39;equip de CoreLab</p>
   </t>
   <t t-else="">
@@ -94,6 +96,7 @@
       <li>Nuevo horario: <strong t-out="when"/></li>
     </ul>
     <p>Tu plaza sigue reservada y tu cr&#233;dito no cambia. Si el nuevo horario no te va bien, escríbenos por la app o por WhatsApp y lo solucionamos.</p>
+    <p>Debes cancelar al menos <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase para recuperar tu cr&#233;dito. Las cancelaciones con menos de <t t-out="object._format_window(object._cancellation_window_hours())"/> horas de antelaci&#243;n, o las ausencias, conllevar&#225;n la deducci&#243;n completa del cr&#233;dito sin reembolso.</p>
     <p>El equipo de CoreLab</p>
   </t>
   <t t-set="notice_lang" t-value="object.student_id.lang"/>

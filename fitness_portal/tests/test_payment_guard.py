@@ -65,15 +65,16 @@ class TestDuplicatePaymentGuard(HttpCase):
         providers = cls.env["payment.provider"].search([])
         cls.provider = providers[:1]
         cls.method = cls.env["payment.method"].with_context(active_test=False).search([], limit=1)
-        # payment.transaction refuses the 'authorized' state unless the provider
-        # declares manual capture. support_manual_capture is computed and not
-        # stored, so it can be neither written nor searched: pick a provider that
-        # already has it, and let the one test that needs it skip if the database
-        # has none. The guard treats 'authorized' and 'done' identically, and
-        # 'done' is covered unconditionally, so nothing goes unverified silently.
-        cls.capture_provider = next(
-            (p for p in providers if p.support_manual_capture), cls.env["payment.provider"]
-        )
+        # payment.transaction refuses the 'authorized' state unless the
+        # provider declares manual capture. support_manual_capture is a
+        # computed, unstored field, so it cannot be SEARCHED - but it can
+        # be assigned, which is what Odoo's own payment tests do, and the
+        # assignment holds for the test. The previous version looked for a
+        # provider that already declared it and skipped when none did,
+        # which was every fresh database. "The guard treats authorized and
+        # done identically" was the argument for allowing that skip; it is
+        # also exactly the claim the skipped test exists to check.
+        cls.capture_provider = cls.provider
 
     # ── helpers ───────────────────────────────────────────────────────────
     def _new_order(self):
@@ -219,13 +220,10 @@ class TestDuplicatePaymentGuard(HttpCase):
 
     def test_authorized_blocks_regardless_of_age(self):
         """Authorized means money is committed; age is irrelevant."""
-        if not self.capture_provider:
-            self.skipTest(
-                "no installed payment provider supports manual capture, so no "
-                "transaction can legally hold the 'authorized' state here"
-            )
         order = self._new_order()
-        self._add_transaction(order, "authorized", 90, provider=self.capture_provider)
+        self.capture_provider.sudo().support_manual_capture = 'full_only'
+        self._add_transaction(order, "authorized", 90,
+                              provider=self.capture_provider)
         self._assert_blocked(order, "an authorized transaction must always block")
 
     def test_done_blocks_regardless_of_age(self):

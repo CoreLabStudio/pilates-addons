@@ -64,7 +64,32 @@ class TestGenerationAlert(TransactionCase):
         sched.generated_until = sched._target_until() - timedelta(
             days=self.Schedule.GENERATION_SLACK_DAYS + 5)
 
+    def _only_ours(self, *keep):
+        """Make every other schedule healthy, so the alert is about ours.
+
+        On a fresh install there are no others and this does nothing. On a
+        copy of the live studio there are seventy-five, and every one of
+        them is stale - the dump froze generated_until while _target_until()
+        goes on moving with today's date. So the cron legitimately alerts
+        about them, and these assertions, which are about THIS schedule,
+        were being answered by somebody else's.
+
+        That also made the alert body useless to the test: it names only the
+        first ten stale rows, and ours was never among seventy-five.
+
+        Writes are rolled back with the test like every other write here.
+        Nothing in the production code changes - the health check was right
+        both times, and it was the question that was badly posed.
+        """
+        keep_ids = [s.id for s in keep]
+        others = self.Schedule.search([('active', '=', True),
+                                       ('recurrence_id', '!=', False),
+                                       ('id', 'not in', keep_ids)])
+        for rec in others:
+            rec.generated_until = rec._target_until()
+
     def test_a_healthy_studio_alerts_nobody(self):
+        self._only_ours(self.sched)
         before = len(self._alerts())
         self.Schedule._cron_check_generation_health()
         self.assertEqual(len(self._alerts()), before,
@@ -72,6 +97,7 @@ class TestGenerationAlert(TransactionCase):
 
     @mute_logger(HEALTH_LOGGER)
     def test_a_stalled_studio_reaches_a_manager(self):
+        self._only_ours(self.sched)
         before = len(self._alerts())
         self._stall()
         self.Schedule._cron_check_generation_health()

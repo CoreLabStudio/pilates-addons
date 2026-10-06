@@ -1018,25 +1018,143 @@
   }
 
   const NOTIF_DISMISSED = 'mv_notif_prompt_dismissed';
+  const NOTIF_DIALOG_DAY = 'mv_notif_dialog_day';
+  const NOTIF_FIRST_OPEN = 'mv_notif_first_open';
 
-  // The card on Home. Shown only to a browser that is not already subscribed,
-  // and only until it is either used or dismissed - a permission prompt that
-  // reappears on every visit is how a studio trains its students to ignore it.
-  async function setupNotifPrompt(reg, alreadyOn) {
-    const card = $('#mv-pushcard');
-    if (!card) return;
-    if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
-    let dismissed = false;
-    try { dismissed = localStorage.getItem(NOTIF_DISMISSED) === '1'; } catch (e) { /* private mode */ }
-    // Denied cannot be undone from script - the browser will not ask twice -
-    // so the card would be a button that does nothing.
-    if (dismissed || Notification.permission === 'denied') { card.hidden = true; return; }
+  // The seven-day snooze and the three-ask cap are gone, on the studio's
+  // instruction: a student who has not turned notifications on is asked
+  // again, and the asks stop only when she turns them on or the browser
+  // refuses. What is left is the pacing - the dialog is a once-a-day
+  // interruption, the card is always there and interrupts nothing.
+  //
+  // The old permanent "dismissed" flag is still cleared on sight. Students
+  // who tapped Not now once under the old rule would otherwise stay
+  // unreachable for ever, which is the bug that started all of this.
+  function clearLegacyDismissal() {
+    try {
+      if (localStorage.getItem(NOTIF_DISMISSED) === '1') {
+        localStorage.removeItem(NOTIF_DISMISSED);
+      }
+      // The snooze shape it was migrated into is no longer read either.
+      localStorage.removeItem('mv_notif_snooze');
+    } catch (e) { /* private mode: nothing to clear and nothing to keep */ }
+  }
 
-    const note = $('#mv-pushcard-state');
-    const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
-    card.hidden = false;
+  // The device's own calendar date, not UTC: "once a day" has to mean the
+  // day she is living in, or a student in Barcelona gets the dialog twice
+  // on one evening and not at all the next.
+  function localDayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
 
-    const enable = $('#mv-notif-enable');
+  // Keyed by user id as well as device. Two accounts on one phone - a
+  // mother and a daughter, or the studio's own test login - must not share
+  // whether the dialog has been shown.
+  function currentUserKey() {
+    const el = document.querySelector('[data-mv-uid]');
+    const uid = el && el.getAttribute('data-mv-uid');
+    return uid ? String(uid) : 'anon';
+  }
+
+  function readKey(name) {
+    try { return localStorage.getItem(name + ':' + currentUserKey()); }
+    catch (e) { return null; }
+  }
+
+  function writeKey(name, value) {
+    try { localStorage.setItem(name + ':' + currentUserKey(), value); }
+    catch (e) { /* private mode: she is asked again, which is the safe way */ }
+  }
+
+  // The dialog is allowed once per local day, per account, per device.
+  function dialogAllowedToday() {
+    return readKey(NOTIF_DIALOG_DAY) !== localDayKey();
+  }
+
+  function markDialogShownToday() {
+    writeKey(NOTIF_DIALOG_DAY, localDayKey());
+  }
+
+  // First portal page view of a login, which is a different question from
+  // "first today": she may log in twice in a day on two devices.
+  function isFirstOpenOfThisLogin() {
+    return readKey(NOTIF_FIRST_OPEN) !== '1';
+  }
+
+  function markFirstOpenSeen() {
+    writeKey(NOTIF_FIRST_OPEN, '1');
+  }
+
+  // Only one dialog per page view, whatever asks for it. Two at once is
+  // the thing that makes an app feel like it is shouting.
+  let dialogOpenedThisView = false;
+
+  // Pages where the ask would land on top of something she is in the middle
+  // of. She gets it on the next Home view instead, which costs her nothing
+  // and costs us one day at most.
+  function isSensitivePage() {
+    const p = window.location.pathname.replace(
+      /^\/(?:es|ca|en)(?:_[A-Z]{2})?(?=\/)/, '');
+    return /^\/my\/(checkout|packages\/\d+\/checkout)|^\/payment\//.test(p)
+      || !!document.querySelector('form[data-mv-payment]');
+  }
+
+  /* Opens the once-a-day dialog. Returns true if it actually opened.
+
+     Everything about WHICH body is shown is decided here rather than on the
+     server: only the browser knows whether this device has a PushManager,
+     what permission says, and whether she is already subscribed. */
+  async function openNotifDialog(reg, opts) {
+    const dlg = $('#mv-notif-dialog');
+    if (!dlg || dialogOpenedThisView) return false;
+
+    const supported = ('PushManager' in window) && ('Notification' in window);
+    const iosNotInstalled = isIos() && !isStandalone();
+    // Blocked is the help card's business, not the dialog's: the browser
+    // will not show its prompt a second time, so a dialog here would be a
+    // button that does nothing.
+    if (supported && Notification.permission !== 'default') return false;
+    if (!supported && !iosNotInstalled) return false;
+
+    const steps = $('#mv-notif-dialog-steps');
+    const actions = $('#mv-notif-dialog-actions');
+    if (!supported) {
+      // iPhone in Safari: the three taps, and no permission button.
+      if (steps) steps.hidden = false;
+      if (actions) actions.hidden = true;
+    } else {
+      if (steps) steps.hidden = true;
+      if (actions) actions.hidden = false;
+    }
+
+    const note = dlg.querySelector('.mv-push-state');
+    const say = (msg) => {
+      if (note) { note.textContent = msg; note.hidden = !msg; }
+    };
+
+    const opener = document.activeElement;
+    dlg.hidden = false;
+    dialogOpenedThisView = true;
+    markDialogShownToday();
+
+    const close = () => {
+      dlg.hidden = true;
+      document.removeEventListener('keydown', onKey);
+      // Focus goes back where she was, not to the top of the page.
+      try { if (opener && opener.focus) opener.focus(); } catch (e) { /* gone */ }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+
+    const closeBtn = $('#mv-notif-dialog-close');
+    if (closeBtn) closeBtn.addEventListener('click', close, { once: true });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
+
+    const dismiss = actions && actions.querySelector('.mv-install-dismiss');
+    if (dismiss) dismiss.addEventListener('click', close, { once: true });
+
+    const enable = actions && actions.querySelector('.mv-install-btn');
     if (enable) {
       enable.addEventListener('click', async () => {
         enable.disabled = true;
@@ -1044,8 +1162,95 @@
           const perm = await Notification.requestPermission();
           if (perm === 'granted') {
             const ok = await subscribeToPush(reg);
-            if (ok) { card.hidden = true; }
-            else { say(card.dataset.msgFailed || ''); }
+            if (ok) { say(dlg.dataset.msgOn || ''); setPushHint(true);
+                      setTimeout(close, 1200); }
+            else { say(dlg.dataset.msgFailed || ''); }
+          } else if (perm === 'denied') {
+            say(dlg.dataset.msgBlocked || '');
+          } else {
+            // She closed the browser's own prompt without choosing. Treated
+            // as Not now for today. Chrome may decide on its own to stop
+            // showing that prompt after several of these, which is its
+            // behaviour and not something this code can prevent.
+            say(dlg.dataset.msgDismissed || '');
+          }
+        } catch (e) {
+          say((dlg.dataset.msgFailed || '') +
+              ' (' + (e && e.name ? e.name : 'error') + ')');
+        } finally { enable.disabled = false; }
+      });
+    }
+
+    // Focus the first thing she can act on, so a keyboard or a screen
+    // reader lands inside the dialog rather than behind it. Deliberately
+    // NOT a focus trap: in the installed iOS app a trap can leave her
+    // unable to reach the browser chrome at all.
+    const first = (actions && !actions.hidden && enable) ? enable : closeBtn;
+    try { if (first) first.focus(); } catch (e) { /* not focusable yet */ }
+    return true;
+  }
+
+  /* The two reasons to open it: the first portal view of a login, and the
+     first Home view of a local day. Both are suppressed on pages where she
+     is in the middle of paying or filling a form - she gets it on the next
+     Home view instead. */
+  async function maybeOpenDailyDialog(reg) {
+    if (isSensitivePage()) return false;
+    const onHome = /\/my\/home\/?$/.test(
+      window.location.pathname.replace(
+        /^\/(?:es|ca|en)(?:_[A-Z]{2})?(?=\/)/, ''));
+    const firstOpen = isFirstOpenOfThisLogin();
+    if (!firstOpen && !(onHome && dialogAllowedToday())) return false;
+    const opened = await openNotifDialog(reg, {});
+    // Marked whether or not it opened: a login whose first page could not
+    // show it has had its first open, and the daily rule takes over.
+    markFirstOpenSeen();
+    return opened;
+  }
+
+  // One opt-in card, wherever it is standing. Shown only to a browser that is
+  // not already subscribed, and only while the snooze allows it - a permission
+  // prompt that reappears on every visit is how a studio trains its students
+  // to ignore it.
+  //
+  // Takes the card rather than looking one up, because there are now two of
+  // them: the quiet one on Home, and the one offered straight after a booking
+  // is confirmed. They share the snooze deliberately - they are the same ask
+  // in two places, and counting them separately would be how somebody gets
+  // asked six times while each card believes it asked three.
+  async function setupNotifPrompt(reg, alreadyOn, card) {
+    if (!card) return;
+    if (alreadyOn || Notification.permission === 'granted') { card.hidden = true; return; }
+    // Denied cannot be undone from script - the browser will not ask twice -
+    // so the card would be a button that does nothing.
+    if (Notification.permission === 'denied') { card.hidden = true; return; }
+    // No snooze and no cap any more: the card stands on every Home visit
+    // until she turns notifications on. It blocks nothing and hides nothing,
+    // so showing it again is not the same kind of ask as a dialog.
+    clearLegacyDismissal();
+
+    const note = card.querySelector('.mv-push-state');
+    const say = (msg) => { if (note) { note.textContent = msg; note.hidden = !msg; } };
+    card.hidden = false;
+
+    const enable = card.querySelector('.mv-install-btn');
+    if (enable) {
+      enable.addEventListener('click', async () => {
+        enable.disabled = true;
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            const ok = await subscribeToPush(reg);
+            if (ok) {
+              // Confirmed rather than vanished. The card used to disappear on
+              // success, which reads the same as the button having failed
+              // silently - and a screen reader was told nothing at all. The
+              // actions go, the confirmation stays, and the card does not
+              // come back next load because permission is granted by then.
+              const actions = card.querySelector('.mv-install-actions');
+              if (actions) actions.hidden = true;
+              say(card.dataset.msgOn || '');
+            } else { say(card.dataset.msgFailed || ''); }
           } else if (perm === 'denied') {
             say(card.dataset.msgBlocked || '');
           } else {
@@ -1056,17 +1261,74 @@
         } finally { enable.disabled = false; }
       });
     }
-    const dismiss = $('#mv-notif-dismiss');
+    const dismiss = card.querySelector('.mv-install-dismiss');
     if (dismiss) {
       dismiss.addEventListener('click', () => {
+        // Hides this instance for this page view only. She will see it again
+        // next time she opens Home, which is what the studio asked for.
         card.hidden = true;
-        try { localStorage.setItem(NOTIF_DISMISSED, '1'); } catch (err) { /* private mode */ }
       });
     }
   }
 
+  const BLOCKED_SNOOZE = 'mv_notif_blocked_seen';
+  const BLOCKED_DAYS = 4;
+
+  // The help card for a phone that has already refused. Shown every few days
+  // rather than every visit: it is not an ask, it is a reminder, and a
+  // reminder on every single load is just noise with no button to stop it.
+  function showBlockedHint() {
+    const card = $('#mv-notif-blocked');
+    if (!card) return;
+    let until = 0;
+    try { until = Number(localStorage.getItem(BLOCKED_SNOOZE)) || 0; }
+    catch (e) { until = 0; }
+    if (Date.now() < until) return;
+    card.hidden = false;
+    const dismiss = $('#mv-notif-blocked-dismiss');
+    if (dismiss) {
+      dismiss.addEventListener('click', () => {
+        card.hidden = true;
+        try {
+          localStorage.setItem(BLOCKED_SNOOZE,
+                               String(Date.now() + BLOCKED_DAYS * 86400000));
+        } catch (e) { /* private mode */ }
+      });
+    }
+  }
+
+  // An iPhone that has not been installed cannot take push at all, so this
+  // is the only thing worth showing it. No snooze: it is three steps and no
+  // button, it disappears for good the moment the app is installed, and a
+  // student who has not installed yet is exactly who it is for.
+  function showIosNotifHint() {
+    const card = $('#mv-notif-ios');
+    if (card) card.hidden = false;
+  }
+
+  // The one-line note on the Notifications page. Off is every state that is
+  // not a live subscription - undecided, refused, or a browser that cannot
+  // take push at all - because from the student's side they are the same
+  // fact: the next cancellation will not reach this phone.
+  function setPushHint(on) {
+    const hint = $('#mv-push-hint');
+    if (hint) hint.hidden = !!on;
+  }
+
   async function setupPush(reg) {
-    if (!reg || !('PushManager' in window) || !('Notification' in window)) return;
+    if (!reg || !('PushManager' in window) || !('Notification' in window)) {
+      // The iPhone-in-Safari case, and by far the most common one here: 13
+      // of the studio's 15 registered devices are Apple. It used to fall out
+      // of this function silently, so the student with the likeliest device
+      // was told nothing - neither that notifications exist nor that
+      // installing is what unlocks them.
+      if (isIos() && !isStandalone()) {
+        showIosNotifHint();
+        await maybeOpenDailyDialog(reg);
+      }
+      setPushHint(false);
+      return;
+    }
     const btn = $('#mv-push-enable');
 
     // Already granted: re-register quietly. The endpoint can change under us
@@ -1081,21 +1343,32 @@
         note.textContent = btn ? (btn.dataset.msgOn || '') : '';
         note.hidden = !note.textContent;
       }
-      await setupNotifPrompt(reg, ok);
+      setPushHint(ok);
+      await setupNotifPrompt(reg, ok, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, ok, $('#mv-notif-booked'));
       return;
     }
     // Denied is the user's decision and asking again is not possible from
     // script - the browser will not show the prompt twice.
     if (Notification.permission === 'denied') {
       if (btn) btn.hidden = true;
-      await setupNotifPrompt(reg, false);
+      setPushHint(false);
+      await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+      await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
+      // Nothing at all was shown here before: both the card and the button
+      // hide themselves, correctly refusing to draw a dead button, and the
+      // student was left with no notifications and no way to find out why.
+      showBlockedHint();
       return;
     }
     // Otherwise offer it, and only ask when they press the button. A prompt
     // fired on page load is the fastest way to get permission denied
     // permanently, and on iOS it is ignored entirely unless it follows a
     // real gesture.
-    await setupNotifPrompt(reg, false);
+    setPushHint(false);
+    await setupNotifPrompt(reg, false, $('#mv-pushcard'));
+    await setupNotifPrompt(reg, false, $('#mv-notif-booked'));
+    await maybeOpenDailyDialog(reg);
     if (!btn) return;
     btn.hidden = false;
     btn.addEventListener('click', async () => {
@@ -1111,6 +1384,7 @@
           const ok = await subscribeToPush(reg);
           if (ok) {
             btn.hidden = true;
+            setPushHint(true);
             say(btn.dataset.msgOn || 'Notifications are on.', 'on');
           } else {
             // Permission is granted but the browser would not hand us a

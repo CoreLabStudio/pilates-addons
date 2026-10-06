@@ -344,3 +344,15 @@ msgid ""
 msgstr ""
 "Verdadero cuando esta notificación dice que una clase suya se ha movido, "
 "se ha cancelado o ha cambiado de instructor."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "%s is active"
+msgstr "%s está activa"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "You can book your classes now."
+msgstr "Ya puedes reservar tus clases."

@@ -260,12 +260,35 @@ class FitnessStudentPortal(http.Controller):
                                    'or your booking is confirmed.'),
             'lbl_notif_cta':     _('Turn on'),
             'lbl_notif_dismiss': _('Not now'),
+            'lbl_notif_close':   _('Close'),
             'lbl_push_on':       _('Notifications are on for this device.'),
             'lbl_push_blocked':  _('Your phone is blocking notifications for this app. '
                                    'Turn them on in your phone settings for CoreLab, '
                                    'then reload this page.'),
             'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
             'lbl_push_failed':   _('Could not register this device for notifications.'),
+            # An iPhone in Safari cannot take notifications at all - not
+            # "badly", not "after a prompt": the browser has no PushManager
+            # outside an installed app, so there is no button we could draw
+            # that would do anything. It used to be shown nothing whatsoever,
+            # which is the worst of both: no notifications and no way to find
+            # out why. The three steps below are the ones already written for
+            # the install prompt, reused rather than reworded, so a student
+            # who meets both cards reads the same instructions twice.
+            'lbl_notif_ios_title': _('Turn on notifications'),
+            'lbl_notif_ios_sub':   _('On iPhone, notifications work once CoreLab '
+                                     'is on your Home Screen. It takes three taps:'),
+            # Blocked is a decision the browser will not let the page revisit,
+            # so this card deliberately carries no button: only the phone's
+            # own settings can undo it.
+            'lbl_notif_blocked_title': _('Notifications are turned off'),
+            'lbl_notif_blocked_sub':   _('You may miss a cancellation or a change '
+                                         'of time. To turn them back on:'),
+            'lbl_notif_blocked_ios':   _('iPhone: Settings, then CoreLab, '
+                                         'then Notifications, then Allow.'),
+            'lbl_notif_blocked_android': _('Android: press and hold the CoreLab '
+                                           'icon, tap App info, then '
+                                           'Notifications.'),
             'lbl_install_title':   _('Install CoreLab'),
             'lbl_install_sub':     _('Add it to your home screen for one-tap booking.'),
             'lbl_install_cta':     _('Install'),
@@ -285,6 +308,106 @@ class FitnessStudentPortal(http.Controller):
             'lbl_timetable_desc': _('Every class we run, week by week'),
             'lbl_timetable_cta':  _('View timetable'),
         })
+
+    def _recent_payment_state(self, partner):
+        """done, pending or failed, for a student just back from paying.
+
+        done ONLY when the money arrived AND the order was confirmed, which
+        is what actually puts the credit in her account. Production shows
+        why the two are separate questions: S00414 sat with a done
+        transaction against an unconfirmed order because Stripe's
+        notification never reached Odoo, and had to be settled by hand.
+        Telling her "payment received" at that moment would have been a
+        promise the account could not keep.
+
+        pending covers draft, pending and authorized:
+
+          draft       the transaction was started and Odoo has not heard
+                      back. NOT harmless - S00389 is a live order with two
+                      draft transactions and Stripe saying the money was
+                      taken. So draft is "we are checking", never "nothing
+                      happened".
+          pending     the provider has it and has not settled. Bizum sits
+                      here while the bank app is open.
+          authorized  Stripe's manual-capture state: the amount is reserved
+                      on her card and nothing has been taken. Only Stripe
+                      offers it here, and only when capture_manually is set;
+                      Bizum does not. The studio has to capture it, so from
+                      her side it is still in progress.
+
+        failed is only cancel and error - a provider saying outright that it
+        did not happen.
+        """
+        if not partner:
+            return None
+        window = fields.Datetime.now() - timedelta(minutes=30)
+        tx = request.env['payment.transaction'].sudo().search(
+            [('partner_id', '=', partner.id),
+             ('create_date', '>=', fields.Datetime.to_string(window))],
+            order='create_date desc', limit=1)
+        if not tx:
+            return None
+        if tx.state in ('cancel', 'error'):
+            return 'failed'
+        if tx.state == 'done' and tx.sale_order_ids and all(
+                o.state in ('sale', 'done') for o in tx.sale_order_ids):
+            return 'done'
+        # Everything else - draft, pending, authorized, and done against an
+        # order that has not confirmed - is still in progress. Erring this
+        # way keeps a promise we can keep instead of a confirmation we
+        # cannot.
+        return 'pending'
+
+    def _notif_labels(self):
+        """Every string the opt-in card, dialog and key-moment ask need.
+
+        One builder rather than a fourth copy. The same labels are already
+        spelled out in three contexts - Home, Studio and Notifications - and
+        a fourth would be a fourth place to forget when the wording changes.
+        Anything new asks for them here.
+        """
+        _ = request.env._
+        return {
+            'lbl_notif_title':   _('Turn on notifications'),
+            'lbl_notif_sub':     _('Get told when a class is cancelled, moved, '
+                                   'or your booking is confirmed.'),
+            'lbl_notif_cta':     _('Turn on'),
+            'lbl_notif_dismiss': _('Not now'),
+            'lbl_notif_close':   _('Close'),
+            'lbl_push_on':       _('Notifications are on for this device.'),
+            'lbl_push_blocked':  _('Your phone is blocking notifications for '
+                                   'this app. Turn them on in your phone '
+                                   'settings for CoreLab, then reload this page.'),
+            'lbl_push_dismissed': _('No answer given yet - tap again and '
+                                    'choose Allow.'),
+            'lbl_push_failed':   _('Could not register this device for '
+                                   'notifications.'),
+            'lbl_ios_step1':     _('Tap the Share button at the bottom of Safari.'),
+            'lbl_ios_step2':     _('Scroll down and tap "Add to Home Screen".'),
+            'lbl_ios_step3':     _('Tap "Add" in the top right corner.'),
+        }
+
+    def _cancel_policy_label(self):
+        """The studio's cancellation rule, in her language, with the real N.
+
+        Section 4 of the Terms, shortened to its two load-bearing sentences,
+        so the screen and the confirmation email say the same thing as the
+        legal text rather than a third version of it.
+
+        The number is never written down here. It comes from
+        fitness.cancellation_window_hours through the booking model's own
+        helper, so a studio that changes the setting changes this sentence
+        too - and _format_window keeps 6.0 from reaching a student as "6.0".
+        """
+        Booking = request.env['fitness.booking'].sudo()
+        hours = Booking._format_window(Booking._cancellation_window_hours())
+        return request.env._(
+            "You must cancel at least %(hours)s hours before the class "
+            "starts to recover your credit. Cancellations made less than "
+            "%(hours)s hours before the class, or no-shows, will result in "
+            "full credit deduction with no refund.",
+            hours=hours,
+        )
 
     # ══════════════════════════════════════════════════════════
     #  STUDIO  (bottom-nav tab 2 — "Available" | "My Schedule")
@@ -314,10 +437,29 @@ class FitnessStudentPortal(http.Controller):
                 'Your free trial class is waiting - pick any class below and '
                 'book it. Booking opens a week before each class.'),
             'booked':          bool(booked),
+            'lbl_cancel_policy': self._cancel_policy_label(),
             'cancelled':       bool(cancelled),
             'credit_returned': bool(credit_returned),
             'error_msg':       error or None,
             'primary_credit':  self._primary_credit(partner.id),
+            # The offer that follows a confirmed booking. Asked here because
+            # this is the one moment the student has just told us she cares
+            # when this class happens - which is exactly what a notification
+            # is for. The card itself is revealed by the browser under the
+            # same rules and the same counter as the one on Home.
+            'lbl_notif_booked_title': _('Want a reminder before this class?'),
+            'lbl_notif_booked_sub':   _("We'll tell you if the time changes "
+                                        'or the class is cancelled.'),
+            'lbl_notif_cta':          _('Turn on'),
+            'lbl_notif_dismiss':      _('Not now'),
+            'lbl_push_on':            _('Notifications are on for this device.'),
+            'lbl_push_blocked':       _('Your phone is blocking notifications for '
+                                        'this app. Turn them on in your phone '
+                                        'settings for CoreLab, then reload this page.'),
+            'lbl_push_dismissed':     _('No answer given yet - tap again and '
+                                        'choose Allow.'),
+            'lbl_push_failed':        _('Could not register this device for '
+                                        'notifications.'),
         }
         full_name = partner.name or ''
         values['student_name'] = full_name.split()[0] if full_name else full_name
@@ -758,6 +900,8 @@ class FitnessStudentPortal(http.Controller):
             'primary_credit':      self._primary_credit(partner.id),
             'student_name':        student_name,
             'booked':              bool(kw.get('booked')),
+            'lbl_cancel_policy':   self._cancel_policy_label(),
+            **self._notif_labels(),
             'error_msg':           kw.get('error') or None,
             'type_has_img':        type_has_img,
             'cat_id':              cat_id,
@@ -1564,6 +1708,13 @@ class FitnessStudentPortal(http.Controller):
                                           'want to try.') % trial_names,
 
             'booked':                   bool(kw.get('booked')),
+            # A free trial is still a seat somebody else cannot take,
+            # and a late cancellation spends the one free class she
+            # gets - so the rule belongs here as much as anywhere.
+            'lbl_cancel_policy':        self._cancel_policy_label(),
+            # The opt-in ask on this page's success states. Only a
+            # logged-in student reaches this route at all (auth='user').
+            **self._notif_labels(),
             'error_msg':                kw.get('error') or '',
             'lbl_book_free':            _('Book'),
             'lbl_price_free':           _('Free'),
@@ -1579,6 +1730,23 @@ class FitnessStudentPortal(http.Controller):
             'cash_requested':           bool(kw.get('cash_requested')),
             # She came back to a checkout she has already used.
             'cash_pending':             bool(kw.get('cash_pending')),
+            'payment_state':            (
+                self._recent_payment_state(partner)
+                if kw.get('from_payment') else None),
+            'lbl_paid_head':            _('Payment received.'),
+            'lbl_paid':                 _('Your classes are ready to book.'),
+            'lbl_paying_head':          _('Payment in progress.'),
+            'lbl_paying':               _('Your bank has not confirmed it yet. We will tell you as soon as it goes through - you do not need to pay again.'),
+            'lbl_pay_failed_head':      _('That payment was not completed.'),
+            # Deliberately NOT "nothing has been charged". Production has an
+            # order sitting on two draft transactions with Stripe saying the
+            # money was taken, so that sentence can be false at exactly the
+            # moment a student is reading it. This says what we know and
+            # gives her somewhere to go.
+            'lbl_pay_failed':           _('You can try again, or pay at the '
+                                          'studio. If you see a charge in '
+                                          'your bank, write to us and we will '
+                                          'sort it out.'),
             'lbl_cash_already':         _('You have already asked to pay for '
                                           'this at the studio. Come and pay '
                                           'and we will activate it.'),
@@ -2642,6 +2810,11 @@ class FitnessStudentPortal(http.Controller):
 
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_subscription', {
+            # Her weekly hour is now booked for the whole period -
+            # the last step of buying a fixed class, and a moment she
+            # will want telling about if any of it moves.
+            'slot_set':     bool(kw.get('slot_set')),
+            **self._notif_labels(),
             'sub_data':          sub_data,
             'has_sub':           bool(sub_data),
             'student_name':      full_name.split()[0] if full_name else '',
@@ -2719,6 +2892,12 @@ class FitnessStudentPortal(http.Controller):
                                     'Turn them on in your phone settings for CoreLab, '
                                     'then reload this page.'),
             'lbl_push_dismissed': _('No answer given yet - tap again and choose Allow.'),
+            # One line, not a card. This page is a list of what the studio has
+            # already sent, so the person reading it is exactly the person who
+            # would want to know the next one will not reach her phone - but
+            # she came here to read, not to be sold a feature.
+            'lbl_push_off_hint':  _('Notifications are off - you may miss a '
+                                    'class change.'),
             'lbl_push_failed':    _('Could not register this device for notifications.'),
         })
 
@@ -4242,7 +4421,11 @@ class FitnessPackagePayment(_OdooPaymentPortal):
             # payment.transaction.sale_order_ids is set automatically and
             # _post_process() can call order.action_confirm() on payment success.
             'transaction_route':    f'/my/orders/{order_id}/transaction',
-            'landing_route':        '/my/packages',
+            # Carries a marker so the landing page knows she has just
+            # come back from paying. Without it a card or Bizum return
+            # is indistinguishable from opening the shop, and she was
+            # shown no confirmation at all.
+            'landing_route':        '/my/packages?from_payment=1',
             'access_token':         access_token,
             'student_name':         full_name.split()[0] if full_name else '',
             'back_url':             (f'/my/packages/{product.id}/checkout'
