@@ -11,6 +11,8 @@ until somebody settled it by hand. So "draft" is not nothing-happened, and
 directions.
 """
 import io
+import os
+import re
 
 from odoo.tests import HttpCase, TransactionCase, tagged
 
@@ -21,8 +23,8 @@ ASK = 'id="mv-notif-booked"'
 # restore, where the company default is Spanish. Pinning the student to
 # en_US instead only moved the problem - the website module then rewrites
 # /my/... to /en/my/..., and that redirect took one request fifty-five
-# minutes to serve. The wording of each flash is asserted once, in all
-# three languages, in TestPaymentWording below.
+# minutes to serve. The wording of each flash is checked separately,
+# in all three languages, by TestPaymentWording below.
 PAID = 'id="mv-pay-done"'
 PAYING = 'id="mv-pay-pending"'
 FAILED = 'id="mv-pay-failed"'
@@ -185,23 +187,95 @@ class TestPaymentReturnStates(HttpCase):
 
 @tagged("post_install", "-at_install")
 class TestPaymentWording(TransactionCase):
-    """The words of the failure flash, read from the controller itself.
+    """The six words of the three payment flashes, in all three languages.
 
     Away from HTTP on purpose. Over a request the portal renders in the
     student's own language, so an English assertion says nothing on the
     production restore and everything on a fresh database - which is how
-    ten of these passed on one shape and failed on the other.
+    ten of these passed on one shape and failed on the other. The flash
+    MARKUP is asserted over HTTP above; the WORDS are asserted here.
+
+    Both catalogues are read from the shipped .po files, so this says the
+    same thing on a fresh database (where es and ca are not installed) as
+    on the restore. Where a language IS installed, the running translation
+    is checked against the catalogue - which catches a .po that was never
+    loaded as well as one that was never written.
     """
 
+    #: head and body of each flash, exactly as the controller spells them
+    FLASHES = {
+        'done': ('Payment received.',
+                 'Your classes are ready to book.'),
+        'pending': ('Payment in progress.',
+                    'Your bank has not confirmed it yet. We will tell you '
+                    'as soon as it goes through - you do not need to pay '
+                    'again.'),
+        'failed': ('That payment was not completed.',
+                   'You can try again, or pay at the studio. If you see a '
+                   'charge in your bank, write to us and we will sort it '
+                   'out.'),
+    }
+    CATALOGUES = {'es_ES': 'es_ES.po', 'ca_ES': 'ca_ES.po'}
     RETIRED = 'Nothing has been charged'
     PROMISE = 'If you see a charge in'
 
+    def _module_dir(self):
+        from odoo.addons import fitness_portal
+        return os.path.dirname(fitness_portal.__file__)
+
     def _controller_source(self):
-        from odoo.addons.fitness_portal.controllers import portal
-        path = portal.__file__
-        if path.endswith('c'):
-            path = path[:-1]
-        return io.open(path, encoding='utf-8').read()
+        path = os.path.join(self._module_dir(), 'controllers', 'portal.py')
+        source = io.open(path, encoding='utf-8').read()
+        # Join Python's implicit concatenation. The longer labels are
+        # written across several lines, so the sentence a student reads is
+        # never contiguous in the file - and the translator's msgid is the
+        # joined one.
+        return re.sub(r"'\s*\n\s*'", '', source)
+
+    @staticmethod
+    def _unquote(chunk):
+        chunk = chunk.strip()
+        if chunk.startswith('"') and chunk.endswith('"'):
+            chunk = chunk[1:-1]
+        return chunk.replace('\\"', '"').replace('\\n', '\n')
+
+    def _catalogue(self, filename):
+        """{msgid: msgstr} from a .po, joining the continuation lines."""
+        path = os.path.join(self._module_dir(), 'i18n', filename)
+        entries, key, msgid, msgstr = {}, None, [], []
+
+        def flush():
+            if key is not None:
+                entries[''.join(msgid)] = ''.join(msgstr)
+
+        for raw in io.open(path, encoding='utf-8'):
+            line = raw.strip()
+            if line.startswith('msgid '):
+                flush()
+                key, msgid, msgstr = 'id', [self._unquote(line[6:])], []
+            elif line.startswith('msgstr '):
+                key, msgstr = 'str', [self._unquote(line[7:])]
+            elif line.startswith('"') and key == 'id':
+                msgid.append(self._unquote(line))
+            elif line.startswith('"') and key == 'str':
+                msgstr.append(self._unquote(line))
+            elif not line:
+                flush()
+                key, msgid, msgstr = None, [], []
+        flush()
+        return entries
+
+    # -- the English the controller actually ships -----------------------
+    def test_english_is_the_wording_the_controller_ships(self):
+        """en_US needs no catalogue - the source string IS the English."""
+        source = self._controller_source()
+        for state, (flash_head, flash_body) in self.FLASHES.items():
+            self.assertIn(flash_head, source,
+                          "the %s flash head is not in the controller"
+                          % state)
+            self.assertIn(flash_body, source,
+                          "the %s flash body is not in the controller"
+                          % state)
 
     def test_the_retired_promise_is_gone(self):
         """It could be false at the moment she reads it.
@@ -217,3 +291,43 @@ class TestPaymentWording(TransactionCase):
         self.assertIn(self.PROMISE, self._controller_source(),
                       "the failure does not say what to do if her bank "
                       "shows a charge")
+
+    # -- Spanish and Catalan ---------------------------------------------
+    def test_every_flash_is_translated_in_spanish_and_catalan(self):
+        for lang, filename in sorted(self.CATALOGUES.items()):
+            catalogue = self._catalogue(filename)
+            for state, strings in sorted(self.FLASHES.items()):
+                for english in strings:
+                    self.assertIn(
+                        english, catalogue,
+                        "%s has no entry for the %s flash: %r"
+                        % (filename, state, english[:40]))
+                    self.assertTrue(
+                        catalogue[english].strip(),
+                        "%s leaves the %s flash untranslated: %r"
+                        % (filename, state, english[:40]))
+                    self.assertNotEqual(
+                        catalogue[english].strip(), english,
+                        "%s copies the English for the %s flash: %r"
+                        % (filename, state, english[:40]))
+
+    def test_an_installed_language_really_serves_its_catalogue(self):
+        """A written .po that was never loaded reads as English on screen."""
+        installed = self.env['res.lang'].sudo().search(
+            [('code', 'in', list(self.CATALOGUES))]).mapped('code')
+        if not installed:
+            # Fresh databases carry en_US alone. The catalogues themselves
+            # are checked above, so this is not a silent pass for the
+            # words - only for the loading of them, and there is nothing
+            # here to load.
+            self.skipTest("neither es_ES nor ca_ES is installed here")
+        for lang in sorted(installed):
+            catalogue = self._catalogue(self.CATALOGUES[lang])
+            translate = self.env(
+                context=dict(self.env.context, lang=lang))._
+            for state, strings in sorted(self.FLASHES.items()):
+                for english in strings:
+                    self.assertEqual(
+                        translate(english), catalogue[english].strip(),
+                        "%s serves something other than its catalogue for "
+                        "the %s flash" % (lang, state))
