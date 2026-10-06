@@ -11,7 +11,12 @@ Everything here runs with_user(manager) and invalidates the cache first, so
 a value cached while admin was asking cannot answer for her.
 """
 
+import logging
+
 from odoo.tests import TransactionCase, tagged
+
+
+_logger = logging.getLogger(__name__)
 
 
 @tagged("post_install", "-at_install")
@@ -211,9 +216,65 @@ class TestMakeStudentAsRealManager(TransactionCase):
 
     def test_a_contacts_own_language_is_kept_when_it_is_installed(self):
         """The fallback must not flatten somebody who has a language set."""
+        # A second language is activated rather than hoped for. A fresh
+        # database ships en_US alone, so this skipped there and ran only
+        # on the restore - and the studio works in three languages, so
+        # the one test that protects a contact's own language has to run
+        # everywhere.
+        #
+        # Activating a language touches global state, and this suite has
+        # already been bitten once by a test leaving a system parameter
+        # behind for whatever class ran next. So the before and after are
+        # compared, and the clock is read, rather than assuming neither
+        # matters.
+        import time as _time
+
+        before = [code for code, _name in self.env["res.lang"].get_installed()]
+        started = _time.monotonic()
+        self.env["res.lang"]._activate_lang("es_ES")
+        self.env.registry.clear_cache()
+        elapsed = _time.monotonic() - started
+        _logger.info("[LANG] activating es_ES took %.2fs", elapsed)
+        self.assertLess(
+            elapsed, 120.0,
+            "activating es_ES took %.0fs, which is long enough to be "
+            "worth knowing about before it is in every run" % elapsed)
+
         installed = self.env["res.lang"].sudo().search([])
-        if len(installed) < 2:
-            self.skipTest("only one language installed; nothing to keep")
+        self.assertGreaterEqual(
+            len(installed), 2,
+            "es_ES could not be activated, so the fallback cannot be "
+            "tested against a second language")
+
+        # Asserting before == after INSIDE this test would be wrong: the
+        # test exists to activate a language, so of course the list grew.
+        # What can be asserted is the thing that actually leaks. The row
+        # itself goes with the transaction rollback. The ormcache behind
+        # get_installed() does NOT roll back - that is exactly how the
+        # trial_offer_end parameter survived into whatever class ran
+        # next. So the invariant checked here, and again on the way out,
+        # is that the cache AGREES WITH THE DATABASE rather than holding
+        # a stale answer of its own.
+        self.assertNotIn("es_ES", before,
+                         "es_ES was already installed, so this test is "
+                         "no longer exercising the activation it claims")
+        self._assert_cache_matches_database()
+        self.addCleanup(self._assert_cache_matches_database)
+        self.addCleanup(self.env.registry.clear_cache)
+
+    def _assert_cache_matches_database(self):
+        """get_installed() must not answer from a cache the rows no
+        longer support."""
+        self.env.registry.clear_cache()
+        cached = {code for code, _name in self.env["res.lang"].get_installed()}
+        self.env.cr.execute(
+            "SELECT code FROM res_lang WHERE active = true")
+        rows = {code for (code,) in self.env.cr.fetchall()}
+        self.assertEqual(
+            cached, rows,
+            "get_installed() says %s but res_lang says %s - the language "
+            "cache is out of step with the database and the next test "
+            "class would inherit it" % (sorted(cached), sorted(rows)))
         other = installed.filtered(lambda l: l.code != "es_ES")[:1]
         partner = self.env["res.partner"].create(
             {"name": "Manager Haslang", "lang": other.code})
