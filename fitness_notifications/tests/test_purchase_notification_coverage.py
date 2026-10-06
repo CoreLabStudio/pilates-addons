@@ -73,6 +73,18 @@ class TestPurchaseNotificationCoverage(TransactionCase):
             # Explicit, so the order total does not depend on whatever
             # promotion the chosen product is running on this database.
             'price_unit': 25.0})
+        # Odoo confirms a paid order only when amount_paid reaches
+        # _get_prepayment_required_amount(), and that is
+        # amount_total * prepayment_percent WHEN require_payment is on.
+        # require_payment is computed from the company's
+        # portal_confirmation_pay, which is a studio setting: False on a
+        # fresh install, True on the restored studio database, and
+        # whatever odoo.sh's build database happens to carry. This test
+        # is about whether confirming a purchase NOTIFIES her; Odoo's
+        # prepayment arithmetic is Odoo's, and has now broken this build
+        # twice without any of it being under test here. So the policy
+        # is pinned rather than inherited.
+        order.write({'require_payment': False})
         order.invalidate_recordset()
         tx = self.env['payment.transaction'].sudo().create({
             'provider_id': self.provider.id,
@@ -103,9 +115,34 @@ class TestPurchaseNotificationCoverage(TransactionCase):
         # which needs a journal and a payment-method line that a synthetic
         # provider has not got - so that half is deliberately not driven
         # here. The path under test is the one that tells the student.
+        # amount_paid is @api.depends('transaction_ids') - NOT on their
+        # state - so flipping a transaction to done by hand, which is
+        # the whole method of this test, does not recompute it. Anything
+        # that read it while the transaction was still pending leaves a
+        # stale zero behind, and the order then fails to confirm for a
+        # reason that has nothing to do with the code under test.
+        order.invalidate_recordset()
         tx.sudo()._check_amount_and_confirm_order()
         order.invalidate_recordset()
         return order, before, self._notifs()
+
+    def _why_not_confirmed(self, order):
+        """The numbers behind a refusal to confirm.
+
+        'draft' on its own cost three odoo.sh builds and a long afternoon
+        of guessing, because the failure could not be reproduced on any
+        local database and the message carried nothing to reason from.
+        Whatever breaks this next, it will say which quantity was wrong.
+        """
+        txs = order.transaction_ids
+        return (
+            "order is %r: require_payment=%r prepayment_percent=%r "
+            "amount_total=%r required=%r amount_paid=%r "
+            "transactions=%r" % (
+                order.state, order.require_payment, order.prepayment_percent,
+                order.amount_total, order._get_prepayment_required_amount(),
+                order.amount_paid,
+                [(t.reference, t.state, t.amount) for t in txs]))
 
     def _product(self, domain, label):
         prod = self.env['product.template'].sudo().search(domain, limit=1)
@@ -119,7 +156,8 @@ class TestPurchaseNotificationCoverage(TransactionCase):
              ('fitness_class_count', '>', 1)], 'multi-class pack')
         order, before, after = self._drive(prod, 'PROMISE-PACK')
         self.assertIn(order.state, ('sale', 'done'),
-                      "the order did not confirm, so nothing was credited")
+                      "the order did not confirm, so nothing was credited. "
+                      + self._why_not_confirmed(order))
         self.assertEqual(after, before + 1,
                          "a pack purchase produced no notification, so the "
                          "pending promise cannot be kept for packs")
@@ -130,7 +168,8 @@ class TestPurchaseNotificationCoverage(TransactionCase):
         if not prod:
             self.skipTest("no trial product on this database")
         order, before, after = self._drive(prod, 'PROMISE-TRIAL')
-        self.assertIn(order.state, ('sale', 'done'))
+        self.assertIn(order.state, ('sale', 'done'),
+                      self._why_not_confirmed(order))
         self.assertEqual(after, before + 1,
                          "a trial purchase produced no notification")
 
@@ -145,7 +184,8 @@ class TestPurchaseNotificationCoverage(TransactionCase):
             self.skipTest("no membership product on this database")
         order, before, after = self._drive(prod, 'PROMISE-MEMBERSHIP')
         self.assertIn(order.state, ('sale', 'done'),
-                      "the membership order did not confirm")
+                      "the membership order did not confirm. "
+                      + self._why_not_confirmed(order))
         self.assertEqual(after, before + 1,
                          "a membership purchase still produces no "
                          "notification, so the pending promise is unkept")
