@@ -1592,7 +1592,7 @@
                      that is not a moment to ask her for anything. -->
                 <t t-if="payment_state == 'done'">
                     <div class="mv-flashes">
-                        <div class="mv-flash mv-flash-ok">
+                        <div class="mv-flash mv-flash-ok" id="mv-pay-done">
                             <strong t-out="lbl_paid_head"/>
                             <span t-out="lbl_paid"/>
                         </div>
@@ -1601,7 +1601,7 @@
                 </t>
                 <t t-elif="payment_state == 'pending'">
                     <div class="mv-flashes">
-                        <div class="mv-flash mv-flash-info">
+                        <div class="mv-flash mv-flash-info" id="mv-pay-pending">
                             <strong t-out="lbl_paying_head"/>
                             <span t-out="lbl_paying"/>
                         </div>
@@ -1610,7 +1610,7 @@
                 </t>
                 <t t-elif="payment_state == 'failed'">
                     <div class="mv-flashes">
-                        <div class="mv-flash mv-flash-err">
+                        <div class="mv-flash mv-flash-err" id="mv-pay-failed">
                             <strong t-out="lbl_pay_failed_head"/>
                             <span t-out="lbl_pay_failed"/>
                         </div>

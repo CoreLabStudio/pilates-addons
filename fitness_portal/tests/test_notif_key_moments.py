@@ -15,6 +15,12 @@ import re
 from odoo.tests import HttpCase, tagged
 
 ASK = 'id="mv-notif-booked"'
+# By markup, not by words - the portal renders in the student's own
+# language, so a phrase asserted here passes on a fresh database and fails
+# on the production restore.
+PAID = 'id="mv-pay-done"'
+PAYING = 'id="mv-pay-pending"'
+FAILED = 'id="mv-pay-failed"'
 LANG_PREFIX = re.compile(r'^/(?:es|ca|en)(?:_[A-Z]{2})?(?=/)')
 
 
@@ -101,14 +107,29 @@ class TestKeyMomentAsk(HttpCase):
                          "a logged-out visitor is being shown the ask")
 
     # ── back from a card or Bizum payment ────────────────────────────────
-    def _a_transaction(self, state):
-        """One recent transaction for this student, in the given state."""
-        provider = self.env['payment.provider'].sudo().search([], limit=1)
-        method = (provider.payment_method_ids[:1]
-                  or self.env['payment.method'].sudo().search([], limit=1))
+    def _a_transaction(self, state, order=None):
+        """One recent transaction for this student, in the given state.
+
+        A provider is enabled and a method activated here rather than hoped
+        for. Providers ship disabled and methods ship archived, so the
+        earlier version of this helper skipped on every fresh database -
+        and a skip reads as a pass.
+        """
+        provider = self.env['payment.provider'].sudo().search(
+            [('code', '=', 'none')], limit=1) or self.env[
+                'payment.provider'].sudo().search([], limit=1)
+        method = self.env['payment.method'].sudo().with_context(
+            active_test=False).search([], limit=1)
         if not provider or not method:
-            self.skipTest("no payment provider on this database")
+            self.skipTest("this database has no payment provider at all")
+        # The provider has to be enabled before the method can be activated;
+        # Odoo refuses the other order.
+        provider.sudo().write({'state': 'test',
+                               'payment_method_ids': [(4, method.id)]})
+        method.sudo().write({'active': True})
+        self.env.registry.clear_cache()
         tx = self.env['payment.transaction'].sudo().create({
+            'sale_order_ids': [(6, 0, order.ids)] if order else False,
             'provider_id': provider.id,
             'payment_method_id': method.id,
             'reference': 'MOMENT-%s' % state,
@@ -119,11 +140,28 @@ class TestKeyMomentAsk(HttpCase):
         tx.sudo().write({'state': state})
         return tx
 
+    def _a_confirmed_order(self):
+        """A real, confirmed package order for this student."""
+        prod = self.env['product.template'].sudo().search(
+            [('fitness_is_package', '=', True)], limit=1)
+        if not prod:
+            self.skipTest("no package product on this database")
+        order = self.env['sale.order'].sudo().create({
+            'partner_id': self.student.partner_id.id,
+            'order_line': [(0, 0, {
+                'product_id': prod.product_variant_ids[:1].id,
+                'product_uom_qty': 1})]})
+        order.write({'state': 'sale'})
+        return order
+
     def test_a_confirmed_payment_carries_the_ask(self):
-        self._a_transaction('done')
+        """Done AND the order confirmed - the only shape that is really
+        paid. Done against an unconfirmed order is S00414 and reads as in
+        progress; TestPaymentReturnStates covers that separately."""
+        self._a_transaction('done', order=self._a_confirmed_order())
         body = self._as_student('/my/packages?from_payment=1')
         self.assertIn(ASK, body, "a paid return does not carry the ask")
-        self.assertIn('Payment received', body,
+        self.assertIn(PAID, body,
                       "she is not told the payment landed")
 
     def test_a_pending_payment_carries_the_ask(self):
@@ -133,7 +171,7 @@ class TestKeyMomentAsk(HttpCase):
         self._a_transaction('pending')
         body = self._as_student('/my/packages?from_payment=1')
         self.assertIn(ASK, body, "a pending return does not carry the ask")
-        self.assertIn('not confirmed it yet', body,
+        self.assertIn(PAYING, body,
                       "she is not told the payment is still in progress")
 
     def test_a_failed_payment_carries_no_ask(self):
@@ -141,7 +179,7 @@ class TestKeyMomentAsk(HttpCase):
         self._a_transaction('error')
         body = self._as_student('/my/packages?from_payment=1')
         self.assertNotIn(ASK, body, "the ask appeared after a failed payment")
-        self.assertIn('did not go through', body,
+        self.assertIn(FAILED, body,
                       "she is not told the payment failed")
 
     def test_without_the_marker_an_old_payment_changes_nothing(self):
