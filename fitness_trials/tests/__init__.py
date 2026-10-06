@@ -6,3 +6,7 @@ from . import test_app_refuses_spent_trial
 from . import test_phone_match
 from . import test_lang_cache
 from . import test_trial_email_policy
+from . import test_offer_ends_on_madrid_time
+from . import test_price_follows_the_request_date
+from . import test_approval_prices_end_to_end
+from . import test_ended_offer_message

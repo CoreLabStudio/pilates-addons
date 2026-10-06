@@ -69,13 +69,27 @@ class TestPurchaseNotificationCoverage(TransactionCase):
         self.env['sale.order.line'].sudo().create({
             'order_id': order.id,
             'product_id': product.product_variant_ids[:1].id,
-            'product_uom_qty': 1})
+            'product_uom_qty': 1,
+            # Explicit, so the order total does not depend on whatever
+            # promotion the chosen product is running on this database.
+            'price_unit': 25.0})
         order.invalidate_recordset()
         tx = self.env['payment.transaction'].sudo().create({
             'provider_id': self.provider.id,
             'payment_method_id': self.method.id,
             'reference': ref,
-            'amount': order.amount_total or 10.0,
+            # EXACTLY the order total, with no fallback.
+            #
+            # This was `order.amount_total or 10.0`, which is fine until
+            # the product prices to zero - and both trial products do
+            # right now, because their promotion runs to 16 October. A
+            # 10.00 transaction against a 0.00 order is an amount
+            # mismatch, _check_amount_and_confirm_order refuses to
+            # confirm on a mismatch, and the order stayed draft. The
+            # suite passed locally because the products these searches
+            # happen to pick here are priced; on odoo.sh they are not.
+            # The price below makes that independent of the database.
+            'amount': order.amount_total,
             'currency_id': order.currency_id.id,
             'partner_id': self.student.partner_id.id,
             'sale_order_ids': [(6, 0, order.ids)]})

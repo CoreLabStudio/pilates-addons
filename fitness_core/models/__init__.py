@@ -1,3 +1,4 @@
+from . import studio_time
 from . import fitness_classroom
 from . import fitness_class_category
 from . import fitness_class_type
