@@ -4,6 +4,7 @@ from datetime import datetime as _dt, time as _time, timedelta
 
 import pytz
 from odoo import models, fields, api, _
+from odoo.addons.fitness_core.models.studio_time import studio_today
 from odoo.exceptions import UserError
 
 
@@ -124,7 +125,17 @@ class FitnessTrialRequest(models.Model):
         end = self._trial_offer_end()
         if not end:
             return True
-        return fields.Date.context_today(self) <= end
+        # THE STUDIO'S DATE, not the reader's.
+        #
+        # This was fields.Date.context_today(self), which answers in the
+        # reader's timezone and falls back to UTC when she has none. On
+        # production that spread one deadline across five and a half
+        # hours: 131 students in Madrid lost the offer at midnight, 7
+        # with no timezone kept it until 02:00 the next morning, and 3
+        # on Asia/Calcutta lost it at 20:30 the evening before. Same
+        # offer, three different endings, decided by a field nobody
+        # filled in.
+        return studio_today() <= end
 
     @api.model
     def _live_schedule(self):
