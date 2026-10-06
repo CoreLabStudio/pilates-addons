@@ -344,3 +344,15 @@ msgid ""
 msgstr ""
 "Cert quan aquesta notificació diu que una classe seva s’ha mogut, s’ha "
 "cancel·lat o ha canviat d’instructor."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "%s is active"
+msgstr "%s està activa"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "You can book your classes now."
+msgstr "Ja pots reservar les teves classes."

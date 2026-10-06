@@ -4594,3 +4594,57 @@ msgstr "¿Quieres un aviso antes de esta clase?"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "We'll tell you if the time changes or the class is cancelled."
 msgstr "Te avisamos si cambia la hora o si se cancela la clase."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You must cancel at least %(hours)s hours before the class starts to recover your credit. Cancellations made less than %(hours)s hours before the class, or no-shows, will result in full credit deduction with no refund."
+msgstr "Debes cancelar al menos %(hours)s horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de %(hours)s horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Payment received."
+msgstr "Pago recibido."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your classes are ready to book."
+msgstr "Tus clases ya se pueden reservar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Payment in progress."
+msgstr "Pago en curso."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Your bank has not confirmed it yet. We will tell you as soon as it goes through - you do not need to pay again."
+msgstr "Tu banco aún no lo ha confirmado. Te avisamos en cuanto se complete; no hace falta que vuelvas a pagar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "That payment did not go through."
+msgstr "Ese pago no se ha completado."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Nothing has been charged. You can try again, or pay at the studio."
+msgstr "No se te ha cobrado nada. Puedes intentarlo de nuevo o pagar en el estudio."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "That payment was not completed."
+msgstr "Ese pago no se ha completado."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "You can try again, or pay at the studio. If you see a charge in your bank, write to us and we will sort it out."
+msgstr "Puedes intentarlo de nuevo o pagar en el estudio. Si ves un cargo en tu banco, escríbenos y lo resolvemos."

@@ -19,9 +19,13 @@ is the one nobody is watching.
 """
 
 import re
+from datetime import timedelta
 
 from odoo import fields
 from odoo.tests import HttpCase, tagged
+
+#: index order matches date.weekday(), Monday first
+WEEKDAY_CODES = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 
 def _text(html):
@@ -104,14 +108,30 @@ class TestNightlyPlacementsShowOnMySchedule(HttpCase):
         A hand-made calendar.event has none, so the job would place
         exactly one class and this test would pass having proved nothing.
         """
+        anchor_day = fields.Date.context_today(self.env.user) + timedelta(
+            days=2)
         sched = self.env["fitness.class.schedule"].sudo().create({
             "name": "Nightly weekly",
             "class_type_id": self.class_type.id,
             "classroom_id": self.room.id,
-            "weekday": "tue",
+            # The weekday and the start date are DERIVED from today,
+            # never written in. This used to say "tue" with date_start =
+            # today. On a Tuesday the first occurrence was therefore today
+            # at 08:00 studio time - 06:00 UTC - and My Schedule lists
+            # only class_start > now, so from 06:00 UTC onward the booking
+            # made at purchase dropped off the page and the cancel test
+            # failed on its own fixture guard. Pinned at 01:00 UTC it
+            # passed; at 12:00 and 23:30 it failed. It looked like a
+            # regression on both shapes only because both runs fell
+            # minutes the wrong side of 06:00, and it had passed the day
+            # before because that day was a Monday.
+            #
+            # Two clear days ahead, so no hour of any day can put the
+            # first occurrence behind now.
+            "weekday": WEEKDAY_CODES[anchor_day.weekday()],
             "start_time": 8.0,
             "duration": 1.0,
-            "date_start": fields.Date.context_today(self.env.user),
+            "date_start": anchor_day,
             "horizon_weeks": horizon_weeks,
             # teacher_user_id is NOT NULL on fitness.class.schedule. A
             # fixture without one does not fail an assertion, it fails the

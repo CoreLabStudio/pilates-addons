@@ -36,6 +36,32 @@ class TestMatriculaIsChargedInFull(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.matricula = cls.env.ref(MATRICULA).sudo()
+        # The registration product ships with no tax on a fresh database,
+        # so the one test that checks the tax arithmetic skipped there and
+        # ran only on the restore. A tax is created and attached here
+        # instead, because "the specific arithmetic that went wrong" is
+        # not something to verify on one shape only.
+        #
+        # PRICE-INCLUDED, which is how Spanish IVA works and how the
+        # studio's real tax is configured. The first version of this
+        # created a tax-excluded one, so 145.00 became 175.45 and three
+        # assertions that had nothing to do with the registration fee
+        # started failing. They only failed on a REBUILT fresh_main: the
+        # old one had been upgraded in place for weeks, the product
+        # carried no tax at all there, and the membership it is copied
+        # onto therefore carried none either. The test was resting on
+        # that emptiness without saying so.
+        if not cls.matricula.taxes_id.filtered(
+                lambda t: t.company_id == cls.env.company):
+            tax = cls.env['account.tax'].sudo().create({
+                'name': 'Matricula Test IVA 21%',
+                'amount_type': 'percent',
+                'amount': 21.0,
+                'type_tax_use': 'sale',
+                'price_include_override': 'tax_included',
+                'company_id': cls.env.company.id,
+            })
+            cls.matricula.write({'taxes_id': [(6, 0, tax.ids)]})
         cls.plan_monthly = cls.env['sale.subscription.plan'].sudo().create({
             'name': 'Matricula Test Mensual',
             'billing_period_value': 1, 'billing_period_unit': 'month'})
@@ -92,8 +118,10 @@ class TestMatriculaIsChargedInFull(TransactionCase):
         gross = self.matricula.fitness_effective_price()
         taxes = self.matricula.taxes_id.filtered(
             lambda t: t.company_id == self.env.company)
-        if not taxes:
-            self.skipTest("no tax on the registration product here")
+        self.assertTrue(
+            taxes,
+            "the registration product has no tax for this company even "
+            "though setUpClass attaches one")
         once_reduced = taxes.compute_all(
             gross, currency=self.matricula.currency_id, quantity=1.0,
         )['total_excluded']

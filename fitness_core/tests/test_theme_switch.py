@@ -10,6 +10,7 @@ not, on the exact devices nobody tests on. That is what this catches.
 import os
 import re
 
+from odoo.modules.module import get_module_path
 from odoo.tests import TransactionCase, tagged
 
 CSS = os.path.join(
@@ -78,18 +79,24 @@ class TestThemeSwitch(TransactionCase):
 
     def test_the_switch_is_in_the_portal_header(self):
         """A toggle nobody can find is not a toggle."""
-        header = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(CSS))),
-            'fitness_portal', 'views', 'portal_templates.xml')
-        # fitness_core cannot see fitness_portal's path from here in every
-        # layout, so fall back to searching the addons dir for the template.
-        if not os.path.exists(header):
-            root = os.path.dirname(os.path.dirname(os.path.dirname(
-                os.path.dirname(CSS))))
-            header = os.path.join(root, 'fitness_portal', 'views',
-                                  'portal_templates.xml')
-        if not os.path.exists(header):
-            self.skipTest("fitness_portal is not beside fitness_core here")
+        # Through Odoo's own module resolution, not by counting dirname()
+        # calls upward from this file. The old version walked two guesses
+        # at a relative path and skipped when neither hit - so on the
+        # production restore, where fitness_portal is installed and under
+        # test in the same run, this reported "fitness_portal is not
+        # beside fitness_core here" and passed without checking anything.
+        # A skip is an untested line, and this one was untrue as well.
+        module_path = get_module_path('fitness_portal')
+        self.assertTrue(
+            module_path,
+            "fitness_portal is not installed, so the portal header cannot "
+            "be checked - and this suite upgrades it, so that would be a "
+            "real problem rather than a reason to skip")
+        header = os.path.join(module_path, 'views', 'portal_templates.xml')
+        self.assertTrue(
+            os.path.exists(header),
+            "fitness_portal resolves to %r but has no "
+            "views/portal_templates.xml" % module_path)
         with open(header, encoding='utf-8') as fh:
             markup = fh.read()
         self.assertEqual(

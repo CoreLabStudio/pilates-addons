@@ -91,6 +91,12 @@
                         <t t-else="">El estudio te confirmará la clase en breve. Te hemos enviado una copia de tu solicitud por correo.</t>
                     </p>
                 </div>
+                <!-- Only for a signed-in student. This page is public, and
+                     asking a logged-out visitor to turn on notifications for
+                     an account she does not have is meaningless. -->
+                <t t-if="notif_ask_ok">
+                    <t t-call="fitness_portal.mv_notif_moment_ask"/>
+                </t>
                 <!-- Not "submit another request": there is one trial per
                      person, so inviting a second one offered something that
                      would be refused. The page ends by looking forward to

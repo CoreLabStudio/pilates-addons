@@ -206,6 +206,19 @@ class TrialRequestController(http.Controller):
             'form_values': {},
             'source': 'website',
         }
+        # The opt-in ask on the confirmation. This route is auth='public', so
+        # a logged-out visitor reaches the same page - and asking her to turn
+        # on notifications for an account she does not have is meaningless.
+        # Gated server-side rather than in the browser, because the browser
+        # cannot tell a public session from a student's.
+        user = request.env.user
+        ctx['notif_ask_ok'] = bool(
+            user and not user._is_public()
+            and user.has_group('fitness_core.group_fitness_student'))
+        if ctx['notif_ask_ok']:
+            from odoo.addons.fitness_portal.controllers.portal import (
+                FitnessStudentPortal)
+            ctx.update(FitnessStudentPortal()._notif_labels())
         ctx.update(extra)
         return ctx
 
