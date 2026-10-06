@@ -18,7 +18,7 @@ both directions: refusing everything would pass half of this and be a worse
 bug than the one it replaced.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 from odoo.tests import HttpCase, tagged
 
@@ -46,6 +46,58 @@ class TestAppRefusesSpentTrial(HttpCase):
             len(trials), 2, "this test needs both trial products")
         self.first_id, self.second_id = trials[0].id, trials[1].id
         self.password = "spent-app-pw-1"
+        self._put_a_class_on_the_calendar()
+
+    def _put_a_class_on_the_calendar(self):
+        """A class of our own for the trial form to offer.
+
+        _a_slot() used to walk the next nineteen days asking the endpoint
+        for slots and skip when it found none, which is every fresh
+        database - so these six ran on the production restore only. The
+        same approach the phone-match privacy test takes is used here
+        instead: put a class on the calendar and then ask.
+
+        A plain calendar.event is enough. These tests submit a request
+        against a slot; they do not need a recurrence, which is what the
+        placement tests need and build for themselves.
+
+        Three days out, on an explicit date rather than an offset from
+        whatever hour this runs at. _is_open_on() derives the open
+        weekdays from active schedules and returns True when there are
+        none, so a fresh database accepts any day; a database that does
+        carry schedules is handled by _a_slot() asking the same question
+        the submit asks.
+        """
+        ctype = self.env["fitness.class.type"].sudo().create({
+            "name": "Spent Trial Reformer",
+            "classroom_type": "reformer",
+            "duration": 50,
+            "level": "all",
+            "session_type": "group",
+        })
+        made = self.env["calendar.event"].sudo()
+        for n in range(3, 12):
+            day = date.today() + timedelta(days=n)
+            if not self.TR._is_open_on(day):
+                continue
+            # 10:00 and 19:00 studio time, so one lands in each of the
+            # two periods the form asks for.
+            for hour in (10, 19):
+                start = datetime.combine(day, time(hour, 0))
+                made |= self.env["calendar.event"].sudo().create({
+                    "name": "Spent trial class %s %02d:00" % (day, hour),
+                    "start": start,
+                    "stop": start + timedelta(minutes=50),
+                    "class_type_id": ctype.id,
+                    "is_fitness_class": True,
+                    "capacity": 10,
+                })
+            if len(made) >= 4:
+                break
+        self.env.flush_all()
+        self.assertTrue(
+            made, "no open day in the next eleven to put a class on")
+        return made
 
     def _student(self, suffix):
         user = self.env["res.users"].with_context(
@@ -105,7 +157,10 @@ class TestAppRefusesSpentTrial(HttpCase):
                     slots = []
                 if slots:
                     return day, period, slots[0]
-        self.skipTest("no trial slots offered on this database")
+        self.fail(
+            "no trial slot was offered in the next nineteen days even "
+            "though setUp put classes on the calendar - the form would "
+            "show a student nothing to book")
 
     def _submit(self, user, source):
         day, period, slot = self._a_slot()
