@@ -19,14 +19,28 @@ The same fault as fitness_subscriptions' fitness_fixed_slot_warning.
 from datetime import timedelta
 
 from odoo import fields
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, freeze_time, tagged
 
+from odoo.addons.fitness_core.models.studio_time import studio_today
 from odoo.addons.fitness_core.tests.lang_cache_common import LangCacheMixin
 
 MODULE = 'fitness_packages'
 
+#: 00:30 in Madrid, 23:30 UTC on the day before.
+#:
+#: Pinned so the promotion this file builds is always the same promotion.
+#: fitness_effective_price() resolves "today" with studio_today(), so a
+#: window measured from the UTC date is a day away from the one the
+#: product compares it against for the hour before midnight in Madrid.
+#: The window here is wide enough that the day does not flip the answer,
+#: but fitness_promo_summary renders its end date through format_date -
+#: so the string this file compares across languages is a different
+#: string every day until the clock is pinned.
+PINNED_UTC = '2026-11-09 23:30:00'
+
 
 @tagged("post_install", "-at_install")
+@freeze_time(PINNED_UTC)
 class TestPackagesLangCache(LangCacheMixin, TransactionCase):
 
     longMessage = False
@@ -99,7 +113,7 @@ class TestPackagesLangCache(LangCacheMixin, TransactionCase):
         well as its wording through _(), so it is language-dependent
         twice over and worth pinning separately.
         """
-        today = fields.Date.context_today(self.env.user)
+        today = studio_today()
         product = self._product(
             fitness_promo_mode='percent', fitness_promo_percent=20.0,
             fitness_promo_start=today - timedelta(days=1),

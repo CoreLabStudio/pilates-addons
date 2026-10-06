@@ -19,12 +19,29 @@ shown and what action_add charges unless she overrides it.
 from datetime import timedelta
 
 from odoo import fields
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, freeze_time, tagged
+
+from odoo.addons.fitness_core.models.studio_time import studio_today
 
 PRIVATE_REFORMER = 'fitness_packages.product_private_single'
 
+#: 00:30 in Madrid, 23:30 UTC on the day before.
+#:
+#: The wizard's price comes from fitness_effective_price(), which
+#: resolves "today" with studio_today(). The window below is built from
+#: the same date, so the two cannot drift apart: measuring it from the
+#: UTC date instead puts it a day away from the date the product
+#: compares it against, for the hour before midnight in Madrid.
+#:
+#: This window is a month wide, so that day would not flip any
+#: assertion here today. It is pinned anyway, because the next person to
+#: narrow one of these windows should not have to rediscover which of
+#: the two dates the product is using.
+PINNED_UTC = '2026-11-09 23:30:00'
+
 
 @tagged("post_install", "-at_install")
+@freeze_time(PINNED_UTC)
 class TestPrivateClassPromoPrice(TransactionCase):
 
     longMessage = False
@@ -74,7 +91,9 @@ class TestPrivateClassPromoPrice(TransactionCase):
         return defaults.get('price')
 
     def _set_promo(self, mode, percent=0.0, days_from=-1, days_to=30):
-        today = fields.Date.context_today(self.env.user)
+        # The studio's date, which is what fitness_effective_price()
+        # compares the window against.
+        today = studio_today()
         self.product.write({
             'fitness_promo_mode': mode,
             'fitness_promo_percent': percent,
