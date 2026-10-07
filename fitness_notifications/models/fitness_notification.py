@@ -42,6 +42,12 @@ class FitnessNotification(models.Model):
         # survey token, and somebody tapping what she thinks is a message
         # from Yoleyva should not land on a questionnaire.
         ('campaign', 'Studio Survey'),
+        # Studio-facing. Its own type rather than borrowing
+        # generation_stalled: a manager who sees that one reasonably
+        # thinks the timetable has stopped being generated, which is an
+        # emergency, and duplicates are the least urgent thing she is
+        # told all day.
+        ('duplicate_contacts', 'Possible Duplicate Contacts'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")
