@@ -784,7 +784,14 @@ class FitnessTrialRequest(models.Model):
                     'confirmation_email_sent_date': fields.Datetime.now(),
                 })
             else:
+                # Pending: no slot was chosen, so the studio has to arrange
+                # one. The student was told we had her request; the studio
+                # was told nothing at all, on the one branch where it is the
+                # studio that has to act. Every request taken from the
+                # website since this form shipped has been waiting for
+                # somebody to notice it in a list.
                 rec._send_pending_email()
+                rec._send_admin_notification()
         return records
 
     # Set by _decline, and by nothing else. A context key rather than a
