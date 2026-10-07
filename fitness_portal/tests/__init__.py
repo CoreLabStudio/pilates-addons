@@ -45,3 +45,4 @@ from . import test_signup_duplicate_join
 from . import test_duplicate_candidate_list
 from . import test_duplicate_merge_guards
 from . import test_duplicate_join_boundaries
+from . import test_verification_join_http

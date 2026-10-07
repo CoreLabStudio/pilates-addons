@@ -170,6 +170,57 @@ class TestDuplicateJoinBoundaries(TransactionCase):
             "access is not proof that an address belongs to anybody")
         self.assertNotIn('_fitness_autojoin_target', source)
 
+    # == (5b) only OUR token may trigger a join =====================
+    def test_only_our_own_token_can_trigger_a_join(self):
+        """Odoo's signup token is not proof that she controls the inbox.
+
+        verify_email accepts two tokens. Ours is emailed to her and
+        spent on use, so following it proves she reads that mailbox.
+        Odoo's signup token is also minted when a manager grants access
+        from the back office, and a link a manager can paste anywhere
+        says nothing about who holds the address - so the join must sit
+        INSIDE the branch that only our own token reaches.
+
+        Structural rather than behavioural: the distinction lives in the
+        control flow of one endpoint, and this asserts the shape of it.
+        It is here because reverting the guard previously broke nothing.
+        """
+        import inspect
+        from odoo.addons.fitness_portal.controllers import signup_override
+        src = inspect.getsource(signup_override)
+        start = src.index('def verify_email')
+        body = src[start:]
+        nxt = body.find(chr(10) + '    @http.route', 1)
+        if nxt > 0:
+            body = body[:nxt]
+
+        # find(), not index(). index() RAISES when the line is gone,
+        # which reports as an error rather than a failed assertion - and
+        # an error reads like the test is broken rather than like the
+        # guard is. Measured: reverting the guard errored instead of
+        # failing until this was changed.
+        flag = body.find('verified_herself = bool(partner_user)')
+        guard = body.find('if verified_herself:')
+        join = body.find('_fitness_autojoin_target')
+
+        self.assertNotEqual(
+            join, -1,
+            "verify_email no longer attempts the join at all")
+        self.assertNotEqual(
+            flag, -1,
+            "verify_email no longer records WHICH token verified her, so "
+            "it cannot tell our own single-use link from Odoo's signup "
+            "token - which a manager can mint and paste anywhere")
+        self.assertNotEqual(
+            guard, -1,
+            "the join is no longer guarded by verified_herself, so a "
+            "back-office grant would trigger an automatic merge")
+        self.assertLess(flag, join, "the flag is set after the join")
+        self.assertLess(
+            guard, join,
+            "the join is NOT inside the our-own-token branch, so Odoo's "
+            "signup token would join duplicates too")
+
     # == (6) verifying twice ========================================
     def test_joining_twice_does_nothing_the_second_time(self):
         desk = self._contact('Twice Person', 'twice@example.invalid')
