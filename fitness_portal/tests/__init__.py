@@ -46,3 +46,5 @@ from . import test_duplicate_candidate_list
 from . import test_duplicate_merge_guards
 from . import test_duplicate_join_boundaries
 from . import test_verification_join_http
+from . import test_waiting_on_the_studio
+from . import test_waiting_states_and_roles

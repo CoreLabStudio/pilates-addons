@@ -1657,7 +1657,7 @@
                 <!-- Said plainly, above the cards. A student who takes the
                      wrong trial has spent the only one they get, so this is
                      not left to be inferred from the two prices. -->
-                <t t-if="active_tab == 'classes' and trial_offered">
+                <t t-if="active_tab == 'classes' and trial_offered and not trial_pending">
                     <div class="mv-trial-note" t-out="lbl_trial_pick_one"/>
                 </t>
                 <!-- The other half of that sentence: once it is spent, the
