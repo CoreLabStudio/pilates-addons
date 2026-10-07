@@ -1672,6 +1672,10 @@ class FitnessStudentPortal(http.Controller):
             # trial products is priced at zero for them. The note above the
             # cards is about that offer, so it is what the note hangs on.
             'trial_offered':            bool(set(student_price) & free_ids),
+            # ...but she may have already chosen. The cards themselves say
+            # "Request sent"; the note above them went on saying "choose
+            # Barre or Reformer" beside them.
+            'trial_pending':            self._trial_awaiting_studio(partner),
             # Her trial entitlement is spent and the cards that were it are
             # gone with it, so the Classes tab shows only the private and duo
             # options - not empty, but with nothing ordinary on it and no
@@ -3935,6 +3939,24 @@ class FitnessStudentPortal(http.Controller):
             return False
         return not self._owned_class_types(partner.id)
 
+    def _trial_awaiting_studio(self, partner):
+        """She has asked for her free trial and the studio has not answered.
+
+        A state the app had no word for. _trial_request_open answers whether
+        the trial is still hers to ask for, which stays true while a request
+        sits in the studio's list - so every screen that asked it went on
+        telling her to request the class she had already requested, and the
+        form behind the button refuses a second one. Home was given the
+        distinction when that was noticed on Home; the shop banner, the three
+        empty-state prompts and the timetable hint were never asked.
+
+        Narrow on purpose: it is False once the trial has been taken, so a
+        student whose class has been placed is an ordinary student again.
+        """
+        if not partner or self._trial_entitlement_used(partner):
+            return False
+        return bool(self._pending_trial_request(partner))
+
     def _no_sources_prompt(self, partner):
         """What to say to a student who cannot book anything yet.
 
@@ -3943,6 +3965,18 @@ class FitnessStudentPortal(http.Controller):
         page says it in a fourth. They used to be able to drift apart.
         """
         _ = request.env._
+        if self._trial_awaiting_studio(partner):
+            # Asked and waiting: there is nothing for her to do here, and the
+            # form the other branch points at would refuse her.
+            return {
+                # Home's exact term, not a longer version of it. Both this
+                # and the CTA below are already in the Spanish and Catalan
+                # catalogues; a reworded sentence would be a new msgid and
+                # would reach a Spanish student in English.
+                'no_sources_msg': _('Your trial request is with the studio'),
+                'no_sources_cta': _('Weekly Timetable'),
+                'no_sources_href': '/my/timetable',
+            }
         if self._trial_request_open(partner):
             return {
                 'no_sources_msg': _('Your first class is free. The studio '
@@ -4052,6 +4086,12 @@ class FitnessStudentPortal(http.Controller):
 
         active = discipline if discipline in ('reformer', 'barre') else 'reformer'
         eligible_types = self._eligible_class_types(partner.id)
+        # An approved trial mints a real order and shows up in eligible_types
+        # like any other credit, so holding nothing here means she holds
+        # nothing - but it does not mean she has nothing coming. A student
+        # waiting on her trial was told to tap a class and see the options,
+        # and the only option she can act on is a form that would refuse her.
+        awaiting_trial = self._trial_awaiting_studio(partner)
 
         schedules = request.env['fitness.class.schedule'].sudo().search([
             ('active', '=', True),
@@ -4164,7 +4204,10 @@ class FitnessStudentPortal(http.Controller):
             'lbl_booked': _('Booked'),
             'lbl_full': _('Full'),
             'lbl_open': _('Open'),
-            'lbl_buy_hint': _('You have no credit for these classes yet — tap any class to see the options.'),
+            'lbl_buy_hint': (
+                _('Your trial request is with the studio')
+                if awaiting_trial else
+                _('You have no credit for these classes yet — tap any class to see the options.')),
         })
 
     def _short_date(self, dt):
