@@ -41,3 +41,5 @@ from . import test_booking_screen_policy
 from . import test_notif_key_moments
 from . import test_payment_return_states
 from . import test_gift
+from . import test_signup_duplicate_join
+from . import test_duplicate_candidate_list

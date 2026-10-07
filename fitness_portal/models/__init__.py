@@ -10,3 +10,6 @@ from . import calendar_grid
 from . import email_verification
 from . import fitness_gift
 from . import make_student_wizard
+from . import res_partner_duplicate
+from . import fitness_duplicate_candidate
+from . import fitness_duplicate_join_log

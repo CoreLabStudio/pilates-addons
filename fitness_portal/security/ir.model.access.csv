@@ -10,3 +10,5 @@ access_fitness_gift_log_manager,fitness.gift.log manager,model_fitness_gift_log,
 access_fitness_gift_log_system,fitness.gift.log system,model_fitness_gift_log,base.group_system,1,1,1,1
 access_fitness_desk_sale_wizard_manager,fitness.desk.sale.wizard.manager,model_fitness_desk_sale_wizard,fitness_core.group_fitness_manager,1,1,1,1
 access_fitness_make_student_wizard_manager,fitness.make.student.wizard manager,model_fitness_make_student_wizard,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_duplicate_candidate_manager,fitness.duplicate.candidate manager,model_fitness_duplicate_candidate,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_duplicate_join_log_manager,fitness.duplicate.join.log manager,model_fitness_duplicate_join_log,fitness_core.group_fitness_manager,1,0,0,0
