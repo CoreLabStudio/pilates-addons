@@ -140,7 +140,10 @@
                         <t t-elif="_lang == 'ca_ES'">Sol·licitar una classe de prova</t>
                         <t t-else="">Solicitar clase de prueba</t>
                     </h5>
-                    <p class="text-muted small mb-0">
+                    <!-- Do not invite her to fill in a form that is not
+                         drawn. Once the offer has ended the message below
+                         is the whole of the page. -->
+                    <p class="text-muted small mb-0" t-if="offer_open">
                         <t t-if="_lang == 'en_US'">Choose your class type and fill in the form.</t>
                         <t t-elif="_lang == 'ca_ES'">Tria el tipus de classe i omple el formulari.</t>
                         <t t-else="">Elige el tipo de clase y rellena el formulario.</t>
@@ -171,7 +174,41 @@
                     </div>
                 </t>
 
-                <form method="post" action="/trial/submit" class="mv-trial-form">
+                <!-- The offer is over. Say so, with the real prices, and
+                     do not draw a form that cannot be submitted. Until this
+                     existed the page simply rendered with no classes on it,
+                     because _offered_class_types() returns nothing once the
+                     horizon has passed - a blank page and no explanation. -->
+                <!-- In the page's OWN language. This was built in the
+                     controller with _(), which resolves against
+                     request.env.lang - a different language from the one
+                     this page renders in, so a Spanish visitor read an
+                     English sentence in the middle of a Spanish page.
+                     The prices are values from the products' list_price;
+                     no figure is written into this template. -->
+                <t t-if="not offer_open">
+                    <div class="alert alert-info" role="alert">
+                        <t t-if="_lang == 'en_US'">
+                            The free trial has ended. You can book a trial class
+                            for <t t-out="trial_price_barre"/> € (Barre) or
+                            <t t-out="trial_price_reformer"/> € (Reformer) in the app.
+                        </t>
+                        <t t-elif="_lang == 'ca_ES'">
+                            La classe de prova gratuïta s'ha acabat. Pots reservar
+                            una classe de prova per <t t-out="trial_price_barre"/> €
+                            (Barre) o <t t-out="trial_price_reformer"/> € (Reformer)
+                            a l'app.
+                        </t>
+                        <t t-else="">
+                            La clase de prueba gratuita ha terminado. Puedes reservar
+                            una clase de prueba por <t t-out="trial_price_barre"/> €
+                            (Barre) o <t t-out="trial_price_reformer"/> € (Reformer)
+                            en la app.
+                        </t>
+                    </div>
+                </t>
+
+                <form t-if="offer_open" method="post" action="/trial/submit" class="mv-trial-form">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <!-- Which entry point this was. Stamped here rather than
                          inferred from the session: somebody can be signed in

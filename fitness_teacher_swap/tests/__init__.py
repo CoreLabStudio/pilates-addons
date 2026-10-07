@@ -3,3 +3,4 @@ from . import test_swap_tells_the_new_instructor
 from . import test_instructor_reads_her_own_classes
 from . import test_swap_emails_the_student
 from . import test_rescheduled_email_policy
+from . import test_her_page_keeps_today

@@ -2,6 +2,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import float_compare, float_is_zero, float_round
 from odoo.tools.misc import format_date
+from odoo.addons.fitness_core.models.studio_time import studio_today
 
 
 class ProductTemplate(models.Model):
@@ -128,7 +129,11 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         if self.fitness_promo_mode == 'none':
             return False
-        on = on or fields.Date.context_today(self)
+        # The studio's date, so the promotion ends for everybody at the
+        # same moment. The trial gate and this one decide the same thing
+        # from two different fields otherwise, and a student could be
+        # shown a free trial by one and charged by the other.
+        on = on or studio_today()
         if self.fitness_promo_start and on < self.fitness_promo_start:
             return False
         if self.fitness_promo_end and on > self.fitness_promo_end:

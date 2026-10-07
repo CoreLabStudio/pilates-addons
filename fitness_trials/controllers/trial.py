@@ -8,6 +8,7 @@ from datetime import date as _date, datetime, time as _time, timedelta
 
 from odoo import fields as _odoo_fields, http, _
 from odoo.http import request
+from odoo.addons.fitness_core.models.studio_time import studio_today
 
 _logger = logging.getLogger(__name__)
 
@@ -193,10 +194,28 @@ class TrialRequestController(http.Controller):
         lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
         if lang not in _VALID_LANGS:
             lang = 'es_ES'
+        # Whether the offer is still running, and what a trial costs once
+        # it is not. Without these the form simply rendered empty when the
+        # deadline passed - _offered_class_types() returns nothing once the
+        # horizon is behind us - so a student arriving on the 17th saw a
+        # page with no classes and no explanation.
+        offer_open = Trials._trial_offer_open()
+        prices = {}
+        for prod in Trials._all_trial_products():
+            kind = prod.fitness_class_type or ''
+            if kind:
+                # The list price, never a number typed into a template.
+                prices[kind] = prod.list_price
         ctx = {
             'barre_types': types['barre'],
             'reformer_types': types['reformer'],
-            'today_iso': _date.today().isoformat(),
+            'offer_open': offer_open,
+            'trial_price_barre': prices.get('barre'),
+            'trial_price_reformer': prices.get('reformer'),
+            # The studio's date. _date.today() is UTC, so between midnight
+            # and 02:00 Madrid the form offered yesterday as the earliest
+            # bookable day.
+            'today_iso': studio_today().isoformat(),
             # Which days the studio is open, for the hint under the date box
             # and for the check in the browser. Python's weekday numbers,
             # because that is what a Date gives JavaScript once shifted.
