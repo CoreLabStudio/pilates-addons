@@ -11,6 +11,7 @@
                  seeing her own history. -->
             <list string="Possible duplicates" create="false">
                 <field name="email"/>
+                <field name="matched_on"/>
                 <field name="partner_ids" widget="many2many_tags"/>
                 <field name="partner_count"/>
                 <field name="login_count"/>
@@ -28,9 +29,22 @@
         <field name="model">fitness.duplicate.candidate</field>
         <field name="arch" type="xml">
             <form string="Possible duplicate" create="false">
+                <header>
+                    <!-- Merge is only offered on a pair. Three or more
+                         contacts is not something to resolve with one
+                         button, and Odoo's own wizard refuses more than
+                         three anyway. -->
+                    <button name="action_merge" type="object" string="Merge"
+                            class="btn-primary"
+                            invisible="partner_count != 2 or resolved"
+                            confirm="Merging cannot be undone. The contact
+                                     that holds less history will be removed
+                                     and everything on it moved across."/>
+                </header>
                 <sheet>
                     <group>
                         <field name="email" readonly="1"/>
+                        <field name="matched_on" readonly="1"/>
                         <field name="reason" readonly="1"/>
                         <field name="has_history" readonly="1"/>
                     </group>
@@ -45,6 +59,11 @@
                         <field name="order_count" readonly="1"/>
                     </group>
                     <group>
+                        <!-- The tick Merge refuses to run without. It is
+                             the record that a person looked, which is the
+                             only thing between a shared family address
+                             and two people being fused into one. -->
+                        <field name="checked"/>
                         <!-- Ticking this keeps the nightly rebuild from
                              reopening a decision somebody has already
                              made. -->

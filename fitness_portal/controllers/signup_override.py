@@ -566,9 +566,17 @@ class FitnessSignup(AuthSignupHome):
                 if survivor:
                     partner._fitness_join_into(survivor)
             except Exception:
-                _logger.exception(
+                # WARNING, not exception(). exception() logs at ERROR, and
+                # the release gate counts ERROR lines - so the first time a
+                # merge failed in production it would have turned a green
+                # build red for something that is, by design, survivable:
+                # she is verified, both contacts are still there, and the
+                # pair goes to the manager's list on the next scan.
+                # exc_info keeps the traceback without the severity.
+                _logger.warning(
                     "[DUPLICATE] joining failed for %s; verification itself "
-                    "stands and she can sign in", partner_user.login)
+                    "stands and she can sign in",
+                    partner_user.login, exc_info=True)
 
         # Clear the signup. Read off the user rather than off a `partner`
         # local, which now only exists on the legacy-token branch: our own

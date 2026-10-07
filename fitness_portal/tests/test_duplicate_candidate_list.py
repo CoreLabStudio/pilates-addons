@@ -41,9 +41,20 @@ class TestDuplicateCandidateList(TransactionCase):
                     cls.env.ref('base.group_user').id,
                     cls.env.ref(MANAGER_GROUP).id])]})
 
-    def _contact(self, name, email, **vals):
-        return self.env['res.partner'].sudo().create(
+    def _contact(self, name, email, history=True, **vals):
+        """A desk contact, carrying a trial unless told otherwise.
+
+        The rule refuses a pair holding nothing between them, so a
+        fixture without history exercises that refusal rather than the
+        shape the test is named for.
+        """
+        partner = self.env['res.partner'].sudo().create(
             dict({'name': name, 'email': email}, **vals))
+        if history:
+            self.env['fitness.trial.request'].sudo().create({
+                'name': name or 'x', 'email': email,
+                'partner_id': partner.id})
+        return partner
 
     def _user(self, name, email):
         return self.env['res.users'].with_context(
@@ -112,6 +123,28 @@ class TestDuplicateCandidateList(TransactionCase):
         self.assertEqual(
             row.order_count, 1,
             "the confirmed order on the desk contact was not counted")
+
+    def test_a_phone_pair_with_different_emails_is_listed(self):
+        """The pair an email search cannot see at all.
+
+        Same student, work address on one contact and personal on the
+        other. Nothing about her email matches, so until the scan looked
+        at phone numbers she was invisible - and she is never joined
+        automatically, because a number is not proof the way a verified
+        address is.
+        """
+        a = self._contact('Clara Font', 'clara.work@example.invalid')
+        a.sudo().phone = '600555444'
+        b = self._user('Clara Font', 'clara.home@example.invalid')
+        b.partner_id.sudo().phone = '+34 600 555 444'
+        self.Candidate._scan()
+        row = self.Candidate.search([('matched_on', '=', 'phone')]).filtered(
+            lambda r: a in r.partner_ids and b.partner_id in r.partner_ids)
+        self.assertTrue(
+            row, "a student with two different addresses and one phone "
+                 "number is invisible to the list, so nobody ever joins "
+                 "her two contacts")
+        self.assertIn("same phone number", row.reason)
 
     # -- what must stay off it ---------------------------------------
     def test_a_single_contact_is_not_a_duplicate(self):

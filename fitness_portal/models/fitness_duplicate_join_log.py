@@ -48,6 +48,18 @@ class FitnessDuplicateJoinLog(models.Model):
 
     bookings_moved = fields.Integer("Bookings moved", default=0)
     orders_moved = fields.Integer("Confirmed orders moved", default=0)
+    trials_moved = fields.Integer(
+        "Trials moved", default=0,
+        help="A spent free trial has no money against it and produces no "
+             "confirmed order, but it is the thing that goes missing: the "
+             "shop offers the free class again because the contact that "
+             "used it is the other one.")
+
+    merged_by_id = fields.Many2one(
+        'res.users', string="Merged by", ondelete='set null',
+        help="Empty when the system did it at verification; set when a "
+             "manager pressed Merge.")
+    was_automatic = fields.Boolean("Automatic", default=True)
 
     user_login = fields.Char(
         "Account",

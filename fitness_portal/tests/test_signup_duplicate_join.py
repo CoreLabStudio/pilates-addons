@@ -31,10 +31,23 @@ class TestSignupDuplicateJoin(TransactionCase):
         super().setUpClass()
         cls.env['ir.config_parameter'].sudo().set_param(AUTOJOIN_PARAM, '1')
 
-    def _desk_contact(self, name, email, **vals):
-        """A contact the studio made at the desk: no login of its own."""
-        return self.env['res.partner'].sudo().create(
+    def _desk_contact(self, name, email, history=True, **vals):
+        """A contact the studio made at the desk: no login of its own.
+
+        It carries a trial by default, because the rule refuses a pair
+        that holds nothing at all between them - there is nothing to
+        rescue, so there is no reason to take the risk. A desk contact
+        with no history whatsoever is not the case this feature exists
+        for, and a fixture without one tests a refusal rather than a
+        join. Pass history=False where that refusal IS the point.
+        """
+        partner = self.env['res.partner'].sudo().create(
             dict({'name': name, 'email': email}, **vals))
+        if history:
+            self.env['fitness.trial.request'].sudo().create({
+                'name': name or 'x', 'email': email,
+                'partner_id': partner.id})
+        return partner
 
     def _signup_user(self, name, email):
         """A contact that arrived by signing up: it has a login."""
@@ -240,6 +253,16 @@ class TestSignupDuplicateJoin(TransactionCase):
             user.partner_id.sudo()._fitness_autojoin_target(),
             "it joined contacts while the parameter was off, so the "
             "safety switch does not switch anything")
+
+    def test_a_pair_holding_nothing_is_not_worth_the_risk(self):
+        """Nothing to rescue, so no reason to merge anything."""
+        self._desk_contact('Hollow Person', 'hollow@example.invalid',
+                           history=False)
+        user = self._signup_user('Hollow Person', 'hollow@example.invalid')
+        self.assertFalse(
+            user.partner_id.sudo()._fitness_autojoin_target(),
+            "two contacts holding no history between them were merged, "
+            "which is all risk and no benefit")
 
     def test_an_unset_parameter_means_off(self):
         """Unset must be OFF here - the opposite of the trial gate.
