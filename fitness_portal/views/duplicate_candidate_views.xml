@@ -12,7 +12,11 @@
             <list string="Possible duplicates" create="false">
                 <field name="email"/>
                 <field name="matched_on"/>
-                <field name="partner_ids" widget="many2many_tags"/>
+                <field name="partner_ids" widget="many2many_tags"
+                       optional="hide"/>
+                <!-- The tags render active contacts only; this names every
+                     one that the count counts, archived included. -->
+                <field name="partner_names"/>
                 <field name="partner_count"/>
                 <field name="login_count"/>
                 <field name="booking_count"/>
@@ -39,9 +43,22 @@
                             invisible="partner_count != 2 or resolved"
                             confirm="Merging cannot be undone. The contact
                                      that holds less history will be removed
-                                     and everything on it moved across."/>
+                                     and everything on it moved across.
+                                     Check the names above first, including
+                                     any marked (archived)."/>
                 </header>
                 <sheet>
+                    <!-- Archived contacts carry no tag, so without this the
+                         screen shows a count with fewer names than it, and a
+                         merge gets decided half-blind. -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not archived_names">
+                        <strong>One of these is archived.</strong>
+                        An archived contact has no name tag, so check this
+                        really is the same person before merging:
+                        <field name="archived_names" readonly="1"
+                               nolabel="1" class="oe_inline"/>
+                    </div>
                     <group>
                         <field name="email" readonly="1"/>
                         <field name="matched_on" readonly="1"/>
@@ -49,6 +66,8 @@
                         <field name="has_history" readonly="1"/>
                     </group>
                     <group string="Contacts sharing this address">
+                        <field name="partner_names" readonly="1" nolabel="1"
+                               colspan="2"/>
                         <field name="partner_ids" widget="many2many_tags"
                                readonly="1" nolabel="1" colspan="2"/>
                     </group>
