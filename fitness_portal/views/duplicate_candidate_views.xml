@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_duplicate_candidate_list" model="ir.ui.view">
+        <field name="name">fitness.duplicate.candidate.list</field>
+        <field name="model">fitness.duplicate.candidate</field>
+        <field name="arch" type="xml">
+            <!-- Ordered so the ones with a student attached come first.
+                 A pair of empty contacts is tidying; a pair where one
+                 side holds the bookings is somebody signing in and not
+                 seeing her own history. -->
+            <list string="Possible duplicates" create="false">
+                <field name="email"/>
+                <field name="matched_on"/>
+                <field name="partner_ids" widget="many2many_tags"/>
+                <field name="partner_count"/>
+                <field name="login_count"/>
+                <field name="booking_count"/>
+                <field name="order_count"/>
+                <field name="has_history"/>
+                <field name="reason"/>
+                <field name="resolved" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fitness_duplicate_candidate_form" model="ir.ui.view">
+        <field name="name">fitness.duplicate.candidate.form</field>
+        <field name="model">fitness.duplicate.candidate</field>
+        <field name="arch" type="xml">
+            <form string="Possible duplicate" create="false">
+                <header>
+                    <!-- Merge is only offered on a pair. Three or more
+                         contacts is not something to resolve with one
+                         button, and Odoo's own wizard refuses more than
+                         three anyway. -->
+                    <button name="action_merge" type="object" string="Merge"
+                            class="btn-primary"
+                            invisible="partner_count != 2 or resolved"
+                            confirm="Merging cannot be undone. The contact
+                                     that holds less history will be removed
+                                     and everything on it moved across."/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="email" readonly="1"/>
+                        <field name="matched_on" readonly="1"/>
+                        <field name="reason" readonly="1"/>
+                        <field name="has_history" readonly="1"/>
+                    </group>
+                    <group string="Contacts sharing this address">
+                        <field name="partner_ids" widget="many2many_tags"
+                               readonly="1" nolabel="1" colspan="2"/>
+                    </group>
+                    <group>
+                        <field name="partner_count" readonly="1"/>
+                        <field name="login_count" readonly="1"/>
+                        <field name="booking_count" readonly="1"/>
+                        <field name="order_count" readonly="1"/>
+                    </group>
+                    <group>
+                        <!-- The tick Merge refuses to run without. It is
+                             the record that a person looked, which is the
+                             only thing between a shared family address
+                             and two people being fused into one. -->
+                        <field name="checked"/>
+                        <!-- Ticking this keeps the nightly rebuild from
+                             reopening a decision somebody has already
+                             made. -->
+                        <field name="resolved"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fitness_duplicate_candidate" model="ir.actions.act_window">
+        <field name="name">Possible duplicates</field>
+        <field name="res_model">fitness.duplicate.candidate</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('resolved', '=', False)]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No duplicate contacts to look at.
+            </p>
+            <p>
+                This list is rebuilt every night. It holds the shared addresses
+                the system would not join on its own - two accounts on one
+                address, or names that do not match - because joining those
+                wrongly cannot be undone.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_fitness_duplicate_candidate"
+        name="Possible duplicates"
+        parent="fitness_core.menu_fitness_root"
+        action="action_fitness_duplicate_candidate"
+        groups="fitness_core.group_fitness_manager"
+        sequence="95"/>
+
+    <record id="view_fitness_duplicate_join_log_list" model="ir.ui.view">
+        <field name="name">fitness.duplicate.join.log.list</field>
+        <field name="model">fitness.duplicate.join.log</field>
+        <field name="arch" type="xml">
+            <!-- Read only, including for a manager. These are the facts
+                 about a merge that cannot be undone; editing them would
+                 only make them untrue. -->
+            <list string="Joins made automatically" create="false"
+                  edit="false" delete="false">
+                <field name="create_date" string="When"/>
+                <field name="email"/>
+                <field name="survivor_name" string="Kept"/>
+                <field name="merged_name" string="Merged away"/>
+                <field name="merged_ref" string="Old id"/>
+                <field name="bookings_moved"/>
+                <field name="orders_moved"/>
+                <field name="user_login" string="Account"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fitness_duplicate_join_log" model="ir.actions.act_window">
+        <field name="name">Duplicate joins</field>
+        <field name="res_model">fitness.duplicate.join.log</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nothing has been joined automatically.
+            </p>
+            <p>
+                Every automatic join is written here before it happens,
+                because the merge deletes the other contact and there is
+                no way back afterwards.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_fitness_duplicate_join_log"
+        name="Duplicate joins"
+        parent="fitness_core.menu_fitness_root"
+        action="action_fitness_duplicate_join_log"
+        groups="fitness_core.group_fitness_manager"
+        sequence="96"/>
+
+</odoo>

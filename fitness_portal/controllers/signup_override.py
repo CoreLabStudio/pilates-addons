@@ -515,6 +515,12 @@ class FitnessSignup(AuthSignupHome):
         # forwarded or left in an inbox cannot be used twice.
         partner_user = request.env['fitness.email.verification'].sudo()._redeem(
             token)
+        # Which branch proved the address matters below. Our own token is
+        # self-service: it was emailed to her and she followed it. Odoo's
+        # signup token can also be minted by a manager granting access
+        # from the back office, and a link a manager can paste anywhere
+        # is not the same statement about who controls the mailbox.
+        verified_herself = bool(partner_user)
 
         if not partner_user:
             # Odoo's signup token, for anyone whose email was sent before this
@@ -542,6 +548,35 @@ class FitnessSignup(AuthSignupHome):
         # Assign fitness student group
         fitness_group = request.env.ref(STUDENT_GROUP)
         partner_user.sudo().write({'group_ids': [(4, fitness_group.id)]})
+
+        # She has just proved she controls this address, which is the only
+        # moment a duplicate may be joined without a human looking at it.
+        # See fitness_portal/models/res_partner_duplicate.py for what the
+        # rule refuses and why; it is off until a parameter is set.
+        #
+        # Wrapped, because verifying must succeed even if joining does
+        # not. A student who followed a valid link and met a 500 would be
+        # left unable to verify at all, which is a worse fault than the
+        # duplicate this is trying to clear up - and it is the fault this
+        # whole verification flow was rewritten to fix.
+        if verified_herself:
+            try:
+                partner = partner_user.partner_id.sudo()
+                survivor = partner._fitness_autojoin_target()
+                if survivor:
+                    partner._fitness_join_into(survivor)
+            except Exception:
+                # WARNING, not exception(). exception() logs at ERROR, and
+                # the release gate counts ERROR lines - so the first time a
+                # merge failed in production it would have turned a green
+                # build red for something that is, by design, survivable:
+                # she is verified, both contacts are still there, and the
+                # pair goes to the manager's list on the next scan.
+                # exc_info keeps the traceback without the severity.
+                _logger.warning(
+                    "[DUPLICATE] joining failed for %s; verification itself "
+                    "stands and she can sign in",
+                    partner_user.login, exc_info=True)
 
         # Clear the signup. Read off the user rather than off a `partner`
         # local, which now only exists on the legacy-token branch: our own

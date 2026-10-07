@@ -23,12 +23,29 @@ identically in both modules, and a database with a real date behaves
 exactly as it does today.
 """
 
-from odoo.tests import TransactionCase, tagged
+from datetime import date
+
+from odoo.tests import TransactionCase, freeze_time, tagged
+
+from odoo.addons.fitness_core.models.studio_time import studio_today
 
 PARAM = 'fitness.trial_offer_end'
 
+#: 00:30 in Madrid, 23:30 UTC on the day before.
+#:
+#: The deadline is a calendar date and the gate compares it with
+#: studio_today(), so the only hour in which "which date is it" has two
+#: answers is the one pinned here. Running unpinned, the boundary test
+#: below agreed with the gate for 23 hours a day and disagreed for the
+#: other one, which is the shape of fault that gets rerun and shrugged at
+#: rather than read.
+PINNED_UTC = '2026-11-09 23:30:00'
+PINNED_MADRID_DATE = date(2026, 11, 10)
+PINNED_UTC_DATE = date(2026, 11, 9)
+
 
 @tagged("post_install", "-at_install")
+@freeze_time(PINNED_UTC)
 class TestTrialOfferGate(TransactionCase):
 
     longMessage = False
@@ -90,13 +107,45 @@ class TestTrialOfferGate(TransactionCase):
 
     def test_today_is_still_open(self):
         """The boundary. `<=`, so the last day counts as open."""
-        from odoo import fields
-        today = fields.Date.context_today(self.env.user)
-        self._set(str(today))
+        self._set(str(studio_today()))
         self.assertTrue(
             self._open(),
             "the offer closed on its own last day - a student on the final "
             "day is told she has missed it")
+
+    def test_the_last_day_is_the_studios_day_not_the_readers(self):
+        """Who is asking must not change when the offer ends.
+
+        At the pinned instant it is already the 10th in Barcelona and
+        still the 9th in UTC. A deadline of the 9th has therefore passed
+        and a deadline of the 10th has not - whoever is reading, and
+        whatever timezone her account carries, which for most portal
+        accounts is none at all.
+        """
+        self._set(PINNED_UTC_DATE.isoformat())
+        self.assertFalse(
+            self._open(),
+            "a deadline that is yesterday in Barcelona is still letting "
+            "students claim the trial, because the gate is reading the UTC "
+            "date rather than the studio's")
+
+        self._set(PINNED_MADRID_DATE.isoformat())
+        self.assertTrue(
+            self._open(),
+            "the offer's own last day in Barcelona is already closed, which "
+            "is the gate reading a date that has not arrived there yet")
+
+    def test_the_clock_is_pinned_and_the_two_dates_differ(self):
+        """The test above means nothing unless both halves hold."""
+        from odoo import fields as odoo_fields
+        self.assertEqual(
+            studio_today(), PINNED_MADRID_DATE,
+            "the clock is not pinned, so the boundary tests are reading "
+            "whatever date the suite happens to run on")
+        self.assertEqual(
+            odoo_fields.Date.today(), PINNED_UTC_DATE,
+            "the pinned instant no longer straddles midnight in Madrid, so "
+            "the two dates are the same and nothing above discriminates")
 
     # -- a value nobody can read -------------------------------------------
 

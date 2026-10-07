@@ -8,9 +8,20 @@ because an alert that fires on a working system is an alert that gets muted.
 """
 from datetime import timedelta
 
-from odoo import fields
 from odoo.tests import TransactionCase, tagged
 from odoo.tools import mute_logger
+
+from odoo.addons.fitness_core.models.fitness_class_schedule import WEEKDAYS
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+#: The schedule model's own codes, not a hand-written copy of them.
+WEEKDAY_CODES = [code for code, _label in WEEKDAYS]
+
+#: Far enough ahead that no hour of any day puts the first generated
+#: class behind now. A named weekday starting today is a different
+#: fixture depending on which day the suite runs on, and on that weekday
+#: it depends on the hour as well.
+FIXTURE_LEAD_DAYS = 2
 
 #: The health check logs at ERROR when generation has stalled, which is the
 #: right level for a studio whose timetable has stopped. These tests stall one
@@ -45,11 +56,16 @@ class TestGenerationAlert(TransactionCase):
         teacher = cls.env["res.users"].create({
             "name": "Alert Teacher", "login": "alert.teacher@example.invalid",
             "group_ids": [(6, 0, [cls.env.ref("base.group_user").id])]})
+        cls.anchor = studio_today() + timedelta(days=FIXTURE_LEAD_DAYS)
         cls.sched = cls.Schedule.create({
             "class_type_id": ctype.id, "teacher_user_id": teacher.id,
-            "classroom_id": room.id, "weekday": "wed", "start_time": 18.0,
+            "classroom_id": room.id,
+            # Derived from the anchor: this file is about schedules going
+            # stale, not about which weekday they run on.
+            "weekday": WEEKDAY_CODES[cls.anchor.weekday()],
+            "start_time": 18.0,
             "duration": 1.0, "capacity": 6,
-            "date_start": fields.Date.today(), "horizon_weeks": 8})
+            "date_start": cls.anchor, "horizon_weeks": 8})
         cls.sched.action_generate()
 
     def _alerts(self):
@@ -117,13 +133,18 @@ class TestGenerationAlert(TransactionCase):
     def test_many_stalled_schedules_are_one_alert_not_many(self):
         """Twelve rows going stale is one fault, and twelve alerts mute it."""
         others = self.Schedule.browse()
-        for day in ("mon", "tue", "thu"):
+        # Three weekdays that are not the main schedule's, derived from
+        # the same anchor so they stay distinct from it on any day of
+        # the week.
+        for offset in (1, 2, 3):
+            day_start = self.anchor + timedelta(days=offset)
             s = self.Schedule.create({
                 "class_type_id": self.sched.class_type_id.id,
                 "teacher_user_id": self.sched.teacher_user_id.id,
                 "classroom_id": self.sched.classroom_id.id,
-                "weekday": day, "start_time": 18.0, "duration": 1.0,
-                "capacity": 6, "date_start": fields.Date.today(),
+                "weekday": WEEKDAY_CODES[day_start.weekday()],
+                "start_time": 18.0, "duration": 1.0,
+                "capacity": 6, "date_start": day_start,
                 "horizon_weeks": 8})
             s.action_generate()
             others |= s

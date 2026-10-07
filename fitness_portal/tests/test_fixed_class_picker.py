@@ -27,7 +27,20 @@ import pytz
 from odoo import fields
 from odoo.tests import HttpCase, tagged
 
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
 STUDIO_TZ = pytz.timezone('Europe/Madrid')
+
+#: Every weekly series here starts this many days out, never "today".
+#:
+#: The weekdays below are named on purpose - the whole feature is
+#: choosing which weekday a membership reserves, and the assertions say
+#: Wednesday. What was not on purpose was starting them today: on a
+#: Wednesday the first class is today at 18:00, so whether it had
+#: already happened - and therefore whether placement books it - came
+#: down to the hour the suite ran at. Starting two days out, no weekday
+#: and no hour can put the first class in the past.
+FIXTURE_LEAD_DAYS = 2
 
 
 @tagged("post_install", "-at_install")
@@ -90,6 +103,15 @@ class TestFixedClassPicker(HttpCase):
         })
 
     @classmethod
+    def _series_start(cls):
+        """The date every weekly series in this file begins on.
+
+        The studio's date, because that is the one the generator lays
+        its occurrences out against.
+        """
+        return studio_today() + timedelta(days=FIXTURE_LEAD_DAYS)
+
+    @classmethod
     def _schedule(cls, weekday, start_time):
         sched = cls.env["fitness.class.schedule"].create({
             "class_type_id": cls.class_type.id,
@@ -99,7 +121,7 @@ class TestFixedClassPicker(HttpCase):
             "start_time": start_time,
             "duration": 1.0,
             "capacity": 6,
-            "date_start": fields.Date.today(),
+            "date_start": cls._series_start(),
             "horizon_weeks": 8,
         })
         sched.action_generate()
@@ -249,7 +271,7 @@ class TestFixedClassPicker(HttpCase):
             "class_type_id": barre_type.id, "teacher_user_id": self.teacher.id,
             "classroom_id": barre_room.id, "weekday": "tue", "start_time": 18.0,
             "duration": 1.0, "capacity": 8,
-            "date_start": fields.Date.today(), "horizon_weeks": 8,
+            "date_start": self._series_start(), "horizon_weeks": 8,
         })
         barre.action_generate()
 

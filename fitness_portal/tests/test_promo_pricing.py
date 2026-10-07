@@ -12,13 +12,32 @@ tests pin that: the window arithmetic, the money, and - most importantly - the
 order line that Stripe is eventually handed carrying the same number the page
 displayed.
 """
-from datetime import timedelta
+from datetime import date, timedelta
 
-from odoo import fields
 from odoo.exceptions import ValidationError
-from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tests import HttpCase, TransactionCase, freeze_time, tagged
+
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+#: 00:30 in Madrid, which is 23:30 UTC on the day before.
+#:
+#: The clock is pinned because these windows are built a day wide at the
+#: edges - a promotion that starts today, one that ended yesterday - and
+#: fitness_effective_price() resolves "today" with studio_today().
+#: Reading the clock as UTC instead puts the window a day away from the
+#: date the product compares it against, so for the hour before midnight
+#: in Madrid this file asserted the opposite of what the shop does. An
+#: hour a night is not a flake worth chasing later; it is pinned here.
+#:
+#: The instant deliberately straddles midnight, so a test that goes back
+#: to reading the UTC date fails at once rather than looking correct for
+#: 23 hours a day.
+PINNED_UTC = '2026-11-09 23:30:00'
+PINNED_MADRID_DATE = date(2026, 11, 10)
+PINNED_UTC_DATE = date(2026, 11, 9)
 
 
+@freeze_time(PINNED_UTC)
 class _PromoCase(TransactionCase):
 
     longMessage = False
@@ -26,7 +45,8 @@ class _PromoCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.today = fields.Date.today()
+        # After super(), so the frozen clock is already running.
+        cls.today = studio_today()
         cls.product = cls.env["product.template"].create({
             "name": "Promo Trial Class",
             "list_price": 25.0,
@@ -122,8 +142,29 @@ class TestPromoPricing(_PromoCase):
         with self.assertRaises(ValidationError):
             self._promo("percent", 10.0, self.today, self.today - timedelta(days=1))
 
+    # ── the pin itself ───────────────────────────────────────────────────
+    def test_the_clock_is_pinned_and_the_two_dates_differ(self):
+        """Everything above is only deterministic while this holds.
+
+        It also checks the pin was chosen to discriminate: at this
+        instant Madrid and UTC are on different dates, so a window built
+        from the UTC date lands a day away from the one the product
+        compares it against.
+        """
+        from odoo import fields as odoo_fields
+        self.assertEqual(
+            studio_today(), PINNED_MADRID_DATE,
+            "the clock is not pinned, so these promotions are being built "
+            "against whatever date the suite happens to run on")
+        self.assertEqual(
+            odoo_fields.Date.today(), PINNED_UTC_DATE,
+            "the pinned instant no longer straddles midnight in Madrid, so "
+            "this file would pass even if it read the UTC date")
+        self.assertEqual(self.today, PINNED_MADRID_DATE)
+
 
 @tagged("post_install", "-at_install")
+@freeze_time(PINNED_UTC)
 class TestPromoCheckout(HttpCase):
     """The number on the page and the number on the order must be the same."""
 
@@ -132,7 +173,7 @@ class TestPromoCheckout(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.today = fields.Date.today()
+        cls.today = studio_today()
         cls.password = "promo-checkout-pw-1"
         cls.user = cls.env["res.users"].create({
             "name": "Promo Checkout Student",

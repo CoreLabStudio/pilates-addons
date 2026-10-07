@@ -21,6 +21,24 @@ import pytz
 from odoo import fields
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.fitness_core.models.fitness_class_schedule import WEEKDAYS
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+#: The schedule model's own codes, not a fifth hand-written copy of them.
+WEEKDAY_CODES = [code for code, _label in WEEKDAYS]
+
+#: Far enough ahead that no hour of any day can put the first occurrence
+#: of a generated series behind now.
+#:
+#: A schedule written as a named weekday starting today is a different
+#: fixture depending on what day the suite runs on: on that weekday the
+#: first class is TODAY, and whether it has already happened depends on
+#: the hour. Every assertion about "her next class" or "what was
+#: generated" then has a few hours a week in which it means something
+#: else. The weekday is derived from this anchor instead, so the fixture
+#: is the same shape on a Monday as on a Sunday.
+FIXTURE_LEAD_DAYS = 2
+
 STUDIO_TZ = pytz.timezone('Europe/Madrid')
 
 
@@ -189,10 +207,15 @@ class TestNoPhantomAttendees(TransactionCase):
             "name": "Phantom teacher",
             "login": "phantom.teacher@example.invalid",
             "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+        anchor = studio_today() + timedelta(days=FIXTURE_LEAD_DAYS)
         schedule = self.env["fitness.class.schedule"].create({
             "name": "Phantom schedule",
             "class_type_id": self.ctype.id,
-            "weekday": "tue",
+            # Derived, not written in: which weekday this is does not
+            # matter to the assertion, but whether its first class is in
+            # the past does.
+            "weekday": WEEKDAY_CODES[anchor.weekday()],
+            "date_start": anchor,
             "start_time": 7.0,
             "teacher_user_id": teacher.id})
         schedule.action_generate()
