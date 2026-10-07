@@ -258,6 +258,26 @@ class TestDuplicateMergeGuards(BookingFixture, TransactionCase):
             row.with_user(self.manager).action_merge()
         self.assertIn("membership", str(caught.exception).lower())
 
+    def test_merge_refuses_two_accounts(self):
+        """Two logins is two people's accounts, not one person's mess.
+
+        Merging moves one user's partner_id onto the other's contact,
+        which leaves two logins pointing at one person and nothing to
+        say afterwards whose history was whose. The list already routes
+        this to a human; a human deciding means closing an account
+        first, not pressing Merge.
+        """
+        a = self._user('Sara Vidal', 'twoacc.a@example.invalid')
+        b = self._user('Sara Vidal', 'twoacc.b@example.invalid')
+        b.partner_id.sudo().write({'email': 'twoacc.a@example.invalid'})
+        row = self._candidate_for(a.partner_id, b.partner_id)
+        row.checked = True
+        with self.assertRaises(UserError) as caught:
+            row.with_user(self.manager).action_merge()
+        self.assertIn("own login", str(caught.exception))
+        self.assertTrue(a.partner_id.exists() and b.partner_id.exists(),
+                        "a contact was removed despite the refusal")
+
     def test_merge_refuses_a_staff_account(self):
         teacher = self._user(
             'Staff Merge', 'staffmerge@example.invalid',

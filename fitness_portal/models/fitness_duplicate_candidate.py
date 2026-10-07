@@ -106,6 +106,9 @@ class FitnessDuplicateCandidate(models.Model):
         settled = {
             r.email for r in self.sudo().search([('resolved', '=', True)])}
 
+        autojoin_on = str(self.env['ir.config_parameter'].sudo().get_param(
+            'fitness.signup_autojoin_enabled')).strip() in ('1', 'True', 'true')
+
         self.sudo().search([('resolved', '=', False)]).unlink()
 
         rows = []
@@ -124,10 +127,24 @@ class FitnessDuplicateCandidate(models.Model):
             if len(with_login) == 1:
                 refusal = with_login._fitness_autojoin_refusal()
                 if not refusal:
-                    # It will go on its own at her next verification.
-                    # Nothing for a manager to do.
-                    continue
-                reason = refusal
+                    # Joinable in principle. It is left OFF the list only
+                    # when a future verification could actually join it:
+                    # the switch is on AND her account has not verified
+                    # yet. An account that has already verified will
+                    # never pass through that door again, so leaving its
+                    # pair off would hide it for ever - which is the
+                    # shape most of the studio's real duplicates are in.
+                    if autojoin_on and with_login._fitness_awaits_verification():
+                        continue
+                    reason = ("clear match - %s. Nothing is stopping these "
+                              "being one contact; press Merge when you have "
+                              "checked."
+                              % ("her account has already verified, so the "
+                                 "automatic join will never see it again"
+                                 if not with_login._fitness_awaits_verification()
+                                 else "the automatic join is switched off"))
+                else:
+                    reason = refusal
             elif len(with_login) >= 2:
                 reason = ("two accounts on one address - merging would take "
                           "somebody's login with it, so a person must decide")
@@ -238,6 +255,20 @@ class FitnessDuplicateCandidate(models.Model):
                 "One of these is a staff account. Merging it would move "
                 "its access as well, so it is not done from here."))
 
+        # Two logins is two accounts. Merging them moves one user's
+        # partner_id onto the other's contact, leaving two logins
+        # pointing at one person and no way to tell afterwards which
+        # history belonged to whom. The list already says a person must
+        # decide; deciding means closing one account first, not pressing
+        # Merge.
+        if first._fitness_has_login() and second._fitness_has_login():
+            raise UserError(self.env._(
+                "Both of these contacts have their own login (%(a)s, "
+                "%(b)s). Merging would leave two accounts pointing at one "
+                "contact. Close or archive one account first, then merge.",
+                a=', '.join(first._fitness_users().mapped('login')),
+                b=', '.join(second._fitness_users().mapped('login'))))
+
         clash = self._fitness_booking_clash(first, second)
         if clash:
             raise UserError(self.env._(
@@ -322,7 +353,11 @@ class FitnessDuplicateCandidate(models.Model):
             Notification._create_for_user(
                 manager.id,
                 'duplicate_contacts',
-                tr("%(count)s possible duplicate contacts",
+                # PAIRS, not contacts. len(open_rows) is one row per
+                # shared address or number - two or more contacts each.
+                # Calling them contacts made the number read as people
+                # and disagreed with the list beside it.
+                tr("%(count)s possible duplicates to check",
                    count=len(open_rows)),
                 tr("%(carrying)s of them hold bookings or paid orders, so "
                    "somebody may be signing in and not seeing her own "

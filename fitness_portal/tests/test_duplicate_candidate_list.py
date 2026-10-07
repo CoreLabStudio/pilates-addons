@@ -20,6 +20,7 @@ from odoo.addons.fitness_portal.models.res_partner_duplicate import (
 )
 
 MANAGER_GROUP = 'fitness_core.group_fitness_manager'
+STUDENT_GROUP = 'fitness_core.group_fitness_student'
 
 
 @tagged("post_install", "-at_install")
@@ -89,8 +90,57 @@ class TestDuplicateCandidateList(TransactionCase):
                  "vanished instead of being shown to anybody")
         self.assertIn("names do not match", row.reason)
 
+    def _verified(self, user):
+        """Mark an account as having verified - what verify_email does."""
+        user.sudo().write(
+            {'group_ids': [(4, self.env.ref(STUDENT_GROUP).id)]})
+        return user
+
+    def test_a_clear_pair_on_a_VERIFIED_account_is_still_listed(self):
+        """The shape most of the studio's real duplicates are in.
+
+        Verification grants group_fitness_student, and it happens once.
+        An account that already has it will never pass through
+        verify_email again, so nothing will ever join its duplicate on
+        its own. Leaving it off the list hid it for ever - and these
+        are exactly the pairs where a student is signing in and not
+        seeing her own history.
+        """
+        self.env['ir.config_parameter'].sudo().set_param(AUTOJOIN_PARAM, '1')
+        self._contact('Haley Fearnley', 'verified@example.invalid')
+        user = self._user('Haley Fearnley', 'verified@example.invalid')
+        self._verified(user)
+        self.Candidate._scan()
+        row = self._rows_for('verified@example.invalid')
+        self.assertTrue(
+            row, "a clear pair whose account has already verified was left "
+                 "off the list, so nothing will ever join it and nobody "
+                 "will ever see it")
+        self.assertIn("clear match", row.reason)
+        self.assertIn("already verified", row.reason)
+
+    def test_a_clear_pair_is_listed_while_the_switch_is_off(self):
+        """Switch off means nothing joins, so everything needs a person."""
+        self.env['ir.config_parameter'].sudo().set_param(AUTOJOIN_PARAM, '0')
+        self._contact('Marta Munoz', 'switchoff@example.invalid')
+        self._user('Marta Munoz', 'switchoff@example.invalid')
+        self.Candidate._scan()
+        row = self._rows_for('switchoff@example.invalid')
+        self.assertTrue(
+            row, "with the automatic join switched off, a clear pair was "
+                 "still left off the list - so it would never be dealt "
+                 "with at all")
+        self.assertIn("clear match", row.reason)
+        self.assertIn("switched off", row.reason)
+
     def test_the_pair_that_joins_itself_is_not_listed(self):
-        """No busywork: this one resolves at her next verification."""
+        """No busywork: this one really does resolve on its own.
+
+        Only true when the switch is ON and her account has NOT verified
+        yet - both conditions, because either one missing means the
+        automatic join will never run for her.
+        """
+        self.env['ir.config_parameter'].sudo().set_param(AUTOJOIN_PARAM, '1')
         self._contact('Marta Munoz', 'auto@example.invalid')
         self._user('Marta Munoz', 'auto@example.invalid')
         self.Candidate._scan()

@@ -135,6 +135,23 @@ class ResPartner(models.Model):
         return self.env['res.users'].sudo().with_context(
             active_test=False).search([('partner_id', '=', self.id)])
 
+    def _fitness_awaits_verification(self):
+        """Has this contact an account that has NOT yet verified its email?
+
+        Verification is what grants group_fitness_student - see
+        verify_email in signup_override.py. An account that already has
+        it has been through that door and will never pass through it
+        again, so nothing will ever join its duplicate automatically.
+        That is the difference between a pair the system will deal with
+        and a pair a person has to.
+        """
+        self.ensure_one()
+        users = self._fitness_users()
+        if not users:
+            return False
+        return any(not u.has_group('fitness_core.group_fitness_student')
+                   for u in users)
+
     def _fitness_has_login(self):
         self.ensure_one()
         return bool(self._fitness_users())
