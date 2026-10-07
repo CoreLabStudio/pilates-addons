@@ -240,18 +240,58 @@ class TestTheNoticeNeverCostsTheRequest(TransactionCase):
             "a studio with no address on file raises an ERROR line, which "
             "fails the build on odoo.sh")
 
-    def test_a_failing_send_is_not_the_end_of_the_request(self):
-        """send_mail raising must not reach the student as an error."""
+    def test_a_failing_send_warns_and_keeps_the_request(self):
+        """A dead mail server is a WARNING, never an ERROR, never a loss.
+
+        Three things at once, because they fail independently:
+
+          - the request survives. She pressed Send; nobody else can retry
+            that for her.
+          - it is logged, with the traceback, so the studio can be told
+            that somebody asked and the email did not go.
+          - it is logged at WARNING. _logger.exception emits at ERROR,
+            and odoo.sh grades a build on ERROR-level lines - so an SMTP
+            outage during a deploy would turn the build red. This test
+            was written because the two handlers behind it did exactly
+            that, and the gate caught it.
+        """
         self.env.company.email = "studio.inbox@example.invalid"
 
         def boom(*_a, **_kw):
             raise RuntimeError("smtp is down")
 
         with patch.object(MailTemplate, "send_mail", boom):
-            rec = self._ask("sendfails@example.invalid")
+            with self.assertLogs(TRIAL_LOGGER, level="WARNING") as captured:
+                rec = self._ask("sendfails@example.invalid")
+
         self.assertTrue(
             rec.exists(),
             "a mail failure rolled back the student's trial request")
+
+        levels = [r.levelname for r in captured.records]
+        self.assertIn(
+            "WARNING", levels,
+            "a failing send was not logged at all, so a lost email is "
+            "invisible: %s" % levels)
+        self.assertNotIn(
+            "ERROR", levels,
+            "a failing send logs at ERROR level. odoo.sh counts those and "
+            "fails the build, so a studio whose SMTP blipped would turn a "
+            "deploy red: %s" % levels)
+        self.assertNotIn("CRITICAL", levels)
+
+        # The traceback has to survive the change from exception() to
+        # warning(), or the log says a send failed and not why.
+        self.assertTrue(
+            any(r.exc_info for r in captured.records),
+            "the traceback was dropped, so the log cannot say why the "
+            "email failed")
+        self.assertTrue(
+            any("pending email failed" in r.getMessage()
+                or "admin notification failed" in r.getMessage()
+                for r in captured.records),
+            "neither mail handler reported anything: %s"
+            % [r.getMessage() for r in captured.records])
 
     def test_a_neutralised_database_sends_nothing_real(self):
         """A restore must not email the studio about last month's requests."""
