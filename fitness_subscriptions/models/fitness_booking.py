@@ -257,6 +257,24 @@ class FitnessBookingSubscription(models.Model):
             # monotonic period reporting counter; enforcement uses weekly counts.
         return True
 
+    def _restore_credit_now(self):
+        """A membership booking gets one make-up credit back.
+
+        The same thing a cancellation outside the window gives her, and it
+        does not matter whether the booking was paid from the weekly
+        allowance or from a make-up credit: the weekly counter is
+        monotonic and stays untouched, and the compensation is one credit.
+        """
+        done = super()._restore_credit_now()
+        sub = self.subscription_id
+        if not sub or sub.fitness_is_unlimited:
+            return done
+        sub.sudo().fitness_floating_credits += 1
+        _logger.info(
+            "[SUBSCRIPTION] Credit given back on %s -> %d make-up credit(s)",
+            sub.name, sub.sudo().fitness_floating_credits)
+        return True
+
     # ─── Payment-source auto-selection ────────────────────────────────────────
     #
     # Selects the source whose allowance EXPIRES SOONEST so that members never

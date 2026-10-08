@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError, UserError, AccessError
 
 from odoo.addons.fitness_bookings.exceptions import LateCancellationError
 
@@ -160,6 +160,21 @@ class FitnessBooking(models.Model):
         "Cancelled Because", readonly=True, copy=False,
         help="What the studio said when cancelling. Shown to the student and "
              "kept on the booking.")
+    # Set by the give-credit-back action, never by a cancellation. It
+    # is what makes that action idempotent: the credit is handed back
+    # once, and a second attempt is refused rather than silently
+    # doubling it.
+    fitness_credit_given_back = fields.Boolean(
+        "Credit given back later", default=False, readonly=True, copy=False,
+        help="A manager returned the credit after this booking was "
+             "cancelled inside the cancellation window.")
+    fitness_credit_given_back_by = fields.Many2one(
+        'res.users', "Given back by", readonly=True, copy=False)
+    fitness_credit_given_back_on = fields.Datetime(
+        "Given back on", readonly=True, copy=False)
+    fitness_credit_given_back_reason = fields.Text(
+        "Why it was given back", readonly=True, copy=False)
+
     credit_returned = fields.Boolean(
         "Credit Returned",
         default=False,
@@ -555,6 +570,109 @@ class FitnessBooking(models.Model):
                 "fitness.cancellation_window_hours is %r, which is not a number; "
                 "falling back to %s h", raw, CANCELLATION_WINDOW_HOURS)
             return CANCELLATION_WINDOW_HOURS
+
+    # ─── Giving a credit back after a late cancellation ───────────────────
+    #
+    # A student cancels inside the window and forfeits, which is the
+    # policy and is now what the product does. Sometimes she then rings up
+    # with a reason the studio accepts - ill, a family emergency - and the
+    # studio decides to be generous. Until now there was no way to act on
+    # that: the booking was cancelled, the credit was gone, and no screen
+    # could return it, so the desk's only option was to hand out a free
+    # class product and lose the connection to the class it was for.
+
+    def _restore_credit_now(self):
+        """Hand one credit back to whatever paid for this booking.
+
+        The base module knows about no credit type at all: fitness_packages
+        and fitness_subscriptions each override this for theirs, exactly as
+        they already override action_cancel. Deliberate - the give-back
+        travels the same road as the manager's Restore Credit tick instead
+        of being a second implementation that can drift from it.
+
+        Returns True when something was actually returned.
+        """
+        return False
+
+    def _check_can_give_credit_back(self):
+        """Everything that must be true before a credit can be returned."""
+        self.ensure_one()
+        if self.state != 'cancelled':
+            raise UserError(self.env._(
+                "This booking is not cancelled, so there is no credit to "
+                "give back."))
+        if self.credit_returned:
+            raise UserError(self.env._(
+                "The credit for this booking was already returned when it "
+                "was cancelled."))
+        if self.fitness_credit_given_back:
+            raise UserError(self.env._(
+                "The credit for this booking has already been given back, "
+                "by %(who)s on %(when)s. It is not given twice.",
+                who=self.fitness_credit_given_back_by.name
+                or self.env._("somebody"),
+                when=self.fitness_credit_given_back_on or ''))
+
+    def _assert_may_give_credit_back(self):
+        """Manager or system, and re-checked on every entry point.
+
+        _give_credit_back is reachable over RPC by anybody who can guess a
+        method name, so the wizard's own access rule is not the guard.
+        """
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user.has_group('base.group_system')):
+            raise AccessError(self.env._(
+                "Only a studio manager can give a credit back."))
+
+    def action_give_credit_back(self):
+        """Open the dialog that asks why. The work happens on confirm."""
+        self.ensure_one()
+        self._assert_may_give_credit_back()
+        self._check_can_give_credit_back()
+        wizard = self.env['fitness.booking.credit.back.wizard'].create(
+            {'booking_id': self.id})
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._("Give the Credit Back"),
+            'res_model': 'fitness.booking.credit.back.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def _give_credit_back(self, reason):
+        """Return one credit, once, and write down who, when and why."""
+        self.ensure_one()
+        self._assert_may_give_credit_back()
+        reason = (reason or '').strip()
+        if not reason:
+            raise UserError(self.env._(
+                "Say why the credit is being given back. It is the only "
+                "record anyone will have of it later."))
+        self._check_can_give_credit_back()
+
+        if not self.sudo()._restore_credit_now():
+            raise UserError(self.env._(
+                "Nothing could be returned: this booking has no class pack "
+                "or membership recorded against it."))
+
+        self.sudo().write({
+            'fitness_credit_given_back': True,
+            'fitness_credit_given_back_by': self.env.uid,
+            'fitness_credit_given_back_on': fields.Datetime.now(),
+            'fitness_credit_given_back_reason': reason,
+        })
+        # On the booking, not in a log file: in three months somebody will
+        # ask why this student got a credit she was not owed.
+        self.sudo().message_post(body=self.env._(
+            "Credit given back by %(who)s after a late cancellation. "
+            "Reason: %(reason)s",
+            who=self.env.user.name, reason=reason))
+        _logger.info(
+            "[GIVE-CREDIT-BACK] booking %s (%s) by %s: %s",
+            self.id, self.student_id.display_name, self.env.user.login,
+            reason[:80])
+        return True
 
     def action_cancel(self):
         """

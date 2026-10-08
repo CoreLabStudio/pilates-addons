@@ -958,3 +958,51 @@ msgstr "Qué línea de bono descontó un crédito por esta reserva."
 #: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__subscription_id
 msgid "Which subscription counted this booking against the monthly cap."
 msgstr "Qué suscripción contó esta reserva dentro del límite mensual."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a studio manager can give a credit back."
+msgstr "Solo un gestor del estudio puede devolver un crédito."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Say why the credit is being given back. It is the only record anyone will have of it later."
+msgstr "Indica por qué se devuelve el crédito. Es el único registro que quedará de ello."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This booking is not cancelled, so there is no credit to give back."
+msgstr "Esta reserva no está cancelada, así que no hay ningún crédito que devolver."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "The credit for this booking was already returned when it was cancelled."
+msgstr "El crédito de esta reserva ya se devolvió al cancelarla."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "The credit for this booking has already been given back, by %(who)s on %(when)s. It is not given twice."
+msgstr "El crédito de esta reserva ya se devolvió, por %(who)s el %(when)s. No se devuelve dos veces."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Nothing could be returned: this booking has no class pack or membership recorded against it."
+msgstr "No se pudo devolver nada: esta reserva no tiene ningún bono ni cuota asociada."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Give the Credit Back"
+msgstr "Devolver el crédito"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "somebody"
+msgstr "alguien"

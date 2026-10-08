@@ -36,6 +36,16 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <!-- Only on a booking that was cancelled inside the
+                         window and has not already had its credit returned.
+                         The model re-checks every one of those conditions,
+                         because invisible is not a permission. -->
+                    <button name="action_give_credit_back"
+                            string="Give the Credit Back"
+                            type="object"
+                            class="btn-primary"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state != 'cancelled' or credit_returned or fitness_credit_given_back"/>
                     <!-- There is no plain "Cancel Student's Booking" button
                          here any more. It and Cancel or Move did the same
                          job, and this was the weaker one: no choice about
@@ -100,6 +110,15 @@
                         </group>
                     </group>
                     <group string="Cancellation" invisible="state != 'cancelled'">
+                        <field name="fitness_credit_given_back" readonly="1"
+                               invisible="not fitness_credit_given_back"/>
+                        <field name="fitness_credit_given_back_by" readonly="1"
+                               invisible="not fitness_credit_given_back"/>
+                        <field name="fitness_credit_given_back_on" readonly="1"
+                               invisible="not fitness_credit_given_back"/>
+                        <field name="fitness_credit_given_back_reason"
+                               readonly="1"
+                               invisible="not fitness_credit_given_back"/>
                         <field name="cancellation_date"/>
                         <!-- What the studio said when it cancelled, when it
                              said anything. Only shown once there is one. -->
