@@ -206,7 +206,18 @@ class TestPaulasCase(MakeUpCreditFixture):
 class TestWhatMustNotChange(MakeUpCreditFixture):
     """The negatives. Each one is a way this change could have gone wrong."""
 
-    def test_inside_the_window_a_student_is_refused_outright(self):
+    def test_inside_the_window_she_cancels_and_forfeits(self):
+        """This test used to assert she was REFUSED inside the window.
+
+        She no longer is. The studio's Terms, printed in every booking
+        email, say a late cancellation forfeits the credit - and the app
+        used to refuse the cancellation altogether, so the seat stayed
+        taken, she did not come, and nobody else could have it.
+
+        What this file is about has not changed, and is what is asserted
+        here: inside the window the make-up credit does NOT come back.
+        Only the refusal went.
+        """
         user = self._student("late")
         partner = user.partner_id
         order = self._membership(partner)
@@ -216,14 +227,21 @@ class TestWhatMustNotChange(MakeUpCreditFixture):
         klass = self._class(self.window - 1)
         booking = self._book(partner, klass,
                              manager_override_timewindow=True)
-        with self.assertRaises(Exception) as caught:
-            booking.with_user(user).action_cancel()
-        self.assertNotIsInstance(
-            caught.exception, AccessError,
-            "she was refused for the wrong reason")
+        self.assertTrue(booking.fitness_used_floating_credit)
+        self.assertEqual(self._floating(order), 0)
+
+        booking.with_user(user).action_cancel()
+
+        self.assertEqual(
+            booking.state, "cancelled",
+            "she is still refused inside the window, so the seat stays "
+            "taken and nobody else can book it")
+        self.assertFalse(
+            booking.credit_returned,
+            "a late cancellation reports the credit as returned")
         self.assertEqual(
             self._floating(order), 0,
-            "a late cancellation handed back a credit")
+            "a late cancellation handed back a make-up credit")
 
     def test_an_allowance_booking_behaves_exactly_as_before(self):
         """Cancelled in good time: one credit, as compensation."""
