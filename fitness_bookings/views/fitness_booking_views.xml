@@ -36,14 +36,18 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_cancel"
-                            string="Cancel Student's Booking"
-                            type="object"
-                            class="btn-danger"
-                            invisible="state != 'booked'"/>
-                    <!-- The list had "Cancel or move" and the form did not, so
-                         opening the record was the one place the desk could
-                         cancel but not move. -->
+                    <!-- There is no plain "Cancel Student's Booking" button
+                         here any more. It and Cancel or Move did the same
+                         job, and this was the weaker one: no choice about
+                         the credit, and no option to move the student
+                         instead of losing her from the class. Cancel or
+                         Move offers Cancel Only with the credit tick, so
+                         nothing is lost by having one button.
+
+                         action_cancel stays on the MODEL. The student's
+                         portal Cancel posts to it, both wizards call it,
+                         and action_cancel_class calls it for a whole
+                         class - only the back-office button is gone. -->
                     <button name="action_open_reassign_wizard"
                             string="Cancel or Move"
                             type="object"
