@@ -91,7 +91,18 @@ class FitnessBookingPackage(models.Model):
             for b in self
             if b.package_order_line_id
         }
-        super().action_cancel()
+        result = super().action_cancel()
+
+        # A manager cancelling inside the window gets the "Cancel Booking
+        # (Late)" dialog, and the base returns that action BEFORE
+        # cancelling anything. Dropping it here did two things: the dialog
+        # never opened, and the restore below ran against a booking that
+        # was never cancelled. Propagate it, and do no post-cancellation
+        # work - the wizard's confirm re-enters this method with
+        # _admin_cancel_direct and the restore runs then.
+        if isinstance(result, dict):
+            return result
+
         for booking in self:
             line = pkg_map.get(booking.id)
             if line and booking.credit_returned:
@@ -102,6 +113,7 @@ class FitnessBookingPackage(models.Model):
                     line.id, line_sudo.fitness_remaining_classes,
                 )
                 self._release_trial_claim(line_sudo)
+        return result
 
     def _release_trial_claim(self, line):
         """Hand a cancelled trial back as an entitlement, not as a credit.

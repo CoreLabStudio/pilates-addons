@@ -5,3 +5,5 @@ from . import test_manage_classes
 from . import test_move_reason_recorded
 from . import test_attendance_marking
 from . import test_move_clears_the_mark
+from . import test_action_overrides_propagate
+from . import test_cancel_dialog_opens

@@ -286,13 +286,22 @@ class FitnessBookingNotifications(models.Model):
     # ─── Booking cancelled ───────────────────────────────────────────────────────
 
     def action_cancel(self):
-        super().action_cancel()
+        result = super().action_cancel()
+
+        # The base returns the admin late-cancel dialog's action BEFORE
+        # cancelling anything. Dropping it here meant the dialog never
+        # opened AND everything below still ran - so the student was sent
+        # "your booking has been cancelled" about a class that was still
+        # booked. Nothing is announced that did not happen.
+        if isinstance(result, dict):
+            return result
+
         if self._notif_enabled('send_cancellation'):
             self._send_notification('fitness_notifications.mail_template_booking_cancellation')
         # In-app bell: skip for class-wide cancellations (_class_cancelled=True)
         # because action_cancel_class() already sends a class-level alert per student.
         if self.env.context.get('skip_fitness_notification') or self.env.context.get('_class_cancelled'):
-            return
+            return result
         for booking in self:
             user = booking.student_id.user_ids[:1]
             if not user:
@@ -339,6 +348,7 @@ class FitnessBookingNotifications(models.Model):
                 )
             except Exception:
                 pass
+        return result
 
     # ─── Class reminder (cron) ──────────────────────────────────────────────────
 
