@@ -8,3 +8,4 @@ from . import test_user_list_view_priority
 from . import test_teacher_calendar_rule
 from . import test_lang_cache
 from . import test_instructor_list_menu
+from . import test_home_action_is_clean

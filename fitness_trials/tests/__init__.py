@@ -10,3 +10,6 @@ from . import test_offer_ends_on_madrid_time
 from . import test_price_follows_the_request_date
 from . import test_approval_prices_end_to_end
 from . import test_ended_offer_message
+from . import test_studio_hears_about_a_request
+from . import test_trial_notice_exactness
+from . import test_pending_request_across_the_offer_end
