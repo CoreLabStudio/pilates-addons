@@ -923,7 +923,8 @@
                                                 <div class="mv-badge-confirmed">Booked</div>
                                                 <form method="post"
                                                       t-attf-action="/my/classes/#{booking.id}/cancel"
-                                                      class="mv-cancel-form">
+                                                      class="mv-cancel-form"
+                                                      t-att-data-forfeit="'1' if booking.fitness_cancel_forfeits else '0'">
                                                     <input type="hidden" name="csrf_token"
                                                            t-att-value="request.csrf_token()"/>
                                                     <input type="hidden" name="next" value="schedule"/>
@@ -1110,7 +1111,8 @@
                              as the My Schedule list. -->
                         <t t-if="existing_booking">
                             <form method="post" class="mv-cancel-form"
-                                  t-attf-action="/my/classes/#{existing_booking.id}/cancel">
+                                  t-attf-action="/my/classes/#{existing_booking.id}/cancel"
+                                  t-att-data-forfeit="'1' if existing_booking.fitness_cancel_forfeits else '0'">
                                 <input type="hidden" name="csrf_token"
                                        t-att-value="request.csrf_token()"/>
                                 <button type="submit" class="mv-cancel-btn mv-cancel-btn-lg">Cancel booking</button>
@@ -1252,8 +1254,21 @@
                                                 </t>
                                                 <t t-elif="booking.state == 'cancelled'">
                                                     <div class="mv-badge mv-badge-cancelled">Cancelled</div>
+                                                    <!-- A cancelled row said "Credit returned" or nothing
+                                                         at all, and nothing is exactly the case she rings
+                                                         the studio about. All three outcomes are named
+                                                         here, including the one where the studio decided
+                                                         afterwards to give it back. Each is a div: a lone
+                                                         inline span is folded into the parent's term and
+                                                         the translation never matches. -->
                                                     <t t-if="booking.credit_returned">
                                                         <div class="mv-badge-credit">Credit returned</div>
+                                                    </t>
+                                                    <t t-elif="booking.fitness_credit_given_back">
+                                                        <div class="mv-badge-credit">Credit given back</div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="mv-badge-nocredit">Credit kept</div>
                                                     </t>
                                                 </t>
                                                 <t t-elif="booking.state == 'no_show'">
@@ -3702,6 +3717,15 @@
                          a div is the same flex item a span was. -->
                     <div class="mv-ios-title">Cancel this class?</div>
                 </div>
+                <!-- Shown only for a booking already inside the window,
+                     revealed by the script below from that form's own
+                     data-forfeit. The policy sentence stays underneath:
+                     one states the rule, the other what it costs her
+                     here. A block element, never a lone inline span -
+                     Odoo folds those into the parent's term and the
+                     translation then never matches. -->
+                <p class="mv-confirm-warning" id="mv-cancel-forfeit"
+                   hidden="hidden" t-out="lbl_cancel_forfeit"/>
                 <p class="mv-confirm-body" t-out="lbl_cancel_policy"/>
                 <div class="mv-confirm-actions">
                     <button type="button" class="mv-confirm-yes" id="mv-cancel-yes">Yes, cancel it</button>
@@ -3720,6 +3744,10 @@
                     if (f.dataset.mvConfirmed === '1') return;
                     ev.preventDefault();
                     pending = f;
+                    // Per booking, not per page: one sheet serves every
+                    // card in the list, so it is set on each open.
+                    var warn = document.getElementById('mv-cancel-forfeit');
+                    if (warn) warn.hidden = (f.dataset.forfeit !== '1');
                     sheet.hidden = false;
                 });
             });

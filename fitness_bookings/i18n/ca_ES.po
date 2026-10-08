@@ -965,3 +965,126 @@ msgstr "Quina línia de bo va descomptar un crèdit per aquesta reserva."
 msgid "Which subscription counted this booking against the monthly cap."
 msgstr ""
 "Quina subscripció va comptar aquesta reserva dins del límit mensual."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a studio manager can give a credit back."
+msgstr "Només un gestor de l'estudi pot retornar un crèdit."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Say why the credit is being given back. It is the only record anyone will have of it later."
+msgstr "Indica per què es retorna el crèdit. És l'únic registre que en quedarà."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This booking is not cancelled, so there is no credit to give back."
+msgstr "Aquesta reserva no està cancel·lada, així que no hi ha cap crèdit per retornar."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "The credit for this booking was already returned when it was cancelled."
+msgstr "El crèdit d'aquesta reserva ja es va retornar en cancel·lar-la."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "The credit for this booking has already been given back, by %(who)s on %(when)s. It is not given twice."
+msgstr "El crèdit d'aquesta reserva ja es va retornar, per %(who)s el %(when)s. No es retorna dues vegades."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Nothing could be returned: this booking has no class pack or membership recorded against it."
+msgstr "No s'ha pogut retornar res: aquesta reserva no té cap bo ni quota associada."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Give the Credit Back"
+msgstr "Retornar el crèdit"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "somebody"
+msgstr "algú"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late, credit kept"
+msgstr "Cancel·lada tard, crèdit no retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late, credit given back"
+msgstr "Cancel·lada tard, crèdit retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late can only be filtered as yes or no."
+msgstr "\"Cancel·lada tard\" només es pot filtrar per sí o no."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_cancel_label
+msgid "Cancellation"
+msgstr "Cancel·lació"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_is_late_cancel
+msgid "Cancelled late"
+msgstr "Cancel·lada tard"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back
+msgid "Credit given back later"
+msgstr "Crèdit retornat després"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_by
+msgid "Given back by"
+msgstr "Retornat per"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_on
+msgid "Given back on"
+msgstr "Retornat el"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_reason
+msgid "Why it was given back"
+msgstr "Per què es va retornar"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Cancelled Late"
+msgstr "Cancel·lades tard"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Credit Given Back"
+msgstr "Crèdit retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "%(klass)s has already started, so it can no longer be cancelled. Speak to the studio."
+msgstr "%(klass)s ja ha començat, així que ja no es pot cancel·lar. Parla amb l'estudi."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This class"
+msgstr "Aquesta classe"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_cancel_forfeits
+msgid "Cancelling now forfeits the credit"
+msgstr "Cancel·lar ara perd el crèdit"

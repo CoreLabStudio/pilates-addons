@@ -115,6 +115,25 @@ class FitnessBookingPackage(models.Model):
                 self._release_trial_claim(line_sudo)
         return result
 
+    def _restore_credit_now(self):
+        """A package line gets its class back, exactly as on cancellation.
+
+        The same two steps action_cancel takes when credit_returned is
+        true: the line regains a class, and a trial hands back its
+        entitlement rather than sitting on the line as a spare credit.
+        """
+        done = super()._restore_credit_now()
+        line = self.package_order_line_id
+        if not line:
+            return done
+        line_sudo = line.sudo()
+        line_sudo.fitness_remaining_classes += 1
+        _logger.info(
+            "[PACKAGE] Credit given back to line %d -> %d remaining",
+            line.id, line_sudo.fitness_remaining_classes)
+        self._release_trial_claim(line_sudo)
+        return True
+
     def _release_trial_claim(self, line):
         """Hand a cancelled trial back as an entitlement, not as a credit.
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fitness_booking_credit_back_wizard_form" model="ir.ui.view">
+        <field name="name">fitness.booking.credit.back.wizard.form</field>
+        <field name="model">fitness.booking.credit.back.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Give the Credit Back">
+                <sheet>
+                    <div class="alert alert-info mb-3" role="alert">This booking was cancelled inside the cancellation window, so the credit was kept under the studio's policy. Returning it is an exception, and the reason below is the only record of it anyone will have.</div>
+                    <group>
+                        <field name="student_name"/>
+                        <field name="class_name"/>
+                        <field name="class_start"/>
+                        <field name="cancelled_on"/>
+                    </group>
+                    <group string="Why">
+                        <field name="reason" nolabel="1" colspan="2"
+                               required="1"
+                               placeholder="e.g. She rang the same morning - ill, and brought a doctor's note."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Give the Credit Back" type="object"
+                            name="action_confirm" class="btn-primary"/>
+                    <button string="Discard" special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

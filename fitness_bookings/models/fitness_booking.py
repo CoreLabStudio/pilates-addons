@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError, UserError, AccessError
 
 from odoo.addons.fitness_bookings.exceptions import LateCancellationError
 
@@ -160,6 +160,45 @@ class FitnessBooking(models.Model):
         "Cancelled Because", readonly=True, copy=False,
         help="What the studio said when cancelling. Shown to the student and "
              "kept on the booking.")
+    # Set by the give-credit-back action, never by a cancellation. It
+    # is what makes that action idempotent: the credit is handed back
+    # once, and a second attempt is refused rather than silently
+    # doubling it.
+    # What the Roster and her own history show, in words. Computed
+    # rather than stored so it cannot drift from the two fields it
+    # describes.
+    fitness_cancel_label = fields.Char(
+        "Cancellation", compute='_compute_fitness_cancel_label',
+        help="Whether this booking was cancelled inside the cancellation "
+             "window, and whether the studio has since given the credit "
+             "back.")
+    # Searchable so the desk can go looking. A manager gets no
+    # notification of a late cancellation - the student just stops
+    # appearing - so a filter is the only way she finds them.
+    fitness_is_late_cancel = fields.Boolean(
+        "Cancelled late", compute='_compute_fitness_cancel_label',
+        search='_search_fitness_is_late_cancel')
+
+    # Whether cancelling THIS booking right now would forfeit the
+    # credit. The confirmation sheet asks it per booking, so she is
+    # warned about her own class instead of only being shown the rule.
+    fitness_cancel_forfeits = fields.Boolean(
+        "Cancelling now forfeits the credit",
+        compute='_compute_fitness_cancel_forfeits',
+        help="True while this booking is inside the cancellation window, "
+             "so cancelling it now would not return the credit.")
+
+    fitness_credit_given_back = fields.Boolean(
+        "Credit given back later", default=False, readonly=True, copy=False,
+        help="A manager returned the credit after this booking was "
+             "cancelled inside the cancellation window.")
+    fitness_credit_given_back_by = fields.Many2one(
+        'res.users', "Given back by", readonly=True, copy=False)
+    fitness_credit_given_back_on = fields.Datetime(
+        "Given back on", readonly=True, copy=False)
+    fitness_credit_given_back_reason = fields.Text(
+        "Why it was given back", readonly=True, copy=False)
+
     credit_returned = fields.Boolean(
         "Credit Returned",
         default=False,
@@ -556,6 +595,163 @@ class FitnessBooking(models.Model):
                 "falling back to %s h", raw, CANCELLATION_WINDOW_HOURS)
             return CANCELLATION_WINDOW_HOURS
 
+    # ─── Giving a credit back after a late cancellation ───────────────────
+    #
+    # A student cancels inside the window and forfeits, which is the
+    # policy and is now what the product does. Sometimes she then rings up
+    # with a reason the studio accepts - ill, a family emergency - and the
+    # studio decides to be generous. Until now there was no way to act on
+    # that: the booking was cancelled, the credit was gone, and no screen
+    # could return it, so the desk's only option was to hand out a free
+    # class product and lose the connection to the class it was for.
+
+    @api.depends('state', 'credit_returned', 'fitness_credit_given_back')
+    def _compute_fitness_cancel_label(self):
+        for booking in self:
+            late = (booking.state == 'cancelled'
+                    and not booking.credit_returned)
+            booking.fitness_is_late_cancel = late
+            if not late:
+                booking.fitness_cancel_label = ''
+            elif booking.fitness_credit_given_back:
+                booking.fitness_cancel_label = self.env._(
+                    "Cancelled late, credit given back")
+            else:
+                booking.fitness_cancel_label = self.env._(
+                    "Cancelled late, credit kept")
+
+    @api.depends('state', 'calendar_event_id.start')
+    def _compute_fitness_cancel_forfeits(self):
+        """The same comparison action_cancel makes, asked ahead of time.
+
+        Not stored. It also depends on the clock, which no @api.depends
+        can express, so a stored value would be wrong within hours of
+        being written with nothing to recompute it. The two fields named
+        above are the ones that CAN change it inside a transaction - the
+        class being moved, the booking being cancelled - and naming them
+        is what keeps the cache from going stale mid-request.
+        """
+        now = fields.Datetime.now()
+        window = self._cancellation_window_hours()
+        for booking in self:
+            start = booking.calendar_event_id.start
+            if booking.state != 'booked' or not start:
+                booking.fitness_cancel_forfeits = False
+                continue
+            hours_until = (start - now).total_seconds() / 3600.0
+            # The open interval at zero matches action_cancel, which
+            # refuses a class that has already started rather than
+            # forfeiting on it.
+            booking.fitness_cancel_forfeits = 0 < hours_until <= window
+
+    def _search_fitness_is_late_cancel(self, operator, value):
+        """Cancelled, and the policy did not return the credit.
+
+        Not expressible as a stored domain because the label is computed,
+        so the search is spelled out against the two fields it reads.
+        """
+        if operator not in ('=', '!='):
+            raise UserError(self.env._(
+                "Cancelled late can only be filtered as yes or no."))
+        wants = bool(value) if operator == '=' else not bool(value)
+        late = [('state', '=', 'cancelled'), ('credit_returned', '=', False)]
+        if wants:
+            return late
+        return ['!', '&'] + late
+
+    def _restore_credit_now(self):
+        """Hand one credit back to whatever paid for this booking.
+
+        The base module knows about no credit type at all: fitness_packages
+        and fitness_subscriptions each override this for theirs, exactly as
+        they already override action_cancel. Deliberate - the give-back
+        travels the same road as the manager's Restore Credit tick instead
+        of being a second implementation that can drift from it.
+
+        Returns True when something was actually returned.
+        """
+        return False
+
+    def _check_can_give_credit_back(self):
+        """Everything that must be true before a credit can be returned."""
+        self.ensure_one()
+        if self.state != 'cancelled':
+            raise UserError(self.env._(
+                "This booking is not cancelled, so there is no credit to "
+                "give back."))
+        if self.credit_returned:
+            raise UserError(self.env._(
+                "The credit for this booking was already returned when it "
+                "was cancelled."))
+        if self.fitness_credit_given_back:
+            raise UserError(self.env._(
+                "The credit for this booking has already been given back, "
+                "by %(who)s on %(when)s. It is not given twice.",
+                who=self.fitness_credit_given_back_by.name
+                or self.env._("somebody"),
+                when=self.fitness_credit_given_back_on or ''))
+
+    def _assert_may_give_credit_back(self):
+        """Manager or system, and re-checked on every entry point.
+
+        _give_credit_back is reachable over RPC by anybody who can guess a
+        method name, so the wizard's own access rule is not the guard.
+        """
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user.has_group('base.group_system')):
+            raise AccessError(self.env._(
+                "Only a studio manager can give a credit back."))
+
+    def action_give_credit_back(self):
+        """Open the dialog that asks why. The work happens on confirm."""
+        self.ensure_one()
+        self._assert_may_give_credit_back()
+        self._check_can_give_credit_back()
+        wizard = self.env['fitness.booking.credit.back.wizard'].create(
+            {'booking_id': self.id})
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._("Give the Credit Back"),
+            'res_model': 'fitness.booking.credit.back.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def _give_credit_back(self, reason):
+        """Return one credit, once, and write down who, when and why."""
+        self.ensure_one()
+        self._assert_may_give_credit_back()
+        reason = (reason or '').strip()
+        if not reason:
+            raise UserError(self.env._(
+                "Say why the credit is being given back. It is the only "
+                "record anyone will have of it later."))
+        self._check_can_give_credit_back()
+
+        if not self.sudo()._restore_credit_now():
+            raise UserError(self.env._(
+                "Nothing could be returned: this booking has no class pack "
+                "or membership recorded against it."))
+
+        self.sudo().write({
+            'fitness_credit_given_back': True,
+            'fitness_credit_given_back_by': self.env.uid,
+            'fitness_credit_given_back_on': fields.Datetime.now(),
+            'fitness_credit_given_back_reason': reason,
+        })
+        # On the booking, not in a log file: in three months somebody will
+        # ask why this student got a credit she was not owed.
+        self.sudo().message_post(body=self.env._(
+            "Credit given back by %(who)s after a late cancellation. "
+            "Reason: %(reason)s",
+            who=self.env.user.name, reason=reason))
+        _logger.info(
+            "[GIVE-CREDIT-BACK] booking %s (%s) by %s: %s",
+            self.id, self.student_id.display_name, self.env.user.login,
+            reason[:80])
+        return True
+
     def action_cancel(self):
         """
         Cancellation rules, where W is the studio's cancellation window:
@@ -606,18 +802,38 @@ class FitnessBooking(models.Model):
                 booking.student_id.name, booking.calendar_event_id.name, hours_until,
             )
 
-            if hours_until <= window and not (
+            # A student may cancel right up to the moment the class starts.
+            #
+            # She used to be refused inside the cancellation window, which
+            # contradicted the studio's own Terms - printed in every booking
+            # email and on the confirmation screen - that say a late
+            # cancellation forfeits the credit. The app said she could not
+            # cancel at all. So the seat stayed taken, she did not come, and
+            # nobody else could have it.
+            #
+            # Nothing about the credit changes here. The rule below is
+            # untouched: outside the window it comes back, inside it does
+            # not, for a pack, an allowance and a make-up credit alike.
+            # The only difference is that she is now allowed to do the
+            # thing the Terms already told her the consequence of.
+            #
+            # The refusal that remains is the one the window check was also
+            # quietly providing: a class that has already started cannot be
+            # cancelled, by her. hours_until goes negative once it begins,
+            # so removing the window check without this would have let a
+            # student cancel last week's class.
+            if hours_until <= 0 and not (
                 self.env.user.has_group('base.group_system')
                 or self.env.user.has_group('fitness_core.group_fitness_manager')
             ):
-                # A type, not a sentence: the portal catches this class rather
-                # than searching the wording for a number.
+                # A type, not a sentence: the portal catches this class
+                # rather than searching the wording for a number.
                 raise LateCancellationError(
                     self.env._(
-                        "This class starts in less than %(hours)s hours. Late "
-                        "cancellations within %(hours)s hours can only be done "
-                        "by a studio admin/manager.",
-                        hours=self._format_window(window),
+                        "%(klass)s has already started, so it can no longer "
+                        "be cancelled. Speak to the studio.",
+                        klass=booking.calendar_event_id.name or self.env._(
+                            "This class"),
                     ),
                     window_hours=window,
                 )

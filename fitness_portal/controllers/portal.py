@@ -387,6 +387,22 @@ class FitnessStudentPortal(http.Controller):
             'lbl_ios_step3':     _('Tap "Add" in the top right corner.'),
         }
 
+    def _cancel_forfeit_label(self):
+        """What she is told when THIS cancellation would forfeit.
+
+        The policy sentence beside it states the rule in general; this one
+        states the consequence for the class in front of her, which is the
+        difference between a notice and a warning. Same source for the
+        number, so the two can never disagree.
+        """
+        Booking = request.env['fitness.booking'].sudo()
+        hours = Booking._format_window(Booking._cancellation_window_hours())
+        return request.env._(
+            "This class starts in less than %(hours)s hours. If you cancel "
+            "now you will not get your credit back.",
+            hours=hours,
+        )
+
     def _cancel_policy_label(self):
         """The studio's cancellation rule, in her language, with the real N.
 
@@ -438,6 +454,7 @@ class FitnessStudentPortal(http.Controller):
                 'book it. Booking opens a week before each class.'),
             'booked':          bool(booked),
             'lbl_cancel_policy': self._cancel_policy_label(),
+            'lbl_cancel_forfeit': self._cancel_forfeit_label(),
             'cancelled':       bool(cancelled),
             'credit_returned': bool(credit_returned),
             'error_msg':       error or None,
@@ -901,6 +918,7 @@ class FitnessStudentPortal(http.Controller):
             'student_name':        student_name,
             'booked':              bool(kw.get('booked')),
             'lbl_cancel_policy':   self._cancel_policy_label(),
+            'lbl_cancel_forfeit':  self._cancel_forfeit_label(),
             **self._notif_labels(),
             'error_msg':           kw.get('error') or None,
             'type_has_img':        type_has_img,
@@ -1716,6 +1734,7 @@ class FitnessStudentPortal(http.Controller):
             # and a late cancellation spends the one free class she
             # gets - so the rule belongs here as much as anywhere.
             'lbl_cancel_policy':        self._cancel_policy_label(),
+            'lbl_cancel_forfeit':       self._cancel_forfeit_label(),
             # The opt-in ask on this page's success states. Only a
             # logged-in student reaches this route at all (auth='user').
             **self._notif_labels(),
