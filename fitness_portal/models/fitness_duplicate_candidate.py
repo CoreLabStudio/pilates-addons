@@ -56,6 +56,20 @@ class FitnessDuplicateCandidate(models.Model):
              "orders, so somebody is signing in and not seeing them.")
     booking_count = fields.Integer("Bookings", default=0)
     order_count = fields.Integer("Confirmed orders", default=0)
+    # partner_count is counted at scan time over ALL the contacts sharing
+    # the address, archived included. The many2many tag widget renders
+    # only the active ones, so a row could read "Contacts 4" beside a
+    # single name, or beside none at all - and a manager cannot decide a
+    # merge she cannot see. These two say it in words instead.
+    partner_names = fields.Char(
+        "Who they are", compute='_compute_partner_names',
+        help="Every contact sharing this address, archived ones marked. "
+             "The count beside it includes archived contacts; the name "
+             "tags do not, which is why this exists.")
+    archived_names = fields.Char(
+        "Archived among them", compute='_compute_partner_names',
+        help="Archived contacts are easy to merge away by accident, "
+             "because nothing on screen otherwise says they are there.")
     resolved = fields.Boolean("Dealt with", default=False)
     checked = fields.Boolean(
         "I have checked these are the same person",
@@ -63,6 +77,30 @@ class FitnessDuplicateCandidate(models.Model):
              "record that a person looked, which is the only thing "
              "standing between a shared family address and two people "
              "being fused into one.")
+
+    @api.depends('partner_ids')
+    def _compute_partner_names(self):
+        """Name every contact on the row, archived ones included.
+
+        active_test=False is the whole point: without it this reproduces
+        the bug it exists to fix. The names are read through sudo because
+        a manager is not necessarily allowed to read an archived partner,
+        and refusing to name it would leave her exactly where she was.
+        """
+        for rec in self:
+            partners = rec.sudo().with_context(
+                active_test=False).partner_ids
+            shown, archived = [], []
+            for p in partners:
+                if p.active:
+                    shown.append(p.name or rec.env._("(no name)"))
+                else:
+                    label = "%s %s" % (p.name or rec.env._("(no name)"),
+                                       rec.env._("(archived)"))
+                    shown.append(label)
+                    archived.append(p.name or rec.env._("(no name)"))
+            rec.partner_names = ", ".join(shown)
+            rec.archived_names = ", ".join(archived)
 
     # -- building the list ---------------------------------------------
     @api.model
@@ -242,12 +280,22 @@ class FitnessDuplicateCandidate(models.Model):
                 "Merging cannot be undone, and a shared address is "
                 "ordinary in a family."))
 
-        partners = self.partner_ids.sudo().with_context(active_test=False)
+        # The context has to be on the record BEFORE the relation is read.
+        # self.partner_ids.with_context(active_test=False) reads the m2m
+        # first and re-binds the recordset afterwards, by which point the
+        # archived contacts are already gone - so a row holding three
+        # contacts, one of them archived, counted as two and sailed
+        # straight through the "exactly two" guard into a merge.
+        partners = self.sudo().with_context(active_test=False).partner_ids
         if len(partners) != 2:
+            # Naming them matters more than the count: the screen she is
+            # looking at may be showing fewer names than this number,
+            # because archived contacts have no tag.
             raise UserError(self.env._(
                 "Merge handles two contacts at a time; this row has "
-                "%(count)s. Sort it out from the contacts screen.",
-                count=len(partners)))
+                "%(count)s: %(names)s. Sort it out from the contacts "
+                "screen.",
+                count=len(partners), names=self.partner_names or '-'))
 
         first, second = partners[0], partners[1]
         if first._fitness_is_staff() or second._fitness_is_staff():

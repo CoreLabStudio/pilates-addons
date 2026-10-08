@@ -48,3 +48,6 @@ from . import test_duplicate_join_boundaries
 from . import test_verification_join_http
 from . import test_waiting_on_the_studio
 from . import test_waiting_states_and_roles
+from . import test_duplicate_names_shown
+from . import test_duplicate_menus_under_students
+from . import test_duplicate_names_shown

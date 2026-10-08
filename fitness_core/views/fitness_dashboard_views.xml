@@ -178,8 +178,19 @@ action = {
     'view_mode': 'form',
     'views': [(False, 'form')],
     'target': 'current',
-    'flags': {'mode': 'readonly'},
 }
+# No 'flags' key. It asked for the form to open read-only, which is a
+# thing the web client stopped doing: Odoo 19's JS contains neither
+# 'action.flags' nor 'form_view_initial_mode', and clean_action() in
+# web/controllers/utils.py keeps unknown keys but logs
+#   "Action 'Home' contains custom properties 'flags'"
+# every single time this action runs. Fourteen of those in one day on
+# production, and they were the only warnings we were producing.
+#
+# Nothing is lost by removing it, because it was already doing nothing:
+# the form has twelve fields and every one is readonly="1", computed, or
+# invisible="1", and the form itself carries create="0". There is
+# nothing on this screen to type into whichever mode it opens in.
         </field>
     </record>
 

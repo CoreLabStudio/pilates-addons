@@ -12,7 +12,11 @@
             <list string="Possible duplicates" create="false">
                 <field name="email"/>
                 <field name="matched_on"/>
-                <field name="partner_ids" widget="many2many_tags"/>
+                <field name="partner_ids" widget="many2many_tags"
+                       optional="hide"/>
+                <!-- The tags render active contacts only; this names every
+                     one that the count counts, archived included. -->
+                <field name="partner_names"/>
                 <field name="partner_count"/>
                 <field name="login_count"/>
                 <field name="booking_count"/>
@@ -39,9 +43,22 @@
                             invisible="partner_count != 2 or resolved"
                             confirm="Merging cannot be undone. The contact
                                      that holds less history will be removed
-                                     and everything on it moved across."/>
+                                     and everything on it moved across.
+                                     Check the names above first, including
+                                     any marked (archived)."/>
                 </header>
                 <sheet>
+                    <!-- Archived contacts carry no tag, so without this the
+                         screen shows a count with fewer names than it, and a
+                         merge gets decided half-blind. -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not archived_names">
+                        <strong>One of these is archived.</strong>
+                        An archived contact has no name tag, so check this
+                        really is the same person before merging:
+                        <field name="archived_names" readonly="1"
+                               nolabel="1" class="oe_inline"/>
+                    </div>
                     <group>
                         <field name="email" readonly="1"/>
                         <field name="matched_on" readonly="1"/>
@@ -49,6 +66,8 @@
                         <field name="has_history" readonly="1"/>
                     </group>
                     <group string="Contacts sharing this address">
+                        <field name="partner_names" readonly="1" nolabel="1"
+                               colspan="2"/>
                         <field name="partner_ids" widget="many2many_tags"
                                readonly="1" nolabel="1" colspan="2"/>
                     </group>
@@ -93,13 +112,18 @@
         </field>
     </record>
 
+    <!-- Under Students, straight after Student List (sequence 5), because
+         that is what these are about: the same student, twice. They sat
+         loose at the bottom of the CoreLab menu, between sections that
+         had nothing to do with them. The id and the action are unchanged,
+         so anything already linking here still resolves. -->
     <menuitem
         id="menu_fitness_duplicate_candidate"
         name="Possible duplicates"
-        parent="fitness_core.menu_fitness_root"
+        parent="fitness_core.menu_group_bookings"
         action="action_fitness_duplicate_candidate"
         groups="fitness_core.group_fitness_manager"
-        sequence="95"/>
+        sequence="6"/>
 
     <record id="view_fitness_duplicate_join_log_list" model="ir.ui.view">
         <field name="name">fitness.duplicate.join.log.list</field>
@@ -123,7 +147,7 @@
     </record>
 
     <record id="action_fitness_duplicate_join_log" model="ir.actions.act_window">
-        <field name="name">Duplicate joins</field>
+        <field name="name">Merge history</field>
         <field name="res_model">fitness.duplicate.join.log</field>
         <field name="view_mode">list</field>
         <field name="help" type="html">
@@ -138,12 +162,15 @@
         </field>
     </record>
 
+    <!-- "Merge history" rather than "Duplicate joins": it is a record of
+         what has already happened, and every merge is in it whether the
+         system made it or a person did. The id stays, so old links work. -->
     <menuitem
         id="menu_fitness_duplicate_join_log"
-        name="Duplicate joins"
-        parent="fitness_core.menu_fitness_root"
+        name="Merge history"
+        parent="fitness_core.menu_group_bookings"
         action="action_fitness_duplicate_join_log"
         groups="fitness_core.group_fitness_manager"
-        sequence="96"/>
+        sequence="7"/>
 
 </odoo>
