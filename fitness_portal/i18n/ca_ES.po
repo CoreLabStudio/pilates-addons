@@ -4657,3 +4657,9 @@ msgstr "Crèdit retornat per l'estudi"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 msgid "Credit kept"
 msgstr "Crèdit no retornat"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "This class starts in less than %(hours)s hours. If you cancel now you will not get your credit back."
+msgstr "Aquesta classe comença en menys de %(hours)s hores. Si la cancel·les ara, no recuperaràs el teu crèdit."

@@ -179,6 +179,15 @@ class FitnessBooking(models.Model):
         "Cancelled late", compute='_compute_fitness_cancel_label',
         search='_search_fitness_is_late_cancel')
 
+    # Whether cancelling THIS booking right now would forfeit the
+    # credit. The confirmation sheet asks it per booking, so she is
+    # warned about her own class instead of only being shown the rule.
+    fitness_cancel_forfeits = fields.Boolean(
+        "Cancelling now forfeits the credit",
+        compute='_compute_fitness_cancel_forfeits',
+        help="True while this booking is inside the cancellation window, "
+             "so cancelling it now would not return the credit.")
+
     fitness_credit_given_back = fields.Boolean(
         "Credit given back later", default=False, readonly=True, copy=False,
         help="A manager returned the credit after this booking was "
@@ -610,6 +619,30 @@ class FitnessBooking(models.Model):
             else:
                 booking.fitness_cancel_label = self.env._(
                     "Cancelled late, credit kept")
+
+    @api.depends('state', 'calendar_event_id.start')
+    def _compute_fitness_cancel_forfeits(self):
+        """The same comparison action_cancel makes, asked ahead of time.
+
+        Not stored. It also depends on the clock, which no @api.depends
+        can express, so a stored value would be wrong within hours of
+        being written with nothing to recompute it. The two fields named
+        above are the ones that CAN change it inside a transaction - the
+        class being moved, the booking being cancelled - and naming them
+        is what keeps the cache from going stale mid-request.
+        """
+        now = fields.Datetime.now()
+        window = self._cancellation_window_hours()
+        for booking in self:
+            start = booking.calendar_event_id.start
+            if booking.state != 'booked' or not start:
+                booking.fitness_cancel_forfeits = False
+                continue
+            hours_until = (start - now).total_seconds() / 3600.0
+            # The open interval at zero matches action_cancel, which
+            # refuses a class that has already started rather than
+            # forfeiting on it.
+            booking.fitness_cancel_forfeits = 0 < hours_until <= window
 
     def _search_fitness_is_late_cancel(self, operator, value):
         """Cancelled, and the policy did not return the credit.

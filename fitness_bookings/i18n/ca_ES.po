@@ -1071,3 +1071,20 @@ msgstr "Cancel·lades tard"
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
 msgid "Credit Given Back"
 msgstr "Crèdit retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "%(klass)s has already started, so it can no longer be cancelled. Speak to the studio."
+msgstr "%(klass)s ja ha començat, així que ja no es pot cancel·lar. Parla amb l'estudi."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This class"
+msgstr "Aquesta classe"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_cancel_forfeits
+msgid "Cancelling now forfeits the credit"
+msgstr "Cancel·lar ara perd el crèdit"

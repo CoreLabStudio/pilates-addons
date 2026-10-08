@@ -4854,6 +4854,20 @@ body:has(.mv-bottom-nav) img { max-width: 100%; height: auto; }
     padding: 4px 2px 14px;
     margin: 0;
 }
+/* The one sentence about HER class, above the general rule. Both tokens
+   are redefined in the two dark blocks, so this reads at AA in either
+   theme without a rule of its own here. */
+.mv-confirm-warning {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--mv-warn-ink);
+    background: var(--mv-warn-bg);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 4px 0 10px;
+}
+.mv-confirm-warning[hidden] { display: none; }
 /* Two buttons on a row, the way the browser's own dialog put them, rather
    than two stacked full-width bars. The confirming button used to be
    --mv-warn-ink (#D40924): an alarm red that belongs to error text and is in
