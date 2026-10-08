@@ -7,3 +7,7 @@ from . import test_attendance_marking
 from . import test_move_clears_the_mark
 from . import test_action_overrides_propagate
 from . import test_cancel_dialog_opens
+from . import test_student_may_cancel_late
+from . import test_late_cancel_trial_branch
+from . import test_manager_gives_the_credit_back
+from . import test_late_cancel_is_visible

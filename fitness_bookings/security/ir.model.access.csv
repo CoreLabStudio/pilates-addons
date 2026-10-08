@@ -15,3 +15,4 @@ access_fitness_bulk_cancel_wizard_system,fitness.class.bulk.cancel.wizard system
 access_fitness_bulk_cancel_wizard_manager,fitness.class.bulk.cancel.wizard manager,model_fitness_class_bulk_cancel_wizard,fitness_core.group_fitness_manager,1,1,1,1
 access_fitness_bulk_cancel_line_system,fitness.class.bulk.cancel.line system,model_fitness_class_bulk_cancel_line,base.group_system,1,1,1,1
 access_fitness_bulk_cancel_line_manager,fitness.class.bulk.cancel.line manager,model_fitness_class_bulk_cancel_line,fitness_core.group_fitness_manager,1,1,1,1
+access_fitness_booking_credit_back_wizard_manager,fitness.booking.credit.back.wizard manager,model_fitness_booking_credit_back_wizard,fitness_core.group_fitness_manager,1,1,1,1

@@ -52,6 +52,13 @@
                                    decoration-danger="state == 'cancelled'"
                                    decoration-warning="state == 'no_show'"/>
                             <field name="credit_returned" optional="show"/>
+                            <!-- Says in words what credit_returned=False on
+                                 a cancelled row means, and whether the
+                                 studio has put it right since. Nothing
+                                 notifies a manager of a late cancellation,
+                                 so the Roster is where she finds out. -->
+                            <field name="fitness_cancel_label"
+                                   optional="show"/>
                             <button name="action_mark_attended" type="object"
                                     string="Attended" icon="fa-check"
                                     invisible="state != 'booked'"/>

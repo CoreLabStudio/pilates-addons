@@ -156,6 +156,39 @@ class FitnessBookingSubscription(models.Model):
         if isinstance(result, dict):
             return result
 
+        # Three ways a floating-credit booking reaches this method, and
+        # they do NOT all return the credit:
+        #
+        #   the student cancels outside the window
+        #       credit_returned is already True, nothing else set.
+        #       -> returns the credit. She kept her side of the bargain.
+        #
+        #   the studio calls the whole class off (action_cancel_class)
+        #       _class_cancelled and admin_force_refund are both set.
+        #       -> returns the credit, whatever the timing. She did not
+        #          choose this, and a pack booking already gets its
+        #          credit back in exactly this case.
+        #
+        #   a manager cancels ONE booking - the late-cancel wizard's
+        #       "Restore Credit" tick, or "Return the credit" on the
+        #       cancel-or-move dialog - which sets admin_force_refund and
+        #       so sets credit_returned.
+        #       -> returns the credit, because that is what the tick says.
+        #
+        # All three now reduce to credit_returned, which is the same
+        # single question a pack booking and an allowance booking have
+        # always been asked. The context no longer has to be read at all.
+        #
+        # The version before this carried `not manager_forced`, which was
+        # perverse in one case: a manager cancelling a booking already
+        # OUTSIDE the window, with the tick ON, got no credit, while the
+        # same cancellation with the tick OFF returned one. Ticking "give
+        # the credit back" took it away.
+        #
+        # A class MOVED to another time never arrives here at all - the
+        # reassign wizard rewrites calendar_event_id and does not cancel.
+        studio_called_off = bool(self.env.context.get('_class_cancelled'))
+
         for booking in self:
             sub = sub_map.get(booking.id)
             if not sub or sub.fitness_is_unlimited:
@@ -170,14 +203,76 @@ class FitnessBookingSubscription(models.Model):
                     "[SUBSCRIPTION] Allowance cancellation on %s → +1 floating credit (%d total)",
                     sub.name, sub.sudo().fitness_floating_credits,
                 )
-            elif was_floating:
-                # Floating-credit booking cancelled → no credit restored (anti-gaming).
+            elif was_floating and booking.credit_returned:
+                # A make-up credit is a credit. She cancelled outside the
+                # window, which is the whole bargain the booking screen
+                # and every confirmation email state: cancel in time and
+                # you keep what you paid. Refusing here made that promise
+                # false for exactly the students who had already been
+                # inconvenienced once.
+                #
+                # This is not a way to manufacture credits. The cancelled
+                # booking still holds its weekly slot - the counter is
+                # monotonic and untouched by this change - so a cycle of
+                # book-and-cancel returns the student to where she
+                # started and never past it.
+                sub.sudo().fitness_floating_credits += 1
+                if studio_called_off:
+                    sub.sudo().message_post(body=self.env._(
+                        "Make-up credit returned: the studio called off "
+                        "%(klass)s, and %(student)s had paid for it with a "
+                        "make-up credit.",
+                        student=booking.student_id.display_name,
+                        klass=booking.calendar_event_id.display_name))
+                else:
+                    sub.sudo().message_post(body=self.env._(
+                        "Make-up credit returned: %(student)s cancelled "
+                        "%(klass)s outside the cancellation window, and the "
+                        "booking had been paid with a make-up credit.",
+                        student=booking.student_id.display_name,
+                        klass=booking.calendar_event_id.display_name))
                 _logger.info(
-                    "[SUBSCRIPTION] Floating-credit cancellation on %s → no credit restored",
+                    "[SUBSCRIPTION] Floating-credit cancellation on %s (%s) "
+                    "→ +1 floating credit returned (%d total)",
                     sub.name,
+                    "studio called the class off" if studio_called_off
+                    else "cancelled outside the window",
+                    sub.sudo().fitness_floating_credits,
+                )
+            elif was_floating:
+                # Still nothing, in the two cases that have not changed:
+                # a late cancellation (credit_returned False - she cannot
+                # reach this as a student anyway, the base refuses her),
+                # and a class the studio called off, which is left exactly
+                # as it was by instruction. The studio case is worth
+                # revisiting: a member loses her make-up credit because
+                # the studio cancelled, which is nobody's fault but hers
+                # to bear. Out of scope here.
+                _logger.info(
+                    "[SUBSCRIPTION] Floating-credit cancellation on %s → no "
+                    "credit restored (credit_returned=%s)",
+                    sub.name, booking.credit_returned,
                 )
             # fitness_subscription_used_classes is NEVER decremented — it is a
             # monotonic period reporting counter; enforcement uses weekly counts.
+        return True
+
+    def _restore_credit_now(self):
+        """A membership booking gets one make-up credit back.
+
+        The same thing a cancellation outside the window gives her, and it
+        does not matter whether the booking was paid from the weekly
+        allowance or from a make-up credit: the weekly counter is
+        monotonic and stays untouched, and the compensation is one credit.
+        """
+        done = super()._restore_credit_now()
+        sub = self.subscription_id
+        if not sub or sub.fitness_is_unlimited:
+            return done
+        sub.sudo().fitness_floating_credits += 1
+        _logger.info(
+            "[SUBSCRIPTION] Credit given back on %s -> %d make-up credit(s)",
+            sub.name, sub.sudo().fitness_floating_credits)
         return True
 
     # ─── Payment-source auto-selection ────────────────────────────────────────
