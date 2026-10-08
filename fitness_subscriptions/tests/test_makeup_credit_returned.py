@@ -256,13 +256,15 @@ class TestWhatMustNotChange(MakeUpCreditFixture):
             line.fitness_remaining_classes, before,
             "the package path changed, and it was not meant to")
 
-    def test_a_studio_cancellation_is_left_exactly_as_it_was(self):
-        """Reported, not changed, by instruction.
+    def test_a_studio_cancellation_now_returns_the_credit(self):
+        """This assertion used to say the opposite, and was wrong to.
 
-        A class the studio calls off still returns NOTHING for a booking
-        paid with a make-up credit. That is today's behaviour and this
-        change preserves it deliberately. It is worth revisiting - the
-        member loses a credit through no fault of her own - but not here.
+        Until the studio commit, a class the studio called off returned
+        NOTHING for a booking paid with a make-up credit, and this test
+        pinned that as deliberate. The owner has since decided it: a
+        student must not lose a credit because the studio cancelled, and
+        a PACK booking has always been refunded in exactly this case.
+        So the behaviour and this test both flip.
         """
         user = self._student("studio")
         partner = user.partner_id
@@ -292,10 +294,10 @@ class TestWhatMustNotChange(MakeUpCreditFixture):
         booking.invalidate_recordset()
         self.assertEqual(booking.state, "cancelled")
         self.assertEqual(
-            self._floating(order), 0,
-            "a studio cancellation now returns a make-up credit. That may "
-            "well be right, but it is OUT OF SCOPE here and changing it "
-            "silently is how a release stops being reviewable.")
+            self._floating(order), 1,
+            "the studio called the class off and she lost the make-up "
+            "credit she had paid with - through no choice of her own, and "
+            "when a pack booking would have been refunded")
 
     def test_a_student_cannot_cancel_somebody_else_s_booking(self):
         mine = self._student("mine")
