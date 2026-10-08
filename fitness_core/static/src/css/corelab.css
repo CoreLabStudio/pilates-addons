@@ -730,6 +730,10 @@ body:has(.mv-app) #wrapwrap > main {
 .mv-badge-noshow    { background:var(--mv-warn-bg);  color:var(--mv-warn-ink); }
 .mv-badge-unmarked  { background:var(--mv-info-bg);  color:var(--mv-muted2); }
 .mv-badge-credit    { font-size:0.63rem; color:var(--mv-ok-ink); display:block; margin-top:2px; }
+/* The same line, for the cancellation that kept her credit. --mv-warn-ink
+   is redefined in both dark blocks, so this reads at AA in either theme
+   without needing a rule of its own here. */
+.mv-badge-nocredit  { font-size:0.63rem; color:var(--mv-warn-ink); display:block; margin-top:2px; }
 
 /* Subscriptions / packs section */
 .mv-pack-section { padding:0 16px; }
@@ -3197,6 +3201,7 @@ details[open].mv-month-group .mv-month-chevron { transform: rotate(90deg); }
 .mv-badge,
 .mv-badge-confirmed,
 .mv-badge-credit,
+.mv-badge-nocredit,
 .mv-card-full,
 .mv-not-started,
 .mv-stat-label,

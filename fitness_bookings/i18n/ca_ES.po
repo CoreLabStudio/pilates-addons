@@ -1013,3 +1013,61 @@ msgstr "Retornar el crèdit"
 #: code:addons/fitness_bookings/models/fitness_booking.py:0
 msgid "somebody"
 msgstr "algú"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late, credit kept"
+msgstr "Cancel·lada tard, crèdit no retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late, credit given back"
+msgstr "Cancel·lada tard, crèdit retornat"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cancelled late can only be filtered as yes or no."
+msgstr "\"Cancel·lada tard\" només es pot filtrar per sí o no."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_cancel_label
+msgid "Cancellation"
+msgstr "Cancel·lació"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_is_late_cancel
+msgid "Cancelled late"
+msgstr "Cancel·lada tard"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back
+msgid "Credit given back later"
+msgstr "Crèdit retornat després"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_by
+msgid "Given back by"
+msgstr "Retornat per"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_on
+msgid "Given back on"
+msgstr "Retornat el"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_credit_given_back_reason
+msgid "Why it was given back"
+msgstr "Per què es va retornar"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Cancelled Late"
+msgstr "Cancel·lades tard"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+msgid "Credit Given Back"
+msgstr "Crèdit retornat"

@@ -4647,3 +4647,13 @@ msgstr "Aquest pagament no s'ha completat."
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "You can try again, or pay at the studio. If you see a charge in your bank, write to us and we will sort it out."
 msgstr "Pots tornar-ho a provar o pagar a l'estudi. Si veus un càrrec al teu banc, escriu-nos i ho resolem."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Credit given back"
+msgstr "Crèdit retornat per l'estudi"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+msgid "Credit kept"
+msgstr "Crèdit no retornat"

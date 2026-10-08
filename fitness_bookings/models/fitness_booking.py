@@ -164,6 +164,21 @@ class FitnessBooking(models.Model):
     # is what makes that action idempotent: the credit is handed back
     # once, and a second attempt is refused rather than silently
     # doubling it.
+    # What the Roster and her own history show, in words. Computed
+    # rather than stored so it cannot drift from the two fields it
+    # describes.
+    fitness_cancel_label = fields.Char(
+        "Cancellation", compute='_compute_fitness_cancel_label',
+        help="Whether this booking was cancelled inside the cancellation "
+             "window, and whether the studio has since given the credit "
+             "back.")
+    # Searchable so the desk can go looking. A manager gets no
+    # notification of a late cancellation - the student just stops
+    # appearing - so a filter is the only way she finds them.
+    fitness_is_late_cancel = fields.Boolean(
+        "Cancelled late", compute='_compute_fitness_cancel_label',
+        search='_search_fitness_is_late_cancel')
+
     fitness_credit_given_back = fields.Boolean(
         "Credit given back later", default=False, readonly=True, copy=False,
         help="A manager returned the credit after this booking was "
@@ -580,6 +595,36 @@ class FitnessBooking(models.Model):
     # that: the booking was cancelled, the credit was gone, and no screen
     # could return it, so the desk's only option was to hand out a free
     # class product and lose the connection to the class it was for.
+
+    @api.depends('state', 'credit_returned', 'fitness_credit_given_back')
+    def _compute_fitness_cancel_label(self):
+        for booking in self:
+            late = (booking.state == 'cancelled'
+                    and not booking.credit_returned)
+            booking.fitness_is_late_cancel = late
+            if not late:
+                booking.fitness_cancel_label = ''
+            elif booking.fitness_credit_given_back:
+                booking.fitness_cancel_label = self.env._(
+                    "Cancelled late, credit given back")
+            else:
+                booking.fitness_cancel_label = self.env._(
+                    "Cancelled late, credit kept")
+
+    def _search_fitness_is_late_cancel(self, operator, value):
+        """Cancelled, and the policy did not return the credit.
+
+        Not expressible as a stored domain because the label is computed,
+        so the search is spelled out against the two fields it reads.
+        """
+        if operator not in ('=', '!='):
+            raise UserError(self.env._(
+                "Cancelled late can only be filtered as yes or no."))
+        wants = bool(value) if operator == '=' else not bool(value)
+        late = [('state', '=', 'cancelled'), ('credit_returned', '=', False)]
+        if wants:
+            return late
+        return ['!', '&'] + late
 
     def _restore_credit_now(self):
         """Hand one credit back to whatever paid for this booking.

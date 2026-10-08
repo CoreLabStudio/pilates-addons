@@ -1252,8 +1252,21 @@
                                                 </t>
                                                 <t t-elif="booking.state == 'cancelled'">
                                                     <div class="mv-badge mv-badge-cancelled">Cancelled</div>
+                                                    <!-- A cancelled row said "Credit returned" or nothing
+                                                         at all, and nothing is exactly the case she rings
+                                                         the studio about. All three outcomes are named
+                                                         here, including the one where the studio decided
+                                                         afterwards to give it back. Each is a div: a lone
+                                                         inline span is folded into the parent's term and
+                                                         the translation never matches. -->
                                                     <t t-if="booking.credit_returned">
                                                         <div class="mv-badge-credit">Credit returned</div>
+                                                    </t>
+                                                    <t t-elif="booking.fitness_credit_given_back">
+                                                        <div class="mv-badge-credit">Credit given back</div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="mv-badge-nocredit">Credit kept</div>
                                                     </t>
                                                 </t>
                                                 <t t-elif="booking.state == 'no_show'">

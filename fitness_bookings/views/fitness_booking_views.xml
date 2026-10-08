@@ -110,6 +110,7 @@
                         </group>
                     </group>
                     <group string="Cancellation" invisible="state != 'cancelled'">
+                        <field name="fitness_cancel_label" readonly="1"/>
                         <field name="fitness_credit_given_back" readonly="1"
                                invisible="not fitness_credit_given_back"/>
                         <field name="fitness_credit_given_back_by" readonly="1"
@@ -162,6 +163,14 @@
                 <filter name="filter_cancelled" string="Cancelled"
                         domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
+                <!-- The ones a manager wants to find: cancelled inside
+                     the window, credit kept. She is not told about them, so
+                     she has to be able to look. -->
+                <filter name="filter_late_cancel" string="Cancelled Late"
+                        domain="[('fitness_is_late_cancel', '=', True)]"/>
+                <filter name="filter_credit_given_back"
+                        string="Credit Given Back"
+                        domain="[('fitness_credit_given_back', '=', True)]"/>
                 <filter name="filter_credit_returned" string="Credit Returned"
                         domain="[('credit_returned', '=', True)]"/>
                 <group>
