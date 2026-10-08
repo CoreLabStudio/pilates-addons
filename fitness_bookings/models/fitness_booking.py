@@ -606,18 +606,38 @@ class FitnessBooking(models.Model):
                 booking.student_id.name, booking.calendar_event_id.name, hours_until,
             )
 
-            if hours_until <= window and not (
+            # A student may cancel right up to the moment the class starts.
+            #
+            # She used to be refused inside the cancellation window, which
+            # contradicted the studio's own Terms - printed in every booking
+            # email and on the confirmation screen - that say a late
+            # cancellation forfeits the credit. The app said she could not
+            # cancel at all. So the seat stayed taken, she did not come, and
+            # nobody else could have it.
+            #
+            # Nothing about the credit changes here. The rule below is
+            # untouched: outside the window it comes back, inside it does
+            # not, for a pack, an allowance and a make-up credit alike.
+            # The only difference is that she is now allowed to do the
+            # thing the Terms already told her the consequence of.
+            #
+            # The refusal that remains is the one the window check was also
+            # quietly providing: a class that has already started cannot be
+            # cancelled, by her. hours_until goes negative once it begins,
+            # so removing the window check without this would have let a
+            # student cancel last week's class.
+            if hours_until <= 0 and not (
                 self.env.user.has_group('base.group_system')
                 or self.env.user.has_group('fitness_core.group_fitness_manager')
             ):
-                # A type, not a sentence: the portal catches this class rather
-                # than searching the wording for a number.
+                # A type, not a sentence: the portal catches this class
+                # rather than searching the wording for a number.
                 raise LateCancellationError(
                     self.env._(
-                        "This class starts in less than %(hours)s hours. Late "
-                        "cancellations within %(hours)s hours can only be done "
-                        "by a studio admin/manager.",
-                        hours=self._format_window(window),
+                        "%(klass)s has already started, so it can no longer "
+                        "be cancelled. Speak to the studio.",
+                        klass=booking.calendar_event_id.name or self.env._(
+                            "This class"),
                     ),
                     window_hours=window,
                 )
