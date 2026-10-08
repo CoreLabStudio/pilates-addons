@@ -181,15 +181,16 @@ class TestStudioCancelledClass(MakeUpCreditFixture):
         self.assertEqual(self._floating(order), 1)
 
     # == what is deliberately NOT changed ============================
-    def test_the_manager_wizard_on_one_booking_is_unchanged(self):
-        """Reported, not changed, by instruction.
+    def test_the_late_wizard_tick_returns_the_credit(self):
+        """"Restore Credit" on Cancel Booking (Late) now means it.
 
-        A manager cancelling ONE booking through the late-cancel wizard
-        and ticking "restore credit" still returns nothing for a booking
-        paid with a make-up credit. That is today's behaviour and it is
-        a gap - pinned here so it cannot move either way by accident.
+        This assertion used to say the opposite and pin it as a known
+        gap. The tick is labelled "Restore Credit" and its help says it
+        returns the student's credit; for a make-up booking it did
+        nothing at all.
         """
-        _user, order, _klass, booking = self._on_a_makeup_credit("wizard")
+        _user, order, _klass, booking = self._on_a_makeup_credit(
+            "wiztick", hours=max(self.window - 2, 1))
         wizard = self.env["fitness.booking.cancel.wizard"].sudo().create({
             "booking_id": booking.id, "restore_credit": True})
         wizard.with_user(self._manager()).action_confirm()
@@ -197,8 +198,69 @@ class TestStudioCancelledClass(MakeUpCreditFixture):
         booking.invalidate_recordset()
         self.assertEqual(booking.state, "cancelled")
         self.assertEqual(
+            self._floating(order), 1,
+            "the manager ticked Restore Credit and the student got "
+            "nothing back")
+
+    def test_the_late_wizard_without_the_tick_returns_nothing(self):
+        """The negative. Unticked inside the window means unticked."""
+        _user, order, _klass, booking = self._on_a_makeup_credit(
+            "wiznotick", hours=max(self.window - 2, 1))
+        wizard = self.env["fitness.booking.cancel.wizard"].sudo().create({
+            "booking_id": booking.id, "restore_credit": False})
+        wizard.with_user(self._manager()).action_confirm()
+
+        booking.invalidate_recordset()
+        self.assertEqual(booking.state, "cancelled")
+        self.assertEqual(
             self._floating(order), 0,
-            "the manager's one-booking wizard now returns the make-up "
-            "credit. That is probably right, but it is OUT OF SCOPE here "
-            "and changing it silently is how a release stops being "
-            "reviewable.")
+            "the credit came back although the manager left the tick off, "
+            "so the tick decides nothing")
+
+    def test_the_tick_returns_the_credit_only_once(self):
+        _user, order, _klass, booking = self._on_a_makeup_credit(
+            "wizonce", hours=max(self.window - 2, 1))
+        wizard = self.env["fitness.booking.cancel.wizard"].sudo().create({
+            "booking_id": booking.id, "restore_credit": True})
+        manager = self._manager()
+        wizard.with_user(manager).action_confirm()
+        self.assertEqual(self._floating(order), 1)
+
+        from odoo.exceptions import UserError
+        with self.assertRaises(UserError):
+            wizard.with_user(manager).action_confirm()
+        self.assertEqual(
+            self._floating(order), 1,
+            "confirming the wizard twice handed out a second credit")
+
+    def test_ticking_outside_the_window_no_longer_takes_the_credit_away(self):
+        """The perverse case the first draft of this rule created.
+
+        A manager cancelling a booking already OUTSIDE the window, with
+        the tick ON, got nothing - while the same cancellation with the
+        tick OFF returned a credit. Ticking "give the credit back" took
+        it away.
+        """
+        _user, order, _klass, booking = self._on_a_makeup_credit(
+            "wizoutside", hours=50)
+        wizard = self.env["fitness.booking.cancel.wizard"].sudo().create({
+            "booking_id": booking.id, "restore_credit": True})
+        wizard.with_user(self._manager()).action_confirm()
+        self.assertEqual(
+            self._floating(order), 1,
+            "ticking Restore Credit on a booking outside the window took "
+            "the credit away")
+
+    def test_the_cancel_or_move_dialog_follows_its_own_tick(self):
+        """The other manager route: "Return the credit" on Cancel Only."""
+        _user, order, _klass, booking = self._on_a_makeup_credit(
+            "reassign", hours=max(self.window - 2, 1))
+        wizard = self.env["fitness.booking.reassign.wizard"].sudo().create({
+            "booking_id": booking.id, "restore_credit": True})
+        wizard.with_user(self._manager()).action_cancel_only()
+
+        booking.invalidate_recordset()
+        self.assertEqual(booking.state, "cancelled")
+        self.assertEqual(
+            self._floating(order), 1,
+            "Cancel Only with Return the credit ticked gave her nothing")

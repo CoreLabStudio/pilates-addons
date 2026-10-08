@@ -169,25 +169,25 @@ class FitnessBookingSubscription(models.Model):
         #          choose this, and a pack booking already gets its
         #          credit back in exactly this case.
         #
-        #   a manager cancels ONE booking through the late-cancel wizard
-        #       _admin_cancel_direct, and admin_force_refund only if the
-        #       manager ticked "restore credit". No _class_cancelled.
-        #       -> UNCHANGED, which today means nothing is returned even
-        #          when the tick is on. That is a gap, and it is out of
-        #          scope here rather than fixed quietly: see the test
-        #          that pins it.
+        #   a manager cancels ONE booking - the late-cancel wizard's
+        #       "Restore Credit" tick, or "Return the credit" on the
+        #       cancel-or-move dialog - which sets admin_force_refund and
+        #       so sets credit_returned.
+        #       -> returns the credit, because that is what the tick says.
+        #
+        # All three now reduce to credit_returned, which is the same
+        # single question a pack booking and an allowance booking have
+        # always been asked. The context no longer has to be read at all.
+        #
+        # The version before this carried `not manager_forced`, which was
+        # perverse in one case: a manager cancelling a booking already
+        # OUTSIDE the window, with the tick ON, got no credit, while the
+        # same cancellation with the tick OFF returned one. Ticking "give
+        # the credit back" took it away.
         #
         # A class MOVED to another time never arrives here at all - the
         # reassign wizard rewrites calendar_event_id and does not cancel.
         studio_called_off = bool(self.env.context.get('_class_cancelled'))
-        manager_forced = bool(self.env.context.get('admin_force_refund'))
-
-        def returns_makeup_credit(booking):
-            if not booking.credit_returned:
-                return False
-            if studio_called_off:
-                return True
-            return not manager_forced
 
         for booking in self:
             sub = sub_map.get(booking.id)
@@ -203,7 +203,7 @@ class FitnessBookingSubscription(models.Model):
                     "[SUBSCRIPTION] Allowance cancellation on %s → +1 floating credit (%d total)",
                     sub.name, sub.sudo().fitness_floating_credits,
                 )
-            elif was_floating and returns_makeup_credit(booking):
+            elif was_floating and booking.credit_returned:
                 # A make-up credit is a credit. She cancelled outside the
                 # window, which is the whole bargain the booking screen
                 # and every confirmation email state: cancel in time and
@@ -250,10 +250,8 @@ class FitnessBookingSubscription(models.Model):
                 # to bear. Out of scope here.
                 _logger.info(
                     "[SUBSCRIPTION] Floating-credit cancellation on %s → no "
-                    "credit restored (credit_returned=%s, studio=%s, "
-                    "manager_forced=%s)",
-                    sub.name, booking.credit_returned, studio_called_off,
-                    manager_forced,
+                    "credit restored (credit_returned=%s)",
+                    sub.name, booking.credit_returned,
                 )
             # fitness_subscription_used_classes is NEVER decremented — it is a
             # monotonic period reporting counter; enforcement uses weekly counts.
