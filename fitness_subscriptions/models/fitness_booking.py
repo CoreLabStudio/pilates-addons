@@ -156,6 +156,11 @@ class FitnessBookingSubscription(models.Model):
         if isinstance(result, dict):
             return result
 
+        # action_cancel_class passes this when the STUDIO calls a class
+        # off. That path is deliberately untouched by this change, so it
+        # has to be told apart from a student cancelling her own booking.
+        studio_called_off = bool(self.env.context.get('_class_cancelled'))
+
         for booking in self:
             sub = sub_map.get(booking.id)
             if not sub or sub.fitness_is_unlimited:
@@ -170,11 +175,44 @@ class FitnessBookingSubscription(models.Model):
                     "[SUBSCRIPTION] Allowance cancellation on %s → +1 floating credit (%d total)",
                     sub.name, sub.sudo().fitness_floating_credits,
                 )
-            elif was_floating:
-                # Floating-credit booking cancelled → no credit restored (anti-gaming).
+            elif was_floating and booking.credit_returned and not studio_called_off:
+                # A make-up credit is a credit. She cancelled outside the
+                # window, which is the whole bargain the booking screen
+                # and every confirmation email state: cancel in time and
+                # you keep what you paid. Refusing here made that promise
+                # false for exactly the students who had already been
+                # inconvenienced once.
+                #
+                # This is not a way to manufacture credits. The cancelled
+                # booking still holds its weekly slot - the counter is
+                # monotonic and untouched by this change - so a cycle of
+                # book-and-cancel returns the student to where she
+                # started and never past it.
+                sub.sudo().fitness_floating_credits += 1
+                sub.sudo().message_post(body=self.env._(
+                    "Make-up credit returned: %(student)s cancelled "
+                    "%(klass)s outside the cancellation window, and the "
+                    "booking had been paid with a make-up credit.",
+                    student=booking.student_id.display_name,
+                    klass=booking.calendar_event_id.display_name))
                 _logger.info(
-                    "[SUBSCRIPTION] Floating-credit cancellation on %s → no credit restored",
-                    sub.name,
+                    "[SUBSCRIPTION] Floating-credit cancellation on %s outside "
+                    "the window → +1 floating credit returned (%d total)",
+                    sub.name, sub.sudo().fitness_floating_credits,
+                )
+            elif was_floating:
+                # Still nothing, in the two cases that have not changed:
+                # a late cancellation (credit_returned False - she cannot
+                # reach this as a student anyway, the base refuses her),
+                # and a class the studio called off, which is left exactly
+                # as it was by instruction. The studio case is worth
+                # revisiting: a member loses her make-up credit because
+                # the studio cancelled, which is nobody's fault but hers
+                # to bear. Out of scope here.
+                _logger.info(
+                    "[SUBSCRIPTION] Floating-credit cancellation on %s → no "
+                    "credit restored (credit_returned=%s, studio=%s)",
+                    sub.name, booking.credit_returned, studio_called_off,
                 )
             # fitness_subscription_used_classes is NEVER decremented — it is a
             # monotonic period reporting counter; enforcement uses weekly counts.
