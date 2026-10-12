@@ -2,10 +2,10 @@
 <odoo>
 
     <!-- ── Add a student to this class ──────────────────────────────────────
-         The last step of a private booking, which until now had no home. The
-         studio agrees the class and the price in conversation; this records
-         that as a real paid line and books the student on the back of it, in
-         one action, from the class they are talking about. -->
+         The last step of a private booking. It books her on credit she
+         already holds and never charges; with no credit that covers the
+         class it says so and sends the studio to the desk, where it sells.
+         Owner decision Q2. -->
     <record id="view_fitness_add_student_wizard_form" model="ir.ui.view">
         <field name="name">fitness.add.student.wizard.form</field>
         <field name="model">fitness.add.student.wizard</field>
@@ -23,23 +23,30 @@
                         <field name="student_id"
                                options="{'no_quick_create': True}"
                                placeholder="Search an existing contact"/>
-                        <field name="product_id" readonly="1"/>
-                        <!-- Defaulted from the product, meant to be changed:
-                             a private class is priced in the conversation. -->
-                        <field name="price" required="1"/>
+                        <field name="has_credit" invisible="1"/>
+                        <!-- What will pay, before anything is pressed. -->
+                        <field name="credit_label" readonly="1"
+                               invisible="not student_id"/>
                     </group>
-                    <div class="alert alert-info mb-0" role="status">
-                        This creates a confirmed order line for the agreed
-                        price and books the student on this class. It does not
-                        email them a payment request.
-                        <br/>
-                        To give a class instead, use
-                        <strong>Gift one spot to a student</strong>.
+                    <div class="alert alert-info mb-0" role="status"
+                         invisible="not has_credit">
+                        Books her on this class with the credit above. Nothing
+                        is charged.
+                    </div>
+                    <div class="alert alert-warning mb-0" role="status"
+                         invisible="not student_id or has_credit">
+                        She has no credit that covers this class, so nothing
+                        can be booked here. Sell her one at the desk, then add
+                        her.
                     </div>
                 </sheet>
                 <footer>
                     <button name="action_add" type="object"
-                            string="Add to class" class="btn-primary"/>
+                            string="Add to class" class="btn-primary"
+                            invisible="not has_credit"/>
+                    <button name="action_open_desk" type="object"
+                            string="Sell at the desk" class="btn-primary"
+                            invisible="not student_id or has_credit"/>
                     <button string="Close" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>
