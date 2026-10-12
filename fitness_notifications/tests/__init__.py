@@ -8,3 +8,4 @@ from . import test_push_neutralized
 from . import test_booking_email_policy
 from . import test_purchase_notification_coverage
 from . import test_cancel_says_what_happened
+from . import test_silent_purchase

@@ -6,6 +6,14 @@ class SaleOrderNotifications(models.Model):
 
     def action_confirm(self):
         result = super().action_confirm()
+        # The fifth path, and the one that ignored the flag. Booking,
+        # cancelling, moving and class changes all stay silent under
+        # skip_fitness_notification; confirming an order rang and pushed
+        # anyway, so nothing that creates a credit on the student's behalf
+        # - a walk-in recorded after the fact, a desk correction - could
+        # ever be done quietly.
+        if self.env.context.get('skip_fitness_notification'):
+            return result
         for order in self:
             partner = order.partner_id
             user = partner.user_ids[:1]
