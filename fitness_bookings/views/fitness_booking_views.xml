@@ -69,19 +69,41 @@
                          to state records neither who nor when.
                          Manager-only: an instructor marks her own classes
                          from /my/instructor, where the class is already
-                         hers. -->
+                         hers.
+                         Hidden until the class starts: before then a
+                         booking offers only Cancel or Move. The model
+                         refuses an early mark as well; hiding is only so
+                         nobody is offered a button that will say no. -->
+                    <field name="fitness_class_started" invisible="1"/>
                     <button name="action_mark_attended"
                             string="Attended"
                             type="object"
                             class="btn-success"
                             groups="fitness_core.group_fitness_manager"
-                            invisible="state != 'booked'"/>
+                            invisible="state != 'booked' or not fitness_class_started"/>
                     <button name="action_mark_no_show"
                             string="No-show"
                             type="object"
                             class="btn-warning"
                             groups="fitness_core.group_fitness_manager"
-                            invisible="state != 'booked'"/>
+                            invisible="state != 'booked' or not fitness_class_started"/>
+                    <!-- A mark is not final. Each correction opens a dialog
+                         that asks why and writes it to the history. -->
+                    <button name="action_open_mark_as_attended"
+                            string="Mark as Attended"
+                            type="object"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state != 'no_show'"/>
+                    <button name="action_open_mark_as_no_show"
+                            string="Mark as No-show"
+                            type="object"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state != 'attended'"/>
+                    <button name="action_open_cancel_with_reason"
+                            string="Cancel with reason"
+                            type="object"
+                            groups="fitness_core.group_fitness_manager"
+                            invisible="state not in ('attended', 'no_show')"/>
                     <!-- Not clickable, said out loud. It is already the
                          default (the widget disables itself unless the
                          clickable option is set), and writing it down is

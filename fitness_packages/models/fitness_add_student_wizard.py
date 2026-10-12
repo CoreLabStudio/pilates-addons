@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
-"""Put a student into a class from the class itself.
+"""Put a student into a class from the class itself, on her own credit.
 
-A private class is agreed in conversation: the student taps Contact on the
-shop card, the studio works out which class and when, and then somebody has
-to actually make the booking. Until now that last step had no home. The
-Roster on a class is read-only, and creating a booking by hand from Student
-Bookings fails for exactly the case it is needed for - a student with no
-private credit is refused by _select_payment_source with "No active
-subscription or package covers this class type", because the credit is the
-thing that was agreed verbally and never recorded.
+A private class is agreed in conversation, and somebody then has to
+actually make the booking. This is where: Add a student, on the class's
+Roster.
 
-So this does both halves in one action: it records what was agreed as a real
-paid line, and books the student on the back of it.
+It used to do that by SELLING the class: it created a new confirmed order
+at the typed price and booked against it, every time, without looking at
+what she already held. A student with a private class left on her pack
+was charged again and kept the class she had paid for (defect A6).
 
-Two things it deliberately does NOT do:
+Owner decision Q2: it uses her existing credit and never charges. Which
+credit is the payment engine's choice - _select_payment_source, the same
+one a booking she makes herself goes through, so the soonest-expiring
+source that covers this class is spent and a cancelled order's credit
+never is. If she holds nothing that covers the class, the dialog says so
+and offers the desk, which is where the studio sells; once she has the
+credit, Add a student books it.
 
-  * It does not bypass fitness.booking.create(). Every rule still runs -
-    capacity, duplicates, overlapping bookings, the opening date. The one
-    thing it may waive is the seven-day booking window, and only through
-    manager_override_timewindow, which re-checks the group itself. A private
-    class is routinely agreed weeks ahead; that is the whole point of
-    agreeing it.
-  * It does not touch _select_payment_source. That helper only runs when the
-    caller sets neither source, so handing the booking its line explicitly
-    means the refusal never arises rather than being worked around. No
-    context escape, no second code path.
+What it still does NOT do:
+
+  * bypass fitness.booking.create(). Every rule still runs - capacity,
+    duplicates, overlapping bookings, the opening date. The one thing it
+    may waive is the seven-day booking window, and only through
+    manager_override_timewindow, which re-checks the group itself. A
+    private class is routinely agreed weeks ahead.
+  * create an order. Nothing here can charge her.
 """
 import logging
 
@@ -38,44 +39,16 @@ class FitnessAddStudentWizard(models.TransientModel):
     _name = 'fitness.add.student.wizard'
     _description = 'Add a student to this class'
 
-    # Which product records the credit, per discipline. Named rather than
-    # searched: a search would quietly pick up whatever else somebody adds
-    # later, and this has to be the single class the studio actually sells.
-    PRIVATE_PRODUCT_XMLID = {
-        'reformer': 'fitness_packages.product_private_single',
-        'barre': 'fitness_packages.product_barre_privada_single',
-    }
-    # What a given-away class is charged against: zero euros, and a product
-    # the shop never shows. Same reasoning as the private map - named, not
-    # searched, so it cannot drift onto whatever somebody adds later.
-    COURTESY_PRODUCT_XMLID = {
-        'reformer': 'fitness_packages.product_courtesy_reformer',
-        'barre': 'fitness_packages.product_courtesy_barre',
-    }
+    #: where a student with no credit is sent. fitness_portal depends on
+    #: this module, so the desk is found by xmlid at run time, not imported.
+    DESK_ACTION_XMLID = 'fitness_portal.action_fitness_desk_sale'
 
     event_id = fields.Many2one(
         'calendar.event', string='Class', required=True, readonly=True)
     student_id = fields.Many2one(
         'res.partner', string='Student', required=True,
-        help="Any contact. The booking and the paid line are both created "
-             "against them.")
-    price = fields.Float(
-        string='Agreed price', default=0.0,
-        help="What the studio agreed with the student. Defaults to the list "
-             "price of the private class, and is meant to be changed when the "
-             "conversation landed somewhere else.")
-    # Not required on the field: required=True puts a NOT NULL constraint on
-    # the column, and a constraint cannot know that a courtesy class has no
-    # price to give. The form asks for it when the mode charges, and
-    # action_add refuses a charged booking without one - both of which can
-    # see the mode, where the database cannot.
-    product_id = fields.Many2one(
-        'product.template', string='Charged as', readonly=True)
-    # This screen now only sells. Giving a class away moved to the gift
-    # wizard, which also gives packs and memberships, asks for a reason every
-    # time and writes every gift to a log the studio can read. Two ways to
-    # give the same thing meant two sets of rules about who could be given
-    # what, and only one of them was ever written down.
+        help="Any contact. The booking is made against them, paid with "
+             "credit they already hold.")
 
     # Shown, not computed at save: the studio should see the room it has
     # before it picks a student, not after being refused.
@@ -86,6 +59,12 @@ class FitnessAddStudentWizard(models.TransientModel):
     seats_label = fields.Char(
         compute='_compute_seats_label', depends_context=('lang',))
     is_private = fields.Boolean(compute='_compute_seats_label')
+
+    # What will pay, said before anybody presses anything.
+    has_credit = fields.Boolean(compute='_compute_credit')
+    credit_label = fields.Char(
+        string='Paid with', compute='_compute_credit',
+        depends_context=('lang',))
 
     @api.depends('event_id')
     def _compute_seats_label(self):
@@ -103,9 +82,44 @@ class FitnessAddStudentWizard(models.TransientModel):
                     taken=taken, capacity=capacity,
                     free=max(0, capacity - taken))
 
+    def _source(self):
+        """The engine's choice for this student and class, or None."""
+        self.ensure_one()
+        if not (self.student_id and self.event_id):
+            return None
+        try:
+            return self.env['fitness.booking'].sudo()._select_payment_source(
+                self.student_id.id, self.event_id)
+        except UserError:
+            return None
+
+    @api.depends('student_id', 'event_id')
+    def _compute_credit(self):
+        for wiz in self:
+            source = wiz._source()
+            wiz.has_credit = bool(source)
+            if not wiz.student_id:
+                wiz.credit_label = False
+            elif not source:
+                wiz.credit_label = _(
+                    "Nothing she holds covers this class.")
+            elif source.get('package_order_line_id'):
+                line = self.env['sale.order.line'].sudo().browse(
+                    source['package_order_line_id'])
+                wiz.credit_label = _(
+                    "%(product)s (%(order)s), %(left)s left",
+                    product=line.product_id.name, order=line.order_id.name,
+                    left=line.fitness_remaining_classes)
+            else:
+                sub = self.env['sale.order'].sudo().browse(
+                    source['subscription_id'])
+                wiz.credit_label = _(
+                    "Membership %(name)s",
+                    name=sub.fitness_subscription_product_id.name or sub.name)
+
     @api.model
     def default_get(self, fields_list):
-        """Opened from a class, so the class and its price come with it."""
+        """Opened from a class, so the class comes with it."""
         res = super().default_get(fields_list)
         event_id = self.env.context.get('default_event_id') \
             or self.env.context.get('active_id')
@@ -114,59 +128,28 @@ class FitnessAddStudentWizard(models.TransientModel):
             event = self.env['calendar.event'].browse(event_id)
             if event.exists():
                 res['event_id'] = event.id
-                product = self._product_for(event)
-                if product:
-                    res['product_id'] = product.id
-                    # Assigned, not setdefault: the field carries a default
-                    # of 0.0 so the column is never null, and setdefault then
-                    # left every charged booking at zero - which the price
-                    # guard duly refused.
-                    #
-                    # The PROMOTIONAL price, not list_price. The promotion
-                    # block - Full price / Free / Percentage off, with a date
-                    # window - sits on every fitness product, and the studio
-                    # sets it there expecting the app to charge it. The shop,
-                    # the desk sale wizard and the membership lines all ask
-                    # fitness_effective_price(); this screen asked for
-                    # list_price, so a promotion put on a private-class
-                    # product was the one discount the studio could set and
-                    # not get. Outside its window the two are the same
-                    # number, which is why nothing looked wrong.
-                    res['price'] = product.fitness_effective_price()
         return res
 
-    def _product_for(self, event):
-        """The private-class product for this class's discipline.
-
-        Only the private table now. The courtesy products are still used -
-        the gift wizard books a given class against them - but nothing on
-        this screen gives anything away any more.
-
-        Returns nothing for a group class. This screen sells a private
-        session; there is no group single-class product to charge against,
-        and action_add refuses one anyway. Resolving the private product
-        regardless put "Charged as: Reformer Private Single - 50.00" on the
-        form of an ordinary group class, which reads as an offer and is not
-        one. Better to show nothing and let the refusal say why.
-        """
-        session = (event.class_type_id.session_type
-                   or event.session_type or 'group')
-        if session == 'group':
-            return self.env['product.template'].browse()
-        discipline = (event.class_type_id.classroom_type
-                      or event.classroom_id.classroom_type or '')
-        xmlid = self.PRIVATE_PRODUCT_XMLID.get(discipline)
-        if not xmlid:
-            return self.env['product.template'].browse()
-        return self.env.ref(xmlid, raise_if_not_found=False) \
-            or self.env['product.template'].browse()
-
-    def action_add(self):
-        """Record what was agreed, then book it."""
-        self.ensure_one()
+    def _check_manager(self):
         if not self.env.user.has_group('fitness_core.group_fitness_manager') \
                 and not self.env.user.has_group('base.group_system'):
             raise UserError(_("Only studio managers can add a student to a class."))
+
+    def action_open_desk(self):
+        """She has no credit for this class: sell her one at the desk."""
+        self.ensure_one()
+        self._check_manager()
+        if not self.env.ref(self.DESK_ACTION_XMLID, raise_if_not_found=False):
+            raise UserError(_("The desk is not installed on this database."))
+        action = self.env['ir.actions.actions']._for_xml_id(
+            self.DESK_ACTION_XMLID)
+        action['context'] = {'default_partner_id': self.student_id.id}
+        return action
+
+    def action_add(self):
+        """Book her on this class, paid with credit she already holds."""
+        self.ensure_one()
+        self._check_manager()
 
         event = self.event_id
         if event.class_state == 'cancelled':
@@ -182,83 +165,47 @@ class FitnessAddStudentWizard(models.TransientModel):
                 name=event.name, taken=event.booked_seats,
                 capacity=event.capacity))
 
-        if (event.class_type_id.session_type or 'group') == 'group':
+        source = self._source()
+        if not source:
+            # Over RPC there is no dialog to show the desk button on, so the
+            # refusal itself says where to go.
             raise UserError(_(
-                "'%(name)s' is a group class, and there is no group class to "
-                "charge a single booking against - the single-class packs are "
-                "not on sale. Use the Gift one spot to a student "
-                "button to give it, or sell the student a pack and let "
-                "them book it.",
-                name=event.name))
-        if not (self.price or 0.0) > 0.0:
-            raise UserError(_(
-                "Enter the price agreed. To give the class instead, use "
-                "the Gift one spot to a student button."))
+                "%(student)s holds no credit that covers this class, so "
+                "nothing was booked and nothing was charged. Sell her a "
+                "class at the desk, then add her here.",
+                student=self.student_id.display_name))
+        paid_with = self.credit_label
 
-        product = self.product_id or self._product_for(event)
-        if not product:
-            raise UserError(_(
-                "There is no private class product for this discipline, so "
-                "there is nothing to book the class against."))
-        variant = product.product_variant_ids[:1]
-        if not variant:
-            raise UserError(_("%(name)s has no variant to sell.",
-                              name=product.display_name))
-
-        discipline = (event.class_type_id.classroom_type
-                      or event.classroom_id.classroom_type or '')
-
-        # The agreed price, recorded as a real confirmed sale so the credit
-        # exists, the studio can invoice it, and the booking has something to
-        # spend. Created as the wizard's own order rather than reusing a
-        # draft: this one is already agreed.
-        order = self.env['sale.order'].sudo().create({
-            'partner_id': self.student_id.id,
-            'order_line': [(0, 0, {
-                'product_id': variant.id,
-                'product_uom_qty': 1,
-                'price_unit': self.price,
-                'fitness_class_type': discipline,
-            })],
-        })
-        order.action_confirm()
-        line = order.order_line[:1]
-
-        # Explicit source, so _select_payment_source never runs: it is the
-        # helper that would refuse a student with no private credit, and the
-        # credit it would have looked for is the one just created.
-        booking = self.env['fitness.booking'].create({
+        vals = {
             'student_id': self.student_id.id,
             'calendar_event_id': event.id,
-            'package_order_line_id': line.id,
             # A private class is agreed weeks ahead as a matter of course, so
             # the seven-day window has to give. Through the flag the model
             # already re-checks, not around it.
             'manager_override_timewindow': True,
-        })
+        }
+        vals.update(source)
+        booking = self.env['fitness.booking'].create(vals)
 
-        order.message_post(body=_(
-            "Added to %(name)s by %(who)s, charged the agreed price.",
-            name=event.name, who=self.env.user.name))
-
+        booking.sudo().message_post(body=_(
+            "Added to %(name)s by %(who)s, paid with her existing credit: "
+            "%(source)s. Nothing was charged.",
+            name=event.name, who=self.env.user.name, source=paid_with))
         _logger.info(
-            "[ADD STUDENT] %s booked onto %s (%s) by %s, %s, order %s",
+            "[ADD STUDENT] %s booked onto %s (%s) by %s on her own credit %s",
             self.student_id.display_name, event.name, event.start,
-            self.env.user.login,
-            'charged %.2f' % (self.price or 0.0), order.name)
+            self.env.user.login, source)
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _("Student added"),
-                # The line, not self.price: what was actually recorded on
-                # the order is what the studio should be told it charged.
                 'message': _(
-                    "%(student)s is booked on %(name)s, charged %(price).2f "
-                    "on %(order)s.",
+                    "%(student)s is booked on %(name)s, paid with %(source)s. "
+                    "Nothing was charged.",
                     student=self.student_id.display_name, name=event.name,
-                    price=line.price_unit, order=order.name),
+                    source=paid_with),
                 'type': 'success',
                 'sticky': False,
                 # The roster behind the dialog is stale the moment this

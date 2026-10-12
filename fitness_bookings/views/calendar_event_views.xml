@@ -59,15 +59,30 @@
                                  so the Roster is where she finds out. -->
                             <field name="fitness_cancel_label"
                                    optional="show"/>
+                            <!-- Before the class starts a booking offers
+                                 only Cancel / Move; the marks appear at the
+                                 start time. A marked row offers its
+                                 correction and Cancel with reason. -->
+                            <field name="fitness_class_started"
+                                   column_invisible="1"/>
                             <button name="action_mark_attended" type="object"
                                     string="Attended" icon="fa-check"
-                                    invisible="state != 'booked'"/>
+                                    invisible="state != 'booked' or not fitness_class_started"/>
                             <button name="action_mark_no_show" type="object"
                                     string="No-show" icon="fa-times"
-                                    invisible="state != 'booked'"/>
+                                    invisible="state != 'booked' or not fitness_class_started"/>
                             <button name="action_open_reassign_wizard" type="object"
                                     string="Cancel / Move" icon="fa-exchange"
                                     invisible="state != 'booked'"/>
+                            <button name="action_open_mark_as_attended" type="object"
+                                    string="Mark as Attended" icon="fa-check"
+                                    invisible="state != 'no_show'"/>
+                            <button name="action_open_mark_as_no_show" type="object"
+                                    string="Mark as No-show" icon="fa-times"
+                                    invisible="state != 'attended'"/>
+                            <button name="action_open_cancel_with_reason" type="object"
+                                    string="Cancel with reason" icon="fa-ban"
+                                    invisible="state not in ('attended', 'no_show')"/>
                         </list>
                     </field>
                 </page>

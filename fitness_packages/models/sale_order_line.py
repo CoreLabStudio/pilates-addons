@@ -123,6 +123,86 @@ class SaleOrderLine(models.Model):
                 line.fitness_original_class_count - line.fitness_remaining_classes
             )
 
+    # ── What "this credit can pay for a class" means. One definition. ──
+    #
+    # It used to mean two different things depending on who asked, and
+    # that is the whole defect. res_partner._fitness_active_package_lines
+    # - the balance a STUDENT SEES - filtered cancelled orders out, with
+    # a comment naming the incident that put it there: a duplicate
+    # private was cancelled, "its credit was handed back to the line on
+    # the way out, and she was left holding one free Reformer Private
+    # that nobody had bought". _select_payment_source - the engine that
+    # SPENDS - had no such filter.
+    #
+    # So a cancelled order's credits were invisible in her balance and
+    # still bookable. Reproduced on a built copy: order state=cancel,
+    # balance 0, booking succeeded charged to that line. Measured on
+    # production: one student, three classes.
+    #
+    # ONE DOMAIN, ASKED TWO WAYS. Searching uses it through search();
+    # records already in hand use it through filtered_domain(), which
+    # applies the SAME domain in memory. There is no second expression
+    # of the rule for the two to drift apart on - that is the point, and
+    # test_spendable_agreement asserts the two answers are equal for
+    # every order state.
+    #
+    # 'done' is kept although Odoo 19 has no such state: it was replaced
+    # by the `locked` boolean, and a locked order keeps state='sale', so
+    # locked orders stay spendable with no special case. Listing 'done'
+    # costs nothing and guarantees that a credit which works on some
+    # older database does not stop working here.
+    SPENDABLE_ORDER_STATES = ('sale', 'done')
+
+    @api.model
+    def _fitness_spendable_domain(self, partner=None, on_date=None):
+        """The one rule: which package lines may pay for a class.
+
+        A null validity date means "never expires" and has to pass,
+        which is why the date half is an explicit OR rather than a
+        simple >=.
+        """
+        today = on_date or fields.Date.context_today(self)
+        domain = [
+            ('product_id.fitness_is_package', '=', True),
+            ('order_id.state', 'in', list(self.SPENDABLE_ORDER_STATES)),
+            ('fitness_remaining_classes', '>', 0),
+            '|', ('fitness_validity_end_date', '=', False),
+                 ('fitness_validity_end_date', '>=', today),
+        ]
+        if partner is not None:
+            domain = [('order_partner_id', '=', partner.id)] + domain
+        return domain
+
+    def fitness_spendable(self, on_date=None):
+        """The same rule, applied to lines already in hand.
+
+        filtered_domain, not a hand-written condition: a second way of
+        saying it is a second thing to get wrong.
+        """
+        return self.filtered_domain(
+            self._fitness_spendable_domain(on_date=on_date))
+
+    def fitness_covering(self, calendar_event):
+        """The lines among these whose pool can pay for this class.
+
+        The line's own discipline, not the product's. A combined package
+        is two lines against one product - one Barre pool, one Reformer
+        pool - and asking the product would match both pools for either
+        class, letting a Reformer booking spend the Barre credits. 'any'
+        covers every discipline. The session type (group or private) must
+        match exactly.
+
+        The payment engine chooses among these, and "running low" counts
+        them, so the two cannot disagree about what pays for a class.
+        """
+        studio = (calendar_event.class_type_id.classroom_type
+                  or calendar_event.classroom_id.classroom_type)
+        session = calendar_event.session_type
+        return self.filtered(
+            lambda l: (l.fitness_class_type or l.product_id.fitness_class_type)
+            in ('any', studio)
+            and l.product_id.fitness_session_type == session)
+
     def validate_package_for_booking(self, calendar_event):
         """Called by fitness_booking before creating a booking. Raises on failure."""
         from odoo.exceptions import ValidationError

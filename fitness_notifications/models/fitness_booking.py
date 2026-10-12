@@ -153,6 +153,7 @@ class FitnessBookingNotifications(models.Model):
             bookings._send_notification('fitness_notifications.mail_template_booking_confirmation')
         for booking in bookings:
             self._maybe_notify_booking_confirmed(booking)
+            self._maybe_notify_instructor(booking)
             self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
             self._maybe_notify_credit_zero(booking)
@@ -198,6 +199,52 @@ class FitnessBookingNotifications(models.Model):
             # Same destination as booking_cancelled and class_reminder: the
             # class list is where you go to see what you just booked.
             action_url='/my/classes',
+        )
+
+    def _maybe_notify_instructor(self, booking):
+        """Tell the instructor a student has been booked into her class.
+
+        Nobody did. Every recipient on the booking path was the student;
+        the only notice an instructor ever got was when a class's own
+        teacher changed. Maridelvis had nothing for a 1-on-1 with Carlota
+        on 16 October and found out by looking.
+
+        Bell and push through _create_for_user, the same road the swap
+        notice takes, in her own language and on studio time. Once per
+        booking, because a booking is created once. Not for:
+
+          * a class that has already started - a booking made then is a
+            recording after the fact, and she was in the room;
+          * the Clase Fija placement, which books a whole quarter at once
+            and would bury her;
+          * a caller that asked for silence.
+        """
+        ctx = self.env.context
+        if ctx.get('skip_fitness_notification') \
+                or ctx.get('_fitness_clase_fija_placement'):
+            return
+        event = booking.calendar_event_id.sudo()
+        teacher = event.user_id
+        if not teacher or not event.start \
+                or event.start <= fields.Datetime.now():
+            return
+        lang = teacher.lang or DEFAULT_LANG
+        tenv = self.with_context(lang=lang)
+        class_name = event.name or 'class'
+        try:
+            when = format_datetime(tenv.env, event.start, tz=STUDIO_TZ,
+                                   dt_format='d MMM HH:mm', lang_code=lang)
+        except Exception:
+            when = event.start.strftime('%d %b %H:%M')
+        self.env['fitness.notification'].sudo()._create_for_user(
+            teacher.id,
+            'student_booked',
+            tenv.env._('New booking: %(cls)s', cls=class_name),
+            tenv.env._('%(student)s is booked into your class %(cls)s on '
+                       '%(when)s.',
+                       student=booking.student_id.sudo().name or '',
+                       cls=class_name, when=when),
+            action_url='/my/instructor/classes/%d' % event.id,
         )
 
     def _maybe_notify_credit_used(self, booking):
@@ -252,16 +299,26 @@ class FitnessBookingNotifications(models.Model):
         )
 
     def _maybe_notify_credit_low(self, booking):
-        """Create an in-app notification when a student's remaining credits drop to 1."""
+        """Tell her when what she has left for this kind of class drops to 1.
+
+        This used to take limit=1 on ANY of her lines with one credit left
+        - expired, on a cancelled order, another discipline - and report
+        that line's count as her balance. Carlota was told "only 1 credit
+        left" while holding five: a Reformer private pack with four, and an
+        old single with one.
+
+        Now it counts what could pay for another class like the one just
+        booked: the spendable lines (the shared rule - live order, not
+        expired) that cover it (fitness_covering, the engine's own filter),
+        summed. The threshold is unchanged.
+        """
         LOW_THRESHOLD = 1
         partner = booking.student_id
-        line = self.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '<=', LOW_THRESHOLD),
-            ('fitness_remaining_classes', '>', 0),
-        ], limit=1)
-        if not line:
+        SOL = self.env['sale.order.line'].sudo()
+        lines = SOL.search(SOL._fitness_spendable_domain(partner=partner)
+                           ).fitness_covering(booking.calendar_event_id)
+        remaining = sum(lines.mapped('fitness_remaining_classes'))
+        if not 0 < remaining <= LOW_THRESHOLD:
             return
         user = partner.user_ids[:1]
         if not user:
@@ -273,7 +330,6 @@ class FitnessBookingNotifications(models.Model):
         ], limit=1)
         if recent:
             return
-        remaining = line.fitness_remaining_classes
         lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
@@ -324,15 +380,21 @@ class FitnessBookingNotifications(models.Model):
                     start_str = event_start.strftime('%d %b %H:%M')
             body = (
                 lang_env.env._(
-                    'Your booking for %(cls)s on %(when)s has been cancelled.'
-                    ' Check your credit balance for any refunds.',
+                    'Your booking for %(cls)s on %(when)s has been cancelled.',
                     cls=class_name, when=start_str)
                 if start_str else
                 lang_env.env._(
-                    'Your booking for %(cls)s has been cancelled.'
-                    ' Check your credit balance for any refunds.',
+                    'Your booking for %(cls)s has been cancelled.',
                     cls=class_name)
             )
+            # Only what happened. This used to end "Check your credit
+            # balance for any refunds" every time - including inside the
+            # window, where the credit is kept on purpose, so a student was
+            # sent to look for a refund that did not exist. Kept: nothing is
+            # said about credit at all. Returned: one sentence saying so.
+            if booking.credit_returned:
+                body = '%s %s' % (
+                    body, lang_env.env._('Your credit has been returned.'))
             # The studio's own words, when it gave any. Appended so the news
             # comes first and the explanation reads as the studio wrote it.
             why = (self.env.context.get('cancel_reason') or '').strip()
@@ -348,6 +410,32 @@ class FitnessBookingNotifications(models.Model):
                 )
             except Exception:
                 pass
+        return result
+
+    def _notify_credit_returned_by_studio(self):
+        """Tell her the studio returned a credit the policy had kept.
+
+        Give the Credit Back after a late cancel, or Cancel with reason on
+        a marked booking with the tick on. Her earlier message said nothing
+        about credit, because at the time nothing came back; when the
+        studio decides otherwise, this is the only place she hears it.
+        """
+        result = super()._notify_credit_returned_by_studio()
+        if self.env.context.get('skip_fitness_notification'):
+            return result
+        user = self.student_id.user_ids[:1]
+        if user:
+            class_name = self.calendar_event_id.name or 'class'
+            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id,
+                'booking_cancelled',
+                lang_env.env._('Credit returned: %(cls)s', cls=class_name),
+                lang_env.env._(
+                    'The studio has returned your credit for %(cls)s.',
+                    cls=class_name),
+                action_url='/my/packages',
+            )
         return result
 
     # ─── Class reminder (cron) ──────────────────────────────────────────────────

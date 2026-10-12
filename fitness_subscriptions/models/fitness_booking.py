@@ -361,24 +361,16 @@ class FitnessBookingSubscription(models.Model):
             expiry = _DATE_MAX if product.is_unlimited else (sub.next_invoice_date or _DATE_MAX)
             candidates.append((expiry, 0, {'subscription_id': sub.id}))
 
-        lines = self.env['sale.order.line'].search([
-            ('order_partner_id', '=', student_id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-        ])
-        for line in lines:
-            if line.fitness_is_expired:
-                continue
-            product = line.product_id
-            # The line's own discipline, not the product's. A combined package
-            # is two lines against one product - one Barre pool, one Reformer
-            # pool - and asking the product would match both pools for either
-            # class, letting a Reformer booking spend the Barre credits.
-            pool_type = line.fitness_class_type or product.fitness_class_type
-            if pool_type not in ('any', event_studio):
-                continue
-            if product.fitness_session_type != event_session:
-                continue
+        # The shared rule, not a domain of our own. This search used to
+        # have no order-state filter, so a cancelled order's credits were
+        # hidden from her balance and still spent here. Expiry is part of
+        # the rule, so there is no separate fitness_is_expired check.
+        SOL = self.env['sale.order.line']
+        lines = SOL.search(SOL._fitness_spendable_domain(
+            partner=self.env['res.partner'].browse(student_id)))
+        # Which of them can pay for THIS class is fitness_covering(), the
+        # same filter the "running low" warning counts with.
+        for line in lines.fitness_covering(calendar_event):
             expiry = line.fitness_validity_end_date or _DATE_MAX
             candidates.append((expiry, 1, {'package_order_line_id': line.id}))
 
