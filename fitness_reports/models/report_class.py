@@ -103,12 +103,18 @@ class FitnessReportClass(models.Model):
                 EXTRACT(EPOCH FROM (ce.stop - ce.start)) / 3600.0           AS duration_hours,
                 ce.class_state,
                 (ce.class_state <> 'cancelled' AND ce.stop < now())         AS did_run,
-                COUNT(fb.id) FILTER (WHERE fb.state IN ('booked','attended'))  AS booked_count,
+                -- Booked in advance: a walk-in recorded after the class is
+                -- attendance, not a seat somebody booked, so it is left out
+                -- here and in the occupancy below and kept in attended.
+                COUNT(fb.id) FILTER (WHERE fb.state IN ('booked','attended')
+                    AND NOT COALESCE(fb.fitness_recorded_after_the_fact, FALSE))
+                                                                            AS booked_count,
                 COUNT(fb.id) FILTER (WHERE fb.state = 'attended')              AS attended_count,
                 COUNT(fb.id) FILTER (WHERE fb.state = 'no_show')               AS no_show_count,
                 COUNT(fb.id) FILTER (WHERE fb.state = 'cancelled')             AS cancelled_count,
                 ROUND(
-                    100.0 * COUNT(fb.id) FILTER (WHERE fb.state IN ('booked','attended'))
+                    100.0 * COUNT(fb.id) FILTER (WHERE fb.state IN ('booked','attended')
+                        AND NOT COALESCE(fb.fitness_recorded_after_the_fact, FALSE))
                     / NULLIF(ce.capacity, 0)
                 , 1)                                                        AS occupancy_pct,
                 COALESCE(ar.attributed_revenue, 0)                         AS attributed_revenue

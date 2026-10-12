@@ -160,6 +160,14 @@ class FitnessBooking(models.Model):
         "Cancelled Because", readonly=True, copy=False,
         help="What the studio said when cancelling. Shown to the student and "
              "kept on the booking.")
+    # Written only by the record-an-attendance wizard. A booking created
+    # after its class has happened is a different kind of record from one
+    # the student made herself: it counts as attendance, never as a seat
+    # booked in advance, and the roster can say so.
+    fitness_recorded_after_the_fact = fields.Boolean(
+        "Recorded after the class", default=False, readonly=True, copy=False,
+        help="The studio recorded this attendance after the class, because "
+             "she took it without booking.")
     # Set by the give-credit-back action, never by a cancellation. It
     # is what makes that action idempotent: the credit is handed back
     # once, and a second attempt is refused rather than silently

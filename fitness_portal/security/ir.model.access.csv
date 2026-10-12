@@ -14,3 +14,4 @@ access_fitness_duplicate_candidate_manager,fitness.duplicate.candidate manager,m
 access_fitness_duplicate_join_log_manager,fitness.duplicate.join.log manager,model_fitness_duplicate_join_log,fitness_core.group_fitness_manager,1,0,0,0
 access_fitness_free_credit_report_manager,fitness.free.credit.report manager,model_fitness_free_credit_report,fitness_core.group_fitness_manager,1,0,0,0
 access_fitness_free_credit_report_system,fitness.free.credit.report system,model_fitness_free_credit_report,base.group_system,1,0,0,0
+access_fitness_record_attendance_wizard_manager,fitness.record.attendance.wizard manager,model_fitness_record_attendance_wizard,fitness_core.group_fitness_manager,1,1,1,1

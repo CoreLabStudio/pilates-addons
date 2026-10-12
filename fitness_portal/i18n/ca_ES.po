@@ -859,6 +859,9 @@ msgstr "Subscripció iniciada · %s"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__calendar_event_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__calendar_event_id
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_gift_log__gift_type__class
 msgid "Class"
 msgstr "Classe"
 
@@ -2738,6 +2741,7 @@ msgstr "Alumnes"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_search
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__student_id
 msgid "Student"
 msgstr "Alumne"
 
@@ -3213,6 +3217,7 @@ msgstr "La teva resposta"
 #: model:ir.model.fields,field_description:fitness_portal.field_res_users__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
 
@@ -3236,6 +3241,7 @@ msgstr "Durada"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
 msgid "Room"
 msgstr "Sala"
 
@@ -4159,6 +4165,9 @@ msgstr "CoreLab"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__create_date
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__create_date
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__create_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__create_date
 msgid "Created on"
 msgstr "Creat el"
 
@@ -4230,6 +4239,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__id
 msgid "ID"
 msgstr "ID"
 
@@ -4242,6 +4252,9 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__write_date
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__write_date
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__write_date
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__write_date
 msgid "Last Updated on"
 msgstr "Última actualització el"
 
@@ -4351,6 +4364,7 @@ msgstr "Telèfon"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__reason
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__reason
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__reason
 msgid "Reason"
 msgstr "Motiu"
 
@@ -5009,3 +5023,243 @@ msgstr "Què en va ser"
 #: model:ir.model.fields,help:fitness_portal.field_fitness_free_credit_report__value_given
 msgid "What the product normally costs - what the studio chose not to charge."
 msgstr "El que costa normalment el producte: el que l'estudi va decidir no cobrar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_gift.py:0
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "%(taken)s of %(capacity)s spots taken"
+msgstr "%(taken)s de %(capacity)s places ocupades"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "'%(name)s' has not happened yet. Book her onto it the ordinary way."
+msgstr "'%(name)s' encara no ha tingut lloc. Reserva-li la plaça de la manera habitual."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid ""
+"'%(name)s' is full - %(taken)s of %(capacity)s spots taken. Recording her "
+"would put the class over its own capacity; check who else is on the roster "
+"first."
+msgstr "'%(name)s' és plena: %(taken)s de %(capacity)s places ocupades. Registrar-la superaria la capacitat de la classe; revisa primer qui més hi ha a la llista."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "'%(name)s' was cancelled, so nobody attended it."
+msgstr "'%(name)s' es va cancel·lar, així que no hi va assistir ningú."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid ""
+"'%(name)s' was more than %(days)s days ago. Attendance is recorded within "
+"%(days)s days; after that it is history and somebody should look at it "
+"properly."
+msgstr "'%(name)s' va ser fa més de %(days)s dies. L'assistència es registra en un termini de %(days)s dies; després és història i algú ho hauria de revisar amb calma."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_record_attendance_wizard__pay_with__existing
+msgid "A credit she already has"
+msgstr "Un crèdit que ja té"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "A free class will be given and used: %(name)s"
+msgstr "Es regalarà i s'utilitzarà una classe gratuïta: %(name)s"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_record_attendance_wizard__pay_with__free
+msgid "A free class, given now"
+msgstr "Una classe gratuïta, regalada ara"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid ""
+"Attendance recorded after the class by %(who)s. She attended %(klass)s and "
+"it was never booked. Reason: %(reason)s"
+msgstr "Assistència registrada després de la classe per %(who)s. Va assistir a %(klass)s i no es va reservar mai. Motiu: %(reason)s"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__available_event_ids
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__available_event_ids
+msgid "Available Event"
+msgstr "Classe disponible"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__pay_with
+msgid "Charge it to"
+msgstr "Carregar-ho a"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__create_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__create_uid
+msgid "Created by"
+msgstr "Creat per"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid "Discard"
+msgstr "Descartar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "Her %(product)s (%(order)s), %(left)s left."
+msgstr "El seu %(product)s (%(order)s), en queden %(left)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_record_attendance_wizard__pay_with__trial
+msgid "Her free trial"
+msgstr "La seva prova gratuïta"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "Her free trial can be used."
+msgstr "Es pot fer servir la seva prova gratuïta."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "Her membership %(name)s."
+msgstr "El seu abonament %(name)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__write_uid
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__write_uid
+msgid "Last Updated by"
+msgstr "Última actualització per"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid ""
+"Nothing is sent to her or to the instructor. The booking is\n"
+"            recorded as attended, marked by you and dated to the class."
+msgstr "No s'envia res ni a ella ni a la instructora. La reserva queda registrada com a assistida, marcada per tu i amb la data de la classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "Only a studio manager can record an attendance."
+msgstr "Només un responsable de l'estudi pot registrar una assistència."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_calendar_event_form_record_attendance
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_partner_form_record_attendance
+msgid "Record a walk-in"
+msgstr "Registrar assistència sense reserva"
+
+#. module: fitness_portal
+#: model:ir.actions.act_window,name:fitness_portal.action_fitness_record_attendance
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid "Record an attendance"
+msgstr "Registrar una assistència"
+
+#. module: fitness_portal
+#: model:ir.model,name:fitness_portal.model_fitness_record_attendance_wizard
+msgid "Record an attendance that was never booked"
+msgstr "Registrar una assistència que no es va reservar mai"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid "Record attendance"
+msgstr "Registrar assistència"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid ""
+"Say why this is being recorded after the class. It is the only record anyone"
+" will have of it later."
+msgstr "Indica per què es registra després de la classe. És l'únic registre que quedarà."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__seats_label
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__seats_label
+msgid "Seats Label"
+msgstr "Places"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_record_attendance_wizard__student_id
+msgid ""
+"She does not need an app account. The class goes on her record either way."
+msgstr "No necessita compte a l'app. La classe queda al seu historial igualment."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "She has already had her free trial."
+msgstr "Ja ha fet la seva prova gratuïta."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__source_label
+msgid "Source Label"
+msgstr "Origen del pagament"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "The free trial offer had closed by %(day)s, the day of this class."
+msgstr "L'oferta de prova gratuïta ja havia acabat el %(day)s, el dia d'aquesta classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid ""
+"There is no free-class product for this discipline and session type, so "
+"there is nothing to record it against."
+msgstr "No hi ha producte de classe gratuïta per a aquesta disciplina i tipus de sessió, així que no hi ha amb què registrar-la."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "There is no free-class product for this discipline and session type."
+msgstr "No hi ha producte de classe gratuïta per a aquesta disciplina i tipus de sessió."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "There is no trial product for this discipline."
+msgstr "No hi ha producte de prova per a aquesta disciplina."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_desk_sale_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid "Why"
+msgstr "Per què"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_record_attendance_wizard__reason
+msgid ""
+"Why this is being recorded after the class. It is the only record anyone "
+"will have of it later."
+msgstr "Per què es registra després de la classe. És l'únic registre que quedarà."
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
+msgid "e.g. Walked in with a friend; the instructor let her take the class."
+msgstr "p. ex. Va venir amb una amiga; la instructora la va deixar fer la classe."
