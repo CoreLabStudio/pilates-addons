@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Packages – CoreLab Studio',
-    'version': '19.0.1.1.21',
+    'version': '19.0.1.1.22',
     'category': 'Services',
     'summary': 'Class-pack products, credit balance tracking and validity management',
     'author': 'Core Lab Studio, S.L.',
@@ -15,6 +15,7 @@
         'security/ir.model.access.csv',
         'views/product_views.xml',
         'views/sale_order_views.xml',
+        'views/fitness_booking_views.xml',
         'views/menu.xml',
         'views/fitness_add_student_wizard_views.xml',
         'data/products.xml',

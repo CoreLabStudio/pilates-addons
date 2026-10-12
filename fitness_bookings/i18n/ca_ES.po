@@ -1265,3 +1265,15 @@ msgstr "Per què es canvia. S'escriu a l'historial de la reserva amb el teu nom 
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
 msgid "e.g. Marked absent by mistake - she was in the room."
 msgstr "p. ex. Marcada com a absent per error: era a la sala."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "%(credit)s (%(order)s) belongs to %(owner)s, not to %(student)s. A class can only be paid with the student's own credit, so this was not saved."
+msgstr "%(credit)s (%(order)s) pertany a %(owner)s, no a %(student)s. Una classe només es pot pagar amb el crèdit propi de l'alumna, així que no s'ha desat."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Membership %(order)s belongs to %(owner)s, not to %(student)s. A class can only be paid with the student's own credit, so this was not saved."
+msgstr "L'abonament %(order)s pertany a %(owner)s, no a %(student)s. Una classe només es pot pagar amb el crèdit propi de l'alumna, així que no s'ha desat."
