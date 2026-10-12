@@ -45,7 +45,10 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_product_template_packages_list"/>
-        <field name="domain">[('fitness_is_package', '=', True)]</field>
+        <!-- The four free classes are not in the catalog: they are given at
+             the desk under Free, never sold. The owner renames them under
+             Sales > Products, where every product is. -->
+        <field name="domain">[('fitness_is_package', '=', True), ('fitness_is_courtesy', '=', False)]</field>
         <field name="context">{'default_fitness_is_package': True, 'active_test': False}</field>
     </record>
 

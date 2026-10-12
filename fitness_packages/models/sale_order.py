@@ -1,4 +1,10 @@
+from datetime import timedelta
+
 from odoo import models, fields, api
+
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+from .sale_order_line import VALIDITY_LAST_DAY_OFFSET
 
 
 class SaleOrder(models.Model):
@@ -23,7 +29,9 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         result = super().action_confirm()
         for order in self:
-            today = fields.Date.context_today(self)
+            # The day given is Madrid's, whoever confirms and wherever the
+            # server runs: a sale at 00:30 in Madrid is that day's.
+            today = studio_today()
             for line in order.order_line:
                 if not line.product_id.fitness_is_package:
                     continue
@@ -42,6 +50,7 @@ class SaleOrder(models.Model):
                 line.write({
                     'fitness_original_class_count': class_count,
                     'fitness_remaining_classes': class_count,
-                    'fitness_validity_end_date': fields.Date.add(today, days=validity_days),
+                    'fitness_validity_end_date': today + timedelta(
+                        days=validity_days + VALIDITY_LAST_DAY_OFFSET),
                 })
         return result

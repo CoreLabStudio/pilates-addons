@@ -1,5 +1,14 @@
 from odoo import models, fields, api
 
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+# Which day a credit stops working. Owner decision, 12 October 2026, (b):
+# a credit given on day D with V validity days pays until the END of day
+# D + V, Madrid time - the free classes exactly like every pack. A free
+# class given on Monday 12 October works until the end of Tuesday 27
+# October. Decision (a) - the day given counts as day 1 - would be -1.
+VALIDITY_LAST_DAY_OFFSET = 0
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -109,7 +118,9 @@ class SaleOrderLine(models.Model):
 
     @api.depends('fitness_validity_end_date')
     def _compute_fitness_is_expired(self):
-        today = fields.Date.context_today(self)
+        # Madrid's date, not the reader's or the server's: a credit stops
+        # at the end of its last day in the studio.
+        today = studio_today()
         for line in self:
             if line.fitness_validity_end_date:
                 line.fitness_is_expired = line.fitness_validity_end_date < today
@@ -161,7 +172,9 @@ class SaleOrderLine(models.Model):
         which is why the date half is an explicit OR rather than a
         simple >=.
         """
-        today = on_date or fields.Date.context_today(self)
+        # Madrid's date, the same cut as fitness_is_expired and as the
+        # expiry written at confirmation.
+        today = on_date or studio_today()
         domain = [
             ('product_id.fitness_is_package', '=', True),
             ('order_id.state', 'in', list(self.SPENDABLE_ORDER_STATES)),
