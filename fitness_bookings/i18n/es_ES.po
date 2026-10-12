@@ -1081,3 +1081,10 @@ msgstr "Esta clase"
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_cancel_forfeits
 msgid "Cancelling now forfeits the credit"
 msgstr "Cancelar ahora pierde el crédito"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+#, python-format
+msgid "This class hasn't started yet — attendance can be marked once it begins."
+msgstr "Esta clase aún no ha empezado — la asistencia se puede marcar una vez que comience."

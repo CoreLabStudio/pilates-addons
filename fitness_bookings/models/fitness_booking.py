@@ -497,6 +497,23 @@ class FitnessBooking(models.Model):
                     restating = True
                     prior = {b.id: b.state for b in self}
 
+        # The attendance rule holds on the field, not only on the buttons.
+        # A write to state is what an RPC call, an import or a server
+        # action does, and the buttons' checks never see it. So, for any
+        # caller that is not the superuser: setting a mark needs the right
+        # to mark and a class that has started; taking one off needs the
+        # right to mark. Superuser code has already decided for itself.
+        if restating and not self.env.su:
+            target = (self.env['calendar.event'].browse(
+                vals['calendar_event_id']) if moving else None)
+            for booking in self:
+                if vals['state'] in ('attended', 'no_show'):
+                    self._check_may_mark_attendance(booking)
+                    self._check_class_has_started(booking, target)
+                elif (booking.state in ('attended', 'no_show')
+                      and vals['state'] != booking.state):
+                    self._check_may_mark_attendance(booking)
+
         result = super().write(vals)
 
         if restating:
@@ -891,19 +908,30 @@ class FitnessBooking(models.Model):
             "Only the studio or the instructor teaching this class can mark "
             "attendance."))
 
+    def _check_class_has_started(self, booking, event=None):
+        """Nobody can say whether she came to a class that has not begun.
+
+        This used to bind the instructor only: the manager was waived, in
+        the model and in the view, and a manager then marked Laia a no-show
+        thirty hours before her class. A mark before the start is not a
+        record of anything, whoever makes it.
+
+        Compared on the stored UTC instant, so the boundary is the class
+        start in Madrid whatever the season. From the start itself, marking
+        is allowed: the instructor takes the register as the class begins.
+        """
+        event = event or booking.calendar_event_id
+        start = event.sudo().start
+        if start and fields.Datetime.now() < start:
+            raise UserError(self.env._(
+                "This class hasn't started yet — attendance can be marked "
+                "once it begins."))
+
     def action_mark_attended(self):
         """Teacher marks student as attended."""
-        is_manager = (
-            self.env.user.has_group('base.group_system')
-            or self.env.user.has_group('fitness_core.group_fitness_manager')
-        )
         for booking in self:
             self._check_may_mark_attendance(booking)
-            if not is_manager and fields.Datetime.now() < booking.calendar_event_id.start:
-                raise UserError(
-                    "This class hasn’t started yet — "
-                    "attendance can be marked once it begins."
-                )
+            self._check_class_has_started(booking)
             if booking.state != 'booked':
                 raise UserError(self.env._("Only a 'Booked' entry can be marked as attended."))
             booking.write({
@@ -920,17 +948,9 @@ class FitnessBooking(models.Model):
 
     def action_mark_no_show(self):
         """Teacher marks student as no-show. Credit is lost (already consumed on booking)."""
-        is_manager = (
-            self.env.user.has_group('base.group_system')
-            or self.env.user.has_group('fitness_core.group_fitness_manager')
-        )
         for booking in self:
             self._check_may_mark_attendance(booking)
-            if not is_manager and fields.Datetime.now() < booking.calendar_event_id.start:
-                raise UserError(
-                    "This class hasn’t started yet — "
-                    "attendance can be marked once it begins."
-                )
+            self._check_class_has_started(booking)
             if booking.state != 'booked':
                 raise UserError(self.env._("Only a 'Booked' entry can be marked as no-show."))
             booking.write({
