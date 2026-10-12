@@ -59,3 +59,4 @@ from . import test_one_dialog_one_confirm
 from . import test_not_for_sale_page
 from . import test_cancelled_credit_pages
 from . import test_desk_free_classes
+from . import test_free_classes_given

@@ -507,7 +507,18 @@ class FitnessDeskSaleWizard(models.TransientModel):
         if plan and 'plan_id' in self.env['sale.order']._fields:
             vals['plan_id'] = plan.id
         order = self.env['sale.order'].sudo().create(vals)
-        order.write({'fitness_payment_method': self.payment_method})
+        # The reason goes on the order as well as into the chatter. The
+        # chatter cannot be listed, filtered or grouped, and a manager
+        # often cannot open the order to read it - so Free classes given
+        # reads this column. Written only on a free grant, because that
+        # is the only case where a reason is required and the only thing
+        # the history is about.
+        order.write({
+            'fitness_payment_method': self.payment_method,
+            'fitness_free_reason': (
+                (self.reason or '').strip()
+                if self.payment_method == 'free' else False),
+        })
         order.action_confirm()
 
         note = _(

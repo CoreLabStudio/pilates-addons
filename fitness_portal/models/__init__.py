@@ -13,3 +13,4 @@ from . import make_student_wizard
 from . import res_partner_duplicate
 from . import fitness_duplicate_candidate
 from . import fitness_duplicate_join_log
+from . import fitness_free_credit_report

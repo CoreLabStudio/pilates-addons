@@ -766,12 +766,15 @@ msgstr "Todos"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__discipline__barre
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Barre"
 msgstr "Barre"
 
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Reformer"
 msgstr "Reformer"
 
@@ -1404,6 +1407,8 @@ msgstr "Bonos de clases"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__status__expired
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Expired"
 msgstr "Caducado"
 
@@ -2291,6 +2296,10 @@ msgstr "Facturado"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__order_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__order_id
+#: model_terms:ir.ui.view,arch_db:fitness_portal.portal_order_detail
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
 msgid "Order"
 msgstr "Pedido"
 
@@ -2303,6 +2312,8 @@ msgstr "Fecha"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__status
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Status"
 msgstr "Estado"
 
@@ -2374,6 +2385,7 @@ msgstr "Siempre"
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_student_history
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "This month"
 msgstr "Este mes"
 
@@ -2713,11 +2725,23 @@ msgstr "Alumnos"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_list
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__partner_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__student_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__student_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__student_id
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_membership_balance_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_package_balance_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_student_search
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_student_profile_simple
 msgid "Student"
 msgstr "Alumno"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__status__used
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Used"
 msgstr "Usados"
 
@@ -3170,6 +3194,21 @@ msgstr "Tu respuesta"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_conversation__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_message__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_studio_new_conversation_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_calendar_grid__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_email_verification__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_make_student_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_ir_http__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_res_partner__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_res_users__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order_line__display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
 
@@ -3235,6 +3274,9 @@ msgstr "Semana"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: code:addons/fitness_portal/models/calendar_grid.py:0
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__given_month
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
 msgid "Month"
 msgstr "Mes"
 
@@ -4123,6 +4165,7 @@ msgstr "Creado el"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__currency_id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__currency_id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__currency_id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__currency_id
 msgid "Currency"
 msgstr "Moneda"
 
@@ -4183,6 +4226,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:fitness_portal.field_res_users__id
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order__id
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order_line__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__id
 msgid "ID"
 msgstr "ID"
 
@@ -4302,6 +4348,8 @@ msgstr "Teléfono"
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_desk_sale_wizard__reason
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__reason
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_wizard__reason
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__reason
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
 msgid "Reason"
 msgstr "Motivo"
 
@@ -4418,6 +4466,7 @@ msgstr "VIP"
 
 #. module: fitness_portal
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__value
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_list
 msgid "Value given away"
 msgstr "Valor regalado"
 
@@ -4724,3 +4773,240 @@ msgid ""
 "trial she has never had. Give a free class instead, or sell her the trial "
 "for cash."
 msgstr "%(name)s es la prueba gratuita y aquí no se puede regalar: una línea gratuita gasta la única prueba de la alumna, y la app dejaría de ofrecerle una prueba que nunca ha hecho. Regálale una clase gratuita o véndele la prueba en efectivo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_free_credit_report.py:0
+msgid "A gift already given cannot be deleted from the history."
+msgstr "Un regalo ya dado no se puede borrar del historial."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_free_credit_report.py:0
+msgid ""
+"A gift already given cannot be edited here. Open the order to see or change "
+"what was recorded."
+msgstr "Un regalo ya dado no se puede editar aquí. Abre el pedido para ver o cambiar lo que se registró."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__discipline__any
+msgid "Any"
+msgstr "Cualquiera"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__status__available
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Available"
+msgstr "Disponible"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__used_event_id
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_list
+msgid "Class it paid for"
+msgstr "Clase que pagó"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__used_event_count
+msgid "Classes booked"
+msgstr "Clases reservadas"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__credits_given
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_list
+msgid "Classes given"
+msgstr "Clases regaladas"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__credits_left
+msgid "Classes left"
+msgstr "Clases restantes"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__order_line_id
+msgid "Credit line"
+msgstr "Línea de crédito"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__discipline
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Discipline"
+msgstr "Disciplina"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__session_type__duo
+msgid "Duo (2 people)"
+msgstr "Dúo (2 personas)"
+
+#. module: fitness_portal
+#: model_terms:ir.actions.act_window,help:fitness_portal.action_fitness_free_credit
+msgid ""
+"Every free class, pack and membership the studio has given is\n"
+"        here, with who gave it and why. Give one at\n"
+"        <b>Students &gt; Sell at the desk</b>, with the payment method\n"
+"        set to <b>Free credit</b>."
+msgstr "Aquí está cada clase, bono y membresía que ha regalado el estudio, con quién lo regaló y por qué. Regala uno en <b>Alumnas &gt; Vender en recepción</b>, con el método de pago en <b>Crédito gratuito</b>."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__expires_on
+msgid "Expires on"
+msgstr "Caduca el"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_list
+msgid "Export to Excel"
+msgstr "Exportar a Excel"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__given_type__class
+msgid "Free class"
+msgstr "Clase gratuita"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+msgid "Free class given"
+msgstr "Clase gratuita regalada"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Free classes"
+msgstr "Clases gratuitas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/free_credits_export.py:0
+#: model:ir.actions.act_window,name:fitness_portal.action_fitness_free_credit
+#: model:ir.model,name:fitness_portal.model_fitness_free_credit_report
+#: model:ir.ui.menu,name:fitness_portal.menu_fitness_free_credit
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_list
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_pivot
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Free classes given"
+msgstr "Clases gratuitas regaladas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_free_credit_report.py:0
+msgid ""
+"Free classes given is a history of what the studio gave. It is not something"
+" you can add to: give the class at Sell at desk and it appears here."
+msgstr "Clases gratuitas regaladas es el historial de lo que ha regalado el estudio. No se puede añadir aquí: regala la clase en Vender en recepción y aparecerá."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__given_type__membership
+msgid "Free membership"
+msgstr "Membresía gratuita"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Free memberships"
+msgstr "Membresías gratuitas"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__given_type__package
+msgid "Free pack"
+msgstr "Bono gratuito"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Free packs"
+msgstr "Bonos gratuitos"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__given_on
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__given_on
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+msgid "Given"
+msgstr "Regalado"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__given_by
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_gift_log__given_by
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Given by"
+msgstr "Regalado por"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__is_last_month
+msgid "Given last month"
+msgstr "Regalado el mes pasado"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__is_this_month
+msgid "Given this month"
+msgstr "Regalado este mes"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__session_type__group
+msgid "Group"
+msgstr "Grupal"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "Last month"
+msgstr "Mes pasado"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+msgid ""
+"No reason is recorded against this one. It was given\n"
+"                before the reason was kept on the order itself - open\n"
+"                the order above, where it is in the chatter."
+msgstr "No hay motivo registrado para este. Se regaló antes de que el motivo se guardara en el propio pedido: abre el pedido de arriba, donde está en el historial de mensajes."
+
+#. module: fitness_portal
+#: model_terms:ir.actions.act_window,help:fitness_portal.action_fitness_free_credit
+msgid "Nothing has been given away yet"
+msgstr "Todavía no se ha regalado nada"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__session_type__private
+msgid "Private (1-on-1)"
+msgstr "Privada (1 a 1)"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__product_id
+msgid "Product"
+msgstr "Producto"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+msgid "Records"
+msgstr "Registros"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_free_credit_report__discipline__reformer
+msgid "Reformer Pilates"
+msgstr "Reformer Pilates"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__session_type
+msgid "Session"
+msgstr "Sesión"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_free_credit_report__used_event_id
+msgid ""
+"The class this credit was spent on - the most recent one, when a pack paid "
+"for several."
+msgstr "La clase en la que se gastó este crédito; la más reciente, si un bono pagó varias."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__value_given
+msgid "Value"
+msgstr "Valor"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__given_type
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_search
+msgid "What"
+msgstr "Qué"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_free_credit_form
+msgid "What became of it"
+msgstr "Qué pasó con él"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_free_credit_report__value_given
+msgid "What the product normally costs - what the studio chose not to charge."
+msgstr "Lo que cuesta normalmente el producto: lo que el estudio decidió no cobrar."
