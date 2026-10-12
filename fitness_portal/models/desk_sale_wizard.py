@@ -26,6 +26,7 @@ MANAGER_GROUP = 'fitness_core.group_fitness_manager'
 
 class FitnessDeskSaleWizard(models.TransientModel):
     _name = 'fitness.desk.sale.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Sell a pack at the desk (cash or goodwill)'
 
     partner_id = fields.Many2one(
@@ -373,6 +374,11 @@ class FitnessDeskSaleWizard(models.TransientModel):
                 "%(pack)s has no sellable variant, so it cannot be sold.",
                 pack=product.display_name))
 
+        # Every refusal is above this line. From here the dialog does its
+        # work exactly once: a second press, a second tab or a retry over
+        # RPC is refused rather than selling or giving it again.
+        self._fitness_confirm_once()
+
         vals = {
             'partner_id': self.partner_id.id,
             'order_line': [(0, 0, line) for line in lines],
@@ -430,27 +436,47 @@ class FitnessDeskSaleWizard(models.TransientModel):
         # So the redirect is offered only to someone who can actually read it.
         try:
             order.with_user(self.env.user).check_access('read')
-        except AccessError:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'type': 'warning' if slot_warning else 'success',
-                    # Sticky when there is something to do about it: a
-                    # message that fades is no use to somebody who has to act
-                    # on it after the student has walked away.
-                    'sticky': bool(slot_warning),
-                    'message': _(
-                        "%(order)s created for %(who)s.",
-                        order=order.name, who=self.partner_id.name)
-                    + ((' ' + slot_warning) if slot_warning else ''),
-                    'next': {'type': 'ir.actions.act_window_close'},
-                },
+            then = {
+                'type': 'ir.actions.act_window',
+                'name': _("Desk sale: %(name)s", name=order.name),
+                'res_model': 'sale.order',
+                'res_id': order.id,
+                'view_mode': 'form',
             }
+        except AccessError:
+            then = {'type': 'ir.actions.act_window_close'}
+        # Said in words, every time: one dialog does its work once, so the
+        # desk has to be able to see that it did - what, for whom, which
+        # order - rather than pressing again to be sure.
         return {
-            'type': 'ir.actions.act_window',
-            'name': _("Desk sale: %(name)s", name=order.name),
-            'res_model': 'sale.order',
-            'res_id': order.id,
-            'view_mode': 'form',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'warning' if slot_warning else 'success',
+                # Sticky when there is something to do about it: a
+                # message that fades is no use to somebody who has to act
+                # on it after the student has walked away.
+                'sticky': bool(slot_warning),
+                'message': self._done_message(order)
+                + ((' ' + slot_warning) if slot_warning else ''),
+                'next': then,
+            },
         }
+
+    def _done_message(self, order):
+        """What was created, in one sentence: what, for whom, which order."""
+        qty = sum(order.order_line.filtered(
+            lambda l: l.product_id.product_tmpl_id == self.product_id
+        ).mapped('product_uom_qty')) or 1
+        if self.payment_method == 'free':
+            return _(
+                "Gave %(qty)s %(product)s to %(who)s, order %(order)s.",
+                qty=int(qty), product=self.product_id.name,
+                who=self.partner_id.name, order=order.name)
+        return _(
+            "Sold %(qty)s %(product)s to %(who)s for %(amount)s, order "
+            "%(order)s.",
+            qty=int(qty), product=self.product_id.name,
+            who=self.partner_id.name, order=order.name,
+            amount="%.2f %s" % (self.amount_paid or 0.0,
+                                self.currency_id.name or ''))

@@ -37,6 +37,7 @@ _logger = logging.getLogger(__name__)
 
 class FitnessAddStudentWizard(models.TransientModel):
     _name = 'fitness.add.student.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Add a student to this class'
 
     #: where a student with no credit is sent. fitness_portal depends on
@@ -185,6 +186,8 @@ class FitnessAddStudentWizard(models.TransientModel):
             'manager_override_timewindow': True,
         }
         vals.update(source)
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         booking = self.env['fitness.booking'].create(vals)
 
         booking.sudo().message_post(body=_(

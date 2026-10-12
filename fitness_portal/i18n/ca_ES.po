@@ -4663,3 +4663,16 @@ msgstr "Crèdit no retornat"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "This class starts in less than %(hours)s hours. If you cancel now you will not get your credit back."
 msgstr "Aquesta classe comença en menys de %(hours)s hores. Si la cancel·les ara, no recuperaràs el teu crèdit."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Gave %(qty)s %(product)s to %(who)s, order %(order)s."
+msgstr "S'ha regalat %(qty)s %(product)s a %(who)s, comanda %(order)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Sold %(qty)s %(product)s to %(who)s for %(amount)s, order %(order)s."
+msgstr "S'ha venut %(qty)s %(product)s a %(who)s per %(amount)s, comanda %(order)s."
+
