@@ -4674,6 +4674,12 @@ msgstr "Se ha regalado %(qty)s %(product)s a %(who)s, pedido %(order)s."
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "%(name)s cannot be sold at the desk."
+msgstr "%(name)s no se puede vender en recepción."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
 msgid "Sold %(qty)s %(product)s to %(who)s for %(amount)s, order %(order)s."
 msgstr "Se ha vendido %(qty)s %(product)s a %(who)s por %(amount)s, pedido %(order)s."
 
@@ -4700,3 +4706,21 @@ msgstr "Clases en grupo"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Private classes"
 msgstr "Clases privadas"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"%(name)s is a free class the studio gives away, so it cannot be sold for "
+"cash - it is worth nothing. Switch this to a Free credit to give it."
+msgstr "%(name)s es una clase gratuita que regala el estudio, así que no se puede vender en efectivo: no vale nada. Cambia a Crédito gratuito para regalarla."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid ""
+"%(name)s is the free trial, and it cannot be given away here: a free line "
+"for it spends the student's one trial, so the app would stop offering her a "
+"trial she has never had. Give a free class instead, or sell her the trial "
+"for cash."
+msgstr "%(name)s es la prueba gratuita y aquí no se puede regalar: una línea gratuita gasta la única prueba de la alumna, y la app dejaría de ofrecerle una prueba que nunca ha hecho. Regálale una clase gratuita o véndele la prueba en efectivo."

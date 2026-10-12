@@ -259,8 +259,14 @@ class TestDeskSale(TransactionCase):
         never going to be enough. This picker was the screen that fix did not
         reach, so both sat in a cash-sale dropdown.
         """
-        domain = self.env["fitness.desk.sale.wizard"]._fields["product_id"].domain
-        offered = self.env["product.template"].search(domain)
+        # The list depends on the payment method now, so it is asked of the
+        # wizard's own _product_domain for a CASH sale - the same method the
+        # model re-checks on save - rather than read off a static domain
+        # the field no longer carries. The promise is unchanged: no gift
+        # product on a cash sale (they are offered only under Free).
+        wiz = self.env["fitness.desk.sale.wizard"].new(
+            {"payment_method": "cash"})
+        offered = self.env["product.template"].search(wiz._product_domain())
 
         courtesy = self.env["product.template"].search([
             ("fitness_is_courtesy", "=", True)])
