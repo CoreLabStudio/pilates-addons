@@ -368,17 +368,9 @@ class FitnessBookingSubscription(models.Model):
         SOL = self.env['sale.order.line']
         lines = SOL.search(SOL._fitness_spendable_domain(
             partner=self.env['res.partner'].browse(student_id)))
-        for line in lines:
-            product = line.product_id
-            # The line's own discipline, not the product's. A combined package
-            # is two lines against one product - one Barre pool, one Reformer
-            # pool - and asking the product would match both pools for either
-            # class, letting a Reformer booking spend the Barre credits.
-            pool_type = line.fitness_class_type or product.fitness_class_type
-            if pool_type not in ('any', event_studio):
-                continue
-            if product.fitness_session_type != event_session:
-                continue
+        # Which of them can pay for THIS class is fitness_covering(), the
+        # same filter the "running low" warning counts with.
+        for line in lines.fitness_covering(calendar_event):
             expiry = line.fitness_validity_end_date or _DATE_MAX
             candidates.append((expiry, 1, {'package_order_line_id': line.id}))
 

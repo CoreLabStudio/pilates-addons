@@ -9,3 +9,4 @@ from . import test_booking_email_policy
 from . import test_purchase_notification_coverage
 from . import test_cancel_says_what_happened
 from . import test_silent_purchase
+from . import test_running_low_is_true

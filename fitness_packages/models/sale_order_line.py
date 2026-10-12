@@ -182,6 +182,27 @@ class SaleOrderLine(models.Model):
         return self.filtered_domain(
             self._fitness_spendable_domain(on_date=on_date))
 
+    def fitness_covering(self, calendar_event):
+        """The lines among these whose pool can pay for this class.
+
+        The line's own discipline, not the product's. A combined package
+        is two lines against one product - one Barre pool, one Reformer
+        pool - and asking the product would match both pools for either
+        class, letting a Reformer booking spend the Barre credits. 'any'
+        covers every discipline. The session type (group or private) must
+        match exactly.
+
+        The payment engine chooses among these, and "running low" counts
+        them, so the two cannot disagree about what pays for a class.
+        """
+        studio = (calendar_event.class_type_id.classroom_type
+                  or calendar_event.classroom_id.classroom_type)
+        session = calendar_event.session_type
+        return self.filtered(
+            lambda l: (l.fitness_class_type or l.product_id.fitness_class_type)
+            in ('any', studio)
+            and l.product_id.fitness_session_type == session)
+
     def validate_package_for_booking(self, calendar_event):
         """Called by fitness_booking before creating a booking. Raises on failure."""
         from odoo.exceptions import ValidationError

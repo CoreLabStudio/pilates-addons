@@ -252,16 +252,26 @@ class FitnessBookingNotifications(models.Model):
         )
 
     def _maybe_notify_credit_low(self, booking):
-        """Create an in-app notification when a student's remaining credits drop to 1."""
+        """Tell her when what she has left for this kind of class drops to 1.
+
+        This used to take limit=1 on ANY of her lines with one credit left
+        - expired, on a cancelled order, another discipline - and report
+        that line's count as her balance. Carlota was told "only 1 credit
+        left" while holding five: a Reformer private pack with four, and an
+        old single with one.
+
+        Now it counts what could pay for another class like the one just
+        booked: the spendable lines (the shared rule - live order, not
+        expired) that cover it (fitness_covering, the engine's own filter),
+        summed. The threshold is unchanged.
+        """
         LOW_THRESHOLD = 1
         partner = booking.student_id
-        line = self.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '<=', LOW_THRESHOLD),
-            ('fitness_remaining_classes', '>', 0),
-        ], limit=1)
-        if not line:
+        SOL = self.env['sale.order.line'].sudo()
+        lines = SOL.search(SOL._fitness_spendable_domain(partner=partner)
+                           ).fitness_covering(booking.calendar_event_id)
+        remaining = sum(lines.mapped('fitness_remaining_classes'))
+        if not 0 < remaining <= LOW_THRESHOLD:
             return
         user = partner.user_ids[:1]
         if not user:
@@ -273,7 +283,6 @@ class FitnessBookingNotifications(models.Model):
         ], limit=1)
         if recent:
             return
-        remaining = line.fitness_remaining_classes
         lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
