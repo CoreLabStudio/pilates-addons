@@ -324,15 +324,21 @@ class FitnessBookingNotifications(models.Model):
                     start_str = event_start.strftime('%d %b %H:%M')
             body = (
                 lang_env.env._(
-                    'Your booking for %(cls)s on %(when)s has been cancelled.'
-                    ' Check your credit balance for any refunds.',
+                    'Your booking for %(cls)s on %(when)s has been cancelled.',
                     cls=class_name, when=start_str)
                 if start_str else
                 lang_env.env._(
-                    'Your booking for %(cls)s has been cancelled.'
-                    ' Check your credit balance for any refunds.',
+                    'Your booking for %(cls)s has been cancelled.',
                     cls=class_name)
             )
+            # Only what happened. This used to end "Check your credit
+            # balance for any refunds" every time - including inside the
+            # window, where the credit is kept on purpose, so a student was
+            # sent to look for a refund that did not exist. Kept: nothing is
+            # said about credit at all. Returned: one sentence saying so.
+            if booking.credit_returned:
+                body = '%s %s' % (
+                    body, lang_env.env._('Your credit has been returned.'))
             # The studio's own words, when it gave any. Appended so the news
             # comes first and the explanation reads as the studio wrote it.
             why = (self.env.context.get('cancel_reason') or '').strip()
@@ -348,6 +354,31 @@ class FitnessBookingNotifications(models.Model):
                 )
             except Exception:
                 pass
+        return result
+
+    def _give_credit_back(self, reason):
+        """Tell her the studio returned the credit a late cancel kept.
+
+        Her cancellation message said nothing about credit, because at the
+        time nothing came back. When the studio decides otherwise, that is
+        news to her and the only place she would hear it.
+        """
+        result = super()._give_credit_back(reason)
+        if self.env.context.get('skip_fitness_notification'):
+            return result
+        user = self.student_id.user_ids[:1]
+        if user:
+            class_name = self.calendar_event_id.name or 'class'
+            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            self.env['fitness.notification'].sudo()._create_for_user(
+                user.id,
+                'booking_cancelled',
+                lang_env.env._('Credit returned: %(cls)s', cls=class_name),
+                lang_env.env._(
+                    'The studio has returned your credit for %(cls)s.',
+                    cls=class_name),
+                action_url='/my/packages',
+            )
         return result
 
     # ─── Class reminder (cron) ──────────────────────────────────────────────────

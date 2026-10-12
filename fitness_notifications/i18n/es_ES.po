@@ -141,28 +141,6 @@ msgid "Booking cancelled: %(cls)s"
 msgstr "Reserva cancelada: %(cls)s"
 
 #. module: fitness_notifications
-#. odoo-python
-#: code:addons/fitness_notifications/models/fitness_booking.py:0
-#, python-format
-msgid ""
-"Your booking for %(cls)s on %(when)s has been cancelled. Check your credit "
-"balance for any refunds."
-msgstr ""
-"Tu reserva para %(cls)s el %(when)s ha sido cancelada. Revisa tu saldo de "
-"créditos por si hay algún reembolso."
-
-#. module: fitness_notifications
-#. odoo-python
-#: code:addons/fitness_notifications/models/fitness_booking.py:0
-#, python-format
-msgid ""
-"Your booking for %(cls)s has been cancelled. Check your credit balance for "
-"any refunds."
-msgstr ""
-"Tu reserva para %(cls)s ha sido cancelada. Revisa tu saldo de créditos por "
-"si hay algún reembolso."
-
-#. module: fitness_notifications
 #: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__reminder_sent
 msgid "Reminder Sent"
 msgstr "Recordatorio enviado"
@@ -356,3 +334,38 @@ msgstr "%s está activa"
 #: code:addons/fitness_notifications/models/sale_order.py:0
 msgid "You can book your classes now."
 msgstr "Ya puedes reservar tus clases."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s on %(when)s has been cancelled."
+msgstr "Tu reserva para %(cls)s el %(when)s ha sido cancelada."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s has been cancelled."
+msgstr "Tu reserva para %(cls)s ha sido cancelada."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your credit has been returned."
+msgstr "Tu crédito ha sido devuelto."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Credit returned: %(cls)s"
+msgstr "Crédito devuelto: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "The studio has returned your credit for %(cls)s."
+msgstr "El estudio te ha devuelto el crédito de %(cls)s."
