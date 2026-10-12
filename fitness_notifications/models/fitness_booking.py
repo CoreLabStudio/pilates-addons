@@ -153,6 +153,7 @@ class FitnessBookingNotifications(models.Model):
             bookings._send_notification('fitness_notifications.mail_template_booking_confirmation')
         for booking in bookings:
             self._maybe_notify_booking_confirmed(booking)
+            self._maybe_notify_instructor(booking)
             self._maybe_notify_credit_used(booking)
             self._maybe_notify_credit_low(booking)
             self._maybe_notify_credit_zero(booking)
@@ -198,6 +199,52 @@ class FitnessBookingNotifications(models.Model):
             # Same destination as booking_cancelled and class_reminder: the
             # class list is where you go to see what you just booked.
             action_url='/my/classes',
+        )
+
+    def _maybe_notify_instructor(self, booking):
+        """Tell the instructor a student has been booked into her class.
+
+        Nobody did. Every recipient on the booking path was the student;
+        the only notice an instructor ever got was when a class's own
+        teacher changed. Maridelvis had nothing for a 1-on-1 with Carlota
+        on 16 October and found out by looking.
+
+        Bell and push through _create_for_user, the same road the swap
+        notice takes, in her own language and on studio time. Once per
+        booking, because a booking is created once. Not for:
+
+          * a class that has already started - a booking made then is a
+            recording after the fact, and she was in the room;
+          * the Clase Fija placement, which books a whole quarter at once
+            and would bury her;
+          * a caller that asked for silence.
+        """
+        ctx = self.env.context
+        if ctx.get('skip_fitness_notification') \
+                or ctx.get('_fitness_clase_fija_placement'):
+            return
+        event = booking.calendar_event_id.sudo()
+        teacher = event.user_id
+        if not teacher or not event.start \
+                or event.start <= fields.Datetime.now():
+            return
+        lang = teacher.lang or DEFAULT_LANG
+        tenv = self.with_context(lang=lang)
+        class_name = event.name or 'class'
+        try:
+            when = format_datetime(tenv.env, event.start, tz=STUDIO_TZ,
+                                   dt_format='d MMM HH:mm', lang_code=lang)
+        except Exception:
+            when = event.start.strftime('%d %b %H:%M')
+        self.env['fitness.notification'].sudo()._create_for_user(
+            teacher.id,
+            'student_booked',
+            tenv.env._('New booking: %(cls)s', cls=class_name),
+            tenv.env._('%(student)s is booked into your class %(cls)s on '
+                       '%(when)s.',
+                       student=booking.student_id.sudo().name or '',
+                       cls=class_name, when=when),
+            action_url='/my/instructor/classes/%d' % event.id,
         )
 
     def _maybe_notify_credit_used(self, booking):
