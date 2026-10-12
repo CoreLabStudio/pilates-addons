@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Subscriptions â€“ CoreLab Studio',
-    'version': '19.0.1.4.29',
+    'version': '19.0.1.4.30',
     'category': 'Services',
     'summary': 'Monthly recurring subscriptions (Reformer Mensual, Barre Ilimitado) on sale_subscription',
     'author': 'Core Lab Studio, S.L.',

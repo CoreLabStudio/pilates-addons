@@ -67,7 +67,10 @@ class FitnessBookingSubscription(models.Model):
         sub_id = vals.get('subscription_id')
         if not sub_id:
             return
-        order = self.env['sale.order'].browse(sub_id)
+        # sudo: the rules are checked on the membership that pays whoever
+        # is booking; a manager without Sales rights must be refused by the
+        # rule, not by an AccessError on reading it.
+        order = self.env['sale.order'].sudo().browse(sub_id)
         event = self.env['calendar.event'].browse(vals['calendar_event_id'])
         order.validate_subscription_for_booking(event)
         _logger.info(
@@ -115,7 +118,9 @@ class FitnessBookingSubscription(models.Model):
             sub_id = vals.get('subscription_id')
             if not sub_id:
                 continue
-            sub = self.env['sale.order'].browse(sub_id)
+            # sudo: bookkeeping on the membership that pays, as in
+            # _select_payment_source - nothing read here reaches the caller.
+            sub = self.env['sale.order'].sudo().browse(sub_id)
             if sub.fitness_is_unlimited:
                 vals['fitness_used_floating_credit'] = False
                 continue
@@ -130,10 +135,10 @@ class FitnessBookingSubscription(models.Model):
         bookings = super().create(vals_list)
 
         for booking in bookings:
-            sub = booking.subscription_id
+            sub = booking.subscription_id.sudo()
             if not sub:
                 continue
-            sub_sudo = sub.sudo()
+            sub_sudo = sub
             if booking.fitness_used_floating_credit:
                 # Floating-credit booking: deduct one credit from the cycle pool.
                 sub_sudo.fitness_floating_credits = max(0, sub.fitness_floating_credits - 1)
@@ -349,7 +354,15 @@ class FitnessBookingSubscription(models.Model):
         # instead of the generic "no source covers this class" message.
         capped_subs = []  # list of dicts with cap details for the error message
 
-        subscriptions = self.env['sale.order'].search(
+        # The engine reads the student's orders as superuser. It only uses
+        # them to choose which one pays, and returns an id for the booking
+        # - nothing read here reaches the caller. Read as the caller, a
+        # fitness manager (no Sales rights, on purpose) could not book
+        # anybody by hand: AccessError on sale.order before any booking
+        # rule ran. sudo here grants her no read on sale.order or
+        # sale.order.line; she already sees the chosen credit's name on the
+        # booking, exactly as when she names the line herself.
+        subscriptions = self.env['sale.order'].sudo().search(
             self._fitness_live_membership_domain(student_id))
         for sub in subscriptions:
             product = sub.fitness_subscription_product_id
@@ -386,7 +399,7 @@ class FitnessBookingSubscription(models.Model):
         # have no order-state filter, so a cancelled order's credits were
         # hidden from her balance and still spent here. Expiry is part of
         # the rule, so there is no separate fitness_is_expired check.
-        SOL = self.env['sale.order.line']
+        SOL = self.env['sale.order.line'].sudo()
         lines = SOL.search(SOL._fitness_spendable_domain(
             partner=self.env['res.partner'].browse(student_id)))
         # Which of them can pay for THIS class is fitness_covering(), the
