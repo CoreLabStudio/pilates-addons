@@ -361,14 +361,14 @@ class FitnessBookingSubscription(models.Model):
             expiry = _DATE_MAX if product.is_unlimited else (sub.next_invoice_date or _DATE_MAX)
             candidates.append((expiry, 0, {'subscription_id': sub.id}))
 
-        lines = self.env['sale.order.line'].search([
-            ('order_partner_id', '=', student_id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-        ])
+        # The shared rule, not a domain of our own. This search used to
+        # have no order-state filter, so a cancelled order's credits were
+        # hidden from her balance and still spent here. Expiry is part of
+        # the rule, so there is no separate fitness_is_expired check.
+        SOL = self.env['sale.order.line']
+        lines = SOL.search(SOL._fitness_spendable_domain(
+            partner=self.env['res.partner'].browse(student_id)))
         for line in lines:
-            if line.fitness_is_expired:
-                continue
             product = line.product_id
             # The line's own discipline, not the product's. A combined package
             # is two lines against one product - one Barre pool, one Reformer
