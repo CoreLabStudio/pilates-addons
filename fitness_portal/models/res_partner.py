@@ -152,33 +152,20 @@ class ResPartner(models.Model):
         (fitness_class_count > 1 vs <= 1), so the home page prompts and the shop
         tabs can never disagree about which category a product belongs to.
 
-        Expiry is filtered in Python rather than in the domain because a null
-        validity date means "never expires" and has to pass.
+        Which lines count at all is sale.order.line._fitness_spendable_domain,
+        the same rule the payment engine searches. The balance used to carry
+        its own copy - the only one with the cancelled-order filter - and the
+        engine's copy lacked it, so a cancelled order was invisible here and
+        still spent there.
         """
         self.ensure_one()
-        domain = [
-            ('order_partner_id', '=', self.id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-            # Confirmed orders only. Cancelling an order does not zero the
-            # credits on its lines, so without this a cancelled sale keeps
-            # paying for classes: Nuria's duplicate 50 EUR private was
-            # cancelled, its credit was handed back to the line on the way
-            # out, and she was left holding one free Reformer Private that
-            # nobody had bought. Draft lines never minted a credit in the
-            # first place, so this only ever removes cancelled ones.
-            ('order_id.state', '=', 'sale'),
-        ]
+        SOL = self.env['sale.order.line'].sudo()
+        domain = SOL._fitness_spendable_domain(partner=self)
         if single_class is True:
             domain += [('product_id.fitness_class_count', '<=', 1)]
         elif single_class is False:
             domain += [('product_id.fitness_class_count', '>', 1)]
-
-        today = fields.Date.context_today(self)
-        lines = self.env['sale.order.line'].sudo().search(domain)
-        return lines.filtered(
-            lambda l: not l.fitness_validity_end_date or l.fitness_validity_end_date >= today
-        )
+        return SOL.search(domain)
 
     def _fitness_active_subscription(self):
         """The student's running membership, or an empty recordset."""

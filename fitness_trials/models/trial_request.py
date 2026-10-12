@@ -1337,16 +1337,12 @@ class FitnessTrialRequest(models.Model):
 
     def _existing_trial_credit(self, partner, product):
         """An unused, unexpired credit for this trial product, if any."""
-        today = fields.Date.context_today(self)
-        lines = self.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('product_id', 'in', product.product_variant_ids.ids),
-            ('fitness_remaining_classes', '>', 0),
-            ('state', '=', 'sale'),
-        ])
-        return lines.filtered(
-            lambda l: not l.fitness_validity_end_date
-            or l.fitness_validity_end_date >= today)[:1]
+        # The shared spendable rule, narrowed to this product.
+        SOL = self.env['sale.order.line'].sudo()
+        return SOL.search(
+            SOL._fitness_spendable_domain(partner=partner)
+            + [('product_id', 'in', product.product_variant_ids.ids)],
+            limit=1)
 
     @api.model
     def _open_request_for(self, partner, discipline=None):

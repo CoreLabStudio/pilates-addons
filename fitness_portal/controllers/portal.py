@@ -3374,16 +3374,12 @@ class FitnessStudentPortal(http.Controller):
         trials = self._trial_products()
         if not trials or not partner:
             return request.env['sale.order.line'].sudo().browse()
-        today = fields.Date.context_today(request.env.user)
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner.id),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('product_id', 'in', trials.mapped('product_variant_ids').ids),
-            ('fitness_remaining_classes', '>', 0),
-        ])
-        return lines.filtered(
-            lambda l: not l.fitness_validity_end_date
-            or l.fitness_validity_end_date >= today)[:1]
+        # The shared spendable rule, narrowed to the trial products.
+        SOL = request.env['sale.order.line'].sudo()
+        return SOL.search(
+            SOL._fitness_spendable_domain(partner=partner)
+            + [('product_id', 'in', trials.mapped('product_variant_ids').ids)],
+            limit=1)
 
     def _matricula_product(self):
         product = request.env.ref('fitness_subscriptions.product_matricula',
