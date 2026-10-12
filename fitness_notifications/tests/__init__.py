@@ -12,3 +12,4 @@ from . import test_silent_purchase
 from . import test_running_low_is_true
 from . import test_instructor_is_told
 from . import test_product_name_in_reader_language
+from . import test_silent_booking_bells
