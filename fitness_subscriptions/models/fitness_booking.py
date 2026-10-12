@@ -398,20 +398,26 @@ class FitnessBookingSubscription(models.Model):
         if not candidates:
             if capped_subs:
                 n = capped_subs[0]['weekly_allowance']
-                word = 'class' if n == 1 else 'classes'
                 _logger.info(
                     "[PAYMENT-SOURCE] Cap exhausted for student=%d event=%s: %s",
                     student_id, calendar_event.name,
                     "; ".join(f"{c['sub_ref']} {c['weekly_used']}/{c['weekly_allowance']}" for c in capped_subs),
                 )
-                raise UserError(
-                    f"You've reached your weekly limit of {n} {word}. "
-                    f"Your allowance resets at the start of your next billing period."
-                )
-            raise UserError(
+                # Translated: these reach the student as the portal's
+                # error line, and were the one English sentence a Spanish
+                # or Catalan student was shown on her own schedule.
+                if n == 1:
+                    raise UserError(self.env._(
+                        "You've reached your weekly limit of 1 class. Your "
+                        "allowance resets at the start of your next billing "
+                        "period."))
+                raise UserError(self.env._(
+                    "You've reached your weekly limit of %(n)s classes. Your "
+                    "allowance resets at the start of your next billing "
+                    "period.", n=n))
+            raise UserError(self.env._(
                 "No active subscription or package covers this class type. "
-                "Contact the studio if you think this is an error."
-            )
+                "Contact the studio if you think this is an error."))
 
         # ── 2. Sort by (expiry ASC, tiebreak ASC) and return first ────────────
         candidates.sort(key=lambda c: (c[0], c[1]))

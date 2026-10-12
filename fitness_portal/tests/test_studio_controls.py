@@ -125,6 +125,10 @@ class TestStudioControls(HttpCase):
                 "fitness_remaining_classes": 10,
                 "fitness_validity_end_date": fields.Date.today() + timedelta(days=90),
             })
+            # Confirmed, as a real sale is: credit on an unconfirmed order is
+            # spent by nothing since the shared spendable rule, so a page
+            # offering it would be offering a class it cannot book.
+            order.write({"state": "sale"})
 
     RANGE_ROW = re.compile(r'id="mv-range-filters".*?</div>', re.S)
     CHIP = re.compile(r'href="/my/studio\?days=(\d+)"(.*?)>', re.S)

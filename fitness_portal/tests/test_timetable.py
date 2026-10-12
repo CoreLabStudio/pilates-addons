@@ -152,6 +152,10 @@ class TestTimetablePage(HttpCase):
             "fitness_remaining_classes": 0,   # tests opt in by raising this
             "fitness_validity_end_date": fields.Date.today() + timedelta(days=90),
         })
+        # Confirmed, as a real sale is: credit on an unconfirmed order is
+        # spent by nothing since the shared spendable rule, so a page
+        # offering it would be offering a class it cannot book.
+        cls.order.write({"state": "sale"})
 
     def _get(self, url="/my/timetable"):
         """Fetch the page as the student, proving the session actually held.

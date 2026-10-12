@@ -57,3 +57,4 @@ from . import test_spendable_agreement
 from . import test_credit_is_her_own
 from . import test_one_dialog_one_confirm
 from . import test_not_for_sale_page
+from . import test_cancelled_credit_pages

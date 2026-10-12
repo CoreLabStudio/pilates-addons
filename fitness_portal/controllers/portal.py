@@ -1622,14 +1622,15 @@ class FitnessStudentPortal(http.Controller):
                 if product:
                     active_product_tmpl_ids.add(product.product_tmpl_id.id)
         else:
-            active_lines = request.env['sale.order.line'].sudo().search([
-                ('order_partner_id', '=', partner.id),
-                ('product_id.fitness_is_package', '=', True),
-                ('fitness_remaining_classes', '>', 0),
-            ])
+            # The shared spendable rule. This read had no order-state
+            # filter, so a pack on a cancelled order was tagged Active and
+            # its Buy button disabled - she could neither use it nor buy it
+            # again.
+            SOL = request.env['sale.order.line'].sudo()
+            active_lines = SOL.search(
+                SOL._fitness_spendable_domain(partner=partner))
             for line in active_lines:
-                if not line.fitness_is_expired:
-                    active_product_tmpl_ids.add(line.product_id.product_tmpl_id.id)
+                active_product_tmpl_ids.add(line.product_id.product_tmpl_id.id)
 
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
@@ -1865,11 +1866,14 @@ class FitnessStudentPortal(http.Controller):
                     'ref':      active_sub.name,
                 }
         else:
-            active_line = request.env['sale.order.line'].sudo().search([
-                ('order_partner_id', '=', partner.id),
-                ('product_id.product_tmpl_id', '=', product.id),
-                ('fitness_remaining_classes', '>', 0),
-            ], order='fitness_validity_end_date asc nulls last', limit=1)
+            # The shared spendable rule, narrowed to this product: a line
+            # on a cancelled order is not hers to be told "Restante 5 / 5"
+            # about.
+            SOL = request.env['sale.order.line'].sudo()
+            active_line = SOL.search(
+                SOL._fitness_spendable_domain(partner=partner)
+                + [('product_id.product_tmpl_id', '=', product.id)],
+                order='fitness_validity_end_date asc nulls last', limit=1)
             if active_line:
                 active_info = {
                     'order':             active_line.order_id,
@@ -3961,12 +3965,13 @@ class FitnessStudentPortal(http.Controller):
             # second one is only named on the product.
             self._collect_type(eligible, product.fitness_secondary_class_type)
 
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_partner_id', '=', partner_id),
-            ('product_id.fitness_is_package', '=', True),
-            ('fitness_remaining_classes', '>', 0),
-        ])
-        for line in lines.filtered(lambda l: not l.fitness_is_expired):
+        # The shared spendable rule, so a discipline is offered only when
+        # something that can pay for it exists: a cancelled order's line
+        # used to put "Reservar" on classes the engine then refused.
+        SOL = request.env['sale.order.line'].sudo()
+        lines = SOL.search(SOL._fitness_spendable_domain(
+            partner=request.env['res.partner'].sudo().browse(partner_id)))
+        for line in lines:
             # The line's own pool discipline: a combo's two lines report one
             # each, so a member whose Barre pool is spent but whose Reformer
             # pool is not is offered Reformer only.
