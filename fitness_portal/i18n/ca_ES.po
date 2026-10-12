@@ -4676,3 +4676,26 @@ msgstr "S'ha regalat %(qty)s %(product)s a %(who)s, comanda %(order)s."
 msgid "Sold %(qty)s %(product)s to %(who)s for %(amount)s, order %(order)s."
 msgstr "S'ha venut %(qty)s %(product)s a %(who)s per %(amount)s, comanda %(order)s."
 
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Book a class"
+msgstr "Reserva una classe"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Covers"
+msgstr "Cobreix"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Group classes"
+msgstr "Classes en grup"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Private classes"
+msgstr "Classes privades"
