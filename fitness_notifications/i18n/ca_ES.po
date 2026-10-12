@@ -141,28 +141,6 @@ msgid "Booking cancelled: %(cls)s"
 msgstr "Reserva cancel·lada: %(cls)s"
 
 #. module: fitness_notifications
-#. odoo-python
-#: code:addons/fitness_notifications/models/fitness_booking.py:0
-#, python-format
-msgid ""
-"Your booking for %(cls)s on %(when)s has been cancelled. Check your credit "
-"balance for any refunds."
-msgstr ""
-"La teva reserva per a %(cls)s el %(when)s s'ha cancel·lat. Revisa el teu "
-"saldo de crèdits per si hi ha cap reemborsament."
-
-#. module: fitness_notifications
-#. odoo-python
-#: code:addons/fitness_notifications/models/fitness_booking.py:0
-#, python-format
-msgid ""
-"Your booking for %(cls)s has been cancelled. Check your credit balance for "
-"any refunds."
-msgstr ""
-"La teva reserva per a %(cls)s s'ha cancel·lat. Revisa el teu saldo de "
-"crèdits per si hi ha cap reemborsament."
-
-#. module: fitness_notifications
 #: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__reminder_sent
 msgid "Reminder Sent"
 msgstr "Recordatori enviat"
@@ -356,3 +334,59 @@ msgstr "%s està activa"
 #: code:addons/fitness_notifications/models/sale_order.py:0
 msgid "You can book your classes now."
 msgstr "Ja pots reservar les teves classes."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s on %(when)s has been cancelled."
+msgstr "La teva reserva per a %(cls)s el %(when)s s'ha cancel·lat."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your booking for %(cls)s has been cancelled."
+msgstr "La teva reserva per a %(cls)s s'ha cancel·lat."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Your credit has been returned."
+msgstr "El teu crèdit s'ha retornat."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Credit returned: %(cls)s"
+msgstr "Crèdit retornat: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "The studio has returned your credit for %(cls)s."
+msgstr "L'estudi t'ha retornat el crèdit de %(cls)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "New booking: %(cls)s"
+msgstr "Nova reserva: %(cls)s"
+
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "%(student)s is booked into your class %(cls)s on %(when)s."
+msgstr "%(student)s té plaça a la teva classe %(cls)s el %(when)s."
+
+
+#. module: fitness_notifications
+#: model:ir.model.fields.selection,name:fitness_notifications.selection__fitness_notification__notification_type__student_booked
+msgid "Student Booked Into Your Class"
+msgstr "Alumna reservada a la teva classe"

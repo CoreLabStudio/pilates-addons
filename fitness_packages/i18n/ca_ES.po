@@ -638,3 +638,88 @@ msgstr ""
 "El que l’estudi va acordar amb l’alumna. Per defecte és el preu de tarifa "
 "de la classe privada, i està pensat per canviar-se quan la conversa va "
 "acabar en un altre lloc."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "%(product)s (%(order)s), %(left)s left"
+msgstr "%(product)s (%(order)s), en queden %(left)s"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"%(student)s holds no credit that covers this class, so nothing was booked "
+"and nothing was charged. Sell her a class at the desk, then add her here."
+msgstr "%(student)s no té cap crèdit que cobreixi aquesta classe, així que no s'ha reservat ni cobrat res. Ven-li una classe a recepció i després afegeix-la aquí."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"%(student)s is booked on %(name)s, paid with %(source)s. Nothing was "
+"charged."
+msgstr "%(student)s té plaça a %(name)s, pagada amb %(source)s. No s'ha cobrat res."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid ""
+"Added to %(name)s by %(who)s, paid with her existing credit: %(source)s. "
+"Nothing was charged."
+msgstr "Afegida a %(name)s per %(who)s, pagada amb el seu crèdit: %(source)s. No s'ha cobrat res."
+
+#. module: fitness_packages
+#: model:ir.model.fields,help:fitness_packages.field_fitness_add_student_wizard__student_id
+msgid ""
+"Any contact. The booking is made against them, paid with credit they already"
+" hold."
+msgstr "Qualsevol contacte. La reserva es fa a nom seu i es paga amb el crèdit que ja té."
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid ""
+"Books her on this class with the credit above. Nothing\n"
+"                        is charged."
+msgstr "La reserva en aquesta classe amb el crèdit indicat. No es cobra res."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__has_credit
+msgid "Has Credit"
+msgstr "Té crèdit"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Membership %(name)s"
+msgstr "Abonament %(name)s"
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "Nothing she holds covers this class."
+msgstr "Res del que té cobreix aquesta classe."
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__credit_label
+msgid "Paid with"
+msgstr "Pagada amb"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid "Sell at the desk"
+msgstr "Vendre a recepció"
+
+#. module: fitness_packages
+#: model_terms:ir.ui.view,arch_db:fitness_packages.view_fitness_add_student_wizard_form
+msgid ""
+"She has no credit that covers this class, so nothing\n"
+"                        can be booked here. Sell her one at the desk, then add\n"
+"                        her."
+msgstr "No té cap crèdit que cobreixi aquesta classe, així que aquí no es pot reservar res. Ven-li una a recepció i després afegeix-la."
+
+#. module: fitness_packages
+#. odoo-python
+#: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
+msgid "The desk is not installed on this database."
+msgstr "La recepció no està instal·lada en aquesta base de dades."

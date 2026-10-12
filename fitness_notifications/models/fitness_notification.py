@@ -48,6 +48,11 @@ class FitnessNotification(models.Model):
         # emergency, and duplicates are the least urgent thing she is
         # told all day.
         ('duplicate_contacts', 'Possible Duplicate Contacts'),
+        # Instructor-facing: a student has been booked into her class. Its
+        # own type rather than borrowing class_reminder or teacher_swap -
+        # neither is what happened, and the admin filters should be able
+        # to tell them apart.
+        ('student_booked', 'Student Booked Into Your Class'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")

@@ -23,7 +23,7 @@ from datetime import timedelta
 
 from odoo import fields
 from odoo.exceptions import UserError
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, common, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -60,8 +60,9 @@ class TestMoveClearsTheMark(TransactionCase):
         The class a booking is CREATED on must be in the future.
         _validate_new_booking refuses outright - "Cannot book a class that
         has already started or passed" - so a fixture that marks somebody
-        absent cannot do it on a class in the past; it marks a future one,
-        which a manager is allowed to do.
+        absent cannot do it on a class in the past; it books a future one
+        and marks it with the clock stepped past the start (_mark), since
+        nobody may mark a class before it begins.
 
         The first version of this used days=0, hour=9 to get something
         that read as markable. That is the clock, not a constant: it
@@ -114,6 +115,15 @@ class TestMoveClearsTheMark(TransactionCase):
         }).action_move_student()
         self.env.invalidate_all()
 
+    def _mark(self, bookings, state):
+        """Mark once the class has started, which is the only time anybody
+        may. The clock steps to a minute after the latest start, marks,
+        and comes back - so the moves below still happen before the class.
+        """
+        start = max(bookings.mapped('calendar_event_id.start'))
+        with common.freeze_time(start + timedelta(minutes=1)):
+            getattr(bookings, 'action_mark_' + state)()
+
     def _notices(self, partner):
         return self.env["fitness.notification"].sudo().search_count([
             ("user_id", "in", partner.user_ids.ids),
@@ -126,7 +136,7 @@ class TestMoveClearsTheMark(TransactionCase):
         partner = self._student("marta")
         origin, target = self._event(days=1, hour=9), self._event(days=3)
         booking = self._booking(partner, origin)
-        booking.action_mark_no_show()
+        self._mark(booking, 'no_show')
         self.assertEqual(booking.state, "no_show", "fixture wrong")
 
         self._move(booking, target)
@@ -141,7 +151,7 @@ class TestMoveClearsTheMark(TransactionCase):
         """The other half: not merely booked, but no longer a no-show."""
         partner = self._student("marta2")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_no_show()
+        self._mark(booking, 'no_show')
 
         self._move(booking, self._event(days=4))
 
@@ -154,7 +164,7 @@ class TestMoveClearsTheMark(TransactionCase):
     def test_attended_moved_forward_is_booked_again(self):
         partner = self._student("attended")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_attended()
+        self._mark(booking, 'attended')
         self.assertEqual(booking.state, "attended", "fixture wrong")
 
         self._move(booking, self._event(days=5))
@@ -167,7 +177,7 @@ class TestMoveClearsTheMark(TransactionCase):
     def test_attended_is_not_left_on_a_class_she_has_not_had(self):
         partner = self._student("attended2")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_attended()
+        self._mark(booking, 'attended')
 
         self._move(booking, self._event(days=5))
 
@@ -184,7 +194,7 @@ class TestMoveClearsTheMark(TransactionCase):
         """
         partner = self._student("stamp")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_no_show()
+        self._mark(booking, 'no_show')
         self.assertTrue(booking.marked_by_id, "fixture wrong")
         self.assertTrue(booking.marked_date, "fixture wrong")
 
@@ -220,7 +230,7 @@ class TestMoveClearsTheMark(TransactionCase):
         """
         partner = self._student("past")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_attended()
+        self._mark(booking, 'attended')
         gone = self._event(days=-7, hour=10)
 
         booking.write({"calendar_event_id": gone.id})
@@ -259,7 +269,7 @@ class TestMoveClearsTheMark(TransactionCase):
         """Cancel-and-move says cancelled and means it."""
         partner = self._student("both")
         booking = self._booking(partner, self._event(days=1, hour=9))
-        booking.action_mark_no_show()
+        self._mark(booking, 'no_show')
 
         booking.write({
             "calendar_event_id": self._event(days=6).id,
@@ -282,7 +292,7 @@ class TestMoveClearsTheMark(TransactionCase):
         partner = self._student("seats")
         origin, target = self._event(days=1, hour=9), self._event(days=3)
         booking = self._booking(partner, origin)
-        booking.action_mark_no_show()
+        self._mark(booking, 'no_show')
         origin.invalidate_recordset()
         self.assertEqual(origin.booked_seats, 0, "fixture wrong")
 
@@ -326,7 +336,7 @@ class TestMoveClearsTheMark(TransactionCase):
                                self._event(days=1, hour=9))
         plain = self._booking(self._student("batch_b"),
                               self._event(days=1, hour=9))
-        marked.action_mark_no_show()
+        self._mark(marked, 'no_show')
         target = self._event(days=4)
 
         (marked | plain).write({"calendar_event_id": target.id})
@@ -350,7 +360,7 @@ class TestMoveClearsTheMark(TransactionCase):
         a, b = self._student("told_a"), self._student("told_b")
         marked = self._booking(a, self._event(days=1, hour=9))
         plain = self._booking(b, self._event(days=1, hour=9))
-        marked.action_mark_no_show()
+        self._mark(marked, 'no_show')
 
         (marked | plain).write(
             {"calendar_event_id": self._event(days=4).id})
