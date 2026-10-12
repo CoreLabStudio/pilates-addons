@@ -767,7 +767,17 @@ class FitnessBooking(models.Model):
             "[GIVE-CREDIT-BACK] booking %s (%s) by %s: %s",
             self.id, self.student_id.display_name, self.env.user.login,
             reason[:80])
+        self._notify_credit_returned_by_studio()
         return True
+
+    def _notify_credit_returned_by_studio(self):
+        """Tell her the studio returned a credit. No-op here.
+
+        fitness_notifications overrides it. One hook for both routes that
+        return a credit against the run of the policy - Give the Credit
+        Back and Cancel with reason - so she is told in the same words.
+        """
+        return False
 
     def action_cancel(self):
         """
@@ -963,4 +973,156 @@ class FitnessBooking(models.Model):
                 "[NO-SHOW] %s → no-show (marked by %s)",
                 booking.sudo().student_id.name, self.env.user.name,
             )
+        return True
+
+    # ─── CORRECTING A MARK ────────────────────────────────────────────────────
+    #
+    # A mark had no way back. Both mark actions refuse anything that is not
+    # Booked, action_cancel refuses anything that IS marked, and every
+    # header button hid itself - so a wrong no-show kept her credit with
+    # nothing on screen able to return it. Laia's booking is in that state.
+    #
+    # Two corrections, each through a dialog that requires a reason and
+    # writes who, when, what changed and why to the chatter:
+    #
+    #   * flip the mark (No-show <-> Attended). A mark NEVER changes a
+    #     credit: the credit was spent when she booked, whether she came
+    #     or not. Owner decision Q4 (a).
+    #   * Cancel with reason, with a "Return the credit" tick, ticked by
+    #     default. Only the tick returns a credit, once, of the kind the
+    #     booking spent - through _restore_credit_now, the road Give the
+    #     Credit Back and the Restore Credit tick already travel.
+    #
+    # Manager only, re-checked in the methods: they are reachable over RPC.
+
+    fitness_class_started = fields.Boolean(
+        "Class Started", compute='_compute_fitness_class_started',
+        help="True from the class start time. Attendance can be marked "
+             "only from then.")
+
+    @api.depends('calendar_event_id.start')
+    def _compute_fitness_class_started(self):
+        now = fields.Datetime.now()
+        for booking in self:
+            start = booking.calendar_event_id.sudo().start
+            booking.fitness_class_started = bool(start) and now >= start
+
+    def _assert_may_correct_mark(self):
+        if not (self.env.user.has_group('fitness_core.group_fitness_manager')
+                or self.env.user.has_group('base.group_system')):
+            raise AccessError(self.env._(
+                "Only a studio manager can correct an attendance mark."))
+
+    def _state_label(self, state):
+        return dict(self._fields['state']._description_selection(
+            self.env)).get(state, state)
+
+    def _require_reason(self, reason):
+        reason = (reason or '').strip()
+        if not reason:
+            raise UserError(self.env._(
+                "Say why. It is the only record anyone will have of this "
+                "change later."))
+        return reason
+
+    def _open_mark_wizard(self, kind):
+        self.ensure_one()
+        self._assert_may_correct_mark()
+        if self.state not in ('attended', 'no_show'):
+            raise UserError(self.env._(
+                "Only a booking marked Attended or No-show can be corrected "
+                "here."))
+        wizard = self.env['fitness.booking.mark.wizard'].create({
+            'booking_id': self.id, 'kind': kind})
+        return {
+            'type': 'ir.actions.act_window',
+            'name': dict(wizard._fields['kind']._description_selection(
+                self.env))[kind],
+            'res_model': 'fitness.booking.mark.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def action_open_mark_as_attended(self):
+        return self._open_mark_wizard('attended')
+
+    def action_open_mark_as_no_show(self):
+        return self._open_mark_wizard('no_show')
+
+    def action_open_cancel_with_reason(self):
+        return self._open_mark_wizard('cancel')
+
+    def _correct_mark(self, new_state, reason):
+        """Attended <-> No-show. Changes the record, never a credit."""
+        self.ensure_one()
+        self._assert_may_correct_mark()
+        reason = self._require_reason(reason)
+        if new_state not in ('attended', 'no_show'):
+            raise UserError(self.env._("That is not an attendance mark."))
+        if self.state not in ('attended', 'no_show'):
+            raise UserError(self.env._(
+                "Only a booking marked Attended or No-show can be corrected "
+                "here."))
+        if self.state == new_state:
+            raise UserError(self.env._(
+                "This booking is already marked %(state)s.",
+                state=self._state_label(new_state)))
+        self._check_class_has_started(self)
+        old = self.state
+        self.write({
+            'state': new_state,
+            'marked_by_id': self.env.uid,
+            'marked_date': fields.Datetime.now(),
+        })
+        self.sudo().message_post(body=self.env._(
+            "Attendance changed from %(old)s to %(new)s by %(who)s. "
+            "No credit changed. Reason: %(reason)s",
+            old=self._state_label(old), new=self._state_label(new_state),
+            who=self.env.user.name, reason=reason))
+        _logger.info("[MARK-CORRECTED] booking %s %s -> %s by %s",
+                     self.id, old, new_state, self.env.user.login)
+        return True
+
+    def _cancel_marked_with_reason(self, reason, return_credit):
+        """Cancel a marked booking; return its credit only when ticked."""
+        self.ensure_one()
+        self._assert_may_correct_mark()
+        reason = self._require_reason(reason)
+        if self.state not in ('attended', 'no_show'):
+            raise UserError(self.env._(
+                "Only a booking marked Attended or No-show is cancelled "
+                "here. A booked one uses Cancel or Move."))
+        old = self.state
+        self.write({
+            'state': 'cancelled',
+            'cancellation_date': fields.Datetime.now(),
+            'cancellation_reason': reason,
+            'credit_returned': False,
+        })
+        returned = False
+        if return_credit:
+            # Once: the booking is cancelled now, so neither this route nor
+            # a mark can reach it again, and credit_returned stops Give the
+            # Credit Back from paying a second time.
+            returned = self.sudo()._restore_credit_now()
+            self.sudo().credit_returned = returned
+            if returned:
+                self._notify_credit_returned_by_studio()
+        if returned:
+            outcome = self.env._("Credit returned.")
+        elif return_credit:
+            outcome = self.env._(
+                "No credit returned: nothing that can be returned paid "
+                "for this booking.")
+        else:
+            outcome = self.env._("No credit returned.")
+        self.sudo().message_post(body=self.env._(
+            "Cancelled by %(who)s; it was marked %(old)s. %(outcome)s "
+            "Reason: %(reason)s",
+            who=self.env.user.name, old=self._state_label(old),
+            outcome=outcome, reason=reason))
+        _logger.info("[MARK-CANCELLED] booking %s (was %s) by %s, credit %s",
+                     self.id, old, self.env.user.login,
+                     'returned' if returned else 'kept')
         return True

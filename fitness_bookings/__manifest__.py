@@ -1,6 +1,6 @@
 {
     'name': 'Fitness Bookings – CoreLab Studio',
-    'version': '19.0.1.2.37',
+    'version': '19.0.1.2.38',
     'category': 'Services',
     'summary': 'Class booking with capacity control, cancellation rules, attendance tracking',
     'author': 'Core Lab Studio, S.L.',
@@ -17,6 +17,7 @@
         'views/fitness_booking_views.xml',
         'views/fitness_booking_cancel_wizard_views.xml',
         'views/fitness_booking_credit_back_wizard_views.xml',
+        'views/fitness_booking_mark_wizard_views.xml',
         'views/fitness_booking_reassign_wizard_views.xml',
         'views/fitness_bulk_cancel_wizard_views.xml',
         'views/calendar_event_views.xml',

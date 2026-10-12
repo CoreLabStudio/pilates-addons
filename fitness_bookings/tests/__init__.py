@@ -12,3 +12,4 @@ from . import test_late_cancel_trial_branch
 from . import test_manager_gives_the_credit_back
 from . import test_late_cancel_is_visible
 from . import test_marks_wait_for_the_start
+from . import test_mark_corrections

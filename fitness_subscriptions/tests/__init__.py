@@ -7,3 +7,4 @@ from . import test_lang_cache
 from . import test_makeup_credit_returned
 from . import test_makeup_studio_cancel
 from . import test_spendable_engine
+from . import test_cancel_with_reason_credit_types

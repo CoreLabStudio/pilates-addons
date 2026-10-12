@@ -1095,3 +1095,173 @@ msgstr "Cancel·lar ara perd el crèdit"
 #, python-format
 msgid "This class hasn't started yet — attendance can be marked once it begins."
 msgstr "Aquesta classe encara no ha començat — l'assistència es pot marcar un cop comenci."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Attendance changed from %(old)s to %(new)s by %(who)s. No credit changed. "
+"Reason: %(reason)s"
+msgstr "Assistència canviada de %(old)s a %(new)s per %(who)s. No ha canviat cap crèdit. Motiu: %(reason)s"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking_mark_wizard__kind__cancel
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "Cancel with reason"
+msgstr "Cancel·lar amb motiu"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Cancelled by %(who)s; it was marked %(old)s. %(outcome)s Reason: %(reason)s"
+msgstr "Cancel·lada per %(who)s; estava marcada com a %(old)s. %(outcome)s Motiu: %(reason)s"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
+msgid ""
+"Changing the mark changes the record only. The credit was spent when she "
+"booked, and stays spent either way."
+msgstr "Canviar la marca només canvia el registre. El crèdit es va gastar en reservar i continua gastat en qualsevol cas."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_class_started
+msgid "Class Started"
+msgstr "Classe començada"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: fitness_bookings
+#: model:ir.model,name:fitness_bookings.model_fitness_booking_mark_wizard
+msgid "Correct an attendance mark"
+msgstr "Corregir una marca d'assistència"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
+msgid "Correct the attendance mark"
+msgstr "Corregir la marca d'assistència"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Credit returned."
+msgstr "Crèdit retornat."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_mark_wizard__return_credit
+msgid ""
+"Give back the credit this booking spent - a pack class, a trial, a gift or a"
+" make-up credit, whichever paid for it. Untick to cancel without returning "
+"anything."
+msgstr "Retorna el crèdit que va gastar aquesta reserva: una classe de bo, una prova, un regal o un crèdit de recuperació, el que la pagués. Desmarca-ho per cancel·lar sense retornar res."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_mark_wizard__kind
+msgid "Kind"
+msgstr "Tipus"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking_mark_wizard__kind__attended
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "Mark as Attended"
+msgstr "Marcar com a assistida"
+
+#. module: fitness_bookings
+#: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking_mark_wizard__kind__no_show
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_calendar_event_form_roster
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_form
+msgid "Mark as No-show"
+msgstr "Marcar com a no presentada"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_mark_wizard__current_state
+msgid "Marked now"
+msgstr "Marcada ara"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "No credit returned."
+msgstr "No s'ha retornat crèdit."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"No credit returned: nothing that can be returned paid for this booking."
+msgstr "No s'ha retornat crèdit: aquesta reserva no es va pagar amb res que es pugui retornar."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a booking marked Attended or No-show can be corrected here."
+msgstr "Aquí només es pot corregir una reserva marcada com a assistida o no presentada."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Only a booking marked Attended or No-show is cancelled here. A booked one "
+"uses Cancel or Move."
+msgstr "Aquí només es cancel·la una reserva marcada com a assistida o no presentada. Una de reservada fa servir Cancel·lar o moure."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Only a studio manager can correct an attendance mark."
+msgstr "Només un responsable de l'estudi pot corregir una marca d'assistència."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Say why. It is the only record anyone will have of this change later."
+msgstr "Indica el motiu. És l'únic registre que quedarà d'aquest canvi."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_credit_back_wizard__class_start
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_mark_wizard__class_start
+msgid "Started"
+msgstr "Va començar"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "That is not an attendance mark."
+msgstr "Això no és una marca d'assistència."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "This booking is already marked %(state)s."
+msgstr "Aquesta reserva ja està marcada com a %(state)s."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__fitness_class_started
+msgid ""
+"True from the class start time. Attendance can be marked only from then."
+msgstr "Cert des de l'hora d'inici de la classe. L'assistència només es pot marcar a partir d'aleshores."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_credit_back_wizard__reason
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_mark_wizard__reason
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_credit_back_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
+msgid "Why"
+msgstr "Per què"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_mark_wizard__reason
+msgid ""
+"Why this is being changed. It is written to the booking's history with your "
+"name and the time."
+msgstr "Per què es canvia. S'escriu a l'historial de la reserva amb el teu nom i l'hora."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_mark_wizard_form
+msgid "e.g. Marked absent by mistake - she was in the room."
+msgstr "p. ex. Marcada com a absent per error: era a la sala."

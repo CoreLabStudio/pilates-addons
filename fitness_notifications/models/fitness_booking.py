@@ -356,14 +356,15 @@ class FitnessBookingNotifications(models.Model):
                 pass
         return result
 
-    def _give_credit_back(self, reason):
-        """Tell her the studio returned the credit a late cancel kept.
+    def _notify_credit_returned_by_studio(self):
+        """Tell her the studio returned a credit the policy had kept.
 
-        Her cancellation message said nothing about credit, because at the
-        time nothing came back. When the studio decides otherwise, that is
-        news to her and the only place she would hear it.
+        Give the Credit Back after a late cancel, or Cancel with reason on
+        a marked booking with the tick on. Her earlier message said nothing
+        about credit, because at the time nothing came back; when the
+        studio decides otherwise, this is the only place she hears it.
         """
-        result = super()._give_credit_back(reason)
+        result = super()._notify_credit_returned_by_studio()
         if self.env.context.get('skip_fitness_notification'):
             return result
         user = self.student_id.user_ids[:1]
