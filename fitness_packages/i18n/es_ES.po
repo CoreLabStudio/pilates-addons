@@ -723,3 +723,26 @@ msgstr "No tiene ningún crédito que cubra esta clase, así que aquí no se pue
 #: code:addons/fitness_packages/models/fitness_add_student_wizard.py:0
 msgid "The desk is not installed on this database."
 msgstr "La recepción no está instalada en esta base de datos."
+
+#. module: fitness_packages
+#: model:product.template,name:fitness_packages.product_courtesy_barre
+msgid "Free Barre class"
+msgstr "Clase de cortesía (Barre)"
+
+
+#. module: fitness_packages
+#: model:product.template,name:fitness_packages.product_courtesy_reformer
+msgid "Free Reformer class"
+msgstr "Clase de cortesía (Reformer)"
+
+
+#. module: fitness_packages
+#: model:product.template,name:fitness_packages.product_courtesy_barre_private
+msgid "Free private Barre class"
+msgstr "Clase privada de cortesía (Barre)"
+
+
+#. module: fitness_packages
+#: model:product.template,name:fitness_packages.product_courtesy_reformer_private
+msgid "Free private Reformer class"
+msgstr "Clase privada de cortesía (Reformer)"

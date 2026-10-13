@@ -9,11 +9,20 @@
        a comped class can have that order while costing nothing.
 
        noupdate="1" deliberately: the studio may rename or re-price these, and
-       a module upgrade must not put its own wording back over hers. -->
+       a module upgrade must not put its own wording back over hers.
+
+       FIFTEEN DAYS IS WRITTEN IN TWO PLACES, and has to be. This file is
+       what a FRESH install gets, and migrations do not run on one. An
+       existing database already holds these two records, and noupdate
+       means an upgrade will not come near them - so the 30 they were
+       created with is moved to 15 by migrations/19.0.1.1.19 instead.
+       Changing only one of the two gives the studio a different validity
+       depending on when her database was built, which is the shape of
+       half the faults in this codebase. -->
   <data noupdate="1">
 
     <record id="product_courtesy_barre" model="product.template">
-      <field name="name">Clase de cortesía (Barre)</field>
+      <field name="name">Free Barre class</field>
       <field name="type">service</field>
       <field name="list_price">0.0</field>
       <field name="sale_ok" eval="False"/>
@@ -21,13 +30,13 @@
       <field name="fitness_is_package" eval="True"/>
       <field name="fitness_is_courtesy" eval="True"/>
       <field name="fitness_class_count">1</field>
-      <field name="fitness_validity_days">30</field>
+      <field name="fitness_validity_days">15</field>
       <field name="fitness_class_type">barre</field>
       <field name="fitness_session_type">group</field>
     </record>
 
     <record id="product_courtesy_reformer" model="product.template">
-      <field name="name">Clase de cortesía (Reformer)</field>
+      <field name="name">Free Reformer class</field>
       <field name="type">service</field>
       <field name="list_price">0.0</field>
       <field name="sale_ok" eval="False"/>
@@ -35,7 +44,7 @@
       <field name="fitness_is_package" eval="True"/>
       <field name="fitness_is_courtesy" eval="True"/>
       <field name="fitness_class_count">1</field>
-      <field name="fitness_validity_days">30</field>
+      <field name="fitness_validity_days">15</field>
       <field name="fitness_class_type">reformer</field>
       <field name="fitness_session_type">group</field>
     </record>

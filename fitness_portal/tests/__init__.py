@@ -57,3 +57,13 @@ from . import test_spendable_agreement
 from . import test_credit_is_her_own
 from . import test_one_dialog_one_confirm
 from . import test_not_for_sale_page
+from . import test_cancelled_credit_pages
+from . import test_desk_free_classes
+from . import test_free_classes_given
+from . import test_record_attendance_is_silent
+from . import test_record_attendance
+from . import test_walkin_confirm_once
+from . import test_plain_manager_credit_paths
+from . import test_walkin_one_free_trial
+from . import test_walkin_window_to_the_minute
+from . import test_one_trial_rule

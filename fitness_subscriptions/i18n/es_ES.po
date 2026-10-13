@@ -352,3 +352,26 @@ msgstr "Alumna"
 #: model_terms:ir.ui.view,arch_db:fitness_subscriptions.view_sale_order_form_fitness_subscription
 msgid "Place Classes for Current Period"
 msgstr "Colocar clases del periodo actual"
+
+#. module: fitness_subscriptions
+#. odoo-python
+#: code:addons/fitness_subscriptions/models/fitness_booking.py:0
+#, python-format
+msgid "You've reached your weekly limit of 1 class. Your allowance resets at the start of your next billing period."
+msgstr "Has alcanzado tu límite semanal de 1 clase. Tu cupo se renueva al inicio de tu próximo periodo de facturación."
+
+
+#. module: fitness_subscriptions
+#. odoo-python
+#: code:addons/fitness_subscriptions/models/fitness_booking.py:0
+#, python-format
+msgid "You've reached your weekly limit of %(n)s classes. Your allowance resets at the start of your next billing period."
+msgstr "Has alcanzado tu límite semanal de %(n)s clases. Tu cupo se renueva al inicio de tu próximo periodo de facturación."
+
+
+#. module: fitness_subscriptions
+#. odoo-python
+#: code:addons/fitness_subscriptions/models/fitness_booking.py:0
+#, python-format
+msgid "No active subscription or package covers this class type. Contact the studio if you think this is an error."
+msgstr "Ninguna suscripción ni bono activo cubre este tipo de clase. Contacta con el estudio si crees que es un error."

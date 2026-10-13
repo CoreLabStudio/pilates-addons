@@ -251,6 +251,11 @@ class FitnessBookingNotifications(models.Model):
         """Notify student when a credit pack credit is used for a booking.
         Skipped for subscription bookings (no pack credits involved).
         """
+        # Silent like booking_confirmed beside it: a booking made under
+        # skip_fitness_notification - a walk-in recorded at the desk, a
+        # bulk placement - must not ring her about the credit it spent.
+        if self.env.context.get('skip_fitness_notification'):
+            return
         if not booking.package_order_line_id:
             return
         partner = booking.student_id
@@ -271,6 +276,11 @@ class FitnessBookingNotifications(models.Model):
 
     def _maybe_notify_credit_zero(self, booking):
         """Notify student when their total credit balance across all packs hits zero."""
+        # Silent like booking_confirmed beside it: a booking made under
+        # skip_fitness_notification - a walk-in recorded at the desk, a
+        # bulk placement - must not ring her about the credit it spent.
+        if self.env.context.get('skip_fitness_notification'):
+            return
         partner = booking.student_id
         user = partner.user_ids[:1]
         if not user:
@@ -313,6 +323,11 @@ class FitnessBookingNotifications(models.Model):
         summed. The threshold is unchanged.
         """
         LOW_THRESHOLD = 1
+        # Silent like booking_confirmed beside it: a booking made under
+        # skip_fitness_notification - a walk-in recorded at the desk, a
+        # bulk placement - must not ring her about the credit it spent.
+        if self.env.context.get('skip_fitness_notification'):
+            return
         partner = booking.student_id
         SOL = self.env['sale.order.line'].sudo()
         lines = SOL.search(SOL._fitness_spendable_domain(partner=partner)
