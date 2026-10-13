@@ -522,10 +522,16 @@ class SaleOrder(models.Model):
         it must place everyone it can rather than stop at the first
         member it cannot.
 
-        future_only clamps the window to now. The nightly run uses it
-        because placement deliberately bypasses the "class has already
-        started" guard - right when a quarter is set up in one go,
-        wrong for a job that runs every night and would book yesterday.
+        Only classes that have not started are placed, for every caller:
+        the member's picker, the studio's Place Classes, the nightly job,
+        confirmation and renewal. Placement bypasses the booking checks,
+        "class has already started" included, so the window has to keep
+        the past out itself. It used to do that for the nightly job only;
+        the others booked from the first day of the period, so a member
+        who chose her hours a week in was booked into classes already
+        over, told her place was reserved for them, and those filled her
+        allowance and left later weeks unbooked. future_only is kept for
+        the callers that pass it and no longer changes anything.
 
         Idempotent: already-booked occurrences are skipped, cancelled
         ones included, so a week the student called off is not
@@ -539,12 +545,9 @@ class SaleOrder(models.Model):
         period_start, period_end = self._fitness_billing_period()
         period_start_dt = datetime.datetime.combine(period_start, datetime.time.min)
         period_end_dt = datetime.datetime.combine(period_end, datetime.time.min)
-        if future_only:
-            now = fields.Datetime.now()
-            if period_start_dt < now:
-                period_start_dt = now
-            if period_end_dt <= period_start_dt:
-                return 0, []   # the whole period is behind us
+        now = fields.Datetime.now()
+        if period_end_dt <= now:
+            return 0, []   # the whole period is behind us
         # How many months this period covers, for the per-slot cap below.
         months = self.env['product.template'].fitness_plan_months(
             self.plan_id) or 1
@@ -574,6 +577,16 @@ class SaleOrder(models.Model):
                 )
                 continue
 
+            # The rest of the period only: a class that has started - even by
+            # a minute - is never booked. When every class of this hour in the
+            # period is already over, there is simply nothing left to place.
+            # The classes she already had still count against the cap below,
+            # so the whole period is kept for that count.
+            period_occurrences = occurrences
+            occurrences = occurrences.filtered(lambda e: e.start > now)
+            if not occurrences:
+                continue
+
             # A fixed-class plan is sold as a COUNT, not a calendar span.
             # Confirmed by the studio on 2026-10-01: "they pay for 4
             # classes or 8, it shouldn't depend on days."
@@ -584,10 +597,15 @@ class SaleOrder(models.Model):
             # Sonia 5 against 4. Capping per slot also gives combined
             # plans their per-discipline count for free, because their
             # slots are one per discipline.
+            #
+            # Held is counted over the WHOLE period, past classes included:
+            # counted over the classes still to come, the ones she already
+            # attended stopped counting, and a month with five of her weekday
+            # gave her a fifth class a week in.
             cap = CLASSES_PER_MONTH_PER_SLOT * months
             held = self.env['fitness.booking'].search_count([
                 ('student_id', '=', partner.id),
-                ('calendar_event_id', 'in', occurrences.ids),
+                ('calendar_event_id', 'in', period_occurrences.ids),
                 ('state', 'in', ('booked', 'attended', 'no_show')),
             ])
             room_left = cap - held

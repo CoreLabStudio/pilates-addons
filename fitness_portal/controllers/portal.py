@@ -2699,6 +2699,11 @@ class FitnessStudentPortal(http.Controller):
                 ('start', '>=', fields.Datetime.to_string(period_start_dt)),
                 ('start', '<', fields.Datetime.to_string(period_end_dt)),
             ], order='start asc')
+            # Only the classes still to come, as placement books them: a
+            # class that is already over is never booked for her, so its
+            # being full once must not refuse her the hour, nor show her a
+            # past date as the reason.
+            occurrences = occurrences.filtered(lambda e: e.start > now)
             full = occurrences.filtered(
                 lambda e: e.capacity and e.booked_seats >= e.capacity)
             local = pytz.utc.localize(anchor.start).astimezone(tz)

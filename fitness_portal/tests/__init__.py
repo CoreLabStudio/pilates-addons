@@ -67,3 +67,4 @@ from . import test_plain_manager_credit_paths
 from . import test_walkin_one_free_trial
 from . import test_walkin_window_to_the_minute
 from . import test_one_trial_rule
+from . import test_fixed_class_only_future

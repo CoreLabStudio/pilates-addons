@@ -274,6 +274,25 @@ class FitnessBookingNotifications(models.Model):
             action_url='/my/packages',
         )
 
+    @api.model
+    def _fitness_membership_still_gives(self, partner):
+        """Whether a running membership still gives her classes.
+
+        Unlimited, a weekly allowance (it renews every week), or floating
+        credits left. A running membership with none of these - an
+        allowance of 0 and nothing floating - is the only one that is
+        really out of classes.
+        """
+        subs = self.env['sale.order'].sudo().search([
+            ('partner_id', '=', partner.id),
+            ('is_subscription', '=', True),
+            ('subscription_state', '=', '3_progress'),
+        ])
+        return any(s.fitness_is_unlimited
+                   or (s.fitness_effective_weekly_allowance() or 0) > 0
+                   or (s.fitness_floating_credits or 0) > 0
+                   for s in subs)
+
     def _maybe_notify_credit_zero(self, booking):
         """Notify student when their total credit balance across all packs hits zero."""
         # Silent like booking_confirmed beside it: a booking made under
@@ -291,6 +310,12 @@ class FitnessBookingNotifications(models.Model):
             ('fitness_remaining_classes', '>', 0),
         ])
         if all_lines:
+            return
+        # A running membership is not "no credits". This only ever counted
+        # packs, so a member booking with her membership - and every class
+        # placed for a fixed-class member - was told she had used her last
+        # credit while her membership still gave her classes every week.
+        if self._fitness_membership_still_gives(partner):
             return
         recent = self.env['fitness.notification'].sudo().search([
             ('user_id', '=', user.id),
