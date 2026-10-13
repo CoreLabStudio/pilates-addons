@@ -12,13 +12,14 @@ walk-in dialog and the desk. Another student's pack and membership are
 refused and left untouched on each; her student's own credit works; and
 she still reads no orders.
 
-How each path refuses is part of what is proven. Naming a line at all -
-another student's or her own - is refused to this manager by Odoo itself
-(she has no read on sale.order.line) before any booking rule runs; a
-manager WITH Sales rights reaches the ownership rule instead, which Hotfix
-2's tests cover. Her own credit is spent by leaving the source to the
-payment engine, which is how the form, the Roster and the walk-in all do
-it. Either way: refused, and the other student's credit untouched.
+How each path refuses is part of what is proven: by the ownership rule's
+own sentence, every time. Naming her student's own line works, left to
+the engine or named, with or without the booking-window override. It
+used to depend on that override by accident: the line was checked as the
+caller, who cannot read order lines, and passed only when the window
+check had already read it as superuser and left it in the cache. It is
+now checked as superuser either way, and whose line it may be is the
+ownership rule's question. She still reads no orders herself.
 
 The clock is pinned (the fixture).
 """
@@ -99,7 +100,7 @@ class TestPlainManagerCreditPaths(MakeUpCreditFixture, HttpCase):
                     'manager_override_timewindow': True}],
                     {'specification': {}})
                 why = refusal(out)
-                self.assertTrue(REFUSED in why or NO_READ in why, out)
+                self.assertIn(REFUSED, why, out)
         self._hers_untouched()
         self.assertEqual(self._bookings(self.mine), 0)
 
@@ -109,7 +110,7 @@ class TestPlainManagerCreditPaths(MakeUpCreditFixture, HttpCase):
             'package_order_line_id': self.her_line.id,
             'manager_override_timewindow': True}])
         why = refusal(out)
-        self.assertTrue(REFUSED in why or NO_READ in why, out)
+        self.assertIn(REFUSED, why, out)
         own = self._call('fitness.booking', 'create', [{
             'student_id': self.mine.id, 'calendar_event_id': self.event.id,
             'manager_override_timewindow': True}])
@@ -122,7 +123,7 @@ class TestPlainManagerCreditPaths(MakeUpCreditFixture, HttpCase):
                 out = self._call('fitness.booking', 'write',
                                  [[booking_id], {field: value}])
                 why = refusal(out)
-                self.assertTrue(REFUSED in why or NO_READ in why, out)
+                self.assertIn(REFUSED, why, out)
         self._hers_untouched()
 
     def test_the_roster_books_her_own_credit_only(self):
@@ -198,14 +199,26 @@ class TestPlainManagerCreditPaths(MakeUpCreditFixture, HttpCase):
         self.assertEqual(self._left(self.my_line), 3)
         self._hers_untouched()
 
-    def test_naming_even_her_own_line_needs_sales_rights(self):
-        """Unchanged by Batch 2: she gains no read on order lines."""
-        out = self._call('fitness.booking', 'create', [{
-            'student_id': self.mine.id, 'calendar_event_id': self.event.id,
-            'package_order_line_id': self.my_line.id,
-            'manager_override_timewindow': True}])
-        self.assertIn(NO_READ, refusal(out), out)
-        self.assertEqual(self._left(self.my_line), 5)
+    def test_naming_her_own_line_works_with_or_without_the_override(self):
+        """QA's call (no override) and this test's old one (override): the
+        same request must get the same answer. Over RPC and the form."""
+        left = 5
+        for n, (method, override) in enumerate((
+                ('create', False), ('create', True),
+                ('web_save', False), ('web_save', True))):
+            with self.subTest(method=method, override=override):
+                vals = {'student_id': self.mine.id,
+                        'calendar_event_id': self._class(30 + n, 'PP n%d' % n).id,
+                        'package_order_line_id': self.my_line.id,
+                        'manager_override_timewindow': override}
+                out = (self._call('fitness.booking', 'create', [vals])
+                       if method == 'create' else
+                       self._call('fitness.booking', 'web_save', [[], vals],
+                                  {'specification': {}}))
+                self.assertNotIn('error', out, out.get('error'))
+                left -= 1
+                self.assertEqual(self._left(self.my_line), left)
+        self._hers_untouched()
 
     def test_she_still_reads_no_orders(self):
         for model, rid in (('sale.order', self.her_line.order_id.id),
