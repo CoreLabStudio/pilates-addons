@@ -4,11 +4,9 @@ from odoo import models, fields
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.exceptions import UserError
 
-import logging
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang
 
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
+import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -140,7 +138,7 @@ class CalendarEvent(models.Model):
                         student_user = booking.student_id.user_ids[:1]
                         if student_user:
                             new_dt_str = _fmt_event_dt(new_start)
-                            senv = self.with_context(lang=student_user.lang or DEFAULT_LANG)
+                            senv = self.with_context(lang=recipient_lang(self.env, student_user))
                             Notif._create_for_user(
                                 student_user.id,
                                 'class_rescheduled',
@@ -176,7 +174,7 @@ class CalendarEvent(models.Model):
                                 booking.student_id.display_name)
                     if teacher and teacher.id:
                         new_dt_str = _fmt_event_dt(new_start)
-                        tenv = self.with_context(lang=teacher.lang or DEFAULT_LANG)
+                        tenv = self.with_context(lang=recipient_lang(self.env, teacher))
                         Notif._create_for_user(
                             teacher.id,
                             'class_rescheduled',
@@ -246,7 +244,7 @@ class CalendarEvent(models.Model):
             student_user = booking.student_id.user_ids[:1]
             if student_user:
                 senv = self.with_context(
-                    lang=student_user.lang or DEFAULT_LANG)
+                    lang=recipient_lang(self.env, student_user))
                 Notif._create_for_user(
                     student_user.id,
                     'teacher_swap',
@@ -276,7 +274,7 @@ class CalendarEvent(models.Model):
                     booking.student_id.display_name, booking.id)
 
         # The instructor taking it on, in her own language.
-        tenv = self.with_context(lang=new_teacher.lang or DEFAULT_LANG)
+        tenv = self.with_context(lang=recipient_lang(self.env, new_teacher))
         Notif._create_for_user(
             new_teacher.id,
             'teacher_swap',

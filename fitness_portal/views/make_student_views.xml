@@ -24,7 +24,7 @@
             <field name="partner_id" invisible="1"/>
             <field name="already_student" invisible="1"/>
             <field name="existing_user_id" invisible="1"/>
-            <field name="partner_name" string="Contact" readonly="1"/>
+            <field name="partner_name" string="Person" readonly="1"/>
             <field name="partner_email" string="Email" readonly="1"
                    placeholder="no email address"/>
           </group>

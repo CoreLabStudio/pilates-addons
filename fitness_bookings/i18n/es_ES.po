@@ -16,6 +16,7 @@ msgstr ""
 #. module: fitness_bookings
 #: model:ir.ui.menu,name:fitness_bookings.menu_fitness_bookings
 #: model:ir.actions.act_window,name:fitness_bookings.action_fitness_booking
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__booking_ids
 msgid "Bookings"
 msgstr "Reservas de estudiantes"
 
@@ -27,12 +28,15 @@ msgstr "Nombre"
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__student_id
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__student_name
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_credit_back_wizard__student_name
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__student_id
 msgid "Student"
 msgstr "Estudiante"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__calendar_event_id
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__class_name
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_credit_back_wizard__class_name
 msgid "Class"
 msgstr "Clase"
 
@@ -118,6 +122,7 @@ msgstr "Cancelar reserva (fuera de plazo)"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_credit_back_wizard_form
 msgid "Discard"
 msgstr "Descartar"
 
@@ -435,21 +440,25 @@ msgstr "Déjalo vacío para cancelar sin cambiarla de clase"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__from_event_id
 msgid "Leaving"
 msgstr "Sale de"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__from_start
 msgid "Class date"
 msgstr "Fecha de la clase"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__target_event_id
 msgid "Move to"
 msgstr "Cambiar a"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__restore_credit
 msgid "Return the credit"
 msgstr "Devolver el crédito"
 
@@ -499,6 +508,7 @@ msgstr "'%(name)s' está cancelada."
 #. module: fitness_bookings
 #. odoo-python
 #: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
 msgid "'%(name)s' is full - %(booked)s/%(capacity)s seats taken."
 msgstr "'%(name)s' está completa - %(booked)s/%(capacity)s plazas ocupadas."
 
@@ -794,6 +804,8 @@ msgstr "Plazas"
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
 msgid "Reason (optional)"
 msgstr "Motivo (opcional)"
 
@@ -809,6 +821,7 @@ msgstr "p. ej. El estudio está cerrado hoy por el temporal."
 
 #. module: fitness_bookings
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_bulk_cancel_wizard_form
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
 msgid "Close"
 msgstr "Cerrar"
 
@@ -819,6 +832,8 @@ msgstr "Día"
 
 #. module: fitness_bookings
 #: model:ir.model.fields,field_description:fitness_bookings.field_fitness_class_bulk_cancel_wizard__reason
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_cancel_wizard__reason
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_reassign_wizard__reason
 msgid "Reason"
 msgstr "Motivo"
 
@@ -852,6 +867,7 @@ msgstr "Evento de calendario"
 #. module: fitness_bookings
 #: model:ir.model.fields.selection,name:fitness_bookings.selection__fitness_booking__state__cancelled
 #: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_search
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking_credit_back_wizard__cancelled_on
 msgid "Cancelled"
 msgstr "Cancelada"
 
@@ -939,6 +955,7 @@ msgstr ""
 #: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_cancel_wizard__class_start
 #: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__from_start
 #: model:ir.model.fields,help:fitness_bookings.field_fitness_class_bulk_cancel_line__start
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_credit_back_wizard__class_start
 msgid "Start date of an event, without time for full days events"
 msgstr ""
 "Fecha de inicio de un evento, sin hora en los eventos de día completo"
@@ -998,6 +1015,7 @@ msgstr "No se pudo devolver nada: esta reserva no tiene ningún bono ni cuota as
 #. module: fitness_bookings
 #. odoo-python
 #: code:addons/fitness_bookings/models/fitness_booking.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_credit_back_wizard_form
 msgid "Give the Credit Back"
 msgstr "Devolver el crédito"
 
@@ -1288,3 +1306,117 @@ msgstr "El estudio registró esta asistencia después de la clase, porque la hiz
 #: code:addons/fitness_bookings/models/fitness_booking.py:0
 msgid "Private classes are arranged by the studio. The studio will contact you."
 msgstr "Las clases privadas las organiza el estudio. El estudio se pondrá en contacto contigo."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_credit_back_wizard__reason
+msgid ""
+"Why the studio is returning a credit the policy says was forfeited. It is "
+"the only record anyone will have of it."
+msgstr ""
+"Por qué el estudio devuelve un crédito que según la política se había "
+"perdido. Es el único registro que quedará."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking_reassign_wizard__restore_credit
+msgid ""
+"Applies to a cancellation inside the studio's cancellation window, where "
+"credit would not normally come back."
+msgstr ""
+"Se aplica a una cancelación dentro del plazo de cancelación del estudio, en "
+"la que el crédito normalmente no se devolvería."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_cancel_wizard_form
+msgid "e.g. The instructor is unwell - sorry for the short notice."
+msgstr "p. ej. La instructora no se encuentra bien - perdona el poco margen."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_credit_back_wizard_form
+msgid ""
+"This booking was cancelled inside the cancellation window, so the credit was"
+" kept under the studio's policy. Returning it is an exception, and the "
+"reason below is the only record of it anyone will have."
+msgstr ""
+"Esta reserva se canceló dentro del plazo de cancelación, así que el crédito "
+"se quedó según la política del estudio. Devolverlo es una excepción, y el "
+"motivo de abajo es el único registro que quedará."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_credit_back_wizard_form
+msgid "e.g. She rang the same morning - ill, and brought a doctor's note."
+msgstr ""
+"p. ej. Llamó la misma mañana - enferma, y trajo un justificante médico."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Students selected"
+msgstr "Alumnos seleccionados"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "e.g. Moving you to the later class so the group can run."
+msgstr "p. ej. Te pasamos a la clase más tarde para que el grupo salga."
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Move"
+msgstr "Mover"
+
+#. module: fitness_bookings
+#: model_terms:ir.ui.view,arch_db:fitness_bookings.view_fitness_booking_reassign_wizard_form
+msgid "Cancel or move students"
+msgstr "Cancelar o mover alumnos"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "Moved from '%(old)s' to '%(new)s'. Reason: %(why)s"
+msgstr "Movida de '%(old)s' a '%(new)s'. Motivo: %(why)s"
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking_reassign_wizard.py:0
+msgid "Moved from '%(old)s' to '%(new)s'. No reason given."
+msgstr "Movida de '%(old)s' a '%(new)s'. Sin motivo."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Cannot book a class that has already started or passed (%(when)s)."
+msgstr ""
+"No se puede reservar una clase que ya ha empezado o ha pasado (%(when)s)."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"The studio opens on %(opening)s. Classes before then are on the timetable "
+"but are not open for booking - this one is on %(day)s."
+msgstr ""
+"El estudio abre el %(opening)s. Las clases anteriores están en el horario "
+"pero no se pueden reservar - esta es el %(day)s."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"Booking opens 7 days before the class. This class starts in %(days)sd "
+"%(hours)sh - come back later."
+msgstr ""
+"Las reservas se abren 7 días antes de la clase. Esta clase empieza dentro de"
+" %(days)s d %(hours)s h - vuelve más adelante."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "%(student)s is already booked for this class."
+msgstr "%(student)s ya tiene reserva en esta clase."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid ""
+"%(student)s already has a booking that overlaps this class time (%(other)s)."
+msgstr ""
+"%(student)s ya tiene una reserva que se solapa con el horario de esta clase "
+"(%(other)s)."

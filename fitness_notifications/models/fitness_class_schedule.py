@@ -17,6 +17,8 @@ import logging
 
 from odoo import _, api, models
 
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang
+
 _logger = logging.getLogger(__name__)
 
 
@@ -48,7 +50,7 @@ class FitnessClassSchedule(models.Model):
             # `translate = env(...)._` puts nothing in the catalogue at all
             # and every manager quietly gets English.
             lang_env = self.env(context=dict(
-                self.env.context, lang=manager.lang or 'es_ES'))
+                self.env.context, lang=recipient_lang(self.env, manager)))
             title = lang_env._("Classes are no longer being scheduled")
             body = lang_env._(
                 "%(reason)s\n\n%(detail)s\n\n"

@@ -8,10 +8,6 @@ from itertools import groupby as _groupby
 from urllib.parse import quote, urlencode
 
 
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
-
 _logger = logging.getLogger(__name__)
 
 
@@ -48,6 +44,8 @@ from odoo.http import request
 from odoo.addons.fitness_bookings.models.fitness_booking import (
     BOOKING_WINDOW_DAYS, fitness_opening_date)
 from odoo.addons.fitness_core import class_colors
+from odoo.addons.fitness_core.models.studio_lang import (
+    recipient_lang, studio_date, studio_datetime, studio_lang)
 from odoo.addons.fitness_core.models.studio_time import (
     studio_midnight_utc, studio_today, studio_tz)
 
@@ -559,7 +557,7 @@ class FitnessStudentPortal(http.Controller):
         of thousands of pixels tall before the student saw anything useful.
         """
         _ = request.env._
-        lang = request.env.lang or DEFAULT_LANG
+        lang = request.env.lang or studio_lang(request.env)
         now = fields.Datetime.now()
 
         try:
@@ -711,7 +709,7 @@ class FitnessStudentPortal(http.Controller):
         # "can book something right now" - it counts running memberships and only
         # unexpired package lines with credits remaining.
         has_sources = bool(self._eligible_class_types(partner.id))
-        lang = request.env.lang or DEFAULT_LANG
+        lang = request.env.lang or studio_lang(request.env)
         now = fields.Datetime.now()
 
         # No look-ahead cap. This used to stop at 28 days, which meant a class
@@ -874,7 +872,7 @@ class FitnessStudentPortal(http.Controller):
         local_stop = pytz.UTC.localize(event.stop).astimezone(user_tz)
 
         _ = request.env._
-        lang = request.env.lang or DEFAULT_LANG
+        lang = request.env.lang or studio_lang(request.env)
 
         if _BABEL_OK:
             try:
@@ -1074,7 +1072,7 @@ class FitnessStudentPortal(http.Controller):
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
         today = studio_today()
-        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        lang_code = (request.lang.code if request.lang else None) or studio_lang(request.env)
 
         cutoff_start = cutoff_end = None
         if period and _re.match(r'^\d{4}-\d{2}$', period):
@@ -1196,7 +1194,7 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        lang_code = (request.lang.code if request.lang else None) or studio_lang(request.env)
         all_entries = self._credit_ledger(partner)
 
         # Validate and apply period filter
@@ -1894,7 +1892,7 @@ class FitnessStudentPortal(http.Controller):
 
         # Check if student holds an active instance of this product
         active_info = None
-        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        lang_code = (request.lang.code if request.lang else None) or studio_lang(request.env)
 
         def _fmt_date(d):
             if not d:
@@ -2450,10 +2448,12 @@ class FitnessStudentPortal(http.Controller):
             return
         Notif = request.env['fitness.notification'].sudo()
         line = order.order_line[:1]
-        product_name = line.product_id.display_name if line else order.name
         for manager in managers:
+            mlang = recipient_lang(request.env, manager)
+            product_name = (line.product_id.with_context(lang=mlang).display_name
+                            if line else order.name)
             translate = request.env(context=dict(request.env.context,
-                                                 lang=manager.lang or DEFAULT_LANG))._
+                                                 lang=mlang))._
             Notif._create_for_user(
                 manager.id,
                 'cash_requested',
@@ -2481,10 +2481,12 @@ class FitnessStudentPortal(http.Controller):
             return
         Notif = request.env['fitness.notification'].sudo()
         line = order.order_line[:1]
-        product_name = line.product_id.display_name if line else order.name
         for manager in managers:
+            mlang = recipient_lang(request.env, manager)
+            product_name = (line.product_id.with_context(lang=mlang).display_name
+                            if line else order.name)
             translate = request.env(context=dict(request.env.context,
-                                                 lang=manager.lang or DEFAULT_LANG))._
+                                                 lang=mlang))._
             # The raw selection label came through in English inside an
             # otherwise-translated message. Translate it in the recipient's
             # language like everything else. "Bizum" is a Spanish payment
@@ -2743,7 +2745,7 @@ class FitnessStudentPortal(http.Controller):
         period_start_dt = _dt_cls.combine(period_start, _dt_cls.min.time())
         period_end_dt = _dt_cls.combine(period_end, _dt_cls.min.time())
         now = fields.Datetime.now()
-        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        lang_code = (request.lang.code if request.lang else None) or studio_lang(request.env)
         taken = sub.fitness_clase_fija_ids.filtered('active').mapped(
             'calendar_event_id.recurrence_id').ids
         Event = request.env['calendar.event'].sudo()
@@ -2793,8 +2795,10 @@ class FitnessStudentPortal(http.Controller):
                 'sort_key':    (local.weekday(), local.hour, local.minute),
                 'class_name':  anchor.name,
                 'available':   not full,
+                # Spelled in her language: strftime gave "25 Oct" on a
+                # Spanish page.
                 'full_dates': [
-                    pytz.utc.localize(e.start).astimezone(tz).strftime('%d %b')
+                    studio_datetime(request.env, e.start, 'd MMM', lang_code)
                     for e in full
                 ],
                 'weeks': len(occurrences),
@@ -2965,7 +2969,9 @@ class FitnessStudentPortal(http.Controller):
                     delta = _relativedelta(**{unit + 's': value})
                     while next_renewal < today_date:
                         next_renewal = next_renewal + delta
-                period_end_str = next_renewal.strftime('%d %b %Y')
+                period_end_str = studio_date(
+                    request.env, next_renewal, 'd MMM y',
+                    request.env.lang or studio_lang(request.env))
 
             sub_data.append({
                 'plan_name':        product.name,
@@ -4380,7 +4386,7 @@ class FitnessStudentPortal(http.Controller):
 
     def _short_date(self, dt):
         """"Mon 8 Sep" in the active language, for the booking-window notice."""
-        lang = request.env.lang or DEFAULT_LANG
+        lang = request.env.lang or studio_lang(request.env)
         if _BABEL_OK:
             try:
                 return _babel_format_date(dt.date(), format='EEE d MMM', locale=lang)
@@ -4390,7 +4396,7 @@ class FitnessStudentPortal(http.Controller):
 
     def _weekday_labels(self):
         """Monday-first weekday names in the active language."""
-        lang = request.env.lang or DEFAULT_LANG
+        lang = request.env.lang or studio_lang(request.env)
         if _BABEL_OK:
             try:
                 # 2024-01-01 was a Monday, so +idx walks Mon..Sun.
@@ -4477,7 +4483,8 @@ class FitnessStudentPortal(http.Controller):
 
     @http.route('/my/language', type='http', auth='user', website=True, sitemap=False)
     def language_picker(self, **kw):
-        mv_lang = request.httprequest.cookies.get('mv_lang') or request.env.lang or 'es_ES'
+        mv_lang = (request.httprequest.cookies.get('mv_lang') or request.env.lang
+                   or studio_lang(request.env))
         partner = request.env.user.partner_id
         full_name = partner.name or ''
         return request.render('fitness_portal.portal_language_picker', {
@@ -4486,7 +4493,7 @@ class FitnessStudentPortal(http.Controller):
         })
 
     @http.route('/my/set_lang', type='http', auth='user', website=False, sitemap=False, csrf=False)
-    def set_lang(self, lang=DEFAULT_LANG, redirect='/my', **kw):
+    def set_lang(self, lang=None, redirect='/my', **kw):
         valid_langs = {'en_US', 'es_ES', 'ca_ES'}
         if lang in valid_langs:
             request.env.user.sudo().write({'lang': lang})
@@ -4512,7 +4519,7 @@ def _time_ago(diff, _=lambda s: s):
     return _('Just now')
 
 
-def _day_label(d, today, tomorrow, _=lambda s: s, lang=DEFAULT_LANG):
+def _day_label(d, today, tomorrow, _=lambda s: s, lang='en_US'):
     """Return a translated, formatted day label for a given date."""
     if d == today:
         return _('Today')

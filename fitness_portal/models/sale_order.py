@@ -5,6 +5,8 @@ from odoo import api, models, fields, _
 from odoo.tools import format_date
 from odoo.exceptions import AccessError, UserError
 
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang
+
 _logger = logging.getLogger(__name__)
 
 # How long the studio gives a student to turn up with the money. Nothing
@@ -149,10 +151,13 @@ class SaleOrder(models.Model):
             # she no longer has.
             user = order.partner_id.user_ids[:1]
             if user:
+                lang = recipient_lang(self.env, user)
                 translate = self.env(context=dict(
-                    self.env.context, lang=user.lang or 'es_ES'))._
+                    self.env.context, lang=lang))._
                 line = order.order_line[:1]
-                what = line.product_id.display_name if line else order.name
+                # Named in her language, not the manager's who declined.
+                what = (line.product_id.with_context(lang=lang).display_name
+                        if line else order.name)
                 self.env['fitness.notification'].sudo()._create_for_user(
                     user.id,
                     'cash_requested',
@@ -591,7 +596,7 @@ class SaleOrder(models.Model):
         product = variant.product_tmpl_id
 
         digest = self._get_order_digest(
-            origin='renewal', lang=self.partner_id.lang or self.env.user.lang)
+            origin='renewal', lang=recipient_lang(self.env, self.partner_id))
         quotation = self.sudo()._create_renew_upsell_order('2_renewal', digest)
 
         # Plan first, then the lines - never together. Writing plan_id beside

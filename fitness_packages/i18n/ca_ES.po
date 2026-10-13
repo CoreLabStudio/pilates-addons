@@ -746,3 +746,8 @@ msgstr "Classe privada de cortesia (Barre)"
 #: model:product.template,name:fitness_packages.product_courtesy_reformer_private
 msgid "Free private Reformer class"
 msgstr "Classe privada de cortesia (Reformer)"
+
+#. module: fitness_packages
+#: model:ir.model.fields,field_description:fitness_packages.field_fitness_add_student_wizard__seats_label
+msgid "Seats Label"
+msgstr "Places"

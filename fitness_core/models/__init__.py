@@ -1,4 +1,5 @@
 from . import studio_time
+from . import studio_lang
 from . import fitness_classroom
 from . import fitness_class_category
 from . import fitness_class_type

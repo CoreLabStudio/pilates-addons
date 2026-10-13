@@ -1,13 +1,10 @@
 import html as _html
 
 from odoo import models, fields, api
-from odoo.addons.fitness_core.models.studio_time import studio_tz
+from odoo.addons.fitness_core.models.studio_lang import (
+    recipient_lang, studio_datetime, studio_lang)
 
 import logging
-
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
 
 _logger = logging.getLogger(__name__)
 
@@ -106,8 +103,9 @@ class FitnessStudioConversation(models.Model):
                 body = _html.escape(msg.body or '').replace('\n', '<br/>')
                 try:
                     # The studio's clock, not the viewer's browser or account.
-                    local = studio_tz().fromutc(msg.create_date.replace(tzinfo=None))
-                    time_str = local.strftime('%d %b · %H:%M')
+                    time_str = studio_datetime(
+                        self.env, msg.create_date, 'd MMM · HH:mm',
+                        self.env.lang or studio_lang(self.env))
                 except Exception:
                     time_str = ''
 
@@ -242,7 +240,7 @@ class FitnessStudioMessage(models.Model):
                 if conv.user_id and conv.user_id != self.env.user:
                     try:
                         recipient = conv.user_id
-                        lang_env = self.with_context(lang=recipient.lang or DEFAULT_LANG)
+                        lang_env = self.with_context(lang=recipient_lang(self.env, recipient))
                         sender = msg.author_name or lang_env.env._('the studio')
                         self.env['fitness.notification'].sudo()._create_for_user(
                             recipient.id,

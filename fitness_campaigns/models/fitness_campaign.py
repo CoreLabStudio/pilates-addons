@@ -14,6 +14,8 @@ import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
+
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -145,15 +147,16 @@ class FitnessCampaign(models.Model):
         retried cleanly - and the studio with no way to tell who got it.
 
         So the code is checked against what is actually installed, and
-        anything else falls back rather than raising.
+        anything else falls back rather than raising - to the studio's
+        language, not the sender's: whoever presses Send has nothing to do
+        with what the student reads.
         """
         installed = {code for code, _name
                      in self.env['res.lang'].sudo().get_installed()}
-        for candidate in (partner.lang, user.lang if user else None,
-                          self.env.user.lang, 'en_US'):
+        for candidate in (partner.lang, user.lang if user else None):
             if candidate and candidate in installed:
                 return candidate
-        return self.env.user.lang or 'en_US'
+        return studio_lang(self.env)
 
     def _pin_survey_settings(self):
         """Make one answer per student actually mean one.

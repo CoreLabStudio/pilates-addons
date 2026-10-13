@@ -1,6 +1,8 @@
 from odoo import models, tools
 from odoo.http import request
 
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
+
 _PORTAL_LANGS = frozenset({'en_US', 'es_ES', 'ca_ES'})
 
 
@@ -13,7 +15,10 @@ class IrHttp(models.AbstractModel):
         if not mv_lang or mv_lang not in _PORTAL_LANGS:
             if tools.config.get('test_enable'):
                 return None
-            mv_lang = 'es_ES'
+            # A first visit, no choice made yet: the studio's language.
+            mv_lang = studio_lang(request.env)
+            if mv_lang not in _PORTAL_LANGS:
+                return None
         return request.env['res.lang']._get_data(code=mv_lang)
 
     @classmethod

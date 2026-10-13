@@ -5,7 +5,8 @@
   <record id="mail_template_trial_pending" model="mail.template">
     <field name="name">Trial Request: Received (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
-    <field name="subject">{{ 'Trial class request received · CoreLab' if object.lang == 'en_US' else ('Sol·licitud de classe de prova rebuda · CoreLab' if object.lang == 'ca_ES' else 'Solicitud de clase de prueba recibida · CoreLab') }}</field>
+    <field name="lang">{{ object.mail_lang }}</field>
+    <field name="subject">{{ 'Trial class request received · CoreLab' if object.mail_lang == 'en_US' else ('Sol·licitud de classe de prova rebuda · CoreLab' if object.mail_lang == 'ca_ES' else 'Solicitud de clase de prueba recibida · CoreLab') }}</field>
     <!-- Odoo defaults use_default_to to True, which ignores email_to and
          asks the record for its recipients instead. A trial submitted from
          the public form has no partner, so that returned nobody: the mail
@@ -19,7 +20,7 @@
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
-  <t t-if="object.lang == 'ca_ES'">
+  <t t-if="object.mail_lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Hola, <t t-out="object.name"/>.</h1>
     <div style="margin:0 0 20px;padding:16px 20px;background:#f0ece6;border-radius:10px;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#9e8e7e;">
@@ -31,7 +32,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Fins aviat.</p>
   </t>
 
-  <t t-elif="object.lang == 'es_ES'">
+  <t t-elif="object.mail_lang == 'es_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Hola, <t t-out="object.name"/>.</h1>
     <div style="margin:0 0 20px;padding:16px 20px;background:#f0ece6;border-radius:10px;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#9e8e7e;">
@@ -55,7 +56,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>See you on the mat.</p>
   </t>
 
-  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-set="notice_lang" t-value="object.mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
@@ -65,7 +66,8 @@
   <record id="mail_template_trial_scheduled" model="mail.template">
     <field name="name">Trial Request: Scheduled Confirmation (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
-    <field name="subject">{{ 'Your CoreLab trial class is confirmed' if object.lang == 'en_US' else ('La teva classe de prova a CoreLab és confirmada' if object.lang == 'ca_ES' else 'Tu clase de prueba en CoreLab está confirmada') }}</field>
+    <field name="lang">{{ object.mail_lang }}</field>
+    <field name="subject">{{ 'Your CoreLab trial class is confirmed' if object.mail_lang == 'en_US' else ('La teva classe de prova a CoreLab és confirmada' if object.mail_lang == 'ca_ES' else 'Tu clase de prueba en CoreLab está confirmada') }}</field>
     <!-- Odoo defaults use_default_to to True, which ignores email_to and
          asks the record for its recipients instead. A trial submitted from
          the public form has no partner, so that returned nobody: the mail
@@ -79,7 +81,7 @@
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
-  <t t-if="object.lang == 'ca_ES'">
+  <t t-if="object.mail_lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Confirmat.</h1>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Hola <t t-out="object.name"/>, la teva classe de prova ha quedat confirmada:</p>
@@ -96,7 +98,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>Fins aviat.</p>
   </t>
 
-  <t t-elif="object.lang == 'es_ES'">
+  <t t-elif="object.mail_lang == 'es_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Confirmado.</h1>
     <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#4a4a4a;">Hola <t t-out="object.name"/>, tu clase de prueba ha quedado confirmada:</p>
@@ -130,7 +132,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona<br/>See you on the mat.</p>
   </t>
 
-  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-set="notice_lang" t-value="object.mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
@@ -217,7 +219,8 @@
   <record id="mail_template_trial_declined" model="mail.template">
     <field name="name">Trial Request: Declined (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
-    <field name="subject">{{ 'About your CoreLab trial class request' if object.lang == 'en_US' else ('Sobre la teva sol·licitud de classe de prova a CoreLab' if object.lang == 'ca_ES' else 'Sobre tu solicitud de clase de prueba en CoreLab') }}</field>
+    <field name="lang">{{ object.mail_lang }}</field>
+    <field name="subject">{{ 'About your CoreLab trial class request' if object.mail_lang == 'en_US' else ('Sobre la teva sol·licitud de classe de prova a CoreLab' if object.mail_lang == 'ca_ES' else 'Sobre tu solicitud de clase de prueba en CoreLab') }}</field>
     <!-- Odoo defaults use_default_to to True, which ignores email_to and
          asks the record for its recipients instead. A trial submitted from
          the public form has no partner, so that returned nobody: the mail
@@ -231,7 +234,7 @@
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
-  <t t-if="object.lang == 'ca_ES'">
+  <t t-if="object.mail_lang == 'ca_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Hola, <t t-out="object.name"/>.</h1>
     <t t-if="object.occurrence_id or object.scheduled_datetime">
@@ -252,7 +255,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
   </t>
 
-  <t t-elif="object.lang == 'es_ES'">
+  <t t-elif="object.mail_lang == 'es_ES'">
     <p style="margin:0 0 28px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9e8e7e;">CoreLab Studio · Matadepera, Barcelona</p>
     <h1 style="margin:0 0 20px;font-size:32px;font-weight:400;line-height:1.2;letter-spacing:-0.02em;">Hola, <t t-out="object.name"/>.</h1>
     <t t-if="object.occurrence_id or object.scheduled_datetime">
@@ -294,7 +297,7 @@
     <p style="margin:32px 0 0;font-size:14px;line-height:1.6;color:#9e8e7e;border-top:1px solid #e8e0d6;padding-top:24px;">CoreLab Studio · Matadepera, Barcelona</p>
   </t>
 
-  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-set="notice_lang" t-value="object.mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>
@@ -304,7 +307,8 @@
   <record id="mail_template_trial_cancelled" model="mail.template">
     <field name="name">Trial Request: Class Cancelled (EN/ES/CA)</field>
     <field name="model_id" ref="fitness_trials.model_fitness_trial_request"/>
-    <field name="subject">{{ 'Your CoreLab trial class has been cancelled' if object.lang == 'en_US' else ('La teva classe de prova a CoreLab s\'ha cancel\u00b7lat' if object.lang == 'ca_ES' else 'Tu clase de prueba en CoreLab se ha cancelado') }}</field>
+    <field name="lang">{{ object.mail_lang }}</field>
+    <field name="subject">{{ 'Your CoreLab trial class has been cancelled' if object.mail_lang == 'en_US' else ('La teva classe de prova a CoreLab s\'ha cancel\u00b7lat' if object.mail_lang == 'ca_ES' else 'Tu clase de prueba en CoreLab se ha cancelado') }}</field>
     <!-- Odoo defaults use_default_to to True, which ignores email_to and
          asks the record for its recipients instead. A trial submitted from
          the public form has no partner, so that returned nobody: the mail
@@ -318,13 +322,13 @@
     <field name="body_html" type="html">
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#2c2c2c;background-color:#faf9f7;color-scheme:light only;supported-color-schemes:light only;">
 
-  <t t-if="object.lang == 'ca_ES'">
+  <t t-if="object.mail_lang == 'ca_ES'">
     <p style="font-size:18px;margin:0 0 18px;">Hola <t t-out="object.name or ''"/>,</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Ho sentim molt: hem hagut de cancel\u00b7lar la classe que havies reservat per a la teva classe de prova.</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">La teva classe de prova segueix sent teva. Ens posarem en contacte amb tu ben aviat per trobar-te un altre horari, o pots respondre aquest correu i ho organitzem.</p>
     <p style="font-size:15px;line-height:1.7;margin:0;">Gr\u00e0cies per la teva paci\u00e8ncia.<br/>L'equip de CoreLab</p>
   </t>
-  <t t-elif="object.lang == 'en_US'">
+  <t t-elif="object.mail_lang == 'en_US'">
     <p style="font-size:18px;margin:0 0 18px;">Hi <t t-out="object.name or ''"/>,</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">We are sorry - we have had to cancel the class you had booked for your trial.</p>
     <p style="font-size:15px;line-height:1.7;margin:0 0 18px;">Your trial class is still yours. We will be in touch shortly to find you another time, or message us in the app or on WhatsApp and we will arrange it.</p>
@@ -337,7 +341,7 @@
     <p style="font-size:15px;line-height:1.7;margin:0;">Gracias por tu paciencia.<br/>El equipo de CoreLab</p>
   </t>
 
-  <t t-set="notice_lang" t-value="object.lang"/>
+  <t t-set="notice_lang" t-value="object.mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
     </field>

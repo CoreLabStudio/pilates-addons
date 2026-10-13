@@ -4,15 +4,27 @@ from datetime import datetime as _dt, time as _time, timedelta
 
 import pytz
 from odoo import models, fields, api, _
+from odoo.addons.fitness_core.models.studio_lang import (
+    recipient_lang, studio_datetime, studio_lang)
 from odoo.addons.fitness_core.models.studio_time import (
-    STUDIO_TZ as STUDIO_TZ_NAME, studio_today, studio_tz)
+    STUDIO_TZ as STUDIO_TZ_NAME, studio_today)
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
 
+_TRIAL_LANGS = ('en_US', 'es_ES', 'ca_ES')
 
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
+
+def _trial_lang(env, lang):
+    """A language the trial texts are written in: hers, else the studio's.
+
+    The fallbacks disagreed: an email subject fell back to Spanish and its
+    body to English, and a request with no language was stored as es_ES
+    whatever the studio is.
+    """
+    if lang in _TRIAL_LANGS:
+        return lang
+    lang = studio_lang(env)
+    return lang if lang in _TRIAL_LANGS else 'en_US'
 
 _logger = logging.getLogger(__name__)
 
@@ -437,7 +449,7 @@ class FitnessTrialRequest(models.Model):
         """"Monday to Friday", or a list when the open days have a gap."""
         if not open_days or len(open_days) == 7:
             return ''
-        code = lang if lang in ('en_US', 'ca_ES') else 'es_ES'
+        code = _trial_lang(self.env, lang)
         names = {
             'en_US': {'mon': 'Monday', 'tue': 'Tuesday', 'wed': 'Wednesday',
                       'thu': 'Thursday', 'fri': 'Friday', 'sat': 'Saturday',
@@ -522,7 +534,11 @@ class FitnessTrialRequest(models.Model):
         index=True,
         tracking=True,
     )
-    lang = fields.Char(string='Language', default='es_ES')
+    lang = fields.Char(string='Language',
+                       default=lambda self: _trial_lang(self.env, False))
+    # What the emails are written in: never empty, never a language they
+    # have no text for.
+    mail_lang = fields.Char(compute='_compute_mail_lang')
     class_interest = fields.Selection(
         selection=[
             ('barre', 'Barre'),
@@ -783,6 +799,11 @@ class FitnessTrialRequest(models.Model):
                   "will be refused - decline the request, or give her a free "
                   "class instead.", name=partner.name, trial=product.name))
 
+    @api.depends('lang')
+    def _compute_mail_lang(self):
+        for rec in self:
+            rec.mail_lang = _trial_lang(self.env, rec.lang)
+
     @api.depends('scheduled_datetime', 'lang')
     def _compute_scheduled_datetime_display(self):
         for rec in self:
@@ -791,9 +812,9 @@ class FitnessTrialRequest(models.Model):
                 continue
             dt_utc = rec.scheduled_datetime.replace(tzinfo=pytz.UTC)
             dt_local = dt_utc.astimezone(_STUDIO_TZ)
-            lang = rec.lang or DEFAULT_LANG
-            days = _DAY_NAMES.get(lang, _DAY_NAMES[DEFAULT_LANG])
-            months = _MONTH_NAMES.get(lang, _MONTH_NAMES[DEFAULT_LANG])
+            lang = _trial_lang(self.env, rec.lang)
+            days = _DAY_NAMES[lang]
+            months = _MONTH_NAMES[lang]
             rec.scheduled_datetime_display = (
                 f"{days[dt_local.weekday()]}, {dt_local.day} "
                 f"{months[dt_local.month - 1]} {dt_local.year} · "
@@ -1298,7 +1319,8 @@ class FitnessTrialRequest(models.Model):
             # extractor only picks up calls literally named _(), so a helper
             # bound to a shorter name puts nothing in the catalogue and the
             # student is notified in English whatever they read the app in.
-            lang_env = self.with_context(lang=user.lang or self.lang or 'es_ES')
+            lang_env = self.with_context(
+                lang=user.lang or _trial_lang(self.env, self.lang))
             title = lang_env.env._("About your trial class request")
             # "Your free class has not been used" is only true for somebody
             # who may still have one. A student refused by the one-trial rule
@@ -1431,7 +1453,7 @@ class FitnessTrialRequest(models.Model):
             'name': (self.name or self.email).strip(),
             'email': self.email.strip(),
             'phone': self.phone or False,
-            'lang': self.lang or 'es_ES',
+            'lang': _trial_lang(self.env, self.lang),
         })
         self.partner_id = partner
         _logger.info("[TRIAL] Created contact %s for request %s from its own "
@@ -1785,13 +1807,13 @@ class FitnessTrialRequest(models.Model):
         cls = self.occurrence_id.name if self.occurrence_id else ''
         # The trial is approved by the studio, so the acting language is the
         # studio's. The student is the one reading this.
-        _ = self.env(context=dict(self.env.context,
-                                  lang=user.lang or 'es_ES'))._
+        lang = recipient_lang(self.env, user)
+        _ = self.env(context=dict(self.env.context, lang=lang))._
         if cls and when:
             body = _("%(cls)s on %(when)s.", cls=cls,
-                     # The studio's clock, not the approving staff's.
-                     when=studio_tz().fromutc(when.replace(tzinfo=None))
-                     .strftime('%d %b %H:%M'))
+                     # The studio's clock, not the approving staff's, in
+                     # her language.
+                     when=studio_datetime(self.env, when, 'd MMM HH:mm', lang))
         elif cls:
             body = _("Your trial class: %(cls)s.", cls=cls)
         else:
