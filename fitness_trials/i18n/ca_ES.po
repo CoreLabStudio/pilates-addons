@@ -404,6 +404,7 @@ msgstr "L'estudi no ha pogut acceptar aquesta. Pots demanar-ne una altra quan vu
 #. module: fitness_trials
 #. odoo-python
 #: code:addons/fitness_trials/models/trial_request.py:0
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
 msgid "Cancel this request"
 msgstr "Cancel·lar aquesta sol·licitud"
 
@@ -661,3 +662,73 @@ msgstr "%(name)s ja ha tingut la %(trial)s. Si l'aproves, es rebutjarà: rebutja
 #: code:addons/fitness_trials/models/trial_request.py:0
 msgid "%(name)s has already had the %(trial)s, so it cannot be given free again. Decline the request, or give her a free class instead."
 msgstr "%(name)s ja ha tingut la %(trial)s, així que no se li pot tornar a donar gratis. Rebutja la sol·licitud o regala-li una classe gratuïta."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "This is sent to"
+msgstr "Això s'envia a"
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid ""
+"by email and in the\n"
+"          app."
+msgstr "per correu electrònic i a l'app."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "Their free class is not used up - they can ask again."
+msgstr "La seva classe gratuïta no s'ha fet servir: la pot tornar a demanar."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid ""
+"They have already had their trial class, so it is not offered free again."
+msgstr ""
+"Ja ha fet la seva classe de prova, així que no se li torna a oferir gratis."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid ""
+"Optional - e.g. We have no Reformer space that week, please ask again for "
+"the following one."
+msgstr ""
+"Opcional - p. ex. No tenim plaça de Reformer aquella setmana, torna-la a "
+"demanar per a la següent."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "Cancel the request"
+msgstr "Cancel·lar la sol·licitud"
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "Keep it"
+msgstr "Mantenir-la"
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid ""
+"We'd love to see you in class again! Your free trial has already been "
+"used, so this request can't be accepted. Note from the studio: %(why)s You "
+"can buy a class pack or membership in the Shop and book whenever suits "
+"you."
+msgstr ""
+"Ens encantaria tornar-te a veure a classe! La teva classe de prova "
+"gratuïta ja s'ha fet servir, així que no podem acceptar aquesta "
+"sol·licitud. Nota de l'estudi: %(why)s Pots comprar un bo o una membresia "
+"a la Botiga i reservar quan millor et vagi."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid ""
+"We'd love to see you in class again! Your free trial has already been "
+"used, so this request can't be accepted. You can buy a class pack or "
+"membership in the Shop and book whenever suits you."
+msgstr ""
+"Ens encantaria tornar-te a veure a classe! La teva classe de prova "
+"gratuïta ja s'ha fet servir, així que no podem acceptar aquesta "
+"sol·licitud. Pots comprar un bo o una membresia a la Botiga i reservar "
+"quan millor et vagi."
