@@ -648,3 +648,15 @@ msgid ""
 msgstr ""
 "Ya tienes una solicitud de clase de prueba con el estudio. Nos pondremos "
 "en contacto contigo en breve."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(name)s has already had the %(trial)s. Approving this will be refused - decline the request, or give her a free class instead."
+msgstr "%(name)s ya ha tenido la %(trial)s. Si la apruebas, se rechazará: rechaza la solicitud o regálale una clase gratuita."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "%(name)s has already had the %(trial)s, so it cannot be given free again. Decline the request, or give her a free class instead."
+msgstr "%(name)s ya ha tenido la %(trial)s, así que no se le puede volver a dar gratis. Rechaza la solicitud o regálale una clase gratuita."

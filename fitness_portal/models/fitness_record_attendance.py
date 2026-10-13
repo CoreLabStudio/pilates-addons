@@ -188,16 +188,19 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
           1. a trial credit she already holds that covers this class is
              spent, and no new trial is made (a trial she bought, or one
              approved and not yet used);
-          2. otherwise, if her one free trial - either discipline - is
-             unused, and the offer was open on the day of the class in
-             Madrid, a trial is created the way approval creates one;
+          2. otherwise, if the studio's one trial rule allows a new free
+             trial - her free trial unused in either discipline, THIS
+             discipline's trial never had, paid or free, and the offer open
+             on the class's day in Madrid (fitness.trial.request
+             ._free_trial_refusal, the same question the student app and
+             approval ask) - a trial is created the way approval creates one;
           3. otherwise the trial cannot pay, and she is pointed at what can.
 
-        This used to ask only whether she had a free trial of THIS class's
-        discipline, so it gave a second free trial to a student who had
-        bought one, who had had the other discipline's, or who had been
-        given one by the walk-in before. The free single class and the desk
-        gift are untouched: they are the studio giving on purpose.
+        This used to ask only whether she had had a FREE trial. A student who
+        had bought the Reformer trial and used it was then given a free
+        Reformer trial as well, which the student app would never offer
+        her. The free single class and the desk gift are untouched: they are
+        the studio giving on purpose.
 
         Returns ('held', line) or ('new', product); raises UserError.
         """
@@ -212,16 +215,17 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
             self.calendar_event_id)[:1]
         if held:
             return 'held', held
-        if TR._trial_already_claimed(student, product):
+        day = self._class_day()
+        why = TR._free_trial_refusal(student, product, on=day)
+        if why == 'closed':
+            raise UserError(self.env._(
+                "The free trial offer had closed by %(day)s, the day of "
+                "this class.", day=day))
+        if why:
             raise UserError(self.env._(
                 "%(name)s has already had her free trial, and holds no trial "
                 "class for this one. Charge it to a credit she already has, "
                 "or give her a free class.", name=student.name))
-        day = self._class_day()
-        if not TR._trial_offer_open(on=day):
-            raise UserError(self.env._(
-                "The free trial offer had closed by %(day)s, the day of "
-                "this class.", day=day))
         return 'new', product
 
     def _courtesy_product(self):

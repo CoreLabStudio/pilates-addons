@@ -1498,9 +1498,12 @@ class FitnessStudentPortal(http.Controller):
         for p in products:
             if self._is_trial_product(p):
                 student_price[p.id] = self._student_price(partner, p)
-        _claimable = self._trial_offer_open() and not self._trial_entitlement_used(partner)
+        # The studio's one trial rule (fitness.trial.request
+        # ._free_trial_refusal), the same question Record a walk-in and
+        # approval ask. Trials she has had are already filtered out above.
         trial_ids = frozenset(
-            p.id for p in products if _claimable and self._is_trial_product(p))
+            p.id for p in products
+            if self._is_trial_product(p) and self._free_trial_allowed(partner, p))
         # Every trial is requested, never booked from the shop. The card used
         # to open the schedule filtered to the discipline, and tapping a class
         # there claimed the entitlement on the spot - so a Barre trial was
@@ -1926,8 +1929,7 @@ class FitnessStudentPortal(http.Controller):
             # The detail page gets the same one-tap Book button as the card.
             'is_free':         self._is_free_for(partner, product),
             'is_trial':        bool(self._is_trial_product(product)
-                                    and self._trial_offer_open()
-                                    and not self._trial_entitlement_used(partner)),
+                                    and self._free_trial_allowed(partner, product)),
             'trial_href':      '/my/trial?%s' % urlencode(
                 {'class_interest': product.fitness_class_type or 'reformer'}),
             'lbl_request_trial': _('Book'),
@@ -3359,25 +3361,21 @@ class FitnessStudentPortal(http.Controller):
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?
 
-        Read from what happened rather than a flag: any confirmed order of
-        either trial product that cost nothing. Drafts do not count - an
-        abandoned checkout must not burn the entitlement - which is the same
-        rule _free_already_claimed applies, widened from one product to both.
+        Asked of fitness.trial.request._free_trial_used, where this rule now
+        lives unchanged, so the app, Record a walk-in and approval cannot
+        come to disagree about the same student.
         """
-        trials = self._trial_products()
-        if not trials or not partner:
-            return False
-        variants = trials.mapped('product_variant_ids').ids
-        if not variants:
-            return False
-        rounding = request.env.company.currency_id.rounding or 0.01
-        lines = request.env['sale.order.line'].sudo().search([
-            ('order_id.partner_id', '=', partner.id),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('product_id', 'in', variants),
-        ])
-        return any(float_is_zero(l.price_total or 0.0, precision_rounding=rounding)
-                   for l in lines)
+        return request.env['fitness.trial.request'].sudo()._free_trial_used(
+            partner)
+
+    def _free_trial_allowed(self, partner, product):
+        """May she be offered a new free trial of this product, today?
+
+        The studio's one trial rule, written once on the model: her free
+        trial unused, this discipline's trial not had, the offer open.
+        """
+        return not request.env['fitness.trial.request'].sudo(
+            )._free_trial_refusal(partner, product)
 
     def _trial_spent_note(self, partner):
         """What to tell a student on the Classes tab once her trial is spent.
