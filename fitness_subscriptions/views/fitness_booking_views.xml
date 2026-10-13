@@ -7,6 +7,15 @@
         <field name="model">fitness.booking</field>
         <field name="inherit_id" ref="fitness_bookings.view_fitness_booking_form"/>
         <field name="arch" type="xml">
+            <!-- Only the booked student's own live memberships. It used to
+                 list every member's. -->
+            <xpath expr="//field[@name='subscription_id']" position="attributes">
+                <attribute name="domain">[('id', 'in', fitness_choosable_subscription_ids)]</attribute>
+                <attribute name="options">{'no_create': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='subscription_id']" position="before">
+                <field name="fitness_choosable_subscription_ids" invisible="1"/>
+            </xpath>
             <xpath expr="//field[@name='subscription_id']" position="after">
                 <!-- True when this booking consumed a floating credit rather than a
                      weekly-allowance slot. Immutable after creation. Shown only when

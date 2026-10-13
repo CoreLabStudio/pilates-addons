@@ -21,6 +21,7 @@ from odoo.exceptions import UserError
 
 class FitnessBookingReassignWizard(models.TransientModel):
     _name = 'fitness.booking.reassign.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Cancel a booking, optionally moving the student'
 
     # Every booking that was ticked. booking_id stays as the first of them so
@@ -162,6 +163,8 @@ class FitnessBookingReassignWizard(models.TransientModel):
     def action_cancel_only(self):
         """Cancel, and leave the student where they chose to be: nowhere."""
         self.ensure_one()
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         for booking in (self.booking_ids or self.booking_id):
             self._do_cancel(booking)
         return {'type': 'ir.actions.act_window_close'}
@@ -199,6 +202,8 @@ class FitnessBookingReassignWizard(models.TransientModel):
                 name=self.student_id.name or _('this student'),
             ))
         target = self.target_event_id
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         for booking in (self.booking_ids or self.booking_id):
             self._move_one(booking, target)
         return {'type': 'ir.actions.act_window_close'}

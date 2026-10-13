@@ -1244,3 +1244,9 @@ msgstr "Alumna"
 #: code:addons/fitness_core/models/fitness_dashboard.py:0
 msgid "Time"
 msgstr "Hora"
+
+#. module: fitness_core
+#. odoo-python
+#: code:addons/fitness_core/models/confirm_once.py:0
+msgid "This dialog has already been confirmed, so nothing more was done. To do it again, open a new one."
+msgstr "Aquest diàleg ja s'ha confirmat, així que no s'ha fet res més. Per tornar-ho a fer, obre'n un de nou."

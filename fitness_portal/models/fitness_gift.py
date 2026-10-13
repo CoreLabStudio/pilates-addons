@@ -95,6 +95,7 @@ class FitnessGiftWizard(models.TransientModel):
     given what.
     """
     _name = 'fitness.gift.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Give a Free Gift'
 
     student_id = fields.Many2one(
@@ -227,6 +228,8 @@ class FitnessGiftWizard(models.TransientModel):
                 "Say why this is being given. It is the only record anyone "
                 "will have of it later."))
 
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         if self.gift_type == 'class':
             log = self._give_a_class()
         else:

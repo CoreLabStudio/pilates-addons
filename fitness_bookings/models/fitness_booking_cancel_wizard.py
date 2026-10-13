@@ -3,6 +3,7 @@ from odoo import models, fields
 
 class FitnessBookingCancelWizard(models.TransientModel):
     _name = 'fitness.booking.cancel.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Admin Late Cancellation'
 
     booking_id = fields.Many2one('fitness.booking', required=True, ondelete='cascade')
@@ -21,6 +22,8 @@ class FitnessBookingCancelWizard(models.TransientModel):
 
     def action_confirm(self):
         self.ensure_one()
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         ctx = dict(self.env.context, _admin_cancel_direct=True)
         if self.restore_credit:
             ctx['admin_force_refund'] = True

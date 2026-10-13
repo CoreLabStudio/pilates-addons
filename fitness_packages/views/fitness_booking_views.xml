@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The pack-line dropdown offers only the booked student's own packs
+         that can pay today. It used to list every student's. -->
+    <record id="view_fitness_booking_form_own_packs" model="ir.ui.view">
+        <field name="name">fitness.booking.form.own.packs</field>
+        <field name="model">fitness.booking</field>
+        <field name="inherit_id" ref="fitness_bookings.view_fitness_booking_form"/>
+        <field name="arch" type="xml">
+            <field name="package_order_line_id" position="attributes">
+                <attribute name="domain">[('id', 'in', fitness_choosable_line_ids)]</attribute>
+                <attribute name="options">{'no_create': True}</attribute>
+            </field>
+            <field name="package_order_line_id" position="before">
+                <field name="fitness_choosable_line_ids" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

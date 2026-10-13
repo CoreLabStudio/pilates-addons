@@ -1798,6 +1798,19 @@ class FitnessStudentPortal(http.Controller):
         if self._hidden_from_shop(request.env.user.partner_id, product):
             return request.redirect('/my/packages')
 
+        # A product the studio does not sell - a free class it gives at the
+        # desk, a private class it arranges - has no page to buy it from.
+        # Reached by a kept or typed link, the page used to offer "Book"
+        # for a price of nothing, and the button did nothing. The holder of
+        # a live one sees what she holds and where to use it; anybody else
+        # is told there is no such page.
+        held = None
+        if not product.sale_ok:
+            held = self._held_not_for_sale(
+                request.env.user.partner_id, product)
+            if not held:
+                raise request.not_found()
+
         is_sub = bool(product.fitness_is_subscription_plan)
         partner = request.env.user.partner_id
         _ = request.env._
@@ -1867,8 +1880,37 @@ class FitnessStudentPortal(http.Controller):
                     'validity_end_str':  _fmt_date(active_line.fitness_validity_end_date),
                 }
 
+        # Not for sale and held: what she holds, read from the record that
+        # passed the check above, and a way to use it. Only this branch sets
+        # these keys, so every page for sale renders exactly as before.
+        held_extra = {}
+        if held:
+            if not is_sub:
+                active_info = {
+                    'order':             held.order_id,
+                    'date_str':          _fmt_date(held.order_id.date_order),
+                    'ref':               held.order_id.name,
+                    'credits_remaining': held.fitness_remaining_classes,
+                    'credits_total':     held.fitness_original_class_count,
+                    'validity_end_str':  _fmt_date(held.fitness_validity_end_date),
+                }
+            disc = product.fitness_class_type
+            held_extra = {
+                'covers_str': ' · '.join(filter(None, [
+                    {'barre': _('Barre'), 'reformer': _('Reformer')}.get(disc),
+                    {'group': _('Group classes'),
+                     'private': _('Private classes')}.get(
+                        product.fitness_session_type),
+                ])),
+                'book_href': ('/my/studio?discipline=%s' % disc
+                              if disc in ('barre', 'reformer')
+                              else '/my/studio'),
+                'lbl_covers': _('Covers'),
+                'lbl_book_class': _('Book a class'),
+            }
+
         full_name = partner.name or ''
-        return request.render('fitness_portal.portal_package_detail', {
+        return request.render('fitness_portal.portal_package_detail', dict(held_extra, **{
             'product':         product,
             'meta':            meta,
             'is_subscription': is_sub,
@@ -1917,7 +1959,28 @@ class FitnessStudentPortal(http.Controller):
             'lbl_valid_until': _('Valid until'),
             'lbl_order':       _('Order'),
             'lbl_price':       _('Price'),
-        })
+        }))
+
+    @staticmethod
+    def _held_not_for_sale(partner, product):
+        """Her live holding of a product the studio does not sell, if any.
+
+        A pack line by the one spendable rule (classes left, in date, on a
+        confirmed order); a membership that is running. Anything else -
+        used up, expired, cancelled, or never hers - is nothing.
+        """
+        if product.fitness_is_subscription_plan:
+            return request.env['sale.order'].sudo().search([
+                ('partner_id', '=', partner.id),
+                ('is_subscription', '=', True),
+                ('subscription_state', '=', '3_progress'),
+                ('order_line.product_id.product_tmpl_id', '=', product.id),
+            ], limit=1)
+        SOL = request.env['sale.order.line'].sudo()
+        return SOL.search(
+            SOL._fitness_spendable_domain(partner=partner)
+            + [('product_id.product_tmpl_id', '=', product.id)],
+            order='fitness_validity_end_date asc nulls last', limit=1)
 
     # Legacy POST target — the Buy button is now a link to the payment step.
     @http.route('/my/packages/<int:product_id>/buy', type='http', auth='user',
