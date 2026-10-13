@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Free classes given.
+
+       One screen for everything the studio handed over for nothing:
+       single classes, packs and memberships, including the ones given
+       before this list existed. The rows come from a Postgres view over
+       the orders - see models/fitness_free_credit_report.py for why it is
+       a view and not a table, and why that is what keeps a manager from
+       needing read access to sale.order.line. -->
+
+  <record id="view_fitness_free_credit_list" model="ir.ui.view">
+    <field name="name">fitness.free.credit.report.list</field>
+    <field name="model">fitness.free.credit.report</field>
+    <field name="arch" type="xml">
+      <!-- Nothing may be added, edited or deleted here. The model
+           refuses all three with a message that says where to go
+           instead; this keeps the buttons off the screen as well. -->
+      <list string="Free classes given" create="false" edit="false"
+            delete="false" default_order="given_on desc">
+        <header>
+          <button name="action_export_xlsx" type="object"
+                  string="Export to Excel" class="btn-secondary"
+                  icon="fa-file-excel-o"/>
+        </header>
+        <field name="given_on" widget="datetime"/>
+        <field name="student_id"/>
+        <field name="product_id"/>
+        <field name="given_type"/>
+        <field name="discipline"/>
+        <field name="session_type" optional="hide"/>
+        <field name="given_by"/>
+        <field name="reason" optional="show"/>
+        <field name="status" widget="badge"
+               decoration-success="status == 'available'"
+               decoration-info="status == 'used'"
+               decoration-danger="status == 'expired'"/>
+        <field name="expires_on"/>
+        <field name="used_event_id" string="Class it paid for"/>
+        <field name="used_event_count" optional="hide"/>
+        <field name="credits_given" optional="hide" sum="Classes given"/>
+        <field name="credits_left" optional="hide"/>
+        <field name="currency_id" column_invisible="1"/>
+        <field name="value_given" widget="monetary"
+               sum="Value given away"/>
+        <field name="given_month" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_fitness_free_credit_form" model="ir.ui.view">
+    <field name="name">fitness.free.credit.report.form</field>
+    <field name="model">fitness.free.credit.report</field>
+    <field name="arch" type="xml">
+      <form string="Free class given" create="false" edit="false">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="product_id" readonly="1"/></h1>
+            <h2><field name="student_id" readonly="1"/></h2>
+          </div>
+          <group>
+            <group string="Given">
+              <field name="given_on" readonly="1"/>
+              <field name="given_by" readonly="1"/>
+              <field name="given_type" readonly="1"/>
+              <field name="discipline" readonly="1"/>
+              <field name="session_type" readonly="1"/>
+            </group>
+            <group string="What became of it">
+              <field name="status" readonly="1"/>
+              <field name="expires_on" readonly="1"/>
+              <field name="credits_given" readonly="1"/>
+              <field name="credits_left" readonly="1"/>
+              <field name="used_event_id" readonly="1"/>
+              <field name="used_event_count" readonly="1"/>
+              <field name="currency_id" invisible="1"/>
+              <field name="value_given" widget="monetary" readonly="1"/>
+            </group>
+          </group>
+          <!-- The way back out, to the two records this row is about.
+               The order is where a gift given before this list existed
+               has its reason, in the chatter. -->
+          <group string="Records">
+            <field name="order_id" readonly="1"/>
+            <field name="order_line_id" readonly="1" invisible="1"/>
+          </group>
+          <group string="Reason">
+            <div colspan="2" invisible="reason">
+              <p class="text-muted mb-0">
+                No reason is recorded against this one. It was given
+                before the reason was kept on the order itself - open
+                the order above, where it is in the chatter.
+              </p>
+            </div>
+            <field name="reason" nolabel="1" readonly="1"
+                   invisible="not reason"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_fitness_free_credit_search" model="ir.ui.view">
+    <field name="name">fitness.free.credit.report.search</field>
+    <field name="model">fitness.free.credit.report</field>
+    <field name="arch" type="xml">
+      <search string="Free classes given">
+        <field name="student_id"/>
+        <field name="product_id"/>
+        <field name="given_by"/>
+        <field name="reason"/>
+        <!-- Typing a month, as the owner would: "2026-10". -->
+        <field name="given_month" string="Month"/>
+
+        <filter name="status_available" string="Available"
+                domain="[('status', '=', 'available')]"/>
+        <filter name="status_used" string="Used"
+                domain="[('status', '=', 'used')]"/>
+        <filter name="status_expired" string="Expired"
+                domain="[('status', '=', 'expired')]"/>
+        <separator/>
+        <filter name="type_class" string="Free classes"
+                domain="[('given_type', '=', 'class')]"/>
+        <filter name="type_package" string="Free packs"
+                domain="[('given_type', '=', 'package')]"/>
+        <filter name="type_membership" string="Free memberships"
+                domain="[('given_type', '=', 'membership')]"/>
+        <separator/>
+        <filter name="disc_barre" string="Barre"
+                domain="[('discipline', '=', 'barre')]"/>
+        <filter name="disc_reformer" string="Reformer"
+                domain="[('discipline', '=', 'reformer')]"/>
+        <separator/>
+        <!-- Months on Madrid's calendar, decided in the SQL: the
+             browser's own date would file a gift given just after
+             midnight on the 1st under the wrong month. -->
+        <filter name="this_month" string="This month"
+                domain="[('is_this_month', '=', True)]"/>
+        <filter name="last_month" string="Last month"
+                domain="[('is_last_month', '=', True)]"/>
+
+        <group>
+          <filter name="by_month" string="Month"
+                  context="{'group_by': 'given_month'}"/>
+          <filter name="by_discipline" string="Discipline"
+                  context="{'group_by': 'discipline'}"/>
+          <filter name="by_giver" string="Given by"
+                  context="{'group_by': 'given_by'}"/>
+          <filter name="by_student" string="Student"
+                  context="{'group_by': 'student_id'}"/>
+          <filter name="by_type" string="What"
+                  context="{'group_by': 'given_type'}"/>
+          <filter name="by_status" string="Status"
+                  context="{'group_by': 'status'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Month down the side, discipline across the top, which is the
+       question the owner asked: how much are we giving away, of which
+       discipline, and when. -->
+  <record id="view_fitness_free_credit_pivot" model="ir.ui.view">
+    <field name="name">fitness.free.credit.report.pivot</field>
+    <field name="model">fitness.free.credit.report</field>
+    <field name="arch" type="xml">
+      <pivot string="Free classes given" sample="0">
+        <field name="given_month" type="row"/>
+        <field name="discipline" type="col"/>
+        <field name="credits_given" type="measure"/>
+        <field name="value_given" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+
+  <record id="action_fitness_free_credit" model="ir.actions.act_window">
+    <field name="name">Free classes given</field>
+    <field name="res_model">fitness.free.credit.report</field>
+    <field name="view_mode">list,pivot,form</field>
+    <field name="search_view_id" ref="view_fitness_free_credit_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Nothing has been given away yet
+      </p>
+      <p>
+        Every free class, pack and membership the studio has given is
+        here, with who gave it and why. Give one at
+        <b>Students &gt; Sell at the desk</b>, with the payment method
+        set to <b>Free credit</b>.
+      </p>
+    </field>
+  </record>
+
+  <!-- Straight after "Sell at the desk" (35) and "Cash requests" (36):
+       the screen that gives one, then the screen that shows what was
+       given. Manager-only, like the rest of this section. -->
+  <menuitem
+      id="menu_fitness_free_credit"
+      name="Free classes given"
+      parent="fitness_core.menu_group_bookings"
+      action="action_fitness_free_credit"
+      sequence="38"
+      groups="fitness_core.group_fitness_manager"/>
+
+</odoo>

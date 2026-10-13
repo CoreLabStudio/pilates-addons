@@ -32,7 +32,15 @@ class FitnessBookingPackage(models.Model):
         line_id = vals.get('package_order_line_id')
         if not line_id:
             return
-        line = self.env['sale.order.line'].browse(line_id)
+        # sudo, like the membership check in fitness_subscriptions: the rules
+        # are checked on the line that pays, whoever is booking, and nothing
+        # read here reaches the caller. Read as the caller, a manager
+        # without Sales rights was refused or accepted by accident - accepted
+        # when the booking-window check had read the same line as superuser
+        # first and left it in the cache, refused when she ticked the
+        # override and that check never ran. Whose line it may be is
+        # _check_credit_is_her_own's question, and it refuses anyone else's.
+        line = self.env['sale.order.line'].sudo().browse(line_id)
         event = self.env['calendar.event'].browse(vals['calendar_event_id'])
         line.validate_package_for_booking(event)
         _logger.info("[PACKAGE] ✓ Package credit valid (%d remaining)", line.fitness_remaining_classes)

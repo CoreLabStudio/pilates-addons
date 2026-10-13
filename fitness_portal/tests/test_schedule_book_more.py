@@ -102,6 +102,10 @@ class TestScheduleBookMoreLink(HttpCase):
             "fitness_remaining_classes": 1,
             "fitness_validity_end_date": fields.Date.today() + timedelta(days=60),
         })
+        # Confirmed, as a real sale is: credit on an unconfirmed order is
+        # spent by nothing since the shared spendable rule, so a page
+        # offering it would be offering a class it cannot book.
+        cls.order.write({"state": "sale"})
 
         # the booking is created while a credit still exists, which is the real
         # sequence; the controller debits the package afterwards

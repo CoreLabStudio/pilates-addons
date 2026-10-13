@@ -3,3 +3,4 @@ from . import pwa
 from . import login_redirect
 from . import signup_override
 from . import payment_guard
+from . import free_credits_export

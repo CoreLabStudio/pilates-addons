@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- The private one-to-one classes the studio gives away.
+
+       The group versions already exist in courtesy_products.xml. These are
+       the same idea for a private session: a credit that pays for one
+       one-to-one class of its discipline and nothing else, because the
+       payment-source picker matches on BOTH fitness_class_type and
+       fitness_session_type. A group courtesy credit cannot pay for a
+       private class and these cannot pay for a group one.
+
+       Like the group pair: sale_ok=False so no student can buy one and
+       none appears in the shop, and noupdate="1" so the studio may rename
+       or re-time them without a module upgrade putting its wording back.
+
+       Names are in English here and translated by the post-migration,
+       which is also where the group pair gets its Spanish and Catalan -
+       a noupdate record's name cannot be changed from the data file
+       after it exists. -->
+  <data noupdate="1">
+
+    <record id="product_courtesy_barre_private" model="product.template">
+      <field name="name">Free private Barre class</field>
+      <field name="type">service</field>
+      <field name="list_price">0.0</field>
+      <field name="sale_ok" eval="False"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="fitness_is_package" eval="True"/>
+      <field name="fitness_is_courtesy" eval="True"/>
+      <field name="fitness_class_count">1</field>
+      <field name="fitness_validity_days">15</field>
+      <field name="fitness_class_type">barre</field>
+      <field name="fitness_session_type">private</field>
+    </record>
+
+    <record id="product_courtesy_reformer_private" model="product.template">
+      <field name="name">Free private Reformer class</field>
+      <field name="type">service</field>
+      <field name="list_price">0.0</field>
+      <field name="sale_ok" eval="False"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="fitness_is_package" eval="True"/>
+      <field name="fitness_is_courtesy" eval="True"/>
+      <field name="fitness_class_count">1</field>
+      <field name="fitness_validity_days">15</field>
+      <field name="fitness_class_type">reformer</field>
+      <field name="fitness_session_type">private</field>
+    </record>
+
+  </data>
+</odoo>

@@ -40,6 +40,26 @@ class SaleOrder(models.Model):
     ], string="Portal Payment Method", copy=False,
         help="Payment method the student selected during portal checkout.")
 
+    # Why this was given away, as a column and not only as a chatter note.
+    #
+    # The desk has always required a reason on a Free credit and has
+    # always posted it to the order's chatter. A chatter body cannot be
+    # listed, filtered or grouped, and a fitness manager often has no
+    # access to the order to read it on - so "what have we given away and
+    # why" had no answer anywhere. The note is still posted, unchanged;
+    # this is the same text in a place the Free classes given list can
+    # read.
+    #
+    # Gifts given BEFORE this field existed have their reason in the
+    # chatter and nowhere else. It is not parsed back out: the prefix was
+    # translated into whatever language the manager had at the time, and
+    # history that is quietly wrong is worse than history that is visibly
+    # absent. Those rows read empty and open the order instead.
+    fitness_free_reason = fields.Text(
+        "Why it was given", copy=False, readonly=True,
+        help="The reason the manager gave for handing this over for "
+             "nothing. Recorded on a Free credit at the desk.")
+
     fitness_terms_accepted_on = fields.Datetime(
         "Terms Accepted On", copy=False, readonly=True,
         help="When the student ticked 'I agree to the Terms and Conditions' "

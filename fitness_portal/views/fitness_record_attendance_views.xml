@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Record an attendance that was never booked ───────────────────────
+       A walk-in: she took the class without booking. Manager only, from
+       the class's Roster or from her contact. Nothing is sent to anybody;
+       the booking is created already attended, marked by the manager and
+       dated to the class. -->
+  <record id="view_fitness_record_attendance_wizard_form" model="ir.ui.view">
+    <field name="name">fitness.record.attendance.wizard.form</field>
+    <field name="model">fitness.record.attendance.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Record an attendance">
+        <sheet>
+          <group>
+            <field name="available_event_ids" invisible="1"/>
+            <field name="calendar_event_id"
+                   options="{'no_create': True, 'no_open': True}"/>
+            <field name="seats_label" string="Room" readonly="1"
+                   invisible="not calendar_event_id"/>
+            <field name="student_id"
+                   options="{'no_quick_create': True}"/>
+            <field name="pay_with" widget="radio"/>
+          </group>
+          <!-- What will pay, or why nothing can, before anything is pressed. -->
+          <div class="alert alert-info mb-3" role="status"
+               invisible="not source_label">
+            <field name="source_label" nolabel="1" readonly="1"/>
+          </div>
+          <group string="Why">
+            <field name="reason" nolabel="1" colspan="2" required="1"
+                   placeholder="e.g. Walked in with a friend; the instructor let her take the class."/>
+          </group>
+          <div class="text-muted" role="note">
+            Nothing is sent to her or to the instructor. The booking is
+            recorded as attended, marked by you and dated to the class.
+          </div>
+        </sheet>
+        <footer>
+          <button name="action_record" type="object"
+                  string="Record attendance" class="btn-primary"/>
+          <button string="Discard" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_fitness_record_attendance" model="ir.actions.act_window">
+    <field name="name">Record an attendance</field>
+    <field name="res_model">fitness.record.attendance.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="group_ids" eval="[(4, ref('fitness_core.group_fitness_manager'))]"/>
+  </record>
+
+  <!-- On the class: beside Add a student, on the Roster. -->
+  <record id="view_calendar_event_form_record_attendance" model="ir.ui.view">
+    <field name="name">calendar.event.form.record_attendance</field>
+    <field name="model">calendar.event</field>
+    <field name="inherit_id" ref="fitness_bookings.view_calendar_event_form_roster"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='fitness_roster']//field[@name='booking_ids']"
+             position="before">
+        <div class="mb-2">
+          <button name="%(action_fitness_record_attendance)d" type="action"
+                  string="Record a walk-in"
+                  class="btn btn-secondary btn-sm"
+                  groups="fitness_core.group_fitness_manager"
+                  context="{'default_calendar_event_id': id}"
+                  invisible="class_state == 'cancelled'"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- On the student: her contact's header, next to Student Account. -->
+  <record id="view_partner_form_record_attendance" model="ir.ui.view">
+    <field name="name">res.partner.form.record_attendance</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="fitness_portal.view_partner_form_make_student"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <button name="%(action_fitness_record_attendance)d" type="action"
+                string="Record a walk-in"
+                class="btn-secondary"
+                groups="fitness_core.group_fitness_manager"
+                context="{'default_student_id': id}"
+                invisible="not fitness_is_student"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

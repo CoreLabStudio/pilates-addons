@@ -14,14 +14,31 @@ order behind it would be a credit that expires wrong, shows up nowhere and
 cannot be given back. Every records-disagree bug found in this codebase has
 had that shape, and there is deliberately no path here that produces one.
 """
+import json
 import logging
 
 from odoo import models, fields, api, _
+from odoo.addons.fitness_packages.models.fitness_booking import (
+    FitnessBookingPackage,
+)
 from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
 MANAGER_GROUP = 'fitness_core.group_fitness_manager'
+
+# The free trial, which this route must never sell or give.
+#
+# These two products are ONE entitlement: a student gets a first class at
+# the trial price once, and the shop stops offering it the moment a line
+# for either product exists against her - see
+# FitnessStudentPortal._trial_offer_end and its callers, which search for
+# exactly these. So selling or gifting one at the desk silently spends
+# the trial she has not had, which is the complaint the four free class
+# products exist to answer. Read from the module that owns them rather
+# than retyped here, because a third copy of this pair is a third thing
+# to forget.
+TRIAL_XMLIDS = FitnessBookingPackage.TRIAL_XMLIDS
 
 
 class FitnessDeskSaleWizard(models.TransientModel):
@@ -34,17 +51,20 @@ class FitnessDeskSaleWizard(models.TransientModel):
         help="Who the credits are for.")
     product_id = fields.Many2one(
         'product.template', string='Pack', required=True,
-        # Courtesy excluded explicitly, not left to sale_ok. 3deca50 kept
-        # these two out of all three shop tabs for the same reason and in the
-        # same words - "these domains never asked about sale_ok, which is how
-        # two products sat in the shop unbuyable until somebody tried to buy
-        # one" - and this picker was the screen that fix did not reach. They
-        # are the studio's gift products at 0.00; a cash sale must not be able
-        # to pick one, and a gift is given from the Roster, not sold here.
-        domain=['|', ('fitness_is_package', '=', True),
-                     ('fitness_is_subscription_plan', '=', True),
-                ('fitness_is_courtesy', '=', False)],
-        help="The pack, class or membership being sold.")
+        # The list depends on what this is, so the domain is computed and
+        # the field below carries it. It used to be a static domain here
+        # with courtesy excluded outright, which was right while a
+        # courtesy class was givable from nowhere and wrong now that this
+        # is where it is given. _product_domain() is the one place the
+        # rule lives; action_create_sale re-asks the same method, so the
+        # list on screen and what the model will accept cannot disagree.
+        help="The pack, class or membership being sold. A free single "
+             "class appears only when this is a Free credit.")
+    # Char, read by domain="product_domain" on the form. A computed domain
+    # is the only way to make the list depend on another field: a static
+    # one is evaluated once, and a field the client cannot re-evaluate is
+    # how a product nobody may sell stays selectable.
+    product_domain = fields.Char(compute='_compute_product_domain')
 
     # Memberships only. A pack has no billing period - it is credits with an
     # expiry - so this stays empty for one and decides the commitment for the
@@ -131,6 +151,89 @@ class FitnessDeskSaleWizard(models.TransientModel):
             wiz.normal_price = wiz.membership_price + wiz.matricula_fee
             wiz.credits_granted = product.fitness_class_count if product else 0
             wiz.validity_days = product.fitness_validity_days if product else 0
+
+    # ── what this route may sell, and what it may give ──────────────
+    #
+    # One method, asked twice: once to build the list on screen, once to
+    # judge what came back. A domain that only lives in a view is a
+    # suggestion - the field accepts anything over
+    # /web/dataset/call_button, and "the picker does not offer it" has
+    # never been a reason a record cannot be written.
+    def _trial_products(self):
+        """The two free-trial products, as a product.template recordset."""
+        Product = self.env['product.template'].sudo()
+        found = Product.browse()
+        for xmlid in TRIAL_XMLIDS:
+            product = self.env.ref(xmlid, raise_if_not_found=False)
+            if product:
+                found |= product.sudo()
+        return found
+
+    def _product_domain(self):
+        """The products this sale may pick, as a domain list.
+
+        Packs and memberships, as before. Two differences:
+
+        * The studio's four free single classes are courtesy products and
+          appear ONLY on a Free credit. On a cash sale they are not in the
+          list and not acceptable if sent anyway - they are worth 0.00, so
+          a cash sale of one would record money taken against a product
+          that charges nothing.
+        * The free-trial pair is hidden ONLY on a Free credit. Giving one
+          away here spends the student's trial entitlement without saying
+          so, and the free single classes are what the studio wanted
+          instead. A trial SOLD for cash at the desk works exactly as it
+          always has, spending the entitlement as a paid trial does -
+          owner decision Q6, and the reason this is not excluded from both.
+        """
+        self.ensure_one()
+        domain = ['|', ('fitness_is_package', '=', True),
+                       ('fitness_is_subscription_plan', '=', True)]
+        if self.payment_method == 'free':
+            trials = self._trial_products()
+            if trials:
+                domain = domain + [('id', 'not in', trials.ids)]
+        else:
+            domain = domain + [('fitness_is_courtesy', '=', False)]
+        return domain
+
+    @api.depends('payment_method')
+    def _compute_product_domain(self):
+        for wiz in self:
+            wiz.product_domain = json.dumps(wiz._product_domain())
+
+    def _check_product_allowed(self):
+        """Refuse a product this route may not sell, whatever sent it.
+
+        Asked of _product_domain, so there is no second opinion to drift:
+        if the picker would not have offered it, the model will not take
+        it. The two cases are told apart only to say something useful -
+        "not in the list" is no help to somebody who cannot see the list.
+        """
+        self.ensure_one()
+        product = self.product_id
+        if not product:
+            return
+        Product = self.env['product.template'].sudo()
+        if Product.search_count(
+                self._product_domain() + [('id', '=', product.id)]):
+            return
+        if product in self._trial_products():
+            raise UserError(_(
+                "%(name)s is the free trial, and it cannot be given away "
+                "here: a free line for it spends the student's one trial, so "
+                "the app would stop offering her a trial she has never had. "
+                "Give a free class instead, or sell her the trial for cash.",
+                name=product.display_name))
+        if product.sudo().fitness_is_courtesy:
+            raise UserError(_(
+                "%(name)s is a free class the studio gives away, so it "
+                "cannot be sold for cash - it is worth nothing. Switch "
+                "this to a Free credit to give it.",
+                name=product.display_name))
+        raise UserError(_(
+            "%(name)s cannot be sold at the desk.",
+            name=product.display_name))
 
     def _matricula_note(self):
         """Why the registration line reads what it reads.
@@ -280,6 +383,15 @@ class FitnessDeskSaleWizard(models.TransientModel):
     @api.onchange('payment_method')
     def _onchange_payment_method(self):
         for wiz in self:
+            # Ticking Cash with a free class already chosen left it chosen
+            # and merely out of the list - the list is rebuilt, but a value
+            # already in the field is not re-validated by the client. The
+            # model refuses it either way; clearing it here is so the
+            # manager finds out now rather than on Confirm.
+            if (wiz.payment_method != 'free' and wiz.product_id
+                    and wiz.product_id.sudo().fitness_is_courtesy):
+                wiz.product_id = False
+                wiz.plan_id = False
             if wiz.payment_method == 'free':
                 wiz.amount_paid = 0.0
             elif wiz.product_id and not wiz.amount_paid:
@@ -330,6 +442,10 @@ class FitnessDeskSaleWizard(models.TransientModel):
         if not (self.env.user.has_group(MANAGER_GROUP)
                 or self.env.user.has_group('base.group_system')):
             raise UserError(_("Only a studio manager can sell from the desk."))
+        # Before anything is written. A product this route may not touch
+        # is refused whether it came from the picker, from a default in a
+        # context, or straight from /web/dataset/call_button.
+        self._check_product_allowed()
         if self.payment_method == 'free' and not (self.reason or '').strip():
             raise UserError(_(
                 "Say why this is being given for free. It is the only record "
@@ -391,7 +507,18 @@ class FitnessDeskSaleWizard(models.TransientModel):
         if plan and 'plan_id' in self.env['sale.order']._fields:
             vals['plan_id'] = plan.id
         order = self.env['sale.order'].sudo().create(vals)
-        order.write({'fitness_payment_method': self.payment_method})
+        # The reason goes on the order as well as into the chatter. The
+        # chatter cannot be listed, filtered or grouped, and a manager
+        # often cannot open the order to read it - so Free classes given
+        # reads this column. Written only on a free grant, because that
+        # is the only case where a reason is required and the only thing
+        # the history is about.
+        order.write({
+            'fitness_payment_method': self.payment_method,
+            'fitness_free_reason': (
+                (self.reason or '').strip()
+                if self.payment_method == 'free' else False),
+        })
         order.action_confirm()
 
         note = _(

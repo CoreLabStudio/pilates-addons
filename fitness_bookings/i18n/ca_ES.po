@@ -1277,3 +1277,15 @@ msgstr "%(credit)s (%(order)s) pertany a %(owner)s, no a %(student)s. Una classe
 #: code:addons/fitness_bookings/models/fitness_booking.py:0
 msgid "Membership %(order)s belongs to %(owner)s, not to %(student)s. A class can only be paid with the student's own credit, so this was not saved."
 msgstr "L'abonament %(order)s pertany a %(owner)s, no a %(student)s. Una classe només es pot pagar amb el crèdit propi de l'alumna, així que no s'ha desat."
+
+#. module: fitness_bookings
+#: model:ir.model.fields,field_description:fitness_bookings.field_fitness_booking__fitness_recorded_after_the_fact
+msgid "Recorded after the class"
+msgstr "Registrada després de la classe"
+
+#. module: fitness_bookings
+#: model:ir.model.fields,help:fitness_bookings.field_fitness_booking__fitness_recorded_after_the_fact
+msgid ""
+"The studio recorded this attendance after the class, because she took it "
+"without booking."
+msgstr "L'estudi va registrar aquesta assistència després de la classe, perquè la va fer sense reservar."
