@@ -65,3 +65,4 @@ from . import test_record_attendance
 from . import test_walkin_confirm_once
 from . import test_plain_manager_credit_paths
 from . import test_walkin_one_free_trial
+from . import test_walkin_window_to_the_minute

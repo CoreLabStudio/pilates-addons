@@ -282,7 +282,10 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
                 "'%(name)s' has not happened yet. Book her onto it the "
                 "ordinary way.", name=event.name))
         days = self._window_days()
-        if (now - event.start).days > days:
+        # The whole interval, not its whole days: timedelta.days drops the
+        # hours, so a class 14 days and 20 hours ago read as 14 and passed.
+        # The dialog's class list already cut at the exact moment.
+        if now - event.start > timedelta(days=days):
             raise UserError(self.env._(
                 "'%(name)s' was more than %(days)s days ago. Attendance is "
                 "recorded within %(days)s days; after that it is history "
