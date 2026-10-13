@@ -1398,6 +1398,15 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
+        # Back from a card payment that went through, with a fixed-class
+        # membership still owed its weekly hours: straight on to choosing
+        # them, as a signed checkout already does. Every card payment lands
+        # here, and this page never asked - so card buyers paid for reserved
+        # classes nobody booked.
+        if (kw.get('from_payment')
+                and self._clase_fija_subs_needing_slots(partner)
+                and self._recent_payment_state(partner) == 'done'):
+            return request.redirect('/my/fixed-class')
         # Classes is the first tab, so it is also what the bare URL shows.
         # 'packages' has to be matched explicitly now that it is no longer the
         # fallback - ?tab=packages was already a live link before this change.
