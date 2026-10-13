@@ -62,3 +62,4 @@ from . import test_desk_free_classes
 from . import test_free_classes_given
 from . import test_record_attendance_is_silent
 from . import test_record_attendance
+from . import test_walkin_confirm_once

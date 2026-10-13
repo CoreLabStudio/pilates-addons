@@ -46,6 +46,7 @@ COURTESY_XMLID = {
 
 class FitnessRecordAttendanceWizard(models.TransientModel):
     _name = 'fitness.record.attendance.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Record an attendance that was never booked'
 
     calendar_event_id = fields.Many2one(
@@ -271,6 +272,12 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
                 "capacity; check who else is on the roster first.",
                 name=event.name, taken=event.booked_seats,
                 capacity=event.capacity))
+
+        # Every refusal is above this line. From here the dialog does its
+        # work once: a second press would book her twice, spend a second
+        # credit or give a second free class. See fitness_core/models/
+        # confirm_once.py.
+        self._fitness_confirm_once()
 
         gift_order = False
         if self.pay_with == 'existing':
