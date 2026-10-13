@@ -5263,3 +5263,9 @@ msgstr "Per què es registra després de la classe. És l'únic registre que que
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_record_attendance_wizard_form
 msgid "e.g. Walked in with a friend; the instructor let her take the class."
 msgstr "p. ex. Va venir amb una amiga; la instructora la va deixar fer la classe."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/fitness_record_attendance.py:0
+msgid "%(name)s has already had her free trial, and holds no trial class for this one. Charge it to a credit she already has, or give her a free class."
+msgstr "%(name)s ja ha tingut la seva prova gratuïta i no té cap classe de prova per a aquesta. Carrega-la a un crèdit que ja tingui o regala-li una classe gratuïta."

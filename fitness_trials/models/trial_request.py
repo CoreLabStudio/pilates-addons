@@ -140,13 +140,17 @@ class FitnessTrialRequest(models.Model):
             pytz.timezone(STUDIO_TZ_NAME)).date()
 
     @api.model
-    def _trial_offer_open(self):
+    def _trial_offer_open(self, on=None):
         """Is a new trial claimable at all today, by anybody?
 
         Gates the browsing eligibility, the Book button on a class outside
         the window, the price on the shop card, the trial page and the class
         list the trial form offers. If any of those disagreed, a student
         would be offered something the next screen refuses.
+
+        on: a studio calendar date to ask about instead of today. Record a
+        walk-in asks about the day of the CLASS, through this same function,
+        so a change to the end date reaches it as it reaches everything else.
         """
         end = self._trial_offer_end()
         if not end:
@@ -161,7 +165,40 @@ class FitnessTrialRequest(models.Model):
         # on Asia/Calcutta lost it at 20:30 the evening before. Same
         # offer, three different endings, decided by a field nobody
         # filled in.
-        return studio_today() <= end
+        return (on or studio_today()) <= end
+
+    @api.model
+    def _create_trial_order(self, partner, product, price_date):
+        """The trial order: the product's promotion price on price_date,
+        confirmed. Returns the order.
+
+        Approving a request makes it here, and so does Record a walk-in when
+        it gives her trial, so the two cannot come to price or count a trial
+        differently. Confirmation honours the caller's context: the walk-in
+        passes skip_fitness_notification and nobody is told; approval passes
+        nothing and behaves exactly as it always has.
+        """
+        variant = product.product_variant_ids[:1]
+        if not variant:
+            raise UserError(_("The trial product has no variant to sell."))
+        # The promotion price, not the list price. Leaving price_unit off
+        # let Odoo fill in the list price, so approving a *free* trial
+        # raised a 15 EUR order: the student was billed for the thing the
+        # studio advertises as free, and because the once-per-student rule
+        # recognises a claimed trial by its zero total, the order did not
+        # count as a claim either - so the rule stopped applying to every
+        # trial granted this way. This is the same call the portal's
+        # one-tap booking makes, for the same reason.
+        order = self.env['sale.order'].sudo().create({
+            'partner_id': partner.id,
+            'order_line': [(0, 0, {
+                'product_id': variant.id,
+                'product_uom_qty': 1,
+                'price_unit': product.fitness_effective_price(on=price_date),
+            })],
+        })
+        order.action_confirm()
+        return order
 
     @api.model
     def _live_schedule(self):
@@ -1491,27 +1528,8 @@ class FitnessTrialRequest(models.Model):
                     "%(name)s has already used their free trial, and has no "
                     "credit left to book with. Sell them a class instead, or "
                     "book it from the back office.", name=partner.name))
-            variant = product.product_variant_ids[:1]
-            if not variant:
-                raise UserError(_("The trial product has no variant to sell."))
-            # The promotion price, not the list price. Leaving price_unit off
-            # let Odoo fill in the list price, so approving a *free* trial
-            # raised a 15 EUR order: the student was billed for the thing the
-            # studio advertises as free, and because the once-per-student rule
-            # recognises a claimed trial by its zero total, the order did not
-            # count as a claim either - so the rule stopped applying to every
-            # trial granted this way. This is the same call the portal's
-            # one-tap booking makes, for the same reason.
-            order = self.env['sale.order'].sudo().create({
-                'partner_id': partner.id,
-                'order_line': [(0, 0, {
-                    'product_id': variant.id,
-                    'product_uom_qty': 1,
-                    'price_unit': product.fitness_effective_price(
-                        on=self._price_date()),
-                })],
-            })
-            order.action_confirm()
+            order = self._create_trial_order(
+                partner, product, self._price_date())
             _logger.info(
                 "[TRIAL] Free trial order %s confirmed for partner %s from request %s",
                 order.name, partner.id, self.id)

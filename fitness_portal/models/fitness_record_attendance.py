@@ -117,9 +117,15 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
                 except UserError as exc:
                     wiz.source_label = str(exc)
             elif wiz.pay_with == 'trial':
-                ok, why = wiz._trial_available()
-                wiz.source_label = self.env._(
-                    "Her free trial can be used.") if ok else why
+                try:
+                    how, what = wiz._trial_plan()
+                except UserError as exc:
+                    wiz.source_label = str(exc)
+                else:
+                    wiz.source_label = (
+                        wiz._describe_source({'package_order_line_id': what.id})
+                        if how == 'held' else
+                        self.env._("Her free trial can be used."))
             else:
                 product = wiz._courtesy_product()
                 wiz.source_label = (
@@ -168,38 +174,55 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
         return self._trial_products().filtered(
             lambda p: p.fitness_class_type == discipline)[:1]
 
-    def _trial_available(self):
-        """Is her free trial usable for this class, on that class's date?"""
+    def _class_day(self):
+        """The class's calendar date in Madrid, whoever is asking."""
+        return pytz.utc.localize(self.calendar_event_id.start).astimezone(
+            studio_tz()).date()
+
+    def _trial_plan(self):
+        """How her free trial would pay for this class, without doing it.
+
+        The studio's one rule, in its order - the same pieces trial approval
+        uses, asked of fitness.trial.request rather than re-written here:
+
+          1. a trial credit she already holds that covers this class is
+             spent, and no new trial is made (a trial she bought, or one
+             approved and not yet used);
+          2. otherwise, if her one free trial - either discipline - is
+             unused, and the offer was open on the day of the class in
+             Madrid, a trial is created the way approval creates one;
+          3. otherwise the trial cannot pay, and she is pointed at what can.
+
+        This used to ask only whether she had a free trial of THIS class's
+        discipline, so it gave a second free trial to a student who had
+        bought one, who had had the other discipline's, or who had been
+        given one by the walk-in before. The free single class and the desk
+        gift are untouched: they are the studio giving on purpose.
+
+        Returns ('held', line) or ('new', product); raises UserError.
+        """
         self.ensure_one()
+        TR = self.env['fitness.trial.request'].sudo()
         product = self._trial_for_discipline()
         if not product:
-            return False, self.env._(
-                "There is no trial product for this discipline.")
-
-        variants = product.mapped('product_variant_ids').ids
-        used = self.env['sale.order.line'].sudo().search_count([
-            ('order_partner_id', '=', self.student_id.id),
-            ('product_id', 'in', variants),
-            ('order_id.state', 'in', ('sale', 'done')),
-            ('price_total', '=', 0.0),
-        ])
-        if used:
-            return False, self.env._(
-                "She has already had her free trial.")
-
-        # The offer has a closing date (fitness.trial_offer_end), and what
-        # matters is whether it was open on the day of the CLASS - not
-        # today - and on that day in Madrid, not in the reader's timezone.
-        # Recording last week's class must not be refused because the
-        # offer closed yesterday.
-        on = pytz.utc.localize(self.calendar_event_id.start).astimezone(
-            studio_tz()).date()
-        end = self.env['fitness.trial.request']._trial_offer_end()
-        if end and on > end:
-            return False, self.env._(
+            raise UserError(self.env._(
+                "There is no trial product for this discipline."))
+        student = self.student_id
+        held = TR._existing_trial_credit(student, product).fitness_covering(
+            self.calendar_event_id)[:1]
+        if held:
+            return 'held', held
+        if TR._trial_already_claimed(student, product):
+            raise UserError(self.env._(
+                "%(name)s has already had her free trial, and holds no trial "
+                "class for this one. Charge it to a credit she already has, "
+                "or give her a free class.", name=student.name))
+        day = self._class_day()
+        if not TR._trial_offer_open(on=day):
+            raise UserError(self.env._(
                 "The free trial offer had closed by %(day)s, the day of "
-                "this class.", day=on)
-        return True, ''
+                "this class.", day=day))
+        return 'new', product
 
     def _courtesy_product(self):
         event = self.calendar_event_id
@@ -283,11 +306,17 @@ class FitnessRecordAttendanceWizard(models.TransientModel):
         if self.pay_with == 'existing':
             vals = self._existing_source()
         elif self.pay_with == 'trial':
-            ok, why = self._trial_available()
-            if not ok:
-                raise UserError(why)
-            gift_order = self._zero_order(self._trial_for_discipline())
-            vals = {'package_order_line_id': gift_order.order_line[:1].id}
+            how, what = self._trial_plan()
+            if how == 'held':
+                vals = {'package_order_line_id': what.id}
+            else:
+                # Made by the code that approves a trial request, priced on
+                # the class's day, and confirmed in silence: nobody is told
+                # about an attendance recorded after the fact.
+                gift_order = self.env['fitness.trial.request'].sudo().with_context(
+                    skip_fitness_notification=True)._create_trial_order(
+                        self.student_id, what, self._class_day())
+                vals = {'package_order_line_id': gift_order.order_line[:1].id}
         else:
             product = self._courtesy_product()
             if not product:
