@@ -6,6 +6,7 @@ import pytz
 from odoo.exceptions import UserError
 from odoo import models, fields, api, _
 from odoo.tools import format_date
+from odoo.addons.fitness_core.models.studio_time import studio_tz
 
 # The studio is in Spain. Times on this dashboard follow the studio's clock,
 # not the server's and not whichever timezone the viewing user is set to.
@@ -121,8 +122,13 @@ class FitnessAdminDashboard(models.TransientModel):
         return [row[0] for row in self.env.cr.fetchall()]
 
     def _studio_tz(self):
-        """The studio's timezone, from the company, falling back to Madrid."""
-        return pytz.timezone(self.env.company.partner_id.tz or DEFAULT_TZ)
+        """The studio's timezone: Madrid, the same clock as every other screen.
+
+        It used to read the company contact's timezone, so a company record
+        set to anything else gave the dashboard a different "today" from the
+        schedule and the portal.
+        """
+        return studio_tz()
 
     def _studio_now(self):
         """Right now, in the studio's timezone."""

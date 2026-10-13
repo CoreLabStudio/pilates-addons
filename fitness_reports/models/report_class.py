@@ -89,7 +89,9 @@ class FitnessReportClass(models.Model):
             SELECT
                 ce.id,
                 ce.id                                                       AS event_id,
-                ce.start::date                                              AS class_date,
+                -- The studio's calendar day, like local_hour below: a class at
+                -- 00:30 Madrid is not on the day before.
+                (ce.start AT TIME ZONE 'UTC' AT TIME ZONE %%(tz)s)::date AS class_date,
                 EXTRACT(HOUR FROM (ce.start AT TIME ZONE 'UTC'
                     AT TIME ZONE %%(tz)s))::int                  AS local_hour,
                 CASE

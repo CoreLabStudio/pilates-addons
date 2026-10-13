@@ -14,6 +14,18 @@ DEFAULT_LANG = 'es_ES'
 
 _logger = logging.getLogger(__name__)
 
+
+def _madrid_month(when):
+    """The 'YYYY-MM' a stored time falls in, on the studio's calendar.
+
+    Stored datetimes are naive UTC: the first two hours of a Madrid month
+    are still the previous month in UTC, so a class at 00:30 on the 1st was
+    filed under the month before. Plain dates are already calendar dates.
+    """
+    if isinstance(when, _dt_cls):
+        when = studio_tz().fromutc(when.replace(tzinfo=None))
+    return when.strftime('%Y-%m')
+
 import pytz
 
 try:
@@ -36,6 +48,8 @@ from odoo.http import request
 from odoo.addons.fitness_bookings.models.fitness_booking import (
     BOOKING_WINDOW_DAYS, fitness_opening_date)
 from odoo.addons.fitness_core import class_colors
+from odoo.addons.fitness_core.models.studio_time import (
+    studio_midnight_utc, studio_today, studio_tz)
 
 try:
     from odoo.addons.payment.controllers.portal import PaymentPortal as _OdooPaymentPortal
@@ -506,6 +520,11 @@ class FitnessStudentPortal(http.Controller):
         else:
             values.update(self._available_values(partner, days))
 
+        # The date filter groups classes by day: the studio's day, not
+        # UTC's, or a class at 00:30 Madrid sits under the day before.
+        values['madrid_date'] = (
+            lambda dt: studio_tz().fromutc(dt.replace(tzinfo=None)).strftime(
+                '%Y-%m-%d') if dt else '')
         return request.render('fitness_portal.portal_student_studio', values)
 
     def _calendar_labels(self, _):
@@ -1054,15 +1073,17 @@ class FitnessStudentPortal(http.Controller):
 
         partner = request.env.user.partner_id
         now = fields.Datetime.now()
-        today = fields.Date.context_today(request.env.user)
+        today = studio_today()
         lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
 
         cutoff_start = cutoff_end = None
         if period and _re.match(r'^\d{4}-\d{2}$', period):
             try:
                 yr, mo = int(period[:4]), int(period[5:7])
-                cutoff_start = _dt_cls(yr, mo, 1)
-                cutoff_end = _dt_cls(yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1, 1)
+                # Madrid midnights, as UTC: the studio's month.
+                cutoff_start = studio_midnight_utc(_date_cls(yr, mo, 1))
+                cutoff_end = studio_midnight_utc(_date_cls(
+                    yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1, 1))
             except ValueError:
                 period = 'all'
         else:
@@ -1081,7 +1102,7 @@ class FitnessStudentPortal(http.Controller):
 
         # Build available months from all bookings (no cutoff) for the picker
         all_month_keys = sorted({
-            b.class_start.strftime('%Y-%m')
+            _madrid_month(b.class_start)
             for b in request.env['fitness.booking'].search([
                 ('student_id', '=', partner.id),
                 ('class_start', '!=', False),
@@ -1136,7 +1157,7 @@ class FitnessStudentPortal(http.Controller):
         month_groups = []
         for month_key, items in _groupby(
             past_bookings,
-            key=lambda b: b.class_start.strftime('%Y-%m') if b.class_start else 'unknown'
+            key=lambda b: _madrid_month(b.class_start) if b.class_start else 'unknown'
         ):
             entries = list(items)
             try:
@@ -1182,7 +1203,7 @@ class FitnessStudentPortal(http.Controller):
         if period and _re.match(r'^\d{4}-\d{2}$', period):
             filtered = [e for e in all_entries
                         if e.get('when') and hasattr(e['when'], 'strftime')
-                        and e['when'].strftime('%Y-%m') == period]
+                        and _madrid_month(e['when']) == period]
         else:
             period = 'all'
             filtered = all_entries
@@ -1192,7 +1213,7 @@ class FitnessStudentPortal(http.Controller):
         for e in all_entries:
             when = e.get('when')
             if when and hasattr(when, 'strftime'):
-                mk = when.strftime('%Y-%m')
+                mk = _madrid_month(when)
                 if mk not in months_seen:
                     try:
                         dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
@@ -1208,7 +1229,7 @@ class FitnessStudentPortal(http.Controller):
         for e in filtered:
             when = e.get('when')
             if when and hasattr(when, 'strftime'):
-                mk = when.strftime('%Y-%m')
+                mk = _madrid_month(when)
                 if mk not in mg_dict:
                     try:
                         dt = _dt_cls.strptime(mk + '-01', '%Y-%m-%d')
@@ -1278,7 +1299,7 @@ class FitnessStudentPortal(http.Controller):
         even when a student's records predate this page.
         """
         _ = request.env._
-        today = fields.Date.context_today(request.env.user)
+        today = studio_today()
         events = []
 
         # ── Class-pack purchases and expiries ────────────────────────
@@ -2908,7 +2929,7 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
-        today = fields.Date.context_today(request.env.user)
+        today = studio_today()
 
         subs = request.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
@@ -2935,7 +2956,7 @@ class FitnessStudentPortal(http.Controller):
             period_end_str = ''
             if sub.next_invoice_date:
                 next_renewal = sub.next_invoice_date
-                today_date = fields.Date.context_today(request.env.user)
+                today_date = studio_today()
                 # Advance stale dates forward — manual-payment studios don't
                 # trigger the Odoo billing cron so next_invoice_date can lag.
                 if next_renewal < today_date and sub.plan_id:

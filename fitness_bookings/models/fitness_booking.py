@@ -2,6 +2,7 @@ from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError, AccessError
 
 from odoo.addons.fitness_bookings.exceptions import LateCancellationError
+from odoo.addons.fitness_core.models.studio_time import studio_tz
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -351,9 +352,11 @@ class FitnessBooking(models.Model):
             and (self.env.user.has_group('fitness_core.group_fitness_manager')
                  or self.env.user._is_admin()))
         if time_until.total_seconds() <= 0 and not recording_history:
+            # The studio's time, not UTC: this is read by a student.
+            local = studio_tz().fromutc(class_start.replace(tzinfo=None))
             raise ValidationError(
                 f"Cannot book a class that has already started or passed "
-                f"({class_start.strftime('%Y-%m-%d %H:%M')} UTC)."
+                f"({local.strftime('%Y-%m-%d %H:%M')})."
             )
 
         # ── 1b. Not before the studio opens ──────────────────────────────────

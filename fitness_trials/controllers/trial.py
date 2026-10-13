@@ -474,7 +474,7 @@ class TrialRequestController(http.Controller):
         else:
             try:
                 chosen = _date.fromisoformat(preferred_date)
-                if chosen < _date.today():
+                if chosen < studio_today():
                     errors.append(_('Please choose a date that has not already passed.'))
             except ValueError:
                 errors.append(_('Please choose a preferred date.'))

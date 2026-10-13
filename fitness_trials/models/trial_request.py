@@ -5,7 +5,7 @@ from datetime import datetime as _dt, time as _time, timedelta
 import pytz
 from odoo import models, fields, api, _
 from odoo.addons.fitness_core.models.studio_time import (
-    STUDIO_TZ as STUDIO_TZ_NAME, studio_today)
+    STUDIO_TZ as STUDIO_TZ_NAME, studio_today, studio_tz)
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
 
@@ -1789,7 +1789,8 @@ class FitnessTrialRequest(models.Model):
                                   lang=user.lang or 'es_ES'))._
         if cls and when:
             body = _("%(cls)s on %(when)s.", cls=cls,
-                     when=fields.Datetime.context_timestamp(self, when)
+                     # The studio's clock, not the approving staff's.
+                     when=studio_tz().fromutc(when.replace(tzinfo=None))
                      .strftime('%d %b %H:%M'))
         elif cls:
             body = _("Your trial class: %(cls)s.", cls=cls)

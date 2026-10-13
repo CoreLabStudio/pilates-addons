@@ -1,6 +1,7 @@
 import html as _html
 
 from odoo import models, fields, api
+from odoo.addons.fitness_core.models.studio_time import studio_tz
 
 import logging
 
@@ -104,7 +105,8 @@ class FitnessStudioConversation(models.Model):
                 )
                 body = _html.escape(msg.body or '').replace('\n', '<br/>')
                 try:
-                    local = fields.Datetime.context_timestamp(conv, msg.create_date)
+                    # The studio's clock, not the viewer's browser or account.
+                    local = studio_tz().fromutc(msg.create_date.replace(tzinfo=None))
                     time_str = local.strftime('%d %b · %H:%M')
                 except Exception:
                     time_str = ''
