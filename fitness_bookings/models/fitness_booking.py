@@ -257,6 +257,43 @@ class FitnessBooking(models.Model):
         """
         return False
 
+    @api.constrains('student_id', 'package_order_line_id', 'subscription_id')
+    def _check_credit_is_her_own(self):
+        """A booking is paid with the booked student's own credit. Always.
+
+        A manager booking by hand could name any student's pack line, and
+        the class came off that student's pack: a paid class gone, nobody
+        told, and the manager unable even to see whose line it was. The
+        studio does not share packs, so there is no exception to allow.
+
+        A constraint rather than a check in one caller: the booking form,
+        Add a student, the desk, the gift and anything over RPC all end in
+        create() or write(), and every one of them is refused here. Only
+        these three fields trigger it, so existing bookings are left alone
+        until somebody changes who or what pays. Read as superuser: a
+        fitness manager has no Sales rights and must still be told whose
+        credit it was.
+        """
+        for booking in self.sudo():
+            student = booking.student_id
+            line = booking.package_order_line_id
+            if line and line.order_id.partner_id != student:
+                raise ValidationError(self.env._(
+                    "%(credit)s (%(order)s) belongs to %(owner)s, not to "
+                    "%(student)s. A class can only be paid with the "
+                    "student's own credit, so this was not saved.",
+                    credit=line.product_id.name, order=line.order_id.name,
+                    owner=line.order_id.partner_id.name,
+                    student=student.name))
+            sub = booking.subscription_id
+            if sub and sub.partner_id != student:
+                raise ValidationError(self.env._(
+                    "Membership %(order)s belongs to %(owner)s, not to "
+                    "%(student)s. A class can only be paid with the "
+                    "student's own credit, so this was not saved.",
+                    order=sub.name, owner=sub.partner_id.name,
+                    student=student.name))
+
     def _validate_new_booking(self, vals):
         event = self.env['calendar.event'].browse(vals['calendar_event_id'])
         student = self.env['res.partner'].browse(vals['student_id'])

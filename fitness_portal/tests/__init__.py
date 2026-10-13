@@ -54,3 +54,6 @@ from . import test_duplicate_names_shown
 from . import test_history_says_what_happened
 from . import test_cancel_warns_about_the_credit
 from . import test_spendable_agreement
+from . import test_credit_is_her_own
+from . import test_one_dialog_one_confirm
+from . import test_not_for_sale_page

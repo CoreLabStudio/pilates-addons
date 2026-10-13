@@ -1925,6 +1925,22 @@
                                 <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_order"/>
                                 <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="active_info['ref']"/>
                             </div>
+                            <!-- Only for a product the studio does not sell,
+                                 which she holds: what it covers and where to
+                                 use it. Nothing here is sent for any other
+                                 product, so their pages are unchanged. -->
+                            <t t-if="covers_str">
+                                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;">
+                                    <span style="font-size:0.8rem;color:var(--mv-muted);" t-out="lbl_covers"/>
+                                    <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="covers_str"/>
+                                </div>
+                            </t>
+                            <t t-if="book_href">
+                                <a t-att-href="book_href"
+                                   class="mv-pkg-buy-btn mv-book-held"
+                                   style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:14px;"
+                                   t-out="lbl_book_class"/>
+                            </t>
                         </div>
                     </t>
                     <t t-else="">

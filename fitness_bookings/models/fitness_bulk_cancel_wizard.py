@@ -39,6 +39,7 @@ _logger = logging.getLogger(__name__)
 
 class FitnessBulkCancelWizard(models.TransientModel):
     _name = 'fitness.class.bulk.cancel.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Manage a day of classes'
 
     day = fields.Date(
@@ -191,6 +192,8 @@ class FitnessBulkCancelWizard(models.TransientModel):
         off_lines, on_lines = self._pending()
         if not (off_lines or on_lines):
             raise UserError(_("Nothing has changed. Move a switch first."))
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
 
         reason = (self.reason or '').strip()
         cancelled = students = restored = 0

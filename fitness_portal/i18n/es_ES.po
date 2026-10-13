@@ -4664,3 +4664,39 @@ msgstr "Crédito no devuelto"
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "This class starts in less than %(hours)s hours. If you cancel now you will not get your credit back."
 msgstr "Esta clase empieza en menos de %(hours)s horas. Si la cancelas ahora, no recuperarás tu crédito."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Gave %(qty)s %(product)s to %(who)s, order %(order)s."
+msgstr "Se ha regalado %(qty)s %(product)s a %(who)s, pedido %(order)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+msgid "Sold %(qty)s %(product)s to %(who)s for %(amount)s, order %(order)s."
+msgstr "Se ha vendido %(qty)s %(product)s a %(who)s por %(amount)s, pedido %(order)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Book a class"
+msgstr "Reservar una clase"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Covers"
+msgstr "Cubre"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Group classes"
+msgstr "Clases en grupo"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Private classes"
+msgstr "Clases privadas"

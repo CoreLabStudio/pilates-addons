@@ -16,6 +16,30 @@ class FitnessBookingSubscription(models.Model):
     """Extends fitness.booking to integrate subscription weekly-allowance management."""
     _inherit = 'fitness.booking'
 
+    # What the booking form's "Subscription Used" may offer: her own live
+    # memberships, the same ones the payment engine considers. It used to
+    # list every member's. See _check_credit_is_her_own.
+    fitness_choosable_subscription_ids = fields.Many2many(
+        'sale.order', compute='_compute_fitness_choosable_subscription_ids',
+        string='Her live memberships')
+
+    @api.model
+    def _fitness_live_membership_domain(self, student_id):
+        """The memberships that may pay for her classes: the engine's list."""
+        return [
+            ('partner_id', '=', student_id),
+            ('subscription_state', '=', '3_progress'),
+            ('fitness_subscription_product_id', '!=', False),
+        ]
+
+    @api.depends('student_id')
+    def _compute_fitness_choosable_subscription_ids(self):
+        SO = self.env['sale.order'].sudo()
+        for booking in self:
+            booking.fitness_choosable_subscription_ids = SO.search(
+                self._fitness_live_membership_domain(booking.student_id.id)
+            ) if booking.student_id else SO
+
     # ── FLOATING-CREDIT FLAG ────────────────────────────────────────────────────
     # True when this booking was paid from the subscription's floating-credit pool
     # rather than from the weekly allowance. Used in two places:
@@ -325,11 +349,8 @@ class FitnessBookingSubscription(models.Model):
         # instead of the generic "no source covers this class" message.
         capped_subs = []  # list of dicts with cap details for the error message
 
-        subscriptions = self.env['sale.order'].search([
-            ('partner_id', '=', student_id),
-            ('subscription_state', '=', '3_progress'),
-            ('fitness_subscription_product_id', '!=', False),
-        ])
+        subscriptions = self.env['sale.order'].search(
+            self._fitness_live_membership_domain(student_id))
         for sub in subscriptions:
             product = sub.fitness_subscription_product_id
             # A combined membership covers two disciplines, so either matches.

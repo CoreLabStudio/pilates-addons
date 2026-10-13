@@ -11,6 +11,7 @@ from odoo import models, fields
 
 class FitnessBookingCreditBackWizard(models.TransientModel):
     _name = 'fitness.booking.credit.back.wizard'
+    _inherit = ['fitness.confirm.once.mixin']
     _description = 'Give a credit back after a late cancellation'
 
     booking_id = fields.Many2one(
@@ -38,6 +39,8 @@ class FitnessBookingCreditBackWizard(models.TransientModel):
 
     def action_confirm(self):
         self.ensure_one()
+        # One dialog, one confirmation: see fitness_core/models/confirm_once.py.
+        self._fitness_confirm_once()
         # The booking re-checks the manager group and every precondition
         # for itself: _give_credit_back is reachable over RPC.
         self.booking_id._give_credit_back(self.reason)

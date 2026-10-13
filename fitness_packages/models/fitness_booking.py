@@ -8,6 +8,23 @@ class FitnessBookingPackage(models.Model):
     """Extends fitness.booking to integrate class-pack credit management."""
     _inherit = 'fitness.booking'
 
+    # What the booking form's "Package Credit Used" may offer: her own
+    # lines that can pay today, by the one spendable rule. The dropdown
+    # used to list every student's packs, which is how a manager came to
+    # book one student on another's credit. The constraint refuses that
+    # whatever is sent; this keeps the form from offering it at all.
+    fitness_choosable_line_ids = fields.Many2many(
+        'sale.order.line', compute='_compute_fitness_choosable_line_ids',
+        string='Her spendable packs')
+
+    @api.depends('student_id')
+    def _compute_fitness_choosable_line_ids(self):
+        SOL = self.env['sale.order.line'].sudo()
+        for booking in self:
+            booking.fitness_choosable_line_ids = SOL.search(
+                SOL._fitness_spendable_domain(partner=booking.student_id)
+            ) if booking.student_id else SOL
+
     # ─── Validation: called inside super().create() ────────────────────────────
 
     def _validate_new_booking(self, vals):
