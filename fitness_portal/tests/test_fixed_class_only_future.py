@@ -243,6 +243,26 @@ class TestPlacementOnlyFuture(FixedFixture, TransactionCase):
             self.assertEqual(self._booked(so), four,
                              'the nightly job a week in gave her a 5th Monday')
 
+    def test_a_class_the_studio_cancelled_is_never_placed(self):
+        """Mon 26 Oct is cancelled. She is not booked into it, not told her
+        place is reserved for it, and it does not use one of her 4."""
+        user, so, mon7, mon8 = self._late_member('cxl')
+        mon7[3].class_state = 'cancelled'          # Mon 26 Oct 07:00
+        with common.freeze_time(PIN):
+            self._hours(so, mon7[0])
+            so._auto_place_clase_fija()
+            booked = self._booked(so)
+            self.env['sale.order']._cron_place_fixed_classes()
+        self.assertEqual(booked, [utc(2026, 10, 19, 5), utc(2026, 11, 2, 6)])
+        self.assertFalse(self.env['fitness.booking'].sudo().search_count(
+            [('student_id', '=', user.partner_id.id),
+             ('calendar_event_id', '=', mon7[3].id)]),
+            'a booking exists on the cancelled class')
+        told = self.env['fitness.notification'].sudo().search(
+            [('user_id', '=', user.id), ('notification_type', '=', 'booking_confirmed')])
+        self.assertFalse([b for b in told.mapped('body') if '26' in b],
+                         'she was told her place is booked on 26 Oct: %s' % told.mapped('body'))
+
     def test_a_class_full_only_in_the_past_does_not_refuse_the_hour(self):
         """The cap counts the whole period; fullness that is over does not
         matter to placement, which books only what is to come."""

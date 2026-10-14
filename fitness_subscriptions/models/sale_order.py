@@ -558,8 +558,13 @@ class SaleOrder(models.Model):
         for slot in active_slots:
             anchor = slot.calendar_event_id
             # Find every occurrence of this slot's class in the billing period.
+            # A class the studio has cancelled is never placed: she would be
+            # told her place is booked in a class that will not run, and it
+            # would use one of the classes she paid for. The picker already
+            # leaves them out.
             domain = [
                 ('is_fitness_class', '=', True),
+                ('class_state', '!=', 'cancelled'),
                 ('start', '>=', fields.Datetime.to_string(period_start_dt)),
                 ('start', '<', fields.Datetime.to_string(period_end_dt)),
             ]
