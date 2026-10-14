@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 from odoo import api, models, fields, _
+from odoo.tools import format_date
 from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
@@ -459,6 +460,17 @@ class SaleOrder(models.Model):
             raise UserError(_(
                 "%(name)s is not running, so it cannot be renewed. Reopen it "
                 "first.", name=order.name))
+        # The same rule as the student's shop: renewable from the day the
+        # renewal reminder goes out, not before. Outside it, say why and do
+        # nothing - no invoice, no payment, no date moved.
+        if not order._fitness_renewable_now():
+            raise UserError(_(
+                "%(name)s is still running until %(end)s. It can be renewed "
+                "from %(opens)s, when her renewal reminder goes out. Nothing "
+                "was charged.",
+                name=order.name,
+                end=format_date(self.env, order.next_invoice_date),
+                opens=format_date(self.env, order._fitness_renewal_opens_on())))
 
         if new_plan and new_plan.id != order.plan_id.id:
             return order._fitness_renew_cash_on_a_new_plan(new_plan)

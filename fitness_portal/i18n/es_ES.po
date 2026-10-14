@@ -5270,3 +5270,13 @@ msgstr "p. ej. Vino con una amiga; la instructora la dejó hacer la clase."
 #: code:addons/fitness_portal/models/fitness_record_attendance.py:0
 msgid "%(name)s has already had her free trial, and holds no trial class for this one. Charge it to a credit she already has, or give her a free class."
 msgstr "%(name)s ya ha tenido su prueba gratuita y no tiene ninguna clase de prueba para esta. Cárgala a un crédito que ya tenga o regálale una clase gratuita."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid ""
+"%(name)s is still running until %(end)s. It can be renewed from %(opens)s, "
+"when her renewal reminder goes out. Nothing was charged."
+msgstr ""
+"%(name)s sigue en curso hasta el %(end)s. Se puede renovar a partir del "
+"%(opens)s, cuando le llega el aviso de renovación. No se ha cobrado nada."
