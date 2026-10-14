@@ -46,10 +46,55 @@ class SaleOrderRenewal(models.Model):
         """Running: inside the window. Ended (closed): always."""
         self.ensure_one()
         today = today or studio_today()
-        if self.subscription_state == '3_progress':
+        if self.end_date and self.next_invoice_date and self.end_date < self.next_invoice_date:
+            return False   # ends before its next bill: replaced by its renewal
+        if self.subscription_state in ('3_progress', '4_paused'):
             opens = self._fitness_renewal_opens_on()
             return bool(opens) and today >= opens
         return self.subscription_state in ('6_churn',)
+
+
+    def action_confirm(self):
+        """A renewal continues from the old plan's end, and the old plan stops there.
+
+        Card, cash approval and desk sale all confirm through here, so they
+        share it. When she renews a membership still running inside the
+        window, the new one starts on the old one's end (next_invoice_date)
+        so she loses no days - Odoo would otherwise start it today - and the
+        old one is given that day as its end: Odoo's billing job closes it
+        there instead of invoicing it again or, with no card on file,
+        closing it as unpaid. A renewal of an ended plan starts today.
+        """
+        successions = []
+        # Odoo's own renewal and upsell quotations (subscription_id set) carry
+        # their parent themselves; they are left to Odoo.
+        for order in self.filtered(lambda o: o.state in ('draft', 'sent')
+                                   and not o.subscription_id):
+            tmpls = order.order_line.product_id.product_tmpl_id.filtered(
+                'fitness_is_subscription_plan')
+            if len(tmpls) != 1 or not order.plan_id:
+                continue
+            renewal = order.partner_id._fitness_renewal_state(tmpls)
+            previous = renewal['order']
+            if (renewal['state'] != 'renewable' or not previous
+                    or previous.subscription_state not in ('3_progress', '4_paused')
+                    or previous.end_date):
+                continue
+            start = renewal['continue_from']
+            if start and (not order.start_date or order.start_date < start):
+                order.start_date = start
+            successions.append((order, previous))
+        res = super().action_confirm()
+        for order, previous in successions:
+            if order.state != 'sale' or previous.end_date:
+                continue
+            # Her last paid day: the day before the first unpaid one. On the
+            # end day itself, overdue, or through a cash request approved
+            # after the end, that is today or earlier - and still the end, so
+            # nothing bills the days she renewed instead of paying for.
+            paid_to = (previous.next_invoice_date or order.start_date) - timedelta(days=1)
+            previous.sudo().end_date = min(paid_to, order.start_date - timedelta(days=1))
+        return res
 
 
 class ResPartnerRenewal(models.Model):
@@ -77,14 +122,33 @@ class ResPartnerRenewal(models.Model):
                 ('partner_id', '=', self.id),
                 ('is_subscription', '=', True),
                 ('order_line.product_id.product_tmpl_id', '=', product_tmpl.id),
-                ('subscription_state', 'in', ('3_progress', '6_churn')),
+                ('subscription_state', 'in', ('3_progress', '4_paused', '6_churn')),
             ])
-            running = subs.filtered(lambda s: s.subscription_state == '3_progress')
+            # Paused is held: it is hers, and buying it again would give her
+            # two. A plan given an end date is being replaced by its renewal,
+            # so the one carrying on is the one without.
+            running = subs.filtered(
+                lambda s: s.subscription_state in ('3_progress', '4_paused'))
+            current = running.filtered(lambda s: not s.end_date) or running
             if running:
-                latest = running.sorted(lambda s: s.next_invoice_date or today)[-1:]
+                latest = current.sorted(lambda s: s.next_invoice_date or today)[-1:]
                 out['order'] = latest
                 out['opens_on'] = latest._fitness_renewal_opens_on()
-                if latest._fitness_renewable_now(today):
+                # A membership whose first period has not been invoiced yet -
+                # a renewal or purchase confirmed and waiting for its payment
+                # (transfer, Bizum) - is hers and Active: renewing it again
+                # stacked a third membership on the same days.
+                if (latest.end_date and latest.end_date < today
+                        and not running.filtered(lambda s: not s.end_date)):
+                    # Ended - its end date has passed and nothing carries on
+                    # after it - but still marked running until Odoo's weekly
+                    # expiry job closes it. It is renewable now, as if closed:
+                    # for up to a week she could not buy her plan back.
+                    out['state'] = 'renewable'
+                elif (latest.start_date and latest.next_invoice_date
+                        and latest.next_invoice_date <= latest.start_date):
+                    out['state'] = 'active'
+                elif latest._fitness_renewable_now(today):
                     out['state'] = 'renewable'
                     if latest.next_invoice_date and latest.next_invoice_date > today:
                         out['continue_from'] = latest.next_invoice_date

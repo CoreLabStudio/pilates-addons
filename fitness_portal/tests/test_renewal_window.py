@@ -96,6 +96,15 @@ class TestRenewalWindow(TransactionCase):
         self.assertEqual(st['state'], 'renewable')
         self.assertFalse(st['continue_from'], 'an ended plan restarts today')
 
+    def test_a_paused_membership_is_held(self):
+        """Paused is hers: not 'never held', so the shop does not sell it again."""
+        p = self._student()
+        so = self._membership(p, 10)
+        so.subscription_state = '4_paused'
+        self.assertEqual(p._fitness_renewal_state(self.plan)['state'], 'active')
+        so.next_invoice_date = self.today + timedelta(days=2)
+        self.assertEqual(p._fitness_renewal_state(self.plan)['state'], 'renewable')
+
     def test_never_held_is_an_ordinary_purchase(self):
         self.assertEqual(self._student()._fitness_renewal_state(self.plan)['state'], 'none')
 

@@ -5280,3 +5280,9 @@ msgid ""
 msgstr ""
 "%(name)s sigue en curso hasta el %(end)s. Se puede renovar a partir del "
 "%(opens)s, cuando le llega el aviso de renovación. No se ha cobrado nada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Renew"
+msgstr "Renovar"

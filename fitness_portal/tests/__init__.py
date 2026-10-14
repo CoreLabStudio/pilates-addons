@@ -73,3 +73,4 @@ from . import test_booking_form_without_sales
 from . import test_decline_tells_the_truth
 from . import test_renew_cash_moves_once
 from . import test_renewal_window
+from . import test_shop_renew

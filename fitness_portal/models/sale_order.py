@@ -327,6 +327,12 @@ class SaleOrder(models.Model):
                 "but unpaid - the money was taken, the entry is not made",
                 self.company_id.name, invoice.name)
             return invoice
+        # The cash approval reaches here twice for the same invoice (once
+        # through fitness_invoice_cash_sale, once afterwards); the second time
+        # there is nothing left to pay, and Odoo refused it with an ERROR line
+        # in the log on every cash approval. Paid is paid: nothing to do.
+        if invoice.sudo().payment_state in ('paid', 'in_payment'):
+            return invoice
         try:
             self.env['account.payment.register'].sudo().with_context(
                 active_model='account.move', active_ids=invoice.ids,

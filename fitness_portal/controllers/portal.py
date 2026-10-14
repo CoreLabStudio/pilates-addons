@@ -1620,29 +1620,20 @@ class FitnessStudentPortal(http.Controller):
             if disc != 'any':
                 chips.append({'key': disc, 'label': self._discipline_label(disc)})
 
-        # D6: find which product.templates the student already has active,
-        # so the template can show a badge and disable the Buy button.
+        # D6: which products she already holds. Read from the one renewal
+        # rule the desk and the reminder use: held and running outside the
+        # renewal window -> Active (badge, button disabled); inside it, or
+        # ended -> Renew; never held -> Buy.
         active_product_tmpl_ids = set()
-        if active_tab == 'subscriptions':
-            active_subs = request.env['sale.order'].sudo().search([
-                ('partner_id', '=', partner.id),
-                ('is_subscription', '=', True),
-                ('subscription_state', '=', '3_progress'),
-            ])
-            for sub in active_subs:
-                product = sub.fitness_subscription_product_id
-                if product:
-                    active_product_tmpl_ids.add(product.product_tmpl_id.id)
-        else:
-            # The shared spendable rule. This read had no order-state
-            # filter, so a pack on a cancelled order was tagged Active and
-            # its Buy button disabled - she could neither use it nor buy it
-            # again.
-            SOL = request.env['sale.order.line'].sudo()
-            active_lines = SOL.search(
-                SOL._fitness_spendable_domain(partner=partner))
-            for line in active_lines:
-                active_product_tmpl_ids.add(line.product_id.product_tmpl_id.id)
+        renewable_product_tmpl_ids = set()
+        for prod in products:
+            if not (prod.fitness_is_package or prod.fitness_is_subscription_plan):
+                continue
+            renewal = partner._fitness_renewal_state(prod)['state']
+            if renewal == 'active':
+                active_product_tmpl_ids.add(prod.id)
+            elif renewal == 'renewable':
+                renewable_product_tmpl_ids.add(prod.id)
 
         full_name = partner.name or ''
         student_name = full_name.split()[0] if full_name else full_name
@@ -1674,6 +1665,8 @@ class FitnessStudentPortal(http.Controller):
             'products':                 products,
             'pkg_meta':                 pkg_meta,
             'active_product_tmpl_ids':  active_product_tmpl_ids,
+            'renewable_product_tmpl_ids': renewable_product_tmpl_ids,
+            'lbl_renew':                _('Renew'),
             'contact_only_ids':         contact_only_ids,
             'free_ids':                 free_ids,
             'claimed_free_ids':         claimed_ids,
@@ -1926,6 +1919,9 @@ class FitnessStudentPortal(http.Controller):
             }
 
         full_name = partner.name or ''
+        can_renew = bool(
+            (product.fitness_is_package or product.fitness_is_subscription_plan)
+            and partner._fitness_renewal_state(product)['state'] == 'renewable')
         return request.render('fitness_portal.portal_package_detail', dict(held_extra, **{
             'product':         product,
             'meta':            meta,
@@ -1966,6 +1962,8 @@ class FitnessStudentPortal(http.Controller):
             'student_name':    full_name.split()[0] if full_name else '',
             'primary_credit':  self._primary_credit(partner.id),
             'active_info':     active_info,
+            'can_renew':       can_renew,
+            'lbl_renew':       _('Renew'),
             'lbl_status':      _('Status'),
             'lbl_active':      _('Active'),
             'lbl_purchased':   _('Purchased'),
@@ -2123,6 +2121,13 @@ class FitnessStudentPortal(http.Controller):
         # product, because the answer is different per student.
         if self._hidden_from_shop(partner, product):
             return request.redirect('/my/packages')
+        # A plan she holds and that is still running outside the renewal
+        # window is not sold to her again: the card says Active and has no
+        # button, and a kept link or a typed URL must not get round that.
+        # Inside the window, or once it has ended, this is a renewal and the
+        # normal purchase goes ahead.
+        if partner._fitness_renewal_state(product)['state'] == 'active':
+            return request.redirect('/my/packages/%d' % product.id)
 
         # Determine whether any enabled/test online payment provider is configured.
         online_providers = request.env['payment.provider'].sudo().search([
