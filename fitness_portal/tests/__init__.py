@@ -71,3 +71,4 @@ from . import test_fixed_class_only_future
 from . import test_fixed_class_after_payment
 from . import test_booking_form_without_sales
 from . import test_decline_tells_the_truth
+from . import test_renew_cash_moves_once
