@@ -1258,6 +1258,29 @@ class FitnessTrialRequest(models.Model):
         self._notify_declined(reason)
         return True
 
+    def _trial_spent(self):
+        """Whether she has already had what this request asks for.
+
+        The one-trial rule says no ('used' or 'taken') and she holds no
+        unspent trial credit for it. Then declining must not tell her she
+        can ask again: she would be refused again.
+        """
+        self.ensure_one()
+        # A scheduled request's own booking is what holds her trial, and
+        # declining cancels it and gives the credit back (_decline). Asked
+        # before that - by the dialog - it would read as spent, and the
+        # manager was told "already had their trial" while the student was
+        # rightly told her free class has not been used.
+        if self._find_booking().filtered(lambda b: b.state == 'booked'):
+            return False
+        partner = self.partner_id or self._match_partner()
+        product = self._trial_product()
+        if not partner or not product:
+            return False
+        if self._existing_trial_credit(partner, product):
+            return False
+        return self._free_trial_refusal(partner, product) in ('used', 'taken')
+
     def _notify_declined(self, reason):
         """In-app and push, in the student's own language.
 
@@ -1277,7 +1300,33 @@ class FitnessTrialRequest(models.Model):
             # student is notified in English whatever they read the app in.
             lang_env = self.with_context(lang=user.lang or self.lang or 'es_ES')
             title = lang_env.env._("About your trial class request")
-            if reason:
+            # "Your free class has not been used" is only true for somebody
+            # who may still have one. A student refused by the one-trial rule
+            # - the case approval now sends to this button - was told to ask
+            # again for a trial she would be refused again.
+            #
+            # Somebody who has had her trial books with a pack or a membership,
+            # which she buys herself in the Shop: the bell says so and opens
+            # it, rather than sending her to message the studio (which could
+            # only tell her the same) or to the trial page (which would refuse
+            # her again).
+            url = '/my/trial'
+            if self._trial_spent():
+                url = '/my/packages'
+                if reason:
+                    body = lang_env.env._(
+                        "We'd love to see you in class again! Your free trial "
+                        "has already been used, so this request can't be "
+                        "accepted. Note from the studio: %(why)s You can buy "
+                        "a class pack or membership in the Shop and book "
+                        "whenever suits you.", why=reason.strip())
+                else:
+                    body = lang_env.env._(
+                        "We'd love to see you in class again! Your free trial "
+                        "has already been used, so this request can't be "
+                        "accepted. You can buy a class pack or membership in "
+                        "the Shop and book whenever suits you.")
+            elif reason:
                 body = lang_env.env._(
                     "The studio could not take this one: %(why)s You are still "
                     "welcome to ask for another - your free class has not been "
@@ -1287,7 +1336,7 @@ class FitnessTrialRequest(models.Model):
                     "The studio could not take this one. You are still welcome "
                     "to ask for another - your free class has not been used.")
             self.env['fitness.notification'].sudo()._create_for_user(
-                user.id, 'trial_declined', title, body, action_url='/my/trial')
+                user.id, 'trial_declined', title, body, action_url=url)
         except Exception:
             _logger.exception(
                 "[TRIAL] Could not notify partner %s that request %s was declined",

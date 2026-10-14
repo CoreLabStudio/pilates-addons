@@ -13,9 +13,15 @@ class FitnessBookingPackage(models.Model):
     # used to list every student's packs, which is how a manager came to
     # book one student on another's credit. The constraint refuses that
     # whatever is sent; this keeps the form from offering it at all.
+    #
+    # compute_sudo: a manager without Sales rights may not read order lines,
+    # and computing this as her failed the whole booking form ("Failed to
+    # write field fitness_choosable_line_ids") for any student who held
+    # credit. Computed as superuser it gives her the ids the dropdown filters
+    # on and nothing more: reading the lines themselves is still refused.
     fitness_choosable_line_ids = fields.Many2many(
         'sale.order.line', compute='_compute_fitness_choosable_line_ids',
-        string='Her spendable packs')
+        compute_sudo=True, string='Her spendable packs')
 
     @api.depends('student_id')
     def _compute_fitness_choosable_line_ids(self):

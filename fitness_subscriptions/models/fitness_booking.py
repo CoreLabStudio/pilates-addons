@@ -19,9 +19,15 @@ class FitnessBookingSubscription(models.Model):
     # What the booking form's "Subscription Used" may offer: her own live
     # memberships, the same ones the payment engine considers. It used to
     # list every member's. See _check_credit_is_her_own.
+    #
+    # compute_sudo: a manager without Sales rights may not read orders, and
+    # computing this as her failed the whole booking form ("Failed to write
+    # field fitness_choosable_subscription_ids") on every booking - the same
+    # failure as fitness_choosable_line_ids. Superuser gives her the ids the
+    # dropdown filters on and nothing more.
     fitness_choosable_subscription_ids = fields.Many2many(
         'sale.order', compute='_compute_fitness_choosable_subscription_ids',
-        string='Her live memberships')
+        compute_sudo=True, string='Her live memberships')
 
     @api.model
     def _fitness_live_membership_domain(self, student_id):

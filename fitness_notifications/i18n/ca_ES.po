@@ -390,3 +390,9 @@ msgstr "%(student)s té plaça a la teva classe %(cls)s el %(when)s."
 #: model:ir.model.fields.selection,name:fitness_notifications.selection__fitness_notification__notification_type__student_booked
 msgid "Student Booked Into Your Class"
 msgstr "Alumna reservada a la teva classe"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "Choose the day and time of your weekly class and we will book it for you every week."
+msgstr "Tria el dia i l'hora de la teva classe setmanal i te la reservarem cada setmana."

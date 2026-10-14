@@ -1398,6 +1398,15 @@ class FitnessStudentPortal(http.Controller):
 
         _ = request.env._
         partner = request.env.user.partner_id
+        # Back from a card payment that went through, with a fixed-class
+        # membership still owed its weekly hours: straight on to choosing
+        # them, as a signed checkout already does. Every card payment lands
+        # here, and this page never asked - so card buyers paid for reserved
+        # classes nobody booked.
+        if (kw.get('from_payment')
+                and self._clase_fija_subs_needing_slots(partner)
+                and self._recent_payment_state(partner) == 'done'):
+            return request.redirect('/my/fixed-class')
         # Classes is the first tab, so it is also what the bare URL shows.
         # 'packages' has to be matched explicitly now that it is no longer the
         # fallback - ?tab=packages was already a live link before this change.
@@ -2699,6 +2708,11 @@ class FitnessStudentPortal(http.Controller):
                 ('start', '>=', fields.Datetime.to_string(period_start_dt)),
                 ('start', '<', fields.Datetime.to_string(period_end_dt)),
             ], order='start asc')
+            # Only the classes still to come, as placement books them: a
+            # class that is already over is never booked for her, so its
+            # being full once must not refuse her the hour, nor show her a
+            # past date as the reason.
+            occurrences = occurrences.filtered(lambda e: e.start > now)
             full = occurrences.filtered(
                 lambda e: e.capacity and e.booked_seats >= e.capacity)
             local = pytz.utc.localize(anchor.start).astimezone(tz)

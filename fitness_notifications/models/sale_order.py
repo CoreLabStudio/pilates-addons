@@ -74,12 +74,24 @@ class SaleOrderNotifications(models.Model):
                     for l in sub_lines) if n]
                 plan_name = ', '.join(names) if names else 'your membership'
                 tr = order.env(context=dict(order.env.context, lang=lang))._
+                # A fixed-class membership books nothing until her weekly
+                # hours are chosen. Paid by card, or approved at the desk
+                # while she is not even on the page, nothing ever sent her
+                # to choose them; this bell is the one message every path
+                # sends, so it takes her there.
+                if order.fitness_missing_fixed_slots():
+                    body = tr('Choose the day and time of your weekly class '
+                              'and we will book it for you every week.')
+                    url = '/my/fixed-class'
+                else:
+                    body = tr('You can book your classes now.')
+                    url = '/my/subscription'
                 self.env['fitness.notification'].sudo()._create_for_user(
                     user.id,
                     'purchase_completed',
                     tr('%s is active', plan_name),
-                    body=tr('You can book your classes now.'),
-                    action_url='/my/subscription',
+                    body=body,
+                    action_url=url,
                 )
                 continue
             count = sum(int(l.fitness_remaining_classes or 0) for l in lines)

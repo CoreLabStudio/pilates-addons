@@ -26,6 +26,13 @@ class FitnessTrialDeclineWizard(models.TransientModel):
         'fitness.trial.request', string='Request', required=True,
         ondelete='cascade')
     student_name = fields.Char(related='request_id.name', readonly=True)
+    # Picks the dialog's second sentence. "Their free class is not used up"
+    # was said of everybody, the students the one-trial rule refuses included.
+    trial_spent = fields.Boolean(compute='_compute_trial_spent')
+
+    def _compute_trial_spent(self):
+        for wiz in self:
+            wiz.trial_spent = bool(wiz.request_id) and wiz.request_id.sudo()._trial_spent()
     reason = fields.Text(
         string='Reason',
         help="Optional. Goes to the student, in the email and in the app. "
