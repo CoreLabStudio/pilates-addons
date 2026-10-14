@@ -18,7 +18,10 @@ from .studio_time import STUDIO_TZ
 def studio_lang(env):
     """The studio's language: the company's, if it is installed."""
     installed = dict(env['res.lang'].get_installed())
-    lang = env.company.partner_id.lang
+    # As superuser: the company's contact is not readable by a portal or
+    # public visitor, and the trial form and the signup pages ask this for
+    # exactly those visitors. Only the language code is read.
+    lang = env.company.sudo().partner_id.lang
     if lang in installed:
         return lang
     # The source language: every msgid is written in it, so a message in it
