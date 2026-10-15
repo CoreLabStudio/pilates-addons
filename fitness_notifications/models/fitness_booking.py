@@ -551,8 +551,13 @@ class FitnessBookingNotifications(models.Model):
 
     @api.model
     def _cron_send_billing_reminders(self):
-        """Notify subscribers 3 days before their next renewal/billing date."""
-        LEAD_DAYS = 3
+        """Notify subscribers N days before their next renewal/billing date.
+
+        N is the studio's renewal window (fitness.renewal_window_days,
+        default 3): the reminder goes out on the day the shop starts
+        offering Renew and the desk may take the renewal, never before.
+        """
+        LEAD_DAYS = self.env['sale.order']._fitness_renewal_window_days()
         today = fields.Date.context_today(self)
         target_date = today + timedelta(days=LEAD_DAYS)
 

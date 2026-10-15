@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 from odoo import api, models, fields, _
+from odoo.tools import format_date
 from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
@@ -326,6 +327,12 @@ class SaleOrder(models.Model):
                 "but unpaid - the money was taken, the entry is not made",
                 self.company_id.name, invoice.name)
             return invoice
+        # The cash approval reaches here twice for the same invoice (once
+        # through fitness_invoice_cash_sale, once afterwards); the second time
+        # there is nothing left to pay, and Odoo refused it with an ERROR line
+        # in the log on every cash approval. Paid is paid: nothing to do.
+        if invoice.sudo().payment_state in ('paid', 'in_payment'):
+            return invoice
         try:
             self.env['account.payment.register'].sudo().with_context(
                 active_model='account.move', active_ids=invoice.ids,
@@ -459,6 +466,17 @@ class SaleOrder(models.Model):
             raise UserError(_(
                 "%(name)s is not running, so it cannot be renewed. Reopen it "
                 "first.", name=order.name))
+        # The same rule as the student's shop: renewable from the day the
+        # renewal reminder goes out, not before. Outside it, say why and do
+        # nothing - no invoice, no payment, no date moved.
+        if not order._fitness_renewable_now():
+            raise UserError(_(
+                "%(name)s is still running until %(end)s. It can be renewed "
+                "from %(opens)s, when her renewal reminder goes out. Nothing "
+                "was charged.",
+                name=order.name,
+                end=format_date(self.env, order.next_invoice_date),
+                opens=format_date(self.env, order._fitness_renewal_opens_on())))
 
         if new_plan and new_plan.id != order.plan_id.id:
             return order._fitness_renew_cash_on_a_new_plan(new_plan)
@@ -493,8 +511,21 @@ class SaleOrder(models.Model):
         if invoice.state == 'draft':
             invoice.action_post()
         # The invoice covers the period being paid for, so it is raised first
-        # and the clock moved afterwards.
+        # and the clock moved afterwards - ONCE. Posting it already moves
+        # next_invoice_date to the day after the paid period (Odoo's
+        # account.move._post), and _update_next_invoice_date() moves it again
+        # from wherever it stands: one cash payment used to push the billing
+        # date two periods on, and the studio's override then opened the
+        # period AFTER the one just paid, so that month got no fixed classes.
+        # The override still has to run - it opens the paid period, resets the
+        # weekly counter and places her hours - so it starts from the date
+        # the renewal began with, and the date posting computed is kept.
+        paid_to = order.next_invoice_date
+        if paid_to != before:
+            order.next_invoice_date = before
         order._update_next_invoice_date()
+        if paid_to != before:
+            order.next_invoice_date = paid_to
         order.fitness_settle_invoice_in_cash(invoice)
 
         order.invalidate_recordset(['next_invoice_date'])
@@ -579,10 +610,21 @@ class SaleOrder(models.Model):
                 "The new commitment %(q)s was created but nothing could be "
                 "invoiced, so no money has been recorded.", q=quotation.name))
         invoice = invoice.sudo()
+        # Moved once, as on the same plan: posting already advances
+        # next_invoice_date past the paid period, and _update_next_invoice_date()
+        # moved it a second period from there - 195.00 paid for one quarter,
+        # two quarters credited, and the period opened was the unpaid one.
+        quotation = quotation.sudo()
+        before = quotation.next_invoice_date
         if invoice.state == 'draft':
             invoice.action_post()
-        quotation.sudo()._update_next_invoice_date()
-        quotation.sudo().fitness_settle_invoice_in_cash(invoice)
+        paid_to = quotation.next_invoice_date
+        if paid_to != before:
+            quotation.next_invoice_date = before
+        quotation._update_next_invoice_date()
+        if paid_to != before:
+            quotation.next_invoice_date = paid_to
+        quotation.fitness_settle_invoice_in_cash(invoice)
 
         _logger.info(
             "[RENEWAL] %s renewed in cash onto %s as %s by %s (invoice %s)",

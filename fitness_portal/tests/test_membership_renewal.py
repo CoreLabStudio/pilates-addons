@@ -10,6 +10,9 @@ nothing was going to bill them either.
 This is the desk half - the studio takes the money in person and the
 membership continues on the plan she is already on.
 """
+from datetime import timedelta
+
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
@@ -163,6 +166,7 @@ class TestMembershipCashRenewal(TransactionCase):
     def test_moving_to_a_quarter_starts_a_new_commitment(self):
         quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
         sub = self._invoiced_membership()
+        sub.next_invoice_date = fields.Date.today() + timedelta(days=2)  # inside the renewal window
 
         sub.with_user(self.manager).action_fitness_renew_cash(new_plan=quarter)
 
@@ -180,6 +184,7 @@ class TestMembershipCashRenewal(TransactionCase):
         fault, on the renewal path this time."""
         quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
         sub = self._invoiced_membership()
+        sub.next_invoice_date = fields.Date.today() + timedelta(days=2)  # inside the renewal window
 
         sub.with_user(self.manager).action_fitness_renew_cash(new_plan=quarter)
 
@@ -196,6 +201,7 @@ class TestMembershipCashRenewal(TransactionCase):
     def test_renewing_on_the_same_plan_is_not_a_plan_change(self):
         """Passing the plan she is already on must renew in place."""
         sub = self._invoiced_membership()
+        sub.next_invoice_date = fields.Date.today() + timedelta(days=2)  # inside the renewal window
         before = self.env["sale.order"].search_count([
             ("partner_id", "=", self.partner.id), ("is_subscription", "=", True)])
 
@@ -208,6 +214,20 @@ class TestMembershipCashRenewal(TransactionCase):
             after, before,
             "renewing on the same plan raised a second contract")
 
+
+    def test_a_plan_change_outside_the_window_is_refused(self):
+        """The renewal window applies to a change of plan too: a month
+        still ahead, nothing is raised, nothing is charged."""
+        quarter = self.env.ref("fitness_subscriptions.subscription_plan_quarter")
+        sub = self._invoiced_membership()
+        before = sub.next_invoice_date
+        with self.assertRaises(UserError):
+            sub.with_user(self.manager).action_fitness_renew_cash(new_plan=quarter)
+        self.assertFalse(self.env["sale.order"].search([
+            ("partner_id", "=", self.partner.id), ("plan_id", "=", quarter.id)]),
+            "a quarterly order was raised outside the window")
+        sub.invalidate_recordset()
+        self.assertEqual(sub.next_invoice_date, before)
 
     def test_a_manager_can_renew_without_sales_rights(self):
         """The reads behind a renewal must not need Sales access.

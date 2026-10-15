@@ -1819,6 +1819,14 @@
                                                                 <button type="submit" class="mv-btn-book" t-out="lbl_book_free"/>
                                                             </form>
                                                         </t>
+                                                        <!-- A plan she bought before, inside the renewal
+                                                             window or ended: the same checkout, labelled
+                                                             Renew. -->
+                                                        <t t-elif="product.id in renewable_product_tmpl_ids">
+                                                            <a t-attf-href="/my/packages/#{product.id}/checkout"
+                                                               class="mv-btn-book mv-btn-renew" style="text-decoration:none;"
+                                                               t-out="lbl_renew"/>
+                                                        </t>
                                                         <t t-else="">
                                                             <a t-attf-href="/my/packages/#{product.id}/checkout"
                                                                class="mv-btn-book" style="text-decoration:none;">Buy</a>
@@ -1941,6 +1949,12 @@
                                    style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:14px;"
                                    t-out="lbl_book_class"/>
                             </t>
+                            <t t-if="can_renew">
+                                <a t-attf-href="/my/packages/#{product.id}/checkout"
+                                   class="mv-pkg-buy-btn mv-btn-renew"
+                                   style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:14px;"
+                                   t-out="lbl_renew"/>
+                            </t>
                         </div>
                     </t>
                     <t t-else="">
@@ -1989,6 +2003,12 @@
                                 <p class="mv-free-terms-note">
                                     <t t-out="lbl_free_terms"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}"><t t-out="terms_link_label or 'Terms and Conditions'"/></a>
                                 </p>
+                            </t>
+                            <t t-elif="can_renew">
+                                <a t-attf-href="/my/packages/#{product.id}/checkout"
+                                   class="mv-pkg-buy-btn mv-btn-renew"
+                                   style="display:block;text-align:center;text-decoration:none;line-height:1.4;"
+                                   t-out="lbl_renew"/>
                             </t>
                             <t t-else="">
                                 <a t-attf-href="/my/packages/#{product.id}/checkout"
