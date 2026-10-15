@@ -4,3 +4,4 @@ from . import sale_order
 from . import fitness_booking
 from . import fitness_class_schedule
 from . import renewal
+from . import account_move

@@ -459,19 +459,25 @@ class SaleOrder(models.Model):
         for sub in self:
             if not sub.fitness_subscription_product_id:
                 continue
-            sub.fitness_subscription_used_classes = 0
-            # fitness_floating_credits is NOT reset — credits carry forward
-            # across billing periods until consumed by an actual booking.
-            # fitness_period_start_date = start of the NEW period (old next_invoice_date)
-            sub.fitness_period_start_date = old_invoice_dates.get(sub.id)
-            _logger.info(
-                "[SUBSCRIPTION] %s renewed: reporting_counter=0 "
-                "floating_credits=%d (carried forward) "
-                "period_start=%s period_end=%s",
-                sub.name, sub.fitness_floating_credits,
-                sub.fitness_period_start_date, sub.next_invoice_date,
-            )
+            sub._fitness_open_period(old_invoice_dates.get(sub.id))
             sub._auto_place_clase_fija()
+
+    def _fitness_open_period(self, period_start):
+        """The studio's side of a new billing period: it starts on
+        period_start (the old next_invoice_date), the weekly counter starts
+        again, floating credits carry forward. Placement is the caller's."""
+        self.ensure_one()
+        self.fitness_subscription_used_classes = 0
+        # fitness_floating_credits is NOT reset - credits carry forward
+        # across billing periods until consumed by an actual booking.
+        self.fitness_period_start_date = period_start
+        _logger.info(
+            "[SUBSCRIPTION] %s renewed: reporting_counter=0 "
+            "floating_credits=%d (carried forward) "
+            "period_start=%s period_end=%s",
+            self.name, self.fitness_floating_credits,
+            self.fitness_period_start_date, self.next_invoice_date,
+        )
 
     # ─── Clase Fija auto-placement (multi-slot) ──────────────────────────────
 
