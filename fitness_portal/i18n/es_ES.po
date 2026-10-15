@@ -5570,3 +5570,9 @@ msgstr "Cuota terminada"
 #: model:sale.order.close.reason,name:fitness_portal.close_reason_membership_ended
 msgid "Membership ended (last paid day passed)"
 msgstr "Cuota terminada (pasó el último día pagado)"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_sale_order__fitness_cash_plan_ended_on
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
+msgid "Her plan ended"
+msgstr "Terminó su cuota"

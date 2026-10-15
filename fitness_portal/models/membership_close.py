@@ -220,3 +220,37 @@ class SaleOrderClose(models.Model):
         _logger.info("[CLOSE] closed %d membership(s), told %d student(s)",
                      len(to_close), told)
         return to_close
+
+
+class SaleOrderCashPlanEnded(models.Model):
+    """The cash list says when her plan ended, so the desk approves the
+    request of a student whose membership the daily job has just closed
+    first - she cannot book until it is approved. Computed, not stored."""
+    _inherit = 'sale.order'
+
+    fitness_cash_plan_ended_on = fields.Date(
+        "Her plan ended", compute='_compute_fitness_cash_plan_ended_on',
+        help="The last paid day of her closed membership for this plan, when "
+             "it has closed and nothing of the same plan is running.")
+
+    def _compute_fitness_cash_plan_ended_on(self):
+        today = studio_today()
+        SO = self.env['sale.order'].sudo()
+        for order in self:
+            order.fitness_cash_plan_ended_on = False
+            tmpls = order.sudo().order_line.product_id.product_tmpl_id.filtered(
+                'fitness_is_subscription_plan')
+            if len(tmpls) != 1 or not order.partner_id:
+                continue
+            mine = SO.search([
+                ('partner_id', '=', order.partner_id.id),
+                ('is_subscription', '=', True),
+                ('id', '!=', order._origin.id or 0),
+                ('order_line.product_id.product_tmpl_id', '=', tmpls.id),
+                ('subscription_state', 'in', ('3_progress', '4_paused', '6_churn')),
+            ])
+            if mine.filtered(lambda s: s.subscription_state != '6_churn'):
+                continue
+            ended = mine.filtered(lambda s: s.end_date and s.end_date < today)
+            if ended:
+                order.fitness_cash_plan_ended_on = max(ended.mapped('end_date'))
