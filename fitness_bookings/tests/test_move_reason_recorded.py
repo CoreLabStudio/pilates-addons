@@ -113,7 +113,10 @@ class TestMoveReasonRecorded(TransactionCase):
         })
 
     def _move(self, booking, target, reason=None):
-        wizard = self.env["fitness.booking.reassign.wizard"].sudo().create({
+        # The note is written in the language of whoever moves her; these
+        # assertions read English, so the move is made in English.
+        wizard = self.env["fitness.booking.reassign.wizard"].sudo().with_context(
+            lang="en_US").create({
             "booking_id": booking.id,
             "target_event_id": target.id,
             "reason": reason or False,

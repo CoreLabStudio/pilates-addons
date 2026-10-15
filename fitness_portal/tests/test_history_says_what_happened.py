@@ -41,13 +41,17 @@ class TestHistorySaysWhatHappened(TranslationCheck, HttpCase):
 
     def setUp(self):
         super().setUp()
+        # These assertions read English. With es/ca installed the studio's
+        # language - which names classes and writes staff notes - is the
+        # company's, so it is pinned rather than assumed.
+        self.env.company.partner_id.lang = 'en_US'
         self.window = self.env['fitness.booking'].sudo(
             )._cancellation_window_hours()
         self.student = self.env['res.users'].with_context(
             no_reset_password=True).create({
                 'name': 'History Student', 'login': 'history.student',
                 'email': 'history.student@example.invalid',
-                'password': 'history-pass-4471',
+                'password': 'history-pass-4471', 'lang': 'en_US',
                 'tz': 'Europe/Madrid',
                 'group_ids': [(6, 0, [
                     self.env.ref('base.group_portal').id,

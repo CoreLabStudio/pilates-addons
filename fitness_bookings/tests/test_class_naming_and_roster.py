@@ -50,6 +50,10 @@ class TestClassNaming(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # These assertions read English. With es/ca installed the studio's
+        # language - which names classes and writes staff notes - is the
+        # company's, so it is pinned rather than assumed.
+        cls.env.company.partner_id.lang = 'en_US'
         cls.room = cls.env["fitness.classroom"].create({
             "name": "Room (naming test)", "classroom_type": "barre", "capacity": 7})
         cls.ctype = cls.env["fitness.class.type"].create({
