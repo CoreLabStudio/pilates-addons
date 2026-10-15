@@ -467,6 +467,11 @@ class SaleOrder(models.Model):
             raise UserError(_(
                 "%(name)s is not a membership, so there is nothing to renew.",
                 name=order.name))
+        # Closed - the daily job closes a plan the day after its last paid
+        # day - so there is no period left to extend: she comes back on a
+        # new membership from today, as the shop sells it to her.
+        if order.subscription_state == '6_churn':
+            return order._fitness_renew_cash_after_close(new_plan)
         if order.subscription_state != '3_progress':
             raise UserError(_(
                 "%(name)s is not running, so it cannot be renewed. Reopen it "
@@ -609,27 +614,8 @@ class SaleOrder(models.Model):
         quotation.write({'order_line': [(5, 0, 0)] + [(0, 0, v) for v in lines]})
         quotation.action_confirm()
 
-        invoice = quotation.sudo()._create_invoices()
-        if not invoice:
-            raise UserError(_(
-                "The new commitment %(q)s was created but nothing could be "
-                "invoiced, so no money has been recorded.", q=quotation.name))
-        invoice = invoice.sudo()
-        # Moved once, as on the same plan: posting already advances
-        # next_invoice_date past the paid period, and _update_next_invoice_date()
-        # moved it a second period from there - 195.00 paid for one quarter,
-        # two quarters credited, and the period opened was the unpaid one.
         quotation = quotation.sudo()
-        before = quotation.next_invoice_date
-        if invoice.state == 'draft':
-            invoice.action_post()
-        paid_to = quotation.next_invoice_date
-        if paid_to != before:
-            quotation.next_invoice_date = before
-        quotation._update_next_invoice_date()
-        if paid_to != before:
-            quotation.next_invoice_date = paid_to
-        quotation.fitness_settle_invoice_in_cash(invoice)
+        invoice = quotation._fitness_take_first_period_in_cash()
 
         _logger.info(
             "[RENEWAL] %s renewed in cash onto %s as %s by %s (invoice %s)",
@@ -647,6 +633,89 @@ class SaleOrder(models.Model):
                     "sent to her.",
                     who=self.partner_id.name, plan=new_plan.display_name,
                     q=quotation.name, inv=invoice.name),
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
+    def _fitness_take_first_period_in_cash(self):
+        """Invoice a just-confirmed membership's first period, settle it in cash."""
+        self.ensure_one()
+        order = self.sudo()
+        invoice = order._create_invoices()
+        if not invoice:
+            raise UserError(_(
+                "The new commitment %(q)s was created but nothing could be "
+                "invoiced, so no money has been recorded.", q=order.name))
+        invoice = invoice.sudo()
+        # Moved once, as on the same plan: posting already advances
+        # next_invoice_date past the paid period, and _update_next_invoice_date()
+        # moved it a second period from there - 195.00 paid for one quarter,
+        # two quarters credited, and the period opened was the unpaid one.
+        before = order.next_invoice_date
+        if invoice.state == 'draft':
+            invoice.action_post()
+        paid_to = order.next_invoice_date
+        if paid_to != before:
+            order.next_invoice_date = before
+        order._update_next_invoice_date()
+        if paid_to != before:
+            order.next_invoice_date = paid_to
+        order.fitness_settle_invoice_in_cash(invoice)
+        return invoice
+
+    def _fitness_renew_cash_after_close(self, new_plan=None):
+        """She pays at the desk for a plan that has already closed.
+
+        A new membership of the same product, from today, priced and built
+        exactly as the shop builds hers (fitness_order_line_vals at the
+        product's effective price) - so the desk and the shop cannot come to
+        charge a returning student differently. A fixed-class member then has
+        no hours on it, and the purchase bell takes her to choose them.
+        """
+        self.ensure_one()
+        self = self.sudo()
+        variant = self.fitness_subscription_product_id
+        if not variant:
+            raise UserError(_(
+                "%(name)s carries no membership product, so there is nothing "
+                "to renew.", name=self.name))
+        product = variant.product_tmpl_id
+        state = self.partner_id._fitness_renewal_state(product)
+        if state['order'] and state['order'] != self and \
+                state['order'].subscription_state in ('3_progress', '4_paused'):
+            raise UserError(_(
+                "%(who)s already has %(other)s running on this plan. Renew "
+                "that one instead.",
+                who=self.partner_id.name, other=state['order'].name))
+        plan = new_plan or self.plan_id
+        order = self.env['sale.order'].sudo().create({
+            'partner_id': self.partner_id.id,
+            'plan_id': plan.id,
+            'fitness_payment_method': 'cash',
+        })
+        # Plan first, then the lines - never together (see above).
+        order.flush_recordset()
+        lines = product.sudo().fitness_order_line_vals(
+            self.partner_id, plan=plan,
+            period_price=product.fitness_effective_price())
+        order.write({'order_line': [(0, 0, v) for v in lines]})
+        order.action_confirm()
+        invoice = order._fitness_take_first_period_in_cash()
+        _logger.info(
+            "[RENEWAL] %s closed; renewed in cash as %s by %s (invoice %s)",
+            self.name, order.name, self.env.user.login, invoice.name)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'sticky': False,
+                'title': _("Membership renewed"),
+                'message': _(
+                    "%(name)s had closed, so %(who)s starts a new membership "
+                    "today, %(new)s. Invoice %(inv)s was sent to her.",
+                    name=self.name, who=self.partner_id.name,
+                    new=order.name, inv=invoice.name),
                 'next': {'type': 'ir.actions.act_window_close'},
             },
         }

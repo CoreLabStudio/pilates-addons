@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        The close reason the daily job writes, so a closed plan says why and
+        the job can find the plans it closed when it comes back to tell a
+        student whose renewal request was declined or never paid.
+    -->
+    <data noupdate="1">
+        <record id="close_reason_membership_ended" model="sale.order.close.reason">
+            <field name="name">Membership ended (last paid day passed)</field>
+            <field name="visible_in_portal" eval="False"/>
+            <field name="is_protected" eval="True"/>
+        </record>
+    </data>
+    <!--
+        Daily, beside Odoo's weekly expiry job (which stays as it is: after
+        this one runs it finds nothing left to close). See
+        models/membership_close.py for what closes and when she is told.
+    -->
+    <data noupdate="1">
+        <record id="ir_cron_fitness_close_ended_memberships" model="ir.cron">
+            <field name="name">Fitness: close ended memberships and tell the student</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fitness_close_ended_memberships()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

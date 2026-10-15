@@ -5518,3 +5518,55 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_make_student_wizard_form
 msgid "Person"
 msgstr "Persona"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/membership_close.py:0
+msgid "Your membership has ended"
+msgstr "Tu cuota ha terminado"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/membership_close.py:0
+msgid "Your %(plan)s membership ended on %(date)s. Renew it in the app to keep booking your classes."
+msgstr "Tu cuota %(plan)s terminó el %(date)s. Renuévala en la app para seguir reservando tus clases."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/membership_close.py:0
+msgid "Closed: the membership ended on %(date)s, its last paid day."
+msgstr "Cerrada: la cuota terminó el %(date)s, su último día pagado."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/membership_close.py:0
+msgid "%(count)s class(es) booked after that day were left booked: %(classes)s. Cancel them if she does not renew."
+msgstr "Se han dejado reservadas %(count)s clase(s) posteriores a ese día: %(classes)s. Cancélalas si no renueva."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s carries no membership product, so there is nothing to renew."
+msgstr "%(name)s no lleva ningún producto de cuota, así que no hay nada que renovar."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(who)s already has %(other)s running on this plan. Renew that one instead."
+msgstr "%(who)s ya tiene %(other)s en curso con este plan. Renueva esa."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/sale_order.py:0
+msgid "%(name)s had closed, so %(who)s starts a new membership today, %(new)s. Invoice %(inv)s was sent to her."
+msgstr "%(name)s estaba cerrada, así que %(who)s empieza hoy una cuota nueva, %(new)s. Se le ha enviado la factura %(inv)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_notification__notification_type__membership_expired
+msgid "Membership Expired"
+msgstr "Cuota terminada"
+
+#. module: fitness_portal
+#: model:sale.order.close.reason,name:fitness_portal.close_reason_membership_ended
+msgid "Membership ended (last paid day passed)"
+msgstr "Cuota terminada (pasó el último día pagado)"

@@ -79,3 +79,4 @@ from . import test_private_class_wording
 from . import test_membership_card_form
 from . import test_madrid_time
 from . import test_recipient_language
+from . import test_close_ended_memberships
