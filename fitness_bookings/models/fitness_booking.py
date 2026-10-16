@@ -306,6 +306,26 @@ class FitnessBooking(models.Model):
         event = self.env['calendar.event'].browse(vals['calendar_event_id'])
         student = self.env['res.partner'].browse(vals['student_id'])
 
+        # ── 0. A private class is booked by the studio, never by her ─────────
+        #
+        # The studio's rule (15 Oct): a private class is agreed with the
+        # student and then booked by the studio, however she came to hold
+        # the credit - a gift, a purchase in the app, or cash. Her private
+        # credit covered any private class open on the timetable, so a
+        # student holding one could take a class arranged for somebody else.
+        #
+        # Here rather than in the portal, because every way of booking ends
+        # in create(): the timetable, the class page, the booking route, a
+        # typed URL and a direct RPC call alike. The studio's own paths are
+        # internal users (Add a student, the booking form) or run as
+        # superuser (the gift, a trial approval, placement by the cron), and
+        # none of them is a portal user, so none is touched.
+        if (not self.env.su and self.env.user.share
+                and event.exists() and event._fitness_is_private()):
+            raise UserError(self.env._(
+                "Private classes are arranged by the studio. The studio will "
+                "contact you."))
+
         now = fields.Datetime.now()
         class_start = event.start
         time_until = class_start - now

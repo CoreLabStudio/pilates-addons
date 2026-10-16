@@ -1127,6 +1127,13 @@
                             <button type="submit" class="mv-btn-book-lg">Reserve My Spot</button>
                         </form>
                     </t>
+                    <!-- A private class is the studio's to book: no button,
+                         and the reason, in her language. -->
+                    <t t-elif="book_state == 'private'">
+                        <div class="mv-class-soon">
+                            <span class="mv-class-soon-sub" t-out="lbl_private_by_studio"/>
+                        </div>
+                    </t>
                     <t t-elif="book_state == 'full'">
                         <div class="mv-class-full">This class is full</div>
                     </t>

@@ -13,6 +13,16 @@ _logger = logging.getLogger(__name__)
 class CalendarEvent(models.Model):
     _inherit = 'calendar.event'
 
+    def _fitness_is_private(self):
+        """A private class: arranged and booked by the studio, never by her.
+
+        The class's own session type is what a credit is matched against,
+        but a class whose type is private is private too - either says so.
+        """
+        self.ensure_one()
+        return (self.session_type == 'private'
+                or self.sudo().class_type_id.session_type == 'private')
+
     booking_ids = fields.One2many(
         'fitness.booking', 'calendar_event_id',
         string="Bookings",

@@ -5286,3 +5286,9 @@ msgstr ""
 #: code:addons/fitness_portal/controllers/portal.py:0
 msgid "Renew"
 msgstr "Renovar"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+msgid "Private classes are arranged by the studio. The studio will contact you."
+msgstr "Las clases privadas las organiza el estudio. El estudio se pondrá en contacto contigo."

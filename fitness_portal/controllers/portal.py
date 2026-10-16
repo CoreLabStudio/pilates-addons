@@ -560,11 +560,15 @@ class FitnessStudentPortal(http.Controller):
             ('start', '<', window_end),
         ], order='start asc')
 
+        # The studio's rule: this is the timetable everyone sees, and it
+        # shows no private classes. A private class is arranged with one
+        # student, and once the studio books her it is in her My Schedule.
         events = all_events.filtered(
             lambda e: (
                 e.id not in non_rebookable_ids
                 and self._has_seats(e)
                 and self._discipline_matches(e, eligible_types)
+                and not e._fitness_is_private()
             )
         )
 
@@ -791,8 +795,10 @@ class FitnessStudentPortal(http.Controller):
         # page would never have offered the button in the first place.
         in_window = opens_at <= now or self._trial_booking_exempt(partner, event)
 
+        is_private = event._fitness_is_private()
         can_book = (
             not existing
+            and not is_private
             and bool(eligible_types)
             and discipline_ok
             and in_window
@@ -808,6 +814,9 @@ class FitnessStudentPortal(http.Controller):
             book_state = 'booked'
         elif event.start <= now:
             book_state = 'past'
+        elif is_private:
+            # Arranged by the studio: no button, whatever she holds.
+            book_state = 'private'
         elif seats_left == 0:
             book_state = 'full'
         elif not eligible_types and self._trial_request_open(partner):
@@ -900,6 +909,8 @@ class FitnessStudentPortal(http.Controller):
             'seats_left':          seats_left,
             'seats_status_label':  seats_status_label,
             'duration_label':      duration_label,
+            'lbl_private_by_studio': _('Private classes are arranged by the studio. '
+                                       'The studio will contact you.'),
             'lbl_description':     _('Description'),
             'lbl_duration':        _('Duration'),
             'lbl_instructor':      _('Instructor'),
@@ -4193,8 +4204,11 @@ class FitnessStudentPortal(http.Controller):
         # and the only option she can act on is a form that would refuse her.
         awaiting_trial = self._trial_awaiting_studio(partner)
 
+        # No private schedules: the studio's timetable is the same for
+        # everyone, and a private class is in its student's My Schedule.
         schedules = request.env['fitness.class.schedule'].sudo().search([
             ('active', '=', True),
+            ('class_type_id.session_type', '!=', 'private'),
         ])
 
         # One batched read of upcoming occurrences for every schedule on the
