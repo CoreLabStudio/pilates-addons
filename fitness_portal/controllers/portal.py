@@ -358,6 +358,20 @@ class FitnessStudentPortal(http.Controller):
         # cannot.
         return 'pending'
 
+    def _recent_purchase_is_private(self, partner):
+        """Was what she has just paid for a private class, and nothing else?"""
+        if not partner:
+            return False
+        window = fields.Datetime.now() - timedelta(minutes=30)
+        tx = request.env['payment.transaction'].sudo().search(
+            [('partner_id', '=', partner.id),
+             ('create_date', '>=', fields.Datetime.to_string(window))],
+            order='create_date desc', limit=1)
+        lines = tx.sale_order_ids.order_line.filtered(
+            lambda l: l.product_id.fitness_is_package)
+        return bool(lines) and all(
+            l.product_id.fitness_session_type == 'private' for l in lines)
+
     def _notif_labels(self):
         """Every string the opt-in card, dialog and key-moment ask need.
 
@@ -1774,7 +1788,13 @@ class FitnessStudentPortal(http.Controller):
                 self._recent_payment_state(partner)
                 if kw.get('from_payment') else None),
             'lbl_paid_head':            _('Payment received.'),
-            'lbl_paid':                 _('Your classes are ready to book.'),
+            # A private class is booked by the studio: not "ready to book".
+            'lbl_paid':                 (
+                _('Your private class is confirmed. The studio will contact '
+                  'you to arrange the day and time.')
+                if kw.get('from_payment')
+                and self._recent_purchase_is_private(partner)
+                else _('Your classes are ready to book.')),
             'lbl_paying_head':          _('Payment in progress.'),
             'lbl_paying':               _('Your bank has not confirmed it yet. We will tell you as soon as it goes through - you do not need to pay again.'),
             'lbl_pay_failed_head':      _('That payment was not completed.'),
@@ -1922,9 +1942,16 @@ class FitnessStudentPortal(http.Controller):
                      'private': _('Private classes')}.get(
                         product.fitness_session_type),
                 ])),
-                'book_href': ('/my/studio?discipline=%s' % disc
+                # A private class is booked by the studio, so there is
+                # nothing for her to book from here.
+                'book_href': (False if product.fitness_session_type == 'private'
+                              else '/my/studio?discipline=%s' % disc
                               if disc in ('barre', 'reformer')
                               else '/my/studio'),
+                'held_private': product.fitness_session_type == 'private',
+                'lbl_private_by_studio': _(
+                    'Private classes are arranged by the studio. '
+                    'The studio will contact you.'),
                 'lbl_covers': _('Covers'),
                 'lbl_book_class': _('Book a class'),
             }
@@ -3446,6 +3473,12 @@ class FitnessStudentPortal(http.Controller):
             return None
 
         bookable = next((p for p in pools if (p.get('remaining') or 0) > 0), None)
+        if bookable and bookable.get('session_type') == 'private':
+            return _('%(credits)s. Private classes are arranged by the studio. '
+                     'The studio will contact you.') % {
+                'credits': (bookable.get('credits_available_text')
+                            or bookable.get('label') or ''),
+            }
         if bookable:
             return _('%(credits)s. Book a class from your schedule.') % {
                 'credits': (bookable.get('credits_available_text')

@@ -396,3 +396,9 @@ msgstr "Alumna reservada a la teva classe"
 #: code:addons/fitness_notifications/models/sale_order.py:0
 msgid "Choose the day and time of your weekly class and we will book it for you every week."
 msgstr "Tria el dia i l'hora de la teva classe setmanal i te la reservarem cada setmana."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/sale_order.py:0
+msgid "Your private class is confirmed. The studio will contact you to arrange the day and time."
+msgstr "La teva classe privada està confirmada. L'estudi es posarà en contacte amb tu per acordar el dia i l'hora."

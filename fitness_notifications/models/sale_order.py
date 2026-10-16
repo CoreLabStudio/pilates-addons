@@ -108,6 +108,13 @@ class SaleOrderNotifications(models.Model):
             body = tr(
                 'You have %d class credit(s) ready to book.', count
             ) if count else None
+            # A private class is the studio's to book: "ready to book" told
+            # her to do the one thing she must not. Whether it was a gift, a
+            # purchase in the app or cash approved at the desk, the order is
+            # confirmed here, so this is the one place that says so.
+            if all(l.product_id.fitness_session_type == 'private' for l in lines):
+                body = tr('Your private class is confirmed. The studio will '
+                          'contact you to arrange the day and time.')
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'purchase_completed',

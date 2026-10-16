@@ -1950,6 +1950,10 @@
                                     <span style="font-size:0.85rem;color:var(--mv-ink);" t-out="covers_str"/>
                                 </div>
                             </t>
+                            <t t-if="held_private">
+                                <p style="font-size:0.85rem;color:var(--mv-muted);margin-top:14px;"
+                                   t-out="lbl_private_by_studio"/>
+                            </t>
                             <t t-if="book_href">
                                 <a t-att-href="book_href"
                                    class="mv-pkg-buy-btn mv-book-held"

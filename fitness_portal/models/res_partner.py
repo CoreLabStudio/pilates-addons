@@ -253,6 +253,8 @@ class ResPartner(models.Model):
                 'total': total,
                 'display': ('%s / %s' % (remaining, int(total))) if total else str(remaining),
                 'label': label,
+                # Read by the portal: a private credit is booked by the studio.
+                'session_type': getattr(line.product_id, 'fitness_session_type', False),
                 # Same reason as above, and worse here: the old form spliced in
                 # `label`, which is itself always plural ("reformer credits"),
                 # so one credit read "1 reformer credits available" in English
