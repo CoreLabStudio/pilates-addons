@@ -82,3 +82,4 @@ from . import test_recipient_language
 from . import test_close_ended_memberships
 from . import test_cash_list_plan_ended
 from . import test_month_end_renewal
+from . import test_no_second_payment_while_pending
