@@ -14,16 +14,18 @@
                 <field name="is_subscription" invisible="1"/>
                 <field name="subscription_state" invisible="1"/>
                 <field name="fitness_subscription_product_id" invisible="1"/>
-                <!-- Only a running membership can be renewed, and only by the
-                     desk. Hidden rather than disabled: a button that refuses
-                     when pressed teaches nothing. -->
+                <!-- Only a running or closed membership can be renewed, and
+                     only by the desk. Closed renews as a new membership from
+                     today (the daily job closes a plan the day after its last
+                     paid day). Hidden rather than disabled: a button that
+                     refuses when pressed teaches nothing. -->
                 <button name="action_fitness_renew_cash"
                         type="object"
                         string="Renew (cash)"
                         class="btn-primary"
                         groups="fitness_core.group_fitness_manager"
                         invisible="not is_subscription
-                                   or subscription_state != '3_progress'
+                                   or subscription_state not in ('3_progress', '6_churn')
                                    or not fitness_subscription_product_id"
                         confirm="Take the next period's payment in cash? The student will be invoiced and emailed."/>
             </xpath>

@@ -22,6 +22,10 @@
                        sum="To collect"/>
                 <field name="fitness_cash_requested_on" string="Asked"/>
                 <field name="fitness_cash_deadline" string="Pay by"/>
+                <!-- Set when her membership for this plan has closed: she
+                     cannot book until this is approved. -->
+                <field name="fitness_cash_plan_ended_on" string="Her plan ended"
+                       decoration-warning="fitness_cash_plan_ended_on"/>
                 <field name="fitness_cash_pending" column_invisible="1"/>
                 <button name="action_fitness_approve_cash"
                         type="object"

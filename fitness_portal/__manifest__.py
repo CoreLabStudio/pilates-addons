@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.28.15',
+    'version': '19.0.1.28.16',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',
@@ -41,6 +41,7 @@
         'security/ir.model.access.csv',
         'security/ir.rule.xml',
         'data/duplicate_cron.xml',
+        'data/membership_close.xml',
         'views/duplicate_candidate_views.xml',
         'views/studio_message_views.xml',
         'views/student_profile_simple.xml',
