@@ -2322,6 +2322,14 @@
                         <p class="mv-panel-label" style="margin-bottom:12px;">Pay securely</p>
                         <t t-call="payment.form">
                             <t t-set="reference_prefix" t-value="'PKG-' + str(order.id)"/>
+                            <!-- The order goes to the form as it goes to the transaction
+                                 route (/my/orders/<id>/transaction). Without it the card
+                                 form of a membership was set up not to save the card while
+                                 Odoo created the payment to save it, and Stripe refused
+                                 every attempt: "setup_future_usage (off_session) does not
+                                 match ... (null)". Aran Bel Busqueta, S00487, 14 tries,
+                                 18-20 Oct 2026. Odoo's own order page passes it the same way. -->
+                            <t t-set="sale_order_id" t-value="order.id"/>
                         </t>
                     </div>
 

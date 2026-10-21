@@ -77,3 +77,4 @@ from . import test_shop_renew
 from . import test_online_payment_opens_period
 from . import test_private_classes_studio_only
 from . import test_private_class_wording
+from . import test_membership_card_form
