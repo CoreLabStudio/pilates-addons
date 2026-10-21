@@ -20,11 +20,18 @@ def _trial_lang(env, lang):
     The fallbacks disagreed: an email subject fell back to Spanish and its
     body to English, and a request with no language was stored as es_ES
     whatever the studio is.
+
+    Only an installed language. The emails render in it (the template's
+    lang), and Odoo refuses a language it does not have: on a database
+    without Spanish installed every trial email failed with "Invalid
+    language code: es_ES" and was never sent (odoo.sh main build, 21 Oct
+    2026, 22 times). studio_lang() already checks; hers now does too.
     """
-    if lang in _TRIAL_LANGS:
+    installed = dict(env['res.lang'].get_installed())
+    if lang in _TRIAL_LANGS and lang in installed:
         return lang
     lang = studio_lang(env)
-    return lang if lang in _TRIAL_LANGS else 'en_US'
+    return lang if lang in _TRIAL_LANGS and lang in installed else 'en_US'
 
 _logger = logging.getLogger(__name__)
 
