@@ -28,6 +28,8 @@ import unicodedata
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
+
 _logger = logging.getLogger(__name__)
 
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
@@ -88,7 +90,7 @@ class FitnessMakeStudentWizard(models.TransientModel):
 
     @api.model
     def _default_lang(self):
-        """Spanish, because the studio is - but only if it is installed.
+        """The studio's language - but only if it is installed.
 
         The code written here ends up on her user record, and Odoo does not
         check it. Anything that later reads a partner's language through
@@ -99,7 +101,7 @@ class FitnessMakeStudentWizard(models.TransientModel):
         Production has Spanish and Catalan, so this falls back on a database
         set up differently rather than in daily use.
         """
-        return (self._installed_lang('es_ES')
+        return (self._installed_lang(studio_lang(self.env))
                 or self._installed_lang(self.env.user.lang)
                 or 'en_US')
 

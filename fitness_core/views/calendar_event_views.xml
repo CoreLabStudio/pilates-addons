@@ -192,21 +192,21 @@
                      end of a month, and "Upcoming" is the one the desk wants
                      nine times out of ten. -->
                 <filter string="Today" name="today"
-                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
-                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc()),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)).to_utc())]"/>
                 <filter string="Tomorrow" name="tomorrow"
-                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0))),
-                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=2), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)).to_utc()),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=2), datetime.time(0,0,0)).to_utc())]"/>
                 <filter string="Next 7 days" name="next_7"
-                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
-                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=7), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc()),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=7), datetime.time(0,0,0)).to_utc())]"/>
                 <filter string="Next 30 days" name="next_30"
-                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
-                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=30), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc()),
+                                 ('start', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=30), datetime.time(0,0,0)).to_utc())]"/>
                 <filter string="Upcoming" name="upcoming"
-                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc())]"/>
                 <filter string="Past" name="past"
-                        domain="[('start', '&lt;', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                        domain="[('start', '&lt;', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc())]"/>
                 <!-- And the open-ended one, so a date typed into the box above
                      can be narrowed by month without the filter fighting it. -->
                 <filter string="Date" name="by_date" date="start"/>

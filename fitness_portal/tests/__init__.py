@@ -50,7 +50,6 @@ from . import test_waiting_on_the_studio
 from . import test_waiting_states_and_roles
 from . import test_duplicate_names_shown
 from . import test_duplicate_menus_under_students
-from . import test_duplicate_names_shown
 from . import test_history_says_what_happened
 from . import test_cancel_warns_about_the_credit
 from . import test_spendable_agreement
@@ -78,3 +77,5 @@ from . import test_online_payment_opens_period
 from . import test_private_classes_studio_only
 from . import test_private_class_wording
 from . import test_membership_card_form
+from . import test_madrid_time
+from . import test_recipient_language

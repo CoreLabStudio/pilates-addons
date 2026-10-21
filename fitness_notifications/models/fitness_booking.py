@@ -3,11 +3,9 @@ from datetime import timedelta
 from odoo import models, fields, api
 from odoo.tools import format_datetime
 
-import logging
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang, studio_date
 
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
+import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -113,14 +111,14 @@ class FitnessBookingNotifications(models.Model):
             if not user:
                 continue
             event = booking.calendar_event_id
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang_env = self.with_context(lang=recipient_lang(self.env, user))
             when = ''
             if event.start:
                 try:
                     when = format_datetime(
                         lang_env.env, event.start, tz=STUDIO_TZ,
                         dt_format='d MMM HH:mm',
-                        lang_code=user.lang or DEFAULT_LANG)
+                        lang_code=recipient_lang(self.env, user))
                 except Exception:
                     when = event.start.strftime('%d %b %H:%M')
             from_name = origin_event.name if origin_event else ''
@@ -175,7 +173,7 @@ class FitnessBookingNotifications(models.Model):
             return
         class_name = booking.calendar_event_id.name or 'class'
         event_start = booking.calendar_event_id.start
-        lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+        lang_env = self.with_context(lang=recipient_lang(self.env, user))
         # Locale-aware and in the student's timezone: strftime would hand a
         # Spanish reader "02 Sep" on a UTC clock. Same helper the dashboard
         # uses, with its strftime fallback if babel is unavailable.
@@ -184,7 +182,7 @@ class FitnessBookingNotifications(models.Model):
             try:
                 start_str = format_datetime(
                     lang_env.env, event_start, tz=STUDIO_TZ,
-                    dt_format='d MMM HH:mm', lang_code=user.lang or DEFAULT_LANG)
+                    dt_format='d MMM HH:mm', lang_code=recipient_lang(self.env, user))
             except Exception:
                 start_str = event_start.strftime('%d %b %H:%M')
         body = (lang_env.env._('Your place is booked for %(cls)s on %(when)s.',
@@ -228,7 +226,7 @@ class FitnessBookingNotifications(models.Model):
         if not teacher or not event.start \
                 or event.start <= fields.Datetime.now():
             return
-        lang = teacher.lang or DEFAULT_LANG
+        lang = recipient_lang(self.env, teacher)
         tenv = self.with_context(lang=lang)
         class_name = event.name or 'class'
         try:
@@ -265,7 +263,7 @@ class FitnessBookingNotifications(models.Model):
         line = booking.package_order_line_id
         remaining = line.fitness_remaining_classes or 0
         class_name = booking.calendar_event_id.name or 'class'
-        lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+        lang_env = self.with_context(lang=recipient_lang(self.env, user))
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_used',
@@ -324,7 +322,7 @@ class FitnessBookingNotifications(models.Model):
         ], limit=1)
         if recent:
             return
-        lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+        lang_env = self.with_context(lang=recipient_lang(self.env, user))
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_zero',
@@ -370,7 +368,7 @@ class FitnessBookingNotifications(models.Model):
         ], limit=1)
         if recent:
             return
-        lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+        lang_env = self.with_context(lang=recipient_lang(self.env, user))
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_low',
@@ -404,7 +402,7 @@ class FitnessBookingNotifications(models.Model):
                 continue
             class_name = booking.calendar_event_id.name or 'class'
             event_start = booking.calendar_event_id.start
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang_env = self.with_context(lang=recipient_lang(self.env, user))
             # Was f-strings, so no .po entry could ever reach it, and the date
             # was raw strftime: English month, UTC clock, an English "at"
             # wedged mid-sentence. Same treatment as booking_confirmed - the
@@ -415,7 +413,7 @@ class FitnessBookingNotifications(models.Model):
                 try:
                     start_str = format_datetime(
                         lang_env.env, event_start, tz=STUDIO_TZ,
-                        dt_format='d MMM HH:mm', lang_code=user.lang or DEFAULT_LANG)
+                        dt_format='d MMM HH:mm', lang_code=recipient_lang(self.env, user))
                 except Exception:
                     start_str = event_start.strftime('%d %b %H:%M')
             body = (
@@ -466,7 +464,7 @@ class FitnessBookingNotifications(models.Model):
         user = self.student_id.user_ids[:1]
         if user:
             class_name = self.calendar_event_id.name or 'class'
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang_env = self.with_context(lang=recipient_lang(self.env, user))
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'booking_cancelled',
@@ -535,8 +533,10 @@ class FitnessBookingNotifications(models.Model):
                 continue
             days_left = (line.fitness_validity_end_date - today).days
             remaining = line.fitness_remaining_classes
-            expire_date_str = line.fitness_validity_end_date.strftime("%d %b %Y")
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang = recipient_lang(self.env, user)
+            expire_date_str = studio_date(
+                self.env, line.fitness_validity_end_date, 'd MMM y', lang)
+            lang_env = self.with_context(lang=lang)
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'credit_expiring',
@@ -580,8 +580,9 @@ class FitnessBookingNotifications(models.Model):
             if recent:
                 continue
             plan_name = sub.fitness_subscription_product_id.name if sub.fitness_subscription_product_id else sub.name
-            renew_date_str = target_date.strftime("%d %b %Y")
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang = recipient_lang(self.env, user)
+            renew_date_str = studio_date(self.env, target_date, 'd MMM y', lang)
+            lang_env = self.with_context(lang=lang)
             # "No action needed" was true when nothing a student could do
             # affected her renewal. It is not true now: she can renew from the
             # app, and the studio can take the money in person. It was also
@@ -634,7 +635,7 @@ class FitnessBookingNotifications(models.Model):
             event = booking.calendar_event_id
             class_name = event.name or 'class'
             hours_until = max(1, int((booking.class_start - now).total_seconds() / 3600))
-            lang_env = self.with_context(lang=user.lang or DEFAULT_LANG)
+            lang_env = self.with_context(lang=recipient_lang(self.env, user))
             self.env['fitness.notification'].sudo()._create_for_user(
                 user.id,
                 'class_reminder',

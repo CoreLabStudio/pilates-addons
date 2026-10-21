@@ -4,11 +4,6 @@ from urllib.parse import quote
 
 import pytz
 
-
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
-
 try:
     from babel.dates import format_date as _babel_format_date
     _BABEL_OK = True
@@ -18,6 +13,8 @@ except Exception:
 from odoo import http, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
+
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
 
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 
@@ -54,6 +51,17 @@ def _studio_tz():
         return pytz.UTC
 
 
+def _madrid_month(when):
+    """The 'YYYY-MM' a stored UTC time falls in, on the studio's calendar."""
+    return _studio_tz().fromutc(when.replace(tzinfo=None)).strftime('%Y-%m')
+
+
+def _madrid_month_start_utc(yr, mo):
+    """Midnight on the 1st of a Madrid month, as the naive UTC stored."""
+    return _studio_tz().localize(_dt_cls(yr, mo, 1)).astimezone(
+        pytz.UTC).replace(tzinfo=None)
+
+
 def _format_local(dt, user_tz):
     if not dt:
         return ''
@@ -62,7 +70,7 @@ def _format_local(dt, user_tz):
 
 def _format_day(dt_local, lang):
     """Thursday, 17 September - in the reader's language, not the server's."""
-    code = (lang or DEFAULT_LANG)
+    code = lang or 'en_US'
     if _BABEL_OK:
         try:
             return _babel_format_date(dt_local.date(), format='EEEE, d MMMM',
@@ -395,14 +403,16 @@ class FitnessTeacherSwapPortal(http.Controller):
             return request.redirect('/my')
 
         now = fields.Datetime.now()
-        lang_code = (request.lang.code if request.lang else None) or DEFAULT_LANG
+        lang_code = (request.lang.code if request.lang else None) or studio_lang(request.env)
 
         cutoff_start = cutoff_end = None
         if period and _re.match(r'^\d{4}-\d{2}$', period):
             try:
                 yr, mo = int(period[:4]), int(period[5:7])
-                cutoff_start = _dt_cls(yr, mo, 1)
-                cutoff_end = _dt_cls(yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1, 1)
+                # The studio's month, not UTC's.
+                cutoff_start = _madrid_month_start_utc(yr, mo)
+                cutoff_end = _madrid_month_start_utc(
+                    yr + (1 if mo == 12 else 0), 1 if mo == 12 else mo + 1)
             except ValueError:
                 period = 'all'
         else:
@@ -431,7 +441,7 @@ class FitnessTeacherSwapPortal(http.Controller):
             ('start', '!=', False),
         ], order='start desc', limit=500)
         all_month_keys = sorted({
-            e.start.strftime('%Y-%m') for e in all_events_for_months if e.start
+            _madrid_month(e.start) for e in all_events_for_months if e.start
         }, reverse=True)
         available_months = []
         for mk in all_month_keys:
@@ -476,7 +486,7 @@ class FitnessTeacherSwapPortal(http.Controller):
         month_groups = []
         for month_key, items in _groupby(
             events_ctx,
-            key=lambda ctx: ctx['event'].start.strftime('%Y-%m') if ctx['event'].start else 'unknown'
+            key=lambda ctx: _madrid_month(ctx['event'].start) if ctx['event'].start else 'unknown'
         ):
             entries = list(items)
             try:

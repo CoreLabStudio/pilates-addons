@@ -30,11 +30,7 @@ import pytz
 
 from odoo import models
 from odoo.addons.fitness_core import class_colors
-
-
-# The studio, the site and the portal are Spanish-first, so anything with
-# no language set falls back to Spanish rather than to Odoo's English base.
-DEFAULT_LANG = 'es_ES'
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
 
 
 class FitnessCalendarGrid(models.AbstractModel):
@@ -62,7 +58,7 @@ class FitnessCalendarGrid(models.AbstractModel):
         this calendar now, and the second one copying the strings would mean
         two msgids for one button - and one of them untranslated.
         """
-        lang = lang or self.env.lang or DEFAULT_LANG
+        lang = lang or self.env.lang or studio_lang(self.env)
         return {
             # Callers that already build Monday-first weekday names pass them;
             # anyone else gets them from here rather than growing a second

@@ -3,8 +3,8 @@ import pytz
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
-# Spanish-first, like the rest of the studio's screens.
-DEFAULT_LANG = 'es_ES'
+from odoo.addons.fitness_core.models.studio_lang import (
+    recipient_lang, studio_datetime, studio_lang)
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -180,7 +180,7 @@ class CalendarEvent(models.Model):
         # any other name means these never enter the catalogue at all.
         def _for(user):
             return self.env(context=dict(
-                self.env.context, lang=user.lang or DEFAULT_LANG))._
+                self.env.context, lang=recipient_lang(self.env, user)))._
 
         notified = 0
         for booking in active_bookings:
@@ -233,6 +233,7 @@ class CalendarEvent(models.Model):
     STUDIO_TZ = 'Europe/Madrid'
 
     @api.depends('name', 'start', 'is_fitness_class')
+    @api.depends_context('lang')
     def _compute_display_name(self):
         """Put the day and time on a class wherever it is picked from a list.
 
@@ -248,9 +249,11 @@ class CalendarEvent(models.Model):
         Odoo's own name.
         """
         fitness = self.filtered(lambda e: e.is_fitness_class and e.start)
+        # The day in the reader's language: strftime spelled it in English
+        # ("Sun 25 Oct") on a Spanish or Catalan screen.
+        lang = self.env.lang or studio_lang(self.env)
         for event in fitness:
-            local = pytz.utc.localize(event.start).astimezone(
-                pytz.timezone(self.STUDIO_TZ))
             event.display_name = "%s - %s" % (
-                event.name or '', local.strftime('%a %d %b %H:%M'))
+                event.name or '',
+                studio_datetime(self.env, event.start, 'EEE d MMM HH:mm', lang))
         super(CalendarEvent, self - fitness)._compute_display_name()

@@ -22,6 +22,8 @@ import logging
 from odoo import models, fields, api
 from odoo.exceptions import AccessError, UserError
 
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang
+
 from odoo.addons.fitness_subscriptions.models.sale_order import (
     ACTIVE_SUBSCRIPTION_STATE,
 )
@@ -397,7 +399,7 @@ class FitnessDuplicateCandidate(models.Model):
         Notification = self.env['fitness.notification'].sudo()
         for manager in managers:
             tr = self.env(context=dict(
-                self.env.context, lang=manager.lang or 'es_ES'))._
+                self.env.context, lang=recipient_lang(self.env, manager)))._
             Notification._create_for_user(
                 manager.id,
                 'duplicate_contacts',

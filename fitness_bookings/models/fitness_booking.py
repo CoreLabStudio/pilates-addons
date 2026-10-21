@@ -2,6 +2,8 @@ from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError, AccessError
 
 from odoo.addons.fitness_bookings.exceptions import LateCancellationError
+from odoo.addons.fitness_core.models.studio_lang import studio_date, studio_datetime
+from odoo.addons.fitness_core.models.studio_time import studio_tz
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -351,10 +353,12 @@ class FitnessBooking(models.Model):
             and (self.env.user.has_group('fitness_core.group_fitness_manager')
                  or self.env.user._is_admin()))
         if time_until.total_seconds() <= 0 and not recording_history:
-            raise ValidationError(
-                f"Cannot book a class that has already started or passed "
-                f"({class_start.strftime('%Y-%m-%d %H:%M')} UTC)."
-            )
+            # The studio's time, not UTC, in the reader's language: these
+            # refusals were f-strings, English to every student.
+            local = studio_tz().fromutc(class_start.replace(tzinfo=None))
+            raise ValidationError(self.env._(
+                "Cannot book a class that has already started or passed "
+                "(%(when)s).", when=local.strftime('%Y-%m-%d %H:%M')))
 
         # ── 1b. Not before the studio opens ──────────────────────────────────
         # Checked before the 7-day window so a class on the opening day gets
@@ -366,12 +370,13 @@ class FitnessBooking(models.Model):
         # for the same reason. Moving the date moves it for everyone.
         opening = fitness_opening_date(self.env)
         if opening and class_start.date() < opening:
-            raise ValidationError(
-                f"The studio opens on {opening.strftime('%d %b %Y')}. "
-                f"Classes before then are on the timetable but are not open "
-                f"for booking - this one is on "
-                f"{class_start.strftime('%d %b %Y')}."
-            )
+            lang = self.env.lang
+            raise ValidationError(self.env._(
+                "The studio opens on %(opening)s. Classes before then are on "
+                "the timetable but are not open for booking - this one is on "
+                "%(day)s.",
+                opening=studio_date(self.env, opening, 'd MMM y', lang),
+                day=studio_datetime(self.env, class_start, 'd MMM y', lang)))
 
         # ── 2. Cannot book more than 7 days in advance ───────────────────────
         # Exception: a manager may tick manager_override_timewindow to bypass
@@ -387,11 +392,10 @@ class FitnessBooking(models.Model):
         if (not _tw_override
                 and not self._skip_booking_window(vals, student, event)
                 and time_until.total_seconds() > BOOKING_WINDOW_DAYS * 86400):
-            raise ValidationError(
-                f"Booking opens 7 days before the class. "
-                f"This class starts in {time_until.days}d "
-                f"{int(time_until.seconds / 3600)}h – come back later."
-            )
+            raise ValidationError(self.env._(
+                "Booking opens 7 days before the class. This class starts in "
+                "%(days)sd %(hours)sh - come back later.",
+                days=time_until.days, hours=int(time_until.seconds / 3600)))
 
         _logger.info("[BOOKING] ✓ Time window OK")
 
@@ -406,9 +410,9 @@ class FitnessBooking(models.Model):
         ])
         capacity = event.capacity
         if capacity and booked >= capacity:
-            raise ValidationError(
-                f"'{event.name}' is full – {booked}/{capacity} seats taken."
-            )
+            raise ValidationError(self.env._(
+                "'%(name)s' is full - %(booked)s/%(capacity)s seats taken.",
+                name=event.name, booked=booked, capacity=capacity))
 
         _logger.info("[BOOKING] ✓ Capacity OK (%d/%d)", booked, capacity)
 
@@ -419,9 +423,9 @@ class FitnessBooking(models.Model):
             ('state', 'in', ('booked', 'attended', 'no_show')),
         ], limit=1)
         if duplicate:
-            raise ValidationError(
-                f"{student.name} is already booked for this class."
-            )
+            raise ValidationError(self.env._(
+                "%(student)s is already booked for this class.",
+                student=student.name))
 
         _logger.info("[BOOKING] ✓ No duplicate")
 
@@ -433,10 +437,11 @@ class FitnessBooking(models.Model):
             ('calendar_event_id.stop', '>', event.start),
         ])
         if overlapping:
-            raise ValidationError(
-                f"{student.name} already has a booking that overlaps this class time "
-                f"({overlapping[0].calendar_event_id.name})."
-            )
+            raise ValidationError(self.env._(
+                "%(student)s already has a booking that overlaps this class "
+                "time (%(other)s).",
+                student=student.name,
+                other=overlapping[0].calendar_event_id.name))
 
         _logger.info("[BOOKING] ✓ No time overlap")
 

@@ -12,11 +12,30 @@ from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools.mail import email_normalize, email_re
 
+from odoo.addons.fitness_core.models.studio_lang import studio_lang
+
 _logger = logging.getLogger(__name__)
 
 STUDENT_GROUP = 'fitness_core.group_fitness_student'
 TEACHER_GROUP = 'fitness_core.group_fitness_teacher'
 _GENERIC_REDIRECTS = {'/my', '/web', '/web#action=', '', '/odoo'}
+
+
+_PORTAL_LANGS = ('en_US', 'es_ES', 'ca_ES')
+
+
+def _cookie_lang():
+    """The language a visitor chose (mv_lang cookie), else the studio's.
+
+    Every page here used to repeat "the cookie, else es_ES": a hard-coded
+    Spanish nobody chose. The studio's language is Spanish on production, so
+    nothing a visitor sees changes there.
+    """
+    lang = request.cookies.get('mv_lang')
+    if lang in _PORTAL_LANGS:
+        return lang
+    lang = studio_lang(request.env)
+    return lang if lang in _PORTAL_LANGS else 'en_US'
 
 
 class FitnessSignup(AuthSignupHome):
@@ -235,9 +254,7 @@ class FitnessSignup(AuthSignupHome):
 
         # multilang=False on this route means Odoo's website language detection
         # does not run. Set language explicitly here for both GET and POST.
-        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
-        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
-            _mv_lang = 'es_ES'
+        _mv_lang = _cookie_lang()
         request.update_context(lang=_mv_lang)
 
         qcontext = self.get_auth_signup_qcontext()
@@ -248,10 +265,8 @@ class FitnessSignup(AuthSignupHome):
 
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             # Guarantee language for all rendered templates in this request:
-            # mv_lang cookie if set and valid, otherwise default to es_ES.
-            _mv_lang = request.cookies.get('mv_lang', 'es_ES')
-            if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
-                _mv_lang = 'es_ES'
+            # mv_lang cookie if set and valid, otherwise the studio's.
+            _mv_lang = _cookie_lang()
             request.update_context(lang=_mv_lang)
 
             try:
@@ -278,7 +293,7 @@ class FitnessSignup(AuthSignupHome):
                         limit=1,
                     )
                     if user_sudo:
-                        user_sudo.sudo().write({'lang': 'es_ES'})
+                        user_sudo.sudo().write({'lang': _mv_lang})
                         # Store GDPR consent timestamps on the partner record
                         now = fields.Datetime.now()
                         consent_vals = {'consent_terms_date': now}
@@ -346,16 +361,12 @@ class FitnessSignup(AuthSignupHome):
 
     @http.route('/corelab/terms', type='http', auth='public', website=True, sitemap=False, multilang=False)
     def public_terms(self, **kw):
-        _mv = request.httprequest.cookies.get('mv_lang', 'es_ES')
-        if _mv not in ('en_US', 'ca_ES', 'es_ES'):
-            _mv = 'es_ES'
+        _mv = _cookie_lang()
         return request.render('fitness_portal.public_terms', {'mv_lang': _mv})
 
     @http.route('/corelab/privacy-policy', type='http', auth='public', website=True, sitemap=False, multilang=False)
     def public_privacy_policy(self, **kw):
-        _mv = request.httprequest.cookies.get('mv_lang', 'es_ES')
-        if _mv not in ('en_US', 'ca_ES', 'es_ES'):
-            _mv = 'es_ES'
+        _mv = _cookie_lang()
         return request.render('fitness_portal.public_privacy_policy', {'mv_lang': _mv})
 
     # ------------------------------------------------------------------
@@ -378,11 +389,8 @@ class FitnessSignup(AuthSignupHome):
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         verify_url = '%s/corelab/verify-email?%s' % (base_url, url_encode({'token': token}))
 
-        # Determine email language: mv_lang cookie → default es_ES
-        _PORTAL_LANGS = {'en_US', 'es_ES', 'ca_ES'}
-        email_lang = request.cookies.get('mv_lang', 'es_ES')
-        if email_lang not in _PORTAL_LANGS:
-            email_lang = 'es_ES'
+        # The language she signed up in, else the studio's.
+        email_lang = _cookie_lang()
 
         body_html = self._fitness_verification_email_body(user_sudo.name, verify_url, email_lang)
         subject = (
@@ -506,9 +514,7 @@ class FitnessSignup(AuthSignupHome):
         if not token:
             return request.redirect('/web/login')
 
-        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
-        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
-            _mv_lang = 'es_ES'
+        _mv_lang = _cookie_lang()
         request.update_context(lang=_mv_lang)
 
         # Our own token first. It is spent by _redeem, so a link that is
@@ -597,9 +603,7 @@ class FitnessSignup(AuthSignupHome):
         user = request.env.user
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP) or user._is_internal():
             return request.redirect('/my/home')
-        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
-        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
-            _mv_lang = 'es_ES'
+        _mv_lang = _cookie_lang()
         request.update_context(lang=_mv_lang)
         return request.render('fitness_portal.pending_verification', {
             'user_email': user.email or '',
@@ -610,9 +614,7 @@ class FitnessSignup(AuthSignupHome):
         user = request.env.user
         if user.has_group(STUDENT_GROUP) or user.has_group(TEACHER_GROUP) or user._is_internal():
             return request.redirect('/my/home')
-        _mv_lang = request.cookies.get('mv_lang', 'es_ES')
-        if _mv_lang not in ('en_US', 'es_ES', 'ca_ES'):
-            _mv_lang = 'es_ES'
+        _mv_lang = _cookie_lang()
         request.update_context(lang=_mv_lang)
         try:
             self._send_fitness_verification_email(user.sudo())

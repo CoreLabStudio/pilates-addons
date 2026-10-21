@@ -9,6 +9,7 @@ from datetime import date as _date, datetime, time as _time, timedelta
 from odoo import fields as _odoo_fields, http, _
 from odoo.http import request
 from odoo.addons.fitness_core.models.studio_time import studio_today
+from odoo.addons.fitness_trials.models.trial_request import _trial_lang
 
 _logger = logging.getLogger(__name__)
 
@@ -191,9 +192,8 @@ class TrialRequestController(http.Controller):
         Trials = self._trials()
         types = Trials._offered_class_types()
         open_days = Trials._open_weekdays()
-        lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
-        if lang not in _VALID_LANGS:
-            lang = 'es_ES'
+        lang = _trial_lang(request.env,
+                           request.httprequest.cookies.get('mv_lang'))
         # Whether the offer is still running, and what a trial costs once
         # it is not. Without these the form simply rendered empty when the
         # deadline passed - _offered_class_types() returns nothing once the
@@ -406,9 +406,8 @@ class TrialRequestController(http.Controller):
         # Stamped by the form itself rather than guessed from the session: a
         # student can be signed in and still be reading the public site.
         source = 'app' if (kw.get('source') or '').strip() == 'app' else 'website'
-        lang = request.httprequest.cookies.get('mv_lang', 'es_ES')
-        if lang not in _VALID_LANGS:
-            lang = 'es_ES'
+        lang = _trial_lang(request.env,
+                           request.httprequest.cookies.get('mv_lang'))
 
         form_values = {
             'name': name, 'email': email, 'phone': phone,
@@ -474,7 +473,7 @@ class TrialRequestController(http.Controller):
         else:
             try:
                 chosen = _date.fromisoformat(preferred_date)
-                if chosen < _date.today():
+                if chosen < studio_today():
                     errors.append(_('Please choose a date that has not already passed.'))
             except ValueError:
                 errors.append(_('Please choose a preferred date.'))
@@ -670,7 +669,7 @@ class TrialRequestController(http.Controller):
         email            = (data.get('email')            or '').strip()[:200]
         phone            = (data.get('phone')            or '').strip()[:40]
         notes            = (data.get('notes')            or '').strip()[:1000]
-        lang             = (data.get('lang')             or 'es_ES').strip()[:10]
+        lang             = (data.get('lang')             or '').strip()[:10]
         class_interest   = (data.get('class_interest')   or 'barre').strip()
         reformer_first   = (data.get('reformer_is_first_time')     or '').strip()
         reformer_years   = (data.get('reformer_years_experience')  or '').strip()[:40]
@@ -680,7 +679,7 @@ class TrialRequestController(http.Controller):
         if not email or not _EMAIL_RE.match(email):
             return _json_err('A valid email address is required.')
         if lang not in _VALID_LANGS:
-            lang = 'es_ES'
+            lang = False
         if class_interest not in _VALID_CLASS_INTERESTS:
             class_interest = 'barre'
 
@@ -698,10 +697,11 @@ class TrialRequestController(http.Controller):
                     'email': email,
                     'phone': phone or False,
                     'preferred_time_notes': notes or False,
-                    'lang': lang,
                     'class_interest': class_interest,
                     'status': 'pending',
                 }
+                if lang:
+                    vals['lang'] = lang
                 if class_interest == 'reformer':
                     if reformer_first in ('yes', 'no'):
                         vals['reformer_is_first_time'] = reformer_first

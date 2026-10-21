@@ -806,7 +806,7 @@
                                         <div class="mv-class-card"
                                              t-att-data-href="'/my/classes/' + str(ev.id)"
                                              t-att-data-ct="ct.classroom_type if ct and ct.classroom_type else ''"
-                                             t-att-data-date="ev.start.strftime('%Y-%m-%d') if ev.start else ''">
+                                             t-att-data-date="madrid_date(ev.start)">
                                             <!-- Image area: 1) occurrence  2) class type  3) category  4) SVG fallback -->
                                             <div class="mv-card-img">
                                                 <t t-if="ev._fields.get('image_512') and ev.image_512">
@@ -901,7 +901,7 @@
                                     <t t-foreach="day_bookings" t-as="booking">
                                         <div class="mv-upcoming-card"
                                              t-att-data-ct="booking.class_type_id.classroom_type if booking.class_type_id and booking.class_type_id.classroom_type else ''"
-                                             t-att-data-date="booking.class_start.strftime('%Y-%m-%d') if booking.class_start else ''">
+                                             t-att-data-date="madrid_date(booking.class_start)">
                                             <div>
                                                 <p class="mv-upcoming-name"
                                                    t-out="booking.calendar_event_id.name"/>
@@ -3261,7 +3261,7 @@
                                     <span class="mv-msg-author"
                                           t-out="msg.author_name or 'You'"/>
                                     <span t-out="msg.create_date"
-                                          t-options='{"widget": "datetime", "format": "d MMM · HH:mm"}'/>
+                                          t-options='{"widget": "datetime", "format": "d MMM · HH:mm", "tz_name": "Europe/Madrid"}'/>
                                 </div>
                                 <div class="mv-msg-body" t-out="msg.body"/>
                             </div>
