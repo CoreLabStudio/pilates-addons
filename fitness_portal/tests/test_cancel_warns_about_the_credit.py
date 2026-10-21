@@ -45,13 +45,17 @@ class TestCancelWarnsAboutTheCredit(TranslationCheck, HttpCase):
 
     def setUp(self):
         super().setUp()
+        # These assertions read English. With es/ca installed the studio's
+        # language - which names classes and writes staff notes - is the
+        # company's, so it is pinned rather than assumed.
+        self.env.company.partner_id.lang = 'en_US'
         self.window = self.env['fitness.booking'].sudo(
             )._cancellation_window_hours()
         self.student = self.env['res.users'].with_context(
             no_reset_password=True).create({
                 'name': 'Warn Student', 'login': 'warn.student',
                 'email': 'warn.student@example.invalid',
-                'password': 'warn-pass-7752', 'tz': 'Europe/Madrid',
+                'password': 'warn-pass-7752', 'lang': 'en_US', 'tz': 'Europe/Madrid',
                 'group_ids': [(6, 0, [
                     self.env.ref('base.group_portal').id,
                     self.env.ref('fitness_core.group_fitness_student').id])]})

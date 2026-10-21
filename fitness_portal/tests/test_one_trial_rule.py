@@ -259,7 +259,10 @@ class TestOneTrialRuleApproval(OneTrialFixture):
         self._trial_order(student, 'reformer', 15.0, used=True)
         req = self._request(student, 'reformer')
         self.assertTrue(req.trial_already_used)
-        self.assertIn('Approving this will be refused', req.trial_used_warning)
+        self.env.company.partner_id.lang = 'en_US'
+        req.invalidate_recordset(['trial_used_warning'])
+        self.assertIn('Approving this will be refused',
+                      req.with_context(lang='en_US').trial_used_warning)
 
     def test_the_refusal_in_three_languages(self):
         for code in ('es_ES', 'ca_ES'):

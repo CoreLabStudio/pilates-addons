@@ -10,10 +10,16 @@ layer.
 Written after a client report that some of these were silent.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
+
+import logging
+
+import pytz
 
 from odoo import fields
 from odoo.tests import TransactionCase, tagged
+
+_logger = logging.getLogger(__name__)
 
 
 @tagged("post_install", "-at_install")
@@ -224,10 +230,24 @@ class TestAdminActionsNotifyTheStudent(TransactionCase):
         self.assertTrue(mails, "no email to inspect")
         body = mails[0].body_html or ""
         self.assertIn(event.name, body, "the email does not name the class")
-        # 08:30 UTC is 10:30 in Madrid, and the studio clock is what she
-        # turns up by. A body carrying 08:30 would send her an hour early.
-        self.assertIn("10:30", body,
-                      "the new time is missing or not in studio time")
+        # The studio clock is what she turns up by. 08:30 UTC is 10:30 in
+        # Madrid in summer and 09:30 in winter, so the expected hour is read
+        # off Madrid's clock for that date rather than written down: written
+        # as 10:30, this failed every run from 21 Oct 2026, the first day
+        # "now + 5 days" fell after the clocks went back on 25 Oct.
+        madrid = pytz.timezone("Europe/Madrid")
+        expected = pytz.utc.localize(new_start).astimezone(madrid).strftime("%H:%M")
+        self.assertIn(expected, body,
+                      "the new time is missing or not in studio time (%s Madrid)" % expected)
+        self.assertNotIn("08:30", body, "the email shows the UTC time")
+        _logger.info("reschedule email shows %s Madrid for %s UTC", expected, new_start)
+
+    def test_the_reschedule_time_follows_the_clock_change(self):
+        """The same 08:30 UTC is 10:30 Madrid before 25 Oct 2026 and 09:30 after."""
+        madrid = pytz.timezone("Europe/Madrid")
+        local = lambda d: pytz.utc.localize(d).astimezone(madrid).strftime("%H:%M")
+        self.assertEqual(local(datetime(2026, 10, 24, 8, 30)), "10:30")
+        self.assertEqual(local(datetime(2026, 10, 26, 8, 30)), "09:30")
 
     def test_rescheduling_tells_her_by_both_channels_not_one(self):
         """The pair, asserted together, so a future change cannot quietly

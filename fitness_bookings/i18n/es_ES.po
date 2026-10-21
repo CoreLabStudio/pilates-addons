@@ -1282,3 +1282,9 @@ msgid ""
 "The studio recorded this attendance after the class, because she took it "
 "without booking."
 msgstr "El estudio registró esta asistencia después de la clase, porque la hizo sin reservar."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+msgid "Private classes are arranged by the studio. The studio will contact you."
+msgstr "Las clases privadas las organiza el estudio. El estudio se pondrá en contacto contigo."
