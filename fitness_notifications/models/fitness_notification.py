@@ -53,6 +53,10 @@ class FitnessNotification(models.Model):
         # neither is what happened, and the admin filters should be able
         # to tell them apart.
         ('student_booked', 'Student Booked Into Your Class'),
+        # Instructor- and studio-facing: a student cancelled her own place.
+        # The other half of student_booked; its own type so the admin
+        # filters can tell a booking from a cancellation.
+        ('student_cancelled', 'Student Cancelled a Booking'),
     ], required=True, default='booking_confirmed')
     is_read = fields.Boolean(string='Read', default=False, index=True)
     action_url = fields.Char("Action URL")

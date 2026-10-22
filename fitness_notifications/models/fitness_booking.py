@@ -380,6 +380,10 @@ class FitnessBookingNotifications(models.Model):
     # ─── Booking cancelled ───────────────────────────────────────────────────────
 
     def action_cancel(self):
+        # Who is cancelling, and whether it is late, can only be read before
+        # the cancel: afterwards the booking is cancelled and "late" is a
+        # question about a class she no longer holds.
+        student_cancels = self._fitness_student_cancels()
         result = super().action_cancel()
 
         # The base returns the admin late-cancel dialog's action BEFORE
@@ -396,6 +400,7 @@ class FitnessBookingNotifications(models.Model):
         # because action_cancel_class() already sends a class-level alert per student.
         if self.env.context.get('skip_fitness_notification') or self.env.context.get('_class_cancelled'):
             return result
+        self._maybe_notify_studio_of_cancel(student_cancels)
         for booking in self:
             user = booking.student_id.user_ids[:1]
             if not user:
@@ -449,6 +454,82 @@ class FitnessBookingNotifications(models.Model):
             except Exception:
                 pass
         return result
+
+    def _fitness_student_cancels(self):
+        """{booking id: late?} for the bookings the student is cancelling herself.
+
+        A cancel is hers when the user pressing it is the booking's own
+        student, in her own environment - the app, or an RPC from her
+        session. The studio cancelling on her behalf (back office, roster,
+        a manager) is not, and is not announced back to the studio. Late
+        means inside the cancellation window, read from the same setting
+        the warning and the credit rule use, at the moment of the cancel.
+        """
+        if self.env.su:
+            return {}
+        user = self.env.user
+        if user.has_group('fitness_core.group_fitness_manager') or user._is_admin():
+            return {}
+        window = self._cancellation_window_hours()
+        now = fields.Datetime.now()
+        out = {}
+        for booking in self:
+            if booking.state != 'booked' or booking.student_id != user.partner_id:
+                continue
+            start = booking.calendar_event_id.start
+            hours_until = (start - now).total_seconds() / 3600.0 if start else 0
+            out[booking.id] = 0 < hours_until <= window
+        return out
+
+    def _maybe_notify_studio_of_cancel(self, student_cancels):
+        """Tell the class's teacher and the studio managers she cancelled.
+
+        The other half of _maybe_notify_instructor: until now a cancel
+        reached the student alone, and the teacher found out by opening her
+        roster. Every cancellation the student makes herself - group or
+        private, early or late - goes to the class's teacher (linked to her
+        roster) and to every studio manager (linked to the class), each in
+        her own language. No teacher on the class: managers only. Somebody
+        who is both hears it once, as the teacher.
+        """
+        if not student_cancels:
+            return
+        Notif = self.env['fitness.notification'].sudo()
+        managers = self.env['res.users'].sudo().search([
+            ('group_ids', 'in', [self.env.ref('fitness_core.group_fitness_manager').id]),
+            ('share', '=', False),
+        ])
+        for booking in self.sudo().filtered(
+                lambda b: b.id in student_cancels and b.state == 'cancelled'):
+            event = booking.calendar_event_id
+            late = student_cancels[booking.id]
+            still = self.sudo().search_count([
+                ('calendar_event_id', '=', event.id),
+                ('state', 'in', ('booked', 'attended')),
+            ])
+            teacher = event.user_id if event.user_id.active else self.env['res.users']
+            for user, url in ([(teacher, '/my/instructor/classes/%d' % event.id)] if teacher else []) + [
+                    (m, '/odoo/calendar.event/%d' % event.id) for m in managers - teacher]:
+                lang = recipient_lang(self.env, user)
+                tenv = self.with_context(lang=lang).env
+                cls = event.with_context(lang=lang).name or 'class'
+                try:
+                    when = format_datetime(tenv, event.start, tz=STUDIO_TZ,
+                                           dt_format='d MMM HH:mm', lang_code=lang)
+                except Exception:
+                    when = event.start.strftime('%d %b %H:%M') if event.start else ''
+                title = (tenv._('Late cancellation: %(cls)s', cls=cls) if late
+                         else tenv._('Cancellation: %(cls)s', cls=cls))
+                body = tenv._('%(student)s cancelled their place in %(cls)s on '
+                              '%(when)s. Still booked: %(count)s.',
+                              student=booking.student_id.name or '', cls=cls,
+                              when=when, count=still)
+                if late:
+                    body = '%s %s' % (body, tenv._(
+                        'Cancelled less than %(hours)s hours before the class.',
+                        hours=self._format_window(self._cancellation_window_hours())))
+                Notif._create_for_user(user.id, 'student_cancelled', title, body,
+                                       action_url=url)
 
     def _notify_credit_returned_by_studio(self):
         """Tell her the studio returned a credit the policy had kept.

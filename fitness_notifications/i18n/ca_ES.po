@@ -402,3 +402,36 @@ msgstr "Tria el dia i l'hora de la teva classe setmanal i te la reservarem cada 
 #: code:addons/fitness_notifications/models/sale_order.py:0
 msgid "Your private class is confirmed. The studio will contact you to arrange the day and time."
 msgstr "La teva classe privada està confirmada. L'estudi es posarà en contacte amb tu per acordar el dia i l'hora."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Late cancellation: %(cls)s"
+msgstr "Cancel·lació tardana: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Cancellation: %(cls)s"
+msgstr "Cancel·lació: %(cls)s"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "%(student)s cancelled their place in %(cls)s on %(when)s. Still booked: %(count)s."
+msgstr "%(student)s ha cancel·lat la seva plaça a %(cls)s el %(when)s. Continuen reservades: %(count)s."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
+#, python-format
+msgid "Cancelled less than %(hours)s hours before the class."
+msgstr "Cancel·lada amb menys de %(hours)s hores d'antelació."
+
+#. module: fitness_notifications
+#: model:ir.model.fields.selection,name:fitness_notifications.selection__fitness_notification__notification_type__student_cancelled
+msgid "Student Cancelled a Booking"
+msgstr "Alumna va cancel·lar una reserva"
