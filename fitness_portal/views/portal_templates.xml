@@ -1179,8 +1179,10 @@
                         <div class="mv-class-full">Booking not available — contact the studio.</div>
                     </t>
 
-                    <!-- Cancellation policy note (Task 3) -->
-                    <p class="mv-cancel-policy" t-out="lbl_cancel_policy"/>
+                    <!-- Cancellation policy note (Task 3). When she is booked it
+                         already stands under "Cancel booking", so it is not
+                         repeated here - it was printed twice. -->
+                    <p t-if="not existing_booking" class="mv-cancel-policy" t-out="lbl_cancel_policy"/>
 
                 </div>
                 </div>
