@@ -3,7 +3,9 @@ from datetime import timedelta
 from odoo import models, fields, api
 from odoo.tools import format_datetime
 
-from odoo.addons.fitness_core.models.studio_lang import recipient_lang, studio_date
+from markupsafe import Markup
+
+from odoo.addons.fitness_core.models.studio_lang import recipient_lang, studio_date, studio_lang
 
 import logging
 
@@ -487,10 +489,17 @@ class FitnessBookingNotifications(models.Model):
         The other half of _maybe_notify_instructor: until now a cancel
         reached the student alone, and the teacher found out by opening her
         roster. Every cancellation the student makes herself - group or
-        private, early or late - goes to the class's teacher (linked to her
-        roster) and to every studio manager (linked to the class), each in
-        her own language. No teacher on the class: managers only. Somebody
-        who is both hears it once, as the teacher.
+        private, early or late, with or without a teacher - is told:
+
+          * to the class's teacher, by app bell linked to her roster, in her
+            own language - teachers use the app;
+          * to every studio manager, through Odoo itself, because the studio
+            works in the back office and never opens the app's bell: a note
+            on the class record, delivered to their Odoo inbox. Inbox only,
+            whatever their email preference - a cancellation is not worth a
+            mail. One note on the class, in the studio's language.
+
+        Somebody who is both teacher and manager hears it once, as the teacher.
         """
         if not student_cancels:
             return
@@ -508,28 +517,43 @@ class FitnessBookingNotifications(models.Model):
                 ('state', 'in', ('booked', 'attended')),
             ])
             teacher = event.user_id if event.user_id.active else self.env['res.users']
-            for user, url in ([(teacher, '/my/instructor/classes/%d' % event.id)] if teacher else []) + [
-                    (m, '/odoo/calendar.event/%d' % event.id) for m in managers - teacher]:
-                lang = recipient_lang(self.env, user)
-                tenv = self.with_context(lang=lang).env
-                cls = event.with_context(lang=lang).name or 'class'
-                try:
-                    when = format_datetime(tenv, event.start, tz=STUDIO_TZ,
-                                           dt_format='d MMM HH:mm', lang_code=lang)
-                except Exception:
-                    when = event.start.strftime('%d %b %H:%M') if event.start else ''
-                title = (tenv._('Late cancellation: %(cls)s', cls=cls) if late
-                         else tenv._('Cancellation: %(cls)s', cls=cls))
-                body = tenv._('%(student)s cancelled their place in %(cls)s on '
-                              '%(when)s. Still booked: %(count)s.',
-                              student=booking.student_id.name or '', cls=cls,
-                              when=when, count=still)
-                if late:
-                    body = '%s %s' % (body, tenv._(
-                        'Cancelled less than %(hours)s hours before the class.',
-                        hours=self._format_window(self._cancellation_window_hours())))
-                Notif._create_for_user(user.id, 'student_cancelled', title, body,
-                                       action_url=url)
+            if teacher:
+                title, body = self._fitness_cancel_text(
+                    booking, late, still, recipient_lang(self.env, teacher))
+                Notif._create_for_user(teacher.id, 'student_cancelled', title, body,
+                                       action_url='/my/instructor/classes/%d' % event.id)
+            title, body = self._fitness_cancel_text(booking, late, still, studio_lang(self.env))
+            # Logged, not posted: a logged note notifies nobody, so no
+            # follower and no preference can turn it into an email. The
+            # managers are then given it through Odoo's own inbox delivery.
+            note = event.sudo()._message_log(
+                body=Markup('<p><strong>%s</strong></p><p>%s</p>') % (title, body))
+            recipients = [{'id': m.partner_id.id, 'uid': m.id, 'notif': 'inbox'}
+                          for m in managers - teacher]
+            if recipients:
+                event.sudo()._notify_thread_by_inbox(note, recipients)
+
+    def _fitness_cancel_text(self, booking, late, still, lang):
+        """(title, body) of the cancellation notice, in `lang`."""
+        event = booking.calendar_event_id
+        tenv = self.with_context(lang=lang).env
+        cls = event.with_context(lang=lang).name or 'class'
+        try:
+            when = format_datetime(tenv, event.start, tz=STUDIO_TZ,
+                                   dt_format='d MMM HH:mm', lang_code=lang)
+        except Exception:
+            when = event.start.strftime('%d %b %H:%M') if event.start else ''
+        title = (tenv._('Late cancellation: %(cls)s', cls=cls) if late
+                 else tenv._('Cancellation: %(cls)s', cls=cls))
+        body = tenv._('%(student)s cancelled their place in %(cls)s on '
+                      '%(when)s. Still booked: %(count)s.',
+                      student=booking.student_id.name or '', cls=cls,
+                      when=when, count=still)
+        if late:
+            body = '%s %s' % (body, tenv._(
+                'Cancelled less than %(hours)s hours before the class.',
+                hours=self._format_window(self._cancellation_window_hours())))
+        return title, body
 
     def _notify_credit_returned_by_studio(self):
         """Tell her the studio returned a credit the policy had kept.
