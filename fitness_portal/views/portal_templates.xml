@@ -1960,7 +1960,13 @@
                                    style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:14px;"
                                    t-out="lbl_book_class"/>
                             </t>
-                            <t t-if="can_renew">
+                            <!-- A payment for it is still waiting: no second one. -->
+                            <t t-if="payment_pending">
+                                <span class="mv-pkg-buy-btn mv-btn-disabled"
+                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;margin-top:14px;"
+                                      t-out="lbl_cash_pending"/>
+                            </t>
+                            <t t-elif="can_renew">
                                 <a t-attf-href="/my/packages/#{product.id}/checkout"
                                    class="mv-pkg-buy-btn mv-btn-renew"
                                    style="display:block;text-align:center;text-decoration:none;line-height:1.4;margin-top:14px;"
@@ -2014,6 +2020,14 @@
                                 <p class="mv-free-terms-note">
                                     <t t-out="lbl_free_terms"/>&#160;<a t-attf-href="/my/terms?back=/my/packages/#{product.id}"><t t-out="terms_link_label or 'Terms and Conditions'"/></a>
                                 </p>
+                            </t>
+                            <!-- A payment for it is still waiting - cash at the
+                                 desk, card or Bizum with the bank. Neither Renew
+                                 nor Buy: either would be a second payment. -->
+                            <t t-elif="payment_pending">
+                                <span class="mv-pkg-buy-btn mv-btn-disabled"
+                                      style="display:block;text-align:center;opacity:0.5;pointer-events:none;line-height:1.4;"
+                                      t-out="lbl_cash_pending"/>
                             </t>
                             <t t-elif="can_renew">
                                 <a t-attf-href="/my/packages/#{product.id}/checkout"

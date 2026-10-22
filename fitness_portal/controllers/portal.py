@@ -1605,7 +1605,10 @@ class FitnessStudentPortal(http.Controller):
         # request invites her to order the same membership twice and turn up
         # owing double - and the second request looks identical to the first
         # on the studio's list, so nobody can tell which one she paid for.
-        pending_cash_ids = self._pending_cash_product_ids(partner)
+        # A card or Bizum payment the bank has not settled yet is the same
+        # case: Renew beside it is a second payment for the same period.
+        pending_cash_ids = (self._pending_cash_product_ids(partner)
+                            | self._pending_online_product_ids(partner))
 
         pkg_meta = {}
         for p in products:
@@ -1976,8 +1979,14 @@ class FitnessStudentPortal(http.Controller):
             }
 
         full_name = partner.name or ''
+        # The same rule as the shop card: while a payment for it is waiting -
+        # cash at the desk, card or Bizum with the bank - the page says so
+        # instead of offering to take a second one.
+        payment_pending = product.id in (self._pending_cash_product_ids(partner)
+                                         | self._pending_online_product_ids(partner))
         can_renew = bool(
             (product.fitness_is_package or product.fitness_is_subscription_plan)
+            and not payment_pending
             and partner._fitness_renewal_state(product)['state'] == 'renewable')
         return request.render('fitness_portal.portal_package_detail', dict(held_extra, **{
             'product':         product,
@@ -2020,7 +2029,9 @@ class FitnessStudentPortal(http.Controller):
             'primary_credit':  self._primary_credit(partner.id),
             'active_info':     active_info,
             'can_renew':       can_renew,
+            'payment_pending': payment_pending,
             'lbl_renew':       _('Renew'),
+            'lbl_cash_pending': _('Waiting for your payment'),
             'lbl_status':      _('Status'),
             'lbl_active':      _('Active'),
             'lbl_purchased':   _('Purchased'),
@@ -2206,6 +2217,11 @@ class FitnessStudentPortal(http.Controller):
         # for the same thing and owe double.
         if product.id in self._pending_cash_product_ids(partner):
             return request.redirect('/my/packages?cash_pending=1')
+        # Her card or Bizum payment for it is still with the bank. The shop
+        # page then says "Payment in progress... you do not need to pay
+        # again" - the same words she sees coming back from the payment.
+        if product.id in self._pending_online_product_ids(partner):
+            return request.redirect('/my/packages?from_payment=1')
 
         # The plan the student picked, validated against what was offered. It
         # is read on GET as well as POST so choosing one can re-render the
@@ -3441,6 +3457,26 @@ class FitnessStudentPortal(http.Controller):
             ('order_id.fitness_cash_pending', '=', True),
         ])
         return frozenset(lines.mapped('product_id.product_tmpl_id').ids)
+
+    @staticmethod
+    def _pending_online_product_ids(partner):
+        """Templates on an order of hers whose card or Bizum payment is
+        still with the bank: pending, or authorized and not yet captured.
+
+        A transfer is not here: that order is confirmed at checkout and the
+        plan already shows as Active. Nor is a draft transaction - one is
+        left behind by every payment form she opened and closed, and
+        counting it would hide Renew from her for good.
+        """
+        if not partner:
+            return frozenset()
+        txs = request.env['payment.transaction'].sudo().search([
+            ('partner_id', '=', partner.id),
+            ('state', 'in', ('pending', 'authorized')),
+        ])
+        orders = txs.sale_order_ids.filtered(
+            lambda o: o.state in ('draft', 'sent') and o.partner_id == partner)
+        return frozenset(orders.order_line.product_id.product_tmpl_id.ids)
 
     def _trial_entitlement_used(self, partner):
         """Has this student already had their one free trial?
