@@ -370,6 +370,14 @@ class FitnessStudentPortal(http.Controller):
         # cannot.
         return 'pending'
 
+    @staticmethod
+    def _booking_closed_label():
+        """The sentence that stands where Book would, inside the last-minute limit."""
+        minutes = request.env['fitness.booking'].sudo()._booking_cutoff_minutes()
+        return request.env._(
+            "Online booking closes %(minutes)s minutes before the class starts.",
+            minutes=minutes)
+
     def _recent_purchase_is_private(self, partner):
         """Was what she has just paid for a private class, and nothing else?"""
         if not partner:
@@ -622,6 +630,7 @@ class FitnessStudentPortal(http.Controller):
             for row in categories.read(['id', 'image_1920']):
                 cat_image_map[row['id']] = bool(row['image_1920'])
 
+        Booking = request.env['fitness.booking'].sudo()
         grouped_events = []
         _current_date = None
         _current_items = []
@@ -646,6 +655,9 @@ class FitnessStudentPortal(http.Controller):
             cat_id = cat_of_ct.get(ct_id, False)
             _current_items.append({
                 'event':        ev,
+                # Inside the studio's last-minute limit: the card says so
+                # instead of offering Book.
+                'closed':       Booking._fitness_inside_booking_cutoff(ev, now),
                 'local_time':   local_dt.strftime('%H:%M'),
                 'seats_v':      seats_v,
                 'seats_label':  seats_label,
@@ -692,6 +704,7 @@ class FitnessStudentPortal(http.Controller):
             'empty_state':     _('No classes available in the next %d days for your plan. Check back soon!') % sel_days,
             **self._no_sources_prompt(partner),
             'discipline_tabs': discipline_tabs,
+            'lbl_booking_closed': self._booking_closed_label(),
             # Same grid the timetable and My Schedule use, given this page's
             # own set of classes: what this student may actually book.
             'calendar_days': cal_days,
@@ -827,9 +840,13 @@ class FitnessStudentPortal(http.Controller):
         in_window = opens_at <= now or self._trial_booking_exempt(partner, event)
 
         is_private = event._fitness_is_private()
+        # The studio's last-minute limit, said on the page rather than met as
+        # an error after she taps. Same test the model applies.
+        closed = request.env['fitness.booking'].sudo()._fitness_inside_booking_cutoff(event, now)
         can_book = (
             not existing
             and not is_private
+            and not closed
             and bool(eligible_types)
             and discipline_ok
             and in_window
@@ -848,6 +865,8 @@ class FitnessStudentPortal(http.Controller):
         elif is_private:
             # Arranged by the studio: no button, whatever she holds.
             book_state = 'private'
+        elif closed:
+            book_state = 'closed'
         elif seats_left == 0:
             book_state = 'full'
         elif not eligible_types and self._trial_request_open(partner):
@@ -942,6 +961,7 @@ class FitnessStudentPortal(http.Controller):
             'duration_label':      duration_label,
             'lbl_private_by_studio': _('Private classes are arranged by the studio. '
                                        'The studio will contact you.'),
+            'lbl_booking_closed':  self._booking_closed_label(),
             'lbl_description':     _('Description'),
             'lbl_duration':        _('Duration'),
             'lbl_instructor':      _('Instructor'),

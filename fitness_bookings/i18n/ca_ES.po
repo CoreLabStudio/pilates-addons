@@ -1426,3 +1426,10 @@ msgid ""
 msgstr ""
 "%(student)s ja té una reserva que coincideix amb l'horari d'aquesta classe "
 "(%(other)s)."
+
+#. module: fitness_bookings
+#. odoo-python
+#: code:addons/fitness_bookings/models/fitness_booking.py:0
+#, python-format
+msgid "Online booking closes %(minutes)s minutes before the class starts."
+msgstr "La reserva en línia es tanca %(minutes)s minuts abans que comenci la classe."

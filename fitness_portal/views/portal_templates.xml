@@ -859,7 +859,12 @@
                                                     <t t-else="">
                                                         <span/>
                                                     </t>
-                                                    <t t-if="seats_v is None or seats_v &gt; 0">
+                                                    <!-- Inside the studio's last-minute limit:
+                                                         the reason, not a button. -->
+                                                    <t t-if="item.get('closed')">
+                                                        <span class="mv-class-meta" t-out="lbl_booking_closed"/>
+                                                    </t>
+                                                    <t t-elif="seats_v is None or seats_v &gt; 0">
                                                         <form method="post"
                                                               t-attf-action="/my/classes/#{ev.id}/book">
                                                             <input type="hidden" name="csrf_token"
@@ -1132,6 +1137,12 @@
                     <t t-elif="book_state == 'private'">
                         <div class="mv-class-soon">
                             <span class="mv-class-soon-sub" t-out="lbl_private_by_studio"/>
+                        </div>
+                    </t>
+                    <!-- Too close to the start for her to book it herself. -->
+                    <t t-elif="book_state == 'closed'">
+                        <div class="mv-class-soon">
+                            <span class="mv-class-soon-sub" t-out="lbl_booking_closed"/>
                         </div>
                     </t>
                     <t t-elif="book_state == 'full'">

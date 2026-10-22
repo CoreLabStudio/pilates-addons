@@ -5576,3 +5576,10 @@ msgstr "Cuota terminada (pasó el último día pagado)"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
 msgid "Her plan ended"
 msgstr "Terminó su cuota"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Online booking closes %(minutes)s minutes before the class starts."
+msgstr "La reserva online se cierra %(minutes)s minutos antes de que empiece la clase."

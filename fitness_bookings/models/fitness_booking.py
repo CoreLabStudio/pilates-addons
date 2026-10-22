@@ -44,6 +44,12 @@ BOOKING_WINDOW_DAYS = 7
 # rule once opening has passed.
 OPENING_DATE_PARAM = 'fitness.opening_date'
 
+# How long before a class a student can no longer book it herself, in minutes.
+# 0 (the default, and anything unreadable) means no limit. The studio's own
+# paths - Add a student, the booking form, a walk-in, a gift, the fixed-class
+# placement - are never limited: they are the studio deciding, not her.
+BOOKING_CUTOFF_PARAM = 'fitness.booking_cutoff_minutes'
+
 
 def fitness_opening_date(env):
     """First date the studio accepts bookings for, or None when unset."""
@@ -360,6 +366,22 @@ class FitnessBooking(models.Model):
                 "Cannot book a class that has already started or passed "
                 "(%(when)s).", when=local.strftime('%Y-%m-%d %H:%M')))
 
+        # ── 1a. Not in the last minutes before it starts, when she books ─────
+        #
+        # The studio's rule (22 Oct): a student cannot book herself into a
+        # class that starts within fitness.booking_cutoff_minutes. The same
+        # test as the private-class block above - a portal user, not running
+        # as superuser - so every way she books (timetable, class page,
+        # booking route, a direct RPC call) meets it, and none of the
+        # studio's paths does. Fixed-class placement is named as well: it
+        # books her whole period at once and must never lose a week to this.
+        if (not self.env.su and self.env.user.share
+                and not self.env.context.get('_fitness_clase_fija_placement')
+                and self._fitness_inside_booking_cutoff(event)):
+            raise ValidationError(self.env._(
+                "Online booking closes %(minutes)s minutes before the class "
+                "starts.", minutes=self._booking_cutoff_minutes()))
+
         # ── 1b. Not before the studio opens ──────────────────────────────────
         # Checked before the 7-day window so a class on the opening day gets
         # the reason that is actually true, rather than being told to come
@@ -655,6 +677,33 @@ class FitnessBooking(models.Model):
         }
 
     # ─── CANCEL ───────────────────────────────────────────────────────────────
+
+    @api.model
+    def _booking_cutoff_minutes(self):
+        """The studio's last-minute booking limit, in minutes; 0 is off."""
+        raw = self.env['ir.config_parameter'].sudo().get_param(BOOKING_CUTOFF_PARAM)
+        if raw in (None, False, ''):
+            return 0
+        try:
+            return max(0, int(float(raw)))
+        except (TypeError, ValueError):
+            _logger.warning(
+                "%s is %r, which is not a number of minutes; no booking limit "
+                "applied.", BOOKING_CUTOFF_PARAM, raw)
+            return 0
+
+    @api.model
+    def _fitness_inside_booking_cutoff(self, event, now=None):
+        """Is `event` too close to its start for a student to book it?
+
+        Measured in real time, UTC against UTC, so the night the clocks
+        change is the same 60 minutes as any other.
+        """
+        cutoff = self._booking_cutoff_minutes()
+        if not cutoff or not event or not event.start:
+            return False
+        seconds = (event.start - (now or fields.Datetime.now())).total_seconds()
+        return 0 < seconds < cutoff * 60
 
     @staticmethod
     def _format_window(hours):
