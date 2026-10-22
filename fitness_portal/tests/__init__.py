@@ -84,3 +84,4 @@ from . import test_cash_list_plan_ended
 from . import test_month_end_renewal
 from . import test_no_second_payment_while_pending
 from . import test_invoice_bell_says_paid
+from . import test_class_started_message

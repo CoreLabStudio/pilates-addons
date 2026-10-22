@@ -1043,13 +1043,13 @@ class FitnessStudentPortal(http.Controller):
             # Caught by type. This used to search the model's English error text
             # for "less than 2 hours", so changing either the wording or the
             # number silently dropped the student back to a raw model message.
-            hours = exc.window_hours or booking._cancellation_window_hours()
-            msg = _(
-                "This class starts in less than %(hours)s hours and can no "
-                "longer be cancelled online. Please contact the studio.",
-                hours=booking._format_window(hours),
-            )
-            qs = urlencode({'error': msg})
+            #
+            # The only refusal left is a class that has already started - a
+            # late cancel is allowed and forfeits the credit. This page then
+            # told her the class "starts in less than 6 hours", which was
+            # untrue, and in English whatever she reads. The model's own
+            # message says what happened, in her language.
+            qs = urlencode({'error': exc.args[0] if exc.args else str(exc)})
             return request.redirect(f'{base}{qs}')
         except (UserError, ValidationError) as exc:
             qs = urlencode({'error': str(exc)})
