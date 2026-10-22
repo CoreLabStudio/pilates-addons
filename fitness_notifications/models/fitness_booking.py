@@ -526,8 +526,12 @@ class FitnessBookingNotifications(models.Model):
             # Logged, not posted: a logged note notifies nobody, so no
             # follower and no preference can turn it into an email. The
             # managers are then given it through Odoo's own inbox delivery.
+            # Posted by the system (OdooBot), not in her name - it is the
+            # studio's record of what she did, not a message from her. Title
+            # and text on one line, so the inbox preview reads as a sentence.
             note = event.sudo()._message_log(
-                body=Markup('<p><strong>%s</strong></p><p>%s</p>') % (title, body))
+                body=Markup('<p><strong>%s</strong> – %s</p>') % (title, body),
+                author_id=self.env.ref('base.partner_root').id)
             recipients = [{'id': m.partner_id.id, 'uid': m.id, 'notif': 'inbox'}
                           for m in managers - teacher]
             if recipients:

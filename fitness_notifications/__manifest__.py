@@ -24,6 +24,14 @@
         'data/ir_cron.xml',
         'data/ir_cron_credit.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'fitness_notifications/static/src/js/class_notice_opens_schedule.js',
+        ],
+        'web.assets_tests': [
+            'fitness_notifications/static/tests/tours/class_notice_opens_schedule_tour.js',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,

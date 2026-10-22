@@ -17,7 +17,8 @@ Clock pinned, window read from the setting.
 """
 from datetime import datetime, timedelta
 
-from odoo.tests import TransactionCase, common, tagged
+from odoo.tests import HttpCase, TransactionCase, common, tagged
+from odoo.tools import html2plaintext
 
 PINNED = datetime(2026, 11, 4, 8, 0, 0)
 
@@ -138,6 +139,25 @@ class TestStudioToldOfCancel(TransactionCase):
         self.assertIn(student.name, text)
         self.assertIn(STILL['es_ES'] % still, text)
         self.assertEqual('menos de 6 horas' in text, late, text)
+        # Posted by the system, not in her name.
+        self.assertEqual(note.author_id, self.env.ref('base.partner_root'),
+                         'the note is posted as %s' % note.author_id.name)
+        self.assertNotEqual(note.author_id, student.partner_id)
+
+    def test_the_note_reads_as_one_line_in_es_ca_en(self):
+        """Title and text on one line, so the inbox preview reads as a sentence."""
+        for lang in ('es_ES', 'ca_ES', 'en_US'):
+            with self.subTest(lang=lang):
+                self.env.company.partner_id.lang = lang
+                event = self._class('group')
+                student, booking = self._book(event)
+                booking.with_user(student).action_cancel()
+                note = self._inbox(self.manager_ca, event).mail_message_id
+                self.assertEqual((note.body or '').count('<p>'), 1, 'two paragraphs: %s' % note.body)
+                line = html2plaintext(note.body or '').replace('*', '').strip()   # bold -> *x*
+                self.assertNotIn('\n', line, 'not one line: %r' % line)
+                self.assertTrue(line.startswith(TITLE[lang][0].strip()), '%s: %r' % (lang, line))
+                self.assertIn(' – %s ' % student.name, line, '%s: %r' % (lang, line))
 
     # -- who is told --------------------------------------------------------
 
@@ -216,3 +236,42 @@ class TestStudioToldOfCancel(TransactionCase):
         self.assertEqual(len(bell), 1)
         self.assertTrue(bell.title.startswith(TITLE['es_ES'][0]),
                         'not in the studio language: %s' % bell.title)
+
+
+@tagged('post_install', '-at_install')
+class TestClassNoticeOpensSchedule(HttpCase):
+    """Clicking the notice in the Odoo inbox opens the class in CoreLab -> Schedule."""
+
+    def test_the_notice_opens_the_class_in_corelab_schedule(self):
+        self.env['ir.config_parameter'].sudo().set_param('fitness.opening_date', '')
+        manager = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'TOUR Manager', 'login': 'tour.mgr@example.invalid', 'password': 'tour.mgr@example.invalid',
+            'email': 'tour.mgr@example.invalid', 'lang': 'en_US',
+            'group_ids': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('fitness_core.group_fitness_manager').id])]})
+        student = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'TOUR Student', 'login': 'tour.student@example.invalid',
+            'email': 'tour.student@example.invalid',
+            'group_ids': [(6, 0, [self.env.ref('base.group_portal').id,
+                                  self.env.ref('fitness_core.group_fitness_student').id])]})
+        ctype = self.env['fitness.class.type'].create({
+            'name': 'TOUR Type', 'classroom_type': 'reformer', 'duration': 50,
+            'level': 'all', 'session_type': 'group'})
+        pack = self.env['product.template'].create({
+            'name': 'TOUR pack', 'list_price': 50.0, 'type': 'service',
+            'fitness_is_package': True, 'fitness_class_count': 5, 'fitness_validity_days': 60,
+            'fitness_class_type': 'reformer', 'fitness_session_type': 'group'})
+        order = self.env['sale.order'].sudo().create({'partner_id': student.partner_id.id})
+        self.env['sale.order.line'].sudo().create({
+            'order_id': order.id, 'product_id': pack.product_variant_ids[:1].id,
+            'product_uom_qty': 1, 'fitness_class_type': 'reformer'})
+        order.action_confirm()
+        start = datetime.now().replace(microsecond=0) + timedelta(days=2)
+        event = self.env['calendar.event'].create({
+            'name': 'TOUR Class', 'start': start, 'stop': start + timedelta(minutes=50),
+            'class_type_id': ctype.id, 'is_fitness_class': True, 'capacity': 6})
+        booking = self.env['fitness.booking'].sudo().create({
+            'student_id': student.partner_id.id, 'calendar_event_id': event.id,
+            'package_order_line_id': order.order_line[:1].id})
+        booking.with_user(student).action_cancel()
+        self.start_tour('/odoo', 'fitness_class_notice_opens_schedule', login=manager.login)
