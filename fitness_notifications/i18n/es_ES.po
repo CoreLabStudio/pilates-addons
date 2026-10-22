@@ -435,3 +435,10 @@ msgstr "Cancelada con menos de %(hours)s horas de antelación."
 #: model:ir.model.fields.selection,name:fitness_notifications.selection__fitness_notification__notification_type__student_cancelled
 msgid "Student Cancelled a Booking"
 msgstr "Alumna canceló una reserva"
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/account_move.py:0
+#, python-format
+msgid "Paid: %(amount)s"
+msgstr "Pagada: %(amount)s"
