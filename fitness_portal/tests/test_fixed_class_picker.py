@@ -20,7 +20,7 @@ What these pin, in order of how much they would cost to get wrong:
   * the weekday is written in her own language, since the weekday is the
     entire choice
 """
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pytz
 
@@ -307,8 +307,35 @@ class TestFixedClassPicker(HttpCase):
             slot.calendar_event_id.start).astimezone(STUDIO_TZ)
         self.assertIn(local.strftime("%H:%M"), slot.name,
                       "the label does not name the studio's hour: %s" % slot.name)
-        self.assertNotIn("21:30", slot.name,
+        # Her clock's reading of the same class, worked out for its own date.
+        # This used to be the literal "21:30", which is 18:00 Madrid in
+        # Calcutta only on summer time; on a winter date her clock says 22:30,
+        # so the check passed whether or not the label was stamped in her zone.
+        wrong = pytz.utc.localize(slot.calendar_event_id.start).astimezone(
+            pytz.timezone("Asia/Calcutta")).strftime("%H:%M")
+        self.assertNotEqual(wrong, local.strftime("%H:%M"))
+        self.assertNotIn(wrong, slot.name,
                          "the label was stamped in the member's timezone")
+
+    def test_the_slot_label_uses_the_studio_clock_in_summer_and_winter(self):
+        """The same rule on a fixed summer and a fixed winter Wednesday.
+
+        18:00 Madrid is 21:30 in Calcutta on summer time and 22:30 on winter
+        time; the label says 18:00 on both, whoever's timezone is in context.
+        """
+        self.user.tz = "Asia/Calcutta"
+        for day, wrong in ((datetime(2026, 7, 15, 18, 0), "21:30"),
+                           (datetime(2026, 1, 14, 18, 0), "22:30")):
+            with self.subTest(day=day.date()):
+                start = STUDIO_TZ.localize(day).astimezone(pytz.utc).replace(tzinfo=None)
+                ev = self.env["calendar.event"].create({
+                    "name": "Label clock", "start": start,
+                    "stop": start + timedelta(hours=1),
+                    "class_type_id": self.class_type.id, "is_fitness_class": True})
+                label = self.env["fitness.clase.fija"].with_user(self.user).with_context(
+                    tz="Asia/Calcutta").sudo().new({"calendar_event_id": ev.id}).name
+                self.assertIn("18:00", label, "not the studio's hour: %s" % label)
+                self.assertNotIn(wrong, label, "stamped in her timezone: %s" % label)
 
     # ── the weekday is the choice, so it has to be in her language ──────────
 

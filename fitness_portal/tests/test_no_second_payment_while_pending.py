@@ -42,7 +42,7 @@ class TestNoSecondPaymentWhilePending(CloseFixture, HttpCase):
         self.assertEqual(old.subscription_state, '6_churn')
         return student, old
 
-    def _bizum_pending(self, student):
+    def _bizum_pending(self, student, state='pending'):
         with common.freeze_time(at(DAY)):
             order = self.env['sale.order'].sudo().create({
                 'partner_id': student.partner_id.id, 'plan_id': self.plan.id,
@@ -56,8 +56,27 @@ class TestNoSecondPaymentWhilePending(CloseFixture, HttpCase):
                 'payment_method_id': (PM.search([('code', '=', 'bizum')], limit=1) or PM.search([], limit=1)).id,
                 'reference': 'NSP-%s' % order.id, 'amount': order.amount_total,
                 'currency_id': order.currency_id.id, 'partner_id': student.partner_id.id,
-                'state': 'pending', 'sale_order_ids': [(6, 0, order.ids)]})
+                'state': state, 'sale_order_ids': [(6, 0, order.ids)]})
         return order, tx
+
+    def test_a_payment_form_she_opened_and_left_does_not_hide_renew(self):
+        """She opened the card form for her renewal and closed it.
+
+        Odoo leaves a draft transaction behind for every payment form that
+        was opened, paid or not. Counting it as "waiting for your payment"
+        would hide Renew from her for good, with no payment anywhere to wait
+        for - so a draft does not count, and Renew stays on the card, on the
+        product page and at the checkout.
+        """
+        student, old = self._closed('nspleft')
+        order, tx = self._bizum_pending(student, state='draft')
+        checkout, shop, detail, r = self._pages(student)
+        self.assertIn(checkout, shop, 'an abandoned payment form hid Renew on the shop card')
+        self.assertNotIn(WAITING, shop)
+        self.assertIn(checkout, detail, 'an abandoned payment form hid Renew on the product page')
+        self.assertNotIn(WAITING, detail)
+        self.assertIn(checkout, r.url, 'the checkout refused her after an abandoned form: %s' % r.url)
+        self.assertEqual(tx.state, 'draft')
 
     def _pages(self, student):
         checkout = '/my/packages/%d/checkout' % self.product.id
