@@ -16,7 +16,7 @@ constant.
 import pytz
 from datetime import date, datetime, timedelta
 
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, common, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -202,28 +202,65 @@ class TestCalendarGridTimes(TransactionCase):
         self.assertEqual(meta["hour_start"], 0)
         self.assertEqual(meta["count"], 0)
 
+    # ── a class that runs past the reader's midnight ───────────────────────
+    #
+    # Each case is a fixed date with the clock pinned to it. The first
+    # version took "today + 3 days" and Madrid 20:00, which is 23:30 in
+    # Asia/Calcutta only while Spain is on summer time: from 22 Oct 2026 that
+    # day fell after the clocks went back, Madrid 20:00 became 00:30 the next
+    # day in Calcutta, the class no longer crossed midnight, and the test
+    # failed on every winter date with 2 != 24. Madrid is UTC+2 in summer and
+    # UTC+1 in winter, so the hour that lands at 23:30 in Calcutta is 20:00 in
+    # summer and 19:00 in winter.
+
+    FAR = pytz.timezone("Asia/Calcutta")
+
+    def _past_midnight(self, *local_dts):
+        """meta for classes at these Madrid wall-clock times, read from Calcutta."""
+        events = self.env["calendar.event"]
+        for local_dt in local_dts:
+            events |= self._event(self.ct, local_dt)
+        for ev in events:
+            far_start = pytz.UTC.localize(ev.start).astimezone(self.FAR)
+            self.assertEqual(far_start.strftime("%H:%M"), "23:30",
+                             "fixture error: %s is not 23:30 in Calcutta" % ev.start)
+        first = min(local_dts).date()
+        with common.freeze_time(datetime(first.year, first.month, first.day, 6, 0)):
+            return self.env["fitness.calendar.grid"].build(
+                events, self.FAR, first,
+                dow_labels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+
+    def _assert_clipped_at_midnight(self, meta):
+        self.assertEqual(meta["hour_end"], 24)
+        self.assertEqual(meta["hours"][-1], "23:00")
+        self.assertNotIn("24:00", meta["hours"])
+
     def test_a_class_running_past_midnight_does_not_invent_a_24th_hour(self):
-        """Madrid's 20:00 is 23:30 for a reader in Asia/Calcutta.
+        """Summer: Madrid's 20:00 is 23:30 for a reader in Asia/Calcutta.
 
         Fifty minutes of it fall on the next day, and ceiling the range to the
         end of the last class then produced an hour labelled "24:00" - not a
         time, and a grid an hour taller than a day. The tail is clipped at the
         bottom of its own day instead.
         """
-        day = date.today() + timedelta(days=3)
-        far = pytz.timezone("Asia/Calcutta")
-        start = self.tz.localize(
-            datetime(day.year, day.month, day.day, 20, 0)
-        ).astimezone(pytz.UTC).replace(tzinfo=None)
-        ev = self.env["calendar.event"].create({
-            "name": self.ct.name,
-            "class_type_id": self.ct.id,
-            "start": start,
-            "stop": start + timedelta(minutes=50),
-        })
-        _days, meta = self.env["fitness.calendar.grid"].build(
-            ev, far, date.today(),
-            dow_labels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
-        self.assertEqual(meta["hour_end"], 24)
-        self.assertEqual(meta["hours"][-1], "23:00")
-        self.assertNotIn("24:00", meta["hours"])
+        _days, meta = self._past_midnight(datetime(2026, 7, 15, 20, 0))
+        self._assert_clipped_at_midnight(meta)
+
+    def test_in_winter_the_same_clip_holds(self):
+        """Winter: Madrid is UTC+1, so 19:00 is the class that ends past midnight."""
+        _days, meta = self._past_midnight(datetime(2026, 1, 14, 19, 0))
+        self._assert_clipped_at_midnight(meta)
+
+    def test_across_the_october_clock_change(self):
+        """Saturday on summer time and Sunday on winter time, one grid.
+
+        Spain's clocks went back at 03:00 on Sunday 25 Oct 2026. Saturday's
+        20:00 (UTC+2) and Sunday's 19:00 (UTC+1) are both 18:00 UTC, both
+        23:30 in Calcutta, and both clipped at the bottom of their own day.
+        """
+        days, meta = self._past_midnight(datetime(2026, 10, 24, 20, 0),
+                                         datetime(2026, 10, 25, 19, 0))
+        self._assert_clipped_at_midnight(meta)
+        by_iso = {d["iso"]: [s["time"] for s in d["slots"]] for d in days}
+        self.assertEqual(by_iso.get("2026-10-24"), ["23:30"])
+        self.assertEqual(by_iso.get("2026-10-25"), ["23:30"])
