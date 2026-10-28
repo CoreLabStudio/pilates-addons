@@ -212,6 +212,11 @@ class FitnessClassSchedule(models.Model):
 
         Writing a later `until` and re-applying is enough: `_apply_recurrence`
         reconciles against existing events and only creates the missing ones.
+
+        New classes take their teacher from the slot. Left to itself the
+        recurrence copies its first class, which is long past, so a slot
+        handed to another teacher kept generating weeks for the old one.
+        That first class is history and stays as it was taught.
         """
         for rec in self.filtered('recurrence_id'):
             target = rec._target_until()
@@ -219,7 +224,10 @@ class FitnessClassSchedule(models.Model):
             if current and current >= target:
                 continue
             rec.recurrence_id.write({'end_type': 'end_date', 'until': target})
-            rec.recurrence_id._apply_recurrence()
+            slot_values = {}
+            if rec.teacher_user_id:
+                slot_values = {rec.recurrence_id.id: {'user_id': rec.teacher_user_id.id}}
+            rec.recurrence_id._apply_recurrence(generic_values_creation=slot_values)
             rec.generated_until = target
             _logger.info("Schedule %s: extended to %s", rec.name, target)
             # Only the stretch just added needs sweeping; dates before `current`
