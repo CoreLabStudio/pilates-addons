@@ -277,6 +277,7 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
     def test_no_third_invoice_and_no_closure_after_a_renewal(self):
         p = self._student().partner_id
         start = self.today + timedelta(days=2) - relativedelta(months=1)
+        nxt = start + relativedelta(months=1)       # = today + 2, except on a month-end
         old = self.env['sale.order'].create({
             'partner_id': p.id, 'plan_id': self.month.id, 'start_date': start,
             'order_line': [(0, 0, {'product_id': self.plan.product_variant_ids[:1].id,
@@ -285,8 +286,8 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
         inv = old._create_invoices()
         inv.action_post()
         old.fitness_settle_invoice_in_cash(inv)        # month one paid
-        self.assertEqual(old.next_invoice_date, self.today + timedelta(days=2),
-                         'fixture: month one paid, ending in 2 days')
+        self.assertEqual(old.next_invoice_date, nxt,
+                         'fixture: month one paid, ending in about 2 days')
         new = self.env['sale.order'].create({
             'partner_id': p.id, 'plan_id': self.month.id,
             'order_line': [(0, 0, {'product_id': self.plan.product_variant_ids[:1].id,
@@ -318,12 +319,18 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
     # -- D1: a renewal on or after the old end ------------------------------
 
     def _old_paid(self, ends_in_days):
-        """Month one paid; its next billing date ends_in_days from today."""
+        """Month one paid; its next billing date about ends_in_days from today.
+
+        The expected date comes from the start, as Odoo computes it: on a
+        month-end the round trip is lossy (31 Oct - 1 month = 30 Sep, + 1 month
+        = 30 Oct), and asserting today + N failed on those days. Callers read
+        the old plan's end from old.next_invoice_date, never from today."""
         p = self._student().partner_id
-        nxt = self.today + timedelta(days=ends_in_days)
+        start = self.today + timedelta(days=ends_in_days) - relativedelta(months=1)
+        nxt = start + relativedelta(months=1)
         old = self.env['sale.order'].create({
             'partner_id': p.id, 'plan_id': self.month.id,
-            'start_date': nxt - relativedelta(months=1),
+            'start_date': start,
             'order_line': [(0, 0, {'product_id': self.plan.product_variant_ids[:1].id,
                                    'product_uom_qty': 1, 'price_unit': 95.0})]})
         old.with_context(skip_fitness_notification=True).action_confirm()
@@ -367,21 +374,24 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
 
     def test_renewal_on_the_end_day(self):
         p, old = self._old_paid(0)
+        paid_to = old.next_invoice_date - timedelta(days=1)
         new = self._paid_renewal(p)
         self.assertEqual(new.start_date, self.today)
-        self.assertEqual(old.end_date, self.today - timedelta(days=1))
+        self.assertEqual(old.end_date, paid_to)
         self._jobs_then_assert(old, new)
 
     def test_renewal_while_overdue(self):
         p, old = self._old_paid(-3)
+        paid_to = old.next_invoice_date - timedelta(days=1)
         new = self._paid_renewal(p)
         self.assertEqual(new.start_date, self.today)
-        self.assertEqual(old.end_date, self.today - timedelta(days=4),
+        self.assertEqual(old.end_date, paid_to,
                          'the old plan must end on its last paid day')
         self._jobs_then_assert(old, new)
 
     def test_a_cash_request_approved_after_the_end(self):
         p, old = self._old_paid(-2)
+        paid_to = old.next_invoice_date - timedelta(days=1)
         manager = self.env['res.users'].with_context(no_reset_password=True).create({
             'name': 'SR Desk', 'login': 'sr.desk.%d@example.invalid' % old.id,
             'group_ids': [(6, 0, [self.env.ref('base.group_user').id,
@@ -403,7 +413,7 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
         self.assertEqual(len(inv._get_reconciled_payments()), 1,
                          'the approval did not leave exactly one payment')
         self.assertEqual(req.start_date, self.today)
-        self.assertEqual(old.end_date, self.today - timedelta(days=3))
+        self.assertEqual(old.end_date, paid_to)
         self._jobs_then_assert(old, req)
 
     # -- D4: a renewal waiting for its payment ------------------------------
@@ -425,8 +435,9 @@ class TestRenewalAndOdoosBillingJob(RenewFixture, TransactionCase):
         After a renewal gives the old plan its end date, job 34 run the day
         after that end closes the old plan and leaves the renewal running."""
         p, old = self._old_paid(2)
+        paid_to = old.next_invoice_date - timedelta(days=1)
         new = self._paid_renewal(p)
-        self.assertEqual(old.end_date, self.today + timedelta(days=1))
+        self.assertEqual(old.end_date, paid_to)
         with common.freeze_time(old.end_date + timedelta(days=1)):
             self.env['sale.order']._cron_subscription_expiration()
         old.invalidate_recordset()

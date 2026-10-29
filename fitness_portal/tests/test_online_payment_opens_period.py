@@ -38,8 +38,10 @@ class TestOnlinePaymentOpensThePeriod(TransactionCase):
         cls.today = fields.Date.today()
         # Her month one ended yesterday-ish: paid to today+2, as Eva paid on
         # 14 Oct for a month starting 17 Oct.
-        cls.next = cls.today + timedelta(days=2)
-        cls.start = cls.next - relativedelta(months=1)
+        # The month's end comes from its start, as Odoo computes it: on a
+        # month-end today + 2 - 1 month + 1 month is not today + 2.
+        cls.start = cls.today + timedelta(days=2) - relativedelta(months=1)
+        cls.next = cls.start + relativedelta(months=1)
         wd = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][cls.today.weekday()]
         sched = env['fitness.class.schedule'].create({
             'name': 'OP weekly', 'class_type_id': ctype.id, 'classroom_id': room.id,
