@@ -40,15 +40,39 @@ class AccountMove(models.Model):
                 'number': move.name or '',
                 'studio': studio,
             }
-            body = translate('Amount due: %(amount)s') % {
-                'amount': self._fitness_format_amount(move),
-            }
+            # "Amount due" on an invoice she has already paid reads as a
+            # second bill. Paid says so; only a real balance is "due".
+            if move._fitness_invoice_is_paid():
+                body = translate('Paid: %(amount)s') % {
+                    'amount': self._fitness_format_amount(move),
+                }
+            else:
+                body = translate('Amount due: %(amount)s') % {
+                    'amount': self._fitness_format_amount(move),
+                }
             # /my/invoices/<id> is the account module's portal view; the
             # notification is about a specific invoice, so it should open it
             # rather than dead-end.
             Notif._create_for_user(user.id, 'invoice_issued', title, body,
                                    action_url='/my/invoices/%d' % move.id)
             _logger.info('[NOTIFICATIONS] Invoice %s -> student %s', move.name, user.login)
+
+    def _fitness_invoice_is_paid(self):
+        """Has she already paid what this invoice asks for?
+
+        Asked at posting, which comes before the payment entry on every
+        path that takes money up front: the card or Bizum transaction is
+        done before Odoo invoices it, and the desk takes the cash before
+        the invoice is settled. So it is answered from how the money came,
+        not only from the ledger: paid in the ledger, or a completed online
+        payment behind the order. fitness_portal adds cash taken at the desk.
+        """
+        self.ensure_one()
+        if self.payment_state in ('paid', 'in_payment'):
+            return True
+        orders = self.sudo().invoice_line_ids.sale_line_ids.order_id
+        txs = orders.transaction_ids if 'transaction_ids' in orders._fields else orders.browse()
+        return bool(txs.filtered(lambda t: t.state == 'done'))
 
     @staticmethod
     def _fitness_format_amount(move):

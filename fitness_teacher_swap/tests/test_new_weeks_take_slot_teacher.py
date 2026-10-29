@@ -40,7 +40,7 @@ class TestNewWeeksTakeSlotTeacher(TransactionCase):
             "lang": "en_US", "group_ids": [(6, 0, [portal, teacher])]})
         cls.naivi = Users.create({
             "name": "Slot Naivi", "login": "slot.naivi@example.invalid",
-            "lang": "es_ES", "group_ids": [(6, 0, [portal, teacher])]})
+            "lang": "en_US", "group_ids": [(6, 0, [portal, teacher])]})
         cls.student = Users.create({
             "name": "Slot Student", "login": "slot.student@example.invalid",
             "lang": "en_US", "group_ids": [(6, 0, [portal, student])]})

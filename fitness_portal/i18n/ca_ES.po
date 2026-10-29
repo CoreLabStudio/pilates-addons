@@ -5573,3 +5573,10 @@ msgstr "Quota acabada (va passar l'últim dia pagat)"
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_sale_order_tree_fitness_cash
 msgid "Her plan ended"
 msgstr "Va acabar la seva quota"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/controllers/portal.py:0
+#, python-format
+msgid "Online booking closes %(minutes)s minutes before the class starts."
+msgstr "La reserva en línia es tanca %(minutes)s minuts abans que comenci la classe."

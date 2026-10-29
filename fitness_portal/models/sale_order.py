@@ -519,7 +519,9 @@ class SaleOrder(models.Model):
         # student receives.
         invoice = invoice.sudo()
         if invoice.state == 'draft':
-            invoice.action_post()
+            # Said for her bell: the cash is in the till, so the invoice is
+            # announced as paid, not as an amount due.
+            invoice.with_context(fitness_paid_in_cash=True).action_post()
         # The invoice covers the period being paid for, so it is raised first
         # and the clock moved afterwards - ONCE. Posting it already moves
         # next_invoice_date to the day after the paid period (Odoo's
