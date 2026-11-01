@@ -157,6 +157,11 @@ msgid "Bell Reminder Sent"
 msgstr "Recordatorio enviado"
 
 #. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__fitness_mail_lang
+msgid "Mail Language"
+msgstr "Idioma del correo"
+
+#. module: fitness_notifications
 #. odoo-python
 #: code:addons/fitness_notifications/models/sale_order.py:0
 msgid "%s confirmed"

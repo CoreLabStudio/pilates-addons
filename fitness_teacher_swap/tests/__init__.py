@@ -5,3 +5,4 @@ from . import test_swap_emails_the_student
 from . import test_rescheduled_email_policy
 from . import test_her_page_keeps_today
 from . import test_new_weeks_take_slot_teacher
+from . import test_swap_mail_lang_falls_back

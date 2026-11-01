@@ -49,6 +49,23 @@ class FitnessBookingNotifications(models.Model):
         help="Set once the 6–12h bell-notification cron has fired for this booking. "
              "Prevents duplicate in-app reminders.",
     )
+    # The language every student email on a booking is written in.
+    #
+    # The templates used to say {{ object.student_id.lang }}. Odoo renders
+    # a template in its lang and refuses a code that is not active
+    # ("Invalid language code"), so a student carrying a deactivated
+    # language - switched on once and off later, or imported with one -
+    # was sent nothing, and _send_notification swallowed the error. Hers
+    # when it is active, else the studio's: the rule the bells already
+    # use, and the trial emails' fix (_trial_lang) in the same shape.
+    fitness_mail_lang = fields.Char(
+        "Mail Language", compute='_compute_fitness_mail_lang')
+
+    @api.depends('student_id.lang')
+    def _compute_fitness_mail_lang(self):
+        for booking in self:
+            booking.fitness_mail_lang = recipient_lang(
+                self.env, booking.student_id)
 
     @api.model
     def _notif_enabled(self, key):

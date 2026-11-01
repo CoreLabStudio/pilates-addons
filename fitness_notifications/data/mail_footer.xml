@@ -9,11 +9,11 @@
          caught out by stale contact details reaching students.
 
          Callers set notice_lang before calling, because the language lives on
-         a different field per model - student_id.lang on a booking, lang on a
+         a different field per model - fitness_mail_lang on a booking, mail_lang on a
          trial request - and the footer should not have to know which model it
          is being rendered under.
 
-             <t t-set="notice_lang" t-value="object.student_id.lang"/>
+             <t t-set="notice_lang" t-value="object.fitness_mail_lang"/>
              <t t-call="fitness_notifications.mail_footer_no_reply"/>
 
          Why it exists: replies to these emails go to info@corelabstudio.es,

@@ -16,3 +16,4 @@ from . import test_silent_booking_bells
 from . import test_studio_told_of_cancel
 from . import test_credit_zero_per_discipline
 from . import test_last_private_credit_no_buy_nudge
+from . import test_mail_lang_falls_back

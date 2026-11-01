@@ -25,17 +25,17 @@
                  as every other CoreLab template, deliberately. -->
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="use_default_to" eval="False"/>
-            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="lang">{{ object.fitness_mail_lang }}</field>
             <field name="description">Sent to a student when the studio runs a campaign</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:14px;">
     <p>
         <t t-out="object.partner_id.name or ''">Hola</t>,
     </p>
-    <p t-if="object.partner_id.lang == 'ca_ES'">
+    <p t-if="object.fitness_mail_lang == 'ca_ES'">
         Ens agradaria molt saber què en penses. Només et prendrà un moment.
     </p>
-    <p t-elif="object.partner_id.lang == 'en_US'">
+    <p t-elif="object.fitness_mail_lang == 'en_US'">
         We would really like to know what you think. It only takes a moment.
     </p>
     <p t-else="">
@@ -45,8 +45,8 @@
         <a t-attf-href="{{ object.get_start_url() }}"
            style="background:#6b2c3e;color:#ffffff;padding:12px 22px;
                   border-radius:6px;text-decoration:none;display:inline-block;">
-            <t t-if="object.partner_id.lang == 'ca_ES'">Respondre</t>
-            <t t-elif="object.partner_id.lang == 'en_US'">Answer</t>
+            <t t-if="object.fitness_mail_lang == 'ca_ES'">Respondre</t>
+            <t t-elif="object.fitness_mail_lang == 'en_US'">Answer</t>
             <t t-else="">Responder</t>
         </a>
     </p>
