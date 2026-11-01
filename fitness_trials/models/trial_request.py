@@ -1590,6 +1590,25 @@ class FitnessTrialRequest(models.Model):
         return self._all_trial_products().filtered(
             lambda prod: not self._trial_taken(partner, prod))
 
+    @api.model
+    def _price_label(self, amount, lang):
+        """A price as a person writes it, without the currency sign.
+
+        Whole euros have no decimals - "12", never "12.0", which is what a
+        float printed straight into a template gives. A price with cents
+        keeps both digits, with the decimal comma in Spanish and Catalan:
+        "12,50", and "12.50" in English.
+        """
+        if amount is None or amount is False:
+            return ''
+        cents = round(float(amount) * 100)
+        if cents % 100 == 0:
+            return '%d' % (cents // 100)
+        text = '%.2f' % (cents / 100.0)
+        if lang != 'en_US':
+            text = text.replace('.', ',')
+        return text
+
     def _all_trial_products(self):
         """Both trial products, whichever disciplines are configured."""
         products = self.env['product.template'].browse()
