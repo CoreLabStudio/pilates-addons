@@ -58,6 +58,12 @@ msgstr "Has usado tu último crédito. Visita Bonos para comprar más."
 #. module: fitness_notifications
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "You have used your last credit."
+msgstr "Has usado tu último crédito."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
 msgid "Only %d credit(s) left"
 msgstr "Solo quedan %d crédito(s)"

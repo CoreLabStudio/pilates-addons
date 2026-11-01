@@ -350,11 +350,19 @@ class FitnessBookingNotifications(models.Model):
         if recent:
             return
         lang_env = self.with_context(lang=recipient_lang(self.env, user))
+        # A private class is arranged by the studio, never bought and
+        # booked by her, so the nudge to go and buy more does not fit it.
+        # She is still told the credit is gone.
+        if booking.calendar_event_id.sudo()._fitness_is_private():
+            body = lang_env.env._('You have used your last credit.')
+        else:
+            body = lang_env.env._(
+                'You have used your last credit. Visit Packages to purchase more.')
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_zero',
             lang_env.env._('No credits remaining'),
-            lang_env.env._('You have used your last credit. Visit Packages to purchase more.'),
+            body,
             action_url='/my/packages',
         )
 
