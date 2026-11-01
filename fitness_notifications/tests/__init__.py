@@ -14,3 +14,4 @@ from . import test_instructor_is_told
 from . import test_product_name_in_reader_language
 from . import test_silent_booking_bells
 from . import test_studio_told_of_cancel
+from . import test_credit_zero_per_discipline
