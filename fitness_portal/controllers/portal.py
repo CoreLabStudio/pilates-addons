@@ -321,6 +321,33 @@ class FitnessStudentPortal(http.Controller):
             'lbl_timetable_cta':  _('View timetable'),
         })
 
+    def _recent_payment_tx(self, partner):
+        """The payment she has just made: her latest transaction of the last
+        30 minutes, or an empty recordset."""
+        Tx = request.env['payment.transaction'].sudo()
+        if not partner:
+            return Tx
+        window = fields.Datetime.now() - timedelta(minutes=30)
+        return Tx.search(
+            [('partner_id', '=', partner.id),
+             ('create_date', '>=', fields.Datetime.to_string(window))],
+            order='create_date desc', limit=1)
+
+    def _recent_payment_paid_for(self, partner, orders):
+        """Did the payment she has just made pay one of these orders?
+
+        Compared by the contract each order descends from, so paying the
+        renewal of a membership counts as paying that membership, whichever
+        of the two is the one still owed its hours.
+        """
+        paid = self._recent_payment_tx(partner).sale_order_ids
+        if not paid or not orders:
+            return False
+
+        def contract(so):
+            return so.origin_order_id or so
+        return bool(paid.mapped(contract) & orders.mapped(contract))
+
     def _recent_payment_state(self, partner):
         """done, pending or failed, for a student just back from paying.
 
@@ -350,13 +377,7 @@ class FitnessStudentPortal(http.Controller):
         failed is only cancel and error - a provider saying outright that it
         did not happen.
         """
-        if not partner:
-            return None
-        window = fields.Datetime.now() - timedelta(minutes=30)
-        tx = request.env['payment.transaction'].sudo().search(
-            [('partner_id', '=', partner.id),
-             ('create_date', '>=', fields.Datetime.to_string(window))],
-            order='create_date desc', limit=1)
+        tx = self._recent_payment_tx(partner)
         if not tx:
             return None
         if tx.state in ('cancel', 'error'):
@@ -380,13 +401,7 @@ class FitnessStudentPortal(http.Controller):
 
     def _recent_purchase_is_private(self, partner):
         """Was what she has just paid for a private class, and nothing else?"""
-        if not partner:
-            return False
-        window = fields.Datetime.now() - timedelta(minutes=30)
-        tx = request.env['payment.transaction'].sudo().search(
-            [('partner_id', '=', partner.id),
-             ('create_date', '>=', fields.Datetime.to_string(window))],
-            order='create_date desc', limit=1)
+        tx = self._recent_payment_tx(partner)
         lines = tx.sale_order_ids.order_line.filtered(
             lambda l: l.product_id.fitness_is_package)
         return bool(lines) and all(
@@ -1467,10 +1482,23 @@ class FitnessStudentPortal(http.Controller):
         # them, as a signed checkout already does. Every card payment lands
         # here, and this page never asked - so card buyers paid for reserved
         # classes nobody booked.
-        if (kw.get('from_payment')
-                and self._clase_fija_subs_needing_slots(partner)
-                and self._recent_payment_state(partner) == 'done'):
-            return request.redirect('/my/fixed-class')
+        #
+        # Only when what she just paid IS that membership (or its renewal).
+        # A member still missing her hours who buys a pack by card has come
+        # back for the pack, and is shown it; Home keeps asking about the
+        # hours.
+        if kw.get('from_payment') and self._recent_payment_state(partner) == 'done':
+            owed = self._clase_fija_subs_needing_slots(partner)
+            if owed and self._recent_payment_paid_for(partner, owed):
+                return request.redirect('/my/fixed-class')
+        # Back from paying for a pack: open the tab the pack is on, not the
+        # single classes.
+        if tab is None and kw.get('from_payment'):
+            paid_lines = self._recent_payment_tx(partner).sale_order_ids.order_line
+            if any(l.product_id.fitness_is_package
+                   and l.product_id.fitness_class_count > 1
+                   for l in paid_lines):
+                tab = 'packages'
         # Classes is the first tab, so it is also what the bare URL shows.
         # 'packages' has to be matched explicitly now that it is no longer the
         # fallback - ?tab=packages was already a live link before this change.
