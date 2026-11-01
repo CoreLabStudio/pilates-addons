@@ -127,10 +127,20 @@ class OneTrialFixture(TransactionCase):
             ('student_id', '=', student.partner_id.id)])
 
     def _request(self, student, room):
-        return self.TR.create({
+        req = self.TR.create({
             'name': student.name, 'email': student.email, 'phone': '600000000',
             'class_interest': room, 'partner_id': student.partner_id.id,
             'occurrence_id': self._class(room, 48 + self._seq).id})
+        # create_date comes from PostgreSQL's now(), which freeze_time does not
+        # reach, and approval prices the trial on the request's create_date.
+        # Left alone, every request is filed on the real day: from 1 Nov 2026
+        # that was after this fixture's offer end, and the free trial was
+        # charged. Filed on the pinned day, as the rest of the fixture is.
+        self.env.cr.execute(
+            "UPDATE fitness_trial_request SET create_date = %s WHERE id = %s",
+            (PINNED, req.id))
+        req.invalidate_recordset(['create_date'])
+        return req
 
     def _approve(self, req, lang='en_US'):
         req.with_user(self.manager).with_context(lang=lang).action_approve_and_book()
