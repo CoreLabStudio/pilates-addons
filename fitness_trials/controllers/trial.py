@@ -420,6 +420,15 @@ class TrialRequestController(http.Controller):
             'preferred_period': preferred_period,
         }
 
+        # Once the free trial is over, the page says so and shows no form -
+        # but a direct POST never asked, and created a pending request after
+        # the end. Same answer as the page, and nothing is written.
+        if not self._trials()._trial_offer_open():
+            _logger.info("Trial submission refused: the free trial offer has ended")
+            return request.render(
+                'fitness_trials.trial_request_form',
+                self._form_ctx(form_values=form_values, source=source))
+
         # In the app, a student whose free trial is spent does not get to
         # submit this form at all.
         #
