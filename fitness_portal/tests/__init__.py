@@ -88,3 +88,4 @@ from . import test_invoice_bell_says_paid
 from . import test_class_started_message
 from . import test_booking_cutoff
 from . import test_cancel_policy_shown_once
+from . import test_duplicate_candidate_labels
