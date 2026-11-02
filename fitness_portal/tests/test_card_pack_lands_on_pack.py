@@ -59,6 +59,22 @@ class TestCardPaymentLandsOnWhatWasPaid(FixedFixture, HttpCase):
         else:
             cls.provider = Provider.search([], limit=1)
             cls.provider.write({'state': 'test'})
+            # Post-processing records an account.payment, which needs a payment
+            # method line for this provider on a bank journal. Stripe ships its
+            # account.payment.method; a generic provider (custom, none) does not,
+            # so on a gate database the payment was refused ("define a payment
+            # method line"). Give the borrowed provider the same set-up Stripe has.
+            code = cls.provider._get_code()
+            Method = cls.env['account.payment.method'].sudo()
+            if not Method.search([('code', '=', code)], limit=1):
+                Method.create({'name': 'CP card', 'code': code, 'payment_type': 'inbound'})
+            journal = cls.env['account.journal'].sudo().search([
+                ('type', '=', 'bank'), ('company_id', '=', cls.env.company.id)], limit=1)
+            if not journal:
+                journal = cls.env['account.journal'].sudo().create(
+                    {'name': 'CP Bank', 'type': 'bank', 'code': 'CPBK'})
+            cls.provider.journal_id = journal
+            cls.provider._ensure_payment_method_line()
         cls.card = cls.env.ref('payment.payment_method_card').sudo()
         cls.pack = cls.env['product.template'].sudo().create({
             'name': 'CP Reformer Pack 5', 'type': 'service', 'list_price': 60.0,
