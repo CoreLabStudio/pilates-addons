@@ -730,3 +730,37 @@ msgstr ""
 "¡Nos encantaría volver a verte en clase! Tu clase de prueba gratuita ya se "
 "ha usado, así que no podemos aceptar esta solicitud. Puedes comprar un "
 "bono o una membresía en la Tienda y reservar cuando mejor te venga."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "We'd love to see you in class! Your free trial was given to you but expired before you used it, so this request can't be accepted. Note from the studio: %(why)s You can buy a class pack or membership in the Shop and book whenever suits you."
+msgstr "¡Nos encantaría verte en clase! Tu clase de prueba gratuita se te concedió pero caducó sin que la usaras, así que no podemos aceptar esta solicitud. Nota del estudio: %(why)s Puedes comprar un bono o una membresía en la Tienda y reservar cuando mejor te venga."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "We'd love to see you in class! Your free trial was given to you but expired before you used it, so this request can't be accepted. You can buy a class pack or membership in the Shop and book whenever suits you."
+msgstr "¡Nos encantaría verte en clase! Tu clase de prueba gratuita se te concedió pero caducó sin que la usaras, así que no podemos aceptar esta solicitud. Puedes comprar un bono o una membresía en la Tienda y reservar cuando mejor te venga."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one: %(why)s The free trial offer has ended. You can book a trial class in the app for %(price)s €."
+msgstr "El estudio no ha podido aceptar esta: %(why)s La oferta de clase de prueba gratuita ha terminado. Puedes reservar una clase de prueba en la app por %(price)s €."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one. The free trial offer has ended. You can book a trial class in the app for %(price)s €."
+msgstr "El estudio no ha podido aceptar esta. La oferta de clase de prueba gratuita ha terminado. Puedes reservar una clase de prueba en la app por %(price)s €."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "Their free trial was given but expired unused, so it is not offered free again."
+msgstr "Su clase de prueba gratuita se le concedió pero caducó sin usarse, así que no se le vuelve a ofrecer gratis."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "The free trial offer has ended, so they cannot ask for a free class again. They can book a trial class in the app at its price."
+msgstr "La oferta de clase de prueba gratuita ha terminado, así que no puede volver a pedir una clase gratis. Puede reservar una clase de prueba en la app a su precio."

@@ -47,7 +47,7 @@ class FitnessDuplicateCandidate(models.Model):
              "the same student with a work address on one contact and a "
              "personal one on the other.")
     partner_ids = fields.Many2many('res.partner', string="Contacts")
-    partner_count = fields.Integer("Contacts", default=0)
+    partner_count = fields.Integer("Number of contacts", default=0)
     login_count = fields.Integer("With a login", default=0)
     reason = fields.Char(
         "Why it needs a person",

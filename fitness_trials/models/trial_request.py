@@ -1294,20 +1294,72 @@ class FitnessTrialRequest(models.Model):
         can ask again: she would be refused again.
         """
         self.ensure_one()
+        return self._decline_case() in ('spent', 'expired')
+
+    def _decline_case(self):
+        """Which truth declining this request has to tell, in one word.
+
+        'open'    - she may still have her free class: ask again.
+        'spent'   - she has had her trial; asking again would be refused.
+        'expired' - her free trial was given and its credit lapsed unused.
+                    "Already had" was false: she never came.
+        'closed'  - the free trial offer has ended, so nothing free can be
+                    asked for again. The bell and the dialog used to say
+                    "ask again" here, and she would have been refused.
+        """
+        self.ensure_one()
         # A scheduled request's own booking is what holds her trial, and
-        # declining cancels it and gives the credit back (_decline). Asked
-        # before that - by the dialog - it would read as spent, and the
+        # declining cancels it and gives the entitlement back (_decline).
+        # Asked before that - by the dialog - it would read as spent, and the
         # manager was told "already had their trial" while the student was
-        # rightly told her free class has not been used.
+        # rightly told her free class has not been used. What comes back is
+        # the entitlement, which a closed offer no longer honours.
         if self._find_booking().filtered(lambda b: b.state == 'booked'):
-            return False
+            return 'open' if self._trial_offer_open() else 'closed'
         partner = self.partner_id or self._match_partner()
         product = self._trial_product()
         if not partner or not product:
-            return False
+            return 'open'
+        # A credit she holds is hers whatever the offer does.
         if self._existing_trial_credit(partner, product):
+            return 'open'
+        why = self._free_trial_refusal(partner, product)
+        if why in ('used', 'taken'):
+            if self._free_trial_expired_unused(partner):
+                return 'expired'
+            return 'spent'
+        if why == 'closed':
+            return 'closed'
+        return 'open'
+
+    def _free_trial_expired_unused(self, partner):
+        """Was her free trial given, and did it lapse without her coming?
+
+        True only when she was given a free trial and no trial credit of
+        hers, in either discipline, was ever spent: every confirmed trial
+        line still has its class and is past its validity date. One she
+        booked - attended or not - is a trial she had.
+        """
+        variants = self._all_trial_products().mapped('product_variant_ids').ids
+        if not partner or not variants:
             return False
-        return self._free_trial_refusal(partner, product) in ('used', 'taken')
+        lines = self.env['sale.order.line'].sudo().search([
+            ('order_id.partner_id', '=', partner.id),
+            ('order_id.state', 'in', ('sale', 'done')),
+            ('product_id', 'in', variants),
+        ])
+        if not lines:
+            return False
+        rounding = self.env.company.currency_id.rounding or 0.01
+        if not any(float_is_zero(l.price_total or 0.0,
+                                 precision_rounding=rounding) for l in lines):
+            return False
+        today = studio_today()
+        return all(
+            (l.fitness_remaining_classes or 0) > 0
+            and l.fitness_validity_end_date
+            and l.fitness_validity_end_date < today
+            for l in lines)
 
     def _notify_declined(self, reason):
         """In-app and push, in the student's own language.
@@ -1340,7 +1392,42 @@ class FitnessTrialRequest(models.Model):
             # only tell her the same) or to the trial page (which would refuse
             # her again).
             url = '/my/trial'
-            if self._trial_spent():
+            case = self._decline_case()
+            if case == 'expired':
+                # She never came: "already used" was false.
+                url = '/my/packages'
+                if reason:
+                    body = lang_env.env._(
+                        "We'd love to see you in class! Your free trial was "
+                        "given to you but expired before you used it, so this "
+                        "request can't be accepted. Note from the studio: "
+                        "%(why)s You can buy a class pack or membership in the "
+                        "Shop and book whenever suits you.", why=reason.strip())
+                else:
+                    body = lang_env.env._(
+                        "We'd love to see you in class! Your free trial was "
+                        "given to you but expired before you used it, so this "
+                        "request can't be accepted. You can buy a class pack "
+                        "or membership in the Shop and book whenever suits you.")
+            elif case == 'closed':
+                # No free trial can be had once the offer has ended, so no
+                # invitation to ask again. The trial class is still sold, at
+                # its list price - the figure the /trial page shows.
+                url = '/my/packages'
+                price = self._price_label(
+                    self._trial_product().list_price, lang_env.env.lang)
+                if reason:
+                    body = lang_env.env._(
+                        "The studio could not take this one: %(why)s The free "
+                        "trial offer has ended. You can book a trial class in "
+                        "the app for %(price)s €.",
+                        why=reason.strip(), price=price)
+                else:
+                    body = lang_env.env._(
+                        "The studio could not take this one. The free trial "
+                        "offer has ended. You can book a trial class in the "
+                        "app for %(price)s €.", price=price)
+            elif case == 'spent':
                 url = '/my/packages'
                 if reason:
                     body = lang_env.env._(
@@ -1589,6 +1676,25 @@ class FitnessTrialRequest(models.Model):
         """
         return self._all_trial_products().filtered(
             lambda prod: not self._trial_taken(partner, prod))
+
+    @api.model
+    def _price_label(self, amount, lang):
+        """A price as a person writes it, without the currency sign.
+
+        Whole euros have no decimals - "12", never "12.0", which is what a
+        float printed straight into a template gives. A price with cents
+        keeps both digits, with the decimal comma in Spanish and Catalan:
+        "12,50", and "12.50" in English.
+        """
+        if amount is None or amount is False:
+            return ''
+        cents = round(float(amount) * 100)
+        if cents % 100 == 0:
+            return '%d' % (cents // 100)
+        text = '%.2f' % (cents / 100.0)
+        if lang != 'en_US':
+            text = text.replace('.', ',')
+        return text
 
     def _all_trial_products(self):
         """Both trial products, whichever disciplines are configured."""

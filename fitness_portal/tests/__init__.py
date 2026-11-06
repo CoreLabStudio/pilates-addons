@@ -68,6 +68,7 @@ from . import test_walkin_window_to_the_minute
 from . import test_one_trial_rule
 from . import test_fixed_class_only_future
 from . import test_fixed_class_after_payment
+from . import test_card_pack_lands_on_pack
 from . import test_booking_form_without_sales
 from . import test_decline_tells_the_truth
 from . import test_renew_cash_moves_once
@@ -87,3 +88,4 @@ from . import test_invoice_bell_says_paid
 from . import test_class_started_message
 from . import test_booking_cutoff
 from . import test_cancel_policy_shown_once
+from . import test_duplicate_candidate_labels

@@ -7,17 +7,17 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_booking_confirmation" model="mail.template">
-            <field name="lang">{{ object.student_id.lang }}</field>
+            <field name="lang">{{ object.fitness_mail_lang }}</field>
             <field name="name">Fitness: Booking Confirmation</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
-            <field name="subject">{{ 'Booking Confirmed' if object.student_id.lang == 'en_US' else ('Reserva Confirmada' if object.student_id.lang == 'ca_ES' else 'Reserva Confirmada') }}</field>
+            <field name="subject">{{ 'Booking Confirmed' if object.fitness_mail_lang == 'en_US' else ('Reserva Confirmada' if object.fitness_mail_lang == 'ca_ES' else 'Reserva Confirmada') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
-  <t t-if="object.student_id.lang == 'en_US'">
+  <t t-if="object.fitness_mail_lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Your booking is confirmed:</p>
     <ul>
@@ -40,7 +40,7 @@
     <p style="color:#2E2724;">You must cancel at least <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts to recover your credit. Cancellations made less than <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class, or no-shows, will result in full credit deduction with no refund.</p>
     <p>See you soon!</p>
   </t>
-  <t t-elif="object.student_id.lang == 'ca_ES'">
+  <t t-elif="object.fitness_mail_lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>La teva reserva està confirmada:</p>
     <ul>
@@ -86,7 +86,7 @@
     <p style="color:#2E2724;">Debes cancelar al menos <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de <t t-out="object._format_window(object._cancellation_window_hours())"/> horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</p>
     <p>¡Nos vemos pronto!</p>
   </t>
-  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-set="notice_lang" t-value="object.fitness_mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
@@ -97,17 +97,17 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_booking_cancellation" model="mail.template">
-            <field name="lang">{{ object.student_id.lang }}</field>
+            <field name="lang">{{ object.fitness_mail_lang }}</field>
             <field name="name">Fitness: Booking Cancellation</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
-            <field name="subject">{{ 'Booking Cancelled' if object.student_id.lang == 'en_US' else ('Reserva Cancel·lada' if object.student_id.lang == 'ca_ES' else 'Reserva Cancelada') }}</field>
+            <field name="subject">{{ 'Booking Cancelled' if object.fitness_mail_lang == 'en_US' else ('Reserva Cancel·lada' if object.fitness_mail_lang == 'ca_ES' else 'Reserva Cancelada') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
-  <t t-if="object.student_id.lang == 'en_US'">
+  <t t-if="object.fitness_mail_lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Your booking has been cancelled:</p>
     <ul>
@@ -119,7 +119,7 @@
       <p>Your credit has been returned.</p>
     </t>
   </t>
-  <t t-elif="object.student_id.lang == 'ca_ES'">
+  <t t-elif="object.fitness_mail_lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>La teva reserva ha estat cancel·lada:</p>
     <ul>
@@ -143,7 +143,7 @@
       <p>Tu crédito ha sido devuelto.</p>
     </t>
   </t>
-  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-set="notice_lang" t-value="object.fitness_mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
@@ -154,17 +154,17 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <record id="mail_template_class_reminder" model="mail.template">
-            <field name="lang">{{ object.student_id.lang }}</field>
+            <field name="lang">{{ object.fitness_mail_lang }}</field>
             <field name="name">Fitness: Class Reminder</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
-            <field name="subject">{{ 'Class Reminder' if object.student_id.lang == 'en_US' else ('Recordatori de Classe' if object.student_id.lang == 'ca_ES' else 'Recordatorio de Clase') }}</field>
+            <field name="subject">{{ 'Class Reminder' if object.fitness_mail_lang == 'en_US' else ('Recordatori de Classe' if object.fitness_mail_lang == 'ca_ES' else 'Recordatorio de Clase') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
-  <t t-if="object.student_id.lang == 'en_US'">
+  <t t-if="object.fitness_mail_lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>Reminder — you have an upcoming class:</p>
     <ul>
@@ -175,7 +175,7 @@
     <p style="color:#2E2724;">You must cancel at least <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts to recover your credit. Cancellations made less than <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class, or no-shows, will result in full credit deduction with no refund.</p>
     <p>See you there!</p>
   </t>
-  <t t-elif="object.student_id.lang == 'ca_ES'">
+  <t t-elif="object.fitness_mail_lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Recordatori — tens una classe properament:</p>
     <ul>
@@ -197,7 +197,7 @@
     <p style="color:#2E2724;">Debes cancelar al menos <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de <t t-out="object._format_window(object._cancellation_window_hours())"/> horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</p>
     <p>¡Nos vemos allí!</p>
   </t>
-  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-set="notice_lang" t-value="object.fitness_mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>
@@ -208,17 +208,17 @@
              to say plainly which class they have left and which they are now
              in, or they turn up on the wrong evening. -->
         <record id="mail_template_booking_moved" model="mail.template">
-            <field name="lang">{{ object.student_id.lang }}</field>
+            <field name="lang">{{ object.fitness_mail_lang }}</field>
             <field name="name">Fitness: Booking Moved</field>
             <field name="model_id" ref="fitness_bookings.model_fitness_booking"/>
-            <field name="subject">{{ 'Your class has been changed' if object.student_id.lang == 'en_US' else ('Hem canviat la teva classe' if object.student_id.lang == 'ca_ES' else 'Hemos cambiado tu clase') }}</field>
+            <field name="subject">{{ 'Your class has been changed' if object.fitness_mail_lang == 'en_US' else ('Hem canviat la teva classe' if object.fitness_mail_lang == 'ca_ES' else 'Hemos cambiado tu clase') }}</field>
             <field name="partner_to">{{ object.student_id.id }}</field>
             <field name="auto_delete" eval="False"/>
             <field name="email_from">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="reply_to">{{ user.company_id.email_formatted or '"CoreLab Studio" &lt;info@corelabstudio.es&gt;' }}</field>
             <field name="body_html" type="html">
 <div style="margin:0;padding:0;font-size:14px;line-height:1.6;color-scheme:light only;supported-color-schemes:light only;background-color:#FAF9F6;color:#2E2724;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px 22px;border-radius:10px;">
-  <t t-if="object.student_id.lang == 'en_US'">
+  <t t-if="object.fitness_mail_lang == 'en_US'">
     <p>Hi <t t-out="object.student_id.name or ''"/>,</p>
     <p>We have moved your booking to another class. Your credit has not changed.</p>
     <ul>
@@ -229,7 +229,7 @@
     <p>If this does not suit you, message us in the app or on WhatsApp and we will find you another class.</p>
     <p style="color:#2E2724;">You must cancel at least <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class starts to recover your credit. Cancellations made less than <t t-out="object._format_window(object._cancellation_window_hours())"/> hours before the class, or no-shows, will result in full credit deduction with no refund.</p>
   </t>
-  <t t-elif="object.student_id.lang == 'ca_ES'">
+  <t t-elif="object.fitness_mail_lang == 'ca_ES'">
     <p>Hola <t t-out="object.student_id.name or ''"/>,</p>
     <p>Hem mogut la teva reserva a una altra classe. El teu crèdit no ha canviat.</p>
     <ul>
@@ -251,7 +251,7 @@
     <p>Si no te viene bien, escríbenos por la app o por WhatsApp y te buscamos otra clase.</p>
     <p style="color:#2E2724;">Debes cancelar al menos <t t-out="object._format_window(object._cancellation_window_hours())"/> horas antes del inicio de la clase para recuperar tu crédito. Las cancelaciones con menos de <t t-out="object._format_window(object._cancellation_window_hours())"/> horas de antelación, o las ausencias, conllevarán la deducción completa del crédito sin reembolso.</p>
   </t>
-  <t t-set="notice_lang" t-value="object.student_id.lang"/>
+  <t t-set="notice_lang" t-value="object.fitness_mail_lang"/>
   <t t-call="fitness_notifications.mail_footer_no_reply"/>
 </div>
             </field>

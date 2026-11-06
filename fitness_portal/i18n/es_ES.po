@@ -5583,3 +5583,8 @@ msgstr "Terminó su cuota"
 #, python-format
 msgid "Online booking closes %(minutes)s minutes before the class starts."
 msgstr "La reserva online se cierra %(minutes)s minutos antes de que empiece la clase."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__partner_count
+msgid "Number of contacts"
+msgstr "Número de contactos"

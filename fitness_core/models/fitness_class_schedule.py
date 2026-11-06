@@ -179,6 +179,7 @@ class FitnessClassSchedule(models.Model):
                 'allday': False,
                 'is_fitness_class': True,
                 'class_type_id': rec.class_type_id.id,
+                'session_type': rec.class_type_id.session_type or 'group',
                 'classroom_id': rec.classroom_id.id or False,
                 'user_id': rec.teacher_user_id.id,
                 'recurrency': True,

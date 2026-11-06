@@ -210,8 +210,11 @@ class TrialRequestController(http.Controller):
             'barre_types': types['barre'],
             'reformer_types': types['reformer'],
             'offer_open': offer_open,
-            'trial_price_barre': prices.get('barre'),
-            'trial_price_reformer': prices.get('reformer'),
+            # Formatted for the page's own language: a bare float printed
+            # "12.0 €".
+            'trial_price_barre': Trials._price_label(prices.get('barre'), lang),
+            'trial_price_reformer': Trials._price_label(
+                prices.get('reformer'), lang),
             # The studio's date. _date.today() is UTC, so between midnight
             # and 02:00 Madrid the form offered yesterday as the earliest
             # bookable day.

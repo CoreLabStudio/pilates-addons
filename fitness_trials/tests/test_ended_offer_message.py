@@ -16,6 +16,7 @@ trial_offer_url to False and stops offering the card - and its labels
 resolve against a logged-in student's own language, so the mismatch
 cannot arise there.
 """
+import re
 from datetime import datetime
 
 import pytz
@@ -167,3 +168,43 @@ class TestEndedOfferMessage(HttpCase):
         self.assertNotIn(
             SENTENCE['es_ES'], body,
             "the ended-offer message shows while the offer is still open")
+
+    # ── whole euros print without a decimal, cents keep their cents ──
+    def _message(self, lang):
+        """The ended-offer alert alone, whitespace collapsed."""
+        body = self._page(lang)
+        m = re.search(r'<div class="alert alert-info"[^>]*>(.*?)</div>',
+                      body, re.S)
+        self.assertTrue(m, "%s has no ended-offer alert" % lang)
+        return ' '.join(m.group(1).split())
+
+    def test_whole_euro_prices_print_without_a_decimal(self):
+        for lang in SENTENCE:
+            text = self._message(lang)
+            for price in ('12 €', '18 €'):
+                self.assertIn(
+                    price, text,
+                    "%s does not print %r in the ended-offer message: %r"
+                    % (lang, price, text))
+            for wrong in ('12.0', '18.0', '12,0', '18,0'):
+                self.assertNotIn(
+                    wrong, text,
+                    "%s prints a whole-euro price as %r: %r"
+                    % (lang, wrong, text))
+
+    def test_a_price_with_cents_keeps_its_cents(self):
+        TR = self.env['fitness.trial.request'].sudo()
+        for prod in TR._all_trial_products():
+            if prod.fitness_class_type == 'barre':
+                prod.sudo().write({'list_price': 12.5})
+        self.env.flush_all()
+        expected = {'es_ES': '12,50 €', 'ca_ES': '12,50 €',
+                    'en_US': '12.50 €'}
+        for lang, price in expected.items():
+            text = self._message(lang)
+            self.assertIn(
+                price, text,
+                "%s does not print 12.5 as %r: %r" % (lang, price, text))
+            self.assertIn('18 €', text,
+                          "%s lost the whole Reformer price: %r"
+                          % (lang, text))

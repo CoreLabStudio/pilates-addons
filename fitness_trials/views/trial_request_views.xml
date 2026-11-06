@@ -12,13 +12,16 @@
       <form string="Cancel this request">
         <field name="request_id" invisible="1"/>
         <field name="trial_spent" invisible="1"/>
+        <field name="decline_case" invisible="1"/>
         <div class="alert alert-info" role="status">
           <div>This is sent to <field name="student_name" nolabel="1" readonly="1"
                                       class="fw-bold d-inline"/> by email and in the
           app.</div>
           <!-- Separate blocks, so each sentence is its own term to translate. -->
-          <div invisible="trial_spent">Their free class is not used up - they can ask again.</div>
-          <div invisible="not trial_spent">They have already had their trial class, so it is not offered free again.</div>
+          <div invisible="decline_case != 'open'">Their free class is not used up - they can ask again.</div>
+          <div invisible="decline_case != 'spent'">They have already had their trial class, so it is not offered free again.</div>
+          <div invisible="decline_case != 'expired'">Their free trial was given but expired unused, so it is not offered free again.</div>
+          <div invisible="decline_case != 'closed'">The free trial offer has ended, so they cannot ask for a free class again. They can book a trial class in the app at its price.</div>
         </div>
         <group>
           <field name="reason" nolabel="1" colspan="2"

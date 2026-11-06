@@ -49,6 +49,23 @@ class FitnessBookingNotifications(models.Model):
         help="Set once the 6–12h bell-notification cron has fired for this booking. "
              "Prevents duplicate in-app reminders.",
     )
+    # The language every student email on a booking is written in.
+    #
+    # The templates used to say {{ object.student_id.lang }}. Odoo renders
+    # a template in its lang and refuses a code that is not active
+    # ("Invalid language code"), so a student carrying a deactivated
+    # language - switched on once and off later, or imported with one -
+    # was sent nothing, and _send_notification swallowed the error. Hers
+    # when it is active, else the studio's: the rule the bells already
+    # use, and the trial emails' fix (_trial_lang) in the same shape.
+    fitness_mail_lang = fields.Char(
+        "Mail Language", compute='_compute_fitness_mail_lang')
+
+    @api.depends('student_id.lang')
+    def _compute_fitness_mail_lang(self):
+        for booking in self:
+            booking.fitness_mail_lang = recipient_lang(
+                self.env, booking.student_id)
 
     @api.model
     def _notif_enabled(self, key):
@@ -275,23 +292,46 @@ class FitnessBookingNotifications(models.Model):
         )
 
     @api.model
-    def _fitness_membership_still_gives(self, partner):
-        """Whether a running membership still gives her classes.
+    def _fitness_membership_still_gives(self, partner, calendar_event):
+        """Whether a running membership still gives her classes like this one.
 
         Unlimited, a weekly allowance (it renews every week), or floating
         credits left. A running membership with none of these - an
         allowance of 0 and nothing floating - is the only one that is
         really out of classes.
+
+        Only a membership that could pay for this class counts: its
+        discipline (either one on a combined plan, or 'any') and its
+        session type, the same match validate_subscription_for_booking
+        books by. This used to ask about ANY running membership, so a
+        student with a Reformer membership who spent her last Barre credit
+        was never told she had no Barre left - and Reformer cannot pay for
+        Barre. The weekly allowance asked is this discipline's own cap.
         """
+        event = calendar_event.sudo()
+        studio = (event.class_type_id.classroom_type
+                  or event.classroom_id.classroom_type)
+        session = event.session_type
         subs = self.env['sale.order'].sudo().search([
             ('partner_id', '=', partner.id),
             ('is_subscription', '=', True),
             ('subscription_state', '=', '3_progress'),
         ])
-        return any(s.fitness_is_unlimited
-                   or (s.fitness_effective_weekly_allowance() or 0) > 0
-                   or (s.fitness_floating_credits or 0) > 0
-                   for s in subs)
+
+        def covers(sub):
+            product = sub.fitness_subscription_product_id
+            if not product or product.fitness_session_type != session:
+                return False
+            kinds = {product.fitness_class_type,
+                     product.fitness_secondary_class_type} - {False}
+            return 'any' in kinds or studio in kinds
+
+        return any(
+            s.fitness_is_unlimited
+            or (s.fitness_effective_weekly_allowance(discipline=studio)
+                or 0) > 0
+            or (s.fitness_floating_credits or 0) > 0
+            for s in subs.filtered(covers))
 
     def _maybe_notify_credit_zero(self, booking):
         """Notify student when their total credit balance across all packs hits zero."""
@@ -315,7 +355,9 @@ class FitnessBookingNotifications(models.Model):
         # packs, so a member booking with her membership - and every class
         # placed for a fixed-class member - was told she had used her last
         # credit while her membership still gave her classes every week.
-        if self._fitness_membership_still_gives(partner):
+        # Only a membership for this kind of class: see the helper.
+        if self._fitness_membership_still_gives(
+                partner, booking.calendar_event_id):
             return
         recent = self.env['fitness.notification'].sudo().search([
             ('user_id', '=', user.id),
@@ -325,11 +367,19 @@ class FitnessBookingNotifications(models.Model):
         if recent:
             return
         lang_env = self.with_context(lang=recipient_lang(self.env, user))
+        # A private class is arranged by the studio, never bought and
+        # booked by her, so the nudge to go and buy more does not fit it.
+        # She is still told the credit is gone.
+        if booking.calendar_event_id.sudo()._fitness_is_private():
+            body = lang_env.env._('You have used your last credit.')
+        else:
+            body = lang_env.env._(
+                'You have used your last credit. Visit Packages to purchase more.')
         self.env['fitness.notification'].sudo()._create_for_user(
             user.id,
             'credit_zero',
             lang_env.env._('No credits remaining'),
-            lang_env.env._('You have used your last credit. Visit Packages to purchase more.'),
+            body,
             action_url='/my/packages',
         )
 

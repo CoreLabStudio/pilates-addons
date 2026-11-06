@@ -15,3 +15,4 @@ from . import test_studio_hears_about_a_request
 from . import test_trial_notice_exactness
 from . import test_pending_request_across_the_offer_end
 from . import test_trial_email_lang_not_installed
+from . import test_decline_after_offer_end

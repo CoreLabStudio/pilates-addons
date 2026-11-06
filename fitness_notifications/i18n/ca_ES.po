@@ -58,6 +58,12 @@ msgstr "Has usat el teu últim crèdit. Visita Bons per comprar-ne més."
 #. module: fitness_notifications
 #. odoo-python
 #: code:addons/fitness_notifications/models/fitness_booking.py:0
+msgid "You have used your last credit."
+msgstr "Has usat el teu últim crèdit."
+
+#. module: fitness_notifications
+#. odoo-python
+#: code:addons/fitness_notifications/models/fitness_booking.py:0
 #, python-format
 msgid "Only %d credit(s) left"
 msgstr "Només queden %d crèdit(s)"
@@ -149,6 +155,11 @@ msgstr "Recordatori enviat"
 #: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__bell_reminder_sent
 msgid "Bell Reminder Sent"
 msgstr "Recordatori enviat"
+
+#. module: fitness_notifications
+#: model:ir.model.fields,field_description:fitness_notifications.field_fitness_booking__fitness_mail_lang
+msgid "Mail Language"
+msgstr "Idioma del correu"
 
 #. module: fitness_notifications
 #. odoo-python

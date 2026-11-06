@@ -101,3 +101,8 @@ msgstr "Solo lo usa 'Alumnas que han venido hace poco'."
 #: model:ir.model.fields,field_description:fitness_campaigns.field_fitness_campaign__state
 msgid "State"
 msgstr "Estado"
+
+#. module: fitness_campaigns
+#: model:ir.model.fields,field_description:fitness_campaigns.field_survey_user_input__fitness_mail_lang
+msgid "Mail Language"
+msgstr "Idioma del correo"

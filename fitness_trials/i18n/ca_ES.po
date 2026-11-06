@@ -732,3 +732,37 @@ msgstr ""
 "gratuïta ja s'ha fet servir, així que no podem acceptar aquesta "
 "sol·licitud. Pots comprar un bo o una membresia a la Botiga i reservar "
 "quan millor et vagi."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "We'd love to see you in class! Your free trial was given to you but expired before you used it, so this request can't be accepted. Note from the studio: %(why)s You can buy a class pack or membership in the Shop and book whenever suits you."
+msgstr "Ens encantaria veure't a classe! La teva classe de prova gratuïta se't va concedir però va caducar sense que la fessis servir, així que no podem acceptar aquesta sol·licitud. Nota de l'estudi: %(why)s Pots comprar un bo o una membresia a la Botiga i reservar quan millor et vagi."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "We'd love to see you in class! Your free trial was given to you but expired before you used it, so this request can't be accepted. You can buy a class pack or membership in the Shop and book whenever suits you."
+msgstr "Ens encantaria veure't a classe! La teva classe de prova gratuïta se't va concedir però va caducar sense que la fessis servir, així que no podem acceptar aquesta sol·licitud. Pots comprar un bo o una membresia a la Botiga i reservar quan millor et vagi."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one: %(why)s The free trial offer has ended. You can book a trial class in the app for %(price)s €."
+msgstr "L'estudi no ha pogut acceptar aquesta: %(why)s L'oferta de classe de prova gratuïta s'ha acabat. Pots reservar una classe de prova a l'app per %(price)s €."
+
+#. module: fitness_trials
+#. odoo-python
+#: code:addons/fitness_trials/models/trial_request.py:0
+msgid "The studio could not take this one. The free trial offer has ended. You can book a trial class in the app for %(price)s €."
+msgstr "L'estudi no ha pogut acceptar aquesta. L'oferta de classe de prova gratuïta s'ha acabat. Pots reservar una classe de prova a l'app per %(price)s €."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "Their free trial was given but expired unused, so it is not offered free again."
+msgstr "La seva classe de prova gratuïta se li va concedir però va caducar sense fer-se servir, així que no se li torna a oferir gratis."
+
+#. module: fitness_trials
+#: model_terms:ir.ui.view,arch_db:fitness_trials.view_fitness_trial_decline_wizard_form
+msgid "The free trial offer has ended, so they cannot ask for a free class again. They can book a trial class in the app at its price."
+msgstr "L'oferta de classe de prova gratuïta s'ha acabat, així que no pot tornar a demanar una classe gratis. Pot reservar una classe de prova a l'app al seu preu."

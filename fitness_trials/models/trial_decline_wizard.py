@@ -29,10 +29,23 @@ class FitnessTrialDeclineWizard(models.TransientModel):
     # Picks the dialog's second sentence. "Their free class is not used up"
     # was said of everybody, the students the one-trial rule refuses included.
     trial_spent = fields.Boolean(compute='_compute_trial_spent')
+    # Which of the dialog's sentences is true: see _decline_case. A closed
+    # offer and a free trial that expired unused each need their own; the
+    # two-way flag told the manager "they can ask again" and "they have
+    # already had their trial class" when neither was so.
+    decline_case = fields.Selection([
+        ('open', 'May ask again'),
+        ('spent', 'Trial already had'),
+        ('expired', 'Free trial expired unused'),
+        ('closed', 'Free trial offer ended'),
+    ], compute='_compute_trial_spent')
 
     def _compute_trial_spent(self):
         for wiz in self:
-            wiz.trial_spent = bool(wiz.request_id) and wiz.request_id.sudo()._trial_spent()
+            case = (wiz.request_id.sudo()._decline_case()
+                    if wiz.request_id else 'open')
+            wiz.decline_case = case
+            wiz.trial_spent = case in ('spent', 'expired')
     reason = fields.Text(
         string='Reason',
         help="Optional. Goes to the student, in the email and in the app. "
