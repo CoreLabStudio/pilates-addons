@@ -9,3 +9,4 @@ from . import test_teacher_calendar_rule
 from . import test_lang_cache
 from . import test_instructor_list_menu
 from . import test_home_action_is_clean
+from . import test_class_type_rename_reaches_slots
