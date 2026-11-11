@@ -91,7 +91,10 @@ class FitnessClassSchedule(models.Model):
 
 
     # ── display ──────────────────────────────────────────────────────────────
-    @api.depends('class_type_id', 'weekday', 'start_time')
+    # class_type_id.name as well: renaming a class type used to leave every
+    # slot under the old name, because the stored name only recomputed when
+    # the slot itself changed.
+    @api.depends('class_type_id', 'class_type_id.name', 'weekday', 'start_time')
     def _compute_name(self):
         labels = dict(WEEKDAYS)
         for rec in self:
@@ -218,6 +221,10 @@ class FitnessClassSchedule(models.Model):
         recurrence copies its first class, which is long past, so a slot
         handed to another teacher kept generating weeks for the old one.
         That first class is history and stays as it was taught.
+
+        The class name comes from the slot's class type for the same reason:
+        copied from the first class, a renamed class type kept generating
+        weeks under its old name.
         """
         for rec in self.filtered('recurrence_id'):
             target = rec._target_until()
@@ -225,9 +232,12 @@ class FitnessClassSchedule(models.Model):
             if current and current >= target:
                 continue
             rec.recurrence_id.write({'end_type': 'end_date', 'until': target})
-            slot_values = {}
+            values = {}
             if rec.teacher_user_id:
-                slot_values = {rec.recurrence_id.id: {'user_id': rec.teacher_user_id.id}}
+                values['user_id'] = rec.teacher_user_id.id
+            if rec.class_type_id:
+                values['name'] = rec.class_type_id.name
+            slot_values = {rec.recurrence_id.id: values} if values else {}
             rec.recurrence_id._apply_recurrence(generic_values_creation=slot_values)
             rec.generated_until = target
             _logger.info("Schedule %s: extended to %s", rec.name, target)
