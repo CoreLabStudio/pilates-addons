@@ -61,12 +61,16 @@
         </field>
     </record>
 
+    <!-- A cancelled order's line keeps its counter ("3 remaining") although
+         nothing can spend it, so a balance list that showed it was showing
+         credits nobody holds. The cancelled order itself stays under
+         Package Sales. -->
     <record id="action_fitness_package_balances" model="ir.actions.act_window">
         <field name="name">Package Balances</field>
         <field name="res_model">sale.order.line</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_fitness_package_line_list"/>
-        <field name="domain">[('product_id.fitness_is_package', '=', True)]</field>
+        <field name="domain">[('product_id.fitness_is_package', '=', True), ('order_id.state', '!=', 'cancel')]</field>
         <field name="context">{}</field>
     </record>
 

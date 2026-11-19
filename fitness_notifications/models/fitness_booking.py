@@ -344,9 +344,13 @@ class FitnessBookingNotifications(models.Model):
         user = partner.user_ids[:1]
         if not user:
             return
-        all_lines = self.env['sale.order.line'].sudo().search([
+        # Credits on a cancelled order are not hers to spend, so they must
+        # not keep her from hearing that the ones she can spend are gone.
+        SOL = self.env['sale.order.line'].sudo()
+        all_lines = SOL.search([
             ('order_partner_id', '=', partner.id),
             ('product_id.fitness_is_package', '=', True),
+            ('order_id.state', 'in', list(SOL.SPENDABLE_ORDER_STATES)),
             ('fitness_remaining_classes', '>', 0),
         ])
         if all_lines:
@@ -664,14 +668,21 @@ class FitnessBookingNotifications(models.Model):
 
     @api.model
     def _cron_check_credit_expiry(self):
-        """Notify students whose credit pack expires within 7 days (once per pack per week)."""
+        """Notify students whose credit pack expires within 7 days (once per student per week)."""
         if not self._notif_enabled('send_credit_expiry'):
             return
         today = fields.Date.context_today(self)
         expiry_window = today + timedelta(days=7)
 
-        expiring_lines = self.env['sale.order.line'].sudo().search([
+        # Only credits she can spend. A cancelled order keeps its counter -
+        # "3 left, valid until 2 Dec" - and was reminding her about classes
+        # she could not book. The reminder goes to a student at most once a
+        # week, so that notice also took the place of the real one for a
+        # live pack expiring the same week.
+        SOL = self.env['sale.order.line'].sudo()
+        expiring_lines = SOL.search([
             ('product_id.fitness_is_package', '=', True),
+            ('order_id.state', 'in', list(SOL.SPENDABLE_ORDER_STATES)),
             ('fitness_remaining_classes', '>', 0),
             ('fitness_validity_end_date', '!=', False),
             ('fitness_validity_end_date', '>=', today),
