@@ -276,6 +276,7 @@
                 <t t-set="_ph_line" t-value="request.env['sale.order.line'].sudo().search([
                     ('order_partner_id', '=', _ph_partner.id),
                     ('product_id.fitness_is_package', '=', True),
+                    ('order_id.state', 'in', ('sale', 'done')),
                     ('fitness_remaining_classes', '>', 0),
                 ], order='fitness_validity_end_date asc nulls last', limit=1)"/>
                 <t t-set="_ph_credits" t-value="_ph_line.fitness_remaining_classes if _ph_line else False"/>
