@@ -22,6 +22,7 @@ from odoo.addons.fitness_packages.models.fitness_booking import (
     FitnessBookingPackage,
 )
 from odoo.exceptions import AccessError, UserError
+from odoo.addons.fitness_subscriptions.models.membership_dates import FEE_WINDOW_DAYS
 
 _logger = logging.getLogger(__name__)
 
@@ -265,6 +266,9 @@ class FitnessDeskSaleWizard(models.TransientModel):
             return _("Waived: %(months)s months or more.",
                      months=waived_from)
         if product.fitness_has_paid_membership_before(self.partner_id):
+            if product.fitness_returning_after_window(self.partner_id):
+                return _("Charged again: her last membership ended more "
+                         "than %(days)s days ago.", days=FEE_WINDOW_DAYS)
             return _("Waived: she has held a membership before. It is "
                      "charged once, on a first membership.")
         if not self.matricula_fee:

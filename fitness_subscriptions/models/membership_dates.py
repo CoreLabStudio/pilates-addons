@@ -112,3 +112,30 @@ class SaleOrderMembershipDates(models.Model):
             " AND nx.is_subscription"
             " AND nx.subscription_state IN ('3_progress', '4_paused', '5_renewed', '6_churn')"
             " AND nxp.product_tmpl_id = sop.product_tmpl_id)").format(so=so)
+
+    @api.model
+    def _fitness_last_paid_day_of(self, partner):
+        """For the fee rule: the last paid day of her most recent membership,
+        or None when she still holds one with no paid day yet (current,
+        waiting for its first payment) or none with dates at all.
+
+        Every confirmed membership of this contact counts, of any plan:
+        "ended more than 30 days before the new start" is about her being
+        away from the studio, not about one product."""
+        if not partner:
+            return None
+        subs = self.sudo().search([
+            ('partner_id', '=', partner.id),
+            ('state', '=', 'sale'),
+            ('is_subscription', '=', True),
+            ('fitness_subscription_product_id', '!=', False),
+        ])
+        days = []
+        for sub in subs:
+            last = sub._fitness_paid_up_to()
+            if last is None:
+                if sub.subscription_state in ('3_progress', '4_paused'):
+                    return None
+                continue
+            days.append(last)
+        return max(days) if days else None

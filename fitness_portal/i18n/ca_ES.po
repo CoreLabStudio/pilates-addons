@@ -5761,3 +5761,10 @@ msgstr "Renovació propera: %(member)s, %(plan)s, pagat fins al %(date)s (queden
 #, python-format
 msgid "Membership ended without renewal: %(member)s, %(plan)s, last paid day %(date)s. Renewing is free of the registration fee until %(until)s. Order %(order)s."
 msgstr "Membresia acabada sense renovar: %(member)s, %(plan)s, últim dia pagat el %(date)s. Pot renovar sense matrícula fins al %(until)s. Comanda %(order)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_sale_wizard.py:0
+#, python-format
+msgid "Charged again: her last membership ended more than %(days)s days ago."
+msgstr "Es cobra de nou: la seva última membresia va acabar fa més de %(days)s dies."
