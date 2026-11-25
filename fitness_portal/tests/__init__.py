@@ -90,3 +90,4 @@ from . import test_booking_cutoff
 from . import test_cancel_policy_shown_once
 from . import test_duplicate_candidate_labels
 from . import test_cancelled_pack_not_on_badge
+from . import test_renewals_list

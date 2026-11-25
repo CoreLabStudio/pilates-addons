@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Renewals: one row per membership, who is about to renew and who is
+       dropping. Read-only; see models/renewal_report.py. -->
+
+  <record id="view_fitness_renewal_report_list" model="ir.ui.view">
+    <field name="name">fitness.renewal.report.list</field>
+    <field name="model">fitness.renewal.report</field>
+    <field name="arch" type="xml">
+      <list string="Renewals" create="false" edit="false" delete="false">
+        <field name="member_id"/>
+        <field name="product_id"/>
+        <field name="billing_plan"/>
+        <field name="payment_method"/>
+        <field name="paid_up_to"/>
+        <field name="days_left"/>
+        <field name="fee_free_until" optional="show"/>
+        <field name="status" widget="badge"
+               decoration-warning="status == 'due_soon'"
+               decoration-info="status == 'ended'"
+               decoration-danger="status == 'dropped'"
+               decoration-success="status in ('free', 'running')"/>
+        <field name="start_date" optional="hide"/>
+        <field name="order_ref" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_fitness_renewal_report_search" model="ir.ui.view">
+    <field name="name">fitness.renewal.report.search</field>
+    <field name="model">fitness.renewal.report</field>
+    <field name="arch" type="xml">
+      <search string="Renewals">
+        <field name="member_id"/>
+        <field name="product_id"/>
+        <field name="order_ref"/>
+        <filter name="filter_due_soon" string="Due soon" domain="[('status', '=', 'due_soon')]"/>
+        <filter name="filter_ended" string="Ended - can renew without fee" domain="[('status', '=', 'ended')]"/>
+        <filter name="filter_dropped" string="Dropped" domain="[('status', '=', 'dropped')]"/>
+        <filter name="filter_free" string="Free" domain="[('status', '=', 'free')]"/>
+        <filter name="filter_running" string="Running" domain="[('status', '=', 'running')]"/>
+        <separator/>
+        <filter name="filter_is_free" string="Given free" domain="[('is_free', '=', True)]"/>
+        <group>
+          <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+          <filter name="group_payment" string="Paid by" context="{'group_by': 'payment_method'}"/>
+          <filter name="group_product" string="Membership" context="{'group_by': 'product_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_fitness_renewal_report" model="ir.actions.act_window">
+    <field name="name">Renewals</field>
+    <field name="res_model">fitness.renewal.report</field>
+    <field name="view_mode">list</field>
+    <field name="search_view_id" ref="view_fitness_renewal_report_search"/>
+    <field name="context">{'search_default_group_status': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No memberships yet</p>
+      <p>Every membership appears here, paid or free, with its last paid day.</p>
+    </field>
+  </record>
+
+  <!-- After "Free classes given" (38). Manager-only, like the rest of
+       this section. -->
+  <menuitem
+      id="menu_fitness_renewal_report"
+      name="Renewals"
+      parent="fitness_core.menu_group_bookings"
+      action="action_fitness_renewal_report"
+      sequence="39"
+      groups="fitness_core.group_fitness_manager"/>
+
+</odoo>

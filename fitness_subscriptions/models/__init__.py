@@ -5,3 +5,4 @@ from . import fitness_booking
 from . import fitness_class_schedule
 from . import renewal
 from . import account_move
+from . import membership_dates

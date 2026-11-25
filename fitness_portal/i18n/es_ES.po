@@ -902,6 +902,7 @@ msgstr "Clase reservada · cubierta por la suscripción"
 # ────────────────────────────────────────────────────────────
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model:ir.model.fields.selection,name:fitness_portal.selection__sale_order__fitness_payment_method__bizum
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__payment_method__bizum
 msgid "Bizum"
 msgstr "Bizum"
 
@@ -1521,6 +1522,8 @@ msgstr "Comprar ahora"
 
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__status
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
 msgid "Status"
 msgstr "Estado"
 
@@ -1549,6 +1552,7 @@ msgstr "Válido hasta"
 #. module: fitness_portal
 #: model_terms:ir.ui.view,arch_db:fitness_portal.portal_package_detail
 #: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_credit_line_list
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__order_ref
 msgid "Order"
 msgstr "Pedido"
 
@@ -2698,6 +2702,8 @@ msgstr "Próximos 14 días"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__product_id
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
 msgid "Membership"
 msgstr "Membresía"
 
@@ -3218,6 +3224,7 @@ msgstr "Tu respuesta"
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_sale_order_line__display_name
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__display_name
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
 
@@ -3305,6 +3312,10 @@ msgstr "Gratis — al reservar aceptas los"
 #. module: fitness_portal
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__is_free
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__payment_method__free
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__status__free
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
 msgid "Free"
 msgstr "GRATIS"
 
@@ -3614,6 +3625,7 @@ msgstr "Ya se está procesando un pago de este pedido. Espera un momento antes d
 #. odoo-python
 #: code:addons/fitness_portal/controllers/portal.py:0
 #: model:ir.model.fields.selection,name:fitness_portal.selection__sale_order__fitness_payment_method__transfer
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__payment_method__transfer
 msgid "Bank Transfer"
 msgstr "Transferencia bancaria"
 
@@ -4244,6 +4256,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_join_log__id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_free_credit_report__id
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_record_attendance_wizard__id
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__id
 msgid "ID"
 msgstr "ID"
 
@@ -5588,3 +5601,166 @@ msgstr "La reserva online se cierra %(minutes)s minutos antes de que empiece la 
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_duplicate_candidate__partner_count
 msgid "Number of contacts"
 msgstr "Número de contactos"
+
+#. module: fitness_portal
+#: model:ir.actions.act_window,name:fitness_portal.action_fitness_renewal_report
+#: model:ir.model,name:fitness_portal.model_fitness_renewal_report
+#: model:ir.ui.menu,name:fitness_portal.menu_fitness_renewal_report
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_list
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Renewals"
+msgstr "Renovaciones"
+
+#. module: fitness_portal
+#: model_terms:ir.actions.act_window,help:fitness_portal.action_fitness_renewal_report
+msgid "No memberships yet"
+msgstr "Aún no hay membresías"
+
+#. module: fitness_portal
+#: model_terms:ir.actions.act_window,help:fitness_portal.action_fitness_renewal_report
+msgid "Every membership appears here, paid or free, with its last paid day."
+msgstr "Aquí aparece cada membresía, pagada o gratuita, con su último día pagado."
+
+#. module: fitness_portal
+#: model:ir.actions.server,name:fitness_portal.ir_cron_fitness_renewal_alerts_ir_actions_server
+msgid "Fitness: renewal alerts to the studio"
+msgstr "Fitness: avisos de renovación al estudio"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__billing_plan
+msgid "Plan"
+msgstr "Plan"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__billing_plan_ref
+msgid "Billing Plan Ref"
+msgstr "Ref. del plan de facturación"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__days_left
+msgid "Days left"
+msgstr "Días restantes"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__fee_free_until
+msgid "Renew without fee until"
+msgstr "Renovar sin matrícula hasta"
+
+#. module: fitness_portal
+#: model:ir.model.fields,help:fitness_portal.field_fitness_renewal_report__fee_free_until
+msgid "The last day she can renew without paying the registration fee again."
+msgstr "Último día en que se puede renovar sin volver a pagar la matrícula."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__member_id
+msgid "Member"
+msgstr "Alumno"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__paid_up_to
+msgid "Paid up to"
+msgstr "Pagado hasta"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__payment_method
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Paid by"
+msgstr "Pagado con"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__start_date
+msgid "Started"
+msgstr "Inicio"
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__status_order
+msgid "Status Order"
+msgstr "Orden del estado"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__payment_method__cash
+msgid "Cash"
+msgstr "Efectivo"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__payment_method__stripe
+msgid "Card"
+msgstr "Tarjeta"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__status__dropped
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Dropped"
+msgstr "Baja"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__status__due_soon
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Due soon"
+msgstr "Vence pronto"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__status__ended
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Ended - can renew without fee"
+msgstr "Terminada - puede renovar sin matrícula"
+
+#. module: fitness_portal
+#: model:ir.model.fields.selection,name:fitness_portal.selection__fitness_renewal_report__status__running
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Running"
+msgstr "En curso"
+
+#. module: fitness_portal
+#: model_terms:ir.ui.view,arch_db:fitness_portal.view_fitness_renewal_report_search
+msgid "Given free"
+msgstr "Regalada"
+
+#. module: fitness_portal
+#: model:mail.message.subtype,name:fitness_portal.mt_fitness_membership_ended
+msgid "Membership ended without renewal"
+msgstr "Membresía terminada sin renovar"
+
+#. module: fitness_portal
+#: model:mail.message.subtype,name:fitness_portal.mt_fitness_renewal_due
+msgid "Renewal due soon"
+msgstr "Renovación próxima"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+msgid "Renewals is read from the memberships themselves. Sell or renew a membership and it appears here."
+msgstr "Renovaciones se lee de las propias membresías. Vende o renueva una membresía y aparecerá aquí."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+msgid "Renewals is read from the memberships themselves. Change the membership, not this list."
+msgstr "Renovaciones se lee de las propias membresías. Cambia la membresía, no esta lista."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+msgid "Renewals is read from the memberships themselves. Nothing here can be deleted."
+msgstr "Renovaciones se lee de las propias membresías. Aquí no se puede borrar nada."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+#, python-format
+msgid "%(plan)s (free)"
+msgstr "%(plan)s (gratis)"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+#, python-format
+msgid "Renewal due soon: %(member)s, %(plan)s, paid up to %(date)s (%(days)s day(s) left). Order %(order)s."
+msgstr "Renovación próxima: %(member)s, %(plan)s, pagado hasta el %(date)s (quedan %(days)s día(s)). Pedido %(order)s."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/renewal_report.py:0
+#, python-format
+msgid "Membership ended without renewal: %(member)s, %(plan)s, last paid day %(date)s. Renewing is free of the registration fee until %(until)s. Order %(order)s."
+msgstr "Membresía terminada sin renovar: %(member)s, %(plan)s, último día pagado el %(date)s. Puede renovar sin matrícula hasta el %(until)s. Pedido %(order)s."

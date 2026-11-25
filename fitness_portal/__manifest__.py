@@ -1,6 +1,6 @@
 {
     'name': 'CoreLab Student Portal',
-    'version': '19.0.1.28.20',
+    'version': '19.0.1.28.22',
     'category': 'Services',
     'summary': 'Student-facing CoreLab portal: home, studio, packages, checkout',
     'author': 'Core Lab Studio, S.L.',
@@ -42,6 +42,7 @@
         'security/ir.rule.xml',
         'data/duplicate_cron.xml',
         'data/membership_close.xml',
+        'data/renewal_alerts.xml',
         'views/duplicate_candidate_views.xml',
         'views/studio_message_views.xml',
         'views/student_profile_simple.xml',
@@ -52,6 +53,7 @@
         'views/make_student_views.xml',
         'views/cash_request_views.xml',
         'views/fitness_free_credit_views.xml',
+        'views/renewal_report_views.xml',
         'views/fitness_record_attendance_views.xml',
         'views/sale_order_renewal_views.xml',
         'views/package_line_views.xml',
