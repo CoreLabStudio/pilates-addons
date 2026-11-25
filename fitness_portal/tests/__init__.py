@@ -93,3 +93,4 @@ from . import test_cancelled_pack_not_on_badge
 from . import test_renewals_list
 from . import test_fee_after_30_days
 from . import test_fee_window_note
+from . import test_desk_sale_path

@@ -5783,3 +5783,23 @@ msgstr "Tu membresía termina el último día pagado. Tienes %(days)s días para
 #: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__member_paid_up_to
 msgid "Member paid up to"
 msgstr "Pagado hasta (todas sus membresías)"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_contact.py:0
+#, python-format
+msgid "%(email)s is already the email of %(names)s. Pick that contact in Student instead of creating a new one."
+msgstr "%(email)s ya es el email de %(names)s. Elige ese contacto en Alumno en lugar de crear uno nuevo."
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_contact.py:0
+msgid "Same email on another contact"
+msgstr "El mismo email en otro contacto"
+
+#. module: fitness_portal
+#. odoo-python
+#: code:addons/fitness_portal/models/desk_contact.py:0
+#, python-format
+msgid "%(email)s is also the email of %(names)s. Check that %(who)s is the right contact - the sale goes ahead either way."
+msgstr "%(email)s también es el email de %(names)s. Comprueba que %(who)s es el contacto correcto: la venta se hace igualmente."

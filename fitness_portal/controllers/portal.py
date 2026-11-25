@@ -1228,7 +1228,18 @@ class FitnessStudentPortal(http.Controller):
                 label = month_key
             month_groups.append({'key': month_key, 'label': label, 'entries': entries})
 
+        # A gift is never billed: its card says when it ends - her last paid
+        # day, in the app's own "Valid until" - instead of "Next billing".
+        free_ends = {}
+        for sub in subscriptions:
+            if sub.sudo()._fitness_is_free_membership():
+                last = sub.sudo()._fitness_paid_up_to()
+                if last:
+                    free_ends[sub.id] = studio_date(
+                        request.env, last, 'd MMM y',
+                        request.env.lang or studio_lang(request.env))
         return request.render('fitness_portal.portal_student_history', {
+            'free_ends':         free_ends,
             'lbl_filter_period': _('Filter period'),
             'month_groups':      month_groups,
             'subscriptions':     subscriptions,
@@ -3053,7 +3064,15 @@ class FitnessStudentPortal(http.Controller):
                     slots.append(slot.name)
 
             period_end_str = ''
-            if sub.next_invoice_date:
+            is_free = sub.sudo()._fitness_is_free_membership()
+            if is_free:
+                # Never billed: the card says when it ends, her last paid day.
+                last = sub.sudo()._fitness_paid_up_to()
+                if last:
+                    period_end_str = studio_date(
+                        request.env, last, 'd MMM y',
+                        request.env.lang or studio_lang(request.env))
+            elif sub.next_invoice_date:
                 next_renewal = sub.next_invoice_date
                 today_date = studio_today()
                 # Advance stale dates forward — manual-payment studios don't
@@ -3075,6 +3094,7 @@ class FitnessStudentPortal(http.Controller):
                 'weekly_used':      weekly_used,
                 'floating_credits': sub.fitness_floating_credits,
                 'period_end':       period_end_str,
+                'is_free':          is_free,
                 'is_clase_fija':    bool(sub.fitness_is_clase_fija),
                 'slots':            slots,
             })
@@ -3094,6 +3114,7 @@ class FitnessStudentPortal(http.Controller):
             'lbl_this_week':     _('This week'),
             'lbl_bonus_credits': _('Bonus credits'),
             'lbl_next_renewal':  _('Next renewal'),
+            'lbl_valid_until':   _('Valid until'),
         })
 
     # ══════════════════════════════════════════════════════════
