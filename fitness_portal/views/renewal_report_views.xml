@@ -14,6 +14,7 @@
         <field name="billing_plan"/>
         <field name="payment_method"/>
         <field name="paid_up_to"/>
+        <field name="member_paid_up_to" optional="hide"/>
         <field name="days_left"/>
         <field name="fee_free_until" optional="show"/>
         <field name="status" widget="badge"

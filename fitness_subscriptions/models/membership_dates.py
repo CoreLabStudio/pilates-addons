@@ -85,12 +85,17 @@ class SaleOrderMembershipDates(models.Model):
                 " ELSE ({last}) END)").format(last=last, so=so)
 
     def _fitness_renewed_by(self):
-        """The confirmed membership that carries this one on, if any: a later
-        order of hers for the same plan product. The same notion of "the same
-        plan" as the shop's Renew button (_fitness_renewal_state)."""
+        """The confirmed membership that carries this one on, if any: any later
+        membership of hers, whatever the plan (owner, 25 Nov 2026) - a member
+        who moves to another plan has not dropped. Only the Renewals list,
+        its alerts and the member's reminder read this; the shop's Renew
+        button keeps its own same-product rule (_fitness_renewal_state).
+
+        A consequence, said out loud: two memberships held side by side (one
+        per discipline) look the same as a switch, so the earlier one is
+        treated as carried on by the later."""
         self.ensure_one()
-        tmpl = self.fitness_subscription_product_id.product_tmpl_id
-        if not tmpl or not self.partner_id:
+        if not self.fitness_subscription_product_id or not self.partner_id:
             return self.browse()
         return self.sudo().search([
             ('partner_id', '=', self.partner_id.id),
@@ -98,7 +103,7 @@ class SaleOrderMembershipDates(models.Model):
             ('state', '=', 'sale'),
             ('is_subscription', '=', True),
             ('subscription_state', 'in', ('3_progress', '4_paused', '5_renewed', '6_churn')),
-            ('fitness_subscription_product_id.product_tmpl_id', '=', tmpl.id),
+            ('fitness_subscription_product_id', '!=', False),
         ], limit=1)
 
     @api.model
@@ -106,12 +111,25 @@ class SaleOrderMembershipDates(models.Model):
         """The same test as _fitness_renewed_by, as a SQL EXISTS over `so`."""
         return (
             "EXISTS (SELECT 1 FROM sale_order nx"
-            " JOIN product_product nxp ON nxp.id = nx.fitness_subscription_product_id"
-            " JOIN product_product sop ON sop.id = {so}.fitness_subscription_product_id"
             " WHERE nx.partner_id = {so}.partner_id AND nx.id > {so}.id AND nx.state = 'sale'"
-            " AND nx.is_subscription"
-            " AND nx.subscription_state IN ('3_progress', '4_paused', '5_renewed', '6_churn')"
-            " AND nxp.product_tmpl_id = sop.product_tmpl_id)").format(so=so)
+            " AND nx.is_subscription AND nx.fitness_subscription_product_id IS NOT NULL"
+            " AND nx.subscription_state IN ('3_progress', '4_paused', '5_renewed', '6_churn'))"
+        ).format(so=so)
+
+    @api.model
+    def _fitness_member_last_paid_sql(self, so='so'):
+        """_fitness_last_paid_day_of(partner of `so`) as a SQL subquery: the
+        member's last paid day over every confirmed membership of hers, NULL
+        while one is still waiting for its first payment. The Renewals list
+        reads its status from this, so the list and the fee rule agree on
+        whether she has dropped."""
+        paid = self._fitness_paid_up_to_sql('a', 'ap')
+        return (
+            "(SELECT CASE WHEN bool_or(a.subscription_state IN ('3_progress', '4_paused')"
+            " AND ({paid}) IS NULL) THEN NULL ELSE MAX({paid}) END"
+            " FROM sale_order a LEFT JOIN sale_subscription_plan ap ON ap.id = a.plan_id"
+            " WHERE a.partner_id = {so}.partner_id AND a.state = 'sale' AND a.is_subscription"
+            " AND a.fitness_subscription_product_id IS NOT NULL)").format(paid=paid, so=so)
 
     @api.model
     def _fitness_last_paid_day_of(self, partner):

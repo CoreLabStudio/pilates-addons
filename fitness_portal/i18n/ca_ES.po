@@ -5775,3 +5775,8 @@ msgstr "Es cobra de nou: la seva última membresia va acabar fa més de %(days)s
 #, python-format
 msgid "Your membership ends on its last paid day. You have %(days)s days to renew without paying the registration fee again. After that, the %(fee)s registration fee applies."
 msgstr "La teva membresia acaba l'últim dia pagat. Tens %(days)s dies per renovar-la sense tornar a pagar la matrícula. Passat aquest termini, s'aplicarà de nou la matrícula de %(fee)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__member_paid_up_to
+msgid "Member paid up to"
+msgstr "Pagat fins al (totes les seves membresies)"

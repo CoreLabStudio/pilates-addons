@@ -40,6 +40,11 @@ class TestRenewalsList(TransactionCase):
             'fitness_is_subscription_plan': True, 'recurring_invoice': True,
             'fitness_class_type': 'barre', 'fitness_session_type': 'group',
             'weekly_class_allowance': 2})
+        cls.plan2 = env['product.template'].sudo().create({
+            'name': 'RL Reformer membership', 'list_price': 120.0, 'type': 'service',
+            'fitness_is_subscription_plan': True, 'recurring_invoice': True,
+            'fitness_class_type': 'reformer', 'fitness_session_type': 'group',
+            'weekly_class_allowance': 2})
         cls.other_sub = env['product.template'].sudo().create({
             'name': 'RL Not a fitness plan', 'list_price': 10.0, 'type': 'service',
             'recurring_invoice': True})
@@ -171,6 +176,66 @@ class TestRenewalsList(TransactionCase):
         self.assertFalse(self._row(old), 'the renewed membership is still listed')
         self.assertTrue(self._row(new))
         self.assertEqual(old._fitness_renewed_by(), new)
+
+    # -- a move to another plan is not a drop ------------------------------------
+
+    def _fee_due_today(self, partner):
+        last = self.env['sale.order']._fitness_last_paid_day_of(partner)
+        return fitness_renewal_pays_fee(last, self.today)
+
+    def test_a_plan_switch_is_carried_on_and_no_ended_alert_fires(self):
+        t = self.today
+        p = self._student().partner_id
+        old = self._paid_to(p, t - timedelta(days=10))
+        new = self._paid_to(p, t + timedelta(days=25), product=self.plan2)
+        self.assertEqual(old._fitness_renewed_by(), new)
+        self.assertFalse(self._row(old), 'a member who changed plan is listed under the old one')
+        self.assertEqual(self._row(new).status, 'running')
+        self.env['fitness.renewal.report']._cron_fitness_renewal_alerts()
+        self.assertFalse(self._alerts(old, 'fitness_portal.mt_fitness_membership_ended'),
+                         'a plan switch was announced as a membership ended without renewal')
+        self.assertFalse(self._alerts(new, 'fitness_portal.mt_fitness_membership_ended'))
+        self.assertFalse(self._fee_due_today(p))
+        # The shop's Renew button keeps its own rule: the old plan's product
+        # is still offered for renewal, as before.
+        self.assertEqual(p._fitness_renewal_state(self.plan)['state'], 'renewable')
+
+    def test_a_switch_then_a_drop_is_dropped_and_the_fee_agrees(self):
+        t = self.today
+        p = self._student().partner_id
+        self._paid_to(p, t - timedelta(days=100))
+        new = self._paid_to(p, t - timedelta(days=FEE_WINDOW_DAYS + 3), product=self.plan2)
+        row = self._row(new)
+        self.assertEqual(row.status, 'dropped')
+        self.assertTrue(self._fee_due_today(p))
+
+    def test_plans_side_by_side_read_the_member_s_last_paid_day(self):
+        t = self.today
+        p = self._student().partner_id
+        first = self._paid_to(p, t + timedelta(days=20))
+        second = self._paid_to(p, t + timedelta(days=2), product=self.plan2)
+        self.assertFalse(self._row(first))
+        row = self._row(second)
+        self.assertEqual(row.paid_up_to, t + timedelta(days=2))
+        self.assertEqual(row.member_paid_up_to, t + timedelta(days=20))
+        self.assertEqual(row.status, 'running', 'she is paid up for 20 more days')
+        self.assertFalse(self._fee_due_today(p))
+
+    def test_every_row_agrees_with_the_fee_rule(self):
+        t = self.today
+        for days in (-10, 1, FEE_WINDOW_DAYS, FEE_WINDOW_DAYS + 1, 90):
+            p = self._student().partner_id
+            self._paid_to(p, t - timedelta(days=days))
+        p = self._student().partner_id
+        self._paid_to(p, t - timedelta(days=60))
+        self._paid_to(p, t - timedelta(days=5), product=self.plan2)
+        self.env.flush_all()
+        rows = self.env['fitness.renewal.report'].sudo().search([('member_id.name', 'like', 'RL Student')])
+        self.assertTrue(rows)
+        for row in rows:
+            last = self.env['sale.order']._fitness_last_paid_day_of(row.member_id)
+            self.assertEqual(row.member_paid_up_to or None, last, row.order_ref)
+            self.assertEqual(row.status == 'dropped', fitness_renewal_pays_fee(last, t), row.order_ref)
 
     def test_grouped_by_status(self):
         self._paid_to(self._student().partner_id, self.today + timedelta(days=1))

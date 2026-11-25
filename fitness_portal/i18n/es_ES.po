@@ -5778,3 +5778,8 @@ msgstr "Se cobra de nuevo: su última membresía terminó hace más de %(days)s 
 #, python-format
 msgid "Your membership ends on its last paid day. You have %(days)s days to renew without paying the registration fee again. After that, the %(fee)s registration fee applies."
 msgstr "Tu membresía termina el último día pagado. Tienes %(days)s días para renovarla sin volver a pagar la matrícula. Pasado ese plazo, se aplicará de nuevo la matrícula de %(fee)s."
+
+#. module: fitness_portal
+#: model:ir.model.fields,field_description:fitness_portal.field_fitness_renewal_report__member_paid_up_to
+msgid "Member paid up to"
+msgstr "Pagado hasta (todas sus membresías)"

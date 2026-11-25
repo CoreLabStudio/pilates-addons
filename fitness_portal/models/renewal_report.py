@@ -3,13 +3,16 @@
 
 WHAT A ROW IS. A confirmed membership (a subscription order carrying a
 fitness plan product) that has not been carried on by a later membership
-of hers for the same plan product - once she renews, the renewal is the
-row. Paid by card, cash, Bizum or transfer, or given free.
+of hers, whatever the plan - once she renews or moves to another plan, the
+new membership is the row. Paid by card, cash, Bizum or transfer, or given
+free. Status, days left and the fee-free date are read from her last paid
+day over all her memberships (member_paid_up_to), the fee rule's value.
 
 THE DATES come from fitness_subscriptions/models/membership_dates.py, the
 one definition the registration-fee rule reads as well:
-  paid_up_to      her last paid day
-  days_left       paid_up_to - today + 1: on the last paid day, 1
+  paid_up_to         this membership's last paid day
+  member_paid_up_to  her last paid day over all her memberships
+  days_left          member_paid_up_to - today + 1: on the last paid day, 1
   fee_free_until  the last day she can renew without the registration fee
 "Today" is the studio's day (Europe/Madrid), as everywhere else.
 
@@ -72,6 +75,11 @@ class FitnessRenewalReport(models.Model):
     order_ref = fields.Char('Order', readonly=True)
     start_date = fields.Date('Started', readonly=True)
     paid_up_to = fields.Date('Paid up to', readonly=True)
+    # The member's last paid day over all her memberships - the value the
+    # registration-fee rule reads. Status, days left and the fee-free date
+    # come from this, so the list and the fee rule cannot disagree. It equals
+    # paid_up_to except while an earlier membership of hers outlasts this one.
+    member_paid_up_to = fields.Date('Member paid up to', readonly=True)
     days_left = fields.Integer('Days left', readonly=True)
     fee_free_until = fields.Date(
         'Renew without fee until', readonly=True,
@@ -99,6 +107,7 @@ class FitnessRenewalReport(models.Model):
         SO = self.env['sale.order']
         paid = SO._fitness_paid_up_to_sql('so', 'ssp')
         renewed = SO._fitness_renewed_by_sql('so')
+        member = SO._fitness_member_last_paid_sql('so')
         return """
             WITH m AS (
                 SELECT so.id, so.partner_id, so.name, so.start_date,
@@ -106,6 +115,7 @@ class FitnessRenewalReport(models.Model):
                        (so.fitness_payment_method = 'free'
                         OR ROUND(so.amount_total, 2) = 0) AS is_free,
                        {paid} AS paid_up_to,
+                       {member} AS last_paid,
                        (now() AT TIME ZONE '{tz}')::date AS today
                   FROM sale_order so
                   JOIN product_product pp ON pp.id = so.fitness_subscription_product_id
@@ -116,10 +126,10 @@ class FitnessRenewalReport(models.Model):
             ), s AS (
                 SELECT m.*,
                        CASE
-                         WHEN paid_up_to IS NOT NULL AND paid_up_to < today
-                              AND today - paid_up_to <= {window} THEN 'ended'
-                         WHEN paid_up_to IS NOT NULL AND paid_up_to < today THEN 'dropped'
-                         WHEN paid_up_to IS NOT NULL AND paid_up_to - today + 1 <= {due} THEN 'due_soon'
+                         WHEN last_paid IS NOT NULL AND last_paid < today
+                              AND today - last_paid <= {window} THEN 'ended'
+                         WHEN last_paid IS NOT NULL AND last_paid < today THEN 'dropped'
+                         WHEN last_paid IS NOT NULL AND last_paid - today + 1 <= {due} THEN 'due_soon'
                          WHEN is_free THEN 'free'
                          ELSE 'running'
                        END AS status
@@ -128,14 +138,15 @@ class FitnessRenewalReport(models.Model):
             SELECT id, partner_id AS member_id, product_tmpl_id AS product_id,
                    plan_id AS billing_plan_ref, fitness_payment_method AS payment_method,
                    is_free, name AS order_ref, start_date, paid_up_to,
-                   CASE WHEN paid_up_to IS NULL THEN NULL
-                        ELSE paid_up_to - today + 1 END AS days_left,
-                   paid_up_to + {window} AS fee_free_until,
+                   last_paid AS member_paid_up_to,
+                   CASE WHEN last_paid IS NULL THEN NULL
+                        ELSE last_paid - today + 1 END AS days_left,
+                   last_paid + {window} AS fee_free_until,
                    status,
                    CASE status WHEN 'due_soon' THEN 1 WHEN 'ended' THEN 2
                         WHEN 'dropped' THEN 3 WHEN 'free' THEN 4 ELSE 5 END AS status_order
               FROM s
-        """.format(paid=paid, renewed=renewed, tz=STUDIO_TZ,
+        """.format(paid=paid, renewed=renewed, member=member, tz=STUDIO_TZ,
                    window=int(FEE_WINDOW_DAYS), due=int(DUE_SOON_DAYS))
 
     def init(self):
@@ -168,7 +179,7 @@ class FitnessRenewalReport(models.Model):
         plan = self.product_id.with_context(lang=lang).name or self.order_ref
         if self.is_free:
             plan = env._('%(plan)s (free)', plan=plan)
-        paid = studio_date(self.env, self.paid_up_to, 'd MMM y', lang)
+        paid = studio_date(self.env, self.member_paid_up_to or self.paid_up_to, 'd MMM y', lang)
         if event == 'due':
             return env._(
                 'Renewal due soon: %(member)s, %(plan)s, paid up to %(date)s '
