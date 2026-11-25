@@ -50,7 +50,7 @@ class TestRenewalsList(TransactionCase):
             'recurring_invoice': True})
         cls.manager = env['res.users'].with_context(no_reset_password=True).create({
             'name': 'RL Manager', 'login': 'rl.manager@example.invalid',
-            'email': 'rl.manager@example.invalid',
+            'email': 'rl.manager@example.invalid', 'notification_type': 'email',
             'group_ids': [(6, 0, [G('base.group_user').id, G(MANAGER).id])]})
         cls.teacher = env['res.users'].with_context(no_reset_password=True).create({
             'name': 'RL Teacher', 'login': 'rl.teacher@example.invalid',
@@ -276,8 +276,15 @@ class TestRenewalsList(TransactionCase):
         self.assertFalse(self._alerts(dropped, 'fitness_portal.mt_fitness_membership_ended'),
                          'a membership dropped long ago was announced as just ended')
         self.assertFalse(self._alerts(far, 'fitness_portal.mt_fitness_renewal_due'))
-        self.assertIn(self.manager.partner_id, due_msg.partner_ids)
-        self.assertNotIn(self.teacher.partner_id, due_msg.partner_ids)
+        # Her preference is e-mail; the alert still lands in her Odoo inbox,
+        # and no e-mail is written for it.
+        self.assertEqual(self.manager.notification_type, 'email')
+        notified = due_msg.notification_ids
+        self.assertEqual(notified.filtered(lambda n: n.res_partner_id == self.manager.partner_id).notification_type,
+                         'inbox')
+        self.assertFalse(self.env['mail.mail'].sudo().search([('mail_message_id', '=', due_msg.id)]))
+        self.assertNotIn(self.teacher.partner_id, notified.res_partner_id)
+        self.assertNotIn(student.partner_id, notified.res_partner_id)
         self.assertNotIn(student.partner_id, due_msg.partner_ids)
         self.assertTrue(due_msg.subtype_id.internal)
         self.assertIn(studio_date(self.env, t + timedelta(days=3), 'd MMM y', studio_lang(self.env)),
@@ -285,7 +292,7 @@ class TestRenewalsList(TransactionCase):
         # The manager reads it in her inbox; the member never sees it on her
         # order, and the instructor cannot read it.
         self.assertTrue(self.env['mail.message'].with_user(self.manager).search(
-            [('id', '=', due_msg.id)]))
+            [('id', '=', due_msg.id), ('needaction', '=', True)]), 'not in her inbox')
         self.assertEqual(due_msg.with_user(self.manager).read(['body'])[0]['body'], due_msg.body)
         self.assertFalse(self.env['mail.message'].with_user(student).search([('id', '=', due_msg.id)]))
         self.assertFalse(self.env['mail.message'].with_user(self.teacher).search([('id', '=', due_msg.id)]))

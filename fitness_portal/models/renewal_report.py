@@ -29,15 +29,20 @@ can only do on a column, and a fitness manager cannot read sale.order: a
 view has its own access row, so managers get this list and nothing more
 (the same reasoning as fitness.free.credit.report).
 
-THE ALERTS go to every Fitness Studio Manager through Odoo's own messaging:
-an internal note on the membership's order, addressed to them, so it
-reaches each one's Inbox (or e-mail, if that is how the user chose to be
-notified). Internal: the member, who follows her own order, does not see
-it, and an instructor cannot read the order at all. Each alert has its own
+THE ALERTS go to every Fitness Studio Manager's Odoo inbox, whatever her
+email preference - the pattern of the class-cancellation notice
+(fitness_notifications, _maybe_notify_studio_of_cancel): a logged note on
+the membership's order, posted by the system, which notifies nobody by
+itself, then delivered to each manager's inbox. The studio works in the
+back office; an alert left to the preference went by e-mail to anyone set
+to "Handle by Emails". Internal: the member, who follows her own order,
+does not see it, and an instructor cannot read the order at all. Each alert has its own
 message subtype, and the job looks for that subtype on the order before
 sending - so each fires once per membership, whatever the number of runs.
 """
 import logging
+
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
@@ -171,7 +176,7 @@ class FitnessRenewalReport(models.Model):
     def _fitness_alert_recipients(self):
         group = self.env.ref('fitness_core.group_fitness_manager')
         return self.env['res.users'].sudo().search([
-            ('group_ids', 'in', group.id), ('share', '=', False)]).partner_id
+            ('group_ids', 'in', group.id), ('share', '=', False)])
 
     def _fitness_alert_body(self, event, lang):
         self.ensure_one()
@@ -216,11 +221,17 @@ class FitnessRenewalReport(models.Model):
                     ('subtype_id', '=', subtypes[event].id)], limit=1):
                 continue
             order = self.env['sale.order'].sudo().browse(row.id)
-            order.with_context(mail_post_autofollow=False).message_post(
-                body=row._fitness_alert_body(event, lang),
-                subtype_id=subtypes[event].id,
-                message_type='comment',
-                partner_ids=recipients.ids)
+            # Logged, not posted: a logged note notifies nobody, so no
+            # follower and no preference turns it into an e-mail. Posted by
+            # the system, carrying the alert's own subtype so the next run
+            # finds it.
+            note = order._message_log(
+                body=Markup('<p>%s</p>') % row._fitness_alert_body(event, lang),
+                author_id=self.env.ref('base.partner_root').id)
+            note.sudo().write({'subtype_id': subtypes[event].id})
+            inbox = [{'id': u.partner_id.id, 'uid': u.id, 'notif': 'inbox'} for u in recipients]
+            if inbox:
+                order._notify_thread_by_inbox(note, inbox)
             sent[event] += 1
         _logger.info("[RENEWALS] alerts sent: %d due soon, %d ended (%d manager(s))",
                      sent['due'], sent['ended'], len(recipients))
