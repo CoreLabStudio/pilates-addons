@@ -232,6 +232,9 @@ class SaleOrder(models.Model):
                         order.name, order_sudo.start_date, today)
                     order_sudo.write({'start_date': today})
             order_sudo.action_confirm()
+            # The order confirmation, as on every cash sale (owner, 25 Nov):
+            # only to a contact with an email address, never raising.
+            order_sudo.fitness_email_order_confirmation()
             # The invoice, settled in cash and mailed - the same three steps
             # a desk sale takes, because the money arrived the same way.
             try:

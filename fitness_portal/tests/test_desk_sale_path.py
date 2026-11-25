@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import HttpCase, tagged
 
 from odoo.addons.fitness_core.models.studio_lang import studio_date
@@ -52,17 +52,18 @@ class TestDeskSalePath(HttpCase):
             'fitness_is_subscription_plan': True, 'recurring_invoice': True,
             'fitness_class_type': 'barre', 'fitness_session_type': 'group',
             'weekly_class_allowance': 2, 'fitness_subscription_plan_id': cls.monthly.id})
+        cls.pack = env['product.template'].sudo().create({
+            'name': 'DP Pack 5', 'type': 'service', 'list_price': 50.0, 'sale_ok': True,
+            'fitness_is_package': True, 'fitness_class_count': 5, 'fitness_validity_days': 60,
+            'fitness_class_type': 'barre', 'fitness_session_type': 'group'})
         cls.manager = env['res.users'].with_context(no_reset_password=True).create({
             'name': 'DP Manager', 'login': 'dp.manager@example.invalid',
             'email': 'dp.manager@example.invalid',
             'group_ids': [(6, 0, [env.ref('base.group_user').id, env.ref(MANAGER).id])]})
-        # Creating a contact needs Odoo's own "Contact Creation" right, which
-        # the Fitness Studio Manager group does not give. The desk staff who
-        # create contacts hold it; this manager does too.
-        cls.creator = env['res.users'].with_context(no_reset_password=True).create({
-            'name': 'DP Creator', 'login': 'dp.creator@example.invalid',
-            'group_ids': [(6, 0, [env.ref('base.group_user').id, env.ref(MANAGER).id,
-                                  env.ref('base.group_partner_manager').id])]})
+        cls.teacher = env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'DP Teacher', 'login': 'dp.teacher@example.invalid',
+            'group_ids': [(6, 0, [env.ref('base.group_user').id,
+                                  env.ref('fitness_core.group_fitness_teacher').id])]})
         if not env['account.journal'].sudo().search(
                 [('type', '=', 'cash'), ('company_id', '=', env.company.id)], limit=1):
             env['account.journal'].sudo().create({
@@ -212,20 +213,62 @@ class TestDeskSalePath(HttpCase):
     # -- the contact ---------------------------------------------------------------
 
     def test_a_new_contact_is_created_with_its_email(self):
-        Partner = self.env['res.partner'].with_user(self.creator).with_context(fitness_desk_new_contact=True)
+        Partner = self.env['res.partner'].with_user(self.manager).with_context(fitness_desk_new_contact=True)
         pid, _name = Partner.name_create('DP Walk In <dp.walkin@example.invalid>')
         self.assertEqual(self.env['res.partner'].browse(pid).email, 'dp.walkin@example.invalid')
-        found = self.env['res.partner'].with_user(self.creator).name_search('dp.walkin@example.invalid')
+        found = self.env['res.partner'].with_user(self.manager).name_search('dp.walkin@example.invalid')
         self.assertIn(pid, [r[0] for r in found], 'the Student field does not find a contact by email')
 
     def test_a_new_contact_with_an_email_already_used_is_refused_naming_it(self):
         existing, _u = self._contact(False, True)
-        Partner = self.env['res.partner'].with_user(self.creator).with_context(fitness_desk_new_contact=True)
+        Partner = self.env['res.partner'].with_user(self.manager).with_context(fitness_desk_new_contact=True)
         with self.assertRaises(UserError) as caught:
             Partner.name_create('Someone Else <%s>' % existing.email.upper())
         self.assertIn(existing.display_name, str(caught.exception))
-        # Outside the desk's field nothing changes.
-        self.env['res.partner'].with_user(self.creator).name_create('Other <%s>' % existing.email)
+        # Outside the desk's field nothing changes: she still cannot create a
+        # contact at all.
+        with self.assertRaises(AccessError):
+            self.env['res.partner'].with_user(self.manager).name_create('Other <%s>' % existing.email)
+
+    def test_a_manager_without_contact_creation_creates_a_student_and_nothing_else(self):
+        self.assertFalse(self.manager.has_group('base.group_partner_manager'), 'fixture: she must lack the right')
+        Partner = self.env['res.partner'].with_user(self.manager)
+        with self.assertRaises(AccessError):
+            Partner.create({'name': 'DP Direct'})
+        # Through the desk's field, with a default from the context that the
+        # elevated create must not apply.
+        pid, _n = Partner.with_context(fitness_desk_new_contact=True, default_comment='SMUGGLED',
+                                       default_function='SMUGGLED').name_create('DP Desk New <dp.desknew@example.invalid>')
+        p = self.env['res.partner'].browse(pid)
+        self.assertEqual((p.name, p.email, p.phone), ('DP Desk New', 'dp.desknew@example.invalid', False))
+        self.assertFalse(p.function)
+        self.assertFalse(p.comment)
+        self.assertEqual(p.create_uid, self.manager)
+        q = Partner.fitness_desk_create_student('DP Phone', email='dp.phone@example.invalid', phone='600 000 000')
+        self.assertEqual((q.name, q.email, q.phone), ('DP Phone', 'dp.phone@example.invalid', '600 000 000'))
+        order, _w = self._sell(q, 'free')
+        self.assertEqual(order.state, 'sale', 'a student created at the desk cannot be sold to')
+
+    def test_instructors_and_members_cannot_create_a_student(self):
+        member = self._contact(True, True)[1]
+        for user in (self.teacher, member):
+            with self.assertRaises(AccessError):
+                self.env['res.partner'].with_user(user).fitness_desk_create_student(
+                    'DP Nope', email='dp.nope@example.invalid')
+        self.assertFalse(self.env['res.partner'].sudo().search([('email', '=', 'dp.nope@example.invalid')]))
+
+    def test_an_app_cash_request_approved_at_the_desk_sends_both_mails_with_an_email_only(self):
+        for email in (True, False):
+            partner, _u = self._contact(False, email)
+            order = self.env['sale.order'].sudo().create({
+                'partner_id': partner.id, 'fitness_payment_method': 'cash',
+                'fitness_cash_requested_on': fields.Datetime.now(),
+                'order_line': [(0, 0, {'product_id': self.pack.product_variant_ids[:1].id,
+                                       'product_uom_qty': 1, 'price_unit': 50.0})]})
+            order.with_user(self.manager).action_fitness_approve_cash()
+            self.assertEqual(order.state, 'sale')
+            self.assertEqual(bool(self._confirmation_mails(order)), email, 'confirmation mail (email %s)' % email)
+            self.assertEqual(order.invoice_ids.is_move_sent, email, 'invoice mail (email %s)' % email)
 
     def test_picking_a_contact_whose_email_is_shared_warns_and_sells(self):
         one, _u = self._contact(False, True)
