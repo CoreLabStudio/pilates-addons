@@ -36,6 +36,7 @@ except Exception:
 from odoo import http, fields
 from odoo.tools import float_is_zero
 from odoo.exceptions import UserError, ValidationError
+from odoo.addons.fitness_subscriptions.models.membership_dates import FEE_WINDOW_DAYS
 from odoo.addons.fitness_bookings.exceptions import LateCancellationError
 from odoo.http import request
 
@@ -451,6 +452,33 @@ class FitnessStudentPortal(http.Controller):
             "now you will not get your credit back.",
             hours=hours,
         )
+
+    def _fee_window_label(self):
+        """The 30-day renewal rule, in her language, beside the registration card.
+
+        Neither number is typed: the days are FEE_WINDOW_DAYS, the one the
+        fee rule and the Renewals list read, and the amount is the
+        registration product's own price - so a studio that changes either
+        changes this sentence too. With no active registration product
+        there is no fee to warn about, and nothing is shown.
+        """
+        matricula = request.env.ref('fitness_subscriptions.product_matricula',
+                                    raise_if_not_found=False)
+        matricula = matricula and matricula.sudo()
+        if not matricula or not matricula.active:
+            return ''
+        price = matricula.fitness_effective_price()
+        if float(price).is_integer():
+            amount = '%d' % price
+        else:
+            lang = request.env['res.lang']._lang_get(request.env.lang or 'en_US')
+            amount = lang.format('%.2f', price) if lang else '%.2f' % price
+        fee = '%s %s' % (amount, matricula.currency_id.symbol or '€')
+        return request.env._(
+            "Your membership ends on its last paid day. You have %(days)s days "
+            "to renew without paying the registration fee again. After that, "
+            "the %(fee)s registration fee applies.",
+            days=FEE_WINDOW_DAYS, fee=fee)
 
     def _cancel_policy_label(self):
         """The studio's cancellation rule, in her language, with the real N.
@@ -1836,6 +1864,9 @@ class FitnessStudentPortal(http.Controller):
             # gets - so the rule belongs here as much as anywhere.
             'lbl_cancel_policy':        self._cancel_policy_label(),
             'lbl_cancel_forfeit':       self._cancel_forfeit_label(),
+            # Read by the registration card, which the Memberships tab alone shows.
+            'lbl_fee_window':           (self._fee_window_label()
+                                         if active_tab == 'subscriptions' else ''),
             # The opt-in ask on this page's success states. Only a
             # logged-in student reaches this route at all (auth='user').
             **self._notif_labels(),
