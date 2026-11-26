@@ -199,16 +199,24 @@ class TestDeskSalePath(HttpCase):
             self.assertEqual(gift._fitness_paid_up_to(), end - timedelta(days=1))
 
     def test_a_gift_uses_no_invoice_number(self):
+        """Measured on the moves themselves, not on "the last invoice": a fresh
+        database has none, and a reference point that is empty proves nothing."""
         Move = self.env['account.move'].sudo()
-        last = Move.search([('move_type', '=', 'out_invoice'), ('state', '=', 'posted')],
-                           order='id desc', limit=1).name
-        self._sell(self._contact(False, True)[0], 'free')
+        before = Move.search([], order='id desc', limit=1).id or 0
+        gift, _w = self._sell(self._contact(False, True)[0], 'free')
+        self.assertFalse(Move.search([('id', '>', before)]),
+                         'the gift created an accounting entry, so it can take a number')
+        self.assertFalse(gift.invoice_ids)
         cash, _w = self._sell(self._contact(False, True)[0], 'cash')
-        posted = Move.search([('move_type', '=', 'out_invoice'), ('state', '=', 'posted'),
-                              ('name', '!=', last)], order='id desc')
-        self.assertEqual(posted.filtered(lambda m: m.id > (Move.search(
-            [('name', '=', last)], limit=1).id or 0)), cash.invoice_ids,
-            'an invoice number was taken by the gift')
+        new = Move.search([('id', '>', before), ('move_type', '=', 'out_invoice')])
+        self.assertEqual(new, cash.invoice_ids, 'only the cash sale was invoiced')
+        inv = cash.invoice_ids
+        earlier = Move.search([('id', '<=', before), ('state', '=', 'posted'),
+                               ('journal_id', '=', inv.journal_id.id),
+                               ('sequence_prefix', '=', inv.sequence_prefix)],
+                              order='sequence_number desc', limit=1)
+        self.assertEqual(inv.sequence_number, (earlier.sequence_number or 0) + 1,
+                         'a number was skipped between the last invoice and this one')
 
     # -- the contact ---------------------------------------------------------------
 
