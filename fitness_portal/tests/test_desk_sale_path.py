@@ -257,6 +257,37 @@ class TestDeskSalePath(HttpCase):
         order, _w = self._sell(q, 'free')
         self.assertEqual(order.state, 'sale', 'a student created at the desk cannot be sold to')
 
+    def test_the_student_field_offers_create_to_a_manager_and_nowhere_else(self):
+        """What the screen is sent, not what the method does: Odoo marks a
+        contact field can_create=False for anyone who cannot create contacts,
+        and the web client then offers no Create at all."""
+        from lxml import etree
+        res = self.env['fitness.desk.sale.wizard'].with_user(self.manager).get_views([(False, 'form')])
+        node = etree.fromstring(res['views']['form']['arch']).xpath("//field[@name='partner_id']")[0]
+        self.assertEqual(node.get('can_create'), 'True', 'the Student field offers no Create to a manager')
+        # Elsewhere nothing changes: a contact field on another form stays
+        # non-creatable for her.
+        plain = self.env['res.users'].with_user(self.manager).get_views([(False, 'form')])['views']['form']['arch']
+        for f in etree.fromstring(plain).xpath("//field[@name='partner_id']"):
+            self.assertNotEqual(f.get('can_create'), 'True', 'a contact field elsewhere became creatable')
+
+    def test_quick_create_from_the_screen_as_a_manager(self):
+        """The request the web client sends when she types an email and picks Create."""
+        import json
+        self.manager.password = PW
+        self.env.flush_all()
+        self.authenticate(self.manager.login, PW)
+        res = self.url_open('/web/dataset/call_kw/res.partner/name_create', data=json.dumps({
+            'jsonrpc': '2.0', 'method': 'call', 'params': {
+                'model': 'res.partner', 'method': 'name_create',
+                'args': ['DP Screen <dp.screen@example.invalid>'],
+                'kwargs': {'context': {'fitness_desk_new_contact': True, 'lang': 'en_US'}}}}),
+            headers={'Content-Type': 'application/json'}, timeout=30)
+        body = res.json()
+        self.assertNotIn('error', body, body.get('error'))
+        p = self.env['res.partner'].browse(body['result'][0])
+        self.assertEqual((p.name, p.email), ('DP Screen', 'dp.screen@example.invalid'))
+
     def test_instructors_and_members_cannot_create_a_student(self):
         member = self._contact(True, True)[1]
         for user in (self.teacher, member):

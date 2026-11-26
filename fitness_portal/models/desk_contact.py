@@ -21,6 +21,8 @@ only, writing exactly name, email and phone and nothing else, after the
 shared-email refusal. A direct create of a contact by the same manager is
 still refused by Odoo, as before.
 """
+from lxml import etree
+
 from odoo import _, api, models, tools
 from odoo.exceptions import AccessError, UserError
 
@@ -81,6 +83,32 @@ class ResPartnerDeskContact(models.Model):
 
 class DeskSaleWizardContact(models.TransientModel):
     _inherit = 'fitness.desk.sale.wizard'
+
+    @api.model
+    def get_views(self, views, options=None):
+        """Offer "Create" in the Student field to a manager.
+
+        Odoo marks every relational field can_create="False" for a user who
+        cannot create the target model (ir_ui_view, model_access_rights), so
+        the web client hid the quick create and the narrow way in
+        (fitness_desk_create_student, reached through name_create with this
+        field's context) could not be used from the screen at all. Only this
+        field, on this dialog, for a manager: everywhere else a manager still
+        cannot create a contact.
+        """
+        res = super().get_views(views, options)
+        user = self.env.user
+        if not (user.has_group(MANAGER_GROUP) or user.has_group('base.group_system')):
+            return res
+        for view in res.get('views', {}).values():
+            arch = view.get('arch')
+            if not arch or 'fitness_desk_new_contact' not in arch:
+                continue
+            tree = etree.fromstring(arch)
+            for node in tree.xpath("//field[@name='partner_id'][contains(@context, 'fitness_desk_new_contact')]"):
+                node.set('can_create', 'True')
+            view['arch'] = etree.tostring(tree, encoding='unicode')
+        return res
 
     @api.onchange('partner_id')
     def _onchange_partner_shared_email(self):

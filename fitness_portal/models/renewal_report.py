@@ -67,7 +67,7 @@ class FitnessRenewalReport(models.Model):
 
     member_id = fields.Many2one('res.partner', 'Member', readonly=True)
     product_id = fields.Many2one('product.template', 'Membership', readonly=True)
-    billing_plan_ref = fields.Integer(readonly=True)
+    billing_plan_ref = fields.Integer(readonly=True, aggregator=None)
     billing_plan = fields.Char('Plan', compute='_compute_billing_plan')
     payment_method = fields.Selection([
         ('stripe', 'Card'),
@@ -85,7 +85,8 @@ class FitnessRenewalReport(models.Model):
     # come from this, so the list and the fee rule cannot disagree. It equals
     # paid_up_to except while an earlier membership of hers outlasts this one.
     member_paid_up_to = fields.Date('Member paid up to', readonly=True)
-    days_left = fields.Integer('Days left', readonly=True)
+    # Never summed: a total of days left across members means nothing.
+    days_left = fields.Integer('Days left', readonly=True, aggregator=None)
     fee_free_until = fields.Date(
         'Renew without fee until', readonly=True,
         help="The last day she can renew without paying the registration "
@@ -97,7 +98,7 @@ class FitnessRenewalReport(models.Model):
         ('free', 'Free'),
         ('running', 'Running'),
     ], string='Status', readonly=True)
-    status_order = fields.Integer(readonly=True)
+    status_order = fields.Integer(readonly=True, aggregator=None)
 
     def _compute_billing_plan(self):
         # sudo: sale.subscription.plan is a Sales model and a fitness manager

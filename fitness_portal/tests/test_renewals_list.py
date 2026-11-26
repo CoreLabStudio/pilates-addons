@@ -237,6 +237,10 @@ class TestRenewalsList(TransactionCase):
             self.assertEqual(row.member_paid_up_to or None, last, row.order_ref)
             self.assertEqual(row.status == 'dropped', fitness_renewal_pays_fee(last, t), row.order_ref)
 
+    def test_days_left_is_not_summed_in_groups(self):
+        for name in ('days_left', 'status_order', 'billing_plan_ref'):
+            self.assertFalse(self.env['fitness.renewal.report']._fields[name].aggregator, name)
+
     def test_grouped_by_status(self):
         self._paid_to(self._student().partner_id, self.today + timedelta(days=1))
         self.env.flush_all()
