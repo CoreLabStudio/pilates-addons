@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        The two studio alerts of the Renewals list (models/renewal_report.py).
+        Each is its own message subtype: internal, so the member never sees it
+        on her order, hidden, so nobody can follow it, and not a default, so
+        no follower of the order is subscribed to it. The job finds an alert
+        already sent by its subtype, which is what makes it fire once.
+    -->
+    <record id="mt_fitness_renewal_due" model="mail.message.subtype">
+        <field name="name">Renewal due soon</field>
+        <field name="res_model">sale.order</field>
+        <field name="internal" eval="True"/>
+        <field name="hidden" eval="True"/>
+        <field name="default" eval="False"/>
+    </record>
+    <record id="mt_fitness_membership_ended" model="mail.message.subtype">
+        <field name="name">Membership ended without renewal</field>
+        <field name="res_model">sale.order</field>
+        <field name="internal" eval="True"/>
+        <field name="hidden" eval="True"/>
+        <field name="default" eval="False"/>
+    </record>
+
+    <data noupdate="1">
+        <record id="ir_cron_fitness_renewal_alerts" model="ir.cron">
+            <field name="name">Fitness: renewal alerts to the studio</field>
+            <field name="model_id" ref="model_fitness_renewal_report"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fitness_renewal_alerts()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,5 +1,9 @@
 from odoo import models, fields
 
+from odoo.addons.fitness_core.models.studio_time import studio_today
+
+from .membership_dates import fitness_renewal_pays_fee
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -136,12 +140,17 @@ class ProductTemplate(models.Model):
             return value // 30
         return 1
 
-    def fitness_matricula_due(self, partner, plan=None):
+    def fitness_matricula_due(self, partner, plan=None, start=None):
         """The registration fee product when it should be charged, else empty.
 
-        Two conditions, both the studio's: it is a student's first membership,
-        and the commitment is shorter than three months. Committing to three
-        months or more waives it.
+        The studio's conditions: the commitment is shorter than three months
+        (three or more waives it), and either it is a student's first
+        membership or her most recent one ended more than FEE_WINDOW_DAYS
+        (30) days before this one starts - she had 30 days to renew without
+        it. `start` is the new membership's first day, the studio's today
+        when not given: every path that builds the lines starts a returning
+        member's membership today (a renewal still inside its plan has no
+        end yet, so it is never charged).
         """
         empty = self.env['product.template'].browse()
         self.ensure_one()
@@ -153,9 +162,22 @@ class ProductTemplate(models.Model):
             return empty
         if self.fitness_plan_months(plan) >= self.MATRICULA_WAIVED_FROM_MONTHS:
             return empty
-        if self.fitness_has_paid_membership_before(partner):
+        if (self.fitness_has_paid_membership_before(partner)
+                and not self.fitness_returning_after_window(partner, start)):
             return empty
         return matricula.sudo()
+
+    @staticmethod
+    def fitness_returning_after_window(partner, start=None):
+        """True when her most recent membership ended more than
+        FEE_WINDOW_DAYS before `start` (default: the studio's today).
+
+        Same contact as fitness_has_paid_membership_before, and the last
+        paid day from the one helper the Renewals list reads as well."""
+        if not partner:
+            return False
+        last = partner.env['sale.order']._fitness_last_paid_day_of(partner)
+        return fitness_renewal_pays_fee(last, start or studio_today())
 
     @staticmethod
     def fitness_has_paid_membership_before(partner):

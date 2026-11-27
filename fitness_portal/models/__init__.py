@@ -15,5 +15,7 @@ from . import res_partner_duplicate
 from . import fitness_duplicate_candidate
 from . import fitness_duplicate_join_log
 from . import fitness_free_credit_report
+from . import renewal_report
+from . import desk_contact
 from . import fitness_record_attendance
 from . import account_move

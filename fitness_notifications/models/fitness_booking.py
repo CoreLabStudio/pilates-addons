@@ -721,11 +721,18 @@ class FitnessBookingNotifications(models.Model):
 
     @api.model
     def _cron_send_billing_reminders(self):
-        """Notify subscribers N days before their next renewal/billing date.
+        """Notify members N days before their next renewal/billing date.
 
         N is the studio's renewal window (fitness.renewal_window_days,
         default 3): the reminder goes out on the day the shop starts
         offering Renew and the desk may take the renewal, never before.
+
+        The date she is told is her LAST PAID DAY, the day before
+        next_invoice_date. It used to quote next_invoice_date itself, the
+        first day she has not paid for, as "the end of its period" - one
+        day late. Only fitness memberships are reminded (another
+        subscription has no plan for her to renew in the app), and never
+        one already carried on by a renewal: she has done what it asks.
         """
         LEAD_DAYS = self.env['sale.order']._fitness_renewal_window_days()
         today = fields.Date.context_today(self)
@@ -738,6 +745,11 @@ class FitnessBookingNotifications(models.Model):
         ])
         notified = 0
         for sub in due_subs:
+            if not sub.fitness_subscription_product_id:
+                continue
+            last_paid = sub._fitness_paid_up_to()
+            if not last_paid or sub._fitness_renewed_by():
+                continue
             partner = sub.partner_id
             user = partner.user_ids[:1]
             if not user:
@@ -751,7 +763,7 @@ class FitnessBookingNotifications(models.Model):
                 continue
             plan_name = sub.fitness_subscription_product_id.name if sub.fitness_subscription_product_id else sub.name
             lang = recipient_lang(self.env, user)
-            renew_date_str = studio_date(self.env, target_date, 'd MMM y', lang)
+            renew_date_str = studio_date(self.env, last_paid, 'd MMM y', lang)
             lang_env = self.with_context(lang=lang)
             # "No action needed" was true when nothing a student could do
             # affected her renewal. It is not true now: she can renew from the

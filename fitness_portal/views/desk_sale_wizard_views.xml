@@ -27,7 +27,11 @@
 
         <group>
           <group string="Who and what">
-            <field name="partner_id" options="{'no_create_edit': True}"/>
+            <!-- Quick create stays: typing an email creates the contact with
+                 it. The context lets the contact refuse an email that is
+                 already on another contact (models/desk_contact.py). -->
+            <field name="partner_id" options="{'no_create_edit': True}"
+                   context="{'fitness_desk_new_contact': True}"/>
             <!-- The list is computed, because what may be picked depends
                  on whether this is a sale or a gift: the studio's four free
                  single classes appear only on a Free credit, and the free

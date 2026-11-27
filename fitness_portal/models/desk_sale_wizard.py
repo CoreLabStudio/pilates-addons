@@ -22,6 +22,7 @@ from odoo.addons.fitness_packages.models.fitness_booking import (
     FitnessBookingPackage,
 )
 from odoo.exceptions import AccessError, UserError
+from odoo.addons.fitness_subscriptions.models.membership_dates import FEE_WINDOW_DAYS
 
 _logger = logging.getLogger(__name__)
 
@@ -265,6 +266,9 @@ class FitnessDeskSaleWizard(models.TransientModel):
             return _("Waived: %(months)s months or more.",
                      months=waived_from)
         if product.fitness_has_paid_membership_before(self.partner_id):
+            if product.fitness_returning_after_window(self.partner_id):
+                return _("Charged again: her last membership ended more "
+                         "than %(days)s days ago.", days=FEE_WINDOW_DAYS)
             return _("Waived: she has held a membership before. It is "
                      "charged once, on a first membership.")
         if not self.matricula_fee:
@@ -431,6 +435,29 @@ class FitnessDeskSaleWizard(models.TransientModel):
         return self.product_id.fitness_price_unit_for_gross(
             membership_gross, self.partner_id)
 
+    @staticmethod
+    def _fitness_date_free_membership(order):
+        """A gift is a normal membership of the plan's length.
+
+        It has no invoice, so nothing moves next_invoice_date past its first
+        period, and Odoo leaves it at the start date. Read that way it is a
+        purchase waiting for its first payment: Odoo's weekly expiry job
+        closes it from day 16 ("Automatic renewal failed" - S00500, 12 Nov),
+        the fitness close job never does, it can never be renewed, and no
+        reminder goes out. The date is written here instead, to exactly what
+        an invoice for the first period would have set, and every reader of
+        that date - both close jobs, the Renew button, the reminder, the
+        Renewals list - then treats the gift as a paid membership of the
+        same plan, ending the same day.
+
+        Odoo's recurring-invoicing job is OFF on this database. Switched on,
+        it would invoice this membership at 0.00 on that date and extend it
+        another period; any future autopay must skip free memberships
+        (fitness_payment_method == 'free'). No guard is built here.
+        """
+        order = order.sudo()
+        order.next_invoice_date = order.start_date + order.plan_id.billing_period
+
     def _invoice_cash_sale(self, order):
         """Delegates. The renewal path needs the same steps, and a second copy
         of "post it, take the cash, mail it" is how two ways of taking money
@@ -543,6 +570,14 @@ class FitnessDeskSaleWizard(models.TransientModel):
             0.0 if self.payment_method == 'free' else (self.amount_paid or 0.0),
             self.payment_method, order.name, order.amount_total)
 
+        if self.payment_method == 'free' and order.is_subscription and order.plan_id:
+            self._fitness_date_free_membership(order)
+        # The same mail the app sends when a purchase goes through
+        # (sale/payment_transaction.py confirms with send_email=True): the
+        # order confirmation, on a cash sale and on a gift alike. Only to a
+        # contact with an address - otherwise Odoo writes a mail nobody can
+        # receive.
+        order.fitness_email_order_confirmation()
         if self.payment_method == 'cash':
             self._invoice_cash_sale(order)
 

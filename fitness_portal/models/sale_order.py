@@ -232,6 +232,9 @@ class SaleOrder(models.Model):
                         order.name, order_sudo.start_date, today)
                     order_sudo.write({'start_date': today})
             order_sudo.action_confirm()
+            # The order confirmation, as on every cash sale (owner, 25 Nov):
+            # only to a contact with an email address, never raising.
+            order_sudo.fitness_email_order_confirmation()
             # The invoice, settled in cash and mailed - the same three steps
             # a desk sale takes, because the money arrived the same way.
             try:
@@ -422,6 +425,35 @@ class SaleOrder(models.Model):
                 "[CASH] could not email invoice %s - it is posted and "
                 "the sale stands", invoice.name)
 
+
+    def _fitness_is_free_membership(self):
+        """Given for nothing: paid "free" at the desk, or 0.00. Nothing will
+        ever be billed on it, so the app says when it ends, not when it
+        next bills."""
+        self.ensure_one()
+        return bool(self.fitness_payment_method == 'free'
+                    or self.currency_id.is_zero(self.amount_total))
+
+    def fitness_email_order_confirmation(self):
+        """Odoo's order confirmation mail, to a contact who has an address.
+
+        The app sends it when a purchase is paid (payment_transaction.py
+        confirms with send_email=True); the desk sends it here, for a cash
+        sale and for a gift. A contact with no email is skipped, as the
+        invoice mail skips her: Odoo would otherwise write a mail with no
+        recipient. Never raises - the sale stands whatever the mail server
+        says.
+        """
+        for order in self:
+            if not order.partner_id.email:
+                _logger.info("[DESK] %s: no confirmation mail - the contact has "
+                             "no email address", order.name)
+                continue
+            try:
+                order._send_order_confirmation_mail()
+            except Exception:
+                _logger.exception("[DESK] could not send the confirmation of %s - "
+                                  "the sale stands", order.name)
 
     # ── Renewing a membership from the desk, in cash ───────────────────────
     #
